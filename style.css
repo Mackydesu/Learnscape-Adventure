@@ -1357,9 +1357,9 @@ footer {
     }
 
     .game-grid {
-        width: min(76vw, 820px);
+        width: min(82vw, 920px);
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: clamp(0.8vw, 1vw, 1.4vw);
+        gap: clamp(0.7vw, 0.9vw, 1.2vw);
     }
 
     .game-card-3 {
@@ -1369,7 +1369,7 @@ footer {
     }
 
     .game-start-prompt {
-        width: min(34vw, 420px);
+        width: min(38vw, 480px);
         bottom: 1.3vh;
     }
 }
