@@ -1353,13 +1353,13 @@ footer {
 @media (max-width: 900px) and (orientation: landscape) {
     .game-start-stage {
         place-items: center center;
-        padding: 9vh 2.2vw 3.4vh;
+        padding: 8.4vh 2vw 3.2vh;
     }
 
     .game-grid {
-        width: min(82vw, 920px);
+        width: min(88vw, 1020px);
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: clamp(0.7vw, 0.9vw, 1.2vw);
+        gap: clamp(0.55vw, 0.75vw, 1vw);
     }
 
     .game-card-3 {
@@ -1369,7 +1369,7 @@ footer {
     }
 
     .game-start-prompt {
-        width: min(38vw, 480px);
+        width: min(44vw, 540px);
         bottom: 1.3vh;
     }
 }
