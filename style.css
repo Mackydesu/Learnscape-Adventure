@@ -717,11 +717,11 @@ body.is-page-loading .page-loading-overlay {
 
 .game-menu-bar {
     position: fixed;
-    top: 16.05vh;
-    left: 13.7vw;
-    width: 72.6vw;
-    height: 6.5vh;
-    min-height: 44px;
+    top: 15.9%;
+    left: 12%;
+    right: 12%;
+    height: 6.8%;
+    min-height: 0;
     z-index: 2;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
