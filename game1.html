@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learnscape Adventure - Letter Forest</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="game1-page">
+    <video class="game1-bg-video" autoplay muted loop playsinline preload="auto" poster="assets/Backgrounds/Game1.jpeg" aria-hidden="true">
+        <source src="assets/Backgrounds/Game1.mp4" type="video/mp4">
+    </video>
+    <div class="game1-overlay" aria-hidden="true"></div>
+    <div class="game1-entry-veil" aria-hidden="true"></div>
+    <div class="game1-intro" aria-hidden="true">
+        <div class="game1-intro-card">
+            <span class="game1-intro-kicker">Welcome</span>
+            <h2 class="game1-intro-title">Alphabet Forest</h2>
+        </div>
+    </div>
+    <section class="game1-choice-tree" aria-label="Alphabet Forest choices">
+        <button class="game1-choice-button game1-choice-button-trace" type="button" data-choice="trace" aria-pressed="false" aria-label="Choose Trace">
+            <img src="assets/Buttons/trace.png" alt="" aria-hidden="true">
+        </button>
+        <button class="game1-choice-button game1-choice-button-spell" type="button" data-choice="spell" aria-pressed="false" aria-label="Choose Spell">
+            <img src="assets/Buttons/spell.png" alt="" aria-hidden="true">
+        </button>
+    </section>
+
+    <a class="game-return-btn loading-link" href="game_start.html" aria-label="Return to game selection">
+        <span>‹</span>
+        Back
+    </a>
+
+    <main class="game1-stage" aria-label="Letter Forest game background">
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
