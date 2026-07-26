@@ -10,105 +10,18 @@
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="title-page">
-    <section class="hero" id="home">
-        <video class="hero-bg-video" autoplay muted loop playsinline preload="auto" poster="assets/Backgrounds/bgintro.jpeg" aria-hidden="true">
-            <source src="assets/Backgrounds/bgintro.mp4" type="video/mp4">
-        </video>
-
-        <div class="hero-title">
-            <h1 class="title-top">
-                <span>L</span><span>E</span><span>A</span><span>R</span><span>N</span><span>S</span><span>C</span><span>A</span><span>P</span><span>E</span>
-            </h1>
-            <h1 class="title-bottom">ADVENTURE</h1>
-        </div>
-
-        <p class="hero-subtitle">
-            Learn letters, numbers & shapes through epic quests!
-        </p>
-
-        <a href="game_start.html" class="btn btn-enter loading-link">
-            <span>▶</span> ENTER
-        </a>
-
-        <img class="hero-character hero-character-ground" src="assets/Character/ch1.png" alt="Peeking adventure character">
-
-        <div class="scroll-down">
-            Scroll down
-            <span>▼</span>
-        </div>
-    </section>
-
-    <div class="divider"></div>
-
-    <section class="game-worlds" id="worlds">
-        <div class="container">
-            
-            <div class="section-header">
-                <div class="section-label">CHOOSE YOUR QUEST</div>
-                <h2 class="section-title">Game Worlds 🌍</h2>
-                <p class="section-desc">
-                    Three amazing worlds to explore - each filled with learning, fun, and adventure!
-                </p>
-            </div>
-
-            <div class="quest-card card-abc">
-                <div class="card-visual">
-                    <span class="visual-badge">LETTERS</span>
-                    <img class="card-image" src="assets/Backgrounds/abc.png" alt="ABC Dungeon preview">
-                </div>
-                <div class="card-content">
-                    <h3 class="card-title">Alphabet Forest</h3>
-                    <p class="card-desc">
-                        A windy day in the Learnscape forest. Letters are falling from the big tree, and the friendly bunny needs help collecting the correct ones.
-                    </p>
-                </div>
-            </div>
-
-            <div class="quest-card reverse card-123">
-                <div class="card-visual">
-                    <span class="visual-badge">NUMBERS</span>
-                    <img class="card-image" src="assets/Backgrounds/123.png" alt="123 Mission preview">
-                </div>
-                <div class="card-content">
-                    <h3 class="card-title">Math Meadow</h3>
-                    <p class="card-desc">
-                         The meadow is filled with critters and magical objects. The bunny needs help counting the forest life to solve a simple puzzle.
-                    </p>
-                </div>
-            </div>
-
-            <div class="quest-card card-shape">
-                <div class="card-visual">
-                    <span class="visual-badge">SHAPES</span>
-                    <img class="card-image" src="assets/Backgrounds/shape.png" alt="Shape Island preview">
-                </div>
-                <div class="card-content">
-                    <h3 class="card-title">Shape Island</h3>
-                    <p class="card-desc">
-                        Join our brave and bubbly bunny on a magical quest across 8 vibrant islands! To journey from one island to the next, you must master your shapes through three exciting challenges.
-                    </p>
-                </div>
-            </div>
-
-            <div class="back-to-top-wrap">
-                <a href="#home" class="btn btn-back-to-top">
-                    <span>▲</span> Back to Top
-                </a>
-            </div>
-
-            <!-- "Ready for adventure?" section intentionally omitted here as requested -->
-
-        </div>
-    </section>
-
-    <footer>
-        <p class="footer-text">© 2026 Learnscape Adventure - Making learning epic, one quest at a time.</p>
-    </footer>
-
-    <script src="script.js"></script>
+<body class="app-shell">
+    <div id="app-shell-container" class="app-shell-container">
+        <iframe
+            id="app-frame"
+            class="app-shell-frame"
+            src="title-screen.html"
+            title="Learnscape Adventure"
+            allow="fullscreen"
+            allowfullscreen
+        ></iframe>
+    </div>
 </body>
 </html>

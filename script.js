@@ -7,14 +7,59 @@ document.addEventListener('DOMContentLoaded', () => {
     let isNavigating = false;
     const loadingDuration = 900;
 
+    const isInShell = () => window.top !== window;
+
+    const getAppFrame = () => {
+        if (!isInShell()) return null;
+
+        try {
+            return window.top.document.getElementById('app-frame');
+        } catch (error) {
+            return null;
+        }
+    };
+
+    const getShellContainer = () => {
+        if (!isInShell()) return null;
+
+        try {
+            return window.top.document.getElementById('app-shell-container');
+        } catch (error) {
+            return null;
+        }
+    };
+
+    const navigateApp = (target) => {
+        const frame = getAppFrame();
+
+        if (frame && target && !target.startsWith('#')) {
+            frame.src = target;
+            return;
+        }
+
+        window.location.href = target;
+    };
+
     const isFullscreenActive = () => Boolean(
         document.fullscreenElement ||
         document.webkitFullscreenElement ||
-        document.msFullscreenElement
+        document.msFullscreenElement ||
+        (window.top !== window && (() => {
+            try {
+                const shellContainer = getShellContainer();
+                return shellContainer && (
+                    window.top.document.fullscreenElement === shellContainer ||
+                    window.top.document.webkitFullscreenElement === shellContainer ||
+                    window.top.document.msFullscreenElement === shellContainer
+                );
+            } catch (error) {
+                return false;
+            }
+        })())
     );
 
-    const requestFullscreen = async () => {
-        const root = document.documentElement;
+    const requestFullscreen = async (targetElement) => {
+        const root = targetElement || document.documentElement;
 
         if (root.requestFullscreen) {
             return root.requestFullscreen();
@@ -45,10 +90,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const enterFullscreenFlow = async () => {
+    const enterFullscreenFlow = async (targetElement) => {
         try {
             if (!isFullscreenActive()) {
-                await requestFullscreen();
+                await requestFullscreen(targetElement);
             }
 
             await lockLandscape();
@@ -64,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let settled = false;
+
         const finish = (value) => {
             if (settled) return;
             settled = true;
@@ -126,16 +172,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 showLoadingScreen();
 
                 window.setTimeout(() => {
-                    window.location.href = target;
+                    navigateApp(target);
                 }, loadingDuration);
             };
 
             const shouldEnterFullscreen = link.classList.contains('btn-enter') && target === 'game_start.html';
 
             if (shouldEnterFullscreen) {
-                enterFullscreenFlow()
-                    .then(() => waitForFullscreenActive(1500))
-                    .finally(goNext);
+                const fullscreenTarget = getShellContainer() || getAppFrame() || document.documentElement;
+
+                (async () => {
+                    await enterFullscreenFlow(fullscreenTarget);
+                    await waitForFullscreenActive(1500);
+                    window.setTimeout(goNext, 150);
+                })().catch(() => {
+                    goNext();
+                });
                 return;
             }
 

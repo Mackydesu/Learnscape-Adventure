@@ -2,6 +2,7 @@ const CACHE_NAME = 'learnscape-adventure-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
+  './title-screen.html',
   './game_start.html',
   './game1.html',
   './style.css',
