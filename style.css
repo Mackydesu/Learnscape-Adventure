@@ -480,9 +480,9 @@ body.is-page-loading .page-loading-overlay {
 }
 
 .game-start-prompt {
-    position: absolute;
+    position: fixed;
     left: 50%;
-    bottom: 24px;
+    bottom: clamp(18px, 3.2vh, 28px);
     z-index: 2;
     display: inline-flex;
     align-items: center;
@@ -1257,15 +1257,16 @@ footer {
     }
 
     .game-start-prompt {
-        width: min(92vw, 520px);
+        width: min(88vw, 520px);
         max-width: calc(100vw - 24px);
-        padding: 7px 14px;
+        padding: 6px 12px;
+        bottom: 18px;
     }
 
     .game-start-prompt-kicker {
-        font-size: clamp(1.08rem, 4.5vw, 1.45rem);
-        letter-spacing: 0.07em;
-        transform: scaleX(1.03);
+        font-size: clamp(0.98rem, 4vw, 1.28rem);
+        letter-spacing: 0.06em;
+        transform: scaleX(1.02);
     }
 
     .hero {
