@@ -7,6 +7,56 @@ document.addEventListener('DOMContentLoaded', () => {
     let isNavigating = false;
     const loadingDuration = 900;
 
+    const isFullscreenActive = () => Boolean(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.msFullscreenElement
+    );
+
+    const requestFullscreen = async () => {
+        const root = document.documentElement;
+
+        if (root.requestFullscreen) {
+            return root.requestFullscreen();
+        }
+
+        if (root.webkitRequestFullscreen) {
+            return root.webkitRequestFullscreen();
+        }
+
+        if (root.msRequestFullscreen) {
+            return root.msRequestFullscreen();
+        }
+
+        return Promise.resolve();
+    };
+
+    const lockLandscape = async () => {
+        const orientation = window.screen?.orientation;
+
+        if (!orientation?.lock) {
+            return;
+        }
+
+        try {
+            await orientation.lock('landscape');
+        } catch (error) {
+            console.warn('Landscape lock was not available.', error);
+        }
+    };
+
+    const enterFullscreenFlow = async () => {
+        try {
+            if (!isFullscreenActive()) {
+                await requestFullscreen();
+            }
+
+            await lockLandscape();
+        } catch (error) {
+            console.warn('Fullscreen mode was not available.', error);
+        }
+    };
+
     const createLoadingMarkup = () => `
         <div class="page-loading-panel" role="status">
             <img class="page-loading-art" src="assets/Backgrounds/loadingscreen.png" alt="Loading">
@@ -41,11 +91,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
             event.preventDefault();
             isNavigating = true;
-            showLoadingScreen();
 
-            window.setTimeout(() => {
-                window.location.href = target;
-            }, loadingDuration);
+            const shouldEnterFullscreen = link.classList.contains('btn-enter') && target === 'game_start.html';
+
+            const goNext = () => {
+                showLoadingScreen();
+
+                window.setTimeout(() => {
+                    window.location.href = target;
+                }, loadingDuration);
+            };
+
+            if (shouldEnterFullscreen) {
+                enterFullscreenFlow().finally(goNext);
+                return;
+            }
+
+            goNext();
         });
     });
 
