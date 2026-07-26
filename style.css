@@ -1352,8 +1352,8 @@ footer {
 
 @media (max-width: 900px) and (orientation: landscape) {
     .game-start-stage {
-        place-items: start center;
-        padding: 13vh 2.2vw 3.4vh;
+        place-items: center center;
+        padding: 9vh 2.2vw 3.4vh;
     }
 
     .game-grid {
