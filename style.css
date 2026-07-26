@@ -1246,22 +1246,22 @@ footer {
 
 @media (max-width: 600px) {
     .game1-choice-tree {
-        left: 50%;
-        top: 13vh;
-        width: 18vw;
-        transform: translateX(-50%);
-        gap: 0.4vw;
+        left: 4vw;
+        top: 15.5vh;
+        width: min(20vw, 128px);
+        transform: none;
+        gap: 0.25vw;
     }
 
     .game1-choice-button-trace {
-        width: 15vw;
-        align-self: center;
+        width: 100%;
+        align-self: stretch;
     }
 
     .game1-choice-button-spell {
-        width: 14vw;
+        width: 96%;
         align-self: center;
-        margin-top: -0.6vw;
+        margin-top: -0.45vw;
     }
 
     .game-start-stage {
