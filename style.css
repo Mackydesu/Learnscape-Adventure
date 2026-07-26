@@ -1257,15 +1257,15 @@ footer {
     }
 
     .game-start-prompt {
-        width: min(88vw, 520px);
-        max-width: calc(100vw - 24px);
-        padding: 6px 12px;
-        bottom: 18px;
+        width: min(82vw, 460px);
+        max-width: calc(100vw - 16px);
+        padding: 5px 10px;
+        bottom: calc(8px + env(safe-area-inset-bottom));
     }
 
     .game-start-prompt-kicker {
-        font-size: clamp(0.98rem, 4vw, 1.28rem);
-        letter-spacing: 0.06em;
+        font-size: clamp(0.88rem, 3.6vw, 1.12rem);
+        letter-spacing: 0.05em;
         transform: scaleX(1.02);
     }
 
