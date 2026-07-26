@@ -33,7 +33,7 @@ body {
 body.title-page {
     background:
         linear-gradient(rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0.22)),
-        url('assets/Backgrounds/bgintro.jpeg') center / cover no-repeat #000;
+        url('assets/Backgrounds/bgintro.webp') center / cover no-repeat #000;
 }
 
 body.app-shell {
