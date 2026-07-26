@@ -482,7 +482,7 @@ body.is-page-loading .page-loading-overlay {
 .game-start-prompt {
     position: absolute;
     left: 50%;
-    bottom: clamp(24px, 5vh, 48px);
+    bottom: 24px;
     z-index: 2;
     display: inline-flex;
     align-items: center;
@@ -1260,7 +1260,6 @@ footer {
         width: min(92vw, 520px);
         max-width: calc(100vw - 24px);
         padding: 7px 14px;
-        bottom: 16px;
     }
 
     .game-start-prompt-kicker {
