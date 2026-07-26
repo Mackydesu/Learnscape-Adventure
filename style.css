@@ -1245,23 +1245,23 @@ footer {
 }
 
 @media (max-width: 600px) {
-    .game1-choice-tree {
-        left: 4vw;
-        top: 15.5vh;
-        width: min(20vw, 128px);
+    .game1-page .game1-choice-tree {
+        left: 3.5vw;
+        top: 24vh;
+        width: min(14vw, 84px);
         transform: none;
-        gap: 0.25vw;
+        gap: 0.15vw;
     }
 
-    .game1-choice-button-trace {
+    .game1-page .game1-choice-button-trace {
         width: 100%;
         align-self: stretch;
     }
 
-    .game1-choice-button-spell {
-        width: 96%;
+    .game1-page .game1-choice-button-spell {
+        width: 94%;
         align-self: center;
-        margin-top: -0.45vw;
+        margin-top: -0.3vw;
     }
 
     .game-start-stage {
