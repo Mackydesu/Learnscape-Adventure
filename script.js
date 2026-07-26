@@ -159,6 +159,41 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    const createRotateOverlayMarkup = () => `
+        <div class="rotate-panel">
+            <div class="rotate-icon" aria-hidden="true">
+                <span class="rotate-phone"></span>
+                <span class="rotate-arrow">↻</span>
+            </div>
+            <p class="rotate-title">Rotate your phone</p>
+            <p class="rotate-copy">For the best experience, use landscape mode.</p>
+        </div>
+    `;
+
+    const ensureRotateOverlay = () => {
+        let rotateOverlay = document.querySelector('.rotate-overlay');
+
+        if (!rotateOverlay) {
+            rotateOverlay = document.createElement('div');
+            rotateOverlay.className = 'rotate-overlay';
+            rotateOverlay.setAttribute('aria-hidden', 'true');
+            rotateOverlay.innerHTML = createRotateOverlayMarkup();
+            document.body.appendChild(rotateOverlay);
+        }
+
+        return rotateOverlay;
+    };
+
+    const updateRotateOverlay = () => {
+        const rotateOverlay = ensureRotateOverlay();
+        const shouldShowRotateOverlay = window.matchMedia('(max-width: 900px) and (orientation: portrait)').matches;
+        rotateOverlay.style.display = shouldShowRotateOverlay ? 'flex' : 'none';
+    };
+
+    updateRotateOverlay();
+    window.addEventListener('resize', updateRotateOverlay);
+    window.addEventListener('orientationchange', updateRotateOverlay);
+
     loadingLinks.forEach((link) => {
         link.addEventListener('click', (event) => {
             const target = link.getAttribute('href');
