@@ -184,15 +184,28 @@ document.addEventListener('DOMContentLoaded', () => {
         return rotateOverlay;
     };
 
+    const shouldShowRotateOverlay = () => {
+        const viewport = window.visualViewport;
+        const viewportWidth = Math.round(viewport?.width ?? window.innerWidth);
+        const viewportHeight = Math.round(viewport?.height ?? window.innerHeight);
+
+        return viewportWidth <= 900 && viewportHeight > viewportWidth;
+    };
+
     const updateRotateOverlay = () => {
         const rotateOverlay = ensureRotateOverlay();
-        const shouldShowRotateOverlay = window.matchMedia('(max-width: 900px) and (orientation: portrait)').matches;
-        rotateOverlay.style.display = shouldShowRotateOverlay ? 'flex' : 'none';
+        rotateOverlay.style.display = shouldShowRotateOverlay() ? 'flex' : 'none';
     };
 
     updateRotateOverlay();
+    window.setTimeout(updateRotateOverlay, 150);
+    window.setTimeout(updateRotateOverlay, 500);
+    window.addEventListener('load', updateRotateOverlay);
+    window.addEventListener('pageshow', updateRotateOverlay);
     window.addEventListener('resize', updateRotateOverlay);
     window.addEventListener('orientationchange', updateRotateOverlay);
+    window.visualViewport?.addEventListener('resize', updateRotateOverlay);
+    window.visualViewport?.addEventListener('scroll', updateRotateOverlay);
 
     loadingLinks.forEach((link) => {
         link.addEventListener('click', (event) => {
