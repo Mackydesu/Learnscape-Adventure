@@ -164,6 +164,51 @@ body.app-shell {
     }
 }
 
+@media (max-width: 600px) and (orientation: portrait) {
+    .hero-title {
+        width: 78vw;
+        margin-bottom: 2vh;
+    }
+
+    .title-top {
+        font-size: clamp(3.2rem, 11.8vw, 4.3rem);
+        letter-spacing: 0.05vw;
+        -webkit-text-stroke-width: 0.07vw;
+        text-shadow:
+            0 3px 0 var(--forest-dark),
+            0 6px 0 rgba(122, 74, 42, 0.62),
+            0 10px 16px rgba(21, 63, 56, 0.32);
+    }
+
+    .title-bottom {
+        font-size: clamp(3.8rem, 13vw, 5rem);
+        letter-spacing: 0.05vw;
+        -webkit-text-stroke-width: 0.07vw;
+        text-shadow:
+            0 3px 0 var(--forest-dark),
+            0 6px 0 rgba(122, 74, 42, 0.66),
+            0 10px 16px rgba(21, 63, 56, 0.36);
+    }
+
+    .hero-subtitle {
+        font-size: 1.08rem;
+        max-width: 82vw;
+        margin-bottom: 2.8vh;
+    }
+
+    .btn-enter {
+        align-self: center;
+        width: min(64vw, 260px);
+        justify-content: center;
+        padding: 1.8vh 4.8vw;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 3.2vh;
+        font-size: clamp(1.4rem, 5vw, 1.9rem);
+        gap: 1.8vw;
+    }
+}
+
 body.is-page-loading {
     cursor: wait;
     overflow: hidden;
@@ -1466,6 +1511,51 @@ footer {
         min-width: 0;
         padding: 1.4vh 2.2vw;
         font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+    .hero-title {
+        width: 82vw;
+        margin-bottom: 2.2vh;
+    }
+
+    .title-top {
+        font-size: clamp(3.45rem, 13vw, 4.7rem);
+        letter-spacing: 0.05vw;
+        -webkit-text-stroke-width: 0.07vw;
+        text-shadow:
+            0 3px 0 var(--forest-dark),
+            0 6px 0 rgba(122, 74, 42, 0.62),
+            0 10px 16px rgba(21, 63, 56, 0.32);
+    }
+
+    .title-bottom {
+        font-size: clamp(4rem, 15vw, 5.5rem);
+        letter-spacing: 0.05vw;
+        -webkit-text-stroke-width: 0.07vw;
+        text-shadow:
+            0 3px 0 var(--forest-dark),
+            0 6px 0 rgba(122, 74, 42, 0.66),
+            0 10px 16px rgba(21, 63, 56, 0.36);
+    }
+
+    .hero-subtitle {
+        max-width: 84vw;
+        margin-bottom: 2.6vh;
+        font-size: 1.12rem;
+    }
+
+    .btn-enter {
+        align-self: center;
+        width: min(68vw, 280px);
+        justify-content: center;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 3vh;
+        padding: 1.7vh 5.2vw;
+        font-size: clamp(1.45rem, 5.8vw, 2.05rem);
+        gap: 1.8vw;
     }
 }
 
