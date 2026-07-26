@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loadingLinks = document.querySelectorAll('.loading-link');
     let isNavigating = false;
-    const loadingDuration = 900;
+    const loadingDuration = 3000;
 
     const isInShell = () => window.top !== window;
 
