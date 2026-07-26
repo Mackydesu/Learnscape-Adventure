@@ -916,28 +916,6 @@ h3 {
     box-shadow: 0 0 0 #7a4a2a, 0 5px 10px rgba(21, 63, 56, 0.4);
 }
 
-.btn-fullscreen {
-    background: linear-gradient(180deg, #6ef3c8 0%, #39c38f 52%, #17845e 100%);
-    color: #10392f;
-    font-size: clamp(1rem, 2vw, 1.35rem);
-    padding: 10px 26px;
-    border: 3px solid #0f5f43;
-    border-radius: 999px;
-    box-shadow:
-        0 7px 0 #0f5f43,
-        0 14px 18px rgba(21, 63, 56, 0.28);
-    display: none;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 28px;
-    z-index: 2;
-}
-
-.btn-fullscreen:active {
-    transform: translateY(6px);
-    box-shadow: 0 0 0 #0f5f43, 0 5px 10px rgba(21, 63, 56, 0.34);
-}
-
 .hero-character {
     position: absolute;
     z-index: 3;
@@ -1244,10 +1222,6 @@ footer {
     .hero {
         padding-top: 54px;
     }
-
-    .btn-fullscreen {
-        display: inline-flex;
-    }
 }
 
 @media (max-width: 600px) {
@@ -1325,12 +1299,6 @@ footer {
     .hero-subtitle { font-size: 1.2rem; }
     .btn-enter {
         padding: 12px 38px;
-    }
-
-    .btn-fullscreen {
-        padding: 9px 22px;
-        font-size: 0.98rem;
-        margin-bottom: 22px;
     }
 
     .hero-character-ground {
