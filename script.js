@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="page-loading-bar" aria-hidden="true">
                 <span></span>
             </div>
-            <p class="page-loading-text">Loading your adventure...</p>
+            <p class="page-loading-text">Loading Adventure</p>
         </div>
     `;
 
