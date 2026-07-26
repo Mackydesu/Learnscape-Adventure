@@ -57,6 +57,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const waitForFullscreenActive = (timeoutMs = 1500) => new Promise((resolve) => {
+        if (isFullscreenActive()) {
+            resolve(true);
+            return;
+        }
+
+        let settled = false;
+        const finish = (value) => {
+            if (settled) return;
+            settled = true;
+            document.removeEventListener('fullscreenchange', onChange);
+            document.removeEventListener('webkitfullscreenchange', onChange);
+            document.removeEventListener('msfullscreenchange', onChange);
+            window.clearTimeout(timer);
+            resolve(value);
+        };
+
+        const onChange = () => {
+            if (isFullscreenActive()) {
+                finish(true);
+            }
+        };
+
+        const timer = window.setTimeout(() => finish(false), timeoutMs);
+
+        document.addEventListener('fullscreenchange', onChange);
+        document.addEventListener('webkitfullscreenchange', onChange);
+        document.addEventListener('msfullscreenchange', onChange);
+    });
+
     const createLoadingMarkup = () => `
         <div class="page-loading-panel" role="status">
             <img class="page-loading-art" src="assets/Backgrounds/loadingscreen.png" alt="Loading">
@@ -92,8 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
             event.preventDefault();
             isNavigating = true;
 
-            const shouldEnterFullscreen = link.classList.contains('btn-enter') && target === 'game_start.html';
-
             const goNext = () => {
                 showLoadingScreen();
 
@@ -102,8 +130,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, loadingDuration);
             };
 
+            const shouldEnterFullscreen = link.classList.contains('btn-enter') && target === 'game_start.html';
+
             if (shouldEnterFullscreen) {
-                enterFullscreenFlow().finally(goNext);
+                enterFullscreenFlow()
+                    .then(() => waitForFullscreenActive(1500))
+                    .finally(goNext);
                 return;
             }
 
@@ -141,4 +173,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     });
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js').catch((error) => {
+                console.warn('Service worker registration failed.', error);
+            });
+        });
+    }
 });
