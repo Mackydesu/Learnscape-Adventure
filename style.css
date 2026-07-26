@@ -488,15 +488,17 @@ body.is-page-loading .page-loading-overlay {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    padding: 12px 22px;
-    border: 2px solid rgba(255, 244, 95, 0.7);
+    width: min(88vw, 700px);
+    max-width: calc(100vw - 24px);
+    padding: 8px 20px;
+    border: 2px solid rgba(255, 244, 95, 0.82);
     border-radius: 999px;
     background:
-        linear-gradient(180deg, rgba(18, 44, 90, 0.92), rgba(10, 24, 54, 0.96));
+        linear-gradient(180deg, rgba(14, 34, 72, 0.96), rgba(6, 18, 40, 0.98));
     box-shadow:
-        0 12px 26px rgba(0, 0, 0, 0.28),
+        0 12px 28px rgba(0, 0, 0, 0.34),
         0 0 0 2px rgba(255, 255, 255, 0.06),
-        0 0 24px rgba(79, 214, 232, 0.16);
+        0 0 26px rgba(79, 214, 232, 0.2);
     transform: translateX(-50%);
     text-align: center;
     pointer-events: none;
@@ -505,23 +507,23 @@ body.is-page-loading .page-loading-overlay {
 .game-start-prompt::before,
 .game-start-prompt::after {
     content: '✦';
-    color: #ffd84d;
-    font-size: 0.95rem;
+    color: #fff45f;
+    font-size: 1rem;
     line-height: 1;
-    text-shadow: 0 0 10px rgba(255, 216, 77, 0.8);
+    text-shadow: 0 0 12px rgba(255, 244, 95, 0.95);
 }
 
 .game-start-prompt-kicker {
     font-family: 'Fredoka', sans-serif;
-    font-size: clamp(1.3rem, 2.4vw, 2rem);
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    color: #fffef1;
+    font-size: clamp(1.15rem, 2.2vw, 1.82rem);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #ffffff;
     text-transform: uppercase;
     text-shadow:
-        0 2px 0 rgba(0, 0, 0, 0.55),
-        0 0 14px rgba(255, 216, 77, 0.28),
-        0 0 24px rgba(79, 214, 232, 0.12);
+        0 2px 0 rgba(0, 0, 0, 0.7),
+        0 0 10px rgba(0, 0, 0, 0.22),
+        0 0 18px rgba(255, 244, 95, 0.28);
 }
 
 .game-card {
@@ -1252,7 +1254,15 @@ footer {
     }
 
     .game-start-prompt {
-        width: auto;
+        width: min(94vw, 580px);
+        max-width: calc(100vw - 24px);
+        padding: 7px 14px;
+        bottom: 16px;
+    }
+
+    .game-start-prompt-kicker {
+        font-size: clamp(1.05rem, 4.4vw, 1.4rem);
+        letter-spacing: 0.06em;
     }
 
     .hero {
