@@ -488,9 +488,9 @@ body.is-page-loading .page-loading-overlay {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    width: min(88vw, 700px);
-    max-width: calc(100vw - 24px);
-    padding: 8px 20px;
+    width: min(84vw, 620px);
+    max-width: calc(100vw - 32px);
+    padding: 8px 18px;
     border: 2px solid rgba(255, 244, 95, 0.82);
     border-radius: 999px;
     background:
@@ -515,11 +515,14 @@ body.is-page-loading .page-loading-overlay {
 
 .game-start-prompt-kicker {
     font-family: 'Fredoka', sans-serif;
-    font-size: clamp(1.15rem, 2.2vw, 1.82rem);
+    font-size: clamp(1.2rem, 2.35vw, 1.9rem);
     font-weight: 800;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.09em;
     color: #ffffff;
     text-transform: uppercase;
+    white-space: nowrap;
+    transform: scaleX(1.05);
+    display: inline-block;
     text-shadow:
         0 2px 0 rgba(0, 0, 0, 0.7),
         0 0 10px rgba(0, 0, 0, 0.22),
@@ -1254,15 +1257,16 @@ footer {
     }
 
     .game-start-prompt {
-        width: min(94vw, 580px);
+        width: min(92vw, 520px);
         max-width: calc(100vw - 24px);
         padding: 7px 14px;
         bottom: 16px;
     }
 
     .game-start-prompt-kicker {
-        font-size: clamp(1.05rem, 4.4vw, 1.4rem);
-        letter-spacing: 0.06em;
+        font-size: clamp(1.08rem, 4.5vw, 1.45rem);
+        letter-spacing: 0.07em;
+        transform: scaleX(1.03);
     }
 
     .hero {
