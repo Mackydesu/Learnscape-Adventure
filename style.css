@@ -56,6 +56,114 @@ body.app-shell {
     background: #000;
 }
 
+.rotate-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 6vw;
+    background:
+        radial-gradient(circle at 50% 30%, rgba(79, 214, 232, 0.16) 0, transparent 34%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.76), rgba(7, 18, 38, 0.92));
+    backdrop-filter: blur(6px);
+    text-align: center;
+}
+
+.rotate-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.1vh;
+    max-width: min(82vw, 420px);
+    padding: 4vh 5vw;
+    border: 2px solid rgba(255, 244, 95, 0.72);
+    border-radius: 28px;
+    background: rgba(14, 34, 72, 0.72);
+    box-shadow:
+        0 18px 36px rgba(0, 0, 0, 0.32),
+        0 0 0 2px rgba(255, 255, 255, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.rotate-icon {
+    position: relative;
+    width: min(26vw, 120px);
+    height: min(26vw, 120px);
+    display: grid;
+    place-items: center;
+}
+
+.rotate-phone {
+    position: absolute;
+    width: min(14vw, 64px);
+    height: min(24vw, 92px);
+    border: 4px solid #fff7d4;
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03));
+    box-shadow:
+        0 0 0 2px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.rotate-phone::before,
+.rotate-phone::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 999px;
+    background: rgba(255, 247, 212, 0.88);
+}
+
+.rotate-phone::before {
+    top: 8%;
+    width: 34%;
+    height: 4px;
+}
+
+.rotate-phone::after {
+    bottom: 8%;
+    width: 16%;
+    height: 16%;
+}
+
+.rotate-arrow {
+    position: absolute;
+    right: 8%;
+    top: 10%;
+    color: #fff45f;
+    font-size: clamp(2.5rem, 7vw, 4rem);
+    line-height: 1;
+    text-shadow: 0 0 16px rgba(255, 244, 95, 0.42);
+    animation: rotatePrompt 1.8s ease-in-out infinite;
+}
+
+.rotate-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    font-weight: 800;
+    color: #fffbe6;
+    letter-spacing: 0.04em;
+    text-shadow: 0 3px 0 rgba(0, 0, 0, 0.42);
+}
+
+.rotate-copy {
+    max-width: 34ch;
+    font-size: clamp(1rem, 2.8vw, 1.3rem);
+    font-weight: 700;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.92);
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.28);
+}
+
+@media (max-width: 900px) and (orientation: portrait) {
+    .rotate-overlay {
+        display: flex;
+    }
+}
+
 body.is-page-loading {
     cursor: wait;
     overflow: hidden;
@@ -168,6 +276,15 @@ body.is-page-loading .page-loading-overlay {
 @keyframes loadingBarStripes {
     from { background-position: 0 0, 0 0; }
     to { background-position: 32px 0, 0 0; }
+}
+
+@keyframes rotatePrompt {
+    0%, 100% {
+        transform: rotate(0deg) translateY(0);
+    }
+    50% {
+        transform: rotate(18deg) translateY(-4px);
+    }
 }
 
 .game-start-page {
