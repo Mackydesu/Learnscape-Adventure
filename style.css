@@ -1655,6 +1655,44 @@ footer {
     }
 }
 
+@media (max-width: 600px) {
+    .game1-page.is-fullscreen-mode .game1-choice-tree,
+    .game1-page:fullscreen .game1-choice-tree,
+    .game1-page:-webkit-full-screen .game1-choice-tree {
+        left: 2vw;
+        top: 20.2vh;
+        width: min(23vw, 126px);
+    }
+
+    .game1-page.is-fullscreen-mode .game1-choice-button-trace,
+    .game1-page:fullscreen .game1-choice-button-trace,
+    .game1-page:-webkit-full-screen .game1-choice-button-trace {
+        width: 100%;
+    }
+
+    .game1-page.is-fullscreen-mode .game1-choice-button-trace img,
+    .game1-page:fullscreen .game1-choice-button-trace img,
+    .game1-page:-webkit-full-screen .game1-choice-button-trace img {
+        transform: rotate(-7deg);
+        transform-origin: center;
+    }
+
+    .game1-page.is-fullscreen-mode .game1-choice-button-match,
+    .game1-page:fullscreen .game1-choice-button-match,
+    .game1-page:-webkit-full-screen .game1-choice-button-match {
+        width: 100%;
+        align-self: stretch;
+    }
+
+    .game1-page.is-fullscreen-mode .game1-choice-button-spell,
+    .game1-page:fullscreen .game1-choice-button-spell,
+    .game1-page:-webkit-full-screen .game1-choice-button-spell {
+        width: 98%;
+        align-self: center;
+        margin-top: -0.2vw;
+    }
+}
+
 @media (max-width: 600px) and (orientation: portrait) {
     .hero-title {
         width: 82vw;
@@ -1750,6 +1788,44 @@ footer {
     .game-start-prompt {
         width: min(50vw, 620px);
         bottom: 1.3vh;
+    }
+}
+
+@media (max-width: 900px) and (orientation: landscape) {
+    .game1-page.is-fullscreen-mode .game1-choice-tree,
+    .game1-page:fullscreen .game1-choice-tree,
+    .game1-page:-webkit-full-screen .game1-choice-tree {
+        left: 3vw;
+        top: 15vh;
+        width: min(22vw, 140px);
+    }
+
+    .game1-page.is-fullscreen-mode .game1-choice-button-trace,
+    .game1-page:fullscreen .game1-choice-button-trace,
+    .game1-page:-webkit-full-screen .game1-choice-button-trace {
+        width: 100%;
+    }
+
+    .game1-page.is-fullscreen-mode .game1-choice-button-trace img,
+    .game1-page:fullscreen .game1-choice-button-trace img,
+    .game1-page:-webkit-full-screen .game1-choice-button-trace img {
+        transform: rotate(-7deg);
+        transform-origin: center;
+    }
+
+    .game1-page.is-fullscreen-mode .game1-choice-button-match,
+    .game1-page:fullscreen .game1-choice-button-match,
+    .game1-page:-webkit-full-screen .game1-choice-button-match {
+        width: 100%;
+        align-self: stretch;
+    }
+
+    .game1-page.is-fullscreen-mode .game1-choice-button-spell,
+    .game1-page:fullscreen .game1-choice-button-spell,
+    .game1-page:-webkit-full-screen .game1-choice-button-spell {
+        width: 98%;
+        align-self: center;
+        margin-top: -0.2vw;
     }
 }
 
