@@ -528,7 +528,7 @@ body.is-page-loading .page-loading-overlay {
 .game1-choice-tree {
     position: fixed;
     z-index: 1;
-    left: 5vw;
+    left: 9vw;
     top: 10.6vh;
     width: 16.7vw;
     display: flex;
@@ -556,15 +556,13 @@ body.is-page-loading .page-loading-overlay {
     pointer-events: none;
 }
 
-.game1-choice-button-trace {
-    width: 17vw;
+.game1-choice-button-match {
     align-self: center;
 }
 
 .game1-choice-button-spell {
-    width: 16vw;
     align-self: center;
-    margin-top: -0.8vw;
+    margin-top: -1vw;
 }
 
 .game1-choice-button:hover,
@@ -739,6 +737,42 @@ body.is-page-loading .page-loading-overlay {
 }
 
 @media (min-width: 901px) {
+    .game1-page .game1-choice-tree {
+        left: 9vw;
+        top: 10.6vh;
+        width: 16.7vw;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .game1-page .game1-choice-button {
+        width: 100%;
+    }
+
+    .game1-page .game1-choice-button-trace {
+        position: absolute;
+        left: 18vw;
+        top: 1vw;
+        width: 19vw;
+    }
+
+    .game1-page .game1-choice-button-trace img {
+        transform: rotate(-7deg);
+        transform-origin: center;
+    }
+
+    .game1-page .game1-choice-button-match {
+        width: 19vw;
+        align-self: center;
+    }
+
+    .game1-page .game1-choice-button-spell {
+        width: 18vw;
+        align-self: center;
+        margin-top: -1vw;
+    }
+
     .game-start-stage {
         padding: 5.8vh 1vw 2.4vh;
     }
@@ -1447,20 +1481,20 @@ footer {
     .game1-page .game1-choice-tree {
         left: 3.5vw;
         top: 24vh;
-        width: min(14vw, 84px);
+        width: min(15vw, 92px);
         transform: none;
         gap: 0.15vw;
     }
 
-    .game1-page .game1-choice-button-trace {
+    .game1-page .game1-choice-button-match {
         width: 100%;
         align-self: stretch;
     }
 
     .game1-page .game1-choice-button-spell {
-        width: 94%;
+        width: 96%;
         align-self: center;
-        margin-top: -0.3vw;
+        margin-top: -0.25vw;
     }
 
     .game-start-stage {
