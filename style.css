@@ -1753,88 +1753,49 @@ footer {
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
     .game1-page.is-fullscreen-mode .game1-choice-tree,
     .game1-page:fullscreen .game1-choice-tree,
     .game1-page:-webkit-full-screen .game1-choice-tree {
-        left: 50%;
-        top: 18vh;
-        width: min(74vw, 360px);
+        left: 8.2vw;
+        top: 13.3vh;
+        width: 16.7vw;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.7rem;
-        transform: translateX(-50%);
+        transform: scale(0.62);
+        transform-origin: top left;
     }
 
     .game1-page.is-fullscreen-mode .game1-choice-button-trace,
     .game1-page:fullscreen .game1-choice-button-trace,
-    .game1-page:-webkit-full-screen .game1-choice-button-trace,
+    .game1-page:-webkit-full-screen .game1-choice-button-trace {
+        position: absolute;
+        left: 18vw;
+        top: 1vw;
+        width: 19vw;
+    }
+
+    .game1-page.is-fullscreen-mode .game1-choice-button-trace img,
+    .game1-page:fullscreen .game1-choice-button-trace img,
+    .game1-page:-webkit-full-screen .game1-choice-button-trace img {
+        transform: rotate(-7deg);
+        transform-origin: center;
+    }
+
     .game1-page.is-fullscreen-mode .game1-choice-button-match,
     .game1-page:fullscreen .game1-choice-button-match,
-    .game1-page:-webkit-full-screen .game1-choice-button-match,
-    .game1-page.is-fullscreen-mode .game1-choice-button-spell,
-    .game1-page:fullscreen .game1-choice-button-spell,
-    .game1-page:-webkit-full-screen .game1-choice-button-spell {
-        width: 100%;
-        grid-column: auto;
+    .game1-page:-webkit-full-screen .game1-choice-button-match {
+        width: 19vw;
         align-self: center;
-        justify-self: center;
-        margin-top: 0;
-    }
-
-    .game1-page.is-fullscreen-mode .game1-choice-button-trace img,
-    .game1-page:fullscreen .game1-choice-button-trace img,
-    .game1-page:-webkit-full-screen .game1-choice-button-trace img {
-        transform: rotate(-7deg);
-        transform-origin: center;
     }
 
     .game1-page.is-fullscreen-mode .game1-choice-button-spell,
     .game1-page:fullscreen .game1-choice-button-spell,
     .game1-page:-webkit-full-screen .game1-choice-button-spell {
-        width: 96%;
-    }
-}
-
-@media (max-width: 900px) and (orientation: landscape) {
-    .game1-page.is-fullscreen-mode .game1-choice-tree,
-    .game1-page:fullscreen .game1-choice-tree,
-    .game1-page:-webkit-full-screen .game1-choice-tree {
-        left: 50%;
-        top: 15vh;
-        width: min(62vw, 420px);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.55rem;
-        transform: translateX(-50%);
-    }
-
-    .game1-page.is-fullscreen-mode .game1-choice-button-trace,
-    .game1-page:fullscreen .game1-choice-button-trace,
-    .game1-page:-webkit-full-screen .game1-choice-button-trace,
-    .game1-page.is-fullscreen-mode .game1-choice-button-match,
-    .game1-page:fullscreen .game1-choice-button-match,
-    .game1-page:-webkit-full-screen .game1-choice-button-match,
-    .game1-page.is-fullscreen-mode .game1-choice-button-spell,
-    .game1-page:fullscreen .game1-choice-button-spell,
-    .game1-page:-webkit-full-screen .game1-choice-button-spell {
-        width: 100%;
-        margin-top: 0;
-    }
-
-    .game1-page.is-fullscreen-mode .game1-choice-button-trace img,
-    .game1-page:fullscreen .game1-choice-button-trace img,
-    .game1-page:-webkit-full-screen .game1-choice-button-trace img {
-        transform: rotate(-7deg);
-        transform-origin: center;
-    }
-
-    .game1-page.is-fullscreen-mode .game1-choice-button-spell,
-    .game1-page:fullscreen .game1-choice-button-spell,
-    .game1-page:-webkit-full-screen .game1-choice-button-spell {
-        width: 96%;
+        width: 18vw;
+        align-self: center;
+        margin-top: -1vw;
     }
 }
 
