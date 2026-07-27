@@ -1541,11 +1541,21 @@ footer {
 
 @media (max-width: 600px) {
     .game1-page .game1-choice-tree {
-        left: 3.5vw;
-        top: 24vh;
-        width: min(15vw, 92px);
+        left: 2.8vw;
+        top: 22.8vh;
+        width: min(19vw, 108px);
         transform: none;
         gap: 0.15vw;
+    }
+
+    .game1-page .game1-choice-button-trace {
+        width: 100%;
+        align-self: stretch;
+    }
+
+    .game1-page .game1-choice-button-trace img {
+        transform: rotate(-7deg);
+        transform-origin: center;
     }
 
     .game1-page .game1-choice-button-match {
@@ -1554,9 +1564,9 @@ footer {
     }
 
     .game1-page .game1-choice-button-spell {
-        width: 96%;
+        width: 98%;
         align-self: center;
-        margin-top: -0.25vw;
+        margin-top: -0.2vw;
     }
 
     .game-start-stage {
@@ -1691,6 +1701,35 @@ footer {
 }
 
 @media (max-width: 900px) and (orientation: landscape) {
+    .game1-page .game1-choice-tree {
+        left: 4vw;
+        top: 17vh;
+        width: min(18vw, 120px);
+        transform: none;
+        gap: 0.15vw;
+    }
+
+    .game1-page .game1-choice-button-trace {
+        width: 100%;
+        align-self: stretch;
+    }
+
+    .game1-page .game1-choice-button-trace img {
+        transform: rotate(-7deg);
+        transform-origin: center;
+    }
+
+    .game1-page .game1-choice-button-match {
+        width: 100%;
+        align-self: stretch;
+    }
+
+    .game1-page .game1-choice-button-spell {
+        width: 98%;
+        align-self: center;
+        margin-top: -0.2vw;
+    }
+
     .game-start-stage {
         place-items: center center;
         padding: 7.6vh 1.8vw 3vh;
