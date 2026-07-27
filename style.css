@@ -740,16 +740,29 @@ body.is-page-loading .page-loading-overlay {
 
 @media (min-width: 901px) {
     .game-start-stage {
-        padding: 9.4vh 1.4vw 3.2vh;
+        padding: 6.8vh 1vw 2.8vh;
     }
 
     .game-grid {
-        width: min(100vw, 1760px);
-        gap: clamp(0.6rem, 0.85vw, 1.2rem);
+        width: min(82vw, 1240px);
+        gap: clamp(0.7rem, 0.9vw, 1.1rem);
     }
 
     .game-card-media {
-        aspect-ratio: 5 / 4;
+        aspect-ratio: 4 / 3;
+        border-radius: 24px;
+    }
+
+    .game-card-overlay {
+        padding: 1.8vw 1.8vw 1.6vw;
+    }
+
+    .game-card-title {
+        font-size: clamp(1.45rem, 2.2vw, 2rem);
+    }
+
+    .game-card-copy {
+        font-size: 1.02rem;
     }
 }
 
