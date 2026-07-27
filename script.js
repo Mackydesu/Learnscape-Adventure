@@ -102,6 +102,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const syncFullscreenClass = () => {
+        document.body.classList.toggle('is-fullscreen-mode', isFullscreenActive());
+    };
+
     const waitForFullscreenActive = (timeoutMs = 1500) => new Promise((resolve) => {
         if (isFullscreenActive()) {
             resolve(true);
@@ -273,6 +277,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     });
+
+    syncFullscreenClass();
+    document.addEventListener('fullscreenchange', syncFullscreenClass);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenClass);
+    document.addEventListener('msfullscreenchange', syncFullscreenClass);
 
     // Service worker registration is disabled during development to avoid stale cached assets.
 });

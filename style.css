@@ -807,6 +807,68 @@ body.is-page-loading .page-loading-overlay {
     }
 }
 
+@media (min-width: 901px) and (display-mode: fullscreen) {
+    .game1-page .game1-choice-tree {
+        left: 8.2vw;
+        top: 13.3vh;
+    }
+
+    .game1-page .game1-choice-button-trace {
+        width: 21vw;
+        top: 1.2vw;
+    }
+
+    .game1-page .game1-choice-button-trace img {
+        transform: rotate(-7deg);
+    }
+
+    .game1-page .game1-choice-button-match {
+        width: 21vw;
+    }
+
+    .game1-page .game1-choice-button-spell {
+        width: 20.5vw;
+        margin-top: -0.75vw;
+    }
+}
+
+.game1-page:fullscreen .game1-choice-tree,
+.game1-page:-webkit-full-screen .game1-choice-tree {
+    left: 8.2vw;
+    top: 13.3vh;
+}
+
+.game1-page:fullscreen .game1-choice-button-trace,
+.game1-page:-webkit-full-screen .game1-choice-button-trace {
+    width: 21vw;
+    top: 0vw;
+}
+
+.game1-page.is-fullscreen-mode .game1-choice-button-trace {
+    width: 21vw;
+    top: 0vw;
+}
+
+.game1-page:fullscreen .game1-choice-button-match,
+.game1-page:-webkit-full-screen .game1-choice-button-match {
+    width: 21vw;
+}
+
+.game1-page:fullscreen .game1-choice-button-spell,
+.game1-page:-webkit-full-screen .game1-choice-button-spell {
+    width: 20.5vw;
+    margin-top: -0.75vw;
+}
+
+.game1-page.is-fullscreen-mode .game1-choice-button-match {
+    width: 21vw;
+}
+
+.game1-page.is-fullscreen-mode .game1-choice-button-spell {
+    width: 20.5vw;
+    margin-top: -0.75vw;
+}
+
 .game-card-media::after {
     content: '';
     position: absolute;
