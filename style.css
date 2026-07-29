@@ -664,7 +664,7 @@ body.is-page-loading .page-loading-overlay {
 .game-start-prompt {
     position: fixed;
     left: 50%;
-    bottom: 2.5vh;
+    bottom: clamp(4vh, 6.5vh, 9.5vh);
     z-index: 2;
     display: inline-flex;
     align-items: center;
@@ -778,7 +778,7 @@ body.is-page-loading .page-loading-overlay {
     }
 
     .game-grid {
-        width: min(88vw, 1360px);
+        width: min(92vw, 1440px);
         gap: clamp(0.9rem, 1vw, 1.25rem);
         justify-content: center;
         justify-items: center;
@@ -786,7 +786,7 @@ body.is-page-loading .page-loading-overlay {
 
     .game-card {
         width: 100%;
-        max-width: 440px;
+        max-width: 490px;
     }
 
     .game-card-media {
@@ -1524,7 +1524,7 @@ footer {
     }
 
     .game-start-prompt {
-        bottom: 1.9vh;
+        bottom: clamp(3.5vh, 5vh, 7vh);
     }
 
     .quest-card,
@@ -1585,7 +1585,7 @@ footer {
         width: 28vw;
         max-width: 99vw;
         padding: 0.5vw 1vw;
-        bottom: calc(0.8vh + env(safe-area-inset-bottom));
+        bottom: calc(2.8vh + env(safe-area-inset-bottom));
     }
 
     .game-start-prompt-kicker {
@@ -1736,7 +1736,7 @@ footer {
     }
 
     .game-grid {
-        width: min(94vw, 1120px);
+        width: min(96vw, 1180px);
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: clamp(0.45vw, 0.65vw, 0.9vw);
     }
@@ -1749,7 +1749,7 @@ footer {
 
     .game-start-prompt {
         width: min(50vw, 620px);
-        bottom: 1.3vh;
+        bottom: 5vh;
     }
 }
 
