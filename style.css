@@ -686,6 +686,10 @@ body.is-page-loading .page-loading-overlay {
     pointer-events: none;
 }
 
+.game-start-page:fullscreen .game-start-prompt {
+    bottom: clamp(9vh, 12vh, 15vh);
+}
+
 .game-start-prompt::before,
 .game-start-prompt::after {
     content: '✦';
