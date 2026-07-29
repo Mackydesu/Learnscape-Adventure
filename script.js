@@ -180,11 +180,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const createRotateOverlayMarkup = () => `
         <div class="rotate-panel">
             <div class="rotate-icon" aria-hidden="true">
-                <span class="rotate-phone"></span>
+                <span class="rotate-phone rotate-phone-portrait"></span>
+                <span class="rotate-phone rotate-phone-landscape"></span>
                 <span class="rotate-arrow">↻</span>
             </div>
             <p class="rotate-title">Rotate your phone</p>
             <p class="rotate-copy">For the best experience, use landscape mode.</p>
+            <div class="rotate-button-cue" aria-hidden="true">
+                <span class="rotate-button-cue-hand">👆</span>
+            </div>
+            <button class="rotate-button" type="button" aria-label="Rotate to landscape">
+                <span class="rotate-button-text">TAP HERE</span>
+            </button>
         </div>
     `;
 
@@ -194,9 +201,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!rotateOverlay) {
             rotateOverlay = document.createElement('div');
             rotateOverlay.className = 'rotate-overlay';
-            rotateOverlay.setAttribute('aria-hidden', 'true');
+            rotateOverlay.setAttribute('aria-hidden', 'false');
             rotateOverlay.innerHTML = createRotateOverlayMarkup();
             document.body.appendChild(rotateOverlay);
+        }
+
+        const rotateButton = rotateOverlay.querySelector('.rotate-button');
+
+        if (rotateButton && !rotateButton.dataset.rotateBound) {
+            rotateButton.dataset.rotateBound = 'true';
+            rotateButton.addEventListener('click', async () => {
+                try {
+                    await enterFullscreenFlow(document.documentElement);
+                } catch (error) {
+                    console.warn('Rotate action was not available.', error);
+                } finally {
+                    updateRotateOverlay();
+                }
+            });
         }
 
         return rotateOverlay;
