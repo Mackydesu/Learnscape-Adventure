@@ -5,9 +5,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loadingLinks = document.querySelectorAll('.loading-link');
     let isNavigating = false;
-    const loadingDuration = 3000;
+    const loadingDuration = 1000;
 
     const isInShell = () => window.top !== window;
+
+    const getShellContainer = () => {
+        const localShell = document.getElementById('app-shell-container');
+        if (localShell) {
+            return localShell;
+        }
+
+        if (!isInShell()) return null;
+
+        try {
+            return window.top.document.getElementById('app-shell-container');
+        } catch (error) {
+            return null;
+        }
+    };
 
     const getAppFrame = () => {
         if (!isInShell()) return null;
@@ -19,17 +34,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const getShellContainer = () => {
-        if (!isInShell()) return null;
-
-        try {
-            return window.top.document.getElementById('app-shell-container');
-        } catch (error) {
-            return null;
-        }
-    };
-
     const navigateApp = (target) => {
+        const shellNavigate = window.top && window.top !== window
+            ? window.top.__learnscapeNavigate
+            : window.__learnscapeNavigate;
+
+        if (typeof shellNavigate === 'function' && target && !target.startsWith('#')) {
+            shellNavigate(target);
+            return;
+        }
+
         const frame = getAppFrame();
 
         if (frame && target && !target.startsWith('#')) {
@@ -213,33 +227,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadingLinks.forEach((link) => {
         link.addEventListener('click', (event) => {
-            const target = link.getAttribute('href');
+            const target = link.getAttribute('data-route') || link.getAttribute('href');
+
+            event.preventDefault();
 
             if (!target || target.startsWith('#') || isNavigating) return;
 
-            event.preventDefault();
             isNavigating = true;
+
+            const releaseNavigationLock = () => {
+                window.setTimeout(() => {
+                    isNavigating = false;
+                }, 100);
+            };
 
             const goNext = () => {
                 showLoadingScreen();
 
                 window.setTimeout(() => {
                     navigateApp(target);
+                    releaseNavigationLock();
                 }, loadingDuration);
             };
 
-            const shouldEnterFullscreen = link.classList.contains('btn-enter') && target === 'game_start.html';
+            const shouldEnterFullscreen = link.classList.contains('btn-enter') && target === 'start';
 
             if (shouldEnterFullscreen) {
                 const fullscreenTarget = getShellContainer() || getAppFrame() || document.documentElement;
-
-                (async () => {
-                    await enterFullscreenFlow(fullscreenTarget);
-                    await waitForFullscreenActive(1500);
-                    window.setTimeout(goNext, 150);
-                })().catch(() => {
-                    goNext();
-                });
+                enterFullscreenFlow(fullscreenTarget).catch(() => {});
+                goNext();
                 return;
             }
 

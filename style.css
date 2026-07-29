@@ -215,8 +215,8 @@ body.is-page-loading {
 }
 
 body.is-page-loading > :not(.page-loading-overlay) {
-    filter: blur(6px);
-    transition: filter 0.28s ease;
+    opacity: 1;
+    transition: opacity 0.28s ease;
 }
 
 .page-loading-overlay {
@@ -1802,7 +1802,6 @@ footer {
         margin-top: -1vw;
     }
 }
-
 
 
 
