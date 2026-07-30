@@ -151,8 +151,6 @@ body.app-shell {
     font-size: clamp(2.5rem, 7vw, 4rem);
     line-height: 1;
     text-shadow: 0 0 16px rgba(255, 244, 95, 0.42);
-    animation: rotatePrompt 1.8s ease-in-out infinite;
-    transform-origin: center;
 }
 
 .rotate-title {
