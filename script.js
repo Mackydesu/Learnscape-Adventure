@@ -304,18 +304,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    const game1ChoiceButtons = document.querySelectorAll('.game1-choice-button');
-
-    game1ChoiceButtons.forEach((button) => {
-        button.addEventListener('click', () => {
-            game1ChoiceButtons.forEach((otherButton) => {
-                const isCurrent = otherButton === button;
-                otherButton.classList.toggle('is-active', isCurrent);
-                otherButton.setAttribute('aria-pressed', isCurrent ? 'true' : 'false');
-            });
-        });
-    });
-
     syncFullscreenClass();
     document.addEventListener('fullscreenchange', syncFullscreenClass);
     document.addEventListener('webkitfullscreenchange', syncFullscreenClass);
