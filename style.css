@@ -145,16 +145,14 @@ body.app-shell {
 
 .rotate-arrow {
     position: absolute;
-    right: 0;
-    top: 0;
+    right: 20%;
+    top: 20%;
     color: #fff45f;
     font-size: clamp(2.5rem, 7vw, 4rem);
     line-height: 1;
     text-shadow: 0 0 16px rgba(255, 244, 95, 0.42);
     animation: rotatePrompt 1.8s ease-in-out infinite;
     transform-origin: center;
-    display: inline-block;
-    transform: rotate(25deg);
 }
 
 .rotate-title {
