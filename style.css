@@ -145,8 +145,8 @@ body.app-shell {
 
 .rotate-arrow {
     position: absolute;
-    right: 20%;
-    top: 20%;
+    right: 15%;
+    top: 15%;
     color: #fff45f;
     font-size: clamp(2.5rem, 7vw, 4rem);
     line-height: 1;
