@@ -151,6 +151,8 @@ body.app-shell {
     font-size: clamp(2.5rem, 7vw, 4rem);
     line-height: 1;
     text-shadow: 0 0 16px rgba(255, 244, 95, 0.42);
+    animation: none;
+    transform: rotate(25deg);
 }
 
 .rotate-title {
@@ -382,15 +384,6 @@ body.is-page-loading .page-loading-overlay {
 @keyframes loadingBarStripes {
     from { background-position: 0 0, 0 0; }
     to { background-position: 32px 0, 0 0; }
-}
-
-@keyframes rotatePrompt {
-    0%, 100% {
-        transform: rotate(8deg) translateY(0);
-    }
-    50% {
-        transform: rotate(26deg) translateY(-4px);
-    }
 }
 
 @keyframes rotateCueHand {
