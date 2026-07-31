@@ -247,6 +247,47 @@ document.addEventListener('DOMContentLoaded', () => {
     window.visualViewport?.addEventListener('resize', updateRotateOverlay);
     window.visualViewport?.addEventListener('scroll', updateRotateOverlay);
 
+    const game1Slides = Array.from(document.querySelectorAll('[data-game1-slide]'));
+    const game1Prev = document.querySelector('[data-game1-prev]');
+    const game1Next = document.querySelector('[data-game1-next]');
+
+    const setGame1Slide = (index) => {
+        if (!game1Slides.length) return;
+
+        const normalizedIndex = (index + game1Slides.length) % game1Slides.length;
+
+        game1Slides.forEach((slide, slideIndex) => {
+            slide.classList.toggle('is-active', slideIndex === normalizedIndex);
+        });
+
+        if (game1Prev) {
+            game1Prev.setAttribute('aria-label', 'Preview previous game');
+        }
+
+        if (game1Next) {
+            game1Next.setAttribute('aria-label', 'Show next game');
+        }
+    };
+
+    if (game1Slides.length) {
+        let game1SlideIndex = game1Slides.findIndex((slide) => slide.classList.contains('is-active'));
+        if (game1SlideIndex < 0) {
+            game1SlideIndex = 0;
+        }
+
+        setGame1Slide(game1SlideIndex);
+
+        game1Prev?.addEventListener('click', () => {
+            game1SlideIndex -= 1;
+            setGame1Slide(game1SlideIndex);
+        });
+
+        game1Next?.addEventListener('click', () => {
+            game1SlideIndex += 1;
+            setGame1Slide(game1SlideIndex);
+        });
+    }
+
     loadingLinks.forEach((link) => {
         link.addEventListener('click', (event) => {
             const target = link.getAttribute('data-route') || link.getAttribute('href');

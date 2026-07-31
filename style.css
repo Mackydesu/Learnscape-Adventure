@@ -582,22 +582,155 @@ body.is-page-loading .page-loading-overlay {
     position: fixed;
     inset: 0;
     z-index: 2;
-    display: grid;
-    place-items: end center;
-    padding: 10.2vh 2vw 4vh;
+    display: block;
+    padding: 0;
     pointer-events: none;
 }
 
-.game1-choice-tree {
-    position: fixed;
-    z-index: 1;
-    left: 8.8vw;
-    top: 8.8vh;
-    width: min(42vw, 760px);
-    height: min(22vw, 360px);
-    display: block;
+.game1-preview {
+    position: absolute;
+    right: clamp(1.3rem, 5.8vw, 4.8rem);
+    top: clamp(13.2vh, 19.2vh, 23.2vh);
+    width: min(32vw, 480px);
+    display: flex;
+    flex-direction: column;
+    gap: 1.3rem;
+    pointer-events: auto;
+    filter: drop-shadow(0 14px 14px rgba(0, 0, 0, 0.28));
+    transform: scale(1.16);
+    transform-origin: top right;
+}
+
+.game1-preview-viewport {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(0.7rem, 1.15vw, 1rem);
+    border: 4px solid #8b5a2b;
+    border-radius: 0;
+    background:
+        linear-gradient(180deg, rgba(36, 84, 51, 0.95), rgba(16, 47, 31, 0.96)),
+        url('assets/Backgrounds/border.png') center / cover;
+    box-shadow:
+        0 14px 24px rgba(0, 0, 0, 0.28),
+        0 0 0 2px rgba(255, 255, 255, 0.08),
+        0 0 20px rgba(255, 216, 77, 0.18),
+        inset 0 2px 0 rgba(255, 255, 255, 0.18);
+}
+
+.game1-preview-viewport::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 50% 18%, rgba(255, 244, 95, 0.18) 0, transparent 28%),
+        radial-gradient(circle at 20% 20%, rgba(79, 214, 232, 0.12) 0, transparent 18%),
+        radial-gradient(circle at 80% 18%, rgba(139, 217, 67, 0.1) 0, transparent 16%);
     pointer-events: none;
-    filter: drop-shadow(0 18px 18px rgba(0, 0, 0, 0.28));
+}
+
+.game1-preview-viewport {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 0;
+    border: 3px solid #6f421e;
+    background: rgba(7, 25, 38, 0.7);
+    box-shadow:
+        inset 0 0 0 2px rgba(139, 90, 43, 0.28),
+        inset 0 0 24px rgba(0, 0, 0, 0.26);
+}
+
+.game1-preview-viewport::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 30%, rgba(0, 0, 0, 0.16));
+    pointer-events: none;
+}
+
+.game1-board-slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 0;
+    transform: scale(1.03);
+    transition: opacity 0.36s ease, transform 0.36s ease;
+}
+
+.game1-board-slide.is-active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.game1-board-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.9rem;
+}
+
+.game1-board-nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.6rem;
+    width: 88%;
+    justify-self: center;
+    padding: 0.62rem 0.6rem;
+    border: 2px solid #fff45f;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #4ce16f 0%, #12783a 100%);
+    box-shadow:
+        0 3px 0 #0b4e25,
+        0 0 14px rgba(255, 244, 95, 0.32),
+        inset 0 2px 0 rgba(255, 255, 255, 0.26);
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.game1-board-nav:hover {
+    transform: translateY(-2px);
+    filter: saturate(1.08);
+    box-shadow:
+        0 4px 0 #0b4e25,
+        0 0 18px rgba(255, 244, 95, 0.4),
+        inset 0 2px 0 rgba(255, 255, 255, 0.3);
+}
+
+.game1-board-nav:active {
+    transform: translateY(3px);
+    box-shadow:
+        0 1px 0 #0b4e25,
+        0 0 10px rgba(255, 244, 95, 0.24),
+        inset 0 2px 0 rgba(255, 255, 255, 0.2);
+}
+
+.game1-board-triangle {
+    width: 0;
+    height: 0;
+    flex: 0 0 auto;
+    border-top: 0.65rem solid transparent;
+    border-bottom: 0.65rem solid transparent;
+}
+
+.game1-board-triangle-left {
+    border-right: 0.92rem solid #fff45f;
+}
+
+.game1-board-triangle-right {
+    border-left: 0.92rem solid #fff45f;
+}
+
+.game1-board-nav:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, 0.95);
+    outline-offset: 2px;
+}
+
+.game1-page .game1-choice-tree {
+    display: none;
 }
 
 @keyframes game1IntroCard {
@@ -758,10 +891,12 @@ body.is-page-loading .page-loading-overlay {
 }
 
 @media (min-width: 901px) {
-    .game1-page .game1-choice-tree {
-        left: 9vw;
-        top: 10.6vh;
-        width: 30vw;
+    .game1-page .game1-preview {
+        right: 4.4vw;
+        top: 19.2vh;
+        width: min(24vw, 360px);
+        transform: scale(1.16);
+        transform-origin: top right;
     }
 
     .game-start-stage {
@@ -799,16 +934,22 @@ body.is-page-loading .page-loading-overlay {
 }
 
 @media (min-width: 901px) and (display-mode: fullscreen) {
-    .game1-page .game1-choice-tree {
-        left: 8.2vw;
-        top: 13.3vh;
+    .game1-page .game1-preview {
+        right: 4.2vw;
+        top: 24.8vh;
+        width: min(26vw, 400px);
+        transform: scale(1.08);
+        transform-origin: top right;
     }
 }
 
-.game1-page:fullscreen .game1-choice-tree,
-.game1-page:-webkit-full-screen .game1-choice-tree {
-    left: 8.2vw;
-    top: 13.3vh;
+.game1-page:fullscreen .game1-preview,
+.game1-page:-webkit-full-screen .game1-preview {
+    right: 4.2vw;
+    top: 24.8vh;
+    width: min(26vw, 400px);
+    transform: scale(1.08);
+    transform-origin: top right;
 }
 
 .game-card-media::after {
@@ -1482,10 +1623,10 @@ footer {
 }
 
 @media (max-width: 600px) {
-    .game1-page .game1-choice-tree {
-        left: 2.8vw;
-        top: 22.8vh;
-        width: min(34vw, 220px);
+    .game1-page .game1-preview {
+        right: 3vw;
+        top: 17vh;
+        width: min(86vw, 360px);
     }
 
     .game-start-stage {
@@ -1620,10 +1761,10 @@ footer {
 }
 
 @media (max-width: 900px) and (orientation: landscape) {
-    .game1-page .game1-choice-tree {
-        left: 4vw;
-        top: 17vh;
-        width: min(32vw, 220px);
+    .game1-page .game1-preview {
+        right: 5vw;
+        top: 20vh;
+        width: min(22vw, 260px);
     }
 
     .game-start-stage {
@@ -1650,13 +1791,13 @@ footer {
 }
 
 @media (max-width: 900px) {
-    .game1-page.is-fullscreen-mode .game1-choice-tree,
-    .game1-page:fullscreen .game1-choice-tree,
-    .game1-page:-webkit-full-screen .game1-choice-tree {
-        left: 8.2vw;
-        top: 13.3vh;
-        width: 30vw;
-        transform: scale(0.92);
-        transform-origin: top left;
+    .game1-page.is-fullscreen-mode .game1-preview,
+    .game1-page:fullscreen .game1-preview,
+    .game1-page:-webkit-full-screen .game1-preview {
+        right: 4.2vw;
+        top: 24.8vh;
+        width: min(26vw, 400px);
+        transform: scale(1.08);
+        transform-origin: top right;
     }
 }

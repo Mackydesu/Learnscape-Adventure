@@ -207,7 +207,24 @@
             Back
         </a>
 
-        <main class="game1-stage" aria-label="Letter Forest game background"></main>
+        <main class="game1-stage" aria-label="Letter Forest game background">
+            <aside class="game1-preview" aria-label="Game 1 preview controls">
+                <div class="game1-preview-viewport" data-game1-board-viewport>
+                    <img class="game1-board-slide is-active" src="assets/Backgrounds/dragtomatch.webp" alt="Drag to Match preview" data-game1-slide>
+                    <img class="game1-board-slide" src="assets/Backgrounds/poptheword.webp" alt="Pop the Word preview" data-game1-slide>
+                    <img class="game1-board-slide" src="assets/Backgrounds/bunnyhop.webp" alt="Bunny Hop preview" data-game1-slide>
+                </div>
+
+                <div class="game1-board-controls" aria-label="Preview controls">
+                    <button class="game1-board-nav game1-board-prev" type="button" data-game1-prev aria-label="Preview previous game">
+                        <span class="game1-board-triangle game1-board-triangle-left" aria-hidden="true"></span>
+                    </button>
+                    <button class="game1-board-nav game1-board-next" type="button" data-game1-next aria-label="Show next game">
+                        <span class="game1-board-triangle game1-board-triangle-right" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </aside>
+        </main>
     </section>
 
     <script src="script.js"></script>
