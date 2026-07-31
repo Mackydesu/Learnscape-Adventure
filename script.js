@@ -250,41 +250,66 @@ document.addEventListener('DOMContentLoaded', () => {
     const game1Slides = Array.from(document.querySelectorAll('[data-game1-slide]'));
     const game1Prev = document.querySelector('[data-game1-prev]');
     const game1Next = document.querySelector('[data-game1-next]');
+    const game1TransitionDuration = 450;
 
-    const setGame1Slide = (index) => {
+    let game1SlideIndex = game1Slides.findIndex((slide) => slide.classList.contains('is-active'));
+    let game1IsAnimating = false;
+
+    if (game1SlideIndex < 0) {
+        game1SlideIndex = 0;
+    }
+
+    const resetGame1TransitionClasses = () => {
+        game1Slides.forEach((slide) => {
+            slide.classList.remove(
+                'is-enter-from-left',
+                'is-enter-from-right',
+                'is-leave-to-left',
+                'is-leave-to-right'
+            );
+        });
+    };
+
+    const setGame1Slide = (index, direction = 'next') => {
         if (!game1Slides.length) return;
 
         const normalizedIndex = (index + game1Slides.length) % game1Slides.length;
+        if (normalizedIndex === game1SlideIndex || game1IsAnimating) return;
 
-        game1Slides.forEach((slide, slideIndex) => {
-            slide.classList.toggle('is-active', slideIndex === normalizedIndex);
-        });
+        const currentSlide = game1Slides[game1SlideIndex];
+        const nextSlide = game1Slides[normalizedIndex];
+        const enterClass = direction === 'prev' ? 'is-enter-from-left' : 'is-enter-from-right';
+        const leaveClass = direction === 'prev' ? 'is-leave-to-right' : 'is-leave-to-left';
 
-        if (game1Prev) {
-            game1Prev.setAttribute('aria-label', 'Preview previous game');
-        }
+        game1IsAnimating = true;
+        resetGame1TransitionClasses();
 
-        if (game1Next) {
-            game1Next.setAttribute('aria-label', 'Show next game');
-        }
+        nextSlide.classList.add(enterClass);
+        nextSlide.getBoundingClientRect();
+
+        currentSlide.classList.add(leaveClass);
+        nextSlide.classList.add('is-active');
+
+        window.setTimeout(() => {
+            currentSlide.classList.remove('is-active', leaveClass);
+            nextSlide.classList.remove(enterClass);
+            game1SlideIndex = normalizedIndex;
+            game1IsAnimating = false;
+        }, game1TransitionDuration);
     };
 
     if (game1Slides.length) {
-        let game1SlideIndex = game1Slides.findIndex((slide) => slide.classList.contains('is-active'));
-        if (game1SlideIndex < 0) {
-            game1SlideIndex = 0;
-        }
-
-        setGame1Slide(game1SlideIndex);
+        resetGame1TransitionClasses();
+        game1Slides.forEach((slide, slideIndex) => {
+            slide.classList.toggle('is-active', slideIndex === game1SlideIndex);
+        });
 
         game1Prev?.addEventListener('click', () => {
-            game1SlideIndex -= 1;
-            setGame1Slide(game1SlideIndex);
+            setGame1Slide(game1SlideIndex - 1, 'prev');
         });
 
         game1Next?.addEventListener('click', () => {
-            game1SlideIndex += 1;
-            setGame1Slide(game1SlideIndex);
+            setGame1Slide(game1SlideIndex + 1, 'next');
         });
     }
 
