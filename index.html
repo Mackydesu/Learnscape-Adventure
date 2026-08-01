@@ -235,6 +235,110 @@
         </main>
     </section>
 
+    <section id="learnscape-dragtomatch-page" hidden>
+        <img class="game1-bg-image" src="assets/Backgrounds/skybg.png" alt="" aria-hidden="true">
+        <div class="game1-overlay" aria-hidden="true"></div>
+        <div class="game1-entry-veil" aria-hidden="true"></div>
+        <div class="game1-dragtomatch-objects" aria-label="Drag to Match object cards">
+            <button class="game1-object-card" type="button" data-dragtomatch-object-card aria-label="Object card 1" aria-pressed="false">
+                <span class="game1-object-card-inner">
+                    <span class="game1-object-card-face game1-object-card-face-back">
+                        <img class="game1-object-card-frame" src="assets/Backgrounds/objectdisplayerback.webp" alt="">
+                    </span>
+                    <span class="game1-object-card-face game1-object-card-face-front">
+                        <img class="game1-object-card-frame" src="assets/Backgrounds/objectdisplayerfront.png" alt="">
+                        <img class="game1-object-card-object" src="" alt="">
+                    </span>
+                </span>
+            </button>
+            <button class="game1-object-card" type="button" data-dragtomatch-object-card aria-label="Object card 2" aria-pressed="false">
+                <span class="game1-object-card-inner">
+                    <span class="game1-object-card-face game1-object-card-face-back">
+                        <img class="game1-object-card-frame" src="assets/Backgrounds/objectdisplayerback.webp" alt="">
+                    </span>
+                    <span class="game1-object-card-face game1-object-card-face-front">
+                        <img class="game1-object-card-frame" src="assets/Backgrounds/objectdisplayerfront.png" alt="">
+                        <img class="game1-object-card-object" src="" alt="">
+                    </span>
+                </span>
+            </button>
+            <button class="game1-object-card" type="button" data-dragtomatch-object-card aria-label="Object card 3" aria-pressed="false">
+                <span class="game1-object-card-inner">
+                    <span class="game1-object-card-face game1-object-card-face-back">
+                        <img class="game1-object-card-frame" src="assets/Backgrounds/objectdisplayerback.webp" alt="">
+                    </span>
+                    <span class="game1-object-card-face game1-object-card-face-front">
+                        <img class="game1-object-card-frame" src="assets/Backgrounds/objectdisplayerfront.png" alt="">
+                        <img class="game1-object-card-object" src="" alt="">
+                    </span>
+                </span>
+            </button>
+            <button class="game1-object-card" type="button" data-dragtomatch-object-card aria-label="Object card 4" aria-pressed="false">
+                <span class="game1-object-card-inner">
+                    <span class="game1-object-card-face game1-object-card-face-back">
+                        <img class="game1-object-card-frame" src="assets/Backgrounds/objectdisplayerback.webp" alt="">
+                    </span>
+                    <span class="game1-object-card-face game1-object-card-face-front">
+                        <img class="game1-object-card-frame" src="assets/Backgrounds/objectdisplayerfront.png" alt="">
+                        <img class="game1-object-card-object" src="" alt="">
+                    </span>
+                </span>
+            </button>
+        </div>
+        <div class="game1-letter-stage" aria-hidden="true">
+            <div class="game1-letter-board-wrap">
+                <img class="game1-letter-board" src="assets/Backgrounds/Letterdisplayer.png" alt="">
+                <img class="game1-current-letter" src="assets/ABC Elements/LetterA.png" alt="Letter A" draggable="true">
+            </div>
+            <img class="game1-letter-island" src="assets/Backgrounds/floatingisland.png" alt="">
+        </div>
+        <div class="game1-intro" aria-hidden="true">
+            <div class="game1-intro-card">
+                <span class="game1-intro-kicker">Game 1</span>
+                <h2 class="game1-intro-title">Drag to Match</h2>
+            </div>
+        </div>
+
+        <a class="game-return-btn loading-link" href="index.html" data-route="game1" aria-label="Return to game 1 previews">
+            <span>‹</span>
+            Back
+        </a>
+    </section>
+
+    <section id="learnscape-poptheword-page" hidden>
+        <img class="game1-bg-image" src="assets/Backgrounds/poptheword.webp" alt="" aria-hidden="true">
+        <div class="game1-overlay" aria-hidden="true"></div>
+        <div class="game1-entry-veil" aria-hidden="true"></div>
+        <div class="game1-intro" aria-hidden="true">
+            <div class="game1-intro-card">
+                <span class="game1-intro-kicker">Game 1</span>
+                <h2 class="game1-intro-title">Pop the Word</h2>
+            </div>
+        </div>
+
+        <a class="game-return-btn loading-link" href="index.html" data-route="game1" aria-label="Return to game 1 previews">
+            <span>‹</span>
+            Back
+        </a>
+    </section>
+
+    <section id="learnscape-bunnyhop-page" hidden>
+        <img class="game1-bg-image" src="assets/Backgrounds/bunnyhop.webp" alt="" aria-hidden="true">
+        <div class="game1-overlay" aria-hidden="true"></div>
+        <div class="game1-entry-veil" aria-hidden="true"></div>
+        <div class="game1-intro" aria-hidden="true">
+            <div class="game1-intro-card">
+                <span class="game1-intro-kicker">Game 1</span>
+                <h2 class="game1-intro-title">Bunny Hop</h2>
+            </div>
+        </div>
+
+        <a class="game-return-btn loading-link" href="index.html" data-route="game1" aria-label="Return to game 1 previews">
+            <span>‹</span>
+            Back
+        </a>
+    </section>
+
     <script src="script.js"></script>
     </div>
 
@@ -259,6 +363,24 @@
                     pageId: 'learnscape-game1-page',
                     hash: '#game1',
                 },
+                dragtomatch: {
+                    title: 'Learnscape Adventure - Drag to Match',
+                    bodyClass: 'gameplay-page',
+                    pageId: 'learnscape-dragtomatch-page',
+                    hash: '#dragtomatch',
+                },
+                poptheword: {
+                    title: 'Learnscape Adventure - Pop the Word',
+                    bodyClass: 'gameplay-page',
+                    pageId: 'learnscape-poptheword-page',
+                    hash: '#poptheword',
+                },
+                bunnyhop: {
+                    title: 'Learnscape Adventure - Bunny Hop',
+                    bodyClass: 'gameplay-page',
+                    pageId: 'learnscape-bunnyhop-page',
+                    hash: '#bunnyhop',
+                },
             };
 
             const routeAliases = {
@@ -266,24 +388,36 @@
                 title: 'title',
                 start: 'start',
                 game1: 'game1',
+                dragtomatch: 'dragtomatch',
+                poptheword: 'poptheword',
+                bunnyhop: 'bunnyhop',
                 '#home': 'title',
                 '#game-start': 'start',
                 '#game1': 'game1',
+                '#dragtomatch': 'dragtomatch',
+                '#poptheword': 'poptheword',
+                '#bunnyhop': 'bunnyhop',
                 'index.html': 'title',
                 'title-screen.html': 'title',
                 'game_start.html': 'start',
                 'game1.html': 'game1',
+                'dragtomatch.html': 'dragtomatch',
+                'poptheword.html': 'poptheword',
+                'bunnyhop.html': 'bunnyhop',
             };
 
             const pages = {
                 title: document.getElementById('learnscape-title-page'),
                 start: document.getElementById('learnscape-game-start-page'),
                 game1: document.getElementById('learnscape-game1-page'),
+                dragtomatch: document.getElementById('learnscape-dragtomatch-page'),
+                poptheword: document.getElementById('learnscape-poptheword-page'),
+                bunnyhop: document.getElementById('learnscape-bunnyhop-page'),
             };
 
             const loadingOverlay = document.querySelector('.page-loading-overlay');
             const body = document.body;
-            const routeBodyClasses = ['title-page', 'game-start-page', 'game1-page'];
+            const routeBodyClasses = ['title-page', 'game-start-page', 'game1-page', 'gameplay-page'];
             let loadingTimer = null;
             let currentRoute = 'title';
             let isNavigating = false;

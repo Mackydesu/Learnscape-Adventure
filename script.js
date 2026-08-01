@@ -250,7 +250,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const game1Slides = Array.from(document.querySelectorAll('[data-game1-slide]'));
     const game1Prev = document.querySelector('[data-game1-prev]');
     const game1Next = document.querySelector('[data-game1-next]');
+    const game1PlayButton = document.querySelector('.game1-play-btn');
+    const game1PlayRoutes = ['dragtomatch', 'poptheword', 'bunnyhop'];
+    const dragtomatchCards = Array.from(document.querySelectorAll('[data-dragtomatch-object-card]'));
+    const dragtomatchLetterImage = document.querySelector('.game1-current-letter');
+    const dragtomatchRoundAdvanceDelay = 900;
     const game1TransitionDuration = 450;
+
+    const dragtomatchPairs = [
+        { letter: 'A', letterSrc: 'assets/ABC Elements/LetterA.png', objectName: 'Apple', objectSrc: 'assets/ABC Elements/Apple.png' },
+        { letter: 'B', letterSrc: 'assets/ABC Elements/LetterB.png', objectName: 'Ball', objectSrc: 'assets/ABC Elements/Ball.png' },
+        { letter: 'C', letterSrc: 'assets/ABC Elements/LetterC.png', objectName: 'Cat', objectSrc: 'assets/ABC Elements/Cat.png' },
+        { letter: 'D', letterSrc: 'assets/ABC Elements/LetterD.png', objectName: 'Dog', objectSrc: 'assets/ABC Elements/Dog.png' },
+        { letter: 'E', letterSrc: 'assets/ABC Elements/LetterE.png', objectName: 'Elephant', objectSrc: 'assets/ABC Elements/Elephant.png' },
+        { letter: 'F', letterSrc: 'assets/ABC Elements/LetterF.png', objectName: 'Frog', objectSrc: 'assets/ABC Elements/Frog.png' },
+        { letter: 'G', letterSrc: 'assets/ABC Elements/LetterG.png', objectName: 'Grapes', objectSrc: 'assets/ABC Elements/Grapes.png' },
+        { letter: 'H', letterSrc: 'assets/ABC Elements/LetterH.png', objectName: 'House', objectSrc: 'assets/ABC Elements/House.png' },
+        { letter: 'I', letterSrc: 'assets/ABC Elements/LetterI.png', objectName: 'Ice cream', objectSrc: 'assets/ABC Elements/Ice cream.png' },
+        { letter: 'J', letterSrc: 'assets/ABC Elements/LetterJ.png', objectName: 'Jelly', objectSrc: 'assets/ABC Elements/Jelly.png' },
+        { letter: 'K', letterSrc: 'assets/ABC Elements/LetterK.png', objectName: 'Kite', objectSrc: 'assets/ABC Elements/Kite.png' },
+        { letter: 'L', letterSrc: 'assets/ABC Elements/LetterL.png', objectName: 'Lion', objectSrc: 'assets/ABC Elements/Lion.png' },
+        { letter: 'M', letterSrc: 'assets/ABC Elements/LetterM.png', objectName: 'Moon', objectSrc: 'assets/ABC Elements/Moon.png' },
+        { letter: 'N', letterSrc: 'assets/ABC Elements/LetterN.png', objectName: 'Nest', objectSrc: 'assets/ABC Elements/Nest.png' },
+        { letter: 'O', letterSrc: 'assets/ABC Elements/LetterO.png', objectName: 'Orange', objectSrc: 'assets/ABC Elements/Orange.png' },
+        { letter: 'P', letterSrc: 'assets/ABC Elements/LetterP.png', objectName: 'Parrot', objectSrc: 'assets/ABC Elements/Parrot.png' },
+        { letter: 'Q', letterSrc: 'assets/ABC Elements/LetterQ.png', objectName: 'Queen', objectSrc: 'assets/ABC Elements/Queen.png' },
+        { letter: 'R', letterSrc: 'assets/ABC Elements/LetterR.png', objectName: 'Rainbow', objectSrc: 'assets/ABC Elements/Rainbow.png' },
+        { letter: 'S', letterSrc: 'assets/ABC Elements/LetterS.png', objectName: 'Sun', objectSrc: 'assets/ABC Elements/Sun.png' },
+        { letter: 'T', letterSrc: 'assets/ABC Elements/LetterT.png', objectName: 'Train', objectSrc: 'assets/ABC Elements/Train.png' },
+        { letter: 'U', letterSrc: 'assets/ABC Elements/LetterU.png', objectName: 'Umbrella', objectSrc: 'assets/ABC Elements/Umbrella.png' },
+        { letter: 'V', letterSrc: 'assets/ABC Elements/LetterV.png', objectName: 'Violin', objectSrc: 'assets/ABC Elements/Violin.png' },
+        { letter: 'W', letterSrc: 'assets/ABC Elements/LetterW.png', objectName: 'Whale', objectSrc: 'assets/ABC Elements/Whale.png' },
+        { letter: 'X', letterSrc: 'assets/ABC Elements/LetterX.png', objectName: 'Xylophone', objectSrc: 'assets/ABC Elements/Xylophone.png' },
+        { letter: 'Y', letterSrc: 'assets/ABC Elements/LetterY.png', objectName: 'Yoyo', objectSrc: 'assets/ABC Elements/Yoyo.png' },
+        { letter: 'Z', letterSrc: 'assets/ABC Elements/LetterZ.png', objectName: 'Zebra', objectSrc: 'assets/ABC Elements/Zebra.png' },
+    ];
+    const dragtomatchCardState = new Map();
+    let dragtomatchCurrentIndex = 0;
+    let dragtomatchAdvanceTimer = null;
 
     let game1SlideIndex = game1Slides.findIndex((slide) => slide.classList.contains('is-active'));
     let game1IsAnimating = false;
@@ -312,6 +349,166 @@ document.addEventListener('DOMContentLoaded', () => {
             setGame1Slide(game1SlideIndex + 1, 'next');
         });
     }
+
+    game1PlayButton?.addEventListener('click', () => {
+        const targetRoute = game1PlayRoutes[game1SlideIndex] || game1PlayRoutes[0];
+
+        if (targetRoute) {
+            window.__learnscapeNavigate?.(targetRoute);
+        }
+    });
+
+    const shuffleArray = (items) => {
+        const copy = items.slice();
+        for (let index = copy.length - 1; index > 0; index -= 1) {
+            const swapIndex = Math.floor(Math.random() * (index + 1));
+            [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
+        }
+        return copy;
+    };
+
+    const getDragtomatchRoundOptions = (index) => {
+        const correct = dragtomatchPairs[index];
+        const picks = [correct];
+        const distractorOffsets = [1, 7, 13, 19, 23];
+
+        distractorOffsets.forEach((offset) => {
+            if (picks.length >= 4) return;
+            const candidate = dragtomatchPairs[(index + offset) % dragtomatchPairs.length];
+            if (!picks.some((entry) => entry.letter === candidate.letter)) {
+                picks.push(candidate);
+            }
+        });
+
+        return shuffleArray(picks.slice(0, 4));
+    };
+
+    const clearDragtomatchAdvance = () => {
+        if (dragtomatchAdvanceTimer) {
+            window.clearTimeout(dragtomatchAdvanceTimer);
+            dragtomatchAdvanceTimer = null;
+        }
+    };
+
+    const syncDragtomatchLetter = (pair) => {
+        if (!dragtomatchLetterImage || !pair) return;
+        dragtomatchLetterImage.src = pair.letterSrc;
+        dragtomatchLetterImage.alt = `Letter ${pair.letter}`;
+        dragtomatchLetterImage.dataset.letter = pair.letter;
+        dragtomatchLetterImage.setAttribute('draggable', 'true');
+    };
+
+    const renderDragtomatchRound = (index) => {
+        clearDragtomatchAdvance();
+
+        if (!dragtomatchCards.length || !dragtomatchPairs.length) return;
+
+        dragtomatchCurrentIndex = (index + dragtomatchPairs.length) % dragtomatchPairs.length;
+        const currentPair = dragtomatchPairs[dragtomatchCurrentIndex];
+        const roundOptions = getDragtomatchRoundOptions(dragtomatchCurrentIndex);
+
+        syncDragtomatchLetter(currentPair);
+
+        dragtomatchCards.forEach((card, cardIndex) => {
+            const option = roundOptions[cardIndex];
+            const objectImage = card.querySelector('.game1-object-card-object');
+            const isCorrect = option.letter === currentPair.letter;
+
+            card.classList.remove('is-flipped', 'is-solved', 'is-wrong-drop');
+            card.setAttribute('aria-pressed', 'false');
+            card.setAttribute('aria-disabled', 'false');
+            card.dataset.letter = option.letter;
+            card.dataset.objectName = option.objectName;
+            card.dataset.objectSrc = option.objectSrc;
+            card.disabled = false;
+            card.style.pointerEvents = 'auto';
+            card.setAttribute('aria-label', `Object card ${cardIndex + 1}: ${option.objectName}`);
+
+            if (objectImage) {
+                objectImage.src = option.objectSrc;
+                objectImage.alt = option.objectName;
+            }
+
+            card.dataset.correct = String(isCorrect);
+        });
+    };
+
+    const advanceDragtomatchRound = () => {
+        renderDragtomatchRound(dragtomatchCurrentIndex + 1);
+    };
+
+    const markDragtomatchSuccess = (card) => {
+        if (!card || card.classList.contains('is-solved')) return;
+
+        card.classList.add('is-flipped');
+        card.setAttribute('aria-pressed', 'true');
+
+        clearDragtomatchAdvance();
+        dragtomatchAdvanceTimer = window.setTimeout(() => {
+            card.classList.add('is-solved');
+            card.setAttribute('aria-disabled', 'true');
+            card.disabled = true;
+            card.style.pointerEvents = 'none';
+            advanceDragtomatchRound();
+        }, Math.max(dragtomatchRoundAdvanceDelay, 760));
+    };
+
+    const markDragtomatchMiss = (card) => {
+        if (!card) return;
+        card.classList.remove('is-wrong-drop');
+        card.getBoundingClientRect();
+        card.classList.add('is-wrong-drop');
+        window.setTimeout(() => {
+            card.classList.remove('is-wrong-drop');
+        }, 320);
+    };
+
+    dragtomatchCards.forEach((card) => {
+        card.addEventListener('dragenter', (event) => {
+            event.preventDefault();
+            card.classList.add('is-drop-target');
+        });
+
+        card.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+            card.classList.add('is-drop-target');
+        });
+
+        card.addEventListener('dragleave', () => {
+            card.classList.remove('is-drop-target');
+        });
+
+        card.addEventListener('drop', (event) => {
+            event.preventDefault();
+            card.classList.remove('is-drop-target');
+
+            const droppedLetter = event.dataTransfer?.getData('text/plain');
+            const correctLetter = dragtomatchLetterImage?.dataset.letter || '';
+
+            if (!droppedLetter || !correctLetter) return;
+
+            if (card.dataset.letter === droppedLetter && droppedLetter === correctLetter) {
+                markDragtomatchSuccess(card);
+            } else {
+                markDragtomatchMiss(card);
+            }
+        });
+    });
+
+    dragtomatchLetterImage?.addEventListener('dragstart', (event) => {
+        const letter = dragtomatchLetterImage.dataset.letter || '';
+        if (!letter) return;
+
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', letter);
+    });
+
+    dragtomatchLetterImage?.addEventListener('dragend', () => {
+        dragtomatchCards.forEach((card) => card.classList.remove('is-drop-target'));
+    });
+
+    renderDragtomatchRound(0);
 
     loadingLinks.forEach((link) => {
         link.addEventListener('click', (event) => {

@@ -1,10 +1,7 @@
-const CACHE_NAME = 'learnscape-adventure-v18';
+const CACHE_NAME = 'learnscape-adventure-v19';
 const CORE_ASSETS = [
   './',
   './index.html',
-  './title-screen.html',
-  './game_start.html',
-  './game1.html',
   './style.css',
   './script.js',
   './manifest.webmanifest',
@@ -45,6 +42,31 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  const requestUrl = new URL(event.request.url);
+  const isShellAsset =
+    event.request.destination === 'document' ||
+    requestUrl.pathname.endsWith('.html') ||
+    requestUrl.pathname.endsWith('.css') ||
+    requestUrl.pathname.endsWith('.js');
+
+  if (isShellAsset) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+            return networkResponse;
+          }
+
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request).then((cachedResponse) => cachedResponse || caches.match('./index.html')))
+    );
+
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
