@@ -479,7 +479,7 @@ body.is-page-loading .page-loading-overlay {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: clamp(0.85rem, 1.5vw, 1.4rem);
-    width: min(40vw, 620px);
+    width: min(44vw, 680px);
     transform: translateY(-50%);
     pointer-events: auto;
 }
@@ -516,14 +516,35 @@ body.is-page-loading .page-loading-overlay {
     position: absolute;
     left: 50%;
     top: 50%;
-    width: min(8.4vw, 126px);
-    height: auto;
+    width: min(16vw, 232px);
+    height: min(16vw, 232px);
     transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    font-family: 'Fredoka', sans-serif;
+    font-size: clamp(6.2rem, 11vw, 12rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.06em;
+    text-transform: uppercase;
+    color: #7d4316;
+    -webkit-text-stroke: clamp(2px, 0.52vw, 6px) #fff7ea;
+    text-shadow:
+        0 3px 0 #4d2508,
+        0 5px 0 rgba(77, 37, 8, 0.9),
+        0 0 10px rgba(255, 255, 255, 0.28),
+        0 0 18px rgba(77, 37, 8, 0.18);
     cursor: grab;
     user-select: none;
     -webkit-user-drag: element;
     pointer-events: auto;
     filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.18));
+}
+
+.game1-current-letter.is-dragging {
+    opacity: 0;
 }
 
 .game1-current-letter:active {
@@ -537,7 +558,7 @@ body.is-page-loading .page-loading-overlay {
     max-width: 100%;
     height: auto;
     object-fit: contain;
-    margin-top: clamp(-2rem, -3vw, -1.1rem);
+    margin-top: clamp(-2.8rem, -4.2vw, -1.6rem);
     z-index: 1;
     filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.28));
 }
@@ -572,8 +593,7 @@ body.is-page-loading .page-loading-overlay {
 }
 
 .game1-object-card.is-drop-target {
-    outline: 3px solid rgba(255, 244, 95, 0.85);
-    outline-offset: 4px;
+    filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 0.28)) saturate(1.06);
 }
 
 .game1-object-card.is-wrong-drop {
@@ -586,13 +606,19 @@ body.is-page-loading .page-loading-overlay {
     height: 100%;
     display: block;
     transform-style: preserve-3d;
-    transform: rotateY(0deg);
+    --card-rotate: 0deg;
+    --card-scale: 1;
+    transform: scale(var(--card-scale)) rotateY(var(--card-rotate));
     transition: transform 0.72s cubic-bezier(0.2, 0.82, 0.2, 1);
     will-change: transform;
 }
 
 .game1-object-card.is-flipped .game1-object-card-inner {
-    transform: rotateY(180deg);
+    --card-rotate: 180deg;
+}
+
+.game1-object-card.is-drop-target .game1-object-card-inner {
+    --card-scale: 1.08;
 }
 
 .game1-object-card-face {
@@ -620,8 +646,10 @@ body.is-page-loading .page-loading-overlay {
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 58%;
+    width: calc(74% * var(--object-scale, 1));
     height: auto;
+    max-width: calc(74% * var(--object-scale, 1));
+    max-height: calc(74% * var(--object-scale, 1));
     transform: translate(-50%, -50%);
     object-fit: contain;
     pointer-events: none;
@@ -1537,7 +1565,7 @@ body.is-page-loading .page-loading-overlay {
 
     .game1-dragtomatch-objects {
         right: 0.8rem;
-        width: min(46vw, 360px);
+        width: min(50vw, 390px);
         gap: 0.5rem;
     }
 
@@ -1547,7 +1575,15 @@ body.is-page-loading .page-loading-overlay {
     }
 
     .game1-current-letter {
-        width: min(10vw, 78px);
+        width: min(18vw, 144px);
+        height: min(18vw, 144px);
+        font-size: clamp(4.2rem, 11vw, 7.4rem);
+    }
+
+    .game1-object-card-object {
+        width: 38%;
+        max-width: 38%;
+        max-height: 38%;
     }
 
     .game1-letter-island {
