@@ -253,10 +253,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const game1PlayButton = document.querySelector('.game1-play-btn');
     const game1PlayRoutes = ['dragtomatch', 'poptheword', 'bunnyhop'];
     const dragtomatchCards = Array.from(document.querySelectorAll('[data-dragtomatch-object-card]'));
+    const dragtomatchObjects = document.querySelector('.game1-dragtomatch-objects');
+    const dragtomatchCelebrationLayer = document.querySelector('.game1-celebration-layer');
     const dragtomatchLetterImage = document.querySelector('.game1-current-letter');
     const dragtomatchRoundAdvanceDelay = 2600;
-    const dragtomatchPreviewFlipDelay = 950;
     const game1TransitionDuration = 450;
+    const dragtomatchFlipTone = [494, 740];
 
     const dragtomatchPairs = [
         { letter: 'A', letterSrc: 'assets/ABC Elements/LetterA.png', objectName: 'Apple', objectSrc: 'assets/ABC Elements/Apple.png' },
@@ -286,7 +288,82 @@ document.addEventListener('DOMContentLoaded', () => {
         { letter: 'Y', letterSrc: 'assets/ABC Elements/LetterY.png', objectName: 'Yoyo', objectSrc: 'assets/ABC Elements/Yoyo.png' },
         { letter: 'Z', letterSrc: 'assets/ABC Elements/LetterZ.png', objectName: 'Zebra', objectSrc: 'assets/ABC Elements/Zebra.png' },
     ];
+    const dragtomatchAudioContext = (() => {
+        const AudioCtor = window.AudioContext || window.webkitAudioContext;
+        return AudioCtor ? new AudioCtor() : null;
+    })();
+    const dragtomatchSpeechSynthesis = window.speechSynthesis || null;
     const dragtomatchFlipTimers = new WeakMap();
+    const dragtomatchSpeechTimers = new WeakMap();
+    let dragtomatchVoicesReadyPromise = null;
+    let dragtomatchCelebrationTimer = null;
+    let dragtomatchCelebrationLetterTimers = [];
+    let dragtomatchCelebratingCard = null;
+    const dragtomatchVoicePreferenceHints = [
+        'natural',
+        'online',
+        'google',
+        'microsoft',
+        'soft',
+        'sweet',
+        'cute',
+        'happy',
+        'bright',
+        'cheer',
+        'cheery',
+        'lively',
+        'peppy',
+        'sunny',
+        'child',
+        'kid',
+        'kids',
+        'kiddo',
+        'girl',
+        'female',
+        'junior',
+        'baby',
+        'little',
+        'samantha',
+        'tessa',
+        'serena',
+        'zoe',
+        'olivia',
+        'claire',
+        'sophia',
+        'hannah',
+        'lisa',
+        'susan',
+        'sarah',
+        'aria',
+        'jenny',
+        'emma',
+        'ava',
+        'victoria',
+    ];
+    const dragtomatchVoiceAvoidHints = [
+        'david',
+        'mark',
+        'john',
+        'paul',
+        'daniel',
+        'dan',
+        'james',
+        'george',
+        'thomas',
+        'tom',
+        'michael',
+        'brian',
+        'robert',
+        'richard',
+        'stephen',
+        'kevin',
+        'harry',
+        'male',
+        'man',
+        'boy',
+        'deep',
+        'baritone',
+    ];
     let dragtomatchCurrentIndex = 0;
     let dragtomatchAdvanceTimer = null;
 
@@ -399,6 +476,286 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const clearDragtomatchSpeechTimer = (card) => {
+        const timer = dragtomatchSpeechTimers.get(card);
+        if (timer) {
+            window.clearTimeout(timer);
+            dragtomatchSpeechTimers.delete(card);
+        }
+    };
+
+    const clearDragtomatchCelebration = () => {
+        if (dragtomatchCelebrationTimer) {
+            window.clearTimeout(dragtomatchCelebrationTimer);
+            dragtomatchCelebrationTimer = null;
+        }
+
+        dragtomatchCelebrationLetterTimers.forEach((timer) => {
+            window.clearTimeout(timer);
+        });
+        dragtomatchCelebrationLetterTimers = [];
+
+        if (dragtomatchCelebratingCard) {
+            dragtomatchCelebratingCard.remove();
+            dragtomatchCelebratingCard = null;
+        }
+
+        if (dragtomatchCelebrationLayer) {
+            dragtomatchCelebrationLayer.innerHTML = '';
+        }
+
+    };
+
+    const startDragtomatchCelebration = (card, word) => new Promise((resolve) => {
+        if (!card || !dragtomatchCelebrationLayer) {
+            resolve();
+            return;
+        }
+
+        clearDragtomatchCelebration();
+
+        const spellTarget = card.querySelector('.game1-object-card-spell');
+        if (!spellTarget) {
+            resolve();
+            return;
+        }
+
+        const cleanWord = String(word || '').trim();
+        const letters = Array.from(cleanWord);
+        const revealDelay = 110;
+        const holdDelay = 900;
+        const zoomDelay = 160;
+        const zoomDuration = 800;
+        const cardRect = card.getBoundingClientRect();
+        const targetWidth = Math.min(window.innerWidth * 0.42, 620);
+        const targetScale = targetWidth / Math.max(cardRect.width, 1);
+        const targetX = window.innerWidth / 2 - (cardRect.left + cardRect.width / 2);
+        const targetY = window.innerHeight / 2 - (cardRect.top + cardRect.height / 2) - Math.min(window.innerHeight * 0.03, 26);
+
+        const celebrationCard = card.cloneNode(true);
+        celebrationCard.classList.add('game1-celebration-card');
+        celebrationCard.classList.remove('is-solved', 'is-drop-target', 'is-wrong-drop', 'is-celebrating');
+        celebrationCard.setAttribute('aria-hidden', 'true');
+        celebrationCard.disabled = true;
+        celebrationCard.style.left = `${cardRect.left}px`;
+        celebrationCard.style.top = `${cardRect.top}px`;
+        celebrationCard.style.width = `${cardRect.width}px`;
+        celebrationCard.style.height = `${cardRect.height}px`;
+        celebrationCard.style.transform = 'translate(0px, 0px) scale(1)';
+        celebrationCard.style.setProperty('--celebration-scale', String(targetScale));
+
+        const celebrationSpellTarget = celebrationCard.querySelector('.game1-object-card-spell');
+        if (!celebrationSpellTarget) {
+            resolve();
+            return;
+        }
+
+        celebrationSpellTarget.innerHTML = '';
+        spellTarget.innerHTML = '';
+        spellTarget.setAttribute('aria-label', cleanWord);
+        celebrationSpellTarget.setAttribute('aria-label', cleanWord);
+
+        dragtomatchCelebratingCard = celebrationCard;
+        dragtomatchCelebrationLayer.appendChild(celebrationCard);
+
+        letters.forEach((letter, index) => {
+            const letterSpan = document.createElement('span');
+            letterSpan.className = letter === ' ' ? 'game1-object-card-spell-letter game1-object-card-spell-space' : 'game1-object-card-spell-letter';
+            letterSpan.textContent = letter === ' ' ? '\u00A0' : letter;
+            const cloneLetterSpan = letterSpan.cloneNode(true);
+            celebrationSpellTarget.appendChild(cloneLetterSpan);
+
+            const timer = window.setTimeout(() => {
+                cloneLetterSpan.classList.add('is-visible');
+            }, zoomDelay + zoomDuration + index * revealDelay);
+            dragtomatchCelebrationLetterTimers.push(timer);
+        });
+
+        if (!letters.length) {
+            celebrationSpellTarget.textContent = cleanWord;
+        }
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                celebrationCard.style.transform = `translate(${targetX}px, ${targetY}px) scale(${targetScale})`;
+            });
+        });
+
+        const totalDuration = zoomDelay + zoomDuration + Math.max(letters.length * revealDelay + holdDelay, 1200);
+        dragtomatchCelebrationTimer = window.setTimeout(() => {
+            dragtomatchCelebrationTimer = null;
+            resolve();
+        }, totalDuration);
+    });
+
+    const waitForDragtomatchVoices = () => {
+        if (!dragtomatchSpeechSynthesis || typeof dragtomatchSpeechSynthesis.getVoices !== 'function') {
+            return Promise.resolve([]);
+        }
+
+        const existingVoices = dragtomatchSpeechSynthesis.getVoices();
+        if (existingVoices.length) {
+            return Promise.resolve(existingVoices);
+        }
+
+        if (!dragtomatchVoicesReadyPromise) {
+            dragtomatchVoicesReadyPromise = new Promise((resolve) => {
+                const finish = () => {
+                    const voices = dragtomatchSpeechSynthesis.getVoices();
+                    resolve(voices);
+                };
+
+                const timeoutId = window.setTimeout(finish, 900);
+                const handleVoicesChanged = () => {
+                    window.clearTimeout(timeoutId);
+                    dragtomatchSpeechSynthesis.removeEventListener?.('voiceschanged', handleVoicesChanged);
+                    finish();
+                };
+
+                dragtomatchSpeechSynthesis.addEventListener?.('voiceschanged', handleVoicesChanged, { once: true });
+            });
+        }
+
+        return dragtomatchVoicesReadyPromise;
+    };
+
+    const getDragtomatchPreferredVoice = () => {
+        if (!dragtomatchSpeechSynthesis || typeof dragtomatchSpeechSynthesis.getVoices !== 'function') {
+            return null;
+        }
+
+        const voices = dragtomatchSpeechSynthesis.getVoices();
+        if (!voices.length) return null;
+
+        const normalize = (value) => String(value || '').toLowerCase();
+        const scoreVoice = (voice) => {
+            const haystack = `${normalize(voice.name)} ${normalize(voice.voiceURI)} ${normalize(voice.lang)}`;
+            let score = 0;
+
+            dragtomatchVoicePreferenceHints.forEach((hint) => {
+                if (haystack.includes(hint)) score += 4;
+            });
+
+            dragtomatchVoiceAvoidHints.forEach((hint) => {
+                if (haystack.includes(hint)) score -= 5;
+            });
+
+            if (normalize(voice.lang).startsWith('en')) score += 2;
+            if (normalize(voice.name).includes('female')) score += 4;
+            if (normalize(voice.name).includes('happy')) score += 6;
+            if (normalize(voice.name).includes('bright')) score += 6;
+            if (normalize(voice.name).includes('cheer')) score += 6;
+            if (normalize(voice.name).includes('lively')) score += 6;
+            if (normalize(voice.name).includes('peppy')) score += 6;
+            if (normalize(voice.name).includes('sunny')) score += 6;
+            if (normalize(voice.name).includes('girl')) score += 8;
+            if (normalize(voice.name).includes('child')) score += 10;
+            if (normalize(voice.name).includes('kid')) score += 10;
+            if (normalize(voice.name).includes('junior')) score += 6;
+            if (voice.default) score -= 1;
+            return score;
+        };
+
+        const rankedVoices = voices
+            .map((voice) => ({ voice, score: scoreVoice(voice) }))
+            .sort((left, right) => right.score - left.score);
+
+        const bestVoice = rankedVoices[0]?.voice || null;
+        if (bestVoice) return bestVoice;
+
+        return voices[0] || null;
+    };
+
+    const speakDragtomatchObjectName = async (name, card) => {
+        if (!name) {
+            return;
+        }
+
+        clearDragtomatchSpeechTimer(card);
+
+        if (!dragtomatchSpeechSynthesis || typeof window.SpeechSynthesisUtterance !== 'function') {
+            await new Promise((resolve) => {
+                const fallbackDelay = Math.max(900, Math.min(2600, name.length * 160));
+                const timer = window.setTimeout(() => {
+                    dragtomatchSpeechTimers.delete(card);
+                    resolve();
+                }, fallbackDelay);
+                dragtomatchSpeechTimers.set(card, timer);
+            });
+            return;
+        }
+
+        await waitForDragtomatchVoices();
+        dragtomatchSpeechSynthesis.cancel();
+
+        await new Promise((resolve) => {
+            const utterance = new window.SpeechSynthesisUtterance(name);
+            const preferredVoice = getDragtomatchPreferredVoice();
+            utterance.lang = preferredVoice?.lang || 'en-US';
+            utterance.rate = 0.82;
+            utterance.pitch = 1.85;
+            utterance.volume = 1;
+            utterance.voice = preferredVoice;
+
+            let timer = null;
+            const finish = () => {
+                if (timer) {
+                    window.clearTimeout(timer);
+                    timer = null;
+                }
+                utterance.onend = null;
+                utterance.onerror = null;
+                dragtomatchSpeechTimers.delete(card);
+                resolve();
+            };
+
+            utterance.onend = finish;
+            utterance.onerror = finish;
+            dragtomatchSpeechSynthesis.speak(utterance);
+
+            const fallbackDelay = Math.max(900, Math.min(2600, name.length * 170));
+            timer = window.setTimeout(() => {
+                finish();
+            }, fallbackDelay + 500);
+
+            dragtomatchSpeechTimers.set(card, timer);
+        });
+    };
+
+    const playDragtomatchFlipSound = () => {
+        if (!dragtomatchAudioContext) return;
+
+        if (dragtomatchAudioContext.state === 'suspended') {
+            dragtomatchAudioContext.resume().catch(() => {});
+        }
+
+        const now = dragtomatchAudioContext.currentTime;
+        const notes = dragtomatchFlipTone;
+
+        notes.forEach((frequency, noteIndex) => {
+            const oscillator = dragtomatchAudioContext.createOscillator();
+            const gain = dragtomatchAudioContext.createGain();
+
+            oscillator.type = noteIndex === 0 ? 'triangle' : 'sine';
+            oscillator.frequency.value = frequency;
+            gain.gain.value = 0.0001;
+
+            oscillator.connect(gain);
+            gain.connect(dragtomatchAudioContext.destination);
+
+            const startTime = now + noteIndex * 0.05;
+            const attackEnd = startTime + 0.03;
+            const releaseEnd = startTime + 0.36 + noteIndex * 0.03;
+
+            gain.gain.setValueAtTime(0.0001, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.18 - noteIndex * 0.03, attackEnd);
+            gain.gain.exponentialRampToValueAtTime(0.0001, releaseEnd);
+
+            oscillator.start(startTime);
+            oscillator.stop(releaseEnd + 0.05);
+        });
+    };
+
     const syncDragtomatchLetter = (pair) => {
         if (!dragtomatchLetterImage || !pair) return;
         dragtomatchLetterImage.textContent = pair.letter;
@@ -409,6 +766,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderDragtomatchRound = (index) => {
         clearDragtomatchAdvance();
+        clearDragtomatchCelebration();
 
         if (!dragtomatchCards.length || !dragtomatchPairs.length) return;
 
@@ -440,6 +798,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 objectImage.style.setProperty('--object-scale', option.objectScale || '1');
             }
 
+            const spellTarget = card.querySelector('.game1-object-card-spell');
+            if (spellTarget) {
+                spellTarget.innerHTML = '';
+            }
+
             card.dataset.correct = String(isCorrect);
         });
     };
@@ -448,25 +811,36 @@ document.addEventListener('DOMContentLoaded', () => {
         renderDragtomatchRound(dragtomatchCurrentIndex + 1);
     };
 
-    const markDragtomatchSuccess = (card) => {
+    const markDragtomatchSuccess = async (card) => {
         if (!card || card.classList.contains('is-solved')) return;
 
         clearDragtomatchCardFlipTimer(card);
+        clearDragtomatchSpeechTimer(card);
+        clearDragtomatchCelebration();
         card.classList.add('is-flipped');
         card.setAttribute('aria-pressed', 'true');
+        card.setAttribute('aria-disabled', 'true');
+        card.disabled = true;
+        card.style.pointerEvents = 'none';
+        playDragtomatchFlipSound();
 
         clearDragtomatchAdvance();
-        window.setTimeout(() => {
+
+        const celebrationWord = card.dataset.objectName || card.dataset.letter || '';
+        const speechPromise = speakDragtomatchObjectName(celebrationWord, card);
+        const celebrationPromise = startDragtomatchCelebration(card, celebrationWord);
+
+        await Promise.all([speechPromise, celebrationPromise]);
+
+        dragtomatchAdvanceTimer = window.setTimeout(() => {
+            clearDragtomatchCelebration();
             card.classList.remove('is-flipped');
             card.classList.add('is-solved');
             card.setAttribute('aria-disabled', 'true');
             card.disabled = true;
             card.style.pointerEvents = 'none';
-        }, dragtomatchRoundAdvanceDelay);
-
-        dragtomatchAdvanceTimer = window.setTimeout(() => {
             advanceDragtomatchRound();
-        }, dragtomatchRoundAdvanceDelay + game1TransitionDuration);
+        }, game1TransitionDuration);
     };
 
     const markDragtomatchMiss = (card) => {
@@ -484,17 +858,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (card.classList.contains('is-solved')) return;
 
             clearDragtomatchCardFlipTimer(card);
+            clearDragtomatchSpeechTimer(card);
             card.classList.add('is-flipped');
             card.setAttribute('aria-pressed', 'true');
 
-            const flipBackTimer = window.setTimeout(() => {
+            playDragtomatchFlipSound();
+            speakDragtomatchObjectName(card.dataset.objectName || '', card).then(() => {
                 if (card.classList.contains('is-solved')) return;
                 card.classList.remove('is-flipped');
                 card.setAttribute('aria-pressed', 'false');
+                dragtomatchSpeechTimers.delete(card);
                 dragtomatchFlipTimers.delete(card);
-            }, dragtomatchPreviewFlipDelay);
-
-            dragtomatchFlipTimers.set(card, flipBackTimer);
+            });
         });
 
         card.addEventListener('dragenter', (event) => {
