@@ -546,8 +546,16 @@ body.is-page-loading .page-loading-overlay {
     cursor: grab;
     user-select: none;
     -webkit-user-drag: element;
+    touch-action: manipulation;
     pointer-events: auto;
     filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.18));
+}
+
+.game1-current-letter.is-selected {
+    filter:
+        drop-shadow(0 8px 16px rgba(0, 0, 0, 0.22))
+        drop-shadow(0 0 18px rgba(255, 244, 95, 0.42));
+    transform: translate(-50%, -50%) scale(1.05);
 }
 
 .game1-current-letter.is-dragging {
@@ -580,6 +588,7 @@ body.is-page-loading .page-loading-overlay {
     background: transparent;
     cursor: pointer;
     perspective: 1200px;
+    touch-action: manipulation;
     transition: filter 0.24s ease, opacity 0.24s ease, transform 0.24s ease;
     filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.22));
 }
@@ -915,20 +924,39 @@ body.is-page-loading .page-loading-overlay {
     display: block;
     padding: 0;
     pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition:
+        opacity 0.45s ease,
+        transform 0.45s ease,
+        visibility 0s linear 0.45s;
+}
+
+.game1-stage.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition:
+        opacity 0.45s ease,
+        transform 0.45s ease,
+        visibility 0s;
 }
 
 .game1-preview {
     position: absolute;
-    right: clamp(1.3rem, 5.8vw, 4.8rem);
-    top: clamp(13.2vh, 19.2vh, 23.2vh);
-    width: min(32vw, 480px);
+    left: 50%;
+    top: 50%;
+    width: min(34vw, 520px);
     display: flex;
     flex-direction: column;
     gap: 1.3rem;
     pointer-events: auto;
-    filter: drop-shadow(0 14px 14px rgba(0, 0, 0, 0.28));
-    transform: scale(1.16);
-    transform-origin: top right;
+    filter:
+        drop-shadow(0 16px 28px rgba(21, 63, 56, 0.28))
+        drop-shadow(0 0 24px rgba(255, 244, 95, 0.14));
+    transform: translate(-50%, -56%) scale(1.08);
+    transform-origin: center center;
 }
 
 .game1-preview-viewport {
@@ -936,14 +964,17 @@ body.is-page-loading .page-loading-overlay {
     overflow: hidden;
     padding: clamp(0.7rem, 1.15vw, 1rem);
     border: 4px solid #8b5a2b;
-    border-radius: 0;
+    border-radius: 28px;
     background:
-        linear-gradient(180deg, rgba(36, 84, 51, 0.95), rgba(16, 47, 31, 0.96)),
+        radial-gradient(circle at 20% 14%, rgba(255, 244, 95, 0.16) 0, transparent 22%),
+        radial-gradient(circle at 78% 16%, rgba(79, 214, 232, 0.12) 0, transparent 18%),
+        radial-gradient(circle at 48% 40%, rgba(139, 217, 67, 0.12) 0, transparent 28%),
+        linear-gradient(180deg, rgba(40, 91, 56, 0.94), rgba(16, 47, 31, 0.96)),
         url('assets/Backgrounds/border.png') center / cover;
     box-shadow:
-        0 14px 24px rgba(0, 0, 0, 0.28),
+        0 16px 30px rgba(0, 0, 0, 0.28),
         0 0 0 2px rgba(255, 255, 255, 0.08),
-        0 0 20px rgba(255, 216, 77, 0.18),
+        0 0 22px rgba(255, 216, 77, 0.18),
         inset 0 2px 0 rgba(255, 255, 255, 0.18);
 }
 
@@ -954,7 +985,8 @@ body.is-page-loading .page-loading-overlay {
     background:
         radial-gradient(circle at 50% 18%, rgba(255, 244, 95, 0.18) 0, transparent 28%),
         radial-gradient(circle at 20% 20%, rgba(79, 214, 232, 0.12) 0, transparent 18%),
-        radial-gradient(circle at 80% 18%, rgba(139, 217, 67, 0.1) 0, transparent 16%);
+        radial-gradient(circle at 80% 18%, rgba(139, 217, 67, 0.1) 0, transparent 16%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 52%, rgba(0, 0, 0, 0.08));
     pointer-events: none;
 }
 
@@ -962,7 +994,7 @@ body.is-page-loading .page-loading-overlay {
     position: relative;
     aspect-ratio: 4 / 3;
     overflow: hidden;
-    border-radius: 0;
+    border-radius: 24px;
     border: 3px solid #6f421e;
     background: rgba(7, 25, 38, 0.7);
     box-shadow:
@@ -1022,29 +1054,51 @@ body.is-page-loading .page-loading-overlay {
     z-index: 1;
 }
 
-.game1-board-controls {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.9rem;
-}
-
 .game1-board-nav {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-height: 2.6rem;
-    width: 88%;
-    justify-self: center;
     padding: 0.62rem 0.6rem;
     border: 2px solid #fff45f;
     border-radius: 16px;
-    background: linear-gradient(180deg, #4ce16f 0%, #12783a 100%);
+    background:
+        radial-gradient(circle at 50% 22%, rgba(255, 244, 95, 0.18) 0, transparent 34%),
+        linear-gradient(180deg, #4ce16f 0%, #12783a 100%);
     box-shadow:
         0 3px 0 #0b4e25,
         0 0 14px rgba(255, 244, 95, 0.32),
         inset 0 2px 0 rgba(255, 255, 255, 0.26);
     cursor: pointer;
     transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.game1-action-row {
+    position: fixed;
+    left: 50%;
+    bottom: clamp(1.2rem, 3.2vh, 2.4rem);
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.65rem, 1.8vw, 1.25rem);
+    transform: translateX(-50%);
+    pointer-events: auto;
+}
+
+.game1-action-row .game1-board-nav {
+    width: auto;
+    min-width: clamp(3.4rem, 7vw, 4.4rem);
+    min-height: 4.1rem;
+    padding-inline: 0.95rem;
+}
+
+.game1-action-row .game1-play-btn {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    transform: none;
+    min-width: min(34vw, 420px);
 }
 
 .game1-board-nav:hover {
@@ -1086,10 +1140,6 @@ body.is-page-loading .page-loading-overlay {
 }
 
 .game1-play-btn {
-    position: absolute;
-    left: 50%;
-    bottom: clamp(1.6rem, 3.4vh, 2.6rem);
-    transform: translateX(-50%);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1123,7 +1173,7 @@ body.is-page-loading .page-loading-overlay {
 }
 
 .game1-play-btn:hover {
-    transform: translateX(-50%) translateY(-2px);
+    transform: translateY(-2px);
     filter: saturate(1.08);
     box-shadow:
         0 8px 0 #2f1908,
@@ -1133,7 +1183,7 @@ body.is-page-loading .page-loading-overlay {
 }
 
 .game1-play-btn:active {
-    transform: translateX(-50%) translateY(4px);
+    transform: translateY(4px);
     box-shadow:
         0 2px 0 #2f1908,
         0 0 0 2px rgba(139, 90, 43, 0.24),
@@ -1378,14 +1428,6 @@ body.is-page-loading .page-loading-overlay {
 }
 
 @media (min-width: 901px) {
-    .game1-page .game1-preview {
-        right: 4.4vw;
-        top: 19.2vh;
-        width: min(24vw, 360px);
-        transform: scale(1.16);
-        transform-origin: top right;
-    }
-
     .game-start-stage {
         padding: 5.8vh 1vw 2.4vh;
     }
@@ -1421,22 +1463,6 @@ body.is-page-loading .page-loading-overlay {
 }
 
 @media (min-width: 901px) and (display-mode: fullscreen) {
-    .game1-page .game1-preview {
-        right: 4.2vw;
-        top: 24.8vh;
-        width: min(26vw, 400px);
-        transform: scale(1.08);
-        transform-origin: top right;
-    }
-}
-
-.game1-page:fullscreen .game1-preview,
-.game1-page:-webkit-full-screen .game1-preview {
-    right: 4.2vw;
-    top: 24.8vh;
-    width: min(26vw, 400px);
-    transform: scale(1.08);
-    transform-origin: top right;
 }
 
 .game-card-media::after {
@@ -1668,46 +1694,6 @@ body.is-page-loading .page-loading-overlay {
 .game1-page .game-return-btn,
 .gameplay-page .game-return-btn {
     z-index: 3;
-}
-
-@media (max-width: 900px) {
-    .game1-left-ornaments {
-        left: 0.8rem;
-        gap: 0.4rem;
-    }
-
-    .game1-dragtomatch-objects {
-        right: 0.8rem;
-        width: min(50vw, 390px);
-        gap: 0.5rem;
-    }
-
-    .game1-letter-stage {
-        left: 0.8rem;
-        width: min(30vw, 250px);
-    }
-
-    .game1-current-letter {
-        width: min(18vw, 144px);
-        height: min(18vw, 144px);
-        font-size: clamp(4.2rem, 11vw, 7.4rem);
-    }
-
-    .game1-object-card-object {
-        width: 38%;
-        max-width: 38%;
-        max-height: 38%;
-    }
-
-    .game1-letter-island {
-        width: min(24vw, 205px);
-        margin-top: clamp(-1.4rem, -2vw, -0.8rem);
-    }
-
-    .game1-object-card-spell {
-        top: calc(100% + 0.3rem);
-        font-size: clamp(1.15rem, 4vw, 2.2rem);
-    }
 }
 
 h1,
@@ -2151,12 +2137,6 @@ footer {
 }
 
 @media (max-width: 600px) {
-    .game1-page .game1-preview {
-        right: 3vw;
-        top: 17vh;
-        width: min(86vw, 360px);
-    }
-
     .game-start-stage {
         padding: 9.8vh 1.8vw 3.2vh;
     }
@@ -2289,12 +2269,6 @@ footer {
 }
 
 @media (max-width: 900px) and (orientation: landscape) {
-    .game1-page .game1-preview {
-        right: 5vw;
-        top: 20vh;
-        width: min(22vw, 260px);
-    }
-
     .game-start-stage {
         place-items: center center;
         padding: 7.6vh 1.8vw 3vh;
@@ -2316,16 +2290,96 @@ footer {
         width: min(50vw, 620px);
         bottom: 5vh;
     }
+
+    .game1-preview {
+        width: min(30vw, 420px);
+        transform: translate(-50%, -55%) scale(1);
+        gap: 1rem;
+    }
+
+    .game1-action-row {
+        bottom: clamp(0.85rem, 1.8vh, 1.3rem);
+        gap: clamp(0.5rem, 1vw, 0.9rem);
+    }
+
+    .game1-action-row .game1-board-nav {
+        min-width: 3.1rem;
+        min-height: 3.55rem;
+        padding-inline: 0.72rem;
+    }
+
+    .game1-action-row .game1-play-btn {
+        min-width: min(34vw, 18rem);
+        min-height: 4rem;
+        font-size: clamp(1.15rem, 3vw, 1.55rem);
+        gap: 0.65rem;
+    }
+
+    .game1-left-ornaments {
+        left: clamp(0.8rem, 2vw, 1.7rem);
+        gap: clamp(0.24rem, 0.75vw, 0.6rem);
+    }
+
+    .game1-dragtomatch-objects {
+        right: clamp(0.8rem, 2vw, 2rem);
+        width: min(46vw, 520px);
+        gap: clamp(0.5rem, 1vw, 1rem);
+    }
+
+    .game1-letter-stage {
+        left: clamp(0.8rem, 2vw, 1.8rem);
+        width: min(25vw, 280px);
+        transform: translateY(-36%);
+    }
+
+    .game1-letter-board-wrap {
+        width: min(100%, 280px);
+    }
+
+    .game1-current-letter {
+        width: min(15vw, 164px);
+        height: min(15vw, 164px);
+        font-size: clamp(4.8rem, 7.8vw, 7.5rem);
+        -webkit-text-stroke: clamp(1.8px, 0.38vw, 4px) #fff7ea;
+    }
+
+    .game1-letter-island {
+        width: min(19vw, 230px);
+        margin-top: clamp(-2.2rem, -3vw, -1.2rem);
+    }
+
+    .game1-object-card-object {
+        width: calc(72% * var(--object-scale, 1));
+        max-width: calc(72% * var(--object-scale, 1));
+        max-height: calc(72% * var(--object-scale, 1));
+    }
+
+    .game1-object-card-spell {
+        font-size: clamp(1rem, 2.4vw, 1.8rem);
+    }
 }
 
 @media (max-width: 900px) {
-    .game1-page.is-fullscreen-mode .game1-preview,
-    .game1-page:fullscreen .game1-preview,
-    .game1-page:-webkit-full-screen .game1-preview {
-        right: 4.2vw;
-        top: 24.8vh;
-        width: min(26vw, 400px);
-        transform: scale(1.08);
-        transform-origin: top right;
+    .game1-preview {
+        width: min(82vw, 470px);
+        transform: translate(-50%, -55%) scale(1);
+    }
+
+    .game1-action-row {
+        bottom: clamp(1rem, 2.3vh, 1.7rem);
+        gap: 0.65rem;
+    }
+
+    .game1-action-row .game1-board-nav {
+        min-width: 3.35rem;
+        min-height: 3.85rem;
+        padding-inline: 0.82rem;
+    }
+
+    .game1-action-row .game1-play-btn {
+        min-width: min(44vw, 20rem);
+        min-height: 4.3rem;
+        font-size: clamp(1.22rem, 3.7vw, 1.7rem);
+        gap: 0.72rem;
     }
 }

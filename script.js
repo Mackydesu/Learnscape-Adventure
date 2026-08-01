@@ -251,6 +251,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const game1Prev = document.querySelector('[data-game1-prev]');
     const game1Next = document.querySelector('[data-game1-next]');
     const game1PlayButton = document.querySelector('.game1-play-btn');
+    const game1Stage = document.querySelector('.game1-stage');
+    const game1IntroCard = document.querySelector('.game1-intro-card');
     const game1PlayRoutes = ['dragtomatch', 'poptheword', 'bunnyhop'];
     const dragtomatchCards = Array.from(document.querySelectorAll('[data-dragtomatch-object-card]'));
     const dragtomatchObjects = document.querySelector('.game1-dragtomatch-objects');
@@ -295,12 +297,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const dragtomatchSpeechSynthesis = window.speechSynthesis || null;
     const dragtomatchFlipTimers = new WeakMap();
     const dragtomatchSpeechTimers = new WeakMap();
+    const dragtomatchUsesTouchFallback = Boolean(
+        (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) ||
+        navigator.maxTouchPoints > 0
+    );
     let dragtomatchVoicesReadyPromise = null;
     let dragtomatchCelebrationTimer = null;
     let dragtomatchCelebrationReturnTimer = null;
     let dragtomatchCelebrationLetterTimers = [];
     let dragtomatchCelebratingCard = null;
     let dragtomatchCelebrationPlaceholder = null;
+    let dragtomatchSelectedLetter = '';
     const dragtomatchVoicePreferenceHints = [
         'natural',
         'online',
@@ -430,6 +437,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (game1Stage) {
+        const revealGame1Stage = () => {
+            game1Stage.classList.add('is-visible');
+        };
+
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            window.setTimeout(revealGame1Stage, 120);
+        } else if (game1IntroCard) {
+            game1IntroCard.addEventListener('animationend', (event) => {
+                if (event.animationName === 'game1IntroCard') {
+                    revealGame1Stage();
+                }
+            }, { once: true });
+        } else {
+            window.setTimeout(revealGame1Stage, 5100);
+        }
+    }
+
     game1PlayButton?.addEventListener('click', () => {
         const targetRoute = game1PlayRoutes[game1SlideIndex] || game1PlayRoutes[0];
 
@@ -484,6 +509,30 @@ document.addEventListener('DOMContentLoaded', () => {
             window.clearTimeout(timer);
             dragtomatchSpeechTimers.delete(card);
         }
+    };
+
+    const syncDragtomatchSelectionTargets = () => {
+        const activeLetter = dragtomatchSelectedLetter || '';
+
+        if (dragtomatchLetterImage) {
+            dragtomatchLetterImage.classList.toggle('is-selected', Boolean(activeLetter));
+        }
+
+        dragtomatchCards.forEach((card) => {
+            const shouldHighlight = Boolean(activeLetter) && card.dataset.letter === activeLetter;
+            card.classList.toggle('is-drop-target', shouldHighlight);
+        });
+    };
+
+    const setDragtomatchSelectedLetter = (letter) => {
+        dragtomatchSelectedLetter = letter || '';
+        syncDragtomatchSelectionTargets();
+    };
+
+    const clearDragtomatchSelectedLetter = () => {
+        if (!dragtomatchSelectedLetter) return;
+        dragtomatchSelectedLetter = '';
+        syncDragtomatchSelectionTargets();
     };
 
     const clearDragtomatchCelebration = () => {
@@ -791,12 +840,13 @@ document.addEventListener('DOMContentLoaded', () => {
         dragtomatchLetterImage.textContent = pair.letter;
         dragtomatchLetterImage.dataset.letter = pair.letter;
         dragtomatchLetterImage.setAttribute('aria-label', `Letter ${pair.letter}`);
-        dragtomatchLetterImage.setAttribute('draggable', 'true');
+        dragtomatchLetterImage.setAttribute('draggable', dragtomatchUsesTouchFallback ? 'false' : 'true');
     };
 
     const renderDragtomatchRound = (index) => {
         clearDragtomatchAdvance();
         clearDragtomatchCelebration();
+        clearDragtomatchSelectedLetter();
 
         if (!dragtomatchCards.length || !dragtomatchPairs.length) return;
 
@@ -811,7 +861,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const objectImage = card.querySelector('.game1-object-card-object');
             const isCorrect = option.letter === currentPair.letter;
 
-            card.classList.remove('is-flipped', 'is-solved', 'is-wrong-drop');
+            card.classList.remove('is-flipped', 'is-solved', 'is-wrong-drop', 'is-drop-target');
             card.setAttribute('aria-pressed', 'false');
             card.setAttribute('aria-disabled', 'false');
             card.dataset.letter = option.letter;
@@ -844,6 +894,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const markDragtomatchSuccess = async (card) => {
         if (!card || card.classList.contains('is-solved')) return;
 
+        clearDragtomatchSelectedLetter();
         clearDragtomatchCardFlipTimer(card);
         clearDragtomatchSpeechTimer(card);
         clearDragtomatchCelebration();
@@ -886,6 +937,24 @@ document.addEventListener('DOMContentLoaded', () => {
     dragtomatchCards.forEach((card) => {
         card.addEventListener('click', () => {
             if (card.classList.contains('is-solved')) return;
+
+            if (dragtomatchSelectedLetter) {
+                const correctLetter = dragtomatchLetterImage?.dataset.letter || '';
+                const selectedLetter = dragtomatchSelectedLetter;
+                const isCorrectMatch = card.dataset.letter === selectedLetter && selectedLetter === correctLetter;
+
+                clearDragtomatchCardFlipTimer(card);
+                clearDragtomatchSpeechTimer(card);
+
+                if (isCorrectMatch) {
+                    markDragtomatchSuccess(card);
+                } else {
+                    markDragtomatchMiss(card);
+                }
+
+                clearDragtomatchSelectedLetter();
+                return;
+            }
 
             clearDragtomatchCardFlipTimer(card);
             clearDragtomatchSpeechTimer(card);
@@ -933,6 +1002,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    if (dragtomatchUsesTouchFallback && dragtomatchLetterImage) {
+        dragtomatchLetterImage.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const currentLetter = dragtomatchLetterImage.dataset.letter || '';
+            if (!currentLetter) return;
+
+            if (dragtomatchSelectedLetter === currentLetter) {
+                clearDragtomatchSelectedLetter();
+                return;
+            }
+
+            setDragtomatchSelectedLetter(currentLetter);
+        });
+    }
 
     dragtomatchLetterImage?.addEventListener('dragstart', (event) => {
         const letter = dragtomatchLetterImage.dataset.letter || '';
