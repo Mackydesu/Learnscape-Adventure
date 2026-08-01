@@ -511,6 +511,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const addTouchPressState = (element, className) => {
+        if (!element) return;
+
+        const setPressed = () => element.classList.add(className);
+        const clearPressed = () => element.classList.remove(className);
+
+        element.addEventListener('touchstart', setPressed, { passive: true });
+        element.addEventListener('touchend', clearPressed, { passive: true });
+        element.addEventListener('touchcancel', clearPressed, { passive: true });
+    };
+
     const syncDragtomatchSelectionTargets = () => {
         const activeLetter = dragtomatchSelectedLetter || '';
 
@@ -935,6 +946,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     dragtomatchCards.forEach((card) => {
+        addTouchPressState(card, 'is-touching');
+
         card.addEventListener('click', () => {
             if (card.classList.contains('is-solved')) return;
 
@@ -1004,6 +1017,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (dragtomatchUsesTouchFallback && dragtomatchLetterImage) {
+        addTouchPressState(dragtomatchLetterImage, 'is-touching');
         dragtomatchLetterImage.addEventListener('click', (event) => {
             event.preventDefault();
             event.stopPropagation();
