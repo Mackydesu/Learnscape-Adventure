@@ -308,6 +308,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let dragtomatchCelebratingCard = null;
     let dragtomatchCelebrationPlaceholder = null;
     let dragtomatchSelectedLetter = '';
+    let dragtomatchTouchDragState = null;
+    let dragtomatchIgnoreClickUntil = 0;
     const dragtomatchVoicePreferenceHints = [
         'natural',
         'online',
@@ -520,6 +522,144 @@ document.addEventListener('DOMContentLoaded', () => {
         element.addEventListener('touchstart', setPressed, { passive: true });
         element.addEventListener('touchend', clearPressed, { passive: true });
         element.addEventListener('touchcancel', clearPressed, { passive: true });
+    };
+
+    const getDragtomatchCardFromPoint = (x, y) => {
+        const target = document.elementFromPoint(x, y);
+        return target?.closest?.('.game1-object-card') || null;
+    };
+
+    const clearDragtomatchTouchHover = () => {
+        if (dragtomatchTouchDragState?.hoveredCard) {
+            dragtomatchTouchDragState.hoveredCard.classList.remove('is-drop-target');
+            dragtomatchTouchDragState.hoveredCard = null;
+        }
+    };
+
+    const removeDragtomatchTouchGhost = () => {
+        if (dragtomatchTouchDragState?.ghost?.parentNode) {
+            dragtomatchTouchDragState.ghost.parentNode.removeChild(dragtomatchTouchDragState.ghost);
+        }
+        if (dragtomatchTouchDragState) {
+            dragtomatchTouchDragState.ghost = null;
+        }
+    };
+
+    const endDragtomatchTouchDrag = () => {
+        if (!dragtomatchTouchDragState) return;
+
+        document.body.classList.remove('is-touch-dragging');
+        clearDragtomatchTouchHover();
+        removeDragtomatchTouchGhost();
+
+        if (dragtomatchLetterImage) {
+            dragtomatchLetterImage.classList.remove('is-dragging');
+        }
+
+        dragtomatchTouchDragState = null;
+    };
+
+    const updateDragtomatchTouchDrag = (x, y) => {
+        if (!dragtomatchTouchDragState || !dragtomatchTouchDragState.active) return;
+
+        const state = dragtomatchTouchDragState;
+        const dx = x - state.startX;
+        const dy = y - state.startY;
+
+        if (!state.dragging) {
+            const distance = Math.hypot(dx, dy);
+            if (distance < 8) return;
+
+            state.dragging = true;
+            state.letterImage.classList.add('is-dragging');
+            state.letterImage.classList.remove('is-touching');
+            state.ghost = state.letterImage.cloneNode(true);
+            state.ghost.classList.add('is-touch-ghost');
+            state.ghost.classList.remove('is-dragging', 'is-touching', 'is-selected');
+            state.ghost.setAttribute('aria-hidden', 'true');
+            state.ghost.setAttribute('draggable', 'false');
+            state.ghost.style.position = 'fixed';
+            state.ghost.style.left = `${x}px`;
+            state.ghost.style.top = `${y}px`;
+            state.ghost.style.margin = '0';
+            state.ghost.style.transform = 'translate(-50%, -50%) scale(1.08)';
+            state.ghost.style.zIndex = '60';
+            state.ghost.style.pointerEvents = 'none';
+            state.ghost.style.willChange = 'transform, opacity';
+            state.ghost.style.transition = 'transform 0.08s linear, opacity 0.12s ease';
+            document.body.appendChild(state.ghost);
+            document.body.classList.add('is-touch-dragging');
+            dragtomatchIgnoreClickUntil = Date.now() + 700;
+        }
+
+        if (!state.dragging || !state.ghost) return;
+
+        state.ghost.style.left = `${x}px`;
+        state.ghost.style.top = `${y}px`;
+
+        const hoveredCard = getDragtomatchCardFromPoint(x, y);
+        if (hoveredCard !== state.hoveredCard) {
+            clearDragtomatchTouchHover();
+            if (hoveredCard) {
+                hoveredCard.classList.add('is-drop-target');
+                state.hoveredCard = hoveredCard;
+            }
+        }
+    };
+
+    const beginDragtomatchTouchDrag = (event) => {
+        if (!dragtomatchUsesTouchFallback || !dragtomatchLetterImage) return;
+        const touch = event.changedTouches?.[0];
+        if (!touch) return;
+
+        if (dragtomatchTouchDragState) {
+            endDragtomatchTouchDrag();
+        }
+
+        dragtomatchTouchDragState = {
+            active: true,
+            dragging: false,
+            startX: touch.clientX,
+            startY: touch.clientY,
+            letter: dragtomatchLetterImage.dataset.letter || '',
+            letterImage: dragtomatchLetterImage,
+            hoveredCard: null,
+            ghost: null,
+        };
+
+        dragtomatchLetterImage.classList.add('is-touching');
+        dragtomatchIgnoreClickUntil = Date.now() + 350;
+    };
+
+    const finishDragtomatchTouchDrag = (event) => {
+        if (!dragtomatchTouchDragState) return;
+
+        const state = dragtomatchTouchDragState;
+        const touch = event.changedTouches?.[0];
+        const x = touch?.clientX ?? state.startX;
+        const y = touch?.clientY ?? state.startY;
+
+        if (!state.dragging) {
+            endDragtomatchTouchDrag();
+            return;
+        }
+
+        const droppedCard = getDragtomatchCardFromPoint(x, y) || state.hoveredCard;
+        const correctLetter = dragtomatchLetterImage?.dataset.letter || '';
+
+        if (droppedCard && state.letter && correctLetter && droppedCard.dataset.letter === state.letter && state.letter === correctLetter) {
+            dragtomatchIgnoreClickUntil = Date.now() + 700;
+            endDragtomatchTouchDrag();
+            markDragtomatchSuccess(droppedCard);
+            return;
+        }
+
+        if (droppedCard) {
+            markDragtomatchMiss(droppedCard);
+        }
+
+        dragtomatchIgnoreClickUntil = Date.now() + 500;
+        endDragtomatchTouchDrag();
     };
 
     const syncDragtomatchSelectionTargets = () => {
@@ -949,6 +1089,7 @@ document.addEventListener('DOMContentLoaded', () => {
         addTouchPressState(card, 'is-touching');
 
         card.addEventListener('click', () => {
+            if (Date.now() < dragtomatchIgnoreClickUntil) return;
             if (card.classList.contains('is-solved')) return;
 
             if (dragtomatchSelectedLetter) {
@@ -1018,7 +1159,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (dragtomatchUsesTouchFallback && dragtomatchLetterImage) {
         addTouchPressState(dragtomatchLetterImage, 'is-touching');
+        dragtomatchLetterImage.addEventListener('touchstart', beginDragtomatchTouchDrag, { passive: false });
+        document.addEventListener('touchmove', (event) => {
+            if (!dragtomatchTouchDragState) return;
+            const touch = event.touches?.[0];
+            if (!touch) return;
+
+            event.preventDefault();
+            updateDragtomatchTouchDrag(touch.clientX, touch.clientY);
+        }, { passive: false });
+        document.addEventListener('touchend', finishDragtomatchTouchDrag, { passive: true });
+        document.addEventListener('touchcancel', finishDragtomatchTouchDrag, { passive: true });
+
         dragtomatchLetterImage.addEventListener('click', (event) => {
+            if (Date.now() < dragtomatchIgnoreClickUntil) return;
             event.preventDefault();
             event.stopPropagation();
 
