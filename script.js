@@ -297,8 +297,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const dragtomatchSpeechTimers = new WeakMap();
     let dragtomatchVoicesReadyPromise = null;
     let dragtomatchCelebrationTimer = null;
+    let dragtomatchCelebrationReturnTimer = null;
     let dragtomatchCelebrationLetterTimers = [];
     let dragtomatchCelebratingCard = null;
+    let dragtomatchCelebrationPlaceholder = null;
     const dragtomatchVoicePreferenceHints = [
         'natural',
         'online',
@@ -490,19 +492,41 @@ document.addEventListener('DOMContentLoaded', () => {
             dragtomatchCelebrationTimer = null;
         }
 
+        if (dragtomatchCelebrationReturnTimer) {
+            window.clearTimeout(dragtomatchCelebrationReturnTimer);
+            dragtomatchCelebrationReturnTimer = null;
+        }
+
         dragtomatchCelebrationLetterTimers.forEach((timer) => {
             window.clearTimeout(timer);
         });
         dragtomatchCelebrationLetterTimers = [];
 
         if (dragtomatchCelebratingCard) {
-            dragtomatchCelebratingCard.remove();
+            const card = dragtomatchCelebratingCard;
+            const spellTarget = card.querySelector('.game1-object-card-spell');
+            if (spellTarget) {
+                spellTarget.innerHTML = '';
+            }
+
+            card.classList.remove('game1-celebration-card');
+            card.removeAttribute('aria-hidden');
+            card.style.left = '';
+            card.style.top = '';
+            card.style.width = '';
+            card.style.height = '';
+            card.style.transform = '';
+            card.style.opacity = '';
+            card.style.filter = '';
+
+            if (dragtomatchCelebrationPlaceholder?.parentNode) {
+                dragtomatchCelebrationPlaceholder.parentNode.insertBefore(card, dragtomatchCelebrationPlaceholder);
+                dragtomatchCelebrationPlaceholder.remove();
+            }
+
             dragtomatchCelebratingCard = null;
         }
-
-        if (dragtomatchCelebrationLayer) {
-            dragtomatchCelebrationLayer.innerHTML = '';
-        }
+        dragtomatchCelebrationPlaceholder = null;
 
     };
 
@@ -526,66 +550,72 @@ document.addEventListener('DOMContentLoaded', () => {
         const holdDelay = 900;
         const zoomDelay = 160;
         const zoomDuration = 800;
+        const returnDuration = 1150;
         const cardRect = card.getBoundingClientRect();
         const targetWidth = Math.min(window.innerWidth * 0.42, 620);
         const targetScale = targetWidth / Math.max(cardRect.width, 1);
         const targetX = window.innerWidth / 2 - (cardRect.left + cardRect.width / 2);
         const targetY = window.innerHeight / 2 - (cardRect.top + cardRect.height / 2) - Math.min(window.innerHeight * 0.03, 26);
 
-        const celebrationCard = card.cloneNode(true);
-        celebrationCard.classList.add('game1-celebration-card');
-        celebrationCard.classList.remove('is-solved', 'is-drop-target', 'is-wrong-drop', 'is-celebrating');
-        celebrationCard.setAttribute('aria-hidden', 'true');
-        celebrationCard.disabled = true;
-        celebrationCard.style.left = `${cardRect.left}px`;
-        celebrationCard.style.top = `${cardRect.top}px`;
-        celebrationCard.style.width = `${cardRect.width}px`;
-        celebrationCard.style.height = `${cardRect.height}px`;
-        celebrationCard.style.transform = 'translate(0px, 0px) scale(1)';
-        celebrationCard.style.setProperty('--celebration-scale', String(targetScale));
+        const placeholder = document.createElement('div');
+        placeholder.className = 'game1-object-card-placeholder';
+        placeholder.setAttribute('aria-hidden', 'true');
+        card.parentNode?.insertBefore(placeholder, card);
+        dragtomatchCelebrationPlaceholder = placeholder;
 
-        const celebrationSpellTarget = celebrationCard.querySelector('.game1-object-card-spell');
-        if (!celebrationSpellTarget) {
-            resolve();
-            return;
-        }
+        card.classList.add('game1-celebration-card');
+        card.classList.remove('is-solved', 'is-drop-target', 'is-wrong-drop');
+        card.setAttribute('aria-hidden', 'true');
+        card.disabled = true;
+        card.style.left = `${cardRect.left}px`;
+        card.style.top = `${cardRect.top}px`;
+        card.style.width = `${cardRect.width}px`;
+        card.style.height = `${cardRect.height}px`;
+        card.style.transform = 'translate(0px, 0px) scale(1)';
+        card.style.opacity = '1';
 
-        celebrationSpellTarget.innerHTML = '';
         spellTarget.innerHTML = '';
         spellTarget.setAttribute('aria-label', cleanWord);
-        celebrationSpellTarget.setAttribute('aria-label', cleanWord);
 
-        dragtomatchCelebratingCard = celebrationCard;
-        dragtomatchCelebrationLayer.appendChild(celebrationCard);
+        dragtomatchCelebratingCard = card;
+        dragtomatchCelebrationLayer.appendChild(card);
 
         letters.forEach((letter, index) => {
             const letterSpan = document.createElement('span');
             letterSpan.className = letter === ' ' ? 'game1-object-card-spell-letter game1-object-card-spell-space' : 'game1-object-card-spell-letter';
             letterSpan.textContent = letter === ' ' ? '\u00A0' : letter;
-            const cloneLetterSpan = letterSpan.cloneNode(true);
-            celebrationSpellTarget.appendChild(cloneLetterSpan);
+            spellTarget.appendChild(letterSpan);
 
             const timer = window.setTimeout(() => {
-                cloneLetterSpan.classList.add('is-visible');
+                letterSpan.classList.add('is-visible');
             }, zoomDelay + zoomDuration + index * revealDelay);
             dragtomatchCelebrationLetterTimers.push(timer);
         });
 
         if (!letters.length) {
-            celebrationSpellTarget.textContent = cleanWord;
+            spellTarget.textContent = cleanWord;
         }
 
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-                celebrationCard.style.transform = `translate(${targetX}px, ${targetY}px) scale(${targetScale})`;
+                card.style.transform = `translate(${targetX}px, ${targetY}px) scale(${targetScale})`;
             });
         });
 
-        const totalDuration = zoomDelay + zoomDuration + Math.max(letters.length * revealDelay + holdDelay, 1200);
+        const returnStartDelay = zoomDelay + zoomDuration + Math.max(letters.length * revealDelay + holdDelay, 1200);
         dragtomatchCelebrationTimer = window.setTimeout(() => {
             dragtomatchCelebrationTimer = null;
-            resolve();
-        }, totalDuration);
+            spellTarget.innerHTML = '';
+            card.style.transform = 'translate(0px, 0px) scale(1)';
+            window.requestAnimationFrame(() => {
+                card.classList.remove('is-flipped');
+            });
+
+            dragtomatchCelebrationReturnTimer = window.setTimeout(() => {
+                dragtomatchCelebrationReturnTimer = null;
+                resolve();
+            }, returnDuration);
+        }, returnStartDelay);
     });
 
     const waitForDragtomatchVoices = () => {

@@ -584,13 +584,20 @@ body.is-page-loading .page-loading-overlay {
     filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.22));
 }
 
+.game1-object-card-placeholder {
+    width: 100%;
+    aspect-ratio: 416 / 297;
+    visibility: hidden;
+    pointer-events: none;
+}
+
 .game1-celebration-card {
     position: fixed;
     margin: 0;
     z-index: 41;
     transform-origin: center center;
     transition:
-        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 1.15s cubic-bezier(0.16, 1, 0.3, 1),
         opacity 0.22s ease,
         filter 0.22s ease;
     pointer-events: none;
@@ -600,7 +607,6 @@ body.is-page-loading .page-loading-overlay {
 }
 
 .game1-celebration-card .game1-object-card-inner {
-    transition: none;
     animation: none;
 }
 
