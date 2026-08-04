@@ -465,6 +465,131 @@ body.is-page-loading .page-loading-overlay {
     pointer-events: none;
 }
 
+.game1-tutorial-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 18;
+    display: grid;
+    place-items: center;
+    padding: clamp(1rem, 3vw, 2rem);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+        opacity 0.28s ease,
+        visibility 0s linear 0.28s;
+}
+
+.game1-tutorial-overlay.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+        opacity 0.28s ease,
+        visibility 0s;
+}
+
+.game1-tutorial-overlay.is-docking {
+    pointer-events: none;
+}
+
+.game1-tutorial-frame {
+    position: relative;
+    width: min(78vw, 960px);
+    aspect-ratio: 16 / 9;
+    border-radius: clamp(1rem, 2.6vw, 1.8rem);
+    padding: clamp(0.5rem, 1.4vw, 0.9rem);
+    background:
+        radial-gradient(circle at 50% 18%, rgba(255, 244, 95, 0.24) 0, transparent 30%),
+        linear-gradient(180deg, rgba(14, 34, 72, 0.94), rgba(8, 19, 46, 0.96));
+    border: 2px solid rgba(255, 244, 95, 0.86);
+    box-shadow:
+        0 28px 54px rgba(0, 0, 0, 0.34),
+        0 0 34px rgba(79, 214, 232, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: scale(0.98);
+    transition: transform 0.45s cubic-bezier(0.2, 0.82, 0.2, 1), opacity 0.24s ease;
+    transform-origin: center center;
+    will-change: transform, opacity;
+}
+
+.game1-tutorial-overlay.is-visible .game1-tutorial-frame {
+    transform: scale(1);
+}
+
+.game1-tutorial-overlay.is-docking .game1-tutorial-frame {
+    opacity: 0;
+    transform:
+        translate(var(--tutorial-dock-x, 0px), var(--tutorial-dock-y, 0px))
+        scale(var(--tutorial-dock-scale, 0.08));
+}
+
+.game1-tutorial-frame::before {
+    content: '';
+    position: absolute;
+    inset: 0.55rem;
+    border-radius: inherit;
+    border: 1px dashed rgba(255, 255, 255, 0.28);
+    pointer-events: none;
+}
+
+.game1-tutorial-video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: calc(clamp(1rem, 2.6vw, 1.8rem) - 0.35rem);
+    object-fit: contain;
+    background: #061225;
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 -18px 30px rgba(0, 0, 0, 0.18);
+}
+
+.game1-tutorial-button {
+    position: fixed;
+    right: clamp(0.9rem, 2.8vw, 1.8rem);
+    top: clamp(0.9rem, 2.8vw, 1.8rem);
+    z-index: 22;
+    width: clamp(2.9rem, 5.8vw, 3.6rem);
+    height: clamp(2.9rem, 5.8vw, 3.6rem);
+    display: grid;
+    place-items: center;
+    border: 2px solid rgba(255, 244, 95, 0.9);
+    border-radius: 999px;
+    background:
+        radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.22) 0, transparent 28%),
+        linear-gradient(180deg, #1aa8df 0%, #0b5c87 100%);
+    color: #fffbe6;
+    font-family: 'Fredoka', sans-serif;
+    font-size: clamp(1.25rem, 3vw, 1.7rem);
+    font-weight: 800;
+    line-height: 1;
+    box-shadow:
+        0 10px 20px rgba(0, 0, 0, 0.24),
+        0 0 0 2px rgba(255, 255, 255, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.24);
+    cursor: pointer;
+    transition:
+        transform 0.18s ease,
+        filter 0.18s ease,
+        opacity 0.18s ease;
+}
+
+.game1-tutorial-button:hover,
+.game1-tutorial-button:focus-visible {
+    transform: translateY(-1px) scale(1.05);
+    filter: brightness(1.06);
+}
+
+.game1-tutorial-button:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.game1-tutorial-button.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
 .game1-left-ornaments {
     position: fixed;
     left: clamp(1rem, 3vw, 2.6rem);
@@ -736,7 +861,11 @@ body.is-touch-dragging {
 }
 
 .game1-object-card.is-wrong-drop {
-    animation: dragtomatchWrongDrop 0.32s ease;
+    animation: dragtomatchWrongDrop 0.44s cubic-bezier(0.2, 0.82, 0.2, 1);
+    filter:
+        drop-shadow(0 16px 24px rgba(0, 0, 0, 0.28))
+        drop-shadow(0 0 18px rgba(255, 92, 92, 0.3))
+        saturate(1.08) hue-rotate(-10deg);
 }
 
 .game1-object-card-inner {
@@ -1363,10 +1492,24 @@ body.is-touch-dragging {
 }
 
 @keyframes dragtomatchWrongDrop {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-4px); }
-    50% { transform: translateX(4px); }
-    75% { transform: translateX(-2px); }
+    0% {
+        transform: translateX(0) rotate(0deg) scale(1);
+    }
+    20% {
+        transform: translateX(-8px) rotate(-3deg) scale(1.01);
+    }
+    40% {
+        transform: translateX(7px) rotate(3deg) scale(1.02);
+    }
+    60% {
+        transform: translateX(-5px) rotate(-2deg) scale(1.01);
+    }
+    80% {
+        transform: translateX(3px) rotate(1deg) scale(1);
+    }
+    100% {
+        transform: translateX(0) rotate(0deg) scale(1);
+    }
 }
 
 .game-start-stage {

@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingLinks = document.querySelectorAll('.loading-link');
     let isNavigating = false;
     const loadingDuration = 1000;
+    const game1BgVideo = document.querySelector('.game1-bg-image');
 
     const isInShell = () => window.top !== window;
 
@@ -177,6 +178,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    const playGame1BgVideo = () => {
+        if (!game1BgVideo) return;
+
+        const playResult = game1BgVideo.play?.();
+        if (playResult && typeof playResult.catch === 'function') {
+            playResult.catch(() => {
+                const startOnGesture = () => {
+                    const retryResult = game1BgVideo.play?.();
+                    if (retryResult && typeof retryResult.catch === 'function') {
+                        retryResult.catch(() => {});
+                    }
+                };
+
+                window.addEventListener('pointerdown', startOnGesture, { once: true, passive: true });
+                window.addEventListener('touchstart', startOnGesture, { once: true, passive: true });
+                window.addEventListener('keydown', startOnGesture, { once: true });
+            });
+        }
+    };
+
+    const pauseGame1BgVideo = () => {
+        if (!game1BgVideo) return;
+
+        game1BgVideo.pause?.();
+        try {
+            game1BgVideo.currentTime = 0;
+        } catch (error) {
+            // The background video can be mid-load; pausing is enough if rewinding is unavailable.
+        }
+    };
+
+    window.addEventListener('learnscape:routechange', (event) => {
+        if (event.detail?.route === 'game1') {
+            playGame1BgVideo();
+            return;
+        }
+
+        pauseGame1BgVideo();
+    });
+
+    if (!document.getElementById('learnscape-game1-page')?.hidden) {
+        playGame1BgVideo();
+    }
+
     const createRotateOverlayMarkup = () => `
         <div class="rotate-panel">
             <div class="rotate-icon" aria-hidden="true">
@@ -256,11 +301,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const game1PlayRoutes = ['dragtomatch', 'poptheword', 'bunnyhop'];
     const dragtomatchCards = Array.from(document.querySelectorAll('[data-dragtomatch-object-card]'));
     const dragtomatchObjects = document.querySelector('.game1-dragtomatch-objects');
+    const dragtomatchTutorialButton = document.querySelector('[data-dragtomatch-tutorial-button]');
+    const dragtomatchTutorialOverlay = document.querySelector('.game1-dragmatch-tutorial');
+    const dragtomatchTutorialVideo = dragtomatchTutorialOverlay?.querySelector('.game1-tutorial-video');
     const dragtomatchCelebrationLayer = document.querySelector('.game1-celebration-layer');
     const dragtomatchLetterImage = document.querySelector('.game1-current-letter');
     const dragtomatchRoundAdvanceDelay = 2600;
     const game1TransitionDuration = 450;
     const dragtomatchFlipTone = [494, 740];
+    const dragtomatchMissTone = [220, 196, 174];
+    const dragtomatchTutorialDelay = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 120 : 5000;
+    const dragtomatchTutorialStorageKey = 'learnscape.dragtomatch.tutorialCompleted';
+    let dragtomatchTutorialTimer = null;
+    let dragtomatchTutorialDockTimer = null;
 
     const dragtomatchPairs = [
         { letter: 'A', letterSrc: 'assets/ABC Elements/LetterA.png', objectName: 'Apple', objectSrc: 'assets/ABC Elements/Apple.png' },
@@ -511,6 +564,116 @@ document.addEventListener('DOMContentLoaded', () => {
             window.clearTimeout(timer);
             dragtomatchSpeechTimers.delete(card);
         }
+    };
+
+    const getDragtomatchTutorialCompleted = () => {
+        try {
+            return window.localStorage.getItem(dragtomatchTutorialStorageKey) === 'true';
+        } catch (error) {
+            return false;
+        }
+    };
+
+    const setDragtomatchTutorialCompleted = (completed) => {
+        try {
+            window.localStorage.setItem(dragtomatchTutorialStorageKey, completed ? 'true' : 'false');
+        } catch (error) {
+            // Storage can be unavailable in private or restricted contexts.
+        }
+    };
+
+    const clearDragtomatchTutorial = () => {
+        if (dragtomatchTutorialTimer) {
+            window.clearTimeout(dragtomatchTutorialTimer);
+            dragtomatchTutorialTimer = null;
+        }
+
+        if (dragtomatchTutorialDockTimer) {
+            window.clearTimeout(dragtomatchTutorialDockTimer);
+            dragtomatchTutorialDockTimer = null;
+        }
+
+        if (dragtomatchTutorialVideo) {
+            dragtomatchTutorialVideo.pause();
+            try {
+                dragtomatchTutorialVideo.currentTime = 0;
+            } catch (error) {
+                // The video may not have metadata yet; pausing is enough here.
+            }
+        }
+
+        if (dragtomatchTutorialOverlay) {
+            dragtomatchTutorialOverlay.classList.remove('is-visible');
+            dragtomatchTutorialOverlay.classList.remove('is-docking');
+            dragtomatchTutorialOverlay.setAttribute('aria-hidden', 'true');
+            dragtomatchTutorialOverlay.style.removeProperty('--tutorial-dock-x');
+            dragtomatchTutorialOverlay.style.removeProperty('--tutorial-dock-y');
+            dragtomatchTutorialOverlay.style.removeProperty('--tutorial-dock-scale');
+        }
+    };
+
+    const dockDragtomatchTutorial = () => {
+        if (!dragtomatchTutorialOverlay || !dragtomatchTutorialButton) return;
+
+        const overlayFrame = dragtomatchTutorialOverlay.querySelector('.game1-tutorial-frame');
+        if (!overlayFrame) {
+            clearDragtomatchTutorial();
+            setDragtomatchTutorialCompleted(true);
+            return;
+        }
+
+        const frameRect = overlayFrame.getBoundingClientRect();
+        const buttonRect = dragtomatchTutorialButton.getBoundingClientRect();
+        const frameCenterX = frameRect.left + frameRect.width / 2;
+        const frameCenterY = frameRect.top + frameRect.height / 2;
+        const buttonCenterX = buttonRect.left + buttonRect.width / 2;
+        const buttonCenterY = buttonRect.top + buttonRect.height / 2;
+        const dockScale = 0.09;
+        const dockX = Math.round(buttonCenterX - frameCenterX);
+        const dockY = Math.round(buttonCenterY - frameCenterY);
+
+        dragtomatchTutorialOverlay.classList.add('is-docking');
+        dragtomatchTutorialOverlay.style.setProperty('--tutorial-dock-x', `${dockX}px`);
+        dragtomatchTutorialOverlay.style.setProperty('--tutorial-dock-y', `${dockY}px`);
+        dragtomatchTutorialOverlay.style.setProperty('--tutorial-dock-scale', String(dockScale));
+
+        dragtomatchTutorialDockTimer = window.setTimeout(() => {
+            dragtomatchTutorialDockTimer = null;
+            setDragtomatchTutorialCompleted(true);
+            clearDragtomatchTutorial();
+        }, 470);
+    };
+
+    const showDragtomatchTutorial = async (force = false) => {
+        if (!dragtomatchTutorialOverlay || !dragtomatchTutorialVideo) return;
+        if (dragtomatchTutorialOverlay.classList.contains('is-visible')) return;
+        if (!force && getDragtomatchTutorialCompleted()) return;
+
+        dragtomatchTutorialOverlay.classList.add('is-visible');
+        dragtomatchTutorialOverlay.setAttribute('aria-hidden', 'false');
+
+        try {
+            try {
+                dragtomatchTutorialVideo.currentTime = 0;
+            } catch (error) {
+                // If metadata is still loading, playback can still start from the beginning.
+            }
+            await dragtomatchTutorialVideo.play();
+        } catch (error) {
+            console.warn('Tutorial video could not autoplay.', error);
+        }
+    };
+
+    const scheduleDragtomatchTutorial = () => {
+        clearDragtomatchTutorial();
+
+        if (!dragtomatchTutorialOverlay || !dragtomatchTutorialVideo) return;
+        if (getDragtomatchTutorialCompleted()) return;
+
+        dragtomatchTutorialTimer = window.setTimeout(() => {
+            dragtomatchTutorialTimer = null;
+            showDragtomatchTutorial();
+        }, dragtomatchTutorialDelay);
     };
 
     const addTouchPressState = (element, className) => {
@@ -986,6 +1149,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    const playDragtomatchMissSound = () => {
+        if (!dragtomatchAudioContext) return;
+
+        if (dragtomatchAudioContext.state === 'suspended') {
+            dragtomatchAudioContext.resume().catch(() => {});
+        }
+
+        const now = dragtomatchAudioContext.currentTime;
+
+        dragtomatchMissTone.forEach((frequency, noteIndex) => {
+            const oscillator = dragtomatchAudioContext.createOscillator();
+            const gain = dragtomatchAudioContext.createGain();
+
+            oscillator.type = noteIndex === 0 ? 'square' : 'triangle';
+            oscillator.frequency.value = frequency;
+            gain.gain.value = 0.0001;
+
+            oscillator.connect(gain);
+            gain.connect(dragtomatchAudioContext.destination);
+
+            const startTime = now + noteIndex * 0.06;
+            const attackEnd = startTime + 0.02;
+            const releaseEnd = startTime + 0.18 + noteIndex * 0.03;
+
+            gain.gain.setValueAtTime(0.0001, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.14 - noteIndex * 0.02, attackEnd);
+            gain.gain.exponentialRampToValueAtTime(0.0001, releaseEnd);
+
+            oscillator.start(startTime);
+            oscillator.stop(releaseEnd + 0.04);
+        });
+    };
+
     const syncDragtomatchLetter = (pair) => {
         if (!dragtomatchLetterImage || !pair) return;
         dragtomatchLetterImage.textContent = pair.letter;
@@ -1078,11 +1274,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const markDragtomatchMiss = (card) => {
         if (!card) return;
         card.classList.remove('is-wrong-drop');
+        playDragtomatchMissSound();
         card.getBoundingClientRect();
         card.classList.add('is-wrong-drop');
         window.setTimeout(() => {
             card.classList.remove('is-wrong-drop');
-        }, 320);
+        }, 440);
     };
 
     dragtomatchCards.forEach((card) => {
@@ -1203,6 +1400,30 @@ document.addEventListener('DOMContentLoaded', () => {
         dragtomatchLetterImage.classList.remove('is-dragging');
         dragtomatchCards.forEach((card) => card.classList.remove('is-drop-target'));
     });
+
+    dragtomatchTutorialVideo?.addEventListener('ended', dockDragtomatchTutorial);
+    dragtomatchTutorialOverlay?.addEventListener('click', (event) => {
+        if (event.target === dragtomatchTutorialOverlay) {
+            clearDragtomatchTutorial();
+        }
+    });
+    dragtomatchTutorialButton?.addEventListener('click', () => {
+        clearDragtomatchTutorial();
+        showDragtomatchTutorial(true);
+    });
+
+    window.addEventListener('learnscape:routechange', (event) => {
+        if (event.detail?.route === 'dragtomatch') {
+            scheduleDragtomatchTutorial();
+            return;
+        }
+
+        clearDragtomatchTutorial();
+    });
+
+    if (!document.getElementById('learnscape-dragtomatch-page')?.hidden) {
+        scheduleDragtomatchTutorial();
+    }
 
     renderDragtomatchRound(0);
 

@@ -46,7 +46,7 @@
     <main id="learnscape-title-page">
         <section class="hero" id="home">
             <video class="hero-bg-video" autoplay muted loop playsinline preload="auto" poster="assets/Backgrounds/bgintro.webp" aria-hidden="true">
-                <source src="assets/Backgrounds/bgintro.webm" type="video/mp4">
+                <source src="assets/Videos/bgintro.webm" type="video/webm">
             </video>
 
             <div class="hero-title">
@@ -192,8 +192,8 @@
     </section>
 
     <section id="learnscape-game1-page" hidden>
-        <video class="game1-bg-image" autoplay muted loop playsinline preload="auto" aria-hidden="true">
-            <source src="assets/Backgrounds/abcbg.mp4" type="video/mp4">
+        <video class="game1-bg-image" autoplay loop playsinline preload="auto" aria-hidden="true">
+            <source src="assets/Videos/abcbg.mp4" type="video/mp4">
         </video>
         <div class="game1-overlay" aria-hidden="true"></div>
         <div class="game1-entry-veil" aria-hidden="true"></div>
@@ -239,6 +239,16 @@
         <div class="game1-overlay" aria-hidden="true"></div>
         <div class="game1-entry-veil" aria-hidden="true"></div>
         <div class="game1-celebration-layer" aria-hidden="true"></div>
+        <div class="game1-tutorial-overlay game1-dragmatch-tutorial" aria-hidden="true">
+            <div class="game1-tutorial-frame">
+                <video class="game1-tutorial-video" autoplay playsinline preload="auto">
+                    <source src="assets/Videos/Tutorialdtm.mp4" type="video/mp4">
+                </video>
+            </div>
+        </div>
+        <button class="game1-tutorial-button" type="button" data-dragtomatch-tutorial-button aria-label="Show Drag to Match tutorial">
+            ?
+        </button>
         <div class="game1-dragtomatch-objects" aria-label="Drag to Match object cards">
             <button class="game1-object-card" type="button" data-dragtomatch-object-card aria-label="Object card 1" aria-pressed="false">
                 <span class="game1-object-card-inner">
@@ -467,6 +477,9 @@
                 }
 
                 window.scrollTo(0, 0);
+                window.dispatchEvent(new CustomEvent('learnscape:routechange', {
+                    detail: { route: currentRoute },
+                }));
             };
 
             const hideLoading = () => {
