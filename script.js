@@ -311,6 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dragtomatchTutorialOverlay = document.querySelector('.game1-dragmatch-tutorial');
     const dragtomatchTutorialVideo = dragtomatchTutorialOverlay?.querySelector('.game1-tutorial-video');
     const dragtomatchCelebrationLayer = document.querySelector('.game1-celebration-layer');
+    const dragtomatchSun = document.querySelector('.game1-dragmatch-sun');
     const dragtomatchLetterImage = document.querySelector('.game1-current-letter');
     const dragtomatchRoundAdvanceDelay = 2600;
     const game1TransitionDuration = 450;
@@ -369,6 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let dragtomatchSelectedLetter = '';
     let dragtomatchTouchDragState = null;
     let dragtomatchIgnoreClickUntil = 0;
+    let dragtomatchSunReactionTimer = null;
     const dragtomatchVoicePreferenceHints = [
         'natural',
         'online',
@@ -553,6 +555,34 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dragtomatchAdvanceTimer) {
             window.clearTimeout(dragtomatchAdvanceTimer);
             dragtomatchAdvanceTimer = null;
+        }
+    };
+
+    const setDragtomatchSunReaction = (reaction) => {
+        if (!dragtomatchSun) return;
+
+        if (dragtomatchSunReactionTimer) {
+            window.clearTimeout(dragtomatchSunReactionTimer);
+            dragtomatchSunReactionTimer = null;
+        }
+
+        const nextReaction = reaction || 'happy';
+        dragtomatchSun.dataset.reaction = nextReaction;
+
+        if (nextReaction === 'happy') {
+            dragtomatchSunReactionTimer = window.setTimeout(() => {
+                dragtomatchSunReactionTimer = null;
+                if (dragtomatchSun?.dataset.reaction === 'happy') {
+                    setDragtomatchSunReaction('happy');
+                }
+            }, 1500);
+        } else if (nextReaction === 'sad') {
+            dragtomatchSunReactionTimer = window.setTimeout(() => {
+                dragtomatchSunReactionTimer = null;
+                if (dragtomatchSun?.dataset.reaction === 'sad') {
+                    setDragtomatchSunReaction('happy');
+                }
+            }, 1200);
         }
     };
 
@@ -1218,6 +1248,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearDragtomatchAdvance();
         clearDragtomatchCelebration();
         clearDragtomatchSelectedLetter();
+        setDragtomatchSunReaction('happy');
 
         if (!dragtomatchCards.length || !dragtomatchPairs.length) return;
 
@@ -1274,6 +1305,7 @@ document.addEventListener('DOMContentLoaded', () => {
         card.setAttribute('aria-disabled', 'true');
         card.disabled = true;
         card.style.pointerEvents = 'none';
+        setDragtomatchSunReaction('happy');
         playDragtomatchFlipSound();
 
         clearDragtomatchAdvance();
@@ -1298,6 +1330,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const markDragtomatchMiss = (card) => {
         if (!card) return;
         card.classList.remove('is-wrong-drop');
+        setDragtomatchSunReaction('sad');
         playDragtomatchMissSound();
         card.getBoundingClientRect();
         card.classList.add('is-wrong-drop');

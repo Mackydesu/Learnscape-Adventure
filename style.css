@@ -465,6 +465,302 @@ body.is-page-loading .page-loading-overlay {
     pointer-events: none;
 }
 
+.game1-dragmatch-sun {
+    position: fixed;
+    left: 41%;
+    top: clamp(0.9rem, 2.8vw, 2.2rem);
+    z-index: 2;
+    width: clamp(8.8rem, 16vw, 15.5rem);
+    aspect-ratio: 1 / 1;
+    pointer-events: none;
+    filter:
+        drop-shadow(0 14px 18px rgba(0, 0, 0, 0.16))
+        drop-shadow(0 0 24px rgba(255, 236, 126, 0.34));
+    transform: translateX(-50%);
+    animation: dragtomatchSunFloat 5.6s ease-in-out infinite;
+}
+
+.game1-dragmatch-sun::before {
+    content: '';
+    position: absolute;
+    inset: 10%;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 33% 28%, rgba(255, 255, 255, 0.56) 0, transparent 18%),
+        radial-gradient(circle at 50% 50%, #fff38b 0%, #ffd84d 53%, #ffbc35 86%, #f0a61f 100%);
+    border: 0.18rem solid #d98b16;
+    box-shadow:
+        inset 0 0.12rem 0 rgba(255, 255, 255, 0.52),
+        inset 0 -0.35rem 0 rgba(0, 0, 0, 0.08),
+        0 0 0 0.08rem rgba(255, 255, 255, 0.08);
+}
+
+.game1-dragmatch-sun::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 250, 206, 0.42) 0, rgba(255, 244, 153, 0.16) 38%, transparent 68%);
+    transform: scale(1.34);
+    opacity: 0.95;
+}
+
+.game1-dragmatch-sun-core,
+.game1-dragmatch-sun-face,
+.game1-dragmatch-sun-eye,
+.game1-dragmatch-sun-smile,
+.game1-dragmatch-sun-cheek,
+.game1-dragmatch-sun-ray {
+    position: absolute;
+}
+
+.game1-dragmatch-sun-core {
+    inset: 0;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.2) 0, transparent 22%),
+        radial-gradient(circle at 50% 50%, rgba(255, 242, 129, 0.22) 0, transparent 64%);
+    box-shadow:
+        inset 0 0.22rem 0.25rem rgba(255, 255, 255, 0.14),
+        inset 0 -0.18rem 0.25rem rgba(0, 0, 0, 0.04);
+}
+
+.game1-dragmatch-sun-face {
+    inset: 18% 18%;
+    border-radius: 50%;
+}
+
+.game1-dragmatch-sun-eye {
+    top: 39%;
+    width: 11%;
+    height: 12%;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #5d3414 0%, #7f4a17 100%);
+    border: 0.09rem solid rgba(61, 33, 10, 0.8);
+    box-shadow:
+        inset 0.08rem 0.08rem 0 rgba(255, 255, 255, 0.32),
+        0 0 0 0.05rem rgba(255, 255, 255, 0.18);
+}
+
+.game1-dragmatch-sun-eye::after {
+    content: '';
+    position: absolute;
+    left: 18%;
+    top: 16%;
+    width: 34%;
+    height: 34%;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 0 0.04rem rgba(255, 255, 255, 0.18);
+}
+
+.game1-dragmatch-sun-eye-left {
+    left: 25%;
+}
+
+.game1-dragmatch-sun-eye-right {
+    right: 25%;
+}
+
+.game1-dragmatch-sun-smile {
+    left: 50%;
+    top: 53%;
+    width: 42%;
+    height: 22%;
+    border-bottom: 0.22rem solid #5d3414;
+    border-radius: 0 0 999px 999px;
+    transform: translateX(-50%);
+}
+
+.game1-dragmatch-sun-cheek {
+    top: 58%;
+    width: 11%;
+    height: 7%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 172, 174, 0.92) 0, rgba(255, 146, 162, 0.56) 56%, transparent 100%);
+    filter: blur(0.04rem);
+}
+
+.game1-dragmatch-sun-cheek-left {
+    left: 15%;
+}
+
+.game1-dragmatch-sun-cheek-right {
+    right: 15%;
+}
+
+.game1-dragmatch-sun-ray {
+    inset: 50%;
+    width: 19%;
+    height: 34%;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #fff6a7 0%, #ffe15a 45%, #ffbe3f 100%);
+    border: 0.13rem solid rgba(214, 135, 20, 0.72);
+    box-shadow:
+        inset 0 0.12rem 0.12rem rgba(255, 255, 255, 0.26),
+        inset 0 -0.14rem 0.16rem rgba(0, 0, 0, 0.05),
+        0 0 8px rgba(255, 216, 77, 0.18);
+    transform-origin: center 124%;
+}
+
+.game1-dragmatch-sun-ray-1 { transform: translate(-50%, -124%) rotate(0deg) scaleY(1.02); }
+.game1-dragmatch-sun-ray-2 { transform: translate(48%, -106%) rotate(45deg) scaleY(0.98); }
+.game1-dragmatch-sun-ray-3 { transform: translate(72%, -50%) rotate(90deg) scaleX(0.96); }
+.game1-dragmatch-sun-ray-4 { transform: translate(48%, 8%) rotate(135deg) scaleY(1.03); }
+.game1-dragmatch-sun-ray-5 { transform: translate(-50%, 28%) rotate(180deg) scaleY(0.98); }
+.game1-dragmatch-sun-ray-6 { transform: translate(-148%, 8%) rotate(225deg) scaleY(1.03); }
+.game1-dragmatch-sun-ray-7 { transform: translate(-172%, -50%) rotate(270deg) scaleX(0.96); }
+.game1-dragmatch-sun-ray-8 { transform: translate(-148%, -106%) rotate(315deg) scaleY(0.98); }
+
+@keyframes dragtomatchSunFloat {
+    0%, 100% {
+        transform: translateX(-50%) translateY(0) rotate(-1.2deg);
+    }
+    50% {
+        transform: translateX(-50%) translateY(0.3rem) rotate(1.2deg);
+    }
+}
+
+.game1-dragmatch-sun[data-reaction='neutral'],
+.game1-dragmatch-sun[data-reaction='happy'],
+.game1-dragmatch-sun[data-reaction='sad'] {
+    overflow: visible;
+}
+
+.game1-dragmatch-sun .game1-sun-face-neutral,
+.game1-dragmatch-sun .game1-sun-face-happy,
+.game1-dragmatch-sun .game1-sun-face-sad {
+    opacity: 0;
+    transform-origin: 50% 50%;
+    transition:
+        opacity 0.18s ease,
+        transform 0.18s ease;
+}
+
+.game1-dragmatch-sun[data-reaction='neutral'] .game1-sun-face-neutral,
+.game1-dragmatch-sun[data-reaction='happy'] .game1-sun-face-happy,
+.game1-dragmatch-sun[data-reaction='sad'] .game1-sun-face-sad {
+    opacity: 1;
+}
+
+.game1-dragmatch-sun[data-reaction='happy'] {
+    filter:
+        drop-shadow(0 18px 18px rgba(0, 0, 0, 0.16))
+        drop-shadow(0 0 30px rgba(255, 231, 122, 0.5));
+}
+
+.game1-dragmatch-sun[data-reaction='sad'] {
+    filter:
+        drop-shadow(0 18px 18px rgba(0, 0, 0, 0.16))
+        drop-shadow(0 0 24px rgba(255, 231, 122, 0.34));
+}
+
+.game1-dragmatch-sun[data-reaction='happy'] .game1-sun-face-happy {
+    animation: dragtomatchSunHappyPop 0.5s ease;
+}
+
+.game1-dragmatch-sun[data-reaction='sad'] .game1-sun-face-sad {
+    animation: dragtomatchSunSadWobble 0.45s ease;
+}
+
+.game1-dragmatch-sun .game1-dragmatch-sun-ray-group path,
+.game1-dragmatch-sun > g > path,
+.game1-dragmatch-sun > g > circle,
+.game1-dragmatch-sun > g > ellipse,
+.game1-dragmatch-sun > g > g {
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+.game1-dragmatch-sun .game1-sun-face-neutral circle,
+.game1-dragmatch-sun .game1-sun-face-happy circle {
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.22));
+}
+
+@keyframes dragtomatchSunHappyPop {
+    0% {
+        transform: scale(0.98);
+    }
+    65% {
+        transform: scale(1.06);
+    }
+    100% {
+        transform: scale(1.02);
+    }
+}
+
+@keyframes dragtomatchSunSadWobble {
+    0% {
+        transform: translateY(0.6%) rotate(0deg);
+    }
+    30% {
+        transform: translateY(0.6%) rotate(-2deg);
+    }
+    65% {
+        transform: translateY(0.6%) rotate(1.5deg);
+    }
+    100% {
+        transform: translateY(0.6%) rotate(0deg);
+    }
+}
+
+.game1-dragmatch-sun {
+    filter:
+        drop-shadow(0 14px 18px rgba(0, 0, 0, 0.14))
+        drop-shadow(0 0 34px rgba(255, 228, 94, 0.42));
+}
+
+.game1-dragmatch-sun::before {
+    content: '';
+    position: absolute;
+    inset: -22%;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 50% 50%, rgba(255, 235, 59, 0.6) 0%, rgba(255, 193, 7, 0.2) 40%, rgba(255, 193, 7, 0.05) 70%, transparent 100%),
+        radial-gradient(circle at 50% 50%, rgba(255, 235, 59, 0.5) 0%, rgba(255, 193, 7, 0.1) 40%, transparent 70%),
+        conic-gradient(from 0deg at 50% 50%, rgba(255, 255, 255, 0.24) 0deg, transparent 15deg, rgba(255, 255, 255, 0.24) 30deg, transparent 45deg, rgba(255, 255, 255, 0.24) 60deg, transparent 75deg, rgba(255, 255, 255, 0.24) 90deg, transparent 105deg, rgba(255, 255, 255, 0.24) 120deg, transparent 135deg, rgba(255, 255, 255, 0.24) 150deg, transparent 165deg, rgba(255, 255, 255, 0.24) 180deg, transparent 195deg, rgba(255, 255, 255, 0.24) 210deg, transparent 225deg, rgba(255, 255, 255, 0.24) 240deg, transparent 255deg, rgba(255, 255, 255, 0.24) 270deg, transparent 285deg, rgba(255, 255, 255, 0.24) 300deg, transparent 315deg, rgba(255, 255, 255, 0.24) 330deg, transparent 345deg, rgba(255, 255, 255, 0.24) 360deg);
+    filter: blur(25px) brightness(1.08);
+    opacity: 0.82;
+    z-index: -1;
+    animation: game1SunGlowPulse 4s ease-in-out infinite alternate;
+}
+
+.game1-dragmatch-sun::after {
+    content: '';
+    position: absolute;
+    inset: -8%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 248, 174, 0.18) 0, rgba(255, 244, 153, 0.08) 44%, transparent 72%);
+    filter: blur(10px);
+    opacity: 0.9;
+    z-index: -1;
+}
+
+.game1-dragmatch-sun-svg {
+    position: relative;
+    z-index: 2;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.game1-dragmatch-sun [fill="url(#game1SunRay)"],
+.game1-dragmatch-sun .game1-dragmatch-sun-ray-group {
+    display: none;
+}
+
+@keyframes game1SunGlowPulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.72;
+    }
+    100% {
+        transform: scale(1.18);
+        opacity: 0.98;
+    }
+}
+
 .game1-tutorial-overlay {
     position: fixed;
     inset: 0;
@@ -604,6 +900,12 @@ body.is-page-loading .page-loading-overlay {
 }
 
 @media (max-width: 900px) and (orientation: portrait) {
+    .game1-dragmatch-sun {
+        width: clamp(7.2rem, 18vw, 9rem);
+        left: 39%;
+        top: clamp(0.6rem, 1.9vw, 1rem);
+    }
+
     .game1-tutorial-overlay {
         place-items: center;
         padding: calc(env(safe-area-inset-top, 0px) + 0.7rem) 0.75rem
@@ -624,6 +926,12 @@ body.is-page-loading .page-loading-overlay {
 }
 
 @media (max-width: 900px) and (orientation: landscape) {
+    .game1-dragmatch-sun {
+        width: clamp(7.6rem, 16vw, 10rem);
+        left: 39%;
+        top: clamp(0.7rem, 1.8vw, 1.2rem);
+    }
+
     .game1-tutorial-overlay {
         padding: calc(env(safe-area-inset-top, 0px) + 0.55rem)
             calc(env(safe-area-inset-right, 0px) + 0.8rem)
@@ -639,6 +947,11 @@ body.is-page-loading .page-loading-overlay {
 }
 
 @media (max-width: 600px) {
+    .game1-dragmatch-sun {
+        width: clamp(6.8rem, 22vw, 8.2rem);
+        left: 37%;
+    }
+
     .game1-tutorial-overlay {
         padding-inline: 0.6rem;
     }
@@ -679,7 +992,7 @@ body.is-page-loading .page-loading-overlay {
 .game1-letter-stage {
     position: fixed;
     left: clamp(1rem, 4vw, 4rem);
-    top: 50%;
+    top: 56%;
     z-index: 2;
     width: min(26vw, 380px);
     display: flex;
@@ -2573,6 +2886,7 @@ footer {
     .game1-letter-stage {
         left: clamp(1rem, 4vw, 4rem);
         width: min(26vw, 380px);
+        top: 58%;
         transform: translateY(-34%);
     }
 

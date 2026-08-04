@@ -239,6 +239,42 @@
         <div class="game1-overlay" aria-hidden="true"></div>
         <div class="game1-entry-veil" aria-hidden="true"></div>
         <div class="game1-celebration-layer" aria-hidden="true"></div>
+        <div class="game1-dragmatch-sun" aria-hidden="true" data-reaction="happy">
+            <svg class="game1-dragmatch-sun-svg" viewBox="0 0 200 200" focusable="false">
+                <defs>
+                    <radialGradient id="sunGradient" cx="40%" cy="40%" r="60%">
+                        <stop offset="0%" stop-color="#fff176"></stop>
+                        <stop offset="40%" stop-color="#ffeb3b"></stop>
+                        <stop offset="85%" stop-color="#ffc107"></stop>
+                        <stop offset="100%" stop-color="#ff8f00"></stop>
+                    </radialGradient>
+                    <clipPath id="circleClip">
+                        <circle cx="100" cy="100" r="60"></circle>
+                    </clipPath>
+                </defs>
+
+                <circle cx="100" cy="100" r="60" fill="url(#sunGradient)" stroke="#e65100" stroke-width="3"></circle>
+                <ellipse cx="135" cy="70" rx="35" ry="15" fill="#ffffff" opacity="0.4" transform="rotate(45 135 70)" clip-path="url(#circleClip)"></ellipse>
+                <ellipse cx="120" cy="85" rx="15" ry="5" fill="#ffffff" opacity="0.7" transform="rotate(45 120 85)" clip-path="url(#circleClip)"></ellipse>
+
+                <g class="game1-sun-face game1-sun-face-happy">
+                    <circle cx="75" cy="90" r="7" fill="#d84315"></circle>
+                    <circle cx="125" cy="90" r="7" fill="#d84315"></circle>
+                    <circle cx="73" cy="88" r="2.5" fill="#ffffff"></circle>
+                    <circle cx="123" cy="88" r="2.5" fill="#ffffff"></circle>
+                    <path d="M 75 115 Q 100 145, 125 115" fill="none" stroke="#d84315" stroke-width="5" stroke-linecap="round"></path>
+                    <ellipse cx="60" cy="105" rx="12" ry="6" fill="#ff8a80" opacity="0.7"></ellipse>
+                    <ellipse cx="140" cy="105" rx="12" ry="6" fill="#ff8a80" opacity="0.7"></ellipse>
+                </g>
+
+                <g class="game1-sun-face game1-sun-face-sad">
+                    <path d="M 68 90 Q 75 95, 82 90" fill="none" stroke="#d84315" stroke-width="5" stroke-linecap="round"></path>
+                    <path d="M 118 90 Q 125 95, 132 90" fill="none" stroke="#d84315" stroke-width="5" stroke-linecap="round"></path>
+                    <path d="M 75 135 Q 100 105, 125 135" fill="none" stroke="#d84315" stroke-width="5" stroke-linecap="round"></path>
+                    <path d="M 120 100 Q 122 115, 120 120 Q 118 115, 120 100 Z" fill="#64b5f6"></path>
+                </g>
+            </svg>
+        </div>
         <div class="game1-tutorial-overlay game1-dragmatch-tutorial" aria-hidden="true">
             <div class="game1-tutorial-frame">
                 <video class="game1-tutorial-video" playsinline preload="auto">
