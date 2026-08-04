@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingLinks = document.querySelectorAll('.loading-link');
     let isNavigating = false;
     const loadingDuration = 1000;
+    const titlePage = document.getElementById('learnscape-title-page');
+    const game1Page = document.getElementById('learnscape-game1-page');
+    const dragtomatchPage = document.getElementById('learnscape-dragtomatch-page');
     const game1BgVideo = document.querySelector('.game1-bg-image');
 
     const isInShell = () => window.top !== window;
@@ -178,13 +181,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    const isPageVisible = (pageElement) => Boolean(pageElement && !pageElement.hidden);
+
     const playGame1BgVideo = () => {
-        if (!game1BgVideo) return;
+        if (!game1BgVideo || !isPageVisible(game1Page)) return;
 
         const playResult = game1BgVideo.play?.();
         if (playResult && typeof playResult.catch === 'function') {
             playResult.catch(() => {
                 const startOnGesture = () => {
+                    if (!isPageVisible(game1Page)) return;
                     const retryResult = game1BgVideo.play?.();
                     if (retryResult && typeof retryResult.catch === 'function') {
                         retryResult.catch(() => {});
@@ -218,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pauseGame1BgVideo();
     });
 
-    if (!document.getElementById('learnscape-game1-page')?.hidden) {
+    if (isPageVisible(game1Page)) {
         playGame1BgVideo();
     }
 
@@ -605,6 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dragtomatchTutorialOverlay) {
             dragtomatchTutorialOverlay.classList.remove('is-visible');
             dragtomatchTutorialOverlay.classList.remove('is-docking');
+            dragtomatchTutorialOverlay.classList.remove('is-completing');
             dragtomatchTutorialOverlay.setAttribute('aria-hidden', 'true');
             dragtomatchTutorialOverlay.style.removeProperty('--tutorial-dock-x');
             dragtomatchTutorialOverlay.style.removeProperty('--tutorial-dock-y');
@@ -612,8 +619,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const completeDragtomatchTutorialDock = () => {
+        if (!dragtomatchTutorialOverlay || !isPageVisible(dragtomatchPage)) {
+            clearDragtomatchTutorial();
+            setDragtomatchTutorialCompleted(true);
+            return;
+        }
+
+        dragtomatchTutorialOverlay.classList.add('is-completing');
+        dragtomatchTutorialOverlay.classList.remove('is-visible');
+        dragtomatchTutorialOverlay.setAttribute('aria-hidden', 'true');
+
+        dragtomatchTutorialDockTimer = window.setTimeout(() => {
+            dragtomatchTutorialDockTimer = null;
+            setDragtomatchTutorialCompleted(true);
+            clearDragtomatchTutorial();
+        }, 300);
+    };
+
     const dockDragtomatchTutorial = () => {
-        if (!dragtomatchTutorialOverlay || !dragtomatchTutorialButton) return;
+        if (!dragtomatchTutorialOverlay || !dragtomatchTutorialButton || !isPageVisible(dragtomatchPage)) return;
 
         const overlayFrame = dragtomatchTutorialOverlay.querySelector('.game1-tutorial-frame');
         if (!overlayFrame) {
@@ -639,13 +664,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         dragtomatchTutorialDockTimer = window.setTimeout(() => {
             dragtomatchTutorialDockTimer = null;
-            setDragtomatchTutorialCompleted(true);
-            clearDragtomatchTutorial();
+            completeDragtomatchTutorialDock();
         }, 470);
     };
 
     const showDragtomatchTutorial = async (force = false) => {
-        if (!dragtomatchTutorialOverlay || !dragtomatchTutorialVideo) return;
+        if (!dragtomatchTutorialOverlay || !dragtomatchTutorialVideo || !isPageVisible(dragtomatchPage)) return;
         if (dragtomatchTutorialOverlay.classList.contains('is-visible')) return;
         if (!force && getDragtomatchTutorialCompleted()) return;
 
@@ -667,7 +691,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const scheduleDragtomatchTutorial = () => {
         clearDragtomatchTutorial();
 
-        if (!dragtomatchTutorialOverlay || !dragtomatchTutorialVideo) return;
+        if (!dragtomatchTutorialOverlay || !dragtomatchTutorialVideo || !isPageVisible(dragtomatchPage)) return;
         if (getDragtomatchTutorialCompleted()) return;
 
         dragtomatchTutorialTimer = window.setTimeout(() => {
@@ -1421,7 +1445,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearDragtomatchTutorial();
     });
 
-    if (!document.getElementById('learnscape-dragtomatch-page')?.hidden) {
+    if (isPageVisible(dragtomatchPage)) {
         scheduleDragtomatchTutorial();
     }
 

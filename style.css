@@ -471,7 +471,7 @@ body.is-page-loading .page-loading-overlay {
     z-index: 18;
     display: grid;
     place-items: center;
-    padding: clamp(1rem, 3vw, 2rem);
+    padding: clamp(0.8rem, 2.4vw, 2rem);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -493,12 +493,18 @@ body.is-page-loading .page-loading-overlay {
     pointer-events: none;
 }
 
+.game1-tutorial-overlay.is-completing {
+    pointer-events: none;
+}
+
 .game1-tutorial-frame {
     position: relative;
-    width: min(78vw, 960px);
+    width: min(72vw, 920px);
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100vh - 2rem);
     aspect-ratio: 16 / 9;
-    border-radius: clamp(1rem, 2.6vw, 1.8rem);
-    padding: clamp(0.5rem, 1.4vw, 0.9rem);
+    border-radius: clamp(0.9rem, 2.2vw, 1.6rem);
+    padding: clamp(0.45rem, 1.1vw, 0.8rem);
     background:
         radial-gradient(circle at 50% 18%, rgba(255, 244, 95, 0.24) 0, transparent 30%),
         linear-gradient(180deg, rgba(14, 34, 72, 0.94), rgba(8, 19, 46, 0.96));
@@ -524,10 +530,17 @@ body.is-page-loading .page-loading-overlay {
         scale(var(--tutorial-dock-scale, 0.08));
 }
 
+.game1-tutorial-overlay.is-completing .game1-tutorial-frame {
+    opacity: 0;
+    transform:
+        translate(var(--tutorial-dock-x, 0px), var(--tutorial-dock-y, 0px))
+        scale(var(--tutorial-dock-scale, 0.08));
+}
+
 .game1-tutorial-frame::before {
     content: '';
     position: absolute;
-    inset: 0.55rem;
+    inset: clamp(0.35rem, 1vw, 0.55rem);
     border-radius: inherit;
     border: 1px dashed rgba(255, 255, 255, 0.28);
     pointer-events: none;
@@ -537,7 +550,7 @@ body.is-page-loading .page-loading-overlay {
     display: block;
     width: 100%;
     height: 100%;
-    border-radius: calc(clamp(1rem, 2.6vw, 1.8rem) - 0.35rem);
+    border-radius: calc(clamp(0.9rem, 2.2vw, 1.6rem) - 0.3rem);
     object-fit: contain;
     background: #061225;
     box-shadow:
@@ -547,11 +560,11 @@ body.is-page-loading .page-loading-overlay {
 
 .game1-tutorial-button {
     position: fixed;
-    right: clamp(0.9rem, 2.8vw, 1.8rem);
-    top: clamp(0.9rem, 2.8vw, 1.8rem);
+    right: calc(env(safe-area-inset-right, 0px) + clamp(0.7rem, 2.4vw, 1.6rem));
+    top: calc(env(safe-area-inset-top, 0px) + clamp(0.7rem, 2.4vw, 1.6rem));
     z-index: 22;
-    width: clamp(2.9rem, 5.8vw, 3.6rem);
-    height: clamp(2.9rem, 5.8vw, 3.6rem);
+    width: clamp(2.5rem, 5vw, 3.4rem);
+    height: clamp(2.5rem, 5vw, 3.4rem);
     display: grid;
     place-items: center;
     border: 2px solid rgba(255, 244, 95, 0.9);
@@ -588,6 +601,53 @@ body.is-page-loading .page-loading-overlay {
 .game1-tutorial-button.is-hidden {
     opacity: 0;
     pointer-events: none;
+}
+
+@media (max-width: 900px) and (orientation: portrait) {
+    .game1-tutorial-overlay {
+        place-items: center;
+        padding: calc(env(safe-area-inset-top, 0px) + 0.7rem) 0.75rem
+            calc(env(safe-area-inset-bottom, 0px) + 4.75rem);
+    }
+
+    .game1-tutorial-frame {
+        width: min(90vw, 440px);
+        max-width: calc(100vw - 1.5rem);
+        max-height: calc(100vh - 7rem);
+    }
+
+    .game1-tutorial-button {
+        width: clamp(2.35rem, 8.5vw, 2.9rem);
+        height: clamp(2.35rem, 8.5vw, 2.9rem);
+        font-size: clamp(1.05rem, 2.8vw, 1.35rem);
+    }
+}
+
+@media (max-width: 900px) and (orientation: landscape) {
+    .game1-tutorial-overlay {
+        padding: calc(env(safe-area-inset-top, 0px) + 0.55rem)
+            calc(env(safe-area-inset-right, 0px) + 0.8rem)
+            calc(env(safe-area-inset-bottom, 0px) + 0.8rem)
+            calc(env(safe-area-inset-left, 0px) + 0.8rem);
+    }
+
+    .game1-tutorial-frame {
+        width: min(62vw, 640px);
+        max-width: calc(100vw - 3rem);
+        max-height: calc(100vh - 3rem);
+    }
+}
+
+@media (max-width: 600px) {
+    .game1-tutorial-overlay {
+        padding-inline: 0.6rem;
+    }
+
+    .game1-tutorial-frame {
+        width: min(94vw, 420px);
+        max-width: calc(100vw - 1.2rem);
+        border-radius: 0.95rem;
+    }
 }
 
 .game1-left-ornaments {
@@ -1094,6 +1154,8 @@ body.is-touch-dragging {
     opacity: 0;
     visibility: hidden;
     transform: translateY(10px);
+    --game1-preview-lift: clamp(3.4rem, 8vh, 6.4rem);
+    --game1-controls-bottom: clamp(1.5rem, 3.8vh, 3rem);
     transition:
         opacity 0.45s ease,
         transform 0.45s ease,
@@ -1113,7 +1175,7 @@ body.is-touch-dragging {
 .game1-preview {
     position: absolute;
     left: 50%;
-    top: 50%;
+    top: calc(50% - var(--game1-preview-lift));
     width: min(34vw, 520px);
     display: flex;
     flex-direction: column;
@@ -1122,7 +1184,7 @@ body.is-touch-dragging {
     filter:
         drop-shadow(0 16px 28px rgba(21, 63, 56, 0.28))
         drop-shadow(0 0 24px rgba(255, 244, 95, 0.14));
-    transform: translate(-50%, -56%) scale(1.08);
+    transform: translate(-50%, -50%) scale(1.08);
     transform-origin: center center;
 }
 
@@ -1243,12 +1305,12 @@ body.is-touch-dragging {
 .game1-action-row {
     position: fixed;
     left: 50%;
-    bottom: clamp(1.2rem, 3.2vh, 2.4rem);
+    bottom: var(--game1-controls-bottom);
     z-index: 3;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: clamp(0.65rem, 1.8vw, 1.25rem);
+    gap: clamp(0.85rem, 2vw, 1.5rem);
     transform: translateX(-50%);
     pointer-events: auto;
 }
@@ -2474,13 +2536,14 @@ footer {
 
     .game1-preview {
         width: min(34vw, 520px);
-        transform: translate(-50%, -62%) scale(1.08);
+        top: calc(50% - clamp(4.6rem, 10vh, 7rem));
+        transform: translate(-50%, -50%) scale(1.06);
         gap: 1.3rem;
     }
 
     .game1-action-row {
-        bottom: clamp(0.75rem, 2.1vh, 1.6rem);
-        gap: clamp(0.65rem, 1.8vw, 1.25rem);
+        bottom: clamp(1.35rem, 3vh, 2.2rem);
+        gap: clamp(0.95rem, 2vw, 1.5rem);
     }
 
     .game1-action-row .game1-board-nav {
@@ -2543,12 +2606,13 @@ footer {
 @media (max-width: 900px) {
     .game1-preview {
         width: min(34vw, 520px);
-        transform: translate(-50%, -62%) scale(1.08);
+        top: calc(50% - clamp(4.6rem, 10vh, 7rem));
+        transform: translate(-50%, -50%) scale(1.06);
     }
 
     .game1-action-row {
-        bottom: clamp(0.75rem, 2.1vh, 1.6rem);
-        gap: clamp(0.65rem, 1.8vw, 1.25rem);
+        bottom: clamp(1.35rem, 3vh, 2.2rem);
+        gap: clamp(0.95rem, 2vw, 1.5rem);
     }
 
     .game1-action-row .game1-board-nav {
