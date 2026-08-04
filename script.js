@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const titlePage = document.getElementById('learnscape-title-page');
     const game1Page = document.getElementById('learnscape-game1-page');
     const dragtomatchPage = document.getElementById('learnscape-dragtomatch-page');
-    const game1BgVideo = document.querySelector('.game1-bg-image');
+    const game1BgVideo = game1Page?.querySelector('video.game1-bg-image') || null;
 
     const isInShell = () => window.top !== window;
 
