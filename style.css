@@ -995,8 +995,8 @@ body.is-page-loading .page-loading-overlay {
 }
 
 .game1-dragtomatch-objects[data-choice-count="3"] {
-    width: min(42vw, 640px);
-    gap: clamp(0.9rem, 1.6vw, 1.5rem);
+    width: min(45vw, 680px);
+    gap: clamp(1rem, 1.7vw, 1.6rem);
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-areas:
         "top top"
@@ -1011,7 +1011,7 @@ body.is-page-loading .page-loading-overlay {
 .game1-dragtomatch-objects[data-choice-count="3"] .game1-object-card:nth-child(1) {
     grid-area: top;
     justify-self: center;
-    width: min(62%, 250px);
+    width: min(66%, 270px);
 }
 
 .game1-dragtomatch-objects[data-choice-count="3"] .game1-object-card:nth-child(2) {

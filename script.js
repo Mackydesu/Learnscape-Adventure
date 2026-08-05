@@ -1387,7 +1387,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dragtomatchObjects.dataset.choiceCount = String(choiceCount);
             dragtomatchObjects.style.setProperty(
                 '--object-card-image-size',
-                choiceCount === 2 ? '0.82' : choiceCount === 3 ? '0.68' : '0.6'
+                choiceCount === 2 ? '0.82' : choiceCount === 3 ? '0.72' : '0.6'
             );
         }
 
