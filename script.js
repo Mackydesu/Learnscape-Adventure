@@ -1071,6 +1071,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     };
 
+    const getDragtomatchDisplayerHoldDelay = (word) => {
+        const letterCount = Array.from(String(word || '')).filter((letter) => /[A-Za-z]/.test(letter)).length;
+        if (!letterCount) return 700;
+
+        return Math.max(900, Math.min(3200, 450 + letterCount * 260));
+    };
+
     const startDragtomatchCelebration = (card, word) => new Promise((resolve) => {
         if (!card || !dragtomatchCelebrationLayer) {
             resolve();
@@ -1086,9 +1093,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const cleanWord = String(word || '').trim();
-        const letters = Array.from(cleanWord);
-        const revealDelay = 110;
-        const holdDelay = 900;
+        const displayLetters = Array.from(cleanWord);
         const zoomDelay = 160;
         const zoomDuration = 800;
         const returnDuration = 1150;
@@ -1121,19 +1126,24 @@ document.addEventListener('DOMContentLoaded', () => {
         dragtomatchCelebratingCard = card;
         dragtomatchCelebrationLayer.appendChild(card);
 
-        letters.forEach((letter, index) => {
+        const letterSpans = [];
+        const spokenSpans = [];
+
+        displayLetters.forEach((letter) => {
             const letterSpan = document.createElement('span');
             letterSpan.className = letter === ' ' ? 'game1-object-card-spell-letter game1-object-card-spell-space' : 'game1-object-card-spell-letter';
             letterSpan.textContent = letter === ' ' ? '\u00A0' : letter;
-            spellTarget.appendChild(letterSpan);
-
-            const timer = window.setTimeout(() => {
+            letterSpan.setAttribute('aria-hidden', 'true');
+            if (letter !== ' ') {
+                spokenSpans.push(letterSpan);
+            } else {
                 letterSpan.classList.add('is-visible');
-            }, zoomDelay + zoomDuration + index * revealDelay);
-            dragtomatchCelebrationLetterTimers.push(timer);
+            }
+            spellTarget.appendChild(letterSpan);
+            letterSpans.push(letterSpan);
         });
 
-        if (!letters.length) {
+        if (!displayLetters.length) {
             spellTarget.textContent = cleanWord;
         }
 
@@ -1143,9 +1153,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        const returnStartDelay = zoomDelay + zoomDuration + Math.max(letters.length * revealDelay + holdDelay, 1200);
-        dragtomatchCelebrationTimer = window.setTimeout(() => {
-            dragtomatchCelebrationTimer = null;
+        const returnToPlace = () => {
             spellTarget.innerHTML = '';
             card.style.transform = 'translate(0px, 0px) scale(1)';
             window.requestAnimationFrame(() => {
@@ -1156,7 +1164,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 dragtomatchCelebrationReturnTimer = null;
                 resolve();
             }, returnDuration);
-        }, returnStartDelay);
+        };
+
+        const startSpelling = () => {
+            let visibleLetterCount = 0;
+            let spellingEnded = false;
+            let hasReturned = false;
+            const afterAllLettersDelay = getDragtomatchDisplayerHoldDelay(cleanWord);
+
+            const finishWhenReady = () => {
+                if (hasReturned || !spellingEnded || visibleLetterCount < spokenSpans.length) return;
+                hasReturned = true;
+
+                dragtomatchCelebrationTimer = window.setTimeout(() => {
+                    dragtomatchCelebrationTimer = null;
+                    returnToPlace();
+                }, afterAllLettersDelay);
+            };
+
+            const spellingPromise = speakDragtomatchSpelledWord(cleanWord, card, (spokenIndex) => {
+                const targetSpan = spokenSpans[spokenIndex];
+                if (targetSpan) {
+                    targetSpan.classList.add('is-visible');
+                    visibleLetterCount += 1;
+                    finishWhenReady();
+                }
+            });
+
+            spellingPromise
+                .then(() => {
+                    spellingEnded = true;
+                    finishWhenReady();
+                })
+                .catch(() => {
+                    spellingEnded = true;
+                    finishWhenReady();
+                });
+        };
+
+        dragtomatchCelebrationTimer = window.setTimeout(() => {
+            dragtomatchCelebrationTimer = null;
+            startSpelling();
+        }, zoomDelay + zoomDuration);
     });
 
     const waitForDragtomatchVoices = () => {
@@ -1263,7 +1312,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const utterance = new window.SpeechSynthesisUtterance(name);
             const preferredVoice = getDragtomatchPreferredVoice();
             utterance.lang = preferredVoice?.lang || 'en-US';
-            utterance.rate = 0.82;
+            utterance.rate = 1.08;
             utterance.pitch = 1.85;
             utterance.volume = 1;
             utterance.voice = preferredVoice;
@@ -1426,6 +1475,84 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    const speakDragtomatchSpelledWord = async (name, card, onLetterStart = () => {}) => {
+        const cleanWord = String(name || '').trim();
+        if (!cleanWord) {
+            return;
+        }
+
+        const letters = Array.from(cleanWord).filter((letter) => /[A-Za-z]/.test(letter));
+        if (!letters.length) {
+            await speakDragtomatchObjectName(cleanWord, card);
+            return;
+        }
+
+        clearDragtomatchSpeechTimer(card);
+
+        await speakDragtomatchObjectName(cleanWord, card);
+        await new Promise((resolve) => window.setTimeout(resolve, 30));
+
+        const spellStepDelay = 170;
+        const spellStartDelay = 60;
+        const spellFinishDelay = 1600;
+        const canSpeakLetters = dragtomatchSpeechSynthesis && typeof window.SpeechSynthesisUtterance === 'function';
+        let preferredVoice = null;
+
+        if (canSpeakLetters) {
+            await waitForDragtomatchVoices();
+            preferredVoice = getDragtomatchPreferredVoice();
+            dragtomatchSpeechSynthesis.cancel();
+        }
+
+        await new Promise((resolve) => {
+            letters.forEach((letter, index) => {
+                const timer = window.setTimeout(() => {
+                    if (!canSpeakLetters) {
+                        onLetterStart(index, letter);
+                        return;
+                    }
+
+                    const utterance = new window.SpeechSynthesisUtterance(letter.toUpperCase());
+                    utterance.lang = preferredVoice?.lang || 'en-US';
+                    utterance.rate = 1.65;
+                    utterance.pitch = 1.9;
+                    utterance.volume = 1;
+                    utterance.voice = preferredVoice;
+
+                    let revealed = false;
+                    let revealFallbackTimer = null;
+                    const revealWithVoice = () => {
+                        if (revealed) return;
+                        revealed = true;
+
+                        if (revealFallbackTimer) {
+                            window.clearTimeout(revealFallbackTimer);
+                            revealFallbackTimer = null;
+                        }
+
+                        onLetterStart(index, letter);
+                    };
+
+                    utterance.onstart = revealWithVoice;
+                    utterance.onerror = revealWithVoice;
+                    dragtomatchSpeechSynthesis.speak(utterance);
+
+                    revealFallbackTimer = window.setTimeout(revealWithVoice, 180);
+                    dragtomatchCelebrationLetterTimers.push(revealFallbackTimer);
+                }, spellStartDelay + index * spellStepDelay);
+
+                dragtomatchCelebrationLetterTimers.push(timer);
+            });
+
+            const finishTimer = window.setTimeout(() => {
+                dragtomatchSpeechTimers.delete(card);
+                resolve();
+            }, spellStartDelay + letters.length * spellStepDelay + spellFinishDelay);
+
+            dragtomatchSpeechTimers.set(card, finishTimer);
+        });
+    };
+
     const advanceDragtomatchRound = () => {
         renderDragtomatchRound(dragtomatchCurrentIndex + 1);
     };
@@ -1448,10 +1575,9 @@ document.addEventListener('DOMContentLoaded', () => {
         clearDragtomatchAdvance();
 
         const celebrationWord = card.dataset.objectName || card.dataset.letter || '';
-        const speechPromise = speakDragtomatchObjectName(celebrationWord, card);
         const celebrationPromise = startDragtomatchCelebration(card, celebrationWord);
 
-        await Promise.all([speechPromise, celebrationPromise]);
+        await Promise.all([celebrationPromise]);
 
         dragtomatchAdvanceTimer = window.setTimeout(() => {
             clearDragtomatchCelebration();
