@@ -989,6 +989,39 @@ body.is-page-loading .page-loading-overlay {
     pointer-events: auto;
 }
 
+.game1-dragtomatch-objects[data-choice-count="2"] {
+    width: min(52vw, 780px);
+    gap: clamp(1.15rem, 2vw, 2.2rem);
+}
+
+.game1-dragtomatch-objects[data-choice-count="3"] {
+    width: min(42vw, 640px);
+    gap: clamp(0.9rem, 1.6vw, 1.5rem);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+        "top top"
+        "left right";
+}
+
+.game1-dragtomatch-objects[data-choice-count="4"] {
+    width: min(44vw, 680px);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.game1-dragtomatch-objects[data-choice-count="3"] .game1-object-card:nth-child(1) {
+    grid-area: top;
+    justify-self: center;
+    width: min(62%, 250px);
+}
+
+.game1-dragtomatch-objects[data-choice-count="3"] .game1-object-card:nth-child(2) {
+    grid-area: left;
+}
+
+.game1-dragtomatch-objects[data-choice-count="3"] .game1-object-card:nth-child(3) {
+    grid-area: right;
+}
+
 .game1-letter-stage {
     position: fixed;
     left: clamp(1rem, 4vw, 4rem);
@@ -1287,10 +1320,10 @@ body.is-touch-dragging {
     position: absolute;
     left: 50%;
     top: 50%;
-    width: calc(74% * var(--object-scale, 1));
+    width: calc(var(--object-card-image-size, 0.6) * 100% * var(--object-scale, 1));
     height: auto;
-    max-width: calc(74% * var(--object-scale, 1));
-    max-height: calc(74% * var(--object-scale, 1));
+    max-width: calc(var(--object-card-image-size, 0.6) * 100% * var(--object-scale, 1));
+    max-height: calc(var(--object-card-image-size, 0.6) * 100% * var(--object-scale, 1));
     transform: translate(-50%, -50%);
     object-fit: contain;
     pointer-events: none;
@@ -2907,9 +2940,9 @@ footer {
     }
 
     .game1-object-card-object {
-        width: calc(74% * var(--object-scale, 1));
-        max-width: calc(74% * var(--object-scale, 1));
-        max-height: calc(74% * var(--object-scale, 1));
+        width: calc(var(--object-card-image-size, 0.6) * 100% * var(--object-scale, 1));
+        max-width: calc(var(--object-card-image-size, 0.6) * 100% * var(--object-scale, 1));
+        max-height: calc(var(--object-card-image-size, 0.6) * 100% * var(--object-scale, 1));
     }
 
     .game1-object-card-spell {

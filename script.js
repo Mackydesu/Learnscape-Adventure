@@ -305,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const game1Stage = document.querySelector('.game1-stage');
     const game1IntroCard = document.querySelector('.game1-intro-card');
     const game1PlayRoutes = ['dragtomatch', 'poptheword', 'bunnyhop'];
-    const dragtomatchCards = Array.from(document.querySelectorAll('[data-dragtomatch-object-card]'));
+    let dragtomatchCards = [];
     const dragtomatchObjects = document.querySelector('.game1-dragtomatch-objects');
     const dragtomatchTutorialButton = document.querySelector('[data-dragtomatch-tutorial-button]');
     const dragtomatchTutorialOverlay = document.querySelector('.game1-dragmatch-tutorial');
@@ -350,6 +350,124 @@ document.addEventListener('DOMContentLoaded', () => {
         { letter: 'Y', letterSrc: 'assets/ABC Elements/LetterY.png', objectName: 'Yoyo', objectSrc: 'assets/ABC Elements/Yoyo.png' },
         { letter: 'Z', letterSrc: 'assets/ABC Elements/LetterZ.png', objectName: 'Zebra', objectSrc: 'assets/ABC Elements/Zebra.png' },
     ];
+
+    const dragtomatchCardMarkup = `
+        <span class="game1-object-card-inner">
+            <span class="game1-object-card-face game1-object-card-face-back">
+                <img class="game1-object-card-frame" src="assets/Backgrounds/objectdisplayerback.webp" alt="">
+            </span>
+            <span class="game1-object-card-face game1-object-card-face-front">
+                <img class="game1-object-card-frame" src="assets/Backgrounds/objectdisplayerfront.png" alt="">
+                <img class="game1-object-card-object" src="" alt="">
+            </span>
+        </span>
+        <span class="game1-object-card-spell" aria-hidden="true"></span>
+    `;
+
+    const attachDragtomatchCardInteractions = (card) => {
+        addTouchPressState(card, 'is-touching');
+
+        card.addEventListener('click', () => {
+            if (Date.now() < dragtomatchIgnoreClickUntil) return;
+            if (card.classList.contains('is-solved')) return;
+
+            if (dragtomatchSelectedLetter) {
+                const correctLetter = dragtomatchLetterImage?.dataset.letter || '';
+                const selectedLetter = dragtomatchSelectedLetter;
+                const isCorrectMatch = card.dataset.letter === selectedLetter && selectedLetter === correctLetter;
+
+                clearDragtomatchCardFlipTimer(card);
+                clearDragtomatchSpeechTimer(card);
+
+                if (isCorrectMatch) {
+                    markDragtomatchSuccess(card);
+                } else {
+                    markDragtomatchMiss(card);
+                }
+
+                clearDragtomatchSelectedLetter();
+                return;
+            }
+
+            clearDragtomatchCardFlipTimer(card);
+            clearDragtomatchSpeechTimer(card);
+            card.classList.add('is-flipped');
+            card.setAttribute('aria-pressed', 'true');
+
+            playDragtomatchFlipSound();
+            speakDragtomatchObjectName(card.dataset.objectName || '', card).then(() => {
+                if (card.classList.contains('is-solved')) return;
+                card.classList.remove('is-flipped');
+                card.setAttribute('aria-pressed', 'false');
+                dragtomatchSpeechTimers.delete(card);
+                dragtomatchFlipTimers.delete(card);
+            });
+        });
+
+        card.addEventListener('dragenter', (event) => {
+            event.preventDefault();
+            card.classList.add('is-drop-target');
+        });
+
+        card.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+            card.classList.add('is-drop-target');
+        });
+
+        card.addEventListener('dragleave', () => {
+            card.classList.remove('is-drop-target');
+        });
+
+        card.addEventListener('drop', (event) => {
+            event.preventDefault();
+            card.classList.remove('is-drop-target');
+
+            const droppedLetter = event.dataTransfer?.getData('text/plain');
+            const correctLetter = dragtomatchLetterImage?.dataset.letter || '';
+
+            if (!droppedLetter || !correctLetter) return;
+
+            if (card.dataset.letter === droppedLetter && droppedLetter === correctLetter) {
+                markDragtomatchSuccess(card);
+            } else {
+                markDragtomatchMiss(card);
+            }
+        });
+    };
+
+    const createDragtomatchCard = (cardIndex) => {
+        const card = document.createElement('button');
+        card.className = 'game1-object-card';
+        card.type = 'button';
+        card.dataset.dragtomatchObjectCard = 'true';
+        card.setAttribute('aria-label', `Object card ${cardIndex + 1}`);
+        card.setAttribute('aria-pressed', 'false');
+        card.innerHTML = dragtomatchCardMarkup;
+        attachDragtomatchCardInteractions(card);
+        return card;
+    };
+
+    const reconcileDragtomatchCards = (choiceCount) => {
+        if (!dragtomatchObjects) return [];
+
+        while (dragtomatchCards.length < choiceCount) {
+            const card = createDragtomatchCard(dragtomatchCards.length);
+            dragtomatchObjects.appendChild(card);
+            dragtomatchCards.push(card);
+        }
+
+        while (dragtomatchCards.length > choiceCount) {
+            const card = dragtomatchCards.pop();
+            if (!card) continue;
+            clearDragtomatchCardFlipTimer(card);
+            clearDragtomatchSpeechTimer(card);
+            card.remove();
+        }
+
+        dragtomatchCards = Array.from(dragtomatchObjects.querySelectorAll('[data-dragtomatch-object-card]'));
+        return dragtomatchCards;
+    };
     const dragtomatchAudioContext = (() => {
         const AudioCtor = window.AudioContext || window.webkitAudioContext;
         return AudioCtor ? new AudioCtor() : null;
@@ -535,20 +653,26 @@ document.addEventListener('DOMContentLoaded', () => {
         return copy;
     };
 
-    const getDragtomatchRoundOptions = (index) => {
+    const getDragtomatchChoiceCount = (letter) => {
+        if (letter <= 'F') return 2;
+        if (letter <= 'L') return 3;
+        return 4;
+    };
+
+    const getDragtomatchRoundOptions = (index, choiceCount) => {
         const correct = dragtomatchPairs[index];
         const picks = [correct];
         const distractorOffsets = [1, 7, 13, 19, 23];
 
         distractorOffsets.forEach((offset) => {
-            if (picks.length >= 4) return;
+            if (picks.length >= choiceCount) return;
             const candidate = dragtomatchPairs[(index + offset) % dragtomatchPairs.length];
             if (!picks.some((entry) => entry.letter === candidate.letter)) {
                 picks.push(candidate);
             }
         });
 
-        return shuffleArray(picks.slice(0, 4));
+        return shuffleArray(picks.slice(0, choiceCount));
     };
 
     const clearDragtomatchAdvance = () => {
@@ -1250,11 +1374,22 @@ document.addEventListener('DOMContentLoaded', () => {
         clearDragtomatchSelectedLetter();
         setDragtomatchSunReaction('happy');
 
-        if (!dragtomatchCards.length || !dragtomatchPairs.length) return;
+        if (!dragtomatchPairs.length) return;
 
         dragtomatchCurrentIndex = (index + dragtomatchPairs.length) % dragtomatchPairs.length;
         const currentPair = dragtomatchPairs[dragtomatchCurrentIndex];
-        const roundOptions = getDragtomatchRoundOptions(dragtomatchCurrentIndex);
+        const choiceCount = getDragtomatchChoiceCount(currentPair.letter);
+        reconcileDragtomatchCards(choiceCount);
+        if (!dragtomatchCards.length) return;
+        const roundOptions = getDragtomatchRoundOptions(dragtomatchCurrentIndex, choiceCount);
+
+        if (dragtomatchObjects) {
+            dragtomatchObjects.dataset.choiceCount = String(choiceCount);
+            dragtomatchObjects.style.setProperty(
+                '--object-card-image-size',
+                choiceCount === 2 ? '0.82' : choiceCount === 3 ? '0.68' : '0.6'
+            );
+        }
 
         syncDragtomatchLetter(currentPair);
 
@@ -1272,6 +1407,8 @@ document.addEventListener('DOMContentLoaded', () => {
             card.dataset.objectScale = option.objectScale || '1';
             card.disabled = false;
             card.style.pointerEvents = 'auto';
+            card.removeAttribute('hidden');
+            card.removeAttribute('aria-hidden');
             card.setAttribute('aria-label', `Object card ${cardIndex + 1}: ${option.objectName}`);
 
             if (objectImage) {
@@ -1339,78 +1476,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 440);
     };
 
-    dragtomatchCards.forEach((card) => {
-        addTouchPressState(card, 'is-touching');
-
-        card.addEventListener('click', () => {
-            if (Date.now() < dragtomatchIgnoreClickUntil) return;
-            if (card.classList.contains('is-solved')) return;
-
-            if (dragtomatchSelectedLetter) {
-                const correctLetter = dragtomatchLetterImage?.dataset.letter || '';
-                const selectedLetter = dragtomatchSelectedLetter;
-                const isCorrectMatch = card.dataset.letter === selectedLetter && selectedLetter === correctLetter;
-
-                clearDragtomatchCardFlipTimer(card);
-                clearDragtomatchSpeechTimer(card);
-
-                if (isCorrectMatch) {
-                    markDragtomatchSuccess(card);
-                } else {
-                    markDragtomatchMiss(card);
-                }
-
-                clearDragtomatchSelectedLetter();
-                return;
-            }
-
-            clearDragtomatchCardFlipTimer(card);
-            clearDragtomatchSpeechTimer(card);
-            card.classList.add('is-flipped');
-            card.setAttribute('aria-pressed', 'true');
-
-            playDragtomatchFlipSound();
-            speakDragtomatchObjectName(card.dataset.objectName || '', card).then(() => {
-                if (card.classList.contains('is-solved')) return;
-                card.classList.remove('is-flipped');
-                card.setAttribute('aria-pressed', 'false');
-                dragtomatchSpeechTimers.delete(card);
-                dragtomatchFlipTimers.delete(card);
-            });
-        });
-
-        card.addEventListener('dragenter', (event) => {
-            event.preventDefault();
-            card.classList.add('is-drop-target');
-        });
-
-        card.addEventListener('dragover', (event) => {
-            event.preventDefault();
-            event.dataTransfer.dropEffect = 'move';
-            card.classList.add('is-drop-target');
-        });
-
-        card.addEventListener('dragleave', () => {
-            card.classList.remove('is-drop-target');
-        });
-
-        card.addEventListener('drop', (event) => {
-            event.preventDefault();
-            card.classList.remove('is-drop-target');
-
-            const droppedLetter = event.dataTransfer?.getData('text/plain');
-            const correctLetter = dragtomatchLetterImage?.dataset.letter || '';
-
-            if (!droppedLetter || !correctLetter) return;
-
-            if (card.dataset.letter === droppedLetter && droppedLetter === correctLetter) {
-                markDragtomatchSuccess(card);
-            } else {
-                markDragtomatchMiss(card);
-            }
-        });
-    });
-
     if (dragtomatchUsesTouchFallback && dragtomatchLetterImage) {
         addTouchPressState(dragtomatchLetterImage, 'is-touching');
         dragtomatchLetterImage.addEventListener('touchstart', beginDragtomatchTouchDrag, { passive: false });
@@ -1455,7 +1520,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     dragtomatchLetterImage?.addEventListener('dragend', () => {
         dragtomatchLetterImage.classList.remove('is-dragging');
-        dragtomatchCards.forEach((card) => card.classList.remove('is-drop-target'));
+        Array.from(dragtomatchObjects?.querySelectorAll('[data-dragtomatch-object-card]') || []).forEach((card) => card.classList.remove('is-drop-target'));
     });
 
     dragtomatchTutorialVideo?.addEventListener('ended', dockDragtomatchTutorial);
