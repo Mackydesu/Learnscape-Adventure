@@ -21,7 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const lettertraceTraceGlyphs = lettertracePage?.querySelectorAll('.lettertrace-trace-glyph') || [];
     const lettertraceTraceMaskPaths = lettertracePage?.querySelectorAll('.lettertrace-trace-mask-path') || [];
     const lettertraceTraceGuidePath = lettertracePage?.querySelector('.lettertrace-trace-glyph-guide') || null;
-    const lettertraceTraceProgressPath = lettertracePage?.querySelector('.lettertrace-trace-progress') || null;
+    const lettertraceTraceProgressGroup = lettertracePage?.querySelector('.lettertrace-trace-progress-group') || null;
+    const lettertraceProgressLabel = lettertracePage?.querySelector('.lettertrace-progress-label') || null;
     const lettertraceTraceCanvas = lettertracePage?.querySelector('.lettertrace-trace-canvas') || null;
     const lettertraceTraceContext = lettertraceTraceCanvas ? lettertraceTraceCanvas.getContext('2d') : null;
     const lettertraceSoundButton = lettertracePage?.querySelector('.lettertrace-sound-btn') || null;
@@ -34,10 +35,24 @@ document.addEventListener('DOMContentLoaded', () => {
     let lettertraceCurrentCase = 'upper';
     let lettertraceTraceDrawing = false;
     let lettertraceTraceLastPoint = null;
-    let lettertraceTracePathLength = 0;
-    let lettertraceTraceProgress = 0;
-    let lettertraceTracePathSamples = [];
-    let lettertraceTracePathBounds = null;
+    let lettertraceTraceStrokeStates = [];
+    let lettertraceTraceStrokeIndex = 0;
+    let lettertraceTraceStrokeProgress = 0;
+
+    const updateLettertraceProgressLabel = () => {
+        if (!lettertraceProgressLabel) return;
+
+        const totalLength = lettertraceTraceStrokeStates.reduce((sum, stroke) => sum + stroke.length, 0);
+        const completedLength = lettertraceTraceStrokeStates
+            .slice(0, lettertraceTraceStrokeIndex)
+            .reduce((sum, stroke) => sum + stroke.length, 0)
+            + (lettertraceTraceStrokeStates[lettertraceTraceStrokeIndex]?.progress || 0);
+        const percentage = totalLength > 0
+            ? Math.min(100, Math.round((completedLength / totalLength) * 100))
+            : 0;
+
+        lettertraceProgressLabel.textContent = `${percentage}%`;
+    };
 
     const lettertraceTraceGuidePaths = {
         upper: {
@@ -177,24 +192,45 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const resetLettertraceTraceProgress = () => {
-        if (!lettertraceTraceProgressPath) return;
+        if (!lettertraceTraceProgressGroup || !lettertraceTraceGuidePath) return;
 
-        const sampledPath = sampleLettertracePath(lettertraceTraceProgressPath.getAttribute('d'));
-        lettertraceTracePathLength = sampledPath.totalLength;
-        lettertraceTraceProgress = 0;
-        lettertraceTracePathSamples = sampledPath.samples;
-        lettertraceTracePathBounds = sampledPath.samples.reduce((bounds, sample) => ({
-            minX: Math.min(bounds.minX, sample.point.x),
-            maxX: Math.max(bounds.maxX, sample.point.x),
-            minY: Math.min(bounds.minY, sample.point.y),
-            maxY: Math.max(bounds.maxY, sample.point.y),
-        }), { minX: Number.POSITIVE_INFINITY, maxX: Number.NEGATIVE_INFINITY, minY: Number.POSITIVE_INFINITY, maxY: Number.NEGATIVE_INFINITY });
-        lettertraceTraceProgressPath.style.visibility = 'hidden';
+        const strokePaths = (lettertraceTraceGuidePath.getAttribute('d') || '')
+            .split(/(?=M)/)
+            .map((pathData) => pathData.trim())
+            .filter(Boolean);
+        const svgNamespace = 'http://www.w3.org/2000/svg';
 
-        if (lettertraceTracePathLength > 0) {
-            lettertraceTraceProgressPath.style.strokeDasharray = `${lettertraceTracePathLength} ${lettertraceTracePathLength}`;
-            lettertraceTraceProgressPath.style.strokeDashoffset = String(lettertraceTracePathLength);
-        }
+        lettertraceTraceProgressGroup.innerHTML = '';
+        lettertraceTraceStrokeStates = strokePaths.map((pathData) => {
+            const sampledPath = sampleLettertracePath(pathData);
+            const progressPath = document.createElementNS(svgNamespace, 'path');
+            progressPath.classList.add('lettertrace-trace-progress');
+            progressPath.setAttribute('d', pathData);
+            progressPath.setAttribute('aria-hidden', 'true');
+            progressPath.style.strokeDasharray = `${sampledPath.totalLength} ${sampledPath.totalLength}`;
+            progressPath.style.strokeDashoffset = String(sampledPath.totalLength);
+            lettertraceTraceProgressGroup.append(progressPath);
+
+            const bounds = sampledPath.samples.reduce((nextBounds, sample) => ({
+                minX: Math.min(nextBounds.minX, sample.point.x),
+                maxX: Math.max(nextBounds.maxX, sample.point.x),
+                minY: Math.min(nextBounds.minY, sample.point.y),
+                maxY: Math.max(nextBounds.maxY, sample.point.y),
+            }), { minX: Number.POSITIVE_INFINITY, maxX: Number.NEGATIVE_INFINITY, minY: Number.POSITIVE_INFINITY, maxY: Number.NEGATIVE_INFINITY });
+
+            return {
+                element: progressPath,
+                length: sampledPath.totalLength,
+                progress: 0,
+                samples: sampledPath.samples,
+                bounds,
+            };
+        }).filter((stroke) => stroke.length > 0);
+
+        lettertraceTraceStrokeIndex = 0;
+        lettertraceTraceStrokeProgress = 0;
+        lettertraceTraceProgressGroup.style.visibility = 'hidden';
+        updateLettertraceProgressLabel();
     };
 
     const configureLettertraceBrush = () => {
@@ -245,23 +281,29 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const advanceLettertraceProgress = (event) => {
-        if (!lettertraceTraceProgressPath || !lettertraceTracePathLength || !lettertraceTracePathSamples.length) return false;
+        const currentStroke = lettertraceTraceStrokeStates[lettertraceTraceStrokeIndex];
+        if (!lettertraceTraceProgressGroup || !currentStroke || !currentStroke.length || !currentStroke.samples.length) return false;
 
-        const pathRect = lettertraceTraceProgressPath.getBoundingClientRect();
-        if (!lettertraceTracePathBounds || !pathRect.width || !pathRect.height) return false;
+        const pathRect = currentStroke.element.getBoundingClientRect();
+        if (!pathRect.width && !pathRect.height) return false;
+
+        const pathWidth = currentStroke.bounds.maxX - currentStroke.bounds.minX;
+        const pathHeight = currentStroke.bounds.maxY - currentStroke.bounds.minY;
 
         const screenPoint = {
-            x: lettertraceTracePathBounds.minX
-                + ((event.clientX - pathRect.left) / pathRect.width)
-                * (lettertraceTracePathBounds.maxX - lettertraceTracePathBounds.minX),
-            y: lettertraceTracePathBounds.minY
-                + ((event.clientY - pathRect.top) / pathRect.height)
-                * (lettertraceTracePathBounds.maxY - lettertraceTracePathBounds.minY),
+            x: pathWidth && pathRect.width
+                ? currentStroke.bounds.minX
+                    + ((event.clientX - pathRect.left) / pathRect.width) * pathWidth
+                : currentStroke.bounds.minX,
+            y: pathHeight && pathRect.height
+                ? currentStroke.bounds.minY
+                    + ((event.clientY - pathRect.top) / pathRect.height) * pathHeight
+                : currentStroke.bounds.minY,
         };
         let nearestSample = null;
         let nearestDistance = Number.POSITIVE_INFINITY;
 
-        lettertraceTracePathSamples.forEach((sample) => {
+        currentStroke.samples.forEach((sample) => {
             const distance = Math.hypot(sample.point.x - screenPoint.x, sample.point.y - screenPoint.y);
             if (distance < nearestDistance) {
                 nearestDistance = distance;
@@ -269,15 +311,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        const traceTolerance = 90;
-        const allowedLead = Math.max(180, lettertraceTracePathLength * 0.08);
-        if (!nearestSample || nearestDistance > traceTolerance || nearestSample.distance > lettertraceTraceProgress + allowedLead) {
+        const traceTolerance = 52;
+        const allowedLead = Math.max(180, currentStroke.length * 0.08);
+        if (!nearestSample || nearestDistance > traceTolerance || nearestSample.distance > currentStroke.progress + allowedLead) {
             return false;
         }
 
-        lettertraceTraceProgress = Math.max(lettertraceTraceProgress, nearestSample.distance);
-        lettertraceTraceProgressPath.style.strokeDashoffset = String(Math.max(0, lettertraceTracePathLength - lettertraceTraceProgress));
-        lettertraceTraceProgressPath.style.visibility = 'visible';
+        currentStroke.progress = Math.max(currentStroke.progress, nearestSample.distance);
+        lettertraceTraceStrokeProgress = currentStroke.progress;
+        currentStroke.element.style.strokeDashoffset = String(Math.max(0, currentStroke.length - currentStroke.progress));
+        lettertraceTraceProgressGroup.style.visibility = 'visible';
+        updateLettertraceProgressLabel();
         return true;
     };
 
@@ -307,7 +351,6 @@ document.addEventListener('DOMContentLoaded', () => {
             nextGuidePath
         );
         lettertraceTraceGuidePath?.setAttribute('aria-label', `Trace ${lettertraceCurrentLetter}`);
-        lettertraceTraceProgressPath?.setAttribute('d', nextGuidePath);
         lettertraceTraceSvg?.setAttribute('data-case', lettertraceCurrentCase);
         resetLettertraceTraceProgress();
     };
@@ -2134,6 +2177,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const stopLettertraceStroke = () => {
+        const currentStroke = lettertraceTraceStrokeStates[lettertraceTraceStrokeIndex];
+        if (currentStroke && currentStroke.progress >= currentStroke.length * 0.96) {
+            currentStroke.progress = currentStroke.length;
+            currentStroke.element.style.strokeDashoffset = '0';
+            lettertraceTraceStrokeIndex += 1;
+            lettertraceTraceStrokeProgress = 0;
+            updateLettertraceProgressLabel();
+        }
         lettertraceTraceDrawing = false;
         lettertraceTraceLastPoint = null;
     };

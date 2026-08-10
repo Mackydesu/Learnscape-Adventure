@@ -254,7 +254,7 @@
                                 </defs>
                                 <path class="lettertrace-trace-glyph" mask="url(#lettertrace-trace-outline-mask)" d="M300 780 L500 220 L700 780 M380 570 H620" aria-hidden="true"></path>
                                 <path class="lettertrace-trace-glyph-guide" d="M300 780 L500 220 L700 780 M380 570 H620" aria-hidden="true"></path>
-                                <path class="lettertrace-trace-progress" d="M300 780 L500 220 L700 780 M380 570 H620" aria-hidden="true"></path>
+                                <g class="lettertrace-trace-progress-group" aria-hidden="true"></g>
                             </svg>
                             <canvas class="lettertrace-trace-canvas" aria-hidden="true"></canvas>
                         </div>
@@ -266,6 +266,8 @@
                 </section>
 
             </main>
+
+            <div class="lettertrace-progress-label" aria-live="polite">0%</div>
 
             <div class="lettertrace-nav" aria-label="Trace controls">
                 <button class="lettertrace-nav-button is-active" type="button" data-letter-case="upper" aria-pressed="true">
@@ -487,7 +489,7 @@
                     });
 
                     return `#${routeName}?${searchParams.toString()}`;
-                }
+                 }
 
                 return (routes[routeName] || routes.title).hash;
             };

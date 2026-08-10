@@ -1219,14 +1219,18 @@ body.is-page-loading .page-loading-overlay {
 .lettertrace-trace-progress {
     fill: none;
     stroke: rgba(255, 213, 93, 0.98);
-    stroke-width: clamp(0.8rem, 1.25vw, 1.15rem);
+    stroke-width: clamp(4rem, 6.2vw, 5.3rem);
     stroke-linecap: round;
     stroke-linejoin: round;
     filter: drop-shadow(0 0 0.25rem rgba(255, 230, 112, 0.6));
+    transform: none;
+    pointer-events: none;
+}
+
+.lettertrace-trace-progress-group {
     transform: scale(2.25, 2);
     transform-box: fill-box;
     transform-origin: center;
-    pointer-events: none;
 }
 
 .lettertrace-trace-glyph[data-case="lower"] {
@@ -1343,6 +1347,27 @@ body.is-page-loading .page-loading-overlay {
     gap: clamp(0.75rem, 1.8vw, 1.5rem);
     transform: translateX(-50%);
     pointer-events: auto;
+}
+
+.lettertrace-progress-label {
+    position: fixed;
+    left: 50%;
+    bottom: clamp(6.2rem, 9vw, 7.4rem);
+    z-index: 6;
+    min-width: 4.5rem;
+    padding: 0.28rem 0.8rem;
+    border: 0.12rem solid rgba(120, 72, 12, 0.92);
+    border-radius: 999px;
+    background: linear-gradient(180deg, #fff0b3 0%, #f2bd53 100%);
+    box-shadow: 0 0.14rem 0 rgba(90, 54, 16, 0.22);
+    color: #6d3f10;
+    font-family: 'Fredoka', sans-serif;
+    font-size: clamp(0.9rem, 1.5vw, 1.15rem);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-align: center;
+    transform: translateX(-50%);
+    pointer-events: none;
 }
 
 .lettertrace-nav-button {
