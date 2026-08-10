@@ -10,6 +10,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const game1Page = document.getElementById('learnscape-game1-page');
     const dragtomatchPage = document.getElementById('learnscape-dragtomatch-page');
     const game1BgVideo = game1Page?.querySelector('video.game1-bg-image') || null;
+    const game1BgLoopFadeWindow = 0.45;
+
+    if (game1BgVideo) {
+        game1BgVideo.loop = true;
+    }
+
+    const syncGame1BgLoopVolume = () => {
+        if (!game1BgVideo || !isPageVisible(game1Page)) return;
+
+        const duration = game1BgVideo.duration;
+        if (!Number.isFinite(duration) || duration <= 0) return;
+
+        const currentTime = game1BgVideo.currentTime || 0;
+        const timeToEnd = duration - currentTime;
+        let targetVolume = 1;
+
+        if (timeToEnd <= game1BgLoopFadeWindow) {
+            targetVolume = Math.max(0, timeToEnd / game1BgLoopFadeWindow);
+        } else if (currentTime <= game1BgLoopFadeWindow) {
+            targetVolume = Math.min(1, currentTime / game1BgLoopFadeWindow);
+        }
+
+        if (Math.abs(game1BgVideo.volume - targetVolume) > 0.01) {
+            game1BgVideo.volume = targetVolume;
+        }
+    };
 
     const isInShell = () => window.top !== window;
 
@@ -227,6 +253,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isPageVisible(game1Page)) {
         playGame1BgVideo();
     }
+
+    game1BgVideo?.addEventListener('loadedmetadata', syncGame1BgLoopVolume);
+    game1BgVideo?.addEventListener('timeupdate', syncGame1BgLoopVolume);
+    game1BgVideo?.addEventListener('playing', syncGame1BgLoopVolume);
+    game1BgVideo?.addEventListener('seeked', syncGame1BgLoopVolume);
+    game1BgVideo?.addEventListener('pause', () => {
+        if (game1BgVideo) {
+            game1BgVideo.volume = 1;
+        }
+    });
 
     const createRotateOverlayMarkup = () => `
         <div class="rotate-panel">

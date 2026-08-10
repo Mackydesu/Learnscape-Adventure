@@ -2884,12 +2884,20 @@ footer {
     }
 
     .game1-level-button {
-        width: clamp(3.25rem, 4.5vw, 4.3rem);
+        width: clamp(2.1rem, 3vw, 2.8rem) !important;
     }
 
     .game1-level-star {
-        width: clamp(0.9rem, 2.5vw, 1rem);
-        height: clamp(0.9rem, 2.5vw, 1rem);
+        width: clamp(0.65rem, 1.8vw, 0.78rem);
+        height: clamp(0.65rem, 1.8vw, 0.78rem);
+    }
+
+    .game1-tap-cue {
+        width: clamp(9.5rem, 42vw, 13.5rem) !important;
+    }
+
+    body.is-fullscreen-mode .game1-tap-cue {
+        width: clamp(10.25rem, 45vw, 14.5rem) !important;
     }
 }
 
