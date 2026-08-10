@@ -989,6 +989,540 @@ body.is-page-loading .page-loading-overlay {
     pointer-events: auto;
 }
 
+.lettertrace-overlay {
+    overflow: hidden;
+}
+
+.lettertrace-home-btn {
+    position: fixed;
+    left: clamp(0.8rem, 1.4vw, 1.4rem);
+    top: clamp(0.8rem, 1.4vw, 1.4rem);
+    z-index: 6;
+}
+
+.lettertrace-sound-btn {
+    position: fixed;
+    right: clamp(0.8rem, 1.4vw, 1.4rem);
+    top: clamp(0.8rem, 1.4vw, 1.4rem);
+    z-index: 6;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(4rem, 6vw, 5.8rem);
+    height: clamp(4rem, 6vw, 5.8rem);
+    padding: 0;
+    border: 0.18rem solid rgba(120, 72, 12, 0.95);
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.56) 0, transparent 18%),
+        linear-gradient(180deg, #ffe59b 0%, #f7ba44 54%, #cf8318 100%);
+    box-shadow:
+        inset 0 0.18rem 0 rgba(255, 255, 255, 0.35),
+        inset 0 -0.2rem 0 rgba(107, 57, 0, 0.18),
+        0 0.3rem 0 rgba(90, 54, 16, 0.26),
+        0 0 1.1rem rgba(255, 228, 107, 0.3);
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.lettertrace-sound-btn:hover,
+.lettertrace-sound-btn:focus-visible {
+    transform: scale(1.05);
+}
+
+.lettertrace-sound-btn.is-muted .lettertrace-sound-wave {
+    opacity: 0.18;
+}
+
+.lettertrace-sound-icon {
+    width: 62%;
+    height: 62%;
+    fill: #6d3f10;
+    stroke: #6d3f10;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 3.2;
+}
+
+.lettertrace-sound-wave {
+    fill: none;
+}
+
+.lettertrace-stage {
+    position: fixed;
+    left: 50%;
+    top: clamp(3rem, 5.8vh, 5rem);
+    z-index: 2;
+    width: min(95vw, 1600px);
+    display: grid;
+    grid-template-columns: minmax(12rem, 1fr) minmax(30rem, 40rem) minmax(12rem, 1fr);
+    align-items: center;
+    gap: clamp(0.35rem, 0.7vw, 0.65rem);
+    transform: translateX(-50%);
+    pointer-events: auto;
+}
+
+.lettertrace-board {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+}
+
+.lettertrace-board-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    user-select: none;
+    pointer-events: none;
+}
+
+.lettertrace-board-content {
+    position: absolute;
+    inset: 12% 12% 14%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: clamp(0.6rem, 1vw, 1rem);
+}
+
+.lettertrace-board-letter .lettertrace-board-content {
+    justify-content: center;
+    inset: 14% 12% 16%;
+}
+
+.lettertrace-board-content-center {
+    inset: 12% 10% 12%;
+    justify-content: center;
+}
+
+.lettertrace-board-trace {
+    justify-self: center;
+}
+
+/* Interactive trace surface */
+.lettertrace-trace-stage {
+    position: absolute;
+    inset: 9% 5% 9%;
+    display: block;
+}
+
+.lettertrace-trace-tools {
+    position: absolute;
+    top: 0.35rem;
+    right: 0.35rem;
+    z-index: 3;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.lettertrace-tool-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(2.4rem, 4vw, 3rem);
+    height: clamp(2.4rem, 4vw, 3rem);
+    padding: 0;
+    border: 0.14rem solid rgba(120, 72, 12, 0.92);
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.46) 0, transparent 18%),
+        linear-gradient(180deg, #ffe6a2 0%, #f1b84a 56%, #c67b16 100%);
+    box-shadow:
+        inset 0 0.12rem 0 rgba(255, 255, 255, 0.3),
+        inset 0 -0.15rem 0 rgba(80, 42, 0, 0.16),
+        0 0.16rem 0 rgba(90, 54, 16, 0.22);
+    cursor: pointer;
+    transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.lettertrace-tool-button svg {
+    width: 68%;
+    height: 68%;
+    fill: #6d3f10;
+    stroke: #6d3f10;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 3.2;
+}
+
+.lettertrace-tool-button:hover,
+.lettertrace-tool-button:focus-visible,
+.lettertrace-tool-button.is-active {
+    transform: translateY(-1px) scale(1.04);
+    filter:
+        drop-shadow(0 0 8px rgba(255, 244, 95, 0.22))
+        drop-shadow(0 0 14px rgba(255, 196, 54, 0.14));
+}
+
+.lettertrace-tool-button.is-active {
+    outline: 0.16rem solid rgba(255, 246, 165, 0.72);
+    outline-offset: 0.08rem;
+}
+
+.lettertrace-trace-svg,
+.lettertrace-trace-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.lettertrace-trace-svg {
+    overflow: visible;
+}
+
+.lettertrace-trace-glyph {
+    fill: transparent;
+    stroke: #000;
+    stroke-width: clamp(4rem, 6.2vw, 5.3rem);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transform: scale(2.25, 2);
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+.lettertrace-trace-mask-path {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.lettertrace-trace-mask-outer {
+    stroke: #fff;
+    stroke-width: clamp(4rem, 6.2vw, 5.3rem);
+}
+
+.lettertrace-trace-mask-inner {
+    stroke: #000;
+    stroke-width: clamp(3.3rem, 5.2vw, 4.5rem);
+}
+
+.lettertrace-trace-glyph-guide {
+    fill: transparent;
+    stroke: #4a4a4a;
+    stroke-width: clamp(0.22rem, 0.4vw, 0.35rem);
+    stroke-dasharray: 8 24;
+    transform: scale(2.25, 2);
+    transform-box: fill-box;
+    transform-origin: center;
+    pointer-events: none;
+}
+
+.lettertrace-trace-progress {
+    fill: none;
+    stroke: rgba(255, 213, 93, 0.98);
+    stroke-width: clamp(0.8rem, 1.25vw, 1.15rem);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 0.25rem rgba(255, 230, 112, 0.6));
+    transform: scale(2.25, 2);
+    transform-box: fill-box;
+    transform-origin: center;
+    pointer-events: none;
+}
+
+.lettertrace-trace-glyph[data-case="lower"] {
+    stroke-width: clamp(4rem, 5.8vw, 5rem);
+}
+
+.lettertrace-trace-canvas {
+    inset: -7%;
+    width: 114%;
+    height: 114%;
+    touch-action: none;
+    cursor: crosshair;
+}
+
+.lettertrace-trace-canvas.is-erasing {
+    cursor: not-allowed;
+}
+
+@media (min-width: 1101px) {
+    .lettertrace-board-trace {
+        width: min(100%, 34rem);
+        min-width: 30rem;
+    }
+
+    .lettertrace-stage {
+        grid-template-columns: minmax(14rem, 1fr) minmax(30rem, 40rem) minmax(14rem, 1fr);
+    }
+}
+
+.lettertrace-board-trace {
+    justify-self: center;
+}
+
+.lettertrace-case-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(4.1rem, 5.8vw, 5.8rem);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0));
+    transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.lettertrace-case-button img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.lettertrace-case-button:hover,
+.lettertrace-case-button:focus-visible,
+.lettertrace-case-button.is-active {
+    transform: translateY(-1px) scale(1.04);
+    filter:
+        drop-shadow(0 0 8px rgba(255, 244, 95, 0.34))
+        drop-shadow(0 0 18px rgba(255, 196, 54, 0.18));
+}
+
+.lettertrace-letter-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.02em;
+    text-align: center;
+    line-height: 0.88;
+}
+
+.lettertrace-letter {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    color: #fff5c7;
+    -webkit-text-stroke: clamp(0.08rem, 0.16vw, 0.14rem) rgba(121, 72, 16, 0.55);
+    text-shadow:
+        0 0.08em 0 rgba(125, 74, 20, 0.4),
+        0 0.16em 0.22em rgba(69, 42, 10, 0.24),
+        0 0 0.55rem rgba(255, 229, 121, 0.2);
+}
+
+.lettertrace-letter-upper {
+    font-size: clamp(5.4rem, 6.8vw, 8rem);
+}
+
+.lettertrace-letter-lower {
+    font-size: clamp(3.6rem, 4.6vw, 5.6rem);
+    opacity: 0.98;
+}
+
+.lettertrace-board-content-center .lettertrace-trace-label,
+.lettertrace-trace-letter,
+.lettertrace-trace-letter[data-case="lower"],
+.lettertrace-trace-hint {
+    display: none;
+}
+
+.lettertrace-board-tips .lettertrace-board-image {
+    filter:
+        drop-shadow(0 10px 16px rgba(0, 0, 0, 0.18))
+        drop-shadow(0 0 12px rgba(255, 244, 95, 0.06));
+}
+
+.lettertrace-nav {
+    position: fixed;
+    left: 50%;
+    bottom: clamp(1.8rem, 3vw, 2.8rem);
+    z-index: 6;
+    width: min(70vw, 48rem);
+    display: flex;
+    justify-content: center;
+    gap: clamp(0.75rem, 1.8vw, 1.5rem);
+    transform: translateX(-50%);
+    pointer-events: auto;
+}
+
+.lettertrace-nav-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: clamp(6rem, 11vw, 8.8rem);
+    height: clamp(3rem, 4.8vw, 4.2rem);
+    padding: 0 clamp(1rem, 1.5vw, 1.4rem);
+    border: 0.14rem solid rgba(120, 72, 12, 0.92);
+    border-radius: 999px;
+    background:
+        radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.46) 0, transparent 18%),
+        linear-gradient(180deg, #ffe6a2 0%, #f1b84a 56%, #c67b16 100%);
+    box-shadow:
+        inset 0 0.12rem 0 rgba(255, 255, 255, 0.3),
+        inset 0 -0.15rem 0 rgba(80, 42, 0, 0.16),
+        0 0.16rem 0 rgba(90, 54, 16, 0.22);
+    color: #6d3f10;
+    font-family: 'Fredoka', sans-serif;
+    font-size: clamp(0.82rem, 1.45vw, 1.08rem);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.lettertrace-nav-button:is(:hover, :focus-visible, .is-active) {
+    transform: translateY(-2px) scale(1.04);
+    filter:
+        drop-shadow(0 0 8px rgba(255, 244, 95, 0.26))
+        drop-shadow(0 0 14px rgba(255, 196, 54, 0.16));
+}
+
+.lettertrace-nav-button:focus-visible {
+    outline: 0.18rem solid rgba(255, 246, 165, 0.78);
+    outline-offset: 0.1rem;
+}
+
+.lettertrace-nav-button:active {
+    transform: translateY(3px);
+    filter: none;
+}
+
+.lettertrace-nav-button[data-letter-case] {
+    min-width: clamp(6.5rem, 12vw, 9rem);
+}
+
+.lettertrace-nav-clear {
+    min-width: clamp(5rem, 8vw, 6.2rem);
+}
+
+@media (max-width: 1100px) {
+    .lettertrace-stage {
+        width: min(97vw, 1320px);
+        grid-template-columns: minmax(8rem, 0.8fr) minmax(26rem, 36rem) minmax(8rem, 0.8fr);
+        gap: clamp(0.35rem, 0.65vw, 0.7rem);
+    }
+
+    .lettertrace-letter-upper {
+        font-size: clamp(4.8rem, 6.2vw, 7.2rem);
+    }
+
+    .lettertrace-letter-lower {
+        font-size: clamp(3rem, 4.1vw, 4.8rem);
+    }
+
+    .lettertrace-trace-letter {
+        font-size: clamp(5.2rem, 8.8vw, 9.2rem);
+    }
+
+}
+
+@media (max-width: 800px) {
+    .lettertrace-stage {
+        top: clamp(3.2rem, 5.5vh, 4.8rem);
+        width: min(96vw, 980px);
+        grid-template-columns: 1fr;
+        gap: clamp(0.8rem, 1.8vw, 1.2rem);
+    }
+
+    .lettertrace-board-letter,
+    .lettertrace-board-trace,
+    .lettertrace-board-tips {
+        width: min(100%, 28rem);
+        justify-self: center;
+    }
+
+    .lettertrace-board-trace {
+        width: min(100%, 34rem);
+    }
+
+    .lettertrace-board-content {
+        inset: 11% 11% 13%;
+    }
+
+    .lettertrace-nav {
+        width: min(72vw, 520px);
+        bottom: 1.6rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .lettertrace-home-btn {
+        left: 0.75rem;
+        top: 0.75rem;
+    }
+
+    .lettertrace-sound-btn {
+        right: 0.75rem;
+        top: 0.75rem;
+        width: 3.5rem;
+        height: 3.5rem;
+    }
+
+    .lettertrace-stage {
+        top: clamp(3rem, 5.8vh, 4.6rem);
+        gap: 0.35rem;
+        width: min(94vw, 900px);
+    }
+
+    .lettertrace-board-letter,
+    .lettertrace-board-trace,
+    .lettertrace-board-tips {
+        width: min(92vw, 24rem);
+    }
+
+    .lettertrace-board-trace {
+        width: min(96vw, 30rem);
+    }
+
+    .lettertrace-case-button {
+        width: clamp(3.5rem, 12vw, 4.1rem);
+    }
+
+    .lettertrace-letter-upper {
+        font-size: clamp(3.8rem, 16vw, 5.8rem);
+    }
+
+    .lettertrace-letter-lower {
+        font-size: clamp(2.5rem, 10vw, 3.8rem);
+    }
+
+    .lettertrace-trace-letter {
+        font-size: clamp(4.4rem, 21vw, 7rem);
+    }
+
+    .lettertrace-trace-glyph {
+        font-size: clamp(58rem, 170vw, 86rem);
+    }
+
+    .lettertrace-trace-glyph[data-case="lower"] {
+        font-size: clamp(46rem, 138vw, 66rem);
+    }
+
+    .lettertrace-nav {
+        width: min(94vw, 30rem);
+        bottom: 1.3rem;
+        gap: clamp(0.45rem, 1.8vw, 0.8rem);
+    }
+
+    .lettertrace-nav-button {
+        min-width: clamp(4.8rem, 28vw, 7rem);
+        height: 2.7rem;
+        padding: 0 0.8rem;
+        font-size: 0.72rem;
+    }
+
+    .lettertrace-nav-button[data-letter-case] {
+        min-width: clamp(5.7rem, 31vw, 7.6rem);
+    }
+
+    .lettertrace-nav-clear {
+        min-width: clamp(4.4rem, 21vw, 5.8rem);
+    }
+}
+
 .game1-dragtomatch-objects[data-choice-count="2"] {
     width: min(52vw, 780px);
     gap: clamp(1.15rem, 2vw, 2.2rem);

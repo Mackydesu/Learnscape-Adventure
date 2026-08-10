@@ -8,12 +8,309 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingDuration = 1000;
     const titlePage = document.getElementById('learnscape-title-page');
     const game1Page = document.getElementById('learnscape-game1-page');
+    const lettertracePage = document.getElementById('learnscape-lettertrace-page');
     const dragtomatchPage = document.getElementById('learnscape-dragtomatch-page');
+    const lettertraceBgImage = lettertracePage?.querySelector('.lettertrace-bg-image') || null;
     const dragtomatchBgImage = dragtomatchPage?.querySelector('.game1-bg-image') || null;
+    const lettertraceUpperButton = lettertracePage?.querySelector('[data-letter-case="upper"]') || null;
+    const lettertraceLowerButton = lettertracePage?.querySelector('[data-letter-case="lower"]') || null;
+    const lettertraceClearButtons = lettertracePage?.querySelectorAll('[data-trace-clear]') || [];
+    const lettertraceUpperGlyph = lettertracePage?.querySelector('.lettertrace-letter-upper') || null;
+    const lettertraceLowerGlyph = lettertracePage?.querySelector('.lettertrace-letter-lower') || null;
+    const lettertraceTraceSvg = lettertracePage?.querySelector('.lettertrace-trace-svg') || null;
+    const lettertraceTraceGlyphs = lettertracePage?.querySelectorAll('.lettertrace-trace-glyph') || [];
+    const lettertraceTraceMaskPaths = lettertracePage?.querySelectorAll('.lettertrace-trace-mask-path') || [];
+    const lettertraceTraceGuidePath = lettertracePage?.querySelector('.lettertrace-trace-glyph-guide') || null;
+    const lettertraceTraceProgressPath = lettertracePage?.querySelector('.lettertrace-trace-progress') || null;
+    const lettertraceTraceCanvas = lettertracePage?.querySelector('.lettertrace-trace-canvas') || null;
+    const lettertraceTraceContext = lettertraceTraceCanvas ? lettertraceTraceCanvas.getContext('2d') : null;
+    const lettertraceSoundButton = lettertracePage?.querySelector('.lettertrace-sound-btn') || null;
+    const dragtomatchBackButton = dragtomatchPage?.querySelector('.game-return-btn.loading-link') || null;
     const game1BgVideo = game1Page?.querySelector('video.game1-bg-image') || null;
     const game1BgVideoSource = game1BgVideo?.querySelector('source') || null;
     const game1BgVideoSourceSrc = game1BgVideoSource?.getAttribute('src') || game1BgVideo?.getAttribute('src') || '';
     const game1BgLoopFadeWindow = 0.45;
+    let lettertraceCurrentLetter = 'A';
+    let lettertraceCurrentCase = 'upper';
+    let lettertraceTraceDrawing = false;
+    let lettertraceTraceLastPoint = null;
+    let lettertraceTracePathLength = 0;
+    let lettertraceTraceProgress = 0;
+    let lettertraceTracePathSamples = [];
+    let lettertraceTracePathBounds = null;
+
+    const lettertraceTraceGuidePaths = {
+        upper: {
+            A: 'M300 780 L500 220 L700 780 M380 570 H620',
+            B: 'M360 220 V780 M360 230 H540 C680 230 680 470 540 470 H360 M540 470 C690 470 690 770 540 770 H360',
+            C: 'M680 300 C610 220 400 210 330 310 C260 410 270 620 340 700 C410 790 610 780 680 690',
+            D: 'M350 220 V780 H520 C700 780 700 220 520 220 H350',
+            E: 'M660 220 H350 V780 H660 M350 500 H600',
+            F: 'M350 780 V220 H660 M350 500 H600',
+            G: 'M680 300 C610 220 400 210 330 310 C260 410 270 620 340 700 C410 790 610 780 680 690 V560 H500',
+            H: 'M350 220 V780 M650 220 V780 M350 500 H650',
+            I: 'M350 220 H650 M500 220 V780 M350 780 H650',
+            J: 'M650 220 V650 C650 820 350 820 350 650 V580',
+            K: 'M350 220 V780 M650 220 L350 500 L650 780',
+            L: 'M350 220 V780 H660',
+            M: 'M300 780 V220 L500 500 L700 220 V780',
+            N: 'M350 780 V220 L650 780 V220',
+            O: 'M500 220 C350 220 300 330 300 500 C300 670 350 780 500 780 C650 780 700 670 700 500 C700 330 650 220 500 220',
+            P: 'M350 780 V220 H530 C680 220 680 500 530 500 H350',
+            Q: 'M500 220 C350 220 300 330 300 500 C300 670 350 780 500 780 C650 780 700 670 700 500 C700 330 650 220 500 220 M570 670 L720 820',
+            R: 'M350 780 V220 H530 C680 220 680 500 530 500 H350 M520 500 L680 780',
+            S: 'M660 290 C570 210 380 220 350 340 C320 450 430 480 520 510 C620 540 680 600 650 690 C610 800 400 800 330 700',
+            T: 'M300 220 H700 M500 220 V780',
+            U: 'M350 220 V620 C350 830 650 830 650 620 V220',
+            V: 'M300 220 L500 780 L700 220',
+            W: 'M250 220 L375 780 L500 470 L625 780 L750 220',
+            X: 'M300 220 L700 780 M700 220 L300 780',
+            Y: 'M300 220 L500 480 L700 220 M500 480 V780',
+            Z: 'M300 220 H700 L300 780 H700'
+        },
+        lower: {
+            A: 'M640 500 C600 450 500 445 420 500 C330 565 340 720 460 740 C550 755 620 700 640 630 M640 500 V740',
+            B: 'M370 220 V740 M370 520 C430 445 560 450 610 540 C680 665 600 750 500 740 C430 735 390 690 370 630',
+            C: 'M640 520 C580 450 470 450 400 520 C330 600 380 740 500 740 C570 740 620 705 650 660',
+            D: 'M630 220 V740 M630 520 C580 450 470 450 400 520 C330 600 380 740 500 740 C570 740 620 700 630 630',
+            E: 'M650 610 H380 C380 500 470 450 550 470 C620 490 650 550 650 620 H400 C420 700 510 750 610 700',
+            F: 'M620 260 C560 210 490 250 490 350 V740 M400 420 H620',
+            G: 'M640 520 C600 450 500 445 420 500 C330 565 340 720 460 740 C550 755 620 700 640 630 M640 520 V780 C620 850 470 850 400 790',
+            H: 'M370 220 V740 M370 540 C430 450 570 450 620 540 V740',
+            I: 'M500 470 V740 M500 340 L500 340',
+            J: 'M570 470 V780 C560 850 430 850 420 770 M570 340 L570 340',
+            K: 'M390 220 V740 M620 480 L390 620 M500 550 L640 740',
+            L: 'M500 220 V740',
+            M: 'M350 740 V540 C390 450 470 450 500 540 V740 M500 540 C540 450 620 450 650 540 V740',
+            N: 'M380 740 V540 C430 450 560 450 620 540 V740',
+            O: 'M500 470 C400 470 350 540 350 620 C350 700 400 740 500 740 C600 740 650 700 650 620 C650 540 600 470 500 470',
+            P: 'M390 850 V540 C440 450 560 450 620 540 C680 650 610 740 500 740 C440 740 400 700 390 640',
+            Q: 'M610 850 V540 C560 450 440 450 380 540 C320 650 390 740 500 740 C560 740 600 700 610 640',
+            R: 'M390 740 V540 C440 450 550 450 620 520',
+            S: 'M630 520 C570 460 450 450 390 510 C350 560 420 600 500 620 C590 640 640 670 610 720 C560 770 430 750 380 690',
+            T: 'M500 330 V700 C500 750 560 760 610 720 M410 470 H590',
+            U: 'M380 500 V650 C380 730 470 760 520 700 C550 670 600 620 620 540 V500 M620 500 V740',
+            V: 'M380 500 L500 740 L620 500',
+            W: 'M320 500 L400 740 L500 560 L600 740 L680 500',
+            X: 'M380 500 L620 740 M620 500 L380 740',
+            Y: 'M380 500 L500 700 L620 500 M500 700 V820',
+            Z: 'M380 500 H650 L380 740 H650'
+        }
+    };
+
+    const sampleLettertracePath = (pathData) => {
+        const tokens = String(pathData || '').match(/[A-Za-z]|-?(?:\d+\.?\d*|\.\d+)/g) || [];
+        const samples = [];
+        let tokenIndex = 0;
+        let command = '';
+        let current = { x: 0, y: 0 };
+        let totalLength = 0;
+
+        const addPoint = (point, isMove = false) => {
+            if (!isMove && samples.length) {
+                totalLength += Math.hypot(point.x - current.x, point.y - current.y);
+            }
+            samples.push({ distance: totalLength, point: { ...point } });
+            current = { ...point };
+        };
+
+        const readNumber = () => Number(tokens[tokenIndex++]);
+        const addLine = (point) => {
+            const start = { ...current };
+            const distance = Math.hypot(point.x - start.x, point.y - start.y);
+            const lineSteps = Math.max(2, Math.ceil(distance / 18));
+
+            for (let step = 1; step <= lineSteps; step += 1) {
+                const ratio = step / lineSteps;
+                addPoint({
+                    x: start.x + ((point.x - start.x) * ratio),
+                    y: start.y + ((point.y - start.y) * ratio),
+                });
+            }
+        };
+        const addCurve = (controlOne, controlTwo, end) => {
+            const start = { ...current };
+            const curveSteps = 24;
+
+            for (let step = 1; step <= curveSteps; step += 1) {
+                const t = step / curveSteps;
+                const inverse = 1 - t;
+                addPoint({
+                    x: (inverse ** 3 * start.x)
+                        + (3 * inverse ** 2 * t * controlOne.x)
+                        + (3 * inverse * t ** 2 * controlTwo.x)
+                        + (t ** 3 * end.x),
+                    y: (inverse ** 3 * start.y)
+                        + (3 * inverse ** 2 * t * controlOne.y)
+                        + (3 * inverse * t ** 2 * controlTwo.y)
+                        + (t ** 3 * end.y),
+                });
+            }
+        };
+
+        while (tokenIndex < tokens.length) {
+            if (/^[A-Za-z]$/.test(tokens[tokenIndex])) {
+                command = tokens[tokenIndex++].toUpperCase();
+            }
+
+            if (command === 'M') {
+                addPoint({ x: readNumber(), y: readNumber() }, true);
+                command = 'L';
+            } else if (command === 'L') {
+                addLine({ x: readNumber(), y: readNumber() });
+            } else if (command === 'H') {
+                addLine({ x: readNumber(), y: current.y });
+            } else if (command === 'V') {
+                addLine({ x: current.x, y: readNumber() });
+            } else if (command === 'C') {
+                addCurve(
+                    { x: readNumber(), y: readNumber() },
+                    { x: readNumber(), y: readNumber() },
+                    { x: readNumber(), y: readNumber() }
+                );
+            } else {
+                tokenIndex += 1;
+            }
+        }
+
+        return { samples, totalLength };
+    };
+
+    const resetLettertraceTraceProgress = () => {
+        if (!lettertraceTraceProgressPath) return;
+
+        const sampledPath = sampleLettertracePath(lettertraceTraceProgressPath.getAttribute('d'));
+        lettertraceTracePathLength = sampledPath.totalLength;
+        lettertraceTraceProgress = 0;
+        lettertraceTracePathSamples = sampledPath.samples;
+        lettertraceTracePathBounds = sampledPath.samples.reduce((bounds, sample) => ({
+            minX: Math.min(bounds.minX, sample.point.x),
+            maxX: Math.max(bounds.maxX, sample.point.x),
+            minY: Math.min(bounds.minY, sample.point.y),
+            maxY: Math.max(bounds.maxY, sample.point.y),
+        }), { minX: Number.POSITIVE_INFINITY, maxX: Number.NEGATIVE_INFINITY, minY: Number.POSITIVE_INFINITY, maxY: Number.NEGATIVE_INFINITY });
+        lettertraceTraceProgressPath.style.visibility = 'hidden';
+
+        if (lettertraceTracePathLength > 0) {
+            lettertraceTraceProgressPath.style.strokeDasharray = `${lettertraceTracePathLength} ${lettertraceTracePathLength}`;
+            lettertraceTraceProgressPath.style.strokeDashoffset = String(lettertraceTracePathLength);
+        }
+    };
+
+    const configureLettertraceBrush = () => {
+        if (!lettertraceTraceContext) return;
+
+        lettertraceTraceContext.globalCompositeOperation = 'source-over';
+        lettertraceTraceContext.strokeStyle = 'rgba(255, 213, 93, 0.95)';
+        lettertraceTraceContext.fillStyle = 'rgba(255, 213, 93, 0.95)';
+        lettertraceTraceContext.shadowColor = 'rgba(255, 234, 130, 0.34)';
+        lettertraceTraceContext.shadowBlur = Math.max(8, Math.min(lettertraceTraceCanvas?.width || 0, lettertraceTraceCanvas?.height || 0) * 0.015);
+    };
+
+    const clearLettertraceCanvas = () => {
+        if (!lettertraceTraceContext || !lettertraceTraceCanvas) return;
+        const rect = lettertraceTraceCanvas.getBoundingClientRect();
+        lettertraceTraceContext.clearRect(0, 0, rect.width, rect.height);
+        lettertraceTraceLastPoint = null;
+        resetLettertraceTraceProgress();
+    };
+
+    const resizeLettertraceCanvas = () => {
+        if (!lettertraceTraceCanvas || !lettertraceTraceContext) return;
+
+        const rect = lettertraceTraceCanvas.getBoundingClientRect();
+        const nextWidth = Math.max(1, Math.round(rect.width));
+        const nextHeight = Math.max(1, Math.round(rect.height));
+        const dpr = window.devicePixelRatio || 1;
+
+        lettertraceTraceCanvas.width = Math.max(1, Math.round(nextWidth * dpr));
+        lettertraceTraceCanvas.height = Math.max(1, Math.round(nextHeight * dpr));
+        lettertraceTraceContext.setTransform(1, 0, 0, 1, 0, 0);
+        lettertraceTraceContext.clearRect(0, 0, lettertraceTraceCanvas.width, lettertraceTraceCanvas.height);
+        lettertraceTraceContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+        lettertraceTraceContext.lineCap = 'round';
+        lettertraceTraceContext.lineJoin = 'round';
+        lettertraceTraceContext.lineWidth = Math.max(12, Math.min(nextWidth, nextHeight) * 0.04);
+        configureLettertraceBrush();
+    };
+
+    const getLettertracePoint = (event) => {
+        if (!lettertraceTraceCanvas) return null;
+
+        const rect = lettertraceTraceCanvas.getBoundingClientRect();
+        return {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top,
+        };
+    };
+
+    const advanceLettertraceProgress = (event) => {
+        if (!lettertraceTraceProgressPath || !lettertraceTracePathLength || !lettertraceTracePathSamples.length) return false;
+
+        const pathRect = lettertraceTraceProgressPath.getBoundingClientRect();
+        if (!lettertraceTracePathBounds || !pathRect.width || !pathRect.height) return false;
+
+        const screenPoint = {
+            x: lettertraceTracePathBounds.minX
+                + ((event.clientX - pathRect.left) / pathRect.width)
+                * (lettertraceTracePathBounds.maxX - lettertraceTracePathBounds.minX),
+            y: lettertraceTracePathBounds.minY
+                + ((event.clientY - pathRect.top) / pathRect.height)
+                * (lettertraceTracePathBounds.maxY - lettertraceTracePathBounds.minY),
+        };
+        let nearestSample = null;
+        let nearestDistance = Number.POSITIVE_INFINITY;
+
+        lettertraceTracePathSamples.forEach((sample) => {
+            const distance = Math.hypot(sample.point.x - screenPoint.x, sample.point.y - screenPoint.y);
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestSample = sample;
+            }
+        });
+
+        const traceTolerance = 90;
+        const allowedLead = Math.max(180, lettertraceTracePathLength * 0.08);
+        if (!nearestSample || nearestDistance > traceTolerance || nearestSample.distance > lettertraceTraceProgress + allowedLead) {
+            return false;
+        }
+
+        lettertraceTraceProgress = Math.max(lettertraceTraceProgress, nearestSample.distance);
+        lettertraceTraceProgressPath.style.strokeDashoffset = String(Math.max(0, lettertraceTracePathLength - lettertraceTraceProgress));
+        lettertraceTraceProgressPath.style.visibility = 'visible';
+        return true;
+    };
+
+    const updateLettertraceTraceGlyph = () => {
+        if (!lettertraceTraceGlyphs.length) return;
+
+        const nextGlyph = lettertraceCurrentCase === 'lower'
+            ? lettertraceCurrentLetter.toLowerCase()
+            : lettertraceCurrentLetter.toUpperCase();
+        const nextGuidePath = lettertraceTraceGuidePaths[lettertraceCurrentCase]?.[lettertraceCurrentLetter]
+            || lettertraceTraceGuidePaths.upper.A;
+
+        lettertraceTraceGlyphs.forEach((glyph) => {
+            if (glyph.tagName.toLowerCase() === 'path') {
+                glyph.setAttribute('d', nextGuidePath);
+            } else {
+                glyph.textContent = nextGlyph;
+            }
+            glyph.dataset.case = lettertraceCurrentCase;
+            glyph.setAttribute('aria-label', `Trace ${lettertraceCurrentLetter}`);
+        });
+        lettertraceTraceMaskPaths.forEach((maskPath) => {
+            maskPath.setAttribute('d', nextGuidePath);
+        });
+        lettertraceTraceGuidePath?.setAttribute(
+            'd',
+            nextGuidePath
+        );
+        lettertraceTraceGuidePath?.setAttribute('aria-label', `Trace ${lettertraceCurrentLetter}`);
+        lettertraceTraceProgressPath?.setAttribute('d', nextGuidePath);
+        lettertraceTraceSvg?.setAttribute('data-case', lettertraceCurrentCase);
+        resetLettertraceTraceProgress();
+    };
 
     if (game1BgVideo) {
         game1BgVideo.loop = true;
@@ -447,6 +744,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return params.get('letter') || '';
     };
 
+    const getLettertraceParamsFromHash = () => {
+        const hash = window.location.hash || '';
+        if (!hash.startsWith('#lettertrace')) return {};
+
+        const queryIndex = hash.indexOf('?');
+        if (queryIndex < 0) return {};
+
+        return Object.fromEntries(new URLSearchParams(hash.slice(queryIndex + 1)));
+    };
+
     const updateDragtomatchBackground = (params = {}) => {
         if (!dragtomatchBgImage) return;
 
@@ -458,6 +765,58 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dragtomatchBgImage.getAttribute('src') !== nextSrc) {
             dragtomatchBgImage.setAttribute('src', nextSrc);
         }
+    };
+
+    const updateLettertraceBackground = (params = {}) => {
+        if (!lettertraceBgImage) return;
+
+        const bg = String(params.bg || '').toLowerCase();
+        const nextSrc = bg === 'abcbg'
+            ? 'assets/Backgrounds/abcbg.webp'
+            : 'assets/Backgrounds/abcbg.webp';
+
+        if (lettertraceBgImage.getAttribute('src') !== nextSrc) {
+            lettertraceBgImage.setAttribute('src', nextSrc);
+        }
+    };
+
+    const syncLettertraceCase = (nextCase = lettertraceCurrentCase) => {
+        lettertraceCurrentCase = nextCase === 'lower' ? 'lower' : 'upper';
+
+        lettertraceUpperButton?.classList.toggle('is-active', lettertraceCurrentCase === 'upper');
+        lettertraceLowerButton?.classList.toggle('is-active', lettertraceCurrentCase === 'lower');
+        lettertraceUpperButton?.setAttribute('aria-pressed', lettertraceCurrentCase === 'upper' ? 'true' : 'false');
+        lettertraceLowerButton?.setAttribute('aria-pressed', lettertraceCurrentCase === 'lower' ? 'true' : 'false');
+
+        if (lettertraceUpperGlyph) {
+            lettertraceUpperGlyph.textContent = lettertraceCurrentLetter.toUpperCase();
+        }
+
+        if (lettertraceLowerGlyph) {
+            lettertraceLowerGlyph.textContent = lettertraceCurrentLetter.toLowerCase();
+        }
+
+        updateLettertraceTraceGlyph();
+        clearLettertraceCanvas();
+    };
+
+    const setLettertraceNavigationTargets = (letter) => {
+        const normalizedLetter = String(letter || lettertraceCurrentLetter || 'A').trim().toUpperCase() || 'A';
+
+        if (dragtomatchBackButton) {
+            dragtomatchBackButton.dataset.route = `lettertrace?letter=${encodeURIComponent(normalizedLetter)}&bg=abcbg`;
+            dragtomatchBackButton.setAttribute('href', 'index.html');
+        }
+    };
+
+    const renderLettertraceScreen = (letter) => {
+        lettertraceCurrentLetter = String(letter || 'A').trim().toUpperCase() || 'A';
+        syncLettertraceCase('upper');
+        setLettertraceNavigationTargets(lettertraceCurrentLetter);
+        window.requestAnimationFrame(() => {
+            resizeLettertraceCanvas();
+            clearLettertraceCanvas();
+        });
     };
 
     const renderDragtomatchLevels = () => {
@@ -499,7 +858,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
 
                 button.addEventListener('click', () => {
-                    window.__learnscapeNavigate?.(`dragtomatch?letter=${encodeURIComponent(pair.letter)}&bg=abcbg`);
+                    window.__learnscapeNavigate?.(`lettertrace?letter=${encodeURIComponent(pair.letter)}&bg=abcbg`);
                 });
 
                 row.appendChild(button);
@@ -1544,6 +1903,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         syncDragtomatchLetter(currentPair);
+        setLettertraceNavigationTargets(currentPair.letter);
         syncDragtomatchLevels();
 
         dragtomatchCards.forEach((card, cardIndex) => {
@@ -1737,6 +2097,51 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    lettertraceUpperButton?.addEventListener('click', () => {
+        syncLettertraceCase('upper');
+    });
+
+    lettertraceLowerButton?.addEventListener('click', () => {
+        syncLettertraceCase('lower');
+    });
+
+    lettertraceClearButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            clearLettertraceCanvas();
+        });
+    });
+
+    lettertraceSoundButton?.addEventListener('click', () => {
+        const isPressed = lettertraceSoundButton.getAttribute('aria-pressed') === 'true';
+        lettertraceSoundButton.setAttribute('aria-pressed', isPressed ? 'false' : 'true');
+        lettertraceSoundButton.classList.toggle('is-muted', isPressed);
+    });
+
+    lettertraceTraceCanvas?.addEventListener('pointerdown', (event) => {
+        if (!lettertraceTraceCanvas || !lettertraceTraceContext) return;
+
+        lettertraceTraceDrawing = advanceLettertraceProgress(event);
+        lettertraceTraceCanvas.setPointerCapture?.(event.pointerId);
+
+        event.preventDefault();
+    });
+
+    lettertraceTraceCanvas?.addEventListener('pointermove', (event) => {
+        if (!lettertraceTraceDrawing) return;
+
+        advanceLettertraceProgress(event);
+        event.preventDefault();
+    });
+
+    const stopLettertraceStroke = () => {
+        lettertraceTraceDrawing = false;
+        lettertraceTraceLastPoint = null;
+    };
+
+    lettertraceTraceCanvas?.addEventListener('pointerup', stopLettertraceStroke);
+    lettertraceTraceCanvas?.addEventListener('pointercancel', stopLettertraceStroke);
+    lettertraceTraceCanvas?.addEventListener('pointerleave', stopLettertraceStroke);
+
     dragtomatchLetterImage?.addEventListener('dragstart', (event) => {
         const letter = dragtomatchLetterImage.dataset.letter || '';
         if (!letter) return;
@@ -1764,26 +2169,50 @@ document.addEventListener('DOMContentLoaded', () => {
         showDragtomatchTutorial(true);
     });
 
+    window.addEventListener('resize', () => {
+        if (isPageVisible(lettertracePage)) {
+            resizeLettertraceCanvas();
+            clearLettertraceCanvas();
+            updateLettertraceTraceGlyph();
+        }
+    });
+
     window.addEventListener('learnscape:routechange', (event) => {
+        if (event.detail?.route === 'lettertrace') {
+            updateLettertraceBackground(event.detail?.params || {});
+            renderLettertraceScreen(event.detail?.params?.letter || getDragtomatchLetterFromHash());
+            return;
+        }
+
         if (event.detail?.route === 'dragtomatch') {
+            setLettertraceNavigationTargets(event.detail?.params?.letter || getDragtomatchLetterFromHash());
             updateDragtomatchBackground(event.detail?.params || {});
             startDragtomatchAtLetter(event.detail?.params?.letter || getDragtomatchLetterFromHash());
             scheduleDragtomatchTutorial();
             return;
         }
 
+        updateLettertraceBackground({});
         updateDragtomatchBackground({});
         clearDragtomatchTutorial();
     });
 
+    if (isPageVisible(lettertracePage)) {
+        updateLettertraceBackground(getLettertraceParamsFromHash());
+        renderLettertraceScreen(getLettertraceParamsFromHash().letter || getDragtomatchLetterFromHash());
+    }
+
     if (isPageVisible(dragtomatchPage)) {
         updateDragtomatchBackground(parseTarget(location.hash || 'title').params);
+        setLettertraceNavigationTargets(getDragtomatchLetterFromHash());
         startDragtomatchAtLetter(getDragtomatchLetterFromHash());
         scheduleDragtomatchTutorial();
     }
 
     renderDragtomatchLevels();
-    startDragtomatchAtLetter(getDragtomatchLetterFromHash());
+    if (!isPageVisible(lettertracePage)) {
+        setLettertraceNavigationTargets(getDragtomatchLetterFromHash() || 'A');
+    }
 
     loadingLinks.forEach((link) => {
         link.addEventListener('click', (event) => {

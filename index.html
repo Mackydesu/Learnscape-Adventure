@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260810-6">
+    <link rel="stylesheet" href="style.css?v=20260810-12">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -215,6 +215,72 @@
         </main>
     </section>
 
+    <section id="learnscape-lettertrace-page" hidden>
+        <img class="game1-bg-image lettertrace-bg-image" src="assets/Backgrounds/abcbg.webp" alt="" aria-hidden="true">
+        <div class="game1-overlay lettertrace-overlay">
+            <a class="game-return-btn game1-home-btn loading-link lettertrace-home-btn" href="index.html" data-route="start" aria-label="Return to game selection">
+                <img src="assets/Buttons/Home.png" alt="" aria-hidden="true">
+            </a>
+            <button class="lettertrace-sound-btn" type="button" aria-label="Toggle sound" aria-pressed="false">
+                <svg class="lettertrace-sound-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+                    <path d="M12 24v16h10l16 12V12L22 24z"></path>
+                    <path class="lettertrace-sound-wave lettertrace-sound-wave-one" d="M43 24c4 2.5 6 5.5 6 8s-2 5.5-6 8"></path>
+                    <path class="lettertrace-sound-wave lettertrace-sound-wave-two" d="M48 17c6 4.5 9 9.5 9 15s-3 10.5-9 15"></path>
+                </svg>
+            </button>
+
+            <main class="lettertrace-stage" aria-label="Letter tracing preview">
+                <section class="lettertrace-board lettertrace-board-letter" aria-label="Letter board">
+                    <img class="lettertrace-board-image" src="assets/ABC Elements/Letterboard.png" alt="" aria-hidden="true">
+                    <div class="lettertrace-board-content">
+                        <div class="lettertrace-letter-stack" aria-live="polite">
+                            <span class="lettertrace-letter lettertrace-letter-upper">A</span>
+                            <span class="lettertrace-letter lettertrace-letter-lower">a</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="lettertrace-board lettertrace-board-trace" aria-label="Trace board">
+                    <img class="lettertrace-board-image" src="assets/ABC Elements/traceboard.png" alt="" aria-hidden="true">
+                    <div class="lettertrace-board-content lettertrace-board-content-center">
+                        <div class="lettertrace-trace-stage" aria-label="Trace the selected letter">
+                            <svg class="lettertrace-trace-svg" viewBox="0 0 1000 1000" aria-hidden="true" focusable="false">
+                                <defs>
+                                    <mask id="lettertrace-trace-outline-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="1000">
+                                        <rect width="1000" height="1000" fill="black"></rect>
+                                        <path class="lettertrace-trace-mask-path lettertrace-trace-mask-outer" d="M300 780 L500 220 L700 780 M380 570 H620"></path>
+                                        <path class="lettertrace-trace-mask-path lettertrace-trace-mask-inner" d="M300 780 L500 220 L700 780 M380 570 H620"></path>
+                                    </mask>
+                                </defs>
+                                <path class="lettertrace-trace-glyph" mask="url(#lettertrace-trace-outline-mask)" d="M300 780 L500 220 L700 780 M380 570 H620" aria-hidden="true"></path>
+                                <path class="lettertrace-trace-glyph-guide" d="M300 780 L500 220 L700 780 M380 570 H620" aria-hidden="true"></path>
+                                <path class="lettertrace-trace-progress" d="M300 780 L500 220 L700 780 M380 570 H620" aria-hidden="true"></path>
+                            </svg>
+                            <canvas class="lettertrace-trace-canvas" aria-hidden="true"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="lettertrace-board lettertrace-board-tips" aria-label="Tips">
+                    <img class="lettertrace-board-image" src="assets/ABC Elements/tips.png" alt="Tracing tips" aria-hidden="true">
+                </section>
+
+            </main>
+
+            <div class="lettertrace-nav" aria-label="Trace controls">
+                <button class="lettertrace-nav-button is-active" type="button" data-letter-case="upper" aria-pressed="true">
+                    Uppercase
+                </button>
+                <button class="lettertrace-nav-button lettertrace-nav-clear" type="button" data-trace-clear="true" aria-label="Erase all drawings">
+                    Erase
+                </button>
+                <button class="lettertrace-nav-button" type="button" data-letter-case="lower" aria-pressed="false">
+                    Lowercase
+                </button>
+            </div>
+        </div>
+    </section>
+
     <section id="learnscape-dragtomatch-page" hidden>
         <img class="game1-bg-image" src="assets/Backgrounds/skybg.png" alt="" aria-hidden="true">
         <div class="game1-overlay" aria-hidden="true"></div>
@@ -281,7 +347,7 @@
             </div>
         </div>
 
-        <a class="game-return-btn loading-link" href="index.html" data-route="game1" aria-label="Return to game 1 previews">
+        <a class="game-return-btn loading-link" href="index.html" data-route="lettertrace" aria-label="Return to letter tracing">
             <span>‹</span>
             Back
         </a>
@@ -321,7 +387,7 @@
         </a>
     </section>
 
-    <script src="script.js?v=20260810-3"></script>
+    <script src="script.js?v=20260810-10"></script>
     </div>
 
     <script>
@@ -344,6 +410,12 @@
                     bodyClass: 'game1-page',
                     pageId: 'learnscape-game1-page',
                     hash: '#game1',
+                },
+                lettertrace: {
+                    title: 'Learnscape Adventure - Trace The Letter',
+                    bodyClass: 'gameplay-page',
+                    pageId: 'learnscape-lettertrace-page',
+                    hash: '#lettertrace',
                 },
                 dragtomatch: {
                     title: 'Learnscape Adventure - Drag to Match',
@@ -370,12 +442,14 @@
                 title: 'title',
                 start: 'start',
                 game1: 'game1',
+                lettertrace: 'lettertrace',
                 dragtomatch: 'dragtomatch',
                 poptheword: 'poptheword',
                 bunnyhop: 'bunnyhop',
                 '#home': 'title',
                 '#game-start': 'start',
                 '#game1': 'game1',
+                '#lettertrace': 'lettertrace',
                 '#dragtomatch': 'dragtomatch',
                 '#poptheword': 'poptheword',
                 '#bunnyhop': 'bunnyhop',
@@ -383,6 +457,7 @@
                 'title-screen.html': 'title',
                 'game_start.html': 'start',
                 'game1.html': 'game1',
+                'lettertrace.html': 'lettertrace',
                 'dragtomatch.html': 'dragtomatch',
                 'poptheword.html': 'poptheword',
                 'bunnyhop.html': 'bunnyhop',
@@ -403,15 +478,15 @@
             };
 
             const buildRouteHash = (routeName, params = {}) => {
-                if (routeName === 'dragtomatch' && params.letter) {
+                if ((routeName === 'dragtomatch' || routeName === 'lettertrace') && Object.keys(params).length) {
                     const searchParams = new URLSearchParams();
-                    searchParams.set('letter', params.letter);
+                    Object.entries(params).forEach(([key, value]) => {
+                        if (value !== undefined && value !== null && value !== '') {
+                            searchParams.set(key, value);
+                        }
+                    });
 
-                    if (params.bg) {
-                        searchParams.set('bg', params.bg);
-                    }
-
-                    return `#dragtomatch?${searchParams.toString()}`;
+                    return `#${routeName}?${searchParams.toString()}`;
                 }
 
                 return (routes[routeName] || routes.title).hash;
@@ -426,6 +501,7 @@
                 title: document.getElementById('learnscape-title-page'),
                 start: document.getElementById('learnscape-game-start-page'),
                 game1: document.getElementById('learnscape-game1-page'),
+                lettertrace: document.getElementById('learnscape-lettertrace-page'),
                 dragtomatch: document.getElementById('learnscape-dragtomatch-page'),
                 poptheword: document.getElementById('learnscape-poptheword-page'),
                 bunnyhop: document.getElementById('learnscape-bunnyhop-page'),
