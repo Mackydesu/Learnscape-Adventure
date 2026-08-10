@@ -298,14 +298,11 @@ document.addEventListener('DOMContentLoaded', () => {
     window.visualViewport?.addEventListener('resize', updateRotateOverlay);
     window.visualViewport?.addEventListener('scroll', updateRotateOverlay);
 
-    const game1Slides = Array.from(document.querySelectorAll('[data-game1-slide]'));
-    const game1Prev = document.querySelector('[data-game1-prev]');
-    const game1Next = document.querySelector('[data-game1-next]');
-    const game1PlayButton = document.querySelector('.game1-play-btn');
     const game1Stage = document.querySelector('.game1-stage');
     const game1IntroCard = document.querySelector('.game1-intro-card');
-    const game1PlayRoutes = ['dragtomatch', 'poptheword', 'bunnyhop'];
+    const game1LevelGrid = document.querySelector('.game1-level-grid');
     let dragtomatchCards = [];
+    let dragtomatchLevelButtons = [];
     const dragtomatchObjects = document.querySelector('.game1-dragtomatch-objects');
     const dragtomatchTutorialButton = document.querySelector('[data-dragtomatch-tutorial-button]');
     const dragtomatchTutorialOverlay = document.querySelector('.game1-dragmatch-tutorial');
@@ -350,6 +347,90 @@ document.addEventListener('DOMContentLoaded', () => {
         { letter: 'Y', letterSrc: 'assets/ABC Elements/LetterY.png', objectName: 'Yoyo', objectSrc: 'assets/ABC Elements/Yoyo.png' },
         { letter: 'Z', letterSrc: 'assets/ABC Elements/LetterZ.png', objectName: 'Zebra', objectSrc: 'assets/ABC Elements/Zebra.png' },
     ];
+
+    const dragtomatchLevelRows = [9, 9, 8];
+
+    const getDragtomatchLevelSrc = (letter) => `assets/Buttons/Level${letter}.png`;
+
+    const getDragtomatchIndexForLetter = (letter) => {
+        const normalizedLetter = String(letter || '').trim().toUpperCase();
+        const index = dragtomatchPairs.findIndex((pair) => pair.letter === normalizedLetter);
+        return index >= 0 ? index : 0;
+    };
+
+    const getDragtomatchLetterFromHash = () => {
+        const hash = window.location.hash || '';
+        if (!hash.startsWith('#dragtomatch')) return '';
+
+        const queryIndex = hash.indexOf('?');
+        if (queryIndex < 0) return '';
+
+        const params = new URLSearchParams(hash.slice(queryIndex + 1));
+        return params.get('letter') || '';
+    };
+
+    const renderDragtomatchLevels = () => {
+        if (!game1LevelGrid) return;
+
+        game1LevelGrid.innerHTML = '';
+        dragtomatchLevelButtons = [];
+        let nextIndex = 0;
+
+        dragtomatchLevelRows.forEach((rowSize, rowIndex) => {
+            const row = document.createElement('div');
+            row.className = 'game1-level-row';
+            row.dataset.row = String(rowIndex + 1);
+
+            for (let columnIndex = 0; columnIndex < rowSize; columnIndex += 1) {
+                const currentIndex = nextIndex;
+                const pair = dragtomatchPairs[currentIndex];
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'game1-level-button';
+                button.dataset.index = String(currentIndex);
+                button.dataset.letter = pair.letter;
+                button.setAttribute('aria-label', `Jump to level ${pair.letter}`);
+                button.innerHTML = `
+                    <img class="game1-level-badge" src="${getDragtomatchLevelSrc(pair.letter)}" alt="" aria-hidden="true">
+                    <span class="game1-level-rating" aria-hidden="true">
+                        <span class="game1-level-stars">
+                            <svg class="game1-level-star" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M12 2.9 14.9 8.8l6.5 1-4.7 4.6 1.1 6.5-5.8-3.1-5.8 3.1 1.1-6.5-4.7-4.6 6.5-1L12 2.9z"></path>
+                            </svg>
+                            <svg class="game1-level-star" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M12 2.9 14.9 8.8l6.5 1-4.7 4.6 1.1 6.5-5.8-3.1-5.8 3.1 1.1-6.5-4.7-4.6 6.5-1L12 2.9z"></path>
+                            </svg>
+                            <svg class="game1-level-star" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M12 2.9 14.9 8.8l6.5 1-4.7 4.6 1.1 6.5-5.8-3.1-5.8 3.1 1.1-6.5-4.7-4.6 6.5-1L12 2.9z"></path>
+                            </svg>
+                        </span>
+                    </span>
+                `;
+
+                button.addEventListener('click', () => {
+                    window.__learnscapeNavigate?.(`dragtomatch?letter=${encodeURIComponent(pair.letter)}`);
+                });
+
+                row.appendChild(button);
+                dragtomatchLevelButtons.push(button);
+                nextIndex += 1;
+            }
+
+            game1LevelGrid.appendChild(row);
+        });
+    };
+
+    const syncDragtomatchLevels = () => {
+        dragtomatchLevelButtons.forEach((button, index) => {
+            const isActive = index === dragtomatchCurrentIndex;
+            button.classList.toggle('is-active', isActive);
+            button.setAttribute('aria-current', isActive ? 'true' : 'false');
+        });
+    };
+
+    const startDragtomatchAtLetter = (letter) => {
+        renderDragtomatchRound(getDragtomatchIndexForLetter(letter));
+    };
 
     const dragtomatchCardMarkup = `
         <span class="game1-object-card-inner">
@@ -557,67 +638,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let dragtomatchCurrentIndex = 0;
     let dragtomatchAdvanceTimer = null;
 
-    let game1SlideIndex = game1Slides.findIndex((slide) => slide.classList.contains('is-active'));
-    let game1IsAnimating = false;
-
-    if (game1SlideIndex < 0) {
-        game1SlideIndex = 0;
-    }
-
-    const resetGame1TransitionClasses = () => {
-        game1Slides.forEach((slide) => {
-            slide.classList.remove(
-                'is-enter-from-left',
-                'is-enter-from-right',
-                'is-leave-to-left',
-                'is-leave-to-right'
-            );
-        });
-    };
-
-    const setGame1Slide = (index, direction = 'next') => {
-        if (!game1Slides.length) return;
-
-        const normalizedIndex = (index + game1Slides.length) % game1Slides.length;
-        if (normalizedIndex === game1SlideIndex || game1IsAnimating) return;
-
-        const currentSlide = game1Slides[game1SlideIndex];
-        const nextSlide = game1Slides[normalizedIndex];
-        const enterClass = direction === 'prev' ? 'is-enter-from-left' : 'is-enter-from-right';
-        const leaveClass = direction === 'prev' ? 'is-leave-to-right' : 'is-leave-to-left';
-
-        game1IsAnimating = true;
-        resetGame1TransitionClasses();
-
-        nextSlide.classList.add(enterClass);
-        nextSlide.getBoundingClientRect();
-
-        currentSlide.classList.add(leaveClass);
-        nextSlide.classList.add('is-active');
-
-        window.setTimeout(() => {
-            currentSlide.classList.remove('is-active', leaveClass);
-            nextSlide.classList.remove(enterClass);
-            game1SlideIndex = normalizedIndex;
-            game1IsAnimating = false;
-        }, game1TransitionDuration);
-    };
-
-    if (game1Slides.length) {
-        resetGame1TransitionClasses();
-        game1Slides.forEach((slide, slideIndex) => {
-            slide.classList.toggle('is-active', slideIndex === game1SlideIndex);
-        });
-
-        game1Prev?.addEventListener('click', () => {
-            setGame1Slide(game1SlideIndex - 1, 'prev');
-        });
-
-        game1Next?.addEventListener('click', () => {
-            setGame1Slide(game1SlideIndex + 1, 'next');
-        });
-    }
-
     if (game1Stage) {
         const revealGame1Stage = () => {
             game1Stage.classList.add('is-visible');
@@ -635,14 +655,6 @@ document.addEventListener('DOMContentLoaded', () => {
             window.setTimeout(revealGame1Stage, 5100);
         }
     }
-
-    game1PlayButton?.addEventListener('click', () => {
-        const targetRoute = game1PlayRoutes[game1SlideIndex] || game1PlayRoutes[0];
-
-        if (targetRoute) {
-            window.__learnscapeNavigate?.(targetRoute);
-        }
-    });
 
     const shuffleArray = (items) => {
         const copy = items.slice();
@@ -1441,6 +1453,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         syncDragtomatchLetter(currentPair);
+        syncDragtomatchLevels();
 
         dragtomatchCards.forEach((card, cardIndex) => {
             const option = roundOptions[cardIndex];
@@ -1662,6 +1675,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('learnscape:routechange', (event) => {
         if (event.detail?.route === 'dragtomatch') {
+            startDragtomatchAtLetter(event.detail?.params?.letter || getDragtomatchLetterFromHash());
             scheduleDragtomatchTutorial();
             return;
         }
@@ -1670,10 +1684,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (isPageVisible(dragtomatchPage)) {
+        startDragtomatchAtLetter(getDragtomatchLetterFromHash());
         scheduleDragtomatchTutorial();
     }
 
-    renderDragtomatchRound(0);
+    renderDragtomatchLevels();
+    startDragtomatchAtLetter(getDragtomatchLetterFromHash());
 
     loadingLinks.forEach((link) => {
         link.addEventListener('click', (event) => {

@@ -195,7 +195,10 @@
         <video class="game1-bg-image" loop playsinline preload="auto" aria-hidden="true">
             <source src="assets/Videos/abcbg.mp4" type="video/mp4">
         </video>
-        <div class="game1-overlay" aria-hidden="true"></div>
+        <div class="game1-overlay">
+            <div class="game1-level-grid" aria-label="Level selector"></div>
+        </div>
+        <img class="game1-tap-cue" src="assets/ABC Elements/Tap.png" alt="" aria-hidden="true">
         <div class="game1-entry-veil" aria-hidden="true"></div>
         <div class="game1-intro" aria-hidden="true">
             <div class="game1-intro-card">
@@ -204,33 +207,11 @@
             </div>
         </div>
 
-        <a class="game-return-btn loading-link" href="index.html" data-route="start" aria-label="Return to game selection">
-            <span>‹</span>
-            Back
+        <a class="game-return-btn game1-home-btn loading-link" href="index.html" data-route="start" aria-label="Return to game selection">
+            <img src="assets/Buttons/Home.png" alt="" aria-hidden="true">
         </a>
 
-        <main class="game1-stage" aria-label="Letter Forest game background">
-            <aside class="game1-preview" aria-label="Game 1 preview controls">
-                <div class="game1-preview-viewport" data-game1-board-viewport>
-                    <img class="game1-board-slide is-active" src="assets/Backgrounds/dragtomatch.webp" alt="Drag to Match preview" data-game1-slide>
-                    <img class="game1-board-slide" src="assets/Backgrounds/poptheword.webp" alt="Pop the Word preview" data-game1-slide>
-                    <img class="game1-board-slide" src="assets/Backgrounds/bunnyhop.webp" alt="Bunny Hop preview" data-game1-slide>
-                </div>
-            </aside>
-
-            <div class="game1-action-row" aria-label="Preview controls">
-                <button class="game1-board-nav game1-board-prev" type="button" data-game1-prev aria-label="Preview previous game">
-                    <span class="game1-board-triangle game1-board-triangle-left" aria-hidden="true"></span>
-                </button>
-                <button class="game1-play-btn" type="button" aria-label="Play Game 1">
-                    <span class="game1-play-btn-glow" aria-hidden="true"></span>
-                    <span class="game1-play-btn-icon" aria-hidden="true">▶</span>
-                    <span class="game1-play-btn-text">PLAY</span>
-                </button>
-                <button class="game1-board-nav game1-board-next" type="button" data-game1-next aria-label="Show next game">
-                    <span class="game1-board-triangle game1-board-triangle-right" aria-hidden="true"></span>
-                </button>
-            </div>
+        <main class="game1-stage" aria-label="Alphabet learning game">
         </main>
     </section>
 
@@ -407,6 +388,33 @@
                 'bunnyhop.html': 'bunnyhop',
             };
 
+            const parseTarget = (target) => {
+                if (!target) {
+                    return { routeName: 'title', params: {} };
+                }
+
+                const cleaned = target.replace(/^\.\/+/, '');
+                const hashTarget = cleaned.startsWith('#') ? cleaned.slice(1) : cleaned;
+                const [path, queryString = ''] = hashTarget.split('?');
+                const routeName = routeAliases[hashTarget] || routeAliases[path] || 'title';
+                const params = Object.fromEntries(new URLSearchParams(queryString));
+
+                return { routeName, params };
+            };
+
+            const buildRouteHash = (routeName, params = {}) => {
+                if (routeName === 'dragtomatch' && params.letter) {
+                    return `#dragtomatch?letter=${encodeURIComponent(params.letter)}`;
+                }
+
+                return (routes[routeName] || routes.title).hash;
+            };
+
+            const getRouteKey = (routeName, params = {}) => {
+                const letter = params.letter ? String(params.letter).toUpperCase() : '';
+                return letter ? `${routeName}?letter=${letter}` : routeName;
+            };
+
             const pages = {
                 title: document.getElementById('learnscape-title-page'),
                 start: document.getElementById('learnscape-game-start-page'),
@@ -421,6 +429,7 @@
             const routeBodyClasses = ['title-page', 'game-start-page', 'game1-page', 'gameplay-page'];
             let loadingTimer = null;
             let currentRoute = 'title';
+            let currentRouteKey = 'title';
             let isNavigating = false;
 
             const isFullscreenActive = () => Boolean(
@@ -433,19 +442,12 @@
                 body.classList.toggle('is-fullscreen-mode', isFullscreenActive());
             };
 
-            const normalizeTarget = (target) => {
-                if (!target) return 'title';
-                if (target.startsWith('#')) {
-                    return routeAliases[target] || 'title';
-                }
-
-                const cleaned = target.replace(/^\.\/+/, '');
-                return routeAliases[cleaned] || 'title';
-            };
-
-            const setRoute = (routeName, replace = false) => {
+            const setRoute = (routeData, replace = false) => {
+                const routeName = routeData?.routeName || 'title';
+                const params = routeData?.params || {};
                 const route = routes[routeName] || routes.title;
                 currentRoute = routeName in routes ? routeName : 'title';
+                currentRouteKey = getRouteKey(currentRoute, params);
 
                 Object.entries(pages).forEach(([name, page]) => {
                     if (!page) return;
@@ -457,15 +459,17 @@
                 syncFullscreenClass();
                 document.title = route.title;
 
+                const nextHash = buildRouteHash(currentRoute, params);
+
                 if (replace) {
-                    history.replaceState({ route: currentRoute }, '', route.hash);
+                    history.replaceState({ route: currentRoute, params }, '', nextHash);
                 } else {
-                    history.pushState({ route: currentRoute }, '', route.hash);
+                    history.pushState({ route: currentRoute, params }, '', nextHash);
                 }
 
                 window.scrollTo(0, 0);
                 window.dispatchEvent(new CustomEvent('learnscape:routechange', {
-                    detail: { route: currentRoute },
+                    detail: { route: currentRoute, params },
                 }));
             };
 
@@ -489,15 +493,16 @@
             };
 
             const navigateWithLoading = (target) => {
-                const routeName = normalizeTarget(target);
-                if (routeName === currentRoute || isNavigating) return;
+                const routeData = parseTarget(target);
+                const targetKey = getRouteKey(routeData.routeName, routeData.params);
+                if (targetKey === currentRouteKey || isNavigating) return;
 
                 isNavigating = true;
                 showLoading();
 
                 loadingTimer = window.setTimeout(() => {
                     hideLoading();
-                    setRoute(routeName);
+                    setRoute(routeData);
                     isNavigating = false;
                 }, 1000);
             };
@@ -513,19 +518,19 @@
             window.addEventListener('popstate', () => {
                 hideLoading();
                 isNavigating = false;
-                setRoute(normalizeTarget(location.hash || 'title'), true);
+                setRoute(parseTarget(location.hash || 'title'), true);
             });
 
             window.addEventListener('hashchange', () => {
                 if (location.hash) {
                     hideLoading();
                     isNavigating = false;
-                    setRoute(normalizeTarget(location.hash), true);
+                    setRoute(parseTarget(location.hash), true);
                 }
             });
 
             syncFullscreenClass();
-            setRoute(normalizeTarget(location.hash || 'title'), true);
+            setRoute(parseTarget(location.hash || 'title'), true);
         })();
     </script>
 </body>
