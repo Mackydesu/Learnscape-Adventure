@@ -2874,45 +2874,45 @@ footer {
 
 @media (max-width: 600px) {
     .game1-level-grid {
-        top: clamp(4.9rem, 7.8vh, 7.2rem);
+        top: clamp(3.8rem, 6.2vh, 6.2rem);
         width: min(calc(100vw - 0.5rem), 940px);
-        gap: clamp(0.3rem, 0.4vw, 0.42rem);
-        transform: translateX(-50%) scale(0.86);
+        gap: clamp(0.22rem, 0.32vw, 0.32rem);
+        transform: translateX(-50%) scale(0.79);
         transform-origin: top center;
     }
 
     body.is-fullscreen-mode .game1-level-grid {
-        top: clamp(4.9rem, 7.8vh, 7.2rem);
+        top: clamp(3.8rem, 6.2vh, 6.2rem);
     }
 
     .game1-level-row {
-        gap: clamp(0.18rem, 0.28vw, 0.25rem);
+        gap: clamp(0.14rem, 0.22vw, 0.2rem);
     }
 
     .game1-level-button {
-        width: clamp(1.65rem, 2.2vw, 2.1rem) !important;
+        width: clamp(1.55rem, 2vw, 1.95rem) !important;
     }
 
     .game1-level-star {
-        width: clamp(0.52rem, 1.35vw, 0.62rem);
-        height: clamp(0.52rem, 1.35vw, 0.62rem);
+        width: clamp(0.48rem, 1.15vw, 0.56rem);
+        height: clamp(0.48rem, 1.15vw, 0.56rem);
     }
 
     body.is-fullscreen-mode .game1-level-button {
-        width: clamp(1.65rem, 2.2vw, 2.1rem) !important;
+        width: clamp(1.55rem, 2vw, 1.95rem) !important;
     }
 
     body.is-fullscreen-mode .game1-level-star {
-        width: clamp(0.52rem, 1.35vw, 0.62rem);
-        height: clamp(0.52rem, 1.35vw, 0.62rem);
+        width: clamp(0.48rem, 1.15vw, 0.56rem);
+        height: clamp(0.48rem, 1.15vw, 0.56rem);
     }
 
     .game1-tap-cue {
-        width: clamp(7.6rem, 32vw, 10rem) !important;
+        width: clamp(7rem, 30vw, 9rem) !important;
     }
 
     body.is-fullscreen-mode .game1-tap-cue {
-        width: clamp(7.6rem, 32vw, 10rem) !important;
+        width: clamp(7rem, 30vw, 9rem) !important;
     }
 }
 
