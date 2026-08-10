@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const titlePage = document.getElementById('learnscape-title-page');
     const game1Page = document.getElementById('learnscape-game1-page');
     const dragtomatchPage = document.getElementById('learnscape-dragtomatch-page');
+    const dragtomatchBgImage = dragtomatchPage?.querySelector('.game1-bg-image') || null;
     const game1BgVideo = game1Page?.querySelector('video.game1-bg-image') || null;
     const game1BgVideoSource = game1BgVideo?.querySelector('source') || null;
     const game1BgVideoSourceSrc = game1BgVideoSource?.getAttribute('src') || game1BgVideo?.getAttribute('src') || '';
@@ -446,6 +447,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return params.get('letter') || '';
     };
 
+    const updateDragtomatchBackground = (params = {}) => {
+        if (!dragtomatchBgImage) return;
+
+        const bg = String(params.bg || '').toLowerCase();
+        const nextSrc = bg === 'abcbg'
+            ? 'assets/Backgrounds/abcbg.webp'
+            : 'assets/Backgrounds/skybg.png';
+
+        if (dragtomatchBgImage.getAttribute('src') !== nextSrc) {
+            dragtomatchBgImage.setAttribute('src', nextSrc);
+        }
+    };
+
     const renderDragtomatchLevels = () => {
         if (!game1LevelGrid) return;
 
@@ -485,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
 
                 button.addEventListener('click', () => {
-                    window.__learnscapeNavigate?.(`dragtomatch?letter=${encodeURIComponent(pair.letter)}`);
+                    window.__learnscapeNavigate?.(`dragtomatch?letter=${encodeURIComponent(pair.letter)}&bg=abcbg`);
                 });
 
                 row.appendChild(button);
@@ -1752,15 +1766,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('learnscape:routechange', (event) => {
         if (event.detail?.route === 'dragtomatch') {
+            updateDragtomatchBackground(event.detail?.params || {});
             startDragtomatchAtLetter(event.detail?.params?.letter || getDragtomatchLetterFromHash());
             scheduleDragtomatchTutorial();
             return;
         }
 
+        updateDragtomatchBackground({});
         clearDragtomatchTutorial();
     });
 
     if (isPageVisible(dragtomatchPage)) {
+        updateDragtomatchBackground(parseTarget(location.hash || 'title').params);
         startDragtomatchAtLetter(getDragtomatchLetterFromHash());
         scheduleDragtomatchTutorial();
     }

@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260810-5">
+    <link rel="stylesheet" href="style.css?v=20260810-6">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -321,7 +321,7 @@
         </a>
     </section>
 
-    <script src="script.js?v=20260810-2"></script>
+    <script src="script.js?v=20260810-3"></script>
     </div>
 
     <script>
@@ -404,7 +404,14 @@
 
             const buildRouteHash = (routeName, params = {}) => {
                 if (routeName === 'dragtomatch' && params.letter) {
-                    return `#dragtomatch?letter=${encodeURIComponent(params.letter)}`;
+                    const searchParams = new URLSearchParams();
+                    searchParams.set('letter', params.letter);
+
+                    if (params.bg) {
+                        searchParams.set('bg', params.bg);
+                    }
+
+                    return `#dragtomatch?${searchParams.toString()}`;
                 }
 
                 return (routes[routeName] || routes.title).hash;
