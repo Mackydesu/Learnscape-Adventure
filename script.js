@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const game1Page = document.getElementById('learnscape-game1-page');
     const dragtomatchPage = document.getElementById('learnscape-dragtomatch-page');
     const game1BgVideo = game1Page?.querySelector('video.game1-bg-image') || null;
+    const game1BgVideoSource = game1BgVideo?.querySelector('source') || null;
+    const game1BgVideoSourceSrc = game1BgVideoSource?.getAttribute('src') || game1BgVideo?.getAttribute('src') || '';
     const game1BgLoopFadeWindow = 0.45;
 
     if (game1BgVideo) {
@@ -34,6 +36,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (Math.abs(game1BgVideo.volume - targetVolume) > 0.01) {
             game1BgVideo.volume = targetVolume;
+        }
+    };
+
+    const loadGame1BgVideoSource = () => {
+        if (!game1BgVideo || !game1BgVideoSource || !game1BgVideoSourceSrc) return;
+
+        if (!game1BgVideoSource.getAttribute('src')) {
+            game1BgVideoSource.setAttribute('src', game1BgVideoSourceSrc);
+        }
+
+        game1BgVideo.load?.();
+    };
+
+    const unloadGame1BgVideoSource = () => {
+        if (!game1BgVideo) return;
+
+        game1BgVideo.pause?.();
+        try {
+            game1BgVideo.currentTime = 0;
+        } catch (error) {
+            // The video can be mid-load; pausing is enough if rewinding is unavailable.
+        }
+
+        if (game1BgVideoSource?.getAttribute('src')) {
+            game1BgVideoSource.removeAttribute('src');
+            game1BgVideo.load?.();
         }
     };
 
@@ -210,13 +238,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const isPageVisible = (pageElement) => Boolean(pageElement && !pageElement.hidden);
 
     const playGame1BgVideo = () => {
-        if (!game1BgVideo || !isPageVisible(game1Page)) return;
+        if (!game1BgVideo || !isPageVisible(game1Page) || document.hidden) return;
+
+        loadGame1BgVideoSource();
 
         const playResult = game1BgVideo.play?.();
         if (playResult && typeof playResult.catch === 'function') {
             playResult.catch(() => {
                 const startOnGesture = () => {
                     if (!isPageVisible(game1Page)) return;
+                    loadGame1BgVideoSource();
                     const retryResult = game1BgVideo.play?.();
                     if (retryResult && typeof retryResult.catch === 'function') {
                         retryResult.catch(() => {});
@@ -233,25 +264,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const pauseGame1BgVideo = () => {
         if (!game1BgVideo) return;
 
-        game1BgVideo.pause?.();
-        try {
-            game1BgVideo.currentTime = 0;
-        } catch (error) {
-            // The background video can be mid-load; pausing is enough if rewinding is unavailable.
-        }
+        unloadGame1BgVideoSource();
     };
 
-    window.addEventListener('learnscape:routechange', (event) => {
-        if (event.detail?.route === 'game1') {
-            playGame1BgVideo();
+    const syncGame1BgPlayback = () => {
+        if (!game1BgVideo) return;
+
+        if (isPageVisible(game1Page) && !document.hidden) {
+            loadGame1BgVideoSource();
+            if (game1BgVideo.paused || game1BgVideo.ended) {
+                playGame1BgVideo();
+            }
             return;
         }
 
         pauseGame1BgVideo();
+    };
+
+    window.addEventListener('learnscape:routechange', (event) => {
+        syncGame1BgPlayback();
     });
 
-    if (isPageVisible(game1Page)) {
+    if (isPageVisible(game1Page) && !document.hidden) {
+        loadGame1BgVideoSource();
         playGame1BgVideo();
+    } else {
+        unloadGame1BgVideoSource();
     }
 
     game1BgVideo?.addEventListener('loadedmetadata', syncGame1BgLoopVolume);
@@ -263,6 +301,9 @@ document.addEventListener('DOMContentLoaded', () => {
             game1BgVideo.volume = 1;
         }
     });
+    document.addEventListener('visibilitychange', syncGame1BgPlayback);
+    window.addEventListener('pagehide', pauseGame1BgVideo);
+    window.addEventListener('blur', pauseGame1BgVideo);
 
     const createRotateOverlayMarkup = () => `
         <div class="rotate-panel">

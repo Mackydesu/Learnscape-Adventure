@@ -2863,41 +2863,47 @@ footer {
     }
 
     body.is-fullscreen-mode .game1-level-button {
-        width: clamp(4.9rem, 6.8vw, 7.5rem);
+        width: clamp(4.3rem, 6vw, 6.7rem);
     }
 
     body.is-fullscreen-mode .game1-level-star {
-        width: clamp(1.05rem, 2.3vw, 1.3rem);
-        height: clamp(1.05rem, 2.3vw, 1.3rem);
+        width: clamp(0.92rem, 2vw, 1.1rem);
+        height: clamp(0.92rem, 2vw, 1.1rem);
     }
 }
 
 @media (max-width: 600px) {
     .game1-level-grid {
-        top: clamp(7rem, 11vh, 9.8rem);
-        width: min(calc(100vw - 0.25rem), 940px);
-        gap: clamp(0.38rem, 0.55vw, 0.5rem);
+        top: clamp(5.8rem, 9vh, 8.2rem);
+        width: min(calc(100vw - 0.5rem), 940px);
+        gap: clamp(0.3rem, 0.4vw, 0.42rem);
+        transform: translateX(-50%) scale(0.86);
+        transform-origin: top center;
+    }
+
+    body.is-fullscreen-mode .game1-level-grid {
+        top: clamp(5.8rem, 9vh, 8.2rem);
     }
 
     .game1-level-row {
-        gap: clamp(0.25rem, 0.38vw, 0.34rem);
+        gap: clamp(0.18rem, 0.28vw, 0.25rem);
     }
 
     .game1-level-button {
-        width: clamp(2.1rem, 3vw, 2.8rem) !important;
+        width: clamp(1.95rem, 2.6vw, 2.45rem) !important;
     }
 
     .game1-level-star {
-        width: clamp(0.65rem, 1.8vw, 0.78rem);
-        height: clamp(0.65rem, 1.8vw, 0.78rem);
+        width: clamp(0.58rem, 1.55vw, 0.7rem);
+        height: clamp(0.58rem, 1.55vw, 0.7rem);
     }
 
     .game1-tap-cue {
-        width: clamp(9.5rem, 42vw, 13.5rem) !important;
+        width: clamp(8.8rem, 38vw, 12rem) !important;
     }
 
     body.is-fullscreen-mode .game1-tap-cue {
-        width: clamp(10.25rem, 45vw, 14.5rem) !important;
+        width: clamp(8.8rem, 38vw, 12rem) !important;
     }
 }
 
