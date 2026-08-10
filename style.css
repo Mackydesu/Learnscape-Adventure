@@ -2874,7 +2874,7 @@ footer {
 
 @media (max-width: 600px) {
     .game1-level-grid {
-        top: clamp(5.8rem, 9vh, 8.2rem);
+        top: clamp(4.9rem, 7.8vh, 7.2rem);
         width: min(calc(100vw - 0.5rem), 940px);
         gap: clamp(0.3rem, 0.4vw, 0.42rem);
         transform: translateX(-50%) scale(0.86);
@@ -2882,7 +2882,7 @@ footer {
     }
 
     body.is-fullscreen-mode .game1-level-grid {
-        top: clamp(5.8rem, 9vh, 8.2rem);
+        top: clamp(4.9rem, 7.8vh, 7.2rem);
     }
 
     .game1-level-row {
@@ -2908,11 +2908,11 @@ footer {
     }
 
     .game1-tap-cue {
-        width: clamp(8.8rem, 38vw, 12rem) !important;
+        width: clamp(7.6rem, 32vw, 10rem) !important;
     }
 
     body.is-fullscreen-mode .game1-tap-cue {
-        width: clamp(8.8rem, 38vw, 12rem) !important;
+        width: clamp(7.6rem, 32vw, 10rem) !important;
     }
 }
 
