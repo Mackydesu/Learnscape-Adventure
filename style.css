@@ -2890,12 +2890,21 @@ footer {
     }
 
     .game1-level-button {
-        width: clamp(1.95rem, 2.6vw, 2.45rem) !important;
+        width: clamp(1.65rem, 2.2vw, 2.1rem) !important;
     }
 
     .game1-level-star {
-        width: clamp(0.58rem, 1.55vw, 0.7rem);
-        height: clamp(0.58rem, 1.55vw, 0.7rem);
+        width: clamp(0.52rem, 1.35vw, 0.62rem);
+        height: clamp(0.52rem, 1.35vw, 0.62rem);
+    }
+
+    body.is-fullscreen-mode .game1-level-button {
+        width: clamp(1.65rem, 2.2vw, 2.1rem) !important;
+    }
+
+    body.is-fullscreen-mode .game1-level-star {
+        width: clamp(0.52rem, 1.35vw, 0.62rem);
+        height: clamp(0.52rem, 1.35vw, 0.62rem);
     }
 
     .game1-tap-cue {
