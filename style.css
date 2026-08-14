@@ -1954,7 +1954,7 @@ body.is-touch-dragging {
     position: absolute;
     display: grid;
     place-items: center;
-    width: clamp(5.8rem, 7.8vw, 8.8rem);
+    width: clamp(6.2rem, 8.3vw, 9.3rem);
     aspect-ratio: 1 / 1;
     padding: 0;
     border: 0;
@@ -2038,7 +2038,7 @@ body.is-touch-dragging {
 .game3-hotspot-square {
     left: 49.5%;
     top: 17.5%;
-    width: clamp(5rem, 6.6vw, 7.4rem);
+    width: clamp(5.4rem, 7vw, 7.9rem);
     color: #9a3ef8;
 }
 
@@ -2049,7 +2049,7 @@ body.is-touch-dragging {
 .game3-hotspot-triangle {
     left: 71.5%;
     top: 27.6%;
-    width: clamp(5.8rem, 7.4vw, 8.2rem);
+    width: clamp(6.2rem, 7.9vw, 8.8rem);
     color: #40c91e;
 }
 
@@ -2065,7 +2065,7 @@ body.is-touch-dragging {
 .game3-hotspot-rectangle {
     left: 87.2%;
     top: 39.8%;
-    width: clamp(6.2rem, 8vw, 8.8rem);
+    width: clamp(6.6rem, 8.5vw, 9.3rem);
     color: #ff9a1f;
 }
 
@@ -2076,7 +2076,7 @@ body.is-touch-dragging {
 .game3-hotspot-oval {
     left: 78.4%;
     top: 78.1%;
-    width: clamp(5rem, 6.4vw, 7rem);
+    width: clamp(5.4rem, 6.8vw, 7.5rem);
     color: #ff5fb0;
 }
 
@@ -2087,7 +2087,7 @@ body.is-touch-dragging {
 .game3-hotspot-heart {
     left: 50.3%;
     top: 79.2%;
-    width: clamp(5rem, 6.4vw, 7rem);
+    width: clamp(5.4rem, 6.8vw, 7.5rem);
     color: #ff3b2f;
 }
 
@@ -2098,7 +2098,7 @@ body.is-touch-dragging {
 .game3-hotspot-star {
     left: 24.2%;
     top: 76.7%;
-    width: clamp(5.5rem, 6.0vw, 6.9rem);
+    width: clamp(5.9rem, 6.4vw, 7.4rem);
     color: #ffca2e;
 }
 
@@ -2109,7 +2109,7 @@ body.is-touch-dragging {
 .game3-hotspot-diamond {
     left: 9.7%;
     top: 59.6%;
-    width: clamp(5rem, 6.2vw, 6.8rem);
+    width: clamp(5.4rem, 6.6vw, 7.3rem);
     color: #2d68ff;
 }
 
