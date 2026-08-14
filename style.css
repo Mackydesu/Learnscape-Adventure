@@ -424,6 +424,7 @@ body.is-page-loading .page-loading-overlay {
 }
 
 .game1-page,
+.game3-page,
 .gameplay-page {
     width: 100vw;
     height: 100vh;
@@ -2803,6 +2804,7 @@ body.is-fullscreen-mode .game1-level-star {
 }
 
 .game1-page .game-return-btn,
+.game3-page .game-return-btn,
 .gameplay-page .game-return-btn {
     z-index: 3;
 }
