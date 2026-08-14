@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingDuration = 1000;
     const titlePage = document.getElementById('learnscape-title-page');
     const game1Page = document.getElementById('learnscape-game1-page');
+    const game3Page = document.getElementById('learnscape-game3-page');
     const lettertracePage = document.getElementById('learnscape-lettertrace-page');
     const dragtomatchPage = document.getElementById('learnscape-dragtomatch-page');
     const lettertraceBgImage = lettertracePage?.querySelector('.lettertrace-bg-image') || null;
@@ -31,6 +32,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const game1BgVideoSource = game1BgVideo?.querySelector('source') || null;
     const game1BgVideoSourceSrc = game1BgVideoSource?.getAttribute('src') || game1BgVideo?.getAttribute('src') || '';
     const game1BgLoopFadeWindow = 0.45;
+    const game3ImageSize = { width: 1672, height: 941 };
+    const game3HotspotCenters = {
+        circle: { x: 453, y: 253},
+        square: { x: 812, y: 150 },
+        triangle: { x: 1175, y: 226 },
+        rectangle: { x: 1493, y: 397 },
+        oval: { x: 1320, y: 759.05 },
+        heart: { x: 904.05, y: 805 },
+        star: { x: 419, y: 787.05 },
+        diamond: { x: 205, y: 569 },
+    };
+    const game3Hotspots = game3Page?.querySelectorAll('[data-game3-shape]') || [];
     let lettertraceCurrentLetter = 'A';
     let lettertraceCurrentCase = 'upper';
     let lettertraceTraceDrawing = false;
@@ -622,8 +635,72 @@ document.addEventListener('DOMContentLoaded', () => {
         pauseGame1BgVideo();
     };
 
+    const resetGame3Hotspots = () => {
+        game3Hotspots.forEach((hotspot) => {
+            hotspot.classList.remove('is-active');
+            hotspot.setAttribute('aria-pressed', 'false');
+        });
+    };
+
+    const bindGame3Hotspots = () => {
+        if (!game3Hotspots.length) return;
+
+        game3Hotspots.forEach((hotspot) => {
+            if (hotspot.dataset.bound === 'true') return;
+
+            hotspot.dataset.bound = 'true';
+            hotspot.addEventListener('click', () => {
+                game3Hotspots.forEach((otherHotspot) => {
+                    const isCurrent = otherHotspot === hotspot;
+                    otherHotspot.classList.toggle('is-active', isCurrent);
+                    otherHotspot.setAttribute('aria-pressed', isCurrent ? 'true' : 'false');
+                });
+            });
+        });
+    };
+
+    const positionGame3Hotspots = () => {
+        if (!game3Page || !game3Hotspots.length) return;
+
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const imageAspect = game3ImageSize.width / game3ImageSize.height;
+        const viewportAspect = viewportWidth / viewportHeight;
+
+        let renderWidth;
+        let renderHeight;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        // Match the background image's `object-fit: cover` sizing so the hotspots
+        // stay pinned to the exact same pixels the user sees.
+        if (viewportAspect > imageAspect) {
+            renderWidth = viewportWidth;
+            renderHeight = viewportWidth / imageAspect;
+            offsetY = (viewportHeight - renderHeight) / 2;
+        } else {
+            renderHeight = viewportHeight;
+            renderWidth = viewportHeight * imageAspect;
+            offsetX = (viewportWidth - renderWidth) / 2;
+        }
+
+        game3Hotspots.forEach((hotspot) => {
+            const key = hotspot.dataset.game3Shape;
+            const center = game3HotspotCenters[key];
+            if (!center) return;
+
+            const left = offsetX + (center.x / game3ImageSize.width) * renderWidth;
+            const top = offsetY + (center.y / game3ImageSize.height) * renderHeight;
+            hotspot.style.left = `${left}px`;
+            hotspot.style.top = `${top}px`;
+        });
+    };
+
     window.addEventListener('learnscape:routechange', (event) => {
         syncGame1BgPlayback();
+        if (event.detail?.route !== 'game3') {
+            resetGame3Hotspots();
+        }
     });
 
     if (isPageVisible(game1Page) && !document.hidden) {
@@ -631,6 +708,12 @@ document.addEventListener('DOMContentLoaded', () => {
         playGame1BgVideo();
     } else {
         unloadGame1BgVideoSource();
+    }
+
+    bindGame3Hotspots();
+    positionGame3Hotspots();
+    if (!isPageVisible(game3Page)) {
+        resetGame3Hotspots();
     }
 
     game1BgVideo?.addEventListener('loadedmetadata', syncGame1BgLoopVolume);
@@ -645,6 +728,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('visibilitychange', syncGame1BgPlayback);
     window.addEventListener('pagehide', pauseGame1BgVideo);
     window.addEventListener('blur', pauseGame1BgVideo);
+    window.addEventListener('resize', positionGame3Hotspots);
+    window.addEventListener('orientationchange', positionGame3Hotspots);
 
     const createRotateOverlayMarkup = () => `
         <div class="rotate-panel">

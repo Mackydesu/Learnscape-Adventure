@@ -1943,6 +1943,180 @@ body.is-touch-dragging {
     pointer-events: none;
 }
 
+.game3-hotspots {
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+}
+
+.game3-hotspot {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: clamp(5.8rem, 7.8vw, 8.8rem);
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    pointer-events: auto;
+    transition:
+        transform 0.18s ease,
+        filter 0.18s ease,
+        opacity 0.18s ease;
+}
+
+.game3-hotspot::before {
+    content: '';
+    position: absolute;
+    inset: -30%;
+    border-radius: inherit;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.16) 0, rgba(255, 244, 95, 0.16) 38%, transparent 74%);
+    opacity: 0;
+    transform: scale(0.85);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.game3-hotspot svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: visible;
+    filter:
+        drop-shadow(0 0 8px rgba(255, 255, 255, 0.22))
+        drop-shadow(0 0 14px rgba(255, 244, 95, 0.16));
+}
+
+.game3-hotspot:hover,
+.game3-hotspot:focus-visible {
+    transform: translate(-50%, -50%) scale(1.07);
+    filter: brightness(1.08);
+}
+
+.game3-hotspot:hover::before,
+.game3-hotspot:focus-visible::before,
+.game3-hotspot.is-active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.game3-hotspot.is-active {
+    transform: translate(-50%, -50%) scale(1.12);
+    filter: brightness(1.1);
+}
+
+.game3-hotspot.is-active svg {
+    filter:
+        drop-shadow(0 0 10px rgba(255, 255, 255, 0.4))
+        drop-shadow(0 0 24px rgba(255, 244, 95, 0.35));
+}
+
+.game3-hotspot:active {
+    transform: translate(-50%, -50%) scale(0.97);
+}
+
+.game3-hotspot svg * {
+    stroke: rgba(255, 255, 255, 0.96);
+    stroke-width: 12;
+    paint-order: stroke fill;
+    vector-effect: non-scaling-stroke;
+}
+
+.game3-hotspot-circle {
+    left: 27%;
+    top: 25%;
+    color: #1f8dff;
+}
+
+.game3-hotspot-circle svg * {
+    fill: #1f8dff;
+}
+
+.game3-hotspot-square {
+    left: 49.5%;
+    top: 17.5%;
+    width: clamp(5rem, 6.6vw, 7.4rem);
+    color: #9a3ef8;
+}
+
+.game3-hotspot-square svg * {
+    fill: #9a3ef8;
+}
+
+.game3-hotspot-triangle {
+    left: 71.5%;
+    top: 27.6%;
+    width: clamp(5.8rem, 7.4vw, 8.2rem);
+    color: #40c91e;
+}
+
+.game3-hotspot-triangle svg * {
+    fill: #40c91e;
+}
+
+.game3-hotspot-triangle svg {
+    transform: scaleY(0.96);
+    transform-origin: center;
+}
+
+.game3-hotspot-rectangle {
+    left: 87.2%;
+    top: 39.8%;
+    width: clamp(6.2rem, 8vw, 8.8rem);
+    color: #ff9a1f;
+}
+
+.game3-hotspot-rectangle svg * {
+    fill: #ff9a1f;
+}
+
+.game3-hotspot-oval {
+    left: 78.4%;
+    top: 78.1%;
+    width: clamp(5rem, 6.4vw, 7rem);
+    color: #ff5fb0;
+}
+
+.game3-hotspot-oval svg * {
+    fill: #ff5fb0;
+}
+
+.game3-hotspot-heart {
+    left: 50.3%;
+    top: 79.2%;
+    width: clamp(5rem, 6.4vw, 7rem);
+    color: #ff3b2f;
+}
+
+.game3-hotspot-heart svg * {
+    fill: #ff3b2f;
+}
+
+.game3-hotspot-star {
+    left: 24.2%;
+    top: 76.7%;
+    width: clamp(5.5rem, 6.0vw, 6.9rem);
+    color: #ffca2e;
+}
+
+.game3-hotspot-star svg * {
+    fill: #ffca2e;
+}
+
+.game3-hotspot-diamond {
+    left: 9.7%;
+    top: 59.6%;
+    width: clamp(5rem, 6.2vw, 6.8rem);
+    color: #2d68ff;
+}
+
+.game3-hotspot-diamond svg * {
+    fill: #2d68ff;
+}
+
 .game1-intro {
     position: fixed;
     inset: 0;
