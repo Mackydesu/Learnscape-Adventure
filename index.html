@@ -222,6 +222,33 @@
             <span>‹</span>
             Back
         </a>
+
+        <div class="shape-collection-widget" aria-label="Shape collection">
+            <button class="shape-collection-chest" type="button" aria-expanded="false" aria-controls="shape-collection-dashboard">
+                <span class="shape-collection-chest-glow" aria-hidden="true"></span>
+                <img class="shape-collection-chest-base" src="assets/Buttons/chest.webp" alt="Shape Collection treasure chest">
+                <video class="shape-collection-chest-video shape-collection-chest-open-video" src="assets/Buttons/chestopen.webm" muted playsinline preload="auto" aria-hidden="true"></video>
+                <video class="shape-collection-chest-video shape-collection-chest-steady-video" src="assets/Buttons/chesteady.webm" muted playsinline loop preload="auto" aria-hidden="true"></video>
+            </button>
+        </div>
+
+        <div id="shape-collection-dashboard" class="shape-collection-dashboard" role="dialog" aria-modal="true" aria-labelledby="shape-collection-dashboard-title" hidden>
+            <div class="shape-collection-dashboard-card">
+                <button class="shape-collection-close" type="button" aria-label="Close Shape Collection">&times;</button>
+                <p class="shape-collection-kicker">Treasure Chest</p>
+                <h2 id="shape-collection-dashboard-title">Shape Collection</h2>
+                <div class="shape-collection-grid" aria-label="Collected shapes">
+                    <span class="shape-collection-item shape-collection-item-circle"><span class="shape-collection-icon" aria-hidden="true"></span><span class="shape-collection-label">Circle</span></span>
+                    <span class="shape-collection-item shape-collection-item-square"><span class="shape-collection-icon" aria-hidden="true"></span><span class="shape-collection-label">Square</span></span>
+                    <span class="shape-collection-item shape-collection-item-triangle"><span class="shape-collection-icon" aria-hidden="true"></span><span class="shape-collection-label">Triangle</span></span>
+                    <span class="shape-collection-item shape-collection-item-rectangle"><span class="shape-collection-icon" aria-hidden="true"></span><span class="shape-collection-label">Rectangle</span></span>
+                    <span class="shape-collection-item shape-collection-item-oval"><span class="shape-collection-icon" aria-hidden="true"></span><span class="shape-collection-label">Oval</span></span>
+                    <span class="shape-collection-item shape-collection-item-heart"><span class="shape-collection-icon" aria-hidden="true"></span><span class="shape-collection-label">Heart</span></span>
+                    <span class="shape-collection-item shape-collection-item-star"><span class="shape-collection-icon" aria-hidden="true"></span><span class="shape-collection-label">Star</span></span>
+                    <span class="shape-collection-item shape-collection-item-diamond"><span class="shape-collection-icon" aria-hidden="true"></span><span class="shape-collection-label">Diamond</span></span>
+                </div>
+            </div>
+        </div>
     </section>
 
     <section id="learnscape-lettertrace-page" hidden>
@@ -681,7 +708,7 @@
                     if (event.pointerType === 'mouse' && event.button !== 0) return;
 
                     const target = event.target instanceof Element ? event.target : null;
-                    if (target?.closest('.game-return-btn')) return;
+                    if (target?.closest('.game-return-btn, .shape-collection-widget, .shape-collection-dashboard')) return;
 
                     activePointerId = event.pointerId;
                     startX = event.clientX;
@@ -742,6 +769,102 @@
             };
 
             setupGame3MapDrag();
+
+            const setupShapeCollectionChest = () => {
+                const page = pages.game3;
+                if (!page) return;
+
+                const widget = page.querySelector('.shape-collection-widget');
+                const chestButton = page.querySelector('.shape-collection-chest');
+                const chestOpenVideo = page.querySelector('.shape-collection-chest-open-video');
+                const chestSteadyVideo = page.querySelector('.shape-collection-chest-steady-video');
+                const dashboard = page.querySelector('.shape-collection-dashboard');
+                const closeButton = page.querySelector('.shape-collection-close');
+                if (!widget || !chestButton || !chestOpenVideo || !chestSteadyVideo || !dashboard || !closeButton) return;
+                let steadyTransitionTimer = null;
+                let dashboardOpenTimer = null;
+
+                const resetChestVideos = () => {
+                    if (steadyTransitionTimer) {
+                        window.clearTimeout(steadyTransitionTimer);
+                        steadyTransitionTimer = null;
+                    }
+
+                    if (dashboardOpenTimer) {
+                        window.clearTimeout(dashboardOpenTimer);
+                        dashboardOpenTimer = null;
+                    }
+
+                    chestOpenVideo.pause();
+                    chestSteadyVideo.pause();
+                    chestOpenVideo.currentTime = 0;
+                    chestSteadyVideo.currentTime = 0;
+                };
+
+                const playSteadyChest = () => {
+                    if (dashboard.hidden) return;
+
+                    if (steadyTransitionTimer) {
+                        window.clearTimeout(steadyTransitionTimer);
+                    }
+
+                    chestSteadyVideo.currentTime = 0;
+                    const steadyPromise = chestSteadyVideo.play();
+                    if (steadyPromise) {
+                        steadyPromise.catch(() => {});
+                    }
+
+                    widget.classList.add('is-steady');
+                    steadyTransitionTimer = window.setTimeout(() => {
+                        widget.classList.remove('is-opening');
+                        steadyTransitionTimer = null;
+                    }, 260);
+                };
+
+                const openDashboard = () => {
+                    resetChestVideos();
+                    widget.classList.add('is-open', 'is-opening');
+                    widget.classList.remove('is-steady');
+                    chestButton.setAttribute('aria-expanded', 'true');
+                    chestOpenVideo.playbackRate = 1.65;
+                    const playPromise = chestOpenVideo.play();
+                    if (playPromise) {
+                        playPromise.catch(playSteadyChest);
+                    }
+
+                    dashboardOpenTimer = window.setTimeout(() => {
+                        dashboard.hidden = false;
+                        dashboardOpenTimer = null;
+                        closeButton.focus({ preventScroll: true });
+                    }, 520);
+                };
+
+                const closeDashboard = () => {
+                    widget.classList.remove('is-open', 'is-opening', 'is-steady');
+                    dashboard.hidden = true;
+                    chestButton.setAttribute('aria-expanded', 'false');
+                    resetChestVideos();
+                    chestButton.focus({ preventScroll: true });
+                };
+
+                chestButton.addEventListener('click', () => {
+                    if (dashboard.hidden) {
+                        openDashboard();
+                    }
+                });
+
+                closeButton.addEventListener('click', closeDashboard);
+
+                chestOpenVideo.addEventListener('ended', playSteadyChest);
+
+                dashboard.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape') {
+                        closeDashboard();
+                    }
+                });
+            };
+
+            setupShapeCollectionChest();
 
             const setRoute = (routeData, replace = false) => {
                 const routeName = routeData?.routeName || 'title';

@@ -2472,6 +2472,355 @@ body.is-touch-dragging {
     fill: #2d68ff;
 }
 
+.shape-collection-widget {
+    position: fixed;
+    left: clamp(0.05rem, 0.35vw, 0.35rem);
+    bottom: clamp(0.6rem, 1.8vh, 1.2rem);
+    z-index: 72;
+    width: clamp(11rem, 20vw, 18rem);
+    pointer-events: auto;
+    perspective: 900px;
+}
+
+.shape-collection-chest {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    filter:
+        drop-shadow(0 1rem 1.1rem rgba(36, 20, 6, 0.34))
+        drop-shadow(0 0 1.2rem rgba(255, 207, 73, 0.2));
+    transform-origin: 50% 82%;
+    animation: shapeCollectionChestFloat 3.4s ease-in-out infinite;
+}
+
+.shape-collection-chest::before {
+    content: none;
+}
+
+.shape-collection-chest-base,
+.shape-collection-chest-video {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    user-select: none;
+    transform-origin: 50% 82%;
+    transition:
+        transform 0.42s cubic-bezier(0.2, 0.9, 0.2, 1.18),
+        filter 0.28s ease,
+        opacity 0.28s ease;
+}
+
+.shape-collection-chest-base {
+    height: auto;
+}
+
+.shape-collection-chest-video {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.shape-collection-chest-glow {
+    display: none;
+}
+
+.shape-collection-chest:hover,
+.shape-collection-chest:focus-visible {
+    animation-play-state: paused;
+}
+
+.shape-collection-chest:hover .shape-collection-chest-base,
+.shape-collection-chest:focus-visible .shape-collection-chest-base,
+.shape-collection-chest:hover .shape-collection-chest-video,
+.shape-collection-chest:focus-visible .shape-collection-chest-video {
+    transform: translateY(-0.25rem) scale(1.04);
+    filter: saturate(1.08) brightness(1.06);
+}
+
+.shape-collection-widget.is-open .shape-collection-chest {
+    animation: none;
+}
+
+.shape-collection-widget.is-open .shape-collection-chest::before {
+    content: none;
+}
+
+.shape-collection-widget.is-open .shape-collection-chest-base,
+.shape-collection-widget.is-open .shape-collection-chest-video {
+    transform: translateY(-0.45rem) scale(1.03);
+    filter: brightness(1.08) saturate(1.12);
+}
+
+.shape-collection-widget.is-open .shape-collection-chest-base {
+    opacity: 0;
+}
+
+.shape-collection-widget.is-open.is-opening .shape-collection-chest-open-video,
+.shape-collection-widget.is-open.is-steady .shape-collection-chest-steady-video {
+    opacity: 1;
+}
+
+.shape-collection-dashboard {
+    position: fixed;
+    left: clamp(9.5rem, 17vw, 16rem);
+    bottom: clamp(8rem, 22vh, 14rem);
+    z-index: 90;
+    width: min(38rem, 62vw);
+    pointer-events: auto;
+    animation: shapeCollectionDashboardIn 0.36s cubic-bezier(0.2, 0.9, 0.2, 1.18) both;
+}
+
+.shape-collection-dashboard-card {
+    position: relative;
+    min-height: clamp(24rem, 58vh, 34rem);
+    padding: clamp(1.25rem, 2.4vw, 1.75rem);
+    border: 0.22rem solid #ffc43d;
+    border-radius: 1.6rem;
+    background:
+        radial-gradient(circle at 16% 14%, rgba(255, 255, 255, 0.4) 0, transparent 18%),
+        radial-gradient(circle at 82% 8%, rgba(255, 244, 95, 0.28) 0, transparent 19%),
+        linear-gradient(180deg, rgba(255, 238, 172, 0.98), rgba(255, 198, 92, 0.96));
+    box-shadow:
+        0 1.2rem 2rem rgba(31, 18, 6, 0.28),
+        0 0 0 0.2rem rgba(120, 58, 6, 0.18),
+        inset 0 0.16rem 0 rgba(255, 255, 255, 0.58);
+    color: #3a1f0b;
+    overflow: hidden;
+}
+
+.shape-collection-dashboard-card::before,
+.shape-collection-dashboard-card::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+}
+
+.shape-collection-dashboard-card::before {
+    inset: 0.45rem;
+    border: 0.12rem dashed rgba(122, 74, 42, 0.28);
+    border-radius: 1.1rem;
+}
+
+.shape-collection-dashboard-card::after {
+    right: -3.5rem;
+    top: -3.2rem;
+    width: 9rem;
+    height: 9rem;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.45) 0, transparent 62%);
+}
+
+.shape-collection-close {
+    position: absolute;
+    top: 0.65rem;
+    right: 0.75rem;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 2.15rem;
+    aspect-ratio: 1;
+    border: 0.16rem solid #7a4a2a;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #fff4b7, #ffbf3d);
+    color: #4d2605;
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 0.25rem 0 #7a4a2a;
+}
+
+.shape-collection-close:active {
+    transform: translateY(0.16rem);
+    box-shadow: 0 0.09rem 0 #7a4a2a;
+}
+
+.shape-collection-kicker {
+    position: relative;
+    z-index: 1;
+    margin: 0 2.8rem 0.25rem 0;
+    color: #7a4a2a;
+    font-family: 'Fredoka', sans-serif;
+    font-size: clamp(0.78rem, 1.4vw, 0.95rem);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.shape-collection-dashboard h2 {
+    position: relative;
+    z-index: 1;
+    margin: 0 2.4rem 0.9rem 0;
+    color: #32169f;
+    font-size: clamp(1.7rem, 3.8vw, 2.6rem);
+    line-height: 0.95;
+    text-shadow:
+        0 0.12rem 0 #fff6ce,
+        0 0.25rem 0 rgba(122, 74, 42, 0.18);
+}
+
+.shape-collection-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(0.95rem, 1.8vw, 1.35rem);
+}
+
+.shape-collection-item {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    place-items: center;
+    min-height: clamp(6.2rem, 13vh, 8rem);
+    padding: 1.05rem 0.85rem 0.85rem;
+    border: 0.16rem solid rgba(122, 74, 42, 0.42);
+    border-radius: 0.9rem;
+    background:
+        linear-gradient(180deg, rgba(255, 249, 215, 0.92), rgba(255, 214, 114, 0.84));
+    color: var(--shape-collection-color, #fff);
+    font-size: clamp(0.72rem, 1.2vw, 0.92rem);
+    font-weight: 900;
+    text-shadow:
+        0 0.08rem 0 rgba(255, 255, 255, 0.72),
+        0 0.12rem 0 rgba(122, 74, 42, 0.18);
+    box-shadow:
+        inset 0 0.12rem 0 rgba(255, 255, 255, 0.46),
+        0 0.28rem 0 rgba(122, 74, 42, 0.26);
+    overflow: hidden;
+}
+
+.shape-collection-icon {
+    position: relative;
+    display: block;
+    align-self: center;
+    max-width: 92%;
+    max-height: 82%;
+    width: clamp(2.65rem, 4.9vw, 3.95rem);
+    height: clamp(2.65rem, 4.9vw, 3.95rem);
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.32), transparent 34%),
+        var(--shape-collection-color, #fff);
+    filter: drop-shadow(0 0.22rem 0 rgba(91, 48, 8, 0.26));
+}
+
+.shape-collection-label {
+    display: block;
+    margin-top: 0.32rem;
+    line-height: 1;
+    text-align: center;
+    max-width: 100%;
+}
+
+.shape-collection-item-circle { --shape-collection-color: #1f8dff; }
+.shape-collection-item-circle .shape-collection-icon { border-radius: 50%; }
+
+.shape-collection-item-square { --shape-collection-color: #9a3ef8; }
+.shape-collection-item-square .shape-collection-icon { border-radius: 0.28rem; }
+
+.shape-collection-item-triangle { --shape-collection-color: #40c91e; }
+.shape-collection-item-triangle .shape-collection-icon {
+    clip-path: polygon(50% 3%, 96% 93%, 4% 93%);
+}
+
+.shape-collection-item-rectangle { --shape-collection-color: #ff9a1f; }
+.shape-collection-item-rectangle .shape-collection-icon {
+    width: clamp(2.9rem, 5.35vw, 4.35rem);
+    height: clamp(1.6rem, 2.9vw, 2.35rem);
+    border-radius: 0.28rem;
+}
+
+.shape-collection-item-oval { --shape-collection-color: #ff5fb0; }
+.shape-collection-item-oval .shape-collection-icon {
+    width: clamp(2.95rem, 5.45vw, 4.45rem);
+    height: clamp(1.75rem, 3.2vw, 2.55rem);
+    border-radius: 50%;
+}
+
+.shape-collection-item-heart { --shape-collection-color: #ff3b2f; }
+.shape-collection-item-heart .shape-collection-icon {
+    width: clamp(1.9rem, 3.6vw, 2.85rem);
+    height: clamp(1.9rem, 3.6vw, 2.85rem);
+    margin-top: 0.5rem;
+    background: var(--shape-collection-color);
+    transform: rotate(-45deg);
+}
+
+.shape-collection-item-heart .shape-collection-icon::before,
+.shape-collection-item-heart .shape-collection-icon::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--shape-collection-color);
+}
+
+.shape-collection-item-heart .shape-collection-icon::before {
+    top: -50%;
+    left: 0;
+}
+
+.shape-collection-item-heart .shape-collection-icon::after {
+    top: 0;
+    right: -50%;
+}
+
+.shape-collection-item-star { --shape-collection-color: #ffca2e; }
+.shape-collection-item-star .shape-collection-icon {
+    width: clamp(3.25rem, 6vw, 4.8rem);
+    height: clamp(3.25rem, 6vw, 4.8rem);
+    clip-path: polygon(50% 0%, 61% 34%, 98% 34%, 68% 55%, 79% 91%, 50% 69%, 21% 91%, 32% 55%, 2% 34%, 39% 34%);
+}
+
+.shape-collection-item-diamond { --shape-collection-color: #2d68ff; }
+.shape-collection-item-diamond .shape-collection-icon {
+    width: clamp(2.55rem, 4.7vw, 3.75rem);
+    height: clamp(2.55rem, 4.7vw, 3.75rem);
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+
+@keyframes shapeCollectionChestFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(-1deg);
+    }
+
+    50% {
+        transform: translateY(-0.35rem) rotate(1deg);
+    }
+}
+
+@keyframes shapeCollectionGemGlow {
+    0%, 100% {
+        opacity: 0.75;
+        filter: blur(0.6rem);
+    }
+
+    50% {
+        opacity: 1;
+        filter: blur(0.9rem);
+    }
+}
+
+@keyframes shapeCollectionDashboardIn {
+    from {
+        opacity: 0;
+        transform: translateY(1rem) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 .game1-intro {
     position: fixed;
     inset: 0;
