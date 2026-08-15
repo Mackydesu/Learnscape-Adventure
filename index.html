@@ -565,10 +565,32 @@
 
                 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
-                const getScrollBounds = () => ({
-                    maxLeft: Math.max(0, map.scrollWidth - map.clientWidth),
-                    maxTop: Math.max(0, map.scrollHeight - map.clientHeight),
-                });
+                const getScrollBounds = () => {
+                    const styles = window.getComputedStyle(map);
+                    const bottomTrimRatio = Number.parseFloat(
+                        styles.getPropertyValue('--game3-bottom-scroll-trim-ratio')
+                    ) || 0;
+                    const bottomTrim = map.clientHeight * bottomTrimRatio;
+
+                    return {
+                        maxLeft: Math.max(0, map.scrollWidth - map.clientWidth),
+                        maxTop: Math.max(0, map.scrollHeight - map.clientHeight - bottomTrim),
+                    };
+                };
+
+                const clampCurrentScroll = () => {
+                    const { maxLeft, maxTop } = getScrollBounds();
+                    const nextScrollLeft = clamp(map.scrollLeft, 0, maxLeft);
+                    const nextScrollTop = clamp(map.scrollTop, 0, maxTop);
+
+                    if (nextScrollLeft !== map.scrollLeft) {
+                        map.scrollLeft = nextScrollLeft;
+                    }
+
+                    if (nextScrollTop !== map.scrollTop) {
+                        map.scrollTop = nextScrollTop;
+                    }
+                };
 
                 const stopScrollAnimation = () => {
                     if (!animationFrame) return;
@@ -715,6 +737,8 @@
                 map.addEventListener('dragstart', (event) => {
                     event.preventDefault();
                 }, true);
+
+                map.addEventListener('scroll', clampCurrentScroll, { passive: true });
             };
 
             setupGame3MapDrag();

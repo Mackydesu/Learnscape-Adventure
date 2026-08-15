@@ -440,6 +440,9 @@ body.is-page-loading .page-loading-overlay {
 #learnscape-game3-page.game3-page {
     --game3-map-width: max(150vw, 266.7vh);
     --game3-map-height: max(150vh, 84.5vw);
+    --game3-base-width: calc(var(--game3-map-width) / 1.5);
+    --game3-base-height: calc(var(--game3-map-height) / 1.5);
+    --game3-bottom-scroll-trim-ratio: 0.18;
     overflow: auto;
     overscroll-behavior: contain;
     scroll-behavior: auto;
@@ -487,7 +490,7 @@ body.is-page-loading .page-loading-overlay {
     width: var(--game3-map-width);
     height: var(--game3-map-height);
     transform: none;
-    object-fit: contain;
+    object-fit: fill;
     object-position: top left;
 }
 
@@ -497,10 +500,18 @@ body.is-page-loading .page-loading-overlay {
     inset: auto;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100svh;
+    width: var(--game3-base-width);
+    height: var(--game3-base-height);
     transform: scale(1.5);
     transform-origin: top left;
+}
+
+#learnscape-game3-page.game3-page > .game3-hotspots {
+    top: 16svh;
+}
+
+body.is-fullscreen-mode #learnscape-game3-page.game3-page > .game3-hotspots {
+    top: 0;
 }
 
 .game1-overlay {
