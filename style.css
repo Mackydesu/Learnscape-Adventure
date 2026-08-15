@@ -459,6 +459,46 @@ body.is-page-loading .page-loading-overlay {
         linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.08));
 }
 
+.game3-clouds {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.game3-cloud {
+    position: absolute;
+    display: block;
+    width: clamp(14rem, 18vw, 22rem);
+    height: auto;
+    max-width: none;
+    transform: translate(-50%, -50%);
+    opacity: 1;
+    filter:
+        drop-shadow(0 0.25rem 0.85rem rgba(80, 120, 145, 0.12))
+        drop-shadow(0 0 1.4rem rgba(255, 255, 255, 0.1));
+    user-select: none;
+}
+
+.game3-cloud--small {
+    opacity: 1;
+    filter:
+        drop-shadow(0 0.18rem 0.7rem rgba(80, 120, 145, 0.08))
+        drop-shadow(0 0 1rem rgba(255, 255, 255, 0.06));
+}
+
+.game3-cloud--medium {
+    opacity: 1;
+}
+
+.game3-cloud--large {
+    opacity: 1;
+    filter:
+        drop-shadow(0 0.36rem 1rem rgba(80, 120, 145, 0.14))
+        drop-shadow(0 0 1.8rem rgba(255, 255, 255, 0.12));
+}
+
 .game1-celebration-layer {
     position: fixed;
     inset: 0;
@@ -2980,7 +3020,7 @@ body.is-fullscreen-mode .game1-level-star {
 .game1-page .game-return-btn,
 .game3-page .game-return-btn,
 .gameplay-page .game-return-btn {
-    z-index: 3;
+    z-index: 6;
 }
 
 h1,
