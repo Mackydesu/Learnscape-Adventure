@@ -542,7 +542,8 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page > .game3-hotspots {
     z-index: 5;
     pointer-events: none;
     overflow: hidden;
-    background-color: rgba(224, 229, 234, 0.38);
+    opacity: 0.9;
+    background-color: rgba(224, 229, 234, 0.3);
     background-image:
         radial-gradient(ellipse 18vw 12vh at 49.5% 20.0%, rgba(242, 246, 248, 0.96) 0 34%, rgba(228, 234, 239, 0.9) 62%, transparent 92%),
         radial-gradient(ellipse 19vw 13vh at 71.5% 30.0%, rgba(242, 246, 248, 0.96) 0 34%, rgba(228, 234, 239, 0.9) 62%, transparent 92%),
@@ -572,6 +573,7 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page > .game3-hotspots {
 }
 
 .game3-fog::before {
+    opacity: 0.78;
     background-image:
         radial-gradient(ellipse 16vw 11vh at 49.2% 20.2%, rgba(244, 247, 249, 0.98) 0 26%, rgba(230, 236, 240, 0.94) 50%, transparent 82%),
         radial-gradient(ellipse 18vw 12vh at 71.6% 22.0%, rgba(237, 242, 246, 0.99) 0 26%, rgba(223, 230, 235, 0.94) 50%, transparent 82%),
@@ -654,7 +656,7 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page > .game3-hotspots {
         100% 100%,
         100% 100%,
         100% 100%;
-    opacity: 1;
+    opacity: 0.78;
     animation: none;
 }
 
@@ -679,7 +681,7 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page > .game3-hotspots {
         url('assets/Backgrounds/clouds.webp'),
         url('assets/Backgrounds/clouds.webp');
     background-repeat: no-repeat;
-    opacity: 1;
+    opacity: 0.82;
     will-change: transform;
     transform: translate3d(115%, 0, 0);
 }
