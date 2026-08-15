@@ -2719,32 +2719,32 @@ body.is-touch-dragging {
     max-width: 100%;
 }
 
-.shape-collection-item-circle { --shape-collection-color: #1f8dff; }
+.shape-collection-item-circle { --shape-collection-color: #17120b; }
 .shape-collection-item-circle .shape-collection-icon { border-radius: 50%; }
 
-.shape-collection-item-square { --shape-collection-color: #9a3ef8; }
+.shape-collection-item-square { --shape-collection-color: #17120b; }
 .shape-collection-item-square .shape-collection-icon { border-radius: 0.28rem; }
 
-.shape-collection-item-triangle { --shape-collection-color: #40c91e; }
+.shape-collection-item-triangle { --shape-collection-color: #17120b; }
 .shape-collection-item-triangle .shape-collection-icon {
     clip-path: polygon(50% 3%, 96% 93%, 4% 93%);
 }
 
-.shape-collection-item-rectangle { --shape-collection-color: #ff9a1f; }
+.shape-collection-item-rectangle { --shape-collection-color: #17120b; }
 .shape-collection-item-rectangle .shape-collection-icon {
     width: clamp(2.9rem, 5.35vw, 4.35rem);
     height: clamp(1.6rem, 2.9vw, 2.35rem);
     border-radius: 0.28rem;
 }
 
-.shape-collection-item-oval { --shape-collection-color: #ff5fb0; }
+.shape-collection-item-oval { --shape-collection-color: #17120b; }
 .shape-collection-item-oval .shape-collection-icon {
     width: clamp(2.95rem, 5.45vw, 4.45rem);
     height: clamp(1.75rem, 3.2vw, 2.55rem);
     border-radius: 50%;
 }
 
-.shape-collection-item-heart { --shape-collection-color: #ff3b2f; }
+.shape-collection-item-heart { --shape-collection-color: #17120b; }
 .shape-collection-item-heart .shape-collection-icon {
     width: clamp(1.9rem, 3.6vw, 2.85rem);
     height: clamp(1.9rem, 3.6vw, 2.85rem);
@@ -2773,14 +2773,14 @@ body.is-touch-dragging {
     right: -50%;
 }
 
-.shape-collection-item-star { --shape-collection-color: #ffca2e; }
+.shape-collection-item-star { --shape-collection-color: #17120b; }
 .shape-collection-item-star .shape-collection-icon {
     width: clamp(3.25rem, 6vw, 4.8rem);
     height: clamp(3.25rem, 6vw, 4.8rem);
     clip-path: polygon(50% 0%, 61% 34%, 98% 34%, 68% 55%, 79% 91%, 50% 69%, 21% 91%, 32% 55%, 2% 34%, 39% 34%);
 }
 
-.shape-collection-item-diamond { --shape-collection-color: #2d68ff; }
+.shape-collection-item-diamond { --shape-collection-color: #17120b; }
 .shape-collection-item-diamond .shape-collection-icon {
     width: clamp(2.55rem, 4.7vw, 3.75rem);
     height: clamp(2.55rem, 4.7vw, 3.75rem);
