@@ -514,6 +514,10 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page > .game3-hotspots {
     top: 0;
 }
 
+body.is-fullscreen-mode #learnscape-game3-page.game3-page {
+    --game3-bottom-scroll-trim-ratio: 0;
+}
+
 .game1-overlay {
     position: fixed;
     inset: 0;
@@ -578,7 +582,8 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page > .game3-hotspots {
         radial-gradient(ellipse 16vw 11vh at 49.2% 20.2%, rgba(244, 247, 249, 0.98) 0 26%, rgba(230, 236, 240, 0.94) 50%, transparent 82%),
         radial-gradient(ellipse 18vw 12vh at 71.6% 22.0%, rgba(237, 242, 246, 0.99) 0 26%, rgba(223, 230, 235, 0.94) 50%, transparent 82%),
         radial-gradient(ellipse 31vw 12vh at 62.6% 25.2%, rgba(243, 247, 249, 0.98) 0 24%, rgba(226, 233, 238, 0.94) 50%, transparent 82%),
-        radial-gradient(ellipse 21vw 18vh at 79.3% 34.0%, rgba(244, 248, 250, 1) 0 32%, rgba(224, 231, 236, 0.98) 58%, transparent 86%),
+        radial-gradient(ellipse 21vw 18vh at 76.8% 40.0%, rgba(244, 248, 250, 1) 0 32%, rgba(224, 231, 236, 0.98) 58%, transparent 86%),
+        radial-gradient(ellipse 20vw 12vh at 77.1% 50.5%, rgba(243, 247, 249, 0.98) 0 28%, rgba(226, 232, 237, 0.94) 56%, transparent 88%),
         radial-gradient(ellipse 22vw 14vh at 67.2% 73.0%, rgba(239, 243, 246, 0.99) 0 28%, rgba(225, 231, 236, 0.96) 56%, transparent 88%),
         radial-gradient(ellipse 18vw 11vh at 68.8% 64.4%, rgba(242, 246, 248, 0.96) 0 24%, rgba(228, 234, 239, 0.9) 50%, transparent 82%),
         radial-gradient(ellipse 16vw 11vh at 50.8% 67.8%, rgba(238, 242, 245, 0.98) 0 26%, rgba(225, 231, 236, 0.92) 50%, transparent 82%),
@@ -612,6 +617,7 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page > .game3-hotspots {
         100% 100%,
         100% 100%,
         100% 100%,
+        100% 100%,
         100% 100%;
     animation: none;
 }
@@ -621,7 +627,8 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page > .game3-hotspots {
         radial-gradient(ellipse 18vw 12vh at 49.4% 19.6%, rgba(242, 246, 248, 0.99) 0 26%, rgba(230, 235, 240, 0.96) 50%, transparent 82%),
         radial-gradient(ellipse 20vw 13vh at 71.3% 22.5%, rgba(234, 239, 243, 1) 0 26%, rgba(220, 227, 232, 0.96) 50%, transparent 82%),
         radial-gradient(ellipse 33vw 13vh at 63.0% 25.6%, rgba(241, 245, 248, 0.99) 0 24%, rgba(224, 231, 236, 0.96) 50%, transparent 82%),
-        radial-gradient(ellipse 23vw 20vh at 79.2% 34.6%, rgba(245, 248, 250, 1) 0 34%, rgba(225, 232, 237, 0.99) 60%, transparent 88%),
+        radial-gradient(ellipse 23vw 20vh at 76.7% 40.6%, rgba(245, 248, 250, 1) 0 34%, rgba(225, 232, 237, 0.99) 60%, transparent 88%),
+        radial-gradient(ellipse 22vw 13vh at 77.1% 51.2%, rgba(244, 248, 250, 0.99) 0 30%, rgba(226, 232, 237, 0.95) 58%, transparent 90%),
         radial-gradient(ellipse 24vw 15vh at 67.2% 73.5%, rgba(240, 244, 247, 0.99) 0 28%, rgba(226, 232, 237, 0.97) 56%, transparent 88%),
         radial-gradient(ellipse 19vw 12vh at 68.8% 64.0%, rgba(242, 246, 248, 0.97) 0 24%, rgba(228, 234, 239, 0.92) 50%, transparent 82%),
         radial-gradient(ellipse 18vw 12vh at 50.6% 67.8%, rgba(237, 241, 245, 1) 0 26%, rgba(224, 230, 235, 0.96) 50%, transparent 82%),
@@ -637,6 +644,7 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page > .game3-hotspots {
         radial-gradient(ellipse 15vw 6vh at 13.8% 56.2%, rgba(248, 251, 252, 1) 0 44%, rgba(229, 235, 240, 1) 72%, transparent 94%),
         radial-gradient(ellipse 80vw 22vh at 11.4% 28.0%, rgba(245, 248, 250, 1) 0 32%, rgba(226, 232, 237, 0.98) 60%, transparent 90%);
     background-size:
+        100% 100%,
         100% 100%,
         100% 100%,
         100% 100%,
@@ -2482,6 +2490,10 @@ body.is-touch-dragging {
     width: clamp(11rem, 20vw, 18rem);
     pointer-events: auto;
     perspective: 900px;
+}
+
+body.is-fullscreen-mode .shape-collection-widget {
+    width: clamp(14rem, 24vw, 22rem);
 }
 
 .shape-collection-chest {
