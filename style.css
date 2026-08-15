@@ -479,7 +479,18 @@ body.is-page-loading .page-loading-overlay {
     background: #111;
 }
 
-#learnscape-game3-page.game3-page > .game1-bg-image,
+#learnscape-game3-page.game3-page > .game1-bg-image {
+    position: absolute;
+    inset: auto;
+    top: 0;
+    left: 0;
+    width: var(--game3-map-width);
+    height: var(--game3-map-height);
+    transform: none;
+    object-fit: contain;
+    object-position: top left;
+}
+
 #learnscape-game3-page.game3-page > .game3-fog,
 #learnscape-game3-page.game3-page > .game3-hotspots {
     position: absolute;
