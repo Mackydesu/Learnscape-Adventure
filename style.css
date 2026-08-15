@@ -525,8 +525,12 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page > .game3-hotspots {
 }
 
 .game3-clouds {
-    position: fixed;
-    inset: 0;
+    position: absolute;
+    inset: auto;
+    top: 0;
+    left: 0;
+    width: var(--game3-map-width);
+    height: var(--game3-map-height);
     z-index: 6;
     pointer-events: none;
     overflow: hidden;
@@ -569,16 +573,34 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page > .game3-hotspots {
 
 .game3-fog::before {
     background-image:
-        radial-gradient(ellipse 16vw 11vh at 49.2% 13.6%, rgba(244, 247, 249, 0.98) 0 26%, rgba(230, 236, 240, 0.94) 50%, transparent 82%),
+        radial-gradient(ellipse 16vw 11vh at 49.2% 20.2%, rgba(244, 247, 249, 0.98) 0 26%, rgba(230, 236, 240, 0.94) 50%, transparent 82%),
         radial-gradient(ellipse 18vw 12vh at 71.6% 22.0%, rgba(237, 242, 246, 0.99) 0 26%, rgba(223, 230, 235, 0.94) 50%, transparent 82%),
-        radial-gradient(ellipse 16vw 11vh at 87.1% 34.0%, rgba(235, 240, 244, 0.98) 0 24%, rgba(222, 228, 233, 0.92) 48%, transparent 80%),
-        radial-gradient(ellipse 22vw 14vh at 74.8% 73.0%, rgba(239, 243, 246, 0.99) 0 28%, rgba(225, 231, 236, 0.96) 56%, transparent 88%),
-        radial-gradient(ellipse 18vw 11vh at 73.0% 64.4%, rgba(242, 246, 248, 0.96) 0 24%, rgba(228, 234, 239, 0.9) 50%, transparent 82%),
-        radial-gradient(ellipse 16vw 11vh at 50.2% 74.0%, rgba(238, 242, 245, 0.98) 0 26%, rgba(225, 231, 236, 0.92) 50%, transparent 82%),
-        radial-gradient(ellipse 16vw 11vh at 24.0% 71.5%, rgba(241, 244, 247, 0.98) 0 26%, rgba(229, 234, 239, 0.92) 50%, transparent 82%),
-        radial-gradient(ellipse 18vw 12vh at 9.8% 54.5%, rgba(242, 246, 248, 0.99) 0 26%, rgba(228, 234, 239, 0.94) 52%, transparent 84%),
-        radial-gradient(ellipse 14vw 10vh at 12.2% 46.5%, rgba(243, 246, 248, 0.92) 0 22%, rgba(230, 235, 240, 0.88) 46%, transparent 80%);
+        radial-gradient(ellipse 31vw 12vh at 62.6% 25.2%, rgba(243, 247, 249, 0.98) 0 24%, rgba(226, 233, 238, 0.94) 50%, transparent 82%),
+        radial-gradient(ellipse 21vw 18vh at 79.3% 34.0%, rgba(244, 248, 250, 1) 0 32%, rgba(224, 231, 236, 0.98) 58%, transparent 86%),
+        radial-gradient(ellipse 22vw 14vh at 67.2% 73.0%, rgba(239, 243, 246, 0.99) 0 28%, rgba(225, 231, 236, 0.96) 56%, transparent 88%),
+        radial-gradient(ellipse 18vw 11vh at 68.8% 64.4%, rgba(242, 246, 248, 0.96) 0 24%, rgba(228, 234, 239, 0.9) 50%, transparent 82%),
+        radial-gradient(ellipse 16vw 11vh at 50.8% 67.8%, rgba(238, 242, 245, 0.98) 0 26%, rgba(225, 231, 236, 0.92) 50%, transparent 82%),
+        radial-gradient(ellipse 18vw 10vh at 53.4% 77.6%, rgba(240, 244, 247, 0.98) 0 26%, rgba(225, 231, 236, 0.92) 52%, transparent 84%),
+        radial-gradient(ellipse 30vw 14vh at 42.5% 80.0%, rgba(241, 245, 248, 0.98) 0 28%, rgba(226, 232, 237, 0.94) 56%, transparent 88%),
+        radial-gradient(ellipse 34vw 15vh at 74.0% 85.5%, rgba(240, 244, 247, 0.98) 0 28%, rgba(225, 231, 236, 0.94) 56%, transparent 88%),
+        radial-gradient(ellipse 46vw 18vh at 58.5% 88.8%, rgba(241, 245, 248, 0.98) 0 30%, rgba(225, 231, 236, 0.94) 58%, transparent 90%),
+        radial-gradient(ellipse 36vw 15vh at 91.0% 82.0%, rgba(242, 246, 248, 0.97) 0 28%, rgba(226, 232, 237, 0.92) 56%, transparent 88%),
+        radial-gradient(ellipse 28vw 12vh at 88.5% 65.5%, rgba(241, 245, 248, 0.96) 0 26%, rgba(226, 232, 237, 0.9) 54%, transparent 86%),
+        radial-gradient(ellipse 38vw 13vh at 52.0% 94.0%, rgba(242, 246, 248, 0.96) 0 28%, rgba(226, 232, 237, 0.9) 56%, transparent 88%),
+        radial-gradient(ellipse 42vw 12vh at 24.0% 67.8%, rgba(241, 244, 247, 0.98) 0 26%, rgba(229, 234, 239, 0.92) 50%, transparent 82%),
+        radial-gradient(ellipse 38vw 13vh at 19.4% 53.8%, rgba(246, 249, 251, 1) 0 40%, rgba(230, 236, 240, 0.99) 68%, transparent 90%),
+        radial-gradient(ellipse 13vw 5vh at 13.8% 55.8%, rgba(247, 250, 252, 1) 0 42%, rgba(229, 235, 240, 0.99) 70%, transparent 92%),
+        radial-gradient(ellipse 74vw 20vh at 12.2% 32.4%, rgba(245, 248, 250, 1) 0 30%, rgba(226, 232, 237, 0.98) 58%, transparent 88%);
     background-size:
+        100% 100%,
+        100% 100%,
+        100% 100%,
+        100% 100%,
+        100% 100%,
+        100% 100%,
+        100% 100%,
+        100% 100%,
+        100% 100%,
         100% 100%,
         100% 100%,
         100% 100%,
@@ -594,16 +616,34 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page > .game3-hotspots {
 
 .game3-fog::after {
     background-image:
-        radial-gradient(ellipse 18vw 12vh at 49.4% 12.8%, rgba(242, 246, 248, 0.99) 0 26%, rgba(230, 235, 240, 0.96) 50%, transparent 82%),
+        radial-gradient(ellipse 18vw 12vh at 49.4% 19.6%, rgba(242, 246, 248, 0.99) 0 26%, rgba(230, 235, 240, 0.96) 50%, transparent 82%),
         radial-gradient(ellipse 20vw 13vh at 71.3% 22.5%, rgba(234, 239, 243, 1) 0 26%, rgba(220, 227, 232, 0.96) 50%, transparent 82%),
-        radial-gradient(ellipse 18vw 12vh at 87.0% 34.6%, rgba(238, 242, 245, 0.99) 0 24%, rgba(225, 231, 236, 0.94) 48%, transparent 80%),
-        radial-gradient(ellipse 24vw 15vh at 74.8% 73.5%, rgba(240, 244, 247, 0.99) 0 28%, rgba(226, 232, 237, 0.97) 56%, transparent 88%),
-        radial-gradient(ellipse 19vw 12vh at 73.0% 64.0%, rgba(242, 246, 248, 0.97) 0 24%, rgba(228, 234, 239, 0.92) 50%, transparent 82%),
-        radial-gradient(ellipse 18vw 12vh at 50.0% 74.0%, rgba(237, 241, 245, 1) 0 26%, rgba(224, 230, 235, 0.96) 50%, transparent 82%),
-        radial-gradient(ellipse 18vw 12vh at 24.0% 71.0%, rgba(241, 244, 247, 0.99) 0 26%, rgba(229, 234, 239, 0.94) 50%, transparent 82%),
-        radial-gradient(ellipse 20vw 13vh at 9.7% 55.0%, rgba(237, 241, 244, 1) 0 28%, rgba(223, 230, 235, 0.98) 54%, transparent 86%),
-        radial-gradient(ellipse 15vw 10vh at 11.4% 42.0%, rgba(239, 243, 246, 0.98) 0 24%, rgba(227, 233, 238, 0.9) 48%, transparent 80%);
+        radial-gradient(ellipse 33vw 13vh at 63.0% 25.6%, rgba(241, 245, 248, 0.99) 0 24%, rgba(224, 231, 236, 0.96) 50%, transparent 82%),
+        radial-gradient(ellipse 23vw 20vh at 79.2% 34.6%, rgba(245, 248, 250, 1) 0 34%, rgba(225, 232, 237, 0.99) 60%, transparent 88%),
+        radial-gradient(ellipse 24vw 15vh at 67.2% 73.5%, rgba(240, 244, 247, 0.99) 0 28%, rgba(226, 232, 237, 0.97) 56%, transparent 88%),
+        radial-gradient(ellipse 19vw 12vh at 68.8% 64.0%, rgba(242, 246, 248, 0.97) 0 24%, rgba(228, 234, 239, 0.92) 50%, transparent 82%),
+        radial-gradient(ellipse 18vw 12vh at 50.6% 67.8%, rgba(237, 241, 245, 1) 0 26%, rgba(224, 230, 235, 0.96) 50%, transparent 82%),
+        radial-gradient(ellipse 20vw 11vh at 53.2% 78.0%, rgba(241, 245, 248, 0.99) 0 28%, rgba(226, 232, 237, 0.95) 54%, transparent 86%),
+        radial-gradient(ellipse 34vw 16vh at 42.0% 80.6%, rgba(242, 246, 248, 0.99) 0 30%, rgba(226, 232, 237, 0.96) 58%, transparent 90%),
+        radial-gradient(ellipse 38vw 17vh at 74.0% 86.2%, rgba(241, 245, 248, 0.99) 0 30%, rgba(225, 231, 236, 0.96) 58%, transparent 90%),
+        radial-gradient(ellipse 50vw 20vh at 58.5% 89.6%, rgba(242, 246, 248, 0.99) 0 32%, rgba(225, 231, 236, 0.96) 60%, transparent 92%),
+        radial-gradient(ellipse 40vw 16vh at 91.5% 82.8%, rgba(243, 247, 249, 0.98) 0 30%, rgba(226, 232, 237, 0.94) 58%, transparent 90%),
+        radial-gradient(ellipse 32vw 13vh at 89.0% 66.2%, rgba(242, 246, 248, 0.98) 0 28%, rgba(226, 232, 237, 0.93) 56%, transparent 88%),
+        radial-gradient(ellipse 42vw 14vh at 52.0% 94.8%, rgba(243, 247, 249, 0.98) 0 30%, rgba(226, 232, 237, 0.93) 58%, transparent 90%),
+        radial-gradient(ellipse 46vw 13vh at 24.0% 67.3%, rgba(241, 244, 247, 0.99) 0 26%, rgba(229, 234, 239, 0.94) 50%, transparent 82%),
+        radial-gradient(ellipse 42vw 14vh at 19.3% 54.4%, rgba(247, 250, 252, 1) 0 42%, rgba(229, 235, 240, 1) 70%, transparent 92%),
+        radial-gradient(ellipse 15vw 6vh at 13.8% 56.2%, rgba(248, 251, 252, 1) 0 44%, rgba(229, 235, 240, 1) 72%, transparent 94%),
+        radial-gradient(ellipse 80vw 22vh at 11.4% 28.0%, rgba(245, 248, 250, 1) 0 32%, rgba(226, 232, 237, 0.98) 60%, transparent 90%);
     background-size:
+        100% 100%,
+        100% 100%,
+        100% 100%,
+        100% 100%,
+        100% 100%,
+        100% 100%,
+        100% 100%,
+        100% 100%,
+        100% 100%,
         100% 100%,
         100% 100%,
         100% 100%,
@@ -622,7 +662,10 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page > .game3-hotspots {
 .game3-clouds::after {
     content: '';
     position: absolute;
-    inset: -20vh -40vw;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background-repeat: no-repeat;
     background-image:
         url('assets/Backgrounds/clouds.webp'),
@@ -638,7 +681,7 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page > .game3-hotspots {
     background-repeat: no-repeat;
     opacity: 1;
     will-change: transform;
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(115%, 0, 0);
 }
 
 .game3-clouds::before {
@@ -664,7 +707,7 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page > .game3-hotspots {
         clamp(10rem, 13vw, 16rem) auto,
         clamp(15rem, 19vw, 24rem) auto,
         clamp(8rem, 10vw, 13rem) auto;
-    animation: game3CloudDriftA 74s linear infinite;
+    animation: game3CloudDriftA 112s linear infinite both;
 }
 
 .game3-clouds::after {
@@ -691,7 +734,8 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page > .game3-hotspots {
         clamp(12rem, 15vw, 20rem) auto,
         clamp(10rem, 13vw, 16rem) auto;
     opacity: 1;
-    animation: game3CloudDriftB 132s linear infinite;
+    animation: game3CloudDriftB 148s linear infinite both;
+    animation-delay: -74s;
 }
 
 .game3-cloud {
@@ -728,21 +772,21 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page > .game3-hotspots {
 
 @keyframes game3CloudDriftA {
     from {
-        transform: translate3d(12vw, 0, 0);
+        transform: translate3d(115%, 0, 0);
     }
 
     to {
-        transform: translate3d(-52vw, 0, 0);
+        transform: translate3d(-115%, 0, 0);
     }
 }
 
 @keyframes game3CloudDriftB {
     from {
-        transform: translate3d(24vw, 2vh, 0);
+        transform: translate3d(125%, 2vh, 0);
     }
 
     to {
-        transform: translate3d(-44vw, -2vh, 0);
+        transform: translate3d(-125%, -2vh, 0);
     }
 }
 
@@ -2431,7 +2475,7 @@ body.is-touch-dragging {
 .game1-intro {
     position: fixed;
     inset: 0;
-    z-index: 3;
+    z-index: 80;
     display: grid;
     place-items: center;
     pointer-events: none;
