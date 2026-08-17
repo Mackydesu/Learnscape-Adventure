@@ -438,11 +438,20 @@ body.is-page-loading .page-loading-overlay {
 }
 
 #learnscape-game3-page.game3-page {
+    background:
+        radial-gradient(circle at 50% 36%, rgba(255, 255, 255, 0.14) 0, transparent 32%),
+        radial-gradient(circle at 50% 88%, rgba(255, 255, 255, 0.08) 0, transparent 28%),
+        linear-gradient(180deg, #1c1f22, #121416);
+}
+
+#learnscape-game3-page.game3-page {
     --game3-map-width: max(150vw, 266.7vh);
     --game3-map-height: max(150vh, 84.5vw);
     --game3-base-width: calc(var(--game3-map-width) / 1.5);
     --game3-base-height: calc(var(--game3-map-height) / 1.5);
     --game3-bottom-scroll-trim-ratio: 0.18;
+    --game3-right-scroll-trim-ratio: 0.1;
+    position: relative;
     overflow: auto;
     overscroll-behavior: contain;
     scroll-behavior: auto;
@@ -492,6 +501,7 @@ body.is-page-loading .page-loading-overlay {
     transform: none;
     object-fit: fill;
     object-position: top left;
+    background: transparent;
 }
 
 #learnscape-game3-page.game3-page > .game3-hotspots {
@@ -537,6 +547,15 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page {
         radial-gradient(circle at 50% 36%, rgba(255, 255, 255, 0.24) 0, transparent 36%),
         radial-gradient(circle at 20% 22%, rgba(255, 244, 95, 0.12) 0, transparent 22%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.08));
+}
+
+#learnscape-game3-page.game3-page > .game1-overlay {
+    position: absolute;
+    inset: auto;
+    top: 0;
+    left: 0;
+    width: var(--game3-map-width);
+    height: var(--game3-map-height);
 }
 
 .game3-clouds {
@@ -2206,6 +2225,15 @@ body.is-touch-dragging {
     pointer-events: none;
 }
 
+#learnscape-game3-page.game3-page > .game1-entry-veil {
+    position: absolute;
+    inset: auto;
+    top: 0;
+    left: 0;
+    width: var(--game3-map-width);
+    height: var(--game3-map-height);
+}
+
 .game3-hotspots {
     position: fixed;
     inset: 0;
@@ -2268,12 +2296,12 @@ body.is-touch-dragging {
 .game3-hotspot::after {
     content: '';
     position: absolute;
-    inset: -112%;
+    inset: -134%;
     z-index: 2;
     border-radius: inherit;
-    background: radial-gradient(circle, rgba(245, 248, 250, 0.96) 0 16%, rgba(235, 239, 242, 0.7) 34%, transparent 72%);
-    filter: blur(60px);
-    opacity: 0.98;
+    background: radial-gradient(circle, rgba(245, 248, 250, 1) 0 16%, rgba(235, 239, 242, 0.88) 30%, rgba(225, 230, 234, 0.52) 50%, transparent 80%);
+    filter: blur(62px);
+    opacity: 1;
     pointer-events: none;
 }
 
@@ -2294,7 +2322,7 @@ body.is-touch-dragging {
 .game3-hotspot:focus-visible::after,
 .game3-hotspot.is-active::after {
     opacity: 1;
-    filter: blur(68px);
+    filter: blur(70px);
 }
 
 .game3-hotspot-circle::after {
@@ -2327,10 +2355,14 @@ body.is-touch-dragging {
     left: 27%;
     top: 25%;
     color: #1f8dff;
+    filter: none;
 }
 
 .game3-hotspot-circle svg * {
     fill: #1f8dff;
+    filter:
+        drop-shadow(0 0 4px rgba(255, 255, 255, 0.36))
+        drop-shadow(0 0 8px rgba(31, 141, 255, 0.18));
 }
 
 .game3-hotspot-square {
@@ -2408,11 +2440,23 @@ body.is-touch-dragging {
     left: 9.7%;
     top: 59.6%;
     width: clamp(5.4rem, 6.6vw, 7.3rem);
-    color: #2d68ff;
+    color: #d7d9dc;
 }
 
 .game3-hotspot-diamond svg * {
-    fill: #2d68ff;
+    fill: #d7d9dc;
+}
+
+.game3-hotspot-diamond::after {
+    inset: -160%;
+    background: radial-gradient(circle, rgba(249, 250, 251, 1) 0 14%, rgba(226, 229, 232, 0.92) 30%, rgba(196, 201, 206, 0.58) 52%, transparent 82%);
+    filter: blur(74px);
+}
+
+.game3-hotspot-diamond:hover::after,
+.game3-hotspot-diamond:focus-visible::after,
+.game3-hotspot-diamond.is-active::after {
+    filter: blur(84px);
 }
 
 .shape-collection-widget {

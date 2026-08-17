@@ -597,10 +597,14 @@
                     const bottomTrimRatio = Number.parseFloat(
                         styles.getPropertyValue('--game3-bottom-scroll-trim-ratio')
                     ) || 0;
+                    const rightTrimRatio = Number.parseFloat(
+                        styles.getPropertyValue('--game3-right-scroll-trim-ratio')
+                    ) || 0;
                     const bottomTrim = map.clientHeight * bottomTrimRatio;
+                    const rightTrim = map.clientWidth * rightTrimRatio;
 
                     return {
-                        maxLeft: Math.max(0, map.scrollWidth - map.clientWidth),
+                        maxLeft: Math.max(0, map.scrollWidth - map.clientWidth - rightTrim),
                         maxTop: Math.max(0, map.scrollHeight - map.clientHeight - bottomTrim),
                     };
                 };
