@@ -494,7 +494,6 @@ body.is-page-loading .page-loading-overlay {
     object-position: top left;
 }
 
-#learnscape-game3-page.game3-page > .game3-fog,
 #learnscape-game3-page.game3-page > .game3-hotspots {
     position: absolute;
     inset: auto;
@@ -504,6 +503,18 @@ body.is-page-loading .page-loading-overlay {
     height: var(--game3-base-height);
     transform: scale(1.5);
     transform-origin: top left;
+}
+
+#learnscape-game3-page.game3-page > .game3-fog {
+    position: absolute;
+    inset: auto;
+    top: 0;
+    left: 0;
+    width: var(--game3-map-width);
+    height: var(--game3-map-height);
+    z-index: 5;
+    pointer-events: none;
+    overflow: hidden;
 }
 
 #learnscape-game3-page.game3-page > .game3-hotspots {
@@ -541,131 +552,22 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page {
 }
 
 .game3-fog {
-    position: fixed;
-    inset: 0;
+    position: absolute;
+    inset: auto;
+    top: 0;
+    left: 0;
+    width: var(--game3-map-width);
+    height: var(--game3-map-height);
     z-index: 5;
     pointer-events: none;
     overflow: hidden;
+    background:
+        radial-gradient(circle at 24% 30%, rgba(245, 248, 250, 0.18) 0, transparent 28%),
+        radial-gradient(circle at 72% 24%, rgba(245, 248, 250, 0.14) 0, transparent 24%),
+        radial-gradient(circle at 60% 82%, rgba(245, 248, 250, 0.16) 0, transparent 30%),
+        linear-gradient(180deg, rgba(245, 248, 250, 0.06), rgba(245, 248, 250, 0.02));
+    filter: blur(9px);
     opacity: 0.9;
-    background-color: rgba(224, 229, 234, 0.3);
-    background-image:
-        radial-gradient(ellipse 18vw 12vh at 49.5% 20.0%, rgba(242, 246, 248, 0.96) 0 34%, rgba(228, 234, 239, 0.9) 62%, transparent 92%),
-        radial-gradient(ellipse 19vw 13vh at 71.5% 30.0%, rgba(242, 246, 248, 0.96) 0 34%, rgba(228, 234, 239, 0.9) 62%, transparent 92%),
-        radial-gradient(ellipse 18vw 12vh at 87.2% 42.0%, rgba(242, 246, 248, 0.96) 0 34%, rgba(228, 234, 239, 0.9) 62%, transparent 92%),
-        radial-gradient(ellipse 26vw 18vh at 78.4% 91.0%, rgba(242, 246, 248, 0.96) 0 34%, rgba(228, 234, 239, 0.9) 62%, transparent 92%),
-        radial-gradient(ellipse 18vw 12vh at 50.3% 82.0%, rgba(242, 246, 248, 0.96) 0 34%, rgba(228, 234, 239, 0.9) 62%, transparent 92%),
-        radial-gradient(ellipse 18vw 12vh at 24.2% 79.5%, rgba(242, 246, 248, 0.96) 0 34%, rgba(228, 234, 239, 0.9) 62%, transparent 92%),
-        radial-gradient(ellipse 18vw 12vh at 9.7% 62.5%, rgba(242, 246, 248, 0.96) 0 34%, rgba(228, 234, 239, 0.9) 62%, transparent 92%);
-    -webkit-mask-image: radial-gradient(circle at 27% 25%, transparent 0 12%, #000 15%);
-    mask-image: radial-gradient(circle at 27% 25%, transparent 0 12%, #000 15%);
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-size: 100% 100%;
-    mask-size: 100% 100%;
-}
-
-.game3-fog::before,
-.game3-fog::after {
-    content: '';
-    position: absolute;
-    inset: -22vh -34vw;
-    pointer-events: none;
-    mix-blend-mode: normal;
-    filter: blur(7px);
-    opacity: 1;
-    background-repeat: no-repeat;
-}
-
-.game3-fog::before {
-    opacity: 0.78;
-    background-image:
-        radial-gradient(ellipse 16vw 11vh at 49.2% 20.2%, rgba(244, 247, 249, 0.98) 0 26%, rgba(230, 236, 240, 0.94) 50%, transparent 82%),
-        radial-gradient(ellipse 18vw 12vh at 71.6% 22.0%, rgba(237, 242, 246, 0.99) 0 26%, rgba(223, 230, 235, 0.94) 50%, transparent 82%),
-        radial-gradient(ellipse 31vw 12vh at 62.6% 25.2%, rgba(243, 247, 249, 0.98) 0 24%, rgba(226, 233, 238, 0.94) 50%, transparent 82%),
-        radial-gradient(ellipse 21vw 18vh at 76.8% 40.0%, rgba(244, 248, 250, 1) 0 32%, rgba(224, 231, 236, 0.98) 58%, transparent 86%),
-        radial-gradient(ellipse 20vw 12vh at 77.1% 50.5%, rgba(243, 247, 249, 0.98) 0 28%, rgba(226, 232, 237, 0.94) 56%, transparent 88%),
-        radial-gradient(ellipse 22vw 14vh at 67.2% 73.0%, rgba(239, 243, 246, 0.99) 0 28%, rgba(225, 231, 236, 0.96) 56%, transparent 88%),
-        radial-gradient(ellipse 18vw 11vh at 68.8% 64.4%, rgba(242, 246, 248, 0.96) 0 24%, rgba(228, 234, 239, 0.9) 50%, transparent 82%),
-        radial-gradient(ellipse 16vw 11vh at 50.8% 67.8%, rgba(238, 242, 245, 0.98) 0 26%, rgba(225, 231, 236, 0.92) 50%, transparent 82%),
-        radial-gradient(ellipse 18vw 10vh at 53.4% 77.6%, rgba(240, 244, 247, 0.98) 0 26%, rgba(225, 231, 236, 0.92) 52%, transparent 84%),
-        radial-gradient(ellipse 30vw 14vh at 42.5% 80.0%, rgba(241, 245, 248, 0.98) 0 28%, rgba(226, 232, 237, 0.94) 56%, transparent 88%),
-        radial-gradient(ellipse 34vw 15vh at 74.0% 85.5%, rgba(240, 244, 247, 0.98) 0 28%, rgba(225, 231, 236, 0.94) 56%, transparent 88%),
-        radial-gradient(ellipse 46vw 18vh at 58.5% 88.8%, rgba(241, 245, 248, 0.98) 0 30%, rgba(225, 231, 236, 0.94) 58%, transparent 90%),
-        radial-gradient(ellipse 36vw 15vh at 91.0% 82.0%, rgba(242, 246, 248, 0.97) 0 28%, rgba(226, 232, 237, 0.92) 56%, transparent 88%),
-        radial-gradient(ellipse 28vw 12vh at 88.5% 65.5%, rgba(241, 245, 248, 0.96) 0 26%, rgba(226, 232, 237, 0.9) 54%, transparent 86%),
-        radial-gradient(ellipse 38vw 13vh at 52.0% 94.0%, rgba(242, 246, 248, 0.96) 0 28%, rgba(226, 232, 237, 0.9) 56%, transparent 88%),
-        radial-gradient(ellipse 42vw 12vh at 24.0% 67.8%, rgba(241, 244, 247, 0.98) 0 26%, rgba(229, 234, 239, 0.92) 50%, transparent 82%),
-        radial-gradient(ellipse 38vw 13vh at 19.4% 53.8%, rgba(246, 249, 251, 1) 0 40%, rgba(230, 236, 240, 0.99) 68%, transparent 90%),
-        radial-gradient(ellipse 13vw 5vh at 13.8% 55.8%, rgba(247, 250, 252, 1) 0 42%, rgba(229, 235, 240, 0.99) 70%, transparent 92%),
-        radial-gradient(ellipse 74vw 20vh at 12.2% 32.4%, rgba(245, 248, 250, 1) 0 30%, rgba(226, 232, 237, 0.98) 58%, transparent 88%);
-    background-size:
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%;
-    animation: none;
-}
-
-.game3-fog::after {
-    background-image:
-        radial-gradient(ellipse 18vw 12vh at 49.4% 19.6%, rgba(242, 246, 248, 0.99) 0 26%, rgba(230, 235, 240, 0.96) 50%, transparent 82%),
-        radial-gradient(ellipse 20vw 13vh at 71.3% 22.5%, rgba(234, 239, 243, 1) 0 26%, rgba(220, 227, 232, 0.96) 50%, transparent 82%),
-        radial-gradient(ellipse 33vw 13vh at 63.0% 25.6%, rgba(241, 245, 248, 0.99) 0 24%, rgba(224, 231, 236, 0.96) 50%, transparent 82%),
-        radial-gradient(ellipse 23vw 20vh at 76.7% 40.6%, rgba(245, 248, 250, 1) 0 34%, rgba(225, 232, 237, 0.99) 60%, transparent 88%),
-        radial-gradient(ellipse 22vw 13vh at 77.1% 51.2%, rgba(244, 248, 250, 0.99) 0 30%, rgba(226, 232, 237, 0.95) 58%, transparent 90%),
-        radial-gradient(ellipse 24vw 15vh at 67.2% 73.5%, rgba(240, 244, 247, 0.99) 0 28%, rgba(226, 232, 237, 0.97) 56%, transparent 88%),
-        radial-gradient(ellipse 19vw 12vh at 68.8% 64.0%, rgba(242, 246, 248, 0.97) 0 24%, rgba(228, 234, 239, 0.92) 50%, transparent 82%),
-        radial-gradient(ellipse 18vw 12vh at 50.6% 67.8%, rgba(237, 241, 245, 1) 0 26%, rgba(224, 230, 235, 0.96) 50%, transparent 82%),
-        radial-gradient(ellipse 20vw 11vh at 53.2% 78.0%, rgba(241, 245, 248, 0.99) 0 28%, rgba(226, 232, 237, 0.95) 54%, transparent 86%),
-        radial-gradient(ellipse 34vw 16vh at 42.0% 80.6%, rgba(242, 246, 248, 0.99) 0 30%, rgba(226, 232, 237, 0.96) 58%, transparent 90%),
-        radial-gradient(ellipse 38vw 17vh at 74.0% 86.2%, rgba(241, 245, 248, 0.99) 0 30%, rgba(225, 231, 236, 0.96) 58%, transparent 90%),
-        radial-gradient(ellipse 50vw 20vh at 58.5% 89.6%, rgba(242, 246, 248, 0.99) 0 32%, rgba(225, 231, 236, 0.96) 60%, transparent 92%),
-        radial-gradient(ellipse 40vw 16vh at 91.5% 82.8%, rgba(243, 247, 249, 0.98) 0 30%, rgba(226, 232, 237, 0.94) 58%, transparent 90%),
-        radial-gradient(ellipse 32vw 13vh at 89.0% 66.2%, rgba(242, 246, 248, 0.98) 0 28%, rgba(226, 232, 237, 0.93) 56%, transparent 88%),
-        radial-gradient(ellipse 42vw 14vh at 52.0% 94.8%, rgba(243, 247, 249, 0.98) 0 30%, rgba(226, 232, 237, 0.93) 58%, transparent 90%),
-        radial-gradient(ellipse 46vw 13vh at 24.0% 67.3%, rgba(241, 244, 247, 0.99) 0 26%, rgba(229, 234, 239, 0.94) 50%, transparent 82%),
-        radial-gradient(ellipse 42vw 14vh at 19.3% 54.4%, rgba(247, 250, 252, 1) 0 42%, rgba(229, 235, 240, 1) 70%, transparent 92%),
-        radial-gradient(ellipse 15vw 6vh at 13.8% 56.2%, rgba(248, 251, 252, 1) 0 44%, rgba(229, 235, 240, 1) 72%, transparent 94%),
-        radial-gradient(ellipse 80vw 22vh at 11.4% 28.0%, rgba(245, 248, 250, 1) 0 32%, rgba(226, 232, 237, 0.98) 60%, transparent 90%);
-    background-size:
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%,
-        100% 100%;
-    opacity: 0.78;
-    animation: none;
 }
 
 .game3-clouds::before,
@@ -2324,6 +2226,7 @@ body.is-touch-dragging {
     transform: translate(-50%, -50%);
     cursor: pointer;
     pointer-events: auto;
+    isolation: isolate;
     transition:
         transform 0.18s ease,
         filter 0.18s ease,
@@ -2355,9 +2258,23 @@ body.is-touch-dragging {
     height: 100%;
     display: block;
     overflow: visible;
+    position: relative;
+    z-index: 1;
     filter:
         drop-shadow(0 0 8px rgba(255, 255, 255, 0.22))
         drop-shadow(0 0 14px rgba(255, 244, 95, 0.16));
+}
+
+.game3-hotspot::after {
+    content: '';
+    position: absolute;
+    inset: -112%;
+    z-index: 2;
+    border-radius: inherit;
+    background: radial-gradient(circle, rgba(245, 248, 250, 0.96) 0 16%, rgba(235, 239, 242, 0.7) 34%, transparent 72%);
+    filter: blur(60px);
+    opacity: 0.98;
+    pointer-events: none;
 }
 
 .game3-hotspot:hover,
@@ -2371,6 +2288,17 @@ body.is-touch-dragging {
 .game3-hotspot.is-active::before {
     opacity: 1;
     transform: scale(1);
+}
+
+.game3-hotspot:hover::after,
+.game3-hotspot:focus-visible::after,
+.game3-hotspot.is-active::after {
+    opacity: 1;
+    filter: blur(68px);
+}
+
+.game3-hotspot-circle::after {
+    content: none;
 }
 
 .game3-hotspot.is-active {
