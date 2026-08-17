@@ -836,32 +836,32 @@ document.addEventListener('DOMContentLoaded', () => {
     let dragtomatchTutorialDockTimer = null;
 
     const dragtomatchPairs = [
-        { letter: 'A', letterSrc: 'assets/ABC Elements/LetterA.png', objectName: 'Apple', objectSrc: 'assets/ABC Elements/Apple.png' },
-        { letter: 'B', letterSrc: 'assets/ABC Elements/LetterB.png', objectName: 'Ball', objectSrc: 'assets/ABC Elements/Ball.png' },
-        { letter: 'C', letterSrc: 'assets/ABC Elements/LetterC.png', objectName: 'Cat', objectSrc: 'assets/ABC Elements/Cat.png' },
-        { letter: 'D', letterSrc: 'assets/ABC Elements/LetterD.png', objectName: 'Dog', objectSrc: 'assets/ABC Elements/Dog.png' },
-        { letter: 'E', letterSrc: 'assets/ABC Elements/LetterE.png', objectName: 'Elephant', objectSrc: 'assets/ABC Elements/Elephant.png' },
-        { letter: 'F', letterSrc: 'assets/ABC Elements/LetterF.png', objectName: 'Frog', objectSrc: 'assets/ABC Elements/Frog.png' },
-        { letter: 'G', letterSrc: 'assets/ABC Elements/LetterG.png', objectName: 'Grapes', objectSrc: 'assets/ABC Elements/Grapes.png' },
-        { letter: 'H', letterSrc: 'assets/ABC Elements/LetterH.png', objectName: 'House', objectSrc: 'assets/ABC Elements/House.png' },
-        { letter: 'I', letterSrc: 'assets/ABC Elements/LetterI.png', objectName: 'Ice cream', objectSrc: 'assets/ABC Elements/Ice cream.png' },
-        { letter: 'J', letterSrc: 'assets/ABC Elements/LetterJ.png', objectName: 'Jelly', objectSrc: 'assets/ABC Elements/Jelly.png' },
-        { letter: 'K', letterSrc: 'assets/ABC Elements/LetterK.png', objectName: 'Kite', objectSrc: 'assets/ABC Elements/Kite.png' },
-        { letter: 'L', letterSrc: 'assets/ABC Elements/LetterL.png', objectName: 'Lion', objectSrc: 'assets/ABC Elements/Lion.png' },
-        { letter: 'M', letterSrc: 'assets/ABC Elements/LetterM.png', objectName: 'Moon', objectSrc: 'assets/ABC Elements/Moon.png' },
-        { letter: 'N', letterSrc: 'assets/ABC Elements/LetterN.png', objectName: 'Nest', objectSrc: 'assets/ABC Elements/Nest.png', objectScale: 0.8 },
-        { letter: 'O', letterSrc: 'assets/ABC Elements/LetterO.png', objectName: 'Orange', objectSrc: 'assets/ABC Elements/Orange.png' },
-        { letter: 'P', letterSrc: 'assets/ABC Elements/LetterP.png', objectName: 'Parrot', objectSrc: 'assets/ABC Elements/Parrot.png' },
-        { letter: 'Q', letterSrc: 'assets/ABC Elements/LetterQ.png', objectName: 'Queen', objectSrc: 'assets/ABC Elements/Queen.png' },
-        { letter: 'R', letterSrc: 'assets/ABC Elements/LetterR.png', objectName: 'Rainbow', objectSrc: 'assets/ABC Elements/Rainbow.png' },
-        { letter: 'S', letterSrc: 'assets/ABC Elements/LetterS.png', objectName: 'Sun', objectSrc: 'assets/ABC Elements/Sun.png' },
-        { letter: 'T', letterSrc: 'assets/ABC Elements/LetterT.png', objectName: 'Train', objectSrc: 'assets/ABC Elements/Train.png' },
-        { letter: 'U', letterSrc: 'assets/ABC Elements/LetterU.png', objectName: 'Umbrella', objectSrc: 'assets/ABC Elements/Umbrella.png' },
-        { letter: 'V', letterSrc: 'assets/ABC Elements/LetterV.png', objectName: 'Violin', objectSrc: 'assets/ABC Elements/Violin.png' },
-        { letter: 'W', letterSrc: 'assets/ABC Elements/LetterW.png', objectName: 'Whale', objectSrc: 'assets/ABC Elements/Whale.png', objectScale: 0.82 },
-        { letter: 'X', letterSrc: 'assets/ABC Elements/LetterX.png', objectName: 'Xylophone', objectSrc: 'assets/ABC Elements/Xylophone.png', objectScale: 0.82 },
-        { letter: 'Y', letterSrc: 'assets/ABC Elements/LetterY.png', objectName: 'Yoyo', objectSrc: 'assets/ABC Elements/Yoyo.png' },
-        { letter: 'Z', letterSrc: 'assets/ABC Elements/LetterZ.png', objectName: 'Zebra', objectSrc: 'assets/ABC Elements/Zebra.png' },
+        { letter: 'A', letterSrc: 'assets/ABC UI/LetterA.png', objectName: 'Apple', objectSrc: 'assets/ABC UI/Apple.png' },
+        { letter: 'B', letterSrc: 'assets/ABC UI/LetterB.png', objectName: 'Ball', objectSrc: 'assets/ABC UI/Ball.png' },
+        { letter: 'C', letterSrc: 'assets/ABC UI/LetterC.png', objectName: 'Cat', objectSrc: 'assets/ABC UI/Cat.png' },
+        { letter: 'D', letterSrc: 'assets/ABC UI/LetterD.png', objectName: 'Dog', objectSrc: 'assets/ABC UI/Dog.png' },
+        { letter: 'E', letterSrc: 'assets/ABC UI/LetterE.png', objectName: 'Elephant', objectSrc: 'assets/ABC UI/Elephant.png' },
+        { letter: 'F', letterSrc: 'assets/ABC UI/LetterF.png', objectName: 'Frog', objectSrc: 'assets/ABC UI/Frog.png' },
+        { letter: 'G', letterSrc: 'assets/ABC UI/LetterG.png', objectName: 'Grapes', objectSrc: 'assets/ABC UI/Grapes.png' },
+        { letter: 'H', letterSrc: 'assets/ABC UI/LetterH.png', objectName: 'House', objectSrc: 'assets/ABC UI/House.png' },
+        { letter: 'I', letterSrc: 'assets/ABC UI/LetterI.png', objectName: 'Ice cream', objectSrc: 'assets/ABC UI/Ice cream.png' },
+        { letter: 'J', letterSrc: 'assets/ABC UI/LetterJ.png', objectName: 'Jelly', objectSrc: 'assets/ABC UI/Jelly.png' },
+        { letter: 'K', letterSrc: 'assets/ABC UI/LetterK.png', objectName: 'Kite', objectSrc: 'assets/ABC UI/Kite.png' },
+        { letter: 'L', letterSrc: 'assets/ABC UI/LetterL.png', objectName: 'Lion', objectSrc: 'assets/ABC UI/Lion.png' },
+        { letter: 'M', letterSrc: 'assets/ABC UI/LetterM.png', objectName: 'Moon', objectSrc: 'assets/ABC UI/Moon.png' },
+        { letter: 'N', letterSrc: 'assets/ABC UI/LetterN.png', objectName: 'Nest', objectSrc: 'assets/ABC UI/Nest.png', objectScale: 0.8 },
+        { letter: 'O', letterSrc: 'assets/ABC UI/LetterO.png', objectName: 'Orange', objectSrc: 'assets/ABC UI/Orange.png' },
+        { letter: 'P', letterSrc: 'assets/ABC UI/LetterP.png', objectName: 'Parrot', objectSrc: 'assets/ABC UI/Parrot.png' },
+        { letter: 'Q', letterSrc: 'assets/ABC UI/LetterQ.png', objectName: 'Queen', objectSrc: 'assets/ABC UI/Queen.png' },
+        { letter: 'R', letterSrc: 'assets/ABC UI/LetterR.png', objectName: 'Rainbow', objectSrc: 'assets/ABC UI/Rainbow.png' },
+        { letter: 'S', letterSrc: 'assets/ABC UI/LetterS.png', objectName: 'Sun', objectSrc: 'assets/ABC UI/Sun.png' },
+        { letter: 'T', letterSrc: 'assets/ABC UI/LetterT.png', objectName: 'Train', objectSrc: 'assets/ABC UI/Train.png' },
+        { letter: 'U', letterSrc: 'assets/ABC UI/LetterU.png', objectName: 'Umbrella', objectSrc: 'assets/ABC UI/Umbrella.png' },
+        { letter: 'V', letterSrc: 'assets/ABC UI/LetterV.png', objectName: 'Violin', objectSrc: 'assets/ABC UI/Violin.png' },
+        { letter: 'W', letterSrc: 'assets/ABC UI/LetterW.png', objectName: 'Whale', objectSrc: 'assets/ABC UI/Whale.png', objectScale: 0.82 },
+        { letter: 'X', letterSrc: 'assets/ABC UI/LetterX.png', objectName: 'Xylophone', objectSrc: 'assets/ABC UI/Xylophone.png', objectScale: 0.82 },
+        { letter: 'Y', letterSrc: 'assets/ABC UI/LetterY.png', objectName: 'Yoyo', objectSrc: 'assets/ABC UI/Yoyo.png' },
+        { letter: 'Z', letterSrc: 'assets/ABC UI/LetterZ.png', objectName: 'Zebra', objectSrc: 'assets/ABC UI/Zebra.png' },
     ];
 
     const dragtomatchLevelRows = [9, 9, 8];
@@ -1026,10 +1026,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const dragtomatchCardMarkup = `
         <span class="game1-object-card-inner">
             <span class="game1-object-card-face game1-object-card-face-back">
-                <img class="game1-object-card-frame" src="assets/UI/objectdisplayerback.webp" alt="">
+                <img class="game1-object-card-frame" src="assets/ABC UI/objectdisplayerback.webp" alt="">
             </span>
             <span class="game1-object-card-face game1-object-card-face-front">
-                <img class="game1-object-card-frame" src="assets/UI/objectdisplayerfront.png" alt="">
+                <img class="game1-object-card-frame" src="assets/ABC UI/objectdisplayerfront.png" alt="">
                 <img class="game1-object-card-object" src="" alt="">
             </span>
         </span>
