@@ -491,6 +491,78 @@ body.is-page-loading .page-loading-overlay {
     background: #111;
 }
 
+.shape-area-page {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    background: #111;
+}
+
+.shape-area-page .shape-area-bg {
+    object-fit: cover;
+}
+
+.shape-area-title {
+    position: absolute;
+    left: 50%;
+    top: clamp(1rem, 3vh, 2rem);
+    z-index: 2;
+    width: clamp(19rem, 35vw, 31rem);
+    height: auto;
+    display: block;
+    transform: translateX(-50%);
+    pointer-events: none;
+    filter: drop-shadow(0 10px 12px rgba(53, 31, 5, 0.28));
+    animation:
+        shapeAreaTitleBounceIn 0.9s cubic-bezier(0.22, 1.15, 0.36, 1) both,
+        shapeAreaTitleFloat 3.4s ease-in-out 0.9s infinite;
+    will-change: transform;
+}
+
+@keyframes shapeAreaTitleBounceIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(1.5rem) scale(0.55);
+    }
+
+    52% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-0.45rem) scale(1.12);
+    }
+
+    70% {
+        transform: translateX(-50%) translateY(0.15rem) scale(0.96);
+    }
+
+    86% {
+        transform: translateX(-50%) translateY(-0.12rem) scale(1.03);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+}
+
+@keyframes shapeAreaTitleFloat {
+    0%, 100% {
+        transform: translateX(-50%) translateY(0) rotate(-0.4deg);
+    }
+
+    50% {
+        transform: translateX(-50%) translateY(-0.55rem) rotate(0.4deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .shape-area-title {
+        animation: none;
+    }
+}
+
 #learnscape-game3-page.game3-page > .game1-bg-image {
     position: absolute;
     inset: auto;
@@ -601,16 +673,16 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page {
     height: 100%;
     background-repeat: no-repeat;
     background-image:
-        url('assets/Backgrounds/clouds.webp'),
-        url('assets/Backgrounds/clouds.webp'),
-        url('assets/Backgrounds/clouds.webp'),
-        url('assets/Backgrounds/clouds.webp'),
-        url('assets/Backgrounds/clouds.webp'),
-        url('assets/Backgrounds/clouds.webp'),
-        url('assets/Backgrounds/clouds.webp'),
-        url('assets/Backgrounds/clouds.webp'),
-        url('assets/Backgrounds/clouds.webp'),
-        url('assets/Backgrounds/clouds.webp');
+        url('assets/UI/clouds.webp'),
+        url('assets/UI/clouds.webp'),
+        url('assets/UI/clouds.webp'),
+        url('assets/UI/clouds.webp'),
+        url('assets/UI/clouds.webp'),
+        url('assets/UI/clouds.webp'),
+        url('assets/UI/clouds.webp'),
+        url('assets/UI/clouds.webp'),
+        url('assets/UI/clouds.webp'),
+        url('assets/UI/clouds.webp');
     background-repeat: no-repeat;
     opacity: 0.82;
     will-change: transform;

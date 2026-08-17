@@ -649,7 +649,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (hotspot.dataset.bound === 'true') return;
 
             hotspot.dataset.bound = 'true';
-            hotspot.addEventListener('click', () => {
+            hotspot.addEventListener('click', (event) => {
+                if (hotspot.dataset.game3Shape === 'circle') {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    if (typeof window.__learnscapeNavigate === 'function') {
+                        window.__learnscapeNavigate('shape-circle');
+                    } else {
+                        window.location.hash = '#shape-circle';
+                    }
+
+                    return;
+                }
+
                 game3Hotspots.forEach((otherHotspot) => {
                     const isCurrent = otherHotspot === hotspot;
                     otherHotspot.classList.toggle('is-active', isCurrent);
@@ -1013,10 +1026,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const dragtomatchCardMarkup = `
         <span class="game1-object-card-inner">
             <span class="game1-object-card-face game1-object-card-face-back">
-                <img class="game1-object-card-frame" src="assets/Backgrounds/objectdisplayerback.webp" alt="">
+                <img class="game1-object-card-frame" src="assets/UI/objectdisplayerback.webp" alt="">
             </span>
             <span class="game1-object-card-face game1-object-card-face-front">
-                <img class="game1-object-card-frame" src="assets/Backgrounds/objectdisplayerfront.png" alt="">
+                <img class="game1-object-card-frame" src="assets/UI/objectdisplayerfront.png" alt="">
                 <img class="game1-object-card-object" src="" alt="">
             </span>
         </span>
