@@ -2234,6 +2234,19 @@ body.is-touch-dragging {
     height: var(--game3-map-height);
 }
 
+.game3-worldmap {
+    position: absolute;
+    top: clamp(2rem, 5vh, 4rem);
+    left: clamp(-1.5rem, -2vw, -0.5rem);
+    z-index: 1;
+    width: clamp(14rem, 29vw, 30rem);
+    height: auto;
+    transform: rotate(-15deg);
+    transform-origin: 18% 18%;
+    pointer-events: none;
+    user-select: none;
+}
+
 .game3-hotspots {
     position: fixed;
     inset: 0;
@@ -2461,7 +2474,8 @@ body.is-touch-dragging {
 
 .shape-collection-widget {
     position: fixed;
-    left: clamp(0.05rem, 0.35vw, 0.35rem);
+    left: auto;
+    right: clamp(0.05rem, 0.35vw, 0.35rem);
     bottom: clamp(0.6rem, 1.8vh, 1.2rem);
     z-index: 72;
     width: clamp(11rem, 20vw, 18rem);
@@ -2561,7 +2575,8 @@ body.is-fullscreen-mode .shape-collection-widget {
 
 .shape-collection-dashboard {
     position: fixed;
-    left: clamp(9.5rem, 17vw, 16rem);
+    left: auto;
+    right: clamp(9.5rem, 17vw, 16rem);
     bottom: clamp(8rem, 22vh, 14rem);
     z-index: 90;
     width: min(38rem, 62vw);
@@ -3676,6 +3691,11 @@ body.is-fullscreen-mode .game1-level-star {
 .game3-page .game-return-btn,
 .gameplay-page .game-return-btn {
     z-index: 6;
+}
+
+.game3-page .game-return-btn {
+    left: auto;
+    right: 1.1vw;
 }
 
 h1,
