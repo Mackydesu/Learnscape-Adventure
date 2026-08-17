@@ -587,6 +587,8 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page {
         linear-gradient(180deg, rgba(245, 248, 250, 0.06), rgba(245, 248, 250, 0.02));
     filter: blur(9px);
     opacity: 0.9;
+    -webkit-mask-image: radial-gradient(circle at 27% 25%, transparent 0 15rem, rgba(0, 0, 0, 0.76) 16.2rem, #000 19.8rem 100%);
+    mask-image: radial-gradient(circle at 27% 25%, transparent 0 15rem, rgba(0, 0, 0, 0.76) 16.2rem, #000 19.8rem 100%);
 }
 
 .game3-clouds::before,
