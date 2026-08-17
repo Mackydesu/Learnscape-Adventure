@@ -1995,7 +1995,7 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page {
         0 5px 0 rgba(77, 37, 8, 0.9),
         0 0 10px rgba(255, 255, 255, 0.28),
         0 0 18px rgba(77, 37, 8, 0.18);
-    cursor: grab;
+    cursor: pointer;
     user-select: none;
     -webkit-user-drag: element;
     touch-action: manipulation;
@@ -2322,7 +2322,7 @@ body.is-touch-dragging {
     border-radius: 50%;
     background: transparent;
     transform: translate(-50%, -50%);
-    cursor: grab;
+    cursor: pointer;
     pointer-events: auto;
     transition:
         transform 0.18s ease,
@@ -2332,6 +2332,11 @@ body.is-touch-dragging {
 
 #learnscape-game3-page.game3-page.is-map-dragging .game3-hotspot {
     cursor: grabbing;
+}
+
+.game3-hotspot svg,
+.game3-hotspot svg * {
+    cursor: pointer;
 }
 
 .game3-hotspot::before {
