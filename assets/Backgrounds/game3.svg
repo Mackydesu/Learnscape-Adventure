@@ -4,9 +4,12 @@
 		<filter id="game3-bw" color-interpolation-filters="sRGB">
 			<feColorMatrix type="saturate" values="0"/>
 		</filter>
+		<filter id="game3-mask-soft" color-interpolation-filters="sRGB">
+			<feGaussianBlur stdDeviation="12"/>
+		</filter>
 		<mask id="game3-local-mono-mask">
 			<rect x="0" y="0" width="1672" height="941" fill="black"/>
-			<g fill="white">
+			<g filter="url(#game3-mask-soft)" fill="white">
 				<ellipse cx="812" cy="150" rx="170" ry="150"/>
 				<ellipse cx="1175" cy="226" rx="170" ry="145"/>
 				<ellipse cx="1493" cy="397" rx="165" ry="145"/>
@@ -20,5 +23,5 @@
 	<style>
 	</style>
 	<use id="Background" href="#img1" x="0" y="0"/>
-	<use href="#img1" x="0" y="0" filter="url(#game3-bw)" mask="url(#game3-local-mono-mask)"/>
+	<use href="#img1" x="0" y="0" filter="url(#game3-bw)" mask="url(#game3-local-mono-mask)" style="cursor: crosshair;"/>
 </svg>
