@@ -594,19 +594,17 @@
                 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
                 const getScrollBounds = () => {
-                    const styles = window.getComputedStyle(map);
-                    const bottomTrimRatio = Number.parseFloat(
-                        styles.getPropertyValue('--game3-bottom-scroll-trim-ratio')
-                    ) || 0;
-                    const rightTrimRatio = Number.parseFloat(
-                        styles.getPropertyValue('--game3-right-scroll-trim-ratio')
-                    ) || 0;
-                    const bottomTrim = map.clientHeight * bottomTrimRatio;
-                    const rightTrim = map.clientWidth * rightTrimRatio;
+                    const background = map.querySelector(':scope > .game1-bg-image');
+                    const scrollWidth = background
+                        ? background.offsetLeft + background.offsetWidth
+                        : map.scrollWidth;
+                    const scrollHeight = background
+                        ? background.offsetTop + background.offsetHeight
+                        : map.scrollHeight;
 
                     return {
-                        maxLeft: Math.max(0, map.scrollWidth - map.clientWidth - rightTrim),
-                        maxTop: Math.max(0, map.scrollHeight - map.clientHeight - bottomTrim),
+                        maxLeft: Math.max(0, scrollWidth - map.clientWidth),
+                        maxTop: Math.max(0, scrollHeight - map.clientHeight),
                     };
                 };
 
