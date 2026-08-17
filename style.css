@@ -2281,8 +2281,8 @@ body.is-touch-dragging {
     cursor: grabbing;
 }
 
-.game3-hotspot svg,
-.game3-hotspot svg * {
+.game3-shape-icon,
+.game3-shape-icon * {
     cursor: pointer;
 }
 
@@ -2297,7 +2297,7 @@ body.is-touch-dragging {
     transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
-.game3-hotspot svg {
+.game3-shape-icon {
     width: 100%;
     height: 100%;
     display: block;
@@ -2350,7 +2350,7 @@ body.is-touch-dragging {
     filter: brightness(1.1);
 }
 
-.game3-hotspot.is-active svg {
+.game3-hotspot.is-active .game3-shape-icon {
     filter:
         drop-shadow(0 0 10px rgba(255, 255, 255, 0.4))
         drop-shadow(0 0 24px rgba(255, 244, 95, 0.35));
@@ -2360,11 +2360,68 @@ body.is-touch-dragging {
     transform: translate(-50%, -50%) scale(0.97);
 }
 
-.game3-hotspot svg * {
+.game3-shape-icon * {
     stroke: rgba(255, 255, 255, 0.96);
     stroke-width: 12;
     paint-order: stroke fill;
     vector-effect: non-scaling-stroke;
+}
+
+.game3-hotspot-lock {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 4;
+    width: clamp(2.8rem, 3.45vw, 3.7rem);
+    height: clamp(2.8rem, 3.45vw, 3.7rem);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    filter:
+        drop-shadow(0 0.12rem 0.04rem rgba(67, 45, 16, 0.22))
+        drop-shadow(0 0.22rem 0.48rem rgba(0, 0, 0, 0.18));
+}
+
+.game3-hotspot-lock-shackle {
+    fill: none;
+    stroke: #6d4a1e;
+    stroke-width: 5.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.game3-hotspot-lock-body {
+    fill: #d4a140;
+    stroke: #7c5521;
+    stroke-width: 2.2;
+}
+
+.game3-hotspot-lock-rim {
+    fill: none;
+    stroke: rgba(255, 246, 220, 0.34);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+}
+
+.game3-hotspot-lock-keyhole {
+    fill: #5c3b12;
+}
+
+.game3-hotspot-lock-keyhole-slot {
+    fill: #5c3b12;
+}
+
+.game3-hotspot-square .game3-hotspot-lock,
+.game3-hotspot-triangle .game3-hotspot-lock,
+.game3-hotspot-rectangle .game3-hotspot-lock,
+.game3-hotspot-oval .game3-hotspot-lock,
+.game3-hotspot-heart .game3-hotspot-lock,
+.game3-hotspot-star .game3-hotspot-lock,
+.game3-hotspot-diamond .game3-hotspot-lock {
+    opacity: 0.98;
+}
+
+.game3-hotspot-heart .game3-hotspot-lock {
+    top: 43%;
 }
 
 .game3-hotspot-circle {
@@ -2374,7 +2431,7 @@ body.is-touch-dragging {
     filter: none;
 }
 
-.game3-hotspot-circle svg * {
+.game3-hotspot-circle .game3-shape-icon * {
     fill: #1f8dff;
     filter:
         drop-shadow(0 0 4px rgba(255, 255, 255, 0.36))
@@ -2389,7 +2446,7 @@ body.is-touch-dragging {
     color: var(--game3-hotspot-temp-fill);
 }
 
-.game3-hotspot-square svg * {
+.game3-hotspot-square .game3-shape-icon * {
     fill: var(--game3-hotspot-temp-fill);
 }
 
@@ -2401,11 +2458,11 @@ body.is-touch-dragging {
     color: var(--game3-hotspot-temp-fill);
 }
 
-.game3-hotspot-triangle svg * {
+.game3-hotspot-triangle .game3-shape-icon * {
     fill: var(--game3-hotspot-temp-fill);
 }
 
-.game3-hotspot-triangle svg {
+.game3-hotspot-triangle .game3-shape-icon {
     transform: scaleY(0.96);
     transform-origin: center;
 }
@@ -2418,7 +2475,7 @@ body.is-touch-dragging {
     color: var(--game3-hotspot-temp-fill);
 }
 
-.game3-hotspot-rectangle svg * {
+.game3-hotspot-rectangle .game3-shape-icon * {
     fill: var(--game3-hotspot-temp-fill);
 }
 
@@ -2430,7 +2487,7 @@ body.is-touch-dragging {
     color: var(--game3-hotspot-temp-fill);
 }
 
-.game3-hotspot-oval svg * {
+.game3-hotspot-oval .game3-shape-icon * {
     fill: var(--game3-hotspot-temp-fill);
 }
 
@@ -2442,7 +2499,7 @@ body.is-touch-dragging {
     color: var(--game3-hotspot-temp-fill);
 }
 
-.game3-hotspot-heart svg * {
+.game3-hotspot-heart .game3-shape-icon * {
     fill: var(--game3-hotspot-temp-fill);
 }
 
@@ -2454,7 +2511,7 @@ body.is-touch-dragging {
     color: var(--game3-hotspot-temp-fill);
 }
 
-.game3-hotspot-star svg * {
+.game3-hotspot-star .game3-shape-icon * {
     fill: var(--game3-hotspot-temp-fill);
 }
 
@@ -2466,7 +2523,7 @@ body.is-touch-dragging {
     color: var(--game3-hotspot-temp-fill);
 }
 
-.game3-hotspot-diamond svg * {
+.game3-hotspot-diamond .game3-shape-icon * {
     fill: var(--game3-hotspot-temp-fill);
 }
 
