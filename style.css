@@ -555,8 +555,14 @@ body.is-page-loading .page-loading-overlay {
     translate: clamp(0.45rem, 0.8vw, 0.8rem) 0;
 }
 
+body:not(.is-fullscreen-mode) .shape-area-character-speaker {
+    left: calc(clamp(2.2rem, 5vw, 5rem) + clamp(1.3rem, 2vw, 2rem));
+    bottom: clamp(1.4rem, 4vh, 2.5rem);
+}
+
 body.is-fullscreen-mode .shape-area-character-speaker {
-    bottom: clamp(3rem, 8vh, 5.5rem);
+    left: calc(clamp(2.2rem, 5vw, 5rem) + clamp(1.3rem, 2vw, 2rem));
+    bottom: calc(clamp(3rem, 8vh, 5.5rem) + clamp(1.4rem, 4vh, 2.5rem));
     height: clamp(19rem, 35vw, 35rem);
 }
 
@@ -632,11 +638,32 @@ body.is-fullscreen-mode .shape-area-character-speaker {
     --shape-area-bubble-character-shift: clamp(0.45rem, 0.8vw, 0.8rem);
 }
 
+body:not(.is-fullscreen-mode) .shape-area-speech-bubble-ch3 {
+    left: calc(
+        clamp(2.2rem, 5vw, 5rem)
+        + clamp(7rem, 13vw, 13rem)
+        + clamp(1.3rem, 2vw, 2rem)
+        + var(--shape-area-bubble-character-shift)
+    );
+    bottom: calc(
+        clamp(16.8rem, 31.2vw, 31.2rem)
+        + clamp(0.8rem, 1.5vw, 1.5rem)
+        + clamp(1.4rem, 4vh, 2.5rem)
+    );
+}
+
 body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
+    left: calc(
+        clamp(2.2rem, 5vw, 5rem)
+        + clamp(7rem, 13vw, 13rem)
+        + clamp(1.3rem, 2vw, 2rem)
+        + var(--shape-area-bubble-character-shift)
+    );
     bottom: calc(
         clamp(19rem, 35vw, 35rem)
         + clamp(0.8rem, 1.5vw, 1.5rem)
         + clamp(3rem, 8vh, 5.5rem)
+        + clamp(1.4rem, 4vh, 2.5rem)
     );
 }
 
