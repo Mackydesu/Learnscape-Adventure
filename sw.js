@@ -1,4 +1,4 @@
-const CACHE_NAME = 'learnscape-adventure-v19';
+const CACHE_NAME = 'learnscape-adventure-v39';
 const CORE_ASSETS = [
   './',
   './index.html',

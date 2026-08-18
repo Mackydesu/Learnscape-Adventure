@@ -530,17 +530,37 @@ body.is-page-loading .page-loading-overlay {
     transform: translateX(-4rem) translateY(0.4rem) scale(0.96);
 }
 
-.shape-area-character-ch3 {
+.shape-area-character-speaker {
     left: clamp(2.2rem, 5vw, 5rem);
     bottom: 0;
     z-index: 1;
     opacity: 0;
     width: clamp(14rem, 26vw, 26rem);
+    height: clamp(16.8rem, 31.2vw, 31.2rem);
+    object-fit: fill;
     transform: translateY(1.2rem) scale(0.55);
     transform-origin: center bottom;
 }
 
-.shape-area-character-ch3.is-popping {
+.shape-area-character-speaker[hidden] {
+    display: none;
+}
+
+.shape-area-character-ch4 {
+    translate: clamp(1.8rem, 3vw, 3rem) 0;
+    scale: 0.9 0.99;
+}
+
+.shape-area-character-ch5 {
+    translate: clamp(0.45rem, 0.8vw, 0.8rem) 0;
+}
+
+body.is-fullscreen-mode .shape-area-character-speaker {
+    bottom: clamp(3rem, 8vh, 5.5rem);
+    height: clamp(19rem, 35vw, 35rem);
+}
+
+.shape-area-character-speaker.is-popping {
     animation: shapeAreaCharacterPop 0.8s cubic-bezier(0.2, 1.1, 0.34, 1) both;
 }
 
@@ -573,7 +593,7 @@ body.is-page-loading .page-loading-overlay {
     position: absolute;
     left: clamp(5rem, 5vw, 10rem);
     bottom: clamp(15rem, 25vw, 23rem);
-    z-index: 2;
+    z-index: 3;
     max-width: min(36vw, 22rem);
     padding: 0.85rem 1rem;
     border: 0.18rem solid #7a4a2a;
@@ -596,6 +616,34 @@ body.is-page-loading .page-loading-overlay {
     transition: opacity 0.45s ease, transform 0.45s ease;
 }
 
+.shape-area-speech-bubble-ch3 {
+    --shape-area-bubble-character-shift: 0px;
+    left: calc(clamp(2.2rem, 5vw, 5rem) + clamp(7rem, 13vw, 13rem) + var(--shape-area-bubble-character-shift));
+    bottom: calc(clamp(16.8rem, 31.2vw, 31.2rem) + clamp(0.8rem, 1.5vw, 1.5rem));
+    max-width: min(40vw, 24rem);
+    translate: -50% 0;
+}
+
+.shape-area-speech-bubble-ch3[data-active-character="ch4"] {
+    --shape-area-bubble-character-shift: clamp(1.8rem, 3vw, 3rem);
+}
+
+.shape-area-speech-bubble-ch3[data-active-character="ch5"] {
+    --shape-area-bubble-character-shift: clamp(0.45rem, 0.8vw, 0.8rem);
+}
+
+body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
+    bottom: calc(
+        clamp(19rem, 35vw, 35rem)
+        + clamp(0.8rem, 1.5vw, 1.5rem)
+        + clamp(3rem, 8vh, 5.5rem)
+    );
+}
+
+.shape-area-speech-bubble-ch3.is-triggering {
+    animation: shapeAreaBubbleTriggerPulse 1.15s ease-in-out infinite;
+}
+
 .shape-area-speech-bubble.is-visible {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -615,6 +663,23 @@ body.is-page-loading .page-loading-overlay {
 
 .shape-area-speech-bubble-text.is-fading {
     opacity: 0;
+}
+
+@keyframes shapeAreaBubbleTriggerPulse {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+        box-shadow:
+            0 0.45rem 0 rgba(122, 74, 42, 0.2),
+            0 0.9rem 1.2rem rgba(34, 20, 4, 0.14);
+    }
+
+    50% {
+        transform: translateY(-0.18rem) scale(1.03);
+        box-shadow:
+            0 0.55rem 0 rgba(122, 74, 42, 0.24),
+            0 1.2rem 1.5rem rgba(34, 20, 4, 0.18),
+            0 0 0 0.22rem rgba(255, 244, 95, 0.12);
+    }
 }
 
 .shape-area-speech-bubble::after {
