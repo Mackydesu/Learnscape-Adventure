@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260818-17';
+    const appVersion = '20260818-43';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -97,6 +97,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeCircleCharacter4 = shapeCirclePage?.querySelector('.shape-area-character-ch4') || null;
     const shapeCircleCharacter5 = shapeCirclePage?.querySelector('.shape-area-character-ch5') || null;
     const shapeCircleSpeakerCharacters = [shapeCircleCharacter3, shapeCircleCharacter4, shapeCircleCharacter5];
+    const shapeCircleLearningGoal = shapeCirclePage?.querySelector('.shape-area-learning-goal') || null;
     const shapeCircleBubble = shapeCirclePage?.querySelector('.shape-area-speech-bubble') || null;
     const shapeCircleBubbleText = shapeCircleBubble?.querySelector('.shape-area-speech-bubble-text') || null;
     const shapeCircleBubbleCh3 = shapeCirclePage?.querySelector('.shape-area-speech-bubble-ch3') || null;
@@ -180,6 +181,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             shapeCircleBubbleCh3.classList.remove('is-visible', 'is-fading', 'is-triggering');
         }
 
+        if (shapeCircleLearningGoal) {
+            shapeCircleLearningGoal.classList.remove('is-start-ready');
+        }
+
         if (shapeCircleCharacter) {
             shapeCircleCharacter.hidden = false;
             shapeCircleCharacter.classList.remove('is-fading', 'is-sliding-left');
@@ -235,6 +240,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const currentMessage = String(shapeCircleBubbleCh3Messages[messageIndex] || '');
                 const isLastCh3Message = messageIndex === shapeCircleBubbleCh3Messages.length - 1;
+                shapeCircleLearningGoal?.classList.toggle('is-start-ready', isLastCh3Message);
                 const pauseAfterTyping = isLastCh3Message
                     ? shapeCircleCh3FinalPauseAfterTyping
                     : shapeCircleCh3PauseAfterTyping;

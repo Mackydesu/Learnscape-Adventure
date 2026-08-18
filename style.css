@@ -506,6 +506,160 @@ body.is-page-loading .page-loading-overlay {
     object-fit: cover;
 }
 
+.circle-illustration-page {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    background: #d9f2a0;
+}
+
+.circle-illustration-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.shape-area-learning-goal {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 2;
+    width: max(100vw, calc(100svh * 1.776833));
+    height: max(100svh, calc(100vw / 1.776833));
+    color: #3f210d;
+    font-family: 'Fredoka', sans-serif;
+    text-align: center;
+    transform: translate(-50%, -50%);
+    text-shadow:
+        0 0.08rem 0 #ffe29a,
+        0 0.16rem 0.12rem rgba(90, 45, 12, 0.28);
+    pointer-events: none;
+}
+
+.shape-area-learning-goal > span {
+    position: absolute;
+    left: 50%;
+    display: block;
+    width: 28%;
+    transform: translate(-50%, -50%) rotate(-0.4deg);
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.shape-area-learning-goal-heading {
+    top: 61.8%;
+    font-size: clamp(1.55rem, 2.75vw, 2.75rem);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.shape-area-learning-goal-line-one,
+.shape-area-learning-goal-line-two {
+    font-size: clamp(1.45rem, 2.45vw, 2.45rem);
+    font-weight: 800;
+    line-height: 1;
+}
+
+.shape-area-learning-goal-line-one {
+    top: 71.5%;
+}
+
+.shape-area-learning-goal-line-two {
+    top: 80.8%;
+}
+
+.shape-area-learning-goal.is-start-ready > span {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.shape-area-start-button {
+    position: absolute;
+    left: 50%;
+    top: 71.5%;
+    min-width: clamp(8rem, 14vw, 14rem);
+    padding: clamp(0.65rem, 1.1vw, 1rem) clamp(1.5rem, 3vw, 3rem);
+    border: clamp(0.16rem, 0.28vw, 0.28rem) solid #6f3b16;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #fff879 0%, #ffd34f 52%, #f0a92f 100%);
+    color: #4a260e;
+    font: 800 clamp(1.4rem, 2.7vw, 2.7rem) 'Fredoka', sans-serif;
+    line-height: 1;
+    text-transform: uppercase;
+    text-shadow: 0 0.1rem 0 #fff4b1;
+    box-shadow:
+        0 0.35rem 0 #9a591f,
+        0 0.7rem 1.1rem rgba(70, 35, 8, 0.28);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    cursor: pointer;
+    transform: translate(-50%, -50%) scale(0.72);
+    transition:
+        transform 0.18s ease,
+        filter 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.shape-area-learning-goal.is-start-ready .shape-area-start-button {
+    visibility: visible;
+    pointer-events: auto;
+    animation: shapeAreaStartButtonIn 0.55s cubic-bezier(0.2, 1.18, 0.35, 1) forwards,
+        shapeAreaStartButtonPulse 1.25s ease-in-out 0.55s infinite;
+}
+
+.shape-area-learning-goal.is-start-ready .shape-area-start-button:hover {
+    animation: none;
+    opacity: 1;
+    background: linear-gradient(180deg, #fffca0 0%, #ffe35d 52%, #f7ba3d 100%);
+    filter: brightness(1.08) saturate(1.08);
+    box-shadow:
+        0 0.48rem 0 #8b4a18,
+        0 0.95rem 1.4rem rgba(70, 35, 8, 0.34),
+        0 0 0 0.32rem rgba(255, 244, 95, 0.3);
+    transform: translate(-50%, -56%) scale(1.08);
+}
+
+.shape-area-learning-goal.is-start-ready .shape-area-start-button:active {
+    animation: none;
+    opacity: 1;
+    filter: brightness(0.98) saturate(1.04);
+    box-shadow:
+        0 0.12rem 0 #8b4a18,
+        0 0.35rem 0.65rem rgba(70, 35, 8, 0.24),
+        0 0 0 0.18rem rgba(255, 244, 95, 0.22);
+    transform: translate(-50%, -47%) scale(0.96);
+}
+
+@keyframes shapeAreaStartButtonIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.72);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes shapeAreaStartButtonPulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    50% {
+        transform: translate(-50%, -54%) scale(1.04);
+    }
+}
+
 .shape-area-character {
     position: absolute;
     left: clamp(-1.7rem, -1.3vw, 0rem);
@@ -616,7 +770,7 @@ body.is-fullscreen-mode .shape-area-character-speaker {
         0 0.45rem 0 rgba(122, 74, 42, 0.2),
         0 0.9rem 1.2rem rgba(34, 20, 4, 0.14);
     pointer-events: none;
-    overflow: hidden;
+    overflow: visible;
     opacity: 0;
     transform: translateY(0.6rem) scale(0.98);
     transition: opacity 0.45s ease, transform 0.45s ease;
@@ -681,6 +835,13 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     transform: translateY(0.7rem) scale(0.96);
 }
 
+.shape-area-speech-bubble:not(.shape-area-speech-bubble-ch3),
+.shape-area-speech-bubble:not(.shape-area-speech-bubble-ch3).is-visible,
+.shape-area-speech-bubble:not(.shape-area-speech-bubble-ch3).is-fading {
+    transform: none;
+    transition-property: opacity;
+}
+
 .shape-area-speech-bubble-text {
     display: inline-block;
     white-space: pre-wrap;
@@ -709,18 +870,33 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     }
 }
 
+.shape-area-speech-bubble::before,
 .shape-area-speech-bubble::after {
     content: '';
     position: absolute;
-    left: 18%;
+    left: clamp(2rem, 3vw, 2.8rem);
+    width: 0;
+    height: 0;
+    transform: translateX(-50%);
+}
+
+.shape-area-speech-bubble-ch3::before,
+.shape-area-speech-bubble-ch3::after {
+    left: 50%;
+}
+
+.shape-area-speech-bubble::before {
+    bottom: -1.08rem;
+    border-left: 0.9rem solid transparent;
+    border-right: 0.9rem solid transparent;
+    border-top: 1.08rem solid #7a4a2a;
+}
+
+.shape-area-speech-bubble::after {
     bottom: -0.72rem;
-    width: 1.2rem;
-    height: 1.2rem;
-    background: linear-gradient(225deg, #ffe8a5 0 50%, transparent 50% 100%);
-    border-right: 0.18rem solid #7a4a2a;
-    border-bottom: 0.18rem solid #7a4a2a;
-    transform: rotate(45deg);
-    border-bottom-right-radius: 0.18rem;
+    border-left: 0.66rem solid transparent;
+    border-right: 0.66rem solid transparent;
+    border-top: 0.8rem solid #ffe8a5;
 }
 
 .shape-area-title {
