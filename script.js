@@ -44,6 +44,19 @@ document.addEventListener('DOMContentLoaded', () => {
         diamond: { x: 205, y: 569 },
     };
     const game3Hotspots = game3Page?.querySelectorAll('[data-game3-shape]') || [];
+    const shapeCirclePage = document.getElementById('learnscape-shape-circle-page');
+    const shapeCircleCharacter = shapeCirclePage?.querySelector('.shape-area-character-ch2') || null;
+    const shapeCircleCharacter3 = shapeCirclePage?.querySelector('.shape-area-character-ch3') || null;
+    const shapeCircleBubble = shapeCirclePage?.querySelector('.shape-area-speech-bubble') || null;
+    const shapeCircleBubbleText = shapeCircleBubble?.querySelector('.shape-area-speech-bubble-text') || null;
+    const shapeCircleMessage = shapeCircleBubble?.dataset.message || 'Hello! Kumusta ka, Kaibigan?';
+    const shapeCircleTypingDelay = 55;
+    const shapeCirclePauseAfterTyping = 1200;
+    const shapeCircleTextFadeDuration = 450;
+    const shapeCircleCharacterSlideDuration = 450;
+    const shapeCircleCharacterPopDelay = 120;
+    let shapeCircleTimers = [];
+    let shapeCircleSession = 0;
     let lettertraceCurrentLetter = 'A';
     let lettertraceCurrentCase = 'upper';
     let lettertraceTraceDrawing = false;
@@ -65,6 +78,94 @@ document.addEventListener('DOMContentLoaded', () => {
             : 0;
 
         lettertraceProgressLabel.textContent = `${percentage}%`;
+    };
+
+    const clearShapeCircleTimers = () => {
+        shapeCircleTimers.forEach((timerId) => window.clearTimeout(timerId));
+        shapeCircleTimers = [];
+    };
+
+    const resetShapeCircleScene = () => {
+        clearShapeCircleTimers();
+        shapeCircleSession += 1;
+
+        if (shapeCircleBubbleText) {
+            shapeCircleBubbleText.textContent = '';
+            shapeCircleBubbleText.classList.remove('is-fading');
+        }
+
+        if (shapeCircleBubble) {
+            shapeCircleBubble.hidden = false;
+            shapeCircleBubble.classList.remove('is-visible', 'is-fading');
+        }
+
+        if (shapeCircleCharacter) {
+            shapeCircleCharacter.hidden = false;
+            shapeCircleCharacter.classList.remove('is-fading', 'is-sliding-left');
+        }
+
+        if (shapeCircleCharacter3) {
+            shapeCircleCharacter3.hidden = true;
+            shapeCircleCharacter3.classList.remove('is-popping');
+        }
+    };
+
+    const startShapeCircleScene = () => {
+        if (!shapeCirclePage || !shapeCircleBubble || !shapeCircleBubbleText || !shapeCircleCharacter) return;
+        if (!isPageVisible(shapeCirclePage)) return;
+
+        resetShapeCircleScene();
+
+        const session = shapeCircleSession;
+        const message = String(shapeCircleMessage);
+
+        shapeCircleBubble.classList.add('is-visible');
+
+        const typeNextCharacter = (index) => {
+            if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
+
+            shapeCircleBubbleText.textContent = message.slice(0, index);
+
+            if (index >= message.length) {
+                shapeCircleTimers.push(window.setTimeout(() => {
+                    if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
+
+                    shapeCircleBubbleText.classList.add('is-fading');
+
+                    shapeCircleTimers.push(window.setTimeout(() => {
+                        if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
+
+                        shapeCircleBubble.hidden = true;
+                        shapeCircleCharacter.classList.add('is-sliding-left');
+
+                    shapeCircleTimers.push(window.setTimeout(() => {
+                        if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
+
+                        shapeCircleCharacter.hidden = true;
+
+                        if (!shapeCircleCharacter3) return;
+
+                        shapeCircleTimers.push(window.setTimeout(() => {
+                            if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
+
+                            shapeCircleCharacter3.hidden = false;
+                            shapeCircleCharacter3.classList.remove('is-popping');
+                            shapeCircleCharacter3.getBoundingClientRect();
+                            shapeCircleCharacter3.classList.add('is-popping');
+                        }, shapeCircleCharacterPopDelay));
+                    }, shapeCircleCharacterSlideDuration));
+                }, shapeCircleTextFadeDuration));
+            }, shapeCirclePauseAfterTyping));
+
+                return;
+            }
+
+            shapeCircleTimers.push(window.setTimeout(() => {
+                typeNextCharacter(index + 1);
+            }, shapeCircleTypingDelay));
+        };
+
+        typeNextCharacter(1);
     };
 
     const lettertraceTraceGuidePaths = {
@@ -2341,9 +2442,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        if (event.detail?.route === 'shapeCircle') {
+            startShapeCircleScene();
+            return;
+        }
+
         updateLettertraceBackground({});
         updateDragtomatchBackground({});
         clearDragtomatchTutorial();
+        resetShapeCircleScene();
     });
 
     if (isPageVisible(lettertracePage)) {
@@ -2356,6 +2463,12 @@ document.addEventListener('DOMContentLoaded', () => {
         setLettertraceNavigationTargets(getDragtomatchLetterFromHash());
         startDragtomatchAtLetter(getDragtomatchLetterFromHash());
         scheduleDragtomatchTutorial();
+    }
+
+    if (isPageVisible(shapeCirclePage)) {
+        startShapeCircleScene();
+    } else {
+        resetShapeCircleScene();
     }
 
     renderDragtomatchLevels();
