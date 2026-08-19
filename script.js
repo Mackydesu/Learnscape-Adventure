@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260819-54';
+    const appVersion = '20260819-59';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -95,6 +95,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const circleIllustrationPage = document.getElementById('learnscape-circle-illustration-page');
     const circleIllustrationVideo = circleIllustrationPage?.querySelector('.circle-illustration-video') || null;
     const circleIllustrationPlayButton = circleIllustrationPage?.querySelector('.circle-illustration-play-button') || null;
+    const circleIllustrationSkipButton = circleIllustrationPage?.querySelector('.circle-illustration-skip-button') || null;
+    const circleIllustrationProgress = circleIllustrationPage?.querySelector('.circle-lesson-progress') || null;
+    const circleIllustrationReplayButton = circleIllustrationPage?.querySelector('[data-circle-lesson-replay]') || null;
+    const circleIllustrationNextButton = circleIllustrationPage?.querySelector('[data-circle-lesson-next]') || null;
     const shapeCircleCharacter = shapeCirclePage?.querySelector('.shape-area-character-ch2') || null;
     const shapeCircleCharacter3 = shapeCirclePage?.querySelector('.shape-area-character-ch3') || null;
     const shapeCircleCharacter4 = shapeCirclePage?.querySelector('.shape-area-character-ch4') || null;
@@ -757,11 +761,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         circleIllustrationPlayButton.style.display = isVisible ? '' : 'none';
     };
 
+    const setCircleIllustrationSkipButtonVisible = (isVisible) => {
+        if (!circleIllustrationSkipButton) return;
+
+        circleIllustrationSkipButton.hidden = !isVisible;
+    };
+
+    const hideCircleIllustrationProgress = () => {
+        circleIllustrationPage?.classList.remove('is-progress-visible');
+        circleIllustrationProgress?.setAttribute('aria-hidden', 'true');
+    };
+
+    const showCircleIllustrationProgress = () => {
+        if (!circleIllustrationPage || !circleIllustrationProgress) return;
+
+        circleIllustrationVideo?.pause();
+        setCircleIllustrationPlayButtonVisible(false);
+        setCircleIllustrationSkipButtonVisible(false);
+        circleIllustrationPage.classList.remove('is-lesson-complete');
+        circleIllustrationPage.classList.add('is-progress-visible');
+        circleIllustrationProgress.setAttribute('aria-hidden', 'false');
+        circleIllustrationNextButton?.focus({ preventScroll: true });
+    };
+
+    const finishCircleIllustrationLesson = () => {
+        hideCircleIllustrationProgress();
+        circleIllustrationPage?.classList.add('is-lesson-complete');
+        setCircleIllustrationPlayButtonVisible(false);
+    };
+
     const playCircleIllustrationVideo = async () => {
         if (!circleIllustrationVideo || !isPageVisible(circleIllustrationPage)) return;
 
         try {
+            hideCircleIllustrationProgress();
+            circleIllustrationPage?.classList.remove('is-lesson-complete');
             setCircleIllustrationPlayButtonVisible(false);
+            setCircleIllustrationSkipButtonVisible(true);
 
             try {
                 circleIllustrationVideo.currentTime = 0;
@@ -772,6 +808,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             await circleIllustrationVideo.play();
         } catch (error) {
             setCircleIllustrationPlayButtonVisible(true);
+            setCircleIllustrationSkipButtonVisible(false);
             console.warn('Circle lesson video could not play.', error);
         }
     };
@@ -779,6 +816,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const resetCircleIllustrationVideo = () => {
         if (!circleIllustrationVideo) return;
 
+        hideCircleIllustrationProgress();
+        circleIllustrationPage?.classList.remove('is-lesson-complete');
+        setCircleIllustrationSkipButtonVisible(false);
         circleIllustrationVideo.pause?.();
 
         try {
@@ -1748,24 +1788,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             dragtomatchTutorialOverlay.style.removeProperty('--tutorial-dock-y');
             dragtomatchTutorialOverlay.style.removeProperty('--tutorial-dock-scale');
         }
-    };
 
-    const completeDragtomatchTutorialDock = () => {
-        if (!dragtomatchTutorialOverlay || !isPageVisible(dragtomatchPage)) {
-            clearDragtomatchTutorial();
-            setDragtomatchTutorialCompleted(true);
-            return;
+        if (dragtomatchTutorialButton) {
+            dragtomatchTutorialButton.classList.remove('is-hidden');
         }
-
-        dragtomatchTutorialOverlay.classList.add('is-completing');
-        dragtomatchTutorialOverlay.classList.remove('is-visible');
-        dragtomatchTutorialOverlay.setAttribute('aria-hidden', 'true');
-
-        dragtomatchTutorialDockTimer = window.setTimeout(() => {
-            dragtomatchTutorialDockTimer = null;
-            setDragtomatchTutorialCompleted(true);
-            clearDragtomatchTutorial();
-        }, 300);
     };
 
     const dockDragtomatchTutorial = () => {
@@ -1795,7 +1821,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         dragtomatchTutorialDockTimer = window.setTimeout(() => {
             dragtomatchTutorialDockTimer = null;
-            completeDragtomatchTutorialDock();
+            if (!dragtomatchTutorialOverlay || !isPageVisible(dragtomatchPage)) {
+                clearDragtomatchTutorial();
+                setDragtomatchTutorialCompleted(true);
+                return;
+            }
+
+            dragtomatchTutorialOverlay.classList.add('is-completing');
+            dragtomatchTutorialOverlay.classList.remove('is-visible');
+            dragtomatchTutorialOverlay.setAttribute('aria-hidden', 'true');
+
+            dragtomatchTutorialDockTimer = window.setTimeout(() => {
+                dragtomatchTutorialDockTimer = null;
+                setDragtomatchTutorialCompleted(true);
+                clearDragtomatchTutorial();
+            }, 300);
         }, 470);
     };
 
@@ -2696,16 +2736,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         playCircleIllustrationVideo();
     });
 
+    circleIllustrationSkipButton?.addEventListener('click', showCircleIllustrationProgress);
+
     circleIllustrationVideo?.addEventListener('play', () => {
         setCircleIllustrationPlayButtonVisible(false);
+        setCircleIllustrationSkipButtonVisible(true);
     });
 
-    circleIllustrationVideo?.addEventListener('ended', () => {
-        setCircleIllustrationPlayButtonVisible(true);
-    });
+    circleIllustrationVideo?.addEventListener('ended', showCircleIllustrationProgress);
+
+    circleIllustrationReplayButton?.addEventListener('click', playCircleIllustrationVideo);
+    circleIllustrationNextButton?.addEventListener('click', finishCircleIllustrationLesson);
 
     circleIllustrationVideo?.addEventListener('pause', () => {
-        if (circleIllustrationVideo.currentTime > 0 && !circleIllustrationVideo.ended) {
+        if (
+            circleIllustrationVideo.currentTime > 0
+            && !circleIllustrationVideo.ended
+            && !circleIllustrationPage?.classList.contains('is-progress-visible')
+            && !circleIllustrationPage?.classList.contains('is-lesson-complete')
+        ) {
             setCircleIllustrationPlayButtonVisible(true);
         }
     });

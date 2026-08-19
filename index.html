@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260819-53">
+    <link rel="stylesheet" href="style.css?v=20260819-75">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -342,16 +342,38 @@
     </section>
 
     <section id="learnscape-circle-illustration-page" class="circle-illustration-page" hidden>
-        <img class="circle-illustration-bg" src="assets/Backgrounds/Illustartion.webp" alt="Circle lesson illustration board">
+        <img class="circle-illustration-bg" src="assets/Backgrounds/Illustration.webp" alt="Circle lesson illustration board">
         <button class="circle-illustration-play-button" type="button" aria-label="Play circle lesson video">
             <svg class="circle-illustration-play-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-                <circle class="circle-illustration-play-ring" cx="50" cy="50" r="44"></circle>
                 <path class="circle-illustration-play-triangle" d="M40 30 L72 50 L40 70 Z"></path>
             </svg>
         </button>
-        <video class="circle-illustration-video" playsinline preload="metadata" aria-label="Circle lesson video">
-            <source src="assets/Videos/Circleshape.mp4" type="video/mp4">
-        </video>
+        <div class="circle-illustration-video-stage">
+            <video class="circle-illustration-video" playsinline preload="metadata" aria-label="Circle lesson video">
+                <source src="assets/Videos/Circleshape.mp4" type="video/mp4">
+            </video>
+            <button class="circle-illustration-skip-button" type="button" aria-label="Skip lesson video" hidden>Skip</button>
+        </div>
+        <section class="circle-lesson-progress" aria-label="Lesson progress" aria-hidden="true">
+            <div class="circle-lesson-progress-board">
+                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/progressboard.webp" alt="">
+                <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Lesson Complete!">
+                    <path id="circleLessonTitleCurve" d="M 4 44 Q 100 32 196 44" fill="none"></path>
+                    <text textLength="184" lengthAdjust="spacingAndGlyphs">
+                        <textPath href="#circleLessonTitleCurve" startOffset="50%" text-anchor="middle">Lesson Complete!</textPath>
+                    </text>
+                </svg>
+                <img class="circle-lesson-progress-star" src="assets/Shape UI/1star.webp" alt="1 star earned">
+                <div class="circle-lesson-progress-actions">
+                    <button class="circle-lesson-progress-button" type="button" data-circle-lesson-replay aria-label="Replay lesson">
+                        <img src="assets/Buttons/replay.webp" alt="">
+                    </button>
+                    <button class="circle-lesson-progress-button" type="button" data-circle-lesson-next aria-label="Continue">
+                        <img src="assets/Buttons/next.webp" alt="">
+                    </button>
+                </div>
+            </div>
+        </section>
         <a class="game-return-btn loading-link" href="index.html" data-route="shape-circle" aria-label="Return to Circle Area">
             <span>‹</span>
             Back
@@ -532,7 +554,7 @@
         </a>
     </section>
 
-    <script src="script.js?v=20260819-54"></script>
+    <script src="script.js?v=20260819-59"></script>
     </div>
 
     <script>

@@ -524,22 +524,67 @@ body.is-page-loading .page-loading-overlay {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    filter: blur(7px);
+    transform: scale(1.025);
 }
 
-.circle-illustration-video {
+.circle-illustration-video-stage {
     position: absolute;
     left: 50%;
     top: 51%;
     z-index: 1;
-    display: block;
-    width: 90vw;
-    height: auto;
-    max-width: 90vw;
-    max-height: 90vh;
+    width: min(95vw, 168.889vh);
+    max-width: 95vw;
+    max-height: 95vh;
+    aspect-ratio: 16 / 9;
     transform: translate(-50%, -50%);
+}
+
+.circle-illustration-video {
+    display: block;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
     pointer-events: auto;
     background: transparent;
+}
+
+.circle-illustration-skip-button {
+    position: absolute;
+    right: clamp(0.6rem, 1.6vw, 1.25rem);
+    bottom: clamp(0.6rem, 1.6vw, 1.25rem);
+    z-index: 3;
+    min-width: clamp(4.5rem, 8vw, 6.5rem);
+    padding: 0.55em 1.15em;
+    border: 0.16rem solid #f7dc72;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #78bd45 0%, #3d8c3d 58%, #286c37 100%);
+    color: #fff8cf;
+    font-family: 'Fredoka', sans-serif;
+    font-size: clamp(0.9rem, 1.7vw, 1.2rem);
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+    box-shadow:
+        0 0.3rem 0 #1f5b32,
+        0 0.7rem 1rem rgba(39, 91, 48, 0.28),
+        inset 0 2px 0 rgba(255, 255, 218, 0.42);
+    cursor: pointer;
+    transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.circle-illustration-skip-button:hover,
+.circle-illustration-skip-button:focus-visible {
+    transform: translateY(-2px);
+    filter: brightness(1.08);
+}
+
+.circle-illustration-skip-button:active {
+    transform: translateY(2px);
+}
+
+.circle-illustration-skip-button[hidden] {
+    display: none;
 }
 
 .circle-illustration-play-button {
@@ -552,20 +597,18 @@ body.is-page-loading .page-loading-overlay {
     justify-content: center;
     width: clamp(4.8rem, 8.5vw, 7rem);
     height: clamp(4.8rem, 8.5vw, 7rem);
-    border: 0.14rem solid rgba(255, 255, 255, 0.28);
+    border: 0.16rem solid #f7dc72;
     border-radius: 999px;
-    background:
-        radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.34) 0 18%, transparent 18% 100%),
-        linear-gradient(180deg, rgba(30, 36, 45, 0.88) 0%, rgba(10, 14, 20, 0.86) 100%);
-    color: #ffffff;
+    background: linear-gradient(180deg, #78bd45 0%, #3d8c3d 58%, #286c37 100%);
+    color: #fff8cf;
     line-height: 1;
     box-shadow:
-        0 0.4rem 0 rgba(0, 0, 0, 0.42),
-        0 0.95rem 1.5rem rgba(0, 0, 0, 0.28),
-        inset 0 1px 0 rgba(255, 255, 255, 0.16);
+        0 0.4rem 0 #1f5b32,
+        0 0.95rem 1.5rem rgba(39, 91, 48, 0.3),
+        inset 0 2px 0 rgba(255, 255, 218, 0.42),
+        inset 0 -2px 0 rgba(31, 91, 50, 0.24);
     cursor: pointer;
     transform: translate(-50%, -50%) scale(1);
-    backdrop-filter: blur(6px);
     transition:
         transform 0.18s ease,
         filter 0.18s ease,
@@ -578,9 +621,10 @@ body.is-page-loading .page-loading-overlay {
     transform: translate(-50%, -50%) scale(1.06);
     filter: brightness(1.08);
     box-shadow:
-        0 0.45rem 0 rgba(0, 0, 0, 0.42),
-        0 1.1rem 1.8rem rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+        0 0.45rem 0 #1f5b32,
+        0 1.1rem 1.8rem rgba(39, 91, 48, 0.34),
+        inset 0 2px 0 rgba(255, 255, 218, 0.48),
+        inset 0 -2px 0 rgba(31, 91, 50, 0.24);
     outline: none;
 }
 
@@ -594,30 +638,174 @@ body.is-page-loading .page-loading-overlay {
 }
 
 .circle-illustration-play-icon {
-    width: 58%;
-    height: 58%;
+    width: 72%;
+    height: 72%;
     overflow: visible;
-    filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.14));
-}
-
-.circle-illustration-play-ring {
-    fill: rgba(255, 255, 255, 0.02);
-    stroke: rgba(255, 255, 255, 0.18);
-    stroke-width: 3.5;
+    filter: drop-shadow(0 2px 0 rgba(38, 93, 47, 0.38));
 }
 
 .circle-illustration-play-triangle {
-    fill: #ffffff;
+    fill: #fff8cf;
     transform-origin: 50px 50px;
-    transform: scale(0.82);
+    transform: scale(1.08);
+}
+
+.circle-lesson-progress {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: none;
+    place-items: center;
+    align-content: center;
+    padding: clamp(0.75rem, 2vw, 1.5rem);
+}
+
+.circle-illustration-page.is-progress-visible .circle-lesson-progress {
+    display: grid;
+}
+
+.circle-lesson-progress-board {
+    position: relative;
+    width: min(68vw, 760px);
+    max-width: calc(100vw - 2rem);
+    animation: circleLessonProgressReveal 0.48s cubic-bezier(0.2, 0.82, 0.2, 1) both;
+}
+
+.circle-lesson-progress-board-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 22px 24px rgba(0, 0, 0, 0.3));
+}
+
+.circle-lesson-progress-title {
+    position: absolute;
+    top: 3.8%;
+    left: 50%;
+    width: 50%;
+    height: 14%;
+    overflow: visible;
+    transform: translateX(-50%);
+    filter: drop-shadow(0 2px 0 #07558d) drop-shadow(0 3px 3px rgba(0, 0, 0, 0.28));
+}
+
+.circle-lesson-progress-title text {
+    fill: #fff8c8;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: 0.15px;
+}
+
+.circle-lesson-progress-star {
+    position: absolute;
+    left: 50%;
+    top: 49%;
+    width: clamp(5rem, 19%, 9rem);
+    transform: translate(-50%, -50%);
+    filter: drop-shadow(0 8px 8px rgba(91, 48, 4, 0.32));
+    animation: circleLessonStarPop 0.5s 0.2s cubic-bezier(0.2, 1.4, 0.35, 1) both;
+}
+
+.circle-lesson-progress-actions {
+    position: absolute;
+    left: 50%;
+    bottom: 9%;
+    width: 62%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transform: translateX(-50%);
+}
+
+.circle-lesson-progress-button {
+    width: auto;
+    height: clamp(4.5rem, 10vw, 6.5rem);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    filter: drop-shadow(0 9px 8px rgba(0, 0, 0, 0.25));
+    transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.circle-lesson-progress-button[data-circle-lesson-next] {
+    aspect-ratio: 308 / 250;
+}
+
+.circle-lesson-progress-button img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.circle-lesson-progress-button:hover,
+.circle-lesson-progress-button:focus-visible {
+    transform: translateY(-3px) scale(1.04);
+    filter: brightness(1.06) drop-shadow(0 12px 10px rgba(0, 0, 0, 0.28));
+}
+
+.circle-lesson-progress-button:active {
+    transform: translateY(1px) scale(0.97);
+}
+
+.circle-illustration-page.is-progress-visible .circle-illustration-video,
+.circle-illustration-page.is-lesson-complete .circle-illustration-video {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.circle-illustration-page.is-lesson-complete .circle-illustration-bg {
+    filter: none;
+    transform: scale(1);
+    transition: filter 0.5s ease, transform 0.5s ease;
+}
+
+@keyframes circleLessonProgressReveal {
+    from {
+        opacity: 0;
+        transform: translateY(1rem) scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes circleLessonStarPop {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.3) rotate(-14deg);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1) rotate(0);
+    }
 }
 
 @media (max-width: 900px), (orientation: portrait) {
-    .circle-illustration-video {
-        width: 90vw;
-        max-width: 90vw;
-        max-height: 90vh;
+    .circle-illustration-video-stage {
         top: 50%;
+    }
+
+    .circle-lesson-progress-board {
+        width: min(88vw, 620px);
+    }
+}
+
+@media (max-height: 600px) and (orientation: landscape) {
+    .circle-lesson-progress-board {
+        width: min(48vw, 560px);
+    }
+
+    .circle-lesson-progress-button {
+        width: auto;
+        height: clamp(3.5rem, 8vw, 5rem);
     }
 }
 
@@ -1714,13 +1902,6 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page {
         scale(var(--tutorial-dock-scale, 0.08));
 }
 
-.game1-tutorial-overlay.is-completing .game1-tutorial-frame {
-    opacity: 0;
-    transform:
-        translate(var(--tutorial-dock-x, 0px), var(--tutorial-dock-y, 0px))
-        scale(var(--tutorial-dock-scale, 0.08));
-}
-
 .game1-tutorial-frame::before {
     content: '';
     position: absolute;
@@ -1832,6 +2013,7 @@ body.is-fullscreen-mode #learnscape-game3-page.game3-page {
         max-width: calc(100vw - 3rem);
         max-height: calc(100vh - 3rem);
     }
+
 }
 
 @media (max-width: 600px) {
