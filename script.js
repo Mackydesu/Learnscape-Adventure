@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260819-59';
+    const appVersion = '20260819-62';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -99,6 +99,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const circleIllustrationProgress = circleIllustrationPage?.querySelector('.circle-lesson-progress') || null;
     const circleIllustrationReplayButton = circleIllustrationPage?.querySelector('[data-circle-lesson-replay]') || null;
     const circleIllustrationNextButton = circleIllustrationPage?.querySelector('[data-circle-lesson-next]') || null;
+    const circleIllustrationStars = circleIllustrationPage?.querySelector('.circle-lesson-stars') || null;
+    const circleIllustrationStarMessage = circleIllustrationPage?.querySelector('.circle-lesson-star-message') || null;
     const shapeCircleCharacter = shapeCirclePage?.querySelector('.shape-area-character-ch2') || null;
     const shapeCircleCharacter3 = shapeCirclePage?.querySelector('.shape-area-character-ch3') || null;
     const shapeCircleCharacter4 = shapeCirclePage?.querySelector('.shape-area-character-ch4') || null;
@@ -772,6 +774,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         circleIllustrationProgress?.setAttribute('aria-hidden', 'true');
     };
 
+    const setCircleIllustrationEarnedStars = (count) => {
+        if (!circleIllustrationStars) return;
+
+        const earnedStars = Math.max(0, Math.min(3, Number(count) || 0));
+        const messages = [
+            '',
+            'Well done!',
+            'Great job!',
+            "Wow! You're a shape superstar!",
+        ];
+        circleIllustrationStars.dataset.earnedStars = String(earnedStars);
+        circleIllustrationStars.setAttribute('aria-label', `${earnedStars} of 3 stars earned`);
+        if (circleIllustrationStarMessage) {
+            circleIllustrationStarMessage.textContent = messages[earnedStars];
+        }
+    };
+
     const showCircleIllustrationProgress = () => {
         if (!circleIllustrationPage || !circleIllustrationProgress) return;
 
@@ -780,6 +799,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setCircleIllustrationSkipButtonVisible(false);
         circleIllustrationPage.classList.remove('is-lesson-complete');
         circleIllustrationPage.classList.add('is-progress-visible');
+        setCircleIllustrationEarnedStars(1);
         circleIllustrationProgress.setAttribute('aria-hidden', 'false');
         circleIllustrationNextButton?.focus({ preventScroll: true });
     };
@@ -818,6 +838,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         hideCircleIllustrationProgress();
         circleIllustrationPage?.classList.remove('is-lesson-complete');
+        setCircleIllustrationEarnedStars(0);
         setCircleIllustrationSkipButtonVisible(false);
         circleIllustrationVideo.pause?.();
 

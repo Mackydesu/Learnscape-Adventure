@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260819-75">
+    <link rel="stylesheet" href="style.css?v=20260819-81">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -363,7 +363,18 @@
                         <textPath href="#circleLessonTitleCurve" startOffset="50%" text-anchor="middle">Lesson Complete!</textPath>
                     </text>
                 </svg>
-                <img class="circle-lesson-progress-star" src="assets/Shape UI/1star.webp" alt="1 star earned">
+                <div class="circle-lesson-stars" data-earned-stars="0" role="img" aria-label="0 of 3 stars earned">
+                    <span class="circle-lesson-star-slot">
+                        <img class="circle-lesson-star-real" src="assets/Shape UI/1star.webp" alt="">
+                    </span>
+                    <span class="circle-lesson-star-slot">
+                        <img class="circle-lesson-star-real" src="assets/Shape UI/1star.webp" alt="">
+                    </span>
+                    <span class="circle-lesson-star-slot">
+                        <img class="circle-lesson-star-real" src="assets/Shape UI/1star.webp" alt="">
+                    </span>
+                </div>
+                <p class="circle-lesson-star-message" aria-live="polite"></p>
                 <div class="circle-lesson-progress-actions">
                     <button class="circle-lesson-progress-button" type="button" data-circle-lesson-replay aria-label="Replay lesson">
                         <img src="assets/Buttons/replay.webp" alt="">
@@ -554,7 +565,7 @@
         </a>
     </section>
 
-    <script src="script.js?v=20260819-59"></script>
+    <script src="script.js?v=20260819-62"></script>
     </div>
 
     <script>
