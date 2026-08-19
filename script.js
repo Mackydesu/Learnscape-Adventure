@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260819-62';
+    const appVersion = '20260819-63';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -815,6 +815,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             hideCircleIllustrationProgress();
+            setCircleIllustrationEarnedStars(0);
             circleIllustrationPage?.classList.remove('is-lesson-complete');
             setCircleIllustrationPlayButtonVisible(false);
             setCircleIllustrationSkipButtonVisible(true);
