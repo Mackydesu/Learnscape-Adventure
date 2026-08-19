@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260818-45">
+    <link rel="stylesheet" href="style.css?v=20260819-53">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -332,6 +332,7 @@
         </div>
         <div class="shape-area-speech-bubble shape-area-speech-bubble-ch3" data-messages="[&quot;MABUHAY! Ako nga pala si Bibi&quot;,&quot;Ikinagagalak kitang makilala&quot;,&quot;Maligayang pagdating sa aking munting paraiso&quot;,&quot;Kung saan pag-aaralan natin ang iba't-ibang hugis&quot;,&quot;Simulan natin sa Circle o Bilog!&quot;,&quot;Handa ka na ba?&quot;]" aria-hidden="true" hidden>
             <span class="shape-area-speech-bubble-text"></span>
+            <button class="shape-area-speech-bubble-skip" type="button" aria-label="Skip to the last message">Skip</button>
         </div>
         <img class="shape-area-title" src="assets/Shape UI/Title1.webp" alt="Area 1: Circle Meadow">
         <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Return to Shape Island">
@@ -342,6 +343,15 @@
 
     <section id="learnscape-circle-illustration-page" class="circle-illustration-page" hidden>
         <img class="circle-illustration-bg" src="assets/Backgrounds/Illustartion.webp" alt="Circle lesson illustration board">
+        <button class="circle-illustration-play-button" type="button" aria-label="Play circle lesson video">
+            <svg class="circle-illustration-play-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                <circle class="circle-illustration-play-ring" cx="50" cy="50" r="44"></circle>
+                <path class="circle-illustration-play-triangle" d="M40 30 L72 50 L40 70 Z"></path>
+            </svg>
+        </button>
+        <video class="circle-illustration-video" playsinline preload="metadata" aria-label="Circle lesson video">
+            <source src="assets/Videos/Circleshape.mp4" type="video/mp4">
+        </video>
         <a class="game-return-btn loading-link" href="index.html" data-route="shape-circle" aria-label="Return to Circle Area">
             <span>‹</span>
             Back
@@ -522,7 +532,7 @@
         </a>
     </section>
 
-    <script src="script.js?v=20260818-43"></script>
+    <script src="script.js?v=20260819-54"></script>
     </div>
 
     <script>
@@ -1049,6 +1059,9 @@
                 if (targetKey === currentRouteKey || isNavigating) return;
 
                 isNavigating = true;
+                if (routeData.routeName === 'circleIllustration') {
+                    window.__learnscapePlayCircleIllustrationVideo?.();
+                }
                 showLoading();
 
                 loadingTimer = window.setTimeout(() => {

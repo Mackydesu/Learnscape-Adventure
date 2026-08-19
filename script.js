@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260818-43';
+    const appVersion = '20260819-54';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -92,6 +92,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     const game3Hotspots = game3Page?.querySelectorAll('[data-game3-shape]') || [];
     const shapeCirclePage = document.getElementById('learnscape-shape-circle-page');
+    const circleIllustrationPage = document.getElementById('learnscape-circle-illustration-page');
+    const circleIllustrationVideo = circleIllustrationPage?.querySelector('.circle-illustration-video') || null;
+    const circleIllustrationPlayButton = circleIllustrationPage?.querySelector('.circle-illustration-play-button') || null;
     const shapeCircleCharacter = shapeCirclePage?.querySelector('.shape-area-character-ch2') || null;
     const shapeCircleCharacter3 = shapeCirclePage?.querySelector('.shape-area-character-ch3') || null;
     const shapeCircleCharacter4 = shapeCirclePage?.querySelector('.shape-area-character-ch4') || null;
@@ -102,6 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeCircleBubbleText = shapeCircleBubble?.querySelector('.shape-area-speech-bubble-text') || null;
     const shapeCircleBubbleCh3 = shapeCirclePage?.querySelector('.shape-area-speech-bubble-ch3') || null;
     const shapeCircleBubbleCh3Text = shapeCircleBubbleCh3?.querySelector('.shape-area-speech-bubble-text') || null;
+    const shapeCircleBubbleCh3SkipButton = shapeCircleBubbleCh3?.querySelector('.shape-area-speech-bubble-skip') || null;
     let shapeCircleBubbleCh3Messages = [];
     try {
         shapeCircleBubbleCh3Messages = JSON.parse(shapeCircleBubbleCh3?.dataset.messages || '[]');
@@ -152,6 +156,54 @@ document.addEventListener('DOMContentLoaded', async () => {
         lettertraceProgressLabel.textContent = `${percentage}%`;
     };
 
+    const getShapeCircleCh3ActiveCharacterIndex = (messageIndex) => (
+        messageIndex >= 5 ? 2 : messageIndex >= 4 ? 1 : 0
+    );
+
+    const syncShapeCircleCh3SpeakerCharacters = (messageIndex) => {
+        if (!shapeCircleBubbleCh3) return;
+
+        const activeCharacterIndex = getShapeCircleCh3ActiveCharacterIndex(messageIndex);
+        shapeCircleBubbleCh3.dataset.activeCharacter = `ch${activeCharacterIndex + 3}`;
+
+        shapeCircleSpeakerCharacters.forEach((character, characterIndex) => {
+            if (!character) return;
+
+            const isActiveCharacter = characterIndex === activeCharacterIndex;
+            const isNewCharacter = isActiveCharacter && character.hidden;
+            character.hidden = !isActiveCharacter;
+
+            if (isNewCharacter) {
+                character.classList.remove('is-popping');
+                character.getBoundingClientRect();
+                character.classList.add('is-popping');
+            }
+        });
+    };
+
+    const showShapeCircleCh3FinalMessage = () => {
+        if (!shapeCircleBubbleCh3 || !shapeCircleBubbleCh3Text || !shapeCircleBubbleCh3Messages.length) return;
+        if (!isPageVisible(shapeCirclePage)) return;
+
+        clearShapeCircleTimers();
+
+        const lastMessageIndex = shapeCircleBubbleCh3Messages.length - 1;
+        const lastMessage = String(shapeCircleBubbleCh3Messages[lastMessageIndex] || '');
+
+        shapeCircleBubbleCh3.hidden = false;
+        shapeCircleBubbleCh3.classList.add('is-visible', 'is-triggering');
+        shapeCircleBubbleCh3.classList.remove('is-fading');
+        shapeCircleBubbleCh3Text.classList.remove('is-fading');
+        shapeCircleBubbleCh3Text.textContent = lastMessage;
+        shapeCircleLearningGoal?.classList.add('is-start-ready');
+        syncShapeCircleCh3SpeakerCharacters(lastMessageIndex);
+
+        if (shapeCircleBubbleCh3SkipButton) {
+            shapeCircleBubbleCh3SkipButton.hidden = true;
+            shapeCircleBubbleCh3SkipButton.style.display = 'none';
+        }
+    };
+
     const clearShapeCircleTimers = () => {
         shapeCircleTimers.forEach((timerId) => window.clearTimeout(timerId));
         shapeCircleTimers = [];
@@ -179,6 +231,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (shapeCircleBubbleCh3) {
             shapeCircleBubbleCh3.hidden = true;
             shapeCircleBubbleCh3.classList.remove('is-visible', 'is-fading', 'is-triggering');
+        }
+
+        if (shapeCircleBubbleCh3SkipButton) {
+            shapeCircleBubbleCh3SkipButton.hidden = true;
+            shapeCircleBubbleCh3SkipButton.style.display = 'none';
+            shapeCircleBubbleCh3SkipButton.onclick = null;
         }
 
         if (shapeCircleLearningGoal) {
@@ -211,6 +269,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const showCh3Bubble = () => {
             if (!shapeCircleBubbleCh3 || !shapeCircleBubbleCh3Text) return;
+            if (shapeCircleBubbleCh3SkipButton) {
+                shapeCircleBubbleCh3SkipButton.onclick = showShapeCircleCh3FinalMessage;
+                shapeCircleBubbleCh3SkipButton.hidden = shapeCircleBubbleCh3Messages.length <= 1;
+                shapeCircleBubbleCh3SkipButton.style.display = shapeCircleBubbleCh3Messages.length <= 1 ? 'none' : '';
+            }
 
             const playCh3Message = (messageIndex) => {
                 if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
@@ -222,21 +285,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 shapeCircleBubbleCh3.classList.remove('is-triggering');
 
-                const activeCharacterIndex = messageIndex >= 5 ? 2 : messageIndex >= 4 ? 1 : 0;
-                shapeCircleBubbleCh3.dataset.activeCharacter = `ch${activeCharacterIndex + 3}`;
-                shapeCircleSpeakerCharacters.forEach((character, characterIndex) => {
-                    if (!character) return;
-
-                    const isActiveCharacter = characterIndex === activeCharacterIndex;
-                    const isNewCharacter = isActiveCharacter && character.hidden;
-                    character.hidden = !isActiveCharacter;
-
-                    if (isNewCharacter) {
-                        character.classList.remove('is-popping');
-                        character.getBoundingClientRect();
-                        character.classList.add('is-popping');
-                    }
-                });
+                syncShapeCircleCh3SpeakerCharacters(messageIndex);
 
                 const currentMessage = String(shapeCircleBubbleCh3Messages[messageIndex] || '');
                 const isLastCh3Message = messageIndex === shapeCircleBubbleCh3Messages.length - 1;
@@ -244,6 +293,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const pauseAfterTyping = isLastCh3Message
                     ? shapeCircleCh3FinalPauseAfterTyping
                     : shapeCircleCh3PauseAfterTyping;
+                if (shapeCircleBubbleCh3SkipButton) {
+                    shapeCircleBubbleCh3SkipButton.hidden = isLastCh3Message;
+                    shapeCircleBubbleCh3SkipButton.style.display = isLastCh3Message ? 'none' : '';
+                }
                 shapeCircleBubbleCh3.hidden = false;
                 shapeCircleBubbleCh3.classList.add('is-visible');
                 shapeCircleBubbleCh3.classList.remove('is-fading');
@@ -696,6 +749,49 @@ document.addEventListener('DOMContentLoaded', async () => {
             game1BgVideo.load?.();
         }
     };
+
+    const setCircleIllustrationPlayButtonVisible = (isVisible) => {
+        if (!circleIllustrationPlayButton) return;
+
+        circleIllustrationPlayButton.hidden = !isVisible;
+        circleIllustrationPlayButton.style.display = isVisible ? '' : 'none';
+    };
+
+    const playCircleIllustrationVideo = async () => {
+        if (!circleIllustrationVideo || !isPageVisible(circleIllustrationPage)) return;
+
+        try {
+            setCircleIllustrationPlayButtonVisible(false);
+
+            try {
+                circleIllustrationVideo.currentTime = 0;
+            } catch (error) {
+                // The clip may still be preparing metadata; playback can still start from the beginning.
+            }
+
+            await circleIllustrationVideo.play();
+        } catch (error) {
+            setCircleIllustrationPlayButtonVisible(true);
+            console.warn('Circle lesson video could not play.', error);
+        }
+    };
+
+    const resetCircleIllustrationVideo = () => {
+        if (!circleIllustrationVideo) return;
+
+        circleIllustrationVideo.pause?.();
+
+        try {
+            circleIllustrationVideo.currentTime = 0;
+        } catch (error) {
+            // If the clip is still loading, pausing is enough and the next open will restart it.
+        }
+
+        setCircleIllustrationPlayButtonVisible(true);
+    };
+
+    window.__learnscapePlayCircleIllustrationVideo = playCircleIllustrationVideo;
+    window.__learnscapeResetCircleIllustrationVideo = resetCircleIllustrationVideo;
 
     const isInShell = () => window.top !== window;
 
@@ -2596,6 +2692,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         showDragtomatchTutorial(true);
     });
 
+    circleIllustrationPlayButton?.addEventListener('click', () => {
+        playCircleIllustrationVideo();
+    });
+
+    circleIllustrationVideo?.addEventListener('play', () => {
+        setCircleIllustrationPlayButtonVisible(false);
+    });
+
+    circleIllustrationVideo?.addEventListener('ended', () => {
+        setCircleIllustrationPlayButtonVisible(true);
+    });
+
+    circleIllustrationVideo?.addEventListener('pause', () => {
+        if (circleIllustrationVideo.currentTime > 0 && !circleIllustrationVideo.ended) {
+            setCircleIllustrationPlayButtonVisible(true);
+        }
+    });
+
     window.addEventListener('resize', () => {
         if (isPageVisible(lettertracePage)) {
             resizeLettertraceCanvas();
@@ -2605,6 +2719,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     window.addEventListener('learnscape:routechange', (event) => {
+        if (event.detail?.route !== 'circleIllustration') {
+            resetCircleIllustrationVideo();
+        }
+
         if (event.detail?.route === 'lettertrace') {
             updateLettertraceBackground(event.detail?.params || {});
             renderLettertraceScreen(event.detail?.params?.letter || getDragtomatchLetterFromHash());
@@ -2646,6 +2764,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         startShapeCircleScene();
     } else {
         resetShapeCircleScene();
+    }
+
+    if (isPageVisible(circleIllustrationPage)) {
+        resetCircleIllustrationVideo();
+    } else {
+        resetCircleIllustrationVideo();
     }
 
     renderDragtomatchLevels();

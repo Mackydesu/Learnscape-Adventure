@@ -526,6 +526,101 @@ body.is-page-loading .page-loading-overlay {
     object-fit: cover;
 }
 
+.circle-illustration-video {
+    position: absolute;
+    left: 50%;
+    top: 51%;
+    z-index: 1;
+    display: block;
+    width: 90vw;
+    height: auto;
+    max-width: 90vw;
+    max-height: 90vh;
+    transform: translate(-50%, -50%);
+    object-fit: contain;
+    pointer-events: auto;
+    background: transparent;
+}
+
+.circle-illustration-play-button {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(4.8rem, 8.5vw, 7rem);
+    height: clamp(4.8rem, 8.5vw, 7rem);
+    border: 0.14rem solid rgba(255, 255, 255, 0.28);
+    border-radius: 999px;
+    background:
+        radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.34) 0 18%, transparent 18% 100%),
+        linear-gradient(180deg, rgba(30, 36, 45, 0.88) 0%, rgba(10, 14, 20, 0.86) 100%);
+    color: #ffffff;
+    line-height: 1;
+    box-shadow:
+        0 0.4rem 0 rgba(0, 0, 0, 0.42),
+        0 0.95rem 1.5rem rgba(0, 0, 0, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    cursor: pointer;
+    transform: translate(-50%, -50%) scale(1);
+    backdrop-filter: blur(6px);
+    transition:
+        transform 0.18s ease,
+        filter 0.18s ease,
+        box-shadow 0.18s ease,
+        opacity 0.18s ease;
+}
+
+.circle-illustration-play-button:hover,
+.circle-illustration-play-button:focus-visible {
+    transform: translate(-50%, -50%) scale(1.06);
+    filter: brightness(1.08);
+    box-shadow:
+        0 0.45rem 0 rgba(0, 0, 0, 0.42),
+        0 1.1rem 1.8rem rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    outline: none;
+}
+
+.circle-illustration-play-button:active {
+    transform: translate(-50%, -50%) scale(0.98);
+}
+
+.circle-illustration-play-button[hidden] {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.circle-illustration-play-icon {
+    width: 58%;
+    height: 58%;
+    overflow: visible;
+    filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.14));
+}
+
+.circle-illustration-play-ring {
+    fill: rgba(255, 255, 255, 0.02);
+    stroke: rgba(255, 255, 255, 0.18);
+    stroke-width: 3.5;
+}
+
+.circle-illustration-play-triangle {
+    fill: #ffffff;
+    transform-origin: 50px 50px;
+    transform: scale(0.82);
+}
+
+@media (max-width: 900px), (orientation: portrait) {
+    .circle-illustration-video {
+        width: 90vw;
+        max-width: 90vw;
+        max-height: 90vh;
+        top: 50%;
+    }
+}
+
 .shape-area-learning-goal {
     position: absolute;
     left: 50%;
@@ -782,6 +877,48 @@ body.is-fullscreen-mode .shape-area-character-speaker {
     bottom: calc(clamp(16.8rem, 31.2vw, 31.2rem) + clamp(0.8rem, 1.5vw, 1.5rem));
     max-width: min(40vw, 24rem);
     translate: -50% 0;
+    pointer-events: auto;
+}
+
+.shape-area-speech-bubble-skip {
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 0.8rem);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 8.5rem;
+    padding: 0.45rem 1rem;
+    border: 0.16rem solid #7a4a2a;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #fff879 0%, #ffd34f 60%, #f0a92f 100%);
+    color: #4a260e;
+    font-family: 'Fredoka', sans-serif;
+    font-size: clamp(0.95rem, 1.5vw, 1.2rem);
+    font-weight: 800;
+    line-height: 1;
+    text-shadow: 0 0.08rem 0 #fff4b1;
+    box-shadow:
+        0 0.28rem 0 #9a591f,
+        0 0.65rem 1rem rgba(70, 35, 8, 0.24);
+    cursor: pointer;
+    pointer-events: auto;
+    transform: translateX(-50%);
+    transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+}
+
+.shape-area-speech-bubble-skip:hover,
+.shape-area-speech-bubble-skip:focus-visible {
+    transform: translateX(-50%) translateY(-2px) scale(1.03);
+    filter: brightness(1.04);
+    box-shadow:
+        0 0.28rem 0 #9a591f,
+        0 0.8rem 1.15rem rgba(70, 35, 8, 0.28);
+    outline: none;
+}
+
+.shape-area-speech-bubble-skip:active {
+    transform: translateX(-50%) translateY(1px) scale(0.99);
 }
 
 .shape-area-speech-bubble-ch3[data-active-character="ch4"] {
