@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260820-9';
+    const appVersion = '20260820-24';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -101,6 +101,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const circleIllustrationNextButton = circleIllustrationPage?.querySelector('[data-circle-lesson-next]') || null;
     const circleIllustrationStars = circleIllustrationPage?.querySelector('.circle-lesson-stars') || null;
     const circleIllustrationStarMessage = circleIllustrationPage?.querySelector('.circle-lesson-star-message') || null;
+    const circleSortBoard = circleIllustrationPage?.querySelector('.circle-lesson-activity-board') || null;
+    const circleSortBin = circleSortBoard?.querySelector('.circle-sort-bin') || null;
+    const circleSortBinCount = circleSortBin?.querySelector('.circle-sort-bin-count') || null;
+    const circleSortFeedback = circleSortBoard?.querySelector('.circle-sort-feedback') || null;
+    const circleSortObjects = Array.from(circleSortBoard?.querySelectorAll('.circle-sort-object') || []);
+    const circleSortTargetCount = circleSortObjects.filter((object) => object.hasAttribute('data-circle-object')).length;
     const shapeCircleCharacter = shapeCirclePage?.querySelector('.shape-area-character-ch2') || null;
     const shapeCircleCharacter3 = shapeCirclePage?.querySelector('.shape-area-character-ch3') || null;
     const shapeCircleCharacter4 = shapeCirclePage?.querySelector('.shape-area-character-ch4') || null;
@@ -140,6 +146,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     let shapeCircleTimers = [];
     let shapeCircleSession = 0;
     let circleIllustrationCelebrationTimers = [];
+    let circleSortCollectedCount = 0;
+    let circleSortActiveDrag = null;
+    let circleSortResetTimers = [];
+    let circleSortIgnoreClickUntil = 0;
     let lettertraceCurrentLetter = 'A';
     let lettertraceCurrentCase = 'upper';
     let lettertraceTraceDrawing = false;
@@ -794,6 +804,174 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    const updateCircleSortProgress = (message = '') => {
+        if (circleSortBinCount) {
+            circleSortBinCount.textContent = `${circleSortCollectedCount}/${circleSortTargetCount}`;
+        }
+        circleSortBin?.setAttribute(
+            'aria-label',
+            `Circle bin, ${circleSortCollectedCount} of ${circleSortTargetCount} circle objects collected`,
+        );
+        if (circleSortFeedback && message) {
+            circleSortFeedback.textContent = message;
+        }
+    };
+
+    const resetCircleSortActivity = () => {
+        circleSortResetTimers.forEach((timerId) => window.clearTimeout(timerId));
+        circleSortResetTimers = [];
+        circleSortCollectedCount = 0;
+        circleSortActiveDrag = null;
+        circleSortBoard?.classList.remove('is-complete');
+        circleSortBoard?.setAttribute('aria-hidden', 'true');
+        circleSortBin?.classList.remove('is-over');
+        circleSortFeedback?.classList.remove('is-success');
+
+        circleSortObjects.forEach((object) => {
+            object.hidden = false;
+            object.disabled = false;
+            object.classList.remove('is-dragging', 'is-returning', 'is-collected');
+            object.style.setProperty('--drag-x', '0px');
+            object.style.setProperty('--drag-y', '0px');
+        });
+        updateCircleSortProgress('Find the round objects!');
+    };
+
+    const startCircleSortActivity = () => {
+        resetCircleSortActivity();
+        circleSortBoard?.setAttribute('aria-hidden', 'false');
+    };
+
+    const isPointInsideCircleSortBin = (clientX, clientY) => {
+        if (!circleSortBin) return false;
+
+        const binRect = circleSortBin.getBoundingClientRect();
+        const radius = Math.min(binRect.width, binRect.height) * 0.58;
+        const distance = Math.hypot(
+            clientX - (binRect.left + binRect.width / 2),
+            clientY - (binRect.top + binRect.height / 2),
+        );
+        return distance <= radius;
+    };
+
+    const returnCircleSortObject = (object, message) => {
+        if (!object) return;
+
+        object.classList.remove('is-dragging');
+        object.classList.add('is-returning');
+        object.style.setProperty('--drag-x', '0px');
+        object.style.setProperty('--drag-y', '0px');
+        updateCircleSortProgress(message);
+        playUiClickSound('thunk');
+
+        const timerId = window.setTimeout(() => {
+            object.classList.remove('is-returning');
+            circleSortResetTimers = circleSortResetTimers.filter((id) => id !== timerId);
+        }, 450);
+        circleSortResetTimers.push(timerId);
+    };
+
+    const collectCircleSortObject = (object) => {
+        if (!object || !circleSortBin || object.classList.contains('is-collected')) return;
+
+        const objectRect = object.getBoundingClientRect();
+        const binRect = circleSortBin.getBoundingClientRect();
+        const currentDragX = circleSortActiveDrag?.dragX || 0;
+        const currentDragY = circleSortActiveDrag?.dragY || 0;
+        const targetX = currentDragX + (binRect.left + binRect.width / 2) - (objectRect.left + objectRect.width / 2);
+        const targetY = currentDragY + (binRect.top + binRect.height / 2) - (objectRect.top + objectRect.height / 2);
+
+        object.classList.remove('is-dragging');
+        object.classList.add('is-collected');
+        object.disabled = true;
+        object.style.setProperty('--drag-x', `${targetX}px`);
+        object.style.setProperty('--drag-y', `${targetY}px`);
+        circleSortCollectedCount += 1;
+
+        const isComplete = circleSortCollectedCount >= circleSortTargetCount;
+        updateCircleSortProgress(
+            isComplete
+                ? 'Amazing! You found every circle object!'
+                : `${object.dataset.objectName || 'Circle object'} collected!`,
+        );
+        playUiClickSound(isComplete ? 'progressCelebration' : 'starPop');
+
+        if (isComplete) {
+            circleSortBoard?.classList.add('is-complete');
+            circleSortFeedback?.classList.add('is-success');
+        }
+
+        const timerId = window.setTimeout(() => {
+            object.hidden = true;
+            circleSortResetTimers = circleSortResetTimers.filter((id) => id !== timerId);
+        }, 520);
+        circleSortResetTimers.push(timerId);
+    };
+
+    const beginCircleSortDrag = (event) => {
+        const object = event.currentTarget;
+        if (
+            !object
+            || object.disabled
+            || circleSortActiveDrag
+            || (event.pointerType === 'mouse' && event.button !== 0)
+        ) return;
+
+        circleSortActiveDrag = {
+            object,
+            pointerId: event.pointerId,
+            startX: event.clientX,
+            startY: event.clientY,
+            dragX: 0,
+            dragY: 0,
+            didMove: false,
+        };
+        object.classList.remove('is-returning');
+        object.classList.add('is-dragging');
+        object.setPointerCapture?.(event.pointerId);
+        event.preventDefault();
+    };
+
+    const moveCircleSortDrag = (event) => {
+        const drag = circleSortActiveDrag;
+        if (!drag || drag.pointerId !== event.pointerId || drag.object !== event.currentTarget) return;
+
+        drag.dragX = event.clientX - drag.startX;
+        drag.dragY = event.clientY - drag.startY;
+        drag.didMove = drag.didMove || Math.hypot(drag.dragX, drag.dragY) > 4;
+        drag.object.style.setProperty('--drag-x', `${drag.dragX}px`);
+        drag.object.style.setProperty('--drag-y', `${drag.dragY}px`);
+        circleSortBin?.classList.toggle('is-over', isPointInsideCircleSortBin(event.clientX, event.clientY));
+        event.preventDefault();
+    };
+
+    const endCircleSortDrag = (event, wasCancelled = false) => {
+        const drag = circleSortActiveDrag;
+        if (!drag || drag.pointerId !== event.pointerId) return;
+
+        const object = drag.object;
+        const droppedOnBin = !wasCancelled && isPointInsideCircleSortBin(event.clientX, event.clientY);
+        const isCircleObject = object.hasAttribute('data-circle-object');
+        object.releasePointerCapture?.(event.pointerId);
+        circleSortBin?.classList.remove('is-over');
+        circleSortIgnoreClickUntil = performance.now() + 500;
+
+        if (droppedOnBin && isCircleObject) {
+            collectCircleSortObject(object);
+        } else {
+            const objectName = object.dataset.objectName || 'That object';
+            const message = droppedOnBin
+                ? `${objectName} is not a circle. It goes back!`
+                : isCircleObject
+                    ? `Drag the ${objectName.toLowerCase()} into the circle bin.`
+                    : 'Look for an object that is round like a circle.';
+            returnCircleSortObject(object, message);
+        }
+
+        circleSortActiveDrag = null;
+        event.preventDefault();
+    };
+
     const showCircleIllustrationProgress = () => {
         if (!circleIllustrationPage || !circleIllustrationProgress) return;
 
@@ -808,7 +986,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         circleIllustrationNextButton?.focus({ preventScroll: true });
 
         if (!wasAlreadyVisible) {
-            playUiClickSound('progressCelebration');
+            playUiClickSound('boardSuccess');
             const starSoundTimer = window.setTimeout(() => {
                 playUiClickSound('starPop');
                 circleIllustrationCelebrationTimers = circleIllustrationCelebrationTimers.filter(
@@ -821,6 +999,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const finishCircleIllustrationLesson = () => {
         hideCircleIllustrationProgress();
+        startCircleSortActivity();
         circleIllustrationPage?.classList.add('is-lesson-complete');
         setCircleIllustrationPlayButtonVisible(false);
     };
@@ -830,6 +1009,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             hideCircleIllustrationProgress();
+            resetCircleSortActivity();
             setCircleIllustrationEarnedStars(0);
             circleIllustrationPage?.classList.remove('is-lesson-complete');
             setCircleIllustrationPlayButtonVisible(false);
@@ -853,6 +1033,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!circleIllustrationVideo) return;
 
         hideCircleIllustrationProgress();
+        resetCircleSortActivity();
         circleIllustrationPage?.classList.remove('is-lesson-complete');
         setCircleIllustrationEarnedStars(0);
         setCircleIllustrationSkipButtonVisible(false);
@@ -1662,6 +1843,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             { frequency: 659.25, type: 'sine', gain: 0.14, duration: 0.25, delay: 0.15, attack: 0.012 },
             { frequency: 783.99, type: 'sine', gain: 0.12, duration: 0.34, delay: 0.225, attack: 0.012 },
         ],
+        boardSuccess: [
+            { frequency: 261.63, type: 'square', gain: 0.16, duration: 0.09, attack: 0.005 },
+            { frequency: 523.25, type: 'triangle', gain: 0.2, duration: 0.16, delay: 0.035, attack: 0.006 },
+            { frequency: 659.25, type: 'triangle', gain: 0.2, duration: 0.18, delay: 0.105, attack: 0.006 },
+            { frequency: 783.99, type: 'triangle', gain: 0.2, duration: 0.2, delay: 0.175, attack: 0.006 },
+            { frequency: 1046.5, type: 'triangle', gain: 0.19, duration: 0.34, delay: 0.245, attack: 0.008 },
+            { frequency: 1318.51, type: 'sine', gain: 0.16, duration: 0.42, delay: 0.315, attack: 0.008 },
+            { frequency: 783.99, type: 'sine', gain: 0.14, duration: 0.48, delay: 0.315, attack: 0.01 },
+            { frequency: 1567.98, type: 'sine', gain: 0.12, duration: 0.5, delay: 0.37, attack: 0.01 },
+        ],
         starPop: [
             { frequency: 440, type: 'square', gain: 0.1, duration: 0.055, attack: 0.006 },
             { frequency: 880, type: 'triangle', gain: 0.15, duration: 0.13, delay: 0.035, attack: 0.006 },
@@ -1688,6 +1879,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             { frequency: 494, type: 'triangle', gain: 0.13, duration: 0.065, attack: 0.008 },
             { frequency: 740, type: 'sine', gain: 0.11, duration: 0.11, delay: 0.028, attack: 0.008 },
         ],
+    };
+    const uiClickSoundGainMultipliers = {
+        boardSuccess: 1.75,
     };
     const dragtomatchVoicePreferenceHints = [
         'natural',
@@ -1795,9 +1989,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const playUiClickSound = (kind) => {
         if (!uiClickAudioContext) return;
+        const tones = uiClickSoundPresets[kind] || uiClickSoundPresets.tap;
+        const gainMultiplier = uiClickSoundGainMultipliers[kind] || 1;
         playToneBurst(
             uiClickAudioContext,
-            uiClickSoundPresets[kind] || uiClickSoundPresets.tap,
+            tones.map((tone) => ({
+                ...tone,
+                gain: (tone.gain || 0.08) * gainMultiplier,
+            })),
             0,
             uiClickAudioOutput || uiClickAudioContext.destination,
         );
@@ -1807,6 +2006,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!control) return null;
         if (control.matches('button[disabled], [aria-disabled="true"]')) return null;
         if (control.classList.contains('game1-object-card')) return null;
+        if (control.classList.contains('circle-sort-object')) return null;
 
         if (control.classList.contains('game-return-btn')) return 'backChime';
         if (control.classList.contains('shape-collection-chest')) return 'chestChime';
@@ -2925,6 +3125,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         clearDragtomatchTutorial();
         showDragtomatchTutorial(true);
     });
+
+    circleSortObjects.forEach((object) => {
+        object.addEventListener('pointerdown', beginCircleSortDrag);
+        object.addEventListener('pointermove', moveCircleSortDrag);
+        object.addEventListener('pointerup', (event) => endCircleSortDrag(event));
+        object.addEventListener('pointercancel', (event) => endCircleSortDrag(event, true));
+        object.addEventListener('dragstart', (event) => event.preventDefault());
+        object.addEventListener('keydown', (event) => {
+            if (!['Enter', ' '].includes(event.key) || object.disabled) return;
+
+            event.preventDefault();
+            circleSortIgnoreClickUntil = performance.now() + 400;
+            if (object.hasAttribute('data-circle-object')) {
+                collectCircleSortObject(object);
+            } else {
+                returnCircleSortObject(object, `${object.dataset.objectName || 'That object'} is not a circle.`);
+            }
+        });
+        object.addEventListener('click', (event) => {
+            if (performance.now() < circleSortIgnoreClickUntil) {
+                event.preventDefault();
+                return;
+            }
+            if (object.disabled || circleSortActiveDrag) return;
+
+            if (object.hasAttribute('data-circle-object')) {
+                collectCircleSortObject(object);
+            } else {
+                returnCircleSortObject(object, `${object.dataset.objectName || 'That object'} is not a circle.`);
+            }
+        });
+    });
+    document.addEventListener('pointerup', (event) => endCircleSortDrag(event), true);
+    document.addEventListener('pointercancel', (event) => endCircleSortDrag(event, true), true);
 
     circleIllustrationPlayButton?.addEventListener('click', () => {
         playCircleIllustrationVideo();

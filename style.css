@@ -534,19 +534,247 @@ body.is-page-loading .page-loading-overlay {
     top: 50%;
     z-index: 2;
     display: block;
-    width: min(96vw, 1450px);
-    max-height: 96vh;
-    object-fit: contain;
+    width: min(96vw, 170.667vh, 1450px);
+    aspect-ratio: 16 / 9;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     filter: drop-shadow(0 24px 22px rgba(73, 45, 10, 0.28));
     transform: translate(-50%, -150vh);
+    user-select: none;
 }
 
 .circle-illustration-page.is-lesson-complete .circle-lesson-activity-board {
     visibility: visible;
+    pointer-events: auto;
     animation: circleLessonBoardFall 1s 0.22s cubic-bezier(0.18, 0.85, 0.28, 1.08) both;
+}
+
+.circle-lesson-activity-board-image {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+.circle-sort-title,
+.circle-sort-instruction,
+.circle-sort-feedback {
+    position: absolute;
+    left: 50%;
+    z-index: 2;
+    width: 70%;
+    margin: 0;
+    color: #76420e;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 800;
+    text-align: center;
+    pointer-events: none;
+    transform: translateX(-50%);
+}
+
+.circle-sort-title {
+    top: 9.5%;
+    font-size: clamp(1rem, 2.25vw, 2rem);
+    line-height: 1;
+    text-shadow: 0 2px 0 #fff4bd, 0 4px 7px rgba(120, 68, 12, 0.18);
+}
+
+.circle-sort-instruction {
+    top: 15%;
+    color: #a45b13;
+    font-size: clamp(0.58rem, 1.15vw, 1rem);
+    letter-spacing: 0.025em;
+}
+
+.circle-sort-objects {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.circle-sort-object {
+    --drag-x: 0px;
+    --drag-y: 0px;
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: max(var(--size), 2.5rem);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: grab;
+    pointer-events: auto;
+    touch-action: none;
+    translate: -50% -50%;
+    transform: translate3d(var(--drag-x), var(--drag-y), 0) rotate(var(--tilt));
+    transform-origin: center;
+    transition: transform 0.42s cubic-bezier(0.2, 0.9, 0.25, 1.15), opacity 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.circle-sort-object img,
+.circle-sort-object svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    overflow: visible;
+    pointer-events: none;
+    filter: drop-shadow(0 0.35rem 0.32rem rgba(88, 48, 10, 0.3));
+    animation: circleSortObjectFloat 2.35s var(--delay) ease-in-out infinite alternate;
+}
+
+.circle-sort-object:hover img,
+.circle-sort-object:hover svg,
+.circle-sort-object:focus-visible img,
+.circle-sort-object:focus-visible svg {
+    filter: brightness(1.08) drop-shadow(0 0.45rem 0.4rem rgba(88, 48, 10, 0.38));
+}
+
+.circle-sort-object:focus-visible {
+    border-radius: 50%;
+    outline: clamp(2px, 0.25vw, 4px) solid #2c91d2;
+    outline-offset: clamp(2px, 0.25vw, 5px);
+}
+
+.circle-sort-object.is-dragging {
+    z-index: 20;
+    cursor: grabbing;
+    transform: translate3d(var(--drag-x), var(--drag-y), 0) rotate(0) scale(1.14);
+    transition: none;
+}
+
+.circle-sort-object.is-dragging img,
+.circle-sort-object.is-dragging svg {
+    animation-play-state: paused;
+    filter: brightness(1.1) drop-shadow(0 0.75rem 0.55rem rgba(88, 48, 10, 0.42));
+}
+
+.circle-sort-object.is-returning {
+    animation: circleSortWrongDrop 0.42s ease-out;
+}
+
+.circle-sort-object.is-collected {
+    z-index: 12;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate3d(var(--drag-x), var(--drag-y), 0) rotate(360deg) scale(0.12);
+    transition: transform 0.48s cubic-bezier(0.2, 0.82, 0.25, 1), opacity 0.34s 0.12s ease;
+}
+
+.circle-sort-object[hidden] {
+    display: none;
+}
+
+.circle-sort-clock-hands {
+    transform-origin: 60px 60px;
+    animation: circleSortClockTick 4s steps(12) infinite;
+}
+
+.circle-sort-object-coin svg {
+    animation-name: circleSortCoinFloat;
+}
+
+.circle-sort-object-cookie svg {
+    animation-name: circleSortCookieFloat;
+}
+
+.circle-sort-bin {
+    position: absolute;
+    left: 50%;
+    top: 80%;
+    z-index: 5;
+    width: max(12.5%, 4rem);
+    aspect-ratio: 1;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    border: clamp(3px, 0.42vw, 7px) solid #fff6a3;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 42% 34%, rgba(255, 255, 255, 0.34) 0 9%, transparent 10%),
+        linear-gradient(145deg, #63d8f0 0%, #2a9ed8 48%, #1564ab 100%);
+    color: #fffbe1;
+    box-shadow:
+        0 0.38rem 0 #0d568c,
+        0 0.75rem 1rem rgba(48, 76, 92, 0.3),
+        inset 0 0 0 0.28rem rgba(14, 83, 140, 0.3),
+        0 0 0 0.22rem rgba(255, 231, 73, 0.24);
+    pointer-events: none;
+    translate: -50% -50%;
+    transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+    animation: circleSortBinPulse 1.7s ease-in-out infinite;
+}
+
+.circle-sort-bin::before {
+    content: '';
+    position: absolute;
+    inset: 11%;
+    border: clamp(2px, 0.24vw, 4px) dashed rgba(255, 250, 181, 0.92);
+    border-radius: 50%;
+}
+
+.circle-sort-bin-symbol {
+    font-family: Georgia, serif;
+    font-size: clamp(1.35rem, 3.2vw, 3.1rem);
+    font-weight: 900;
+    line-height: 0.62;
+    text-shadow: 0 2px 0 #155b91;
+}
+
+.circle-sort-bin-label,
+.circle-sort-bin-count {
+    position: relative;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 800;
+    line-height: 1;
+    text-shadow: 0 2px 0 #155b91;
+}
+
+.circle-sort-bin-label {
+    margin-top: 7%;
+    font-size: clamp(0.42rem, 0.82vw, 0.78rem);
+}
+
+.circle-sort-bin-count {
+    margin-top: 5%;
+    font-size: clamp(0.52rem, 1vw, 0.95rem);
+}
+
+.circle-sort-bin.is-over {
+    filter: brightness(1.18) saturate(1.12);
+    box-shadow:
+        0 0.25rem 0 #0d568c,
+        0 0.65rem 1rem rgba(48, 76, 92, 0.3),
+        inset 0 0 0 0.28rem rgba(14, 83, 140, 0.3),
+        0 0 0 0.55rem rgba(255, 226, 51, 0.58),
+        0 0 1.4rem rgba(255, 221, 42, 0.8);
+    transform: scale(1.1);
+}
+
+.circle-lesson-activity-board.is-complete .circle-sort-bin {
+    animation: circleSortBinComplete 0.8s ease-in-out infinite alternate;
+}
+
+.circle-sort-feedback {
+    bottom: 4.5%;
+    color: #7a4510;
+    font-size: clamp(0.56rem, 1.05vw, 0.95rem);
+    text-shadow: 0 1px 0 #fff4bd;
+}
+
+.circle-sort-feedback.is-success {
+    color: #17823b;
+    font-size: clamp(0.7rem, 1.4vw, 1.25rem);
 }
 
 .circle-illustration-video-stage {
@@ -707,14 +935,14 @@ body.is-page-loading .page-loading-overlay {
     background: repeating-conic-gradient(
         from -8deg at 50% 50%,
         transparent 0deg 8deg,
-        rgba(255, 214, 28, 0.3) 11deg,
-        rgba(255, 253, 195, 0.92) 17deg,
-        rgba(255, 205, 24, 0.38) 23deg,
+        rgba(255, 204, 18, 0.52) 11deg,
+        rgba(255, 255, 210, 1) 17deg,
+        rgba(255, 194, 12, 0.58) 23deg,
         transparent 28deg 42deg
     );
-    -webkit-mask-image: radial-gradient(ellipse closest-side at center, transparent 0 30%, #000 48% 72%, transparent 100%);
-    mask-image: radial-gradient(ellipse closest-side at center, transparent 0 30%, #000 48% 72%, transparent 100%);
-    filter: blur(2px) drop-shadow(0 0 22px rgba(255, 224, 65, 0.88));
+    -webkit-mask-image: radial-gradient(ellipse closest-side at center, transparent 0 24%, #000 42% 82%, transparent 100%);
+    mask-image: radial-gradient(ellipse closest-side at center, transparent 0 24%, #000 42% 82%, transparent 100%);
+    filter: saturate(1.25) blur(1px) drop-shadow(0 0 28px rgba(255, 220, 42, 0.98));
     transform-origin: 50% 50%;
     animation:
         circleLessonGoldenRaysSpin 11s linear infinite,
@@ -726,8 +954,8 @@ body.is-page-loading .page-loading-overlay {
     border-radius: 50%;
     background: radial-gradient(
         ellipse closest-side at 50% 50%,
-        rgba(255, 250, 190, 0.62) 0 48%,
-        rgba(255, 215, 48, 0.46) 62%,
+        rgba(255, 252, 197, 0.78) 0 48%,
+        rgba(255, 211, 35, 0.64) 62%,
         transparent 100%
     );
     filter: blur(18px);
@@ -969,7 +1197,7 @@ body.is-page-loading .page-loading-overlay {
 
 @keyframes circleLessonGoldenRaysPulse {
     0%, 100% {
-        opacity: 0.58;
+        opacity: 0.8;
     }
     50% {
         opacity: 1;
@@ -978,11 +1206,11 @@ body.is-page-loading .page-loading-overlay {
 
 @keyframes circleLessonBoardGlow {
     0%, 100% {
-        opacity: 0.52;
+        opacity: 0.68;
         transform: scale(0.98);
     }
     50% {
-        opacity: 0.92;
+        opacity: 1;
         transform: scale(1.035);
     }
 }
@@ -1044,6 +1272,80 @@ body.is-page-loading .page-loading-overlay {
     100% {
         opacity: 1;
         transform: translate(-50%, -50%) rotate(0) scale(1);
+    }
+}
+
+@keyframes circleSortObjectFloat {
+    from {
+        transform: translateY(-3%) rotate(-2deg) scale(0.98);
+    }
+    to {
+        transform: translateY(4%) rotate(2deg) scale(1.03);
+    }
+}
+
+@keyframes circleSortCoinFloat {
+    from {
+        transform: translateY(-3%) rotateY(-12deg) rotate(-2deg);
+    }
+    to {
+        transform: translateY(4%) rotateY(18deg) rotate(3deg);
+    }
+}
+
+@keyframes circleSortCookieFloat {
+    from {
+        transform: translateY(-2%) rotate(-5deg);
+    }
+    to {
+        transform: translateY(4%) rotate(5deg);
+    }
+}
+
+@keyframes circleSortClockTick {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes circleSortWrongDrop {
+    0%, 100% {
+        translate: -50% -50%;
+    }
+    25% {
+        translate: calc(-50% - 0.35rem) -50%;
+    }
+    55% {
+        translate: calc(-50% + 0.35rem) -50%;
+    }
+    78% {
+        translate: calc(-50% - 0.18rem) -50%;
+    }
+}
+
+@keyframes circleSortBinPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.045);
+    }
+}
+
+@keyframes circleSortBinComplete {
+    from {
+        filter: brightness(1.05);
+        transform: scale(1.02) rotate(-2deg);
+    }
+    to {
+        filter: brightness(1.28) saturate(1.2);
+        transform: scale(1.12) rotate(2deg);
+        box-shadow:
+            0 0.28rem 0 #0d568c,
+            0 0.8rem 1.1rem rgba(48, 76, 92, 0.28),
+            inset 0 0 0 0.28rem rgba(14, 83, 140, 0.3),
+            0 0 0 0.55rem rgba(255, 226, 51, 0.7),
+            0 0 1.8rem rgba(255, 221, 42, 0.9);
     }
 }
 
@@ -1537,6 +1839,14 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 
 @media (prefers-reduced-motion: reduce) {
     .shape-area-title {
+        animation: none;
+    }
+
+    .circle-sort-object img,
+    .circle-sort-object svg,
+    .circle-sort-clock-hands,
+    .circle-sort-bin,
+    .circle-lesson-activity-board.is-complete .circle-sort-bin {
         animation: none;
     }
 }
