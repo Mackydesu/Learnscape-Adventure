@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260819-63';
+    const appVersion = '20260820-9';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -139,6 +139,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeCircleCharacterPopDelay = 120;
     let shapeCircleTimers = [];
     let shapeCircleSession = 0;
+    let circleIllustrationCelebrationTimers = [];
     let lettertraceCurrentLetter = 'A';
     let lettertraceCurrentCase = 'upper';
     let lettertraceTraceDrawing = false;
@@ -770,6 +771,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const hideCircleIllustrationProgress = () => {
+        circleIllustrationCelebrationTimers.forEach((timerId) => window.clearTimeout(timerId));
+        circleIllustrationCelebrationTimers = [];
         circleIllustrationPage?.classList.remove('is-progress-visible');
         circleIllustrationProgress?.setAttribute('aria-hidden', 'true');
     };
@@ -794,6 +797,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const showCircleIllustrationProgress = () => {
         if (!circleIllustrationPage || !circleIllustrationProgress) return;
 
+        const wasAlreadyVisible = circleIllustrationPage.classList.contains('is-progress-visible');
         circleIllustrationVideo?.pause();
         setCircleIllustrationPlayButtonVisible(false);
         setCircleIllustrationSkipButtonVisible(false);
@@ -802,6 +806,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         setCircleIllustrationEarnedStars(1);
         circleIllustrationProgress.setAttribute('aria-hidden', 'false');
         circleIllustrationNextButton?.focus({ preventScroll: true });
+
+        if (!wasAlreadyVisible) {
+            playUiClickSound('progressCelebration');
+            const starSoundTimer = window.setTimeout(() => {
+                playUiClickSound('starPop');
+                circleIllustrationCelebrationTimers = circleIllustrationCelebrationTimers.filter(
+                    (timerId) => timerId !== starSoundTimer,
+                );
+            }, 700);
+            circleIllustrationCelebrationTimers.push(starSoundTimer);
+        }
     };
 
     const finishCircleIllustrationLesson = () => {
@@ -1580,6 +1595,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         const AudioCtor = window.AudioContext || window.webkitAudioContext;
         return AudioCtor ? new AudioCtor() : null;
     })();
+    const uiClickAudioContext = (() => {
+        const AudioCtor = window.AudioContext || window.webkitAudioContext;
+        return AudioCtor ? new AudioCtor() : null;
+    })();
+    const uiClickAudioOutput = (() => {
+        if (!uiClickAudioContext) return null;
+
+        const compressor = uiClickAudioContext.createDynamicsCompressor();
+        const volume = uiClickAudioContext.createGain();
+        compressor.threshold.value = -18;
+        compressor.knee.value = 12;
+        compressor.ratio.value = 6;
+        compressor.attack.value = 0.003;
+        compressor.release.value = 0.12;
+        volume.gain.value = 1.35;
+        compressor.connect(volume);
+        volume.connect(uiClickAudioContext.destination);
+        return compressor;
+    })();
     const dragtomatchSpeechSynthesis = window.speechSynthesis || null;
     const dragtomatchFlipTimers = new WeakMap();
     const dragtomatchSpeechTimers = new WeakMap();
@@ -1597,6 +1631,64 @@ document.addEventListener('DOMContentLoaded', async () => {
     let dragtomatchTouchDragState = null;
     let dragtomatchIgnoreClickUntil = 0;
     let dragtomatchSunReactionTimer = null;
+    const uiClickSoundPresets = {
+        tap: [
+            { frequency: 520, type: 'square', gain: 0.1, duration: 0.045, attack: 0.008 },
+            { frequency: 780, type: 'triangle', gain: 0.13, duration: 0.075, delay: 0.018, attack: 0.008 },
+        ],
+        pop: [
+            { frequency: 560, type: 'square', gain: 0.12, duration: 0.055, attack: 0.008 },
+            { frequency: 880, type: 'triangle', gain: 0.15, duration: 0.1, delay: 0.025, attack: 0.008 },
+        ],
+        chime: [
+            { frequency: 523.25, type: 'triangle', gain: 0.13, duration: 0.12, attack: 0.01 },
+            { frequency: 659.25, type: 'sine', gain: 0.12, duration: 0.16, delay: 0.045, attack: 0.01 },
+            { frequency: 783.99, type: 'sine', gain: 0.11, duration: 0.2, delay: 0.09, attack: 0.01 },
+        ],
+        chestChime: [
+            { frequency: 523.25, type: 'triangle', gain: 0.14, duration: 0.15, attack: 0.01 },
+            { frequency: 659.25, type: 'triangle', gain: 0.14, duration: 0.19, delay: 0.055, attack: 0.01 },
+            { frequency: 783.99, type: 'sine', gain: 0.13, duration: 0.24, delay: 0.11, attack: 0.01 },
+            { frequency: 1046.5, type: 'sine', gain: 0.1, duration: 0.32, delay: 0.17, attack: 0.012 },
+        ],
+        backChime: [
+            { frequency: 783.99, type: 'triangle', gain: 0.14, duration: 0.11, attack: 0.008 },
+            { frequency: 659.25, type: 'triangle', gain: 0.13, duration: 0.14, delay: 0.055, attack: 0.008 },
+            { frequency: 523.25, type: 'sine', gain: 0.12, duration: 0.19, delay: 0.11, attack: 0.01 },
+        ],
+        progressCelebration: [
+            { frequency: 392, type: 'triangle', gain: 0.13, duration: 0.16, attack: 0.01 },
+            { frequency: 523.25, type: 'triangle', gain: 0.15, duration: 0.2, delay: 0.075, attack: 0.01 },
+            { frequency: 659.25, type: 'sine', gain: 0.14, duration: 0.25, delay: 0.15, attack: 0.012 },
+            { frequency: 783.99, type: 'sine', gain: 0.12, duration: 0.34, delay: 0.225, attack: 0.012 },
+        ],
+        starPop: [
+            { frequency: 440, type: 'square', gain: 0.1, duration: 0.055, attack: 0.006 },
+            { frequency: 880, type: 'triangle', gain: 0.15, duration: 0.13, delay: 0.035, attack: 0.006 },
+            { frequency: 1318.51, type: 'sine', gain: 0.12, duration: 0.2, delay: 0.085, attack: 0.008 },
+            { frequency: 1760, type: 'sine', gain: 0.075, duration: 0.26, delay: 0.135, attack: 0.008 },
+        ],
+        spark: [
+            { frequency: 880, type: 'triangle', gain: 0.13, duration: 0.055, attack: 0.006 },
+            { frequency: 1174.66, type: 'sine', gain: 0.1, duration: 0.075, delay: 0.025, attack: 0.006 },
+            { frequency: 1567.98, type: 'sine', gain: 0.075, duration: 0.11, delay: 0.05, attack: 0.006 },
+        ],
+        thunk: [
+            { frequency: 260, type: 'square', gain: 0.14, duration: 0.055, attack: 0.006 },
+            { frequency: 196, type: 'triangle', gain: 0.11, duration: 0.1, delay: 0.025, attack: 0.008 },
+        ],
+        wood: [
+            { frequency: 220, type: 'square', gain: 0.13, duration: 0.055, attack: 0.006 },
+            { frequency: 164.81, type: 'triangle', gain: 0.1, duration: 0.11, delay: 0.028, attack: 0.008 },
+        ],
+        soft: [
+            { frequency: 587.33, type: 'sine', gain: 0.13, duration: 0.08, attack: 0.01 },
+        ],
+        flip: [
+            { frequency: 494, type: 'triangle', gain: 0.13, duration: 0.065, attack: 0.008 },
+            { frequency: 740, type: 'sine', gain: 0.11, duration: 0.11, delay: 0.028, attack: 0.008 },
+        ],
+    };
     const dragtomatchVoicePreferenceHints = [
         'natural',
         'online',
@@ -1664,6 +1756,86 @@ document.addEventListener('DOMContentLoaded', async () => {
     ];
     let dragtomatchCurrentIndex = 0;
     let dragtomatchAdvanceTimer = null;
+
+    const resumeAudioContext = (audioContext) => {
+        if (!audioContext || audioContext.state !== 'suspended') return;
+        audioContext.resume().catch(() => {});
+    };
+
+    const playToneBurst = (audioContext, tones, baseDelay = 0, destination = audioContext?.destination) => {
+        if (!audioContext || !Array.isArray(tones) || !tones.length) return;
+
+        resumeAudioContext(audioContext);
+
+        const now = audioContext.currentTime;
+
+        tones.forEach((tone) => {
+            const oscillator = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            const delay = baseDelay + (tone.delay || 0);
+            const startTime = now + delay;
+            const attackEnd = startTime + Math.max(0.012, (tone.attack || 0.02));
+            const releaseEnd = startTime + (tone.duration || 0.06);
+
+            oscillator.type = tone.type || 'sine';
+            oscillator.frequency.value = tone.frequency;
+            gain.gain.value = 0.0001;
+
+            oscillator.connect(gain);
+            gain.connect(destination);
+
+            gain.gain.setValueAtTime(0.0001, startTime);
+            gain.gain.exponentialRampToValueAtTime(tone.gain || 0.08, attackEnd);
+            gain.gain.exponentialRampToValueAtTime(0.0001, releaseEnd);
+
+            oscillator.start(startTime);
+            oscillator.stop(releaseEnd + 0.04);
+        });
+    };
+
+    const playUiClickSound = (kind) => {
+        if (!uiClickAudioContext) return;
+        playToneBurst(
+            uiClickAudioContext,
+            uiClickSoundPresets[kind] || uiClickSoundPresets.tap,
+            0,
+            uiClickAudioOutput || uiClickAudioContext.destination,
+        );
+    };
+
+    const getButtonClickSoundKind = (control) => {
+        if (!control) return null;
+        if (control.matches('button[disabled], [aria-disabled="true"]')) return null;
+        if (control.classList.contains('game1-object-card')) return null;
+
+        if (control.classList.contains('game-return-btn')) return 'backChime';
+        if (control.classList.contains('shape-collection-chest')) return 'chestChime';
+        if (control.classList.contains('shape-collection-close')) return 'thunk';
+        if (control.classList.contains('circle-illustration-play-button')) return 'chime';
+        if (control.classList.contains('circle-illustration-skip-button')) return 'tap';
+        if (control.classList.contains('circle-lesson-progress-button')) return control.matches('[data-circle-lesson-next]') ? 'chime' : 'pop';
+        if (control.classList.contains('shape-area-start-button')) return 'chime';
+        if (control.classList.contains('game-menu-btn')) return 'pop';
+        if (control.classList.contains('rotate-button')) return 'spark';
+        if (control.classList.contains('game1-tutorial-button')) return 'spark';
+        if (control.classList.contains('game1-level-button')) return 'spark';
+        if (control.classList.contains('game3-hotspot')) return 'spark';
+        if (control.classList.contains('lettertrace-sound-btn')) return 'tap';
+        if (control.classList.contains('lettertrace-nav-clear')) return 'thunk';
+        if (control.classList.contains('lettertrace-nav-button')) return control.matches('[data-letter-case]') ? 'tap' : 'thunk';
+        if (control.matches('[data-trace-clear]')) return 'thunk';
+        if (control.classList.contains('loading-link')) return 'chime';
+
+        return 'tap';
+    };
+
+    document.addEventListener('click', (event) => {
+        const control = event.target.closest?.('button, a');
+        const clickSoundKind = getButtonClickSoundKind(control);
+
+        if (!clickSoundKind) return;
+        playUiClickSound(clickSoundKind);
+    }, true);
 
     if (game1Stage) {
         const revealGame1Stage = () => {

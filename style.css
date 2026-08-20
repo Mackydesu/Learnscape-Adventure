@@ -687,12 +687,56 @@ body.is-page-loading .page-loading-overlay {
 
 .circle-lesson-progress-board {
     position: relative;
+    isolation: isolate;
     width: min(68vw, 760px);
     max-width: calc(100vw - 2rem);
     animation: circleLessonProgressReveal 0.48s cubic-bezier(0.2, 0.82, 0.2, 1) both;
 }
 
+.circle-lesson-progress-board::before,
+.circle-lesson-progress-board::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.circle-lesson-progress-board::before {
+    inset: -34% -28%;
+    border-radius: 50%;
+    background: repeating-conic-gradient(
+        from -8deg at 50% 50%,
+        transparent 0deg 8deg,
+        rgba(255, 214, 28, 0.3) 11deg,
+        rgba(255, 253, 195, 0.92) 17deg,
+        rgba(255, 205, 24, 0.38) 23deg,
+        transparent 28deg 42deg
+    );
+    -webkit-mask-image: radial-gradient(ellipse closest-side at center, transparent 0 30%, #000 48% 72%, transparent 100%);
+    mask-image: radial-gradient(ellipse closest-side at center, transparent 0 30%, #000 48% 72%, transparent 100%);
+    filter: blur(2px) drop-shadow(0 0 22px rgba(255, 224, 65, 0.88));
+    transform-origin: 50% 50%;
+    animation:
+        circleLessonGoldenRaysSpin 11s linear infinite,
+        circleLessonGoldenRaysPulse 2.2s ease-in-out infinite;
+}
+
+.circle-lesson-progress-board::after {
+    inset: -12% -14%;
+    border-radius: 50%;
+    background: radial-gradient(
+        ellipse closest-side at 50% 50%,
+        rgba(255, 250, 190, 0.62) 0 48%,
+        rgba(255, 215, 48, 0.46) 62%,
+        transparent 100%
+    );
+    filter: blur(18px);
+    animation: circleLessonBoardGlow 2.6s ease-in-out infinite;
+}
+
 .circle-lesson-progress-board-image {
+    position: relative;
+    z-index: 0;
     display: block;
     width: 100%;
     height: auto;
@@ -701,6 +745,7 @@ body.is-page-loading .page-loading-overlay {
 
 .circle-lesson-progress-title {
     position: absolute;
+    z-index: 2;
     top: 3.8%;
     left: 50%;
     width: 50%;
@@ -720,6 +765,7 @@ body.is-page-loading .page-loading-overlay {
 
 .circle-lesson-stars {
     position: absolute;
+    z-index: 2;
     left: 50%;
     top: 24%;
     width: 58%;
@@ -824,6 +870,7 @@ body.is-page-loading .page-loading-overlay {
 
 .circle-lesson-star-message {
     position: absolute;
+    z-index: 2;
     left: 50%;
     top: 62%;
     width: 78%;
@@ -842,6 +889,7 @@ body.is-page-loading .page-loading-overlay {
 
 .circle-lesson-progress-actions {
     position: absolute;
+    z-index: 2;
     left: 50%;
     bottom: 9%;
     width: 62%;
@@ -907,6 +955,43 @@ body.is-page-loading .page-loading-overlay {
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes circleLessonGoldenRaysSpin {
+    from {
+        transform: rotate(0deg) scale(1.02);
+    }
+    to {
+        transform: rotate(360deg) scale(1.02);
+    }
+}
+
+@keyframes circleLessonGoldenRaysPulse {
+    0%, 100% {
+        opacity: 0.58;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes circleLessonBoardGlow {
+    0%, 100% {
+        opacity: 0.52;
+        transform: scale(0.98);
+    }
+    50% {
+        opacity: 0.92;
+        transform: scale(1.035);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .circle-lesson-progress-board::before,
+    .circle-lesson-progress-board::after {
+        animation: none;
+        opacity: 0.5;
     }
 }
 
