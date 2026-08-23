@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260820-24';
+    const appVersion = '20260820-29';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -1533,7 +1533,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const bg = String(params.bg || '').toLowerCase();
         const nextSrc = bg === 'abcbg'
             ? 'assets/Backgrounds/abcbg.webp'
-            : 'assets/Backgrounds/skybg.png';
+            : 'assets/Backgrounds/skybg.webp';
 
         if (dragtomatchBgImage.getAttribute('src') !== nextSrc) {
             dragtomatchBgImage.setAttribute('src', nextSrc);
@@ -2019,7 +2019,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (control.classList.contains('rotate-button')) return 'spark';
         if (control.classList.contains('game1-tutorial-button')) return 'spark';
         if (control.classList.contains('game1-level-button')) return 'spark';
-        if (control.classList.contains('game3-hotspot')) return 'spark';
         if (control.classList.contains('lettertrace-sound-btn')) return 'tap';
         if (control.classList.contains('lettertrace-nav-clear')) return 'thunk';
         if (control.classList.contains('lettertrace-nav-button')) return control.matches('[data-letter-case]') ? 'tap' : 'thunk';
@@ -3295,6 +3294,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelector('.scroll-down')?.addEventListener('click', () => {
         document.getElementById('worlds')?.scrollIntoView({ behavior: 'smooth' });
     });
+
+    const game3IslandCarousel = document.querySelector('.game3-island-carousel');
+    const game3IslandPrevButton = document.querySelector('.game3-island-prev');
+    const game3IslandNextButton = document.querySelector('.game3-island-next');
+
+    if (game3IslandCarousel && game3IslandPrevButton && game3IslandNextButton) {
+        const game3IslandCards = game3IslandCarousel.querySelectorAll('.game3-island-card');
+
+        const updateGame3IslandButtons = () => {
+            const currentIsland = Math.round(game3IslandCarousel.scrollLeft / game3IslandCarousel.clientWidth);
+            game3IslandPrevButton.disabled = currentIsland <= 0;
+            game3IslandNextButton.disabled = currentIsland >= game3IslandCards.length - 1;
+            game3Page.dataset.game3Island = String(currentIsland + 1);
+        };
+
+        game3IslandPrevButton.addEventListener('click', () => {
+            const currentIsland = Math.round(game3IslandCarousel.scrollLeft / game3IslandCarousel.clientWidth);
+            const previousIsland = Math.max(currentIsland - 1, 0);
+
+            game3IslandCarousel.scrollTo({
+                left: previousIsland * game3IslandCarousel.clientWidth,
+                behavior: 'smooth'
+            });
+        });
+
+        game3IslandNextButton.addEventListener('click', () => {
+            const currentIsland = Math.round(game3IslandCarousel.scrollLeft / game3IslandCarousel.clientWidth);
+            const nextIsland = Math.min(currentIsland + 1, game3IslandCards.length - 1);
+
+            game3IslandCarousel.scrollTo({
+                left: nextIsland * game3IslandCarousel.clientWidth,
+                behavior: 'smooth'
+            });
+        });
+
+        game3IslandCarousel.addEventListener('scroll', updateGame3IslandButtons, { passive: true });
+        window.addEventListener('resize', updateGame3IslandButtons);
+        updateGame3IslandButtons();
+    }
 
     const heroCharacters = document.querySelectorAll('.hero-character-ground');
 

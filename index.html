@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260820-24">
+    <link rel="stylesheet" href="style.css?v=20260820-29">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -164,117 +164,102 @@
     </section>
 
     <section id="learnscape-game3-page" class="game3-page" hidden>
-        <img class="game1-bg-image" src="assets/Backgrounds/game3.svg" alt="" aria-hidden="true">
+        <img class="game1-bg-image" src="assets/Backgrounds/skybg.webp" alt="" aria-hidden="true">
         <div class="game1-overlay" aria-hidden="true"></div>
         <div class="game3-clouds" aria-hidden="true"></div>
         <div class="game3-fog" aria-hidden="true"></div>
         <div class="game1-entry-veil" aria-hidden="true"></div>
+        <header class="game3-page-title" aria-label="Shape Island">
+            <span class="game3-page-title-shape" aria-hidden="true">
+                <span>S</span><span>H</span><span>A</span><span>P</span><span>E</span>
+            </span>
+            <span class="game3-page-title-island" aria-hidden="true">Island</span>
+        </header>
         <img class="game3-worldmap" src="assets/Shape UI/worldmap.webp" alt="" aria-hidden="true">
-        <div class="game3-hotspots" aria-label="Shape islands">
-            <button class="game3-hotspot game3-hotspot-circle" type="button" data-game3-shape="circle" aria-label="Circle Meadow" aria-pressed="false">
-                <svg class="game3-shape-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-                    <circle cx="50" cy="50" r="30"></circle>
-                </svg>
-            </button>
-            <button class="game3-hotspot game3-hotspot-square" type="button" data-game3-shape="square" aria-label="Square Town" aria-pressed="false">
-                <svg class="game3-shape-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-                    <rect x="18" y="18" width="64" height="64" rx="8"></rect>
-                </svg>
-                <svg class="game3-hotspot-lock" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-                    <path class="game3-hotspot-lock-shackle" d="M22 28V22c0-5.5 4.5-10 10-10s10 4.5 10 10v6" />
-                    <rect class="game3-hotspot-lock-body" x="14" y="28" width="36" height="27" rx="6" />
-                    <path class="game3-hotspot-lock-rim" d="M18 31h28" />
-                    <path class="game3-hotspot-lock-rim" d="M19 32v18" />
-                    <path class="game3-hotspot-lock-rim" d="M24 31v19" />
-                    <circle class="game3-hotspot-lock-keyhole" cx="32" cy="41" r="3.1" />
-                    <rect class="game3-hotspot-lock-keyhole-slot" x="31.2" y="41" width="1.6" height="6.5" rx="0.8" />
-                </svg>
-            </button>
-            <button class="game3-hotspot game3-hotspot-triangle" type="button" data-game3-shape="triangle" aria-label="Triangle Mountains" aria-pressed="false">
-                <svg class="game3-shape-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-                    <path d="M50 16 L84 80 H16 Z"></path>
-                </svg>
-                <svg class="game3-hotspot-lock" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-                    <path class="game3-hotspot-lock-shackle" d="M22 28V22c0-5.5 4.5-10 10-10s10 4.5 10 10v6" />
-                    <rect class="game3-hotspot-lock-body" x="14" y="28" width="36" height="27" rx="6" />
-                    <path class="game3-hotspot-lock-rim" d="M18 31h28" />
-                    <path class="game3-hotspot-lock-rim" d="M19 32v18" />
-                    <path class="game3-hotspot-lock-rim" d="M24 31v19" />
-                    <circle class="game3-hotspot-lock-keyhole" cx="32" cy="41" r="3.1" />
-                    <rect class="game3-hotspot-lock-keyhole-slot" x="31.2" y="41" width="1.6" height="6.5" rx="0.8" />
-                </svg>
-            </button>
-            <button class="game3-hotspot game3-hotspot-rectangle" type="button" data-game3-shape="rectangle" aria-label="Rectangle Village" aria-pressed="false">
-                <svg class="game3-shape-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-                    <rect x="14" y="28" width="72" height="44"></rect>
-                </svg>
-                <svg class="game3-hotspot-lock" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-                    <path class="game3-hotspot-lock-shackle" d="M22 28V22c0-5.5 4.5-10 10-10s10 4.5 10 10v6" />
-                    <rect class="game3-hotspot-lock-body" x="14" y="28" width="36" height="27" rx="6" />
-                    <path class="game3-hotspot-lock-rim" d="M18 31h28" />
-                    <path class="game3-hotspot-lock-rim" d="M19 32v18" />
-                    <path class="game3-hotspot-lock-rim" d="M24 31v19" />
-                    <circle class="game3-hotspot-lock-keyhole" cx="32" cy="41" r="3.1" />
-                    <rect class="game3-hotspot-lock-keyhole-slot" x="31.2" y="41" width="1.6" height="6.5" rx="0.8" />
-                </svg>
-            </button>
-            <button class="game3-hotspot game3-hotspot-oval" type="button" data-game3-shape="oval" aria-label="Oval Garden" aria-pressed="false">
-                <svg class="game3-shape-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-                    <ellipse cx="50" cy="50" rx="30" ry="40"></ellipse>
-                </svg>
-                <svg class="game3-hotspot-lock" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-                    <path class="game3-hotspot-lock-shackle" d="M22 28V22c0-5.5 4.5-10 10-10s10 4.5 10 10v6" />
-                    <rect class="game3-hotspot-lock-body" x="14" y="28" width="36" height="27" rx="6" />
-                    <path class="game3-hotspot-lock-rim" d="M18 31h28" />
-                    <path class="game3-hotspot-lock-rim" d="M19 32v18" />
-                    <path class="game3-hotspot-lock-rim" d="M24 31v19" />
-                    <circle class="game3-hotspot-lock-keyhole" cx="32" cy="41" r="3.1" />
-                    <rect class="game3-hotspot-lock-keyhole-slot" x="31.2" y="41" width="1.6" height="6.5" rx="0.8" />
-                </svg>
-            </button>
-            <button class="game3-hotspot game3-hotspot-heart" type="button" data-game3-shape="heart" aria-label="Heart City" aria-pressed="false">
-                <svg class="game3-shape-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-                    <path d="M50 83 L20 51 C7 38 10 18 26 12 C36 8 46 12 50 21 C54 12 64 8 74 12 C90 18 93 38 80 51 Z"></path>
-                </svg>
-                <svg class="game3-hotspot-lock" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-                    <path class="game3-hotspot-lock-shackle" d="M22 28V22c0-5.5 4.5-10 10-10s10 4.5 10 10v6" />
-                    <rect class="game3-hotspot-lock-body" x="14" y="28" width="36" height="27" rx="6" />
-                    <path class="game3-hotspot-lock-rim" d="M18 31h28" />
-                    <path class="game3-hotspot-lock-rim" d="M19 32v18" />
-                    <path class="game3-hotspot-lock-rim" d="M24 31v19" />
-                    <circle class="game3-hotspot-lock-keyhole" cx="32" cy="41" r="3.1" />
-                    <rect class="game3-hotspot-lock-keyhole-slot" x="31.2" y="41" width="1.6" height="6.5" rx="0.8" />
-                </svg>
-            </button>
-            <button class="game3-hotspot game3-hotspot-star" type="button" data-game3-shape="star" aria-label="Star Forest" aria-pressed="false">
-                <svg class="game3-shape-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-                    <path d="M50 12 L61 37 L88 39 L67 57 L73 84 L50 70 L27 84 L33 57 L12 39 L39 37 Z"></path>
-                </svg>
-                <svg class="game3-hotspot-lock" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-                    <path class="game3-hotspot-lock-shackle" d="M22 28V22c0-5.5 4.5-10 10-10s10 4.5 10 10v6" />
-                    <rect class="game3-hotspot-lock-body" x="14" y="28" width="36" height="27" rx="6" />
-                    <path class="game3-hotspot-lock-rim" d="M18 31h28" />
-                    <path class="game3-hotspot-lock-rim" d="M19 32v18" />
-                    <path class="game3-hotspot-lock-rim" d="M24 31v19" />
-                    <circle class="game3-hotspot-lock-keyhole" cx="32" cy="41" r="3.1" />
-                    <rect class="game3-hotspot-lock-keyhole-slot" x="31.2" y="41" width="1.6" height="6.5" rx="0.8" />
-                </svg>
-            </button>
-            <button class="game3-hotspot game3-hotspot-diamond" type="button" data-game3-shape="diamond" aria-label="Diamond Cave" aria-pressed="false">
-                <svg class="game3-shape-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-                    <path d="M50 10 L82 50 L50 90 L18 50 Z"></path>
-                </svg>
-                <svg class="game3-hotspot-lock" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-                    <path class="game3-hotspot-lock-shackle" d="M22 28V22c0-5.5 4.5-10 10-10s10 4.5 10 10v6" />
-                    <rect class="game3-hotspot-lock-body" x="14" y="28" width="36" height="27" rx="6" />
-                    <path class="game3-hotspot-lock-rim" d="M18 31h28" />
-                    <path class="game3-hotspot-lock-rim" d="M19 32v18" />
-                    <path class="game3-hotspot-lock-rim" d="M24 31v19" />
-                    <circle class="game3-hotspot-lock-keyhole" cx="32" cy="41" r="3.1" />
-                    <rect class="game3-hotspot-lock-keyhole-slot" x="31.2" y="41" width="1.6" height="6.5" rx="0.8" />
-                </svg>
-            </button>
-        </div>
+        <nav class="game3-island-carousel" aria-label="Shape Island areas">
+            <div class="game3-island-card">
+                <img src="assets/Shape UI/1.webp" alt="1. Circle Meadow">
+                <a class="game3-island-enter loading-link" href="index.html" data-route="shape-circle">Enter</a>
+            </div>
+            <div class="game3-island-card">
+                <img src="assets/Shape UI/2.webp" alt="2. Square Town">
+                <svg class="game3-island-lock" role="img" aria-label="Locked"><use href="#game3-padlock"></use></svg>
+                <button class="game3-island-enter" type="button" disabled>Enter</button>
+            </div>
+            <div class="game3-island-card">
+                <img src="assets/Shape UI/3.webp" alt="3. Triangle Mountains">
+                <svg class="game3-island-lock" role="img" aria-label="Locked"><use href="#game3-padlock"></use></svg>
+                <button class="game3-island-enter" type="button" disabled>Enter</button>
+            </div>
+            <div class="game3-island-card">
+                <img src="assets/Shape UI/4.webp" alt="4. Rectangle Village">
+                <svg class="game3-island-lock" role="img" aria-label="Locked"><use href="#game3-padlock"></use></svg>
+                <button class="game3-island-enter" type="button" disabled>Enter</button>
+            </div>
+            <div class="game3-island-card">
+                <img src="assets/Shape UI/5.webp" alt="5. Oval Garden">
+                <svg class="game3-island-lock" role="img" aria-label="Locked"><use href="#game3-padlock"></use></svg>
+                <button class="game3-island-enter" type="button" disabled>Enter</button>
+            </div>
+            <div class="game3-island-card">
+                <img src="assets/Shape UI/6.webp" alt="6. Heart City">
+                <svg class="game3-island-lock" role="img" aria-label="Locked"><use href="#game3-padlock"></use></svg>
+                <button class="game3-island-enter" type="button" disabled>Enter</button>
+            </div>
+            <div class="game3-island-card">
+                <img src="assets/Shape UI/7.webp" alt="7. Star Forest">
+                <svg class="game3-island-lock" role="img" aria-label="Locked"><use href="#game3-padlock"></use></svg>
+                <button class="game3-island-enter" type="button" disabled>Enter</button>
+            </div>
+            <div class="game3-island-card">
+                <img src="assets/Shape UI/8.webp" alt="8. Diamond Cave">
+                <svg class="game3-island-lock" role="img" aria-label="Locked"><use href="#game3-padlock"></use></svg>
+                <button class="game3-island-enter" type="button" disabled>Enter</button>
+            </div>
+        </nav>
+        <svg class="game3-padlock-defs" aria-hidden="true" focusable="false">
+            <defs>
+                <linearGradient id="game3-lock-shackle" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#f8fbfd"></stop>
+                    <stop offset="0.28" stop-color="#aeb7c1"></stop>
+                    <stop offset="0.55" stop-color="#eef2f5"></stop>
+                    <stop offset="1" stop-color="#59636e"></stop>
+                </linearGradient>
+                <linearGradient id="game3-lock-body" x1="0" y1="0" x2="0.9" y2="1">
+                    <stop offset="0" stop-color="#f5f7f9"></stop>
+                    <stop offset="0.2" stop-color="#c7cdd4"></stop>
+                    <stop offset="0.58" stop-color="#8a949f"></stop>
+                    <stop offset="1" stop-color="#555f69"></stop>
+                </linearGradient>
+                <linearGradient id="game3-lock-rim" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#68737e"></stop>
+                    <stop offset="1" stop-color="#323940"></stop>
+                </linearGradient>
+                <radialGradient id="game3-lock-keyhole" cx="42%" cy="30%" r="72%">
+                    <stop offset="0" stop-color="#31373d"></stop>
+                    <stop offset="1" stop-color="#0f1215"></stop>
+                </radialGradient>
+                <filter id="game3-lock-inner-shadow" x="-25%" y="-25%" width="150%" height="165%">
+                    <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#17212a" flood-opacity="0.55"></feDropShadow>
+                </filter>
+                <symbol id="game3-padlock" viewBox="0 0 120 145">
+                    <path d="M31 62V42C31 22 44 10 60 10s29 12 29 32v20" fill="none" stroke="#3b444d" stroke-width="23" stroke-linecap="round"></path>
+                    <path d="M31 62V42C31 22 44 10 60 10s29 12 29 32v20" fill="none" stroke="url(#game3-lock-shackle)" stroke-width="15" stroke-linecap="round"></path>
+                    <path d="M39 48V41c0-14 8-23 21-23" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity="0.72"></path>
+                    <rect x="10" y="55" width="100" height="79" rx="16" fill="url(#game3-lock-rim)" filter="url(#game3-lock-inner-shadow)"></rect>
+                    <rect x="16" y="59" width="88" height="67" rx="12" fill="url(#game3-lock-body)" stroke="#dce2e7" stroke-width="2.5"></rect>
+                    <path d="M22 66h76" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity="0.58"></path>
+                    <path d="M22 116c24 7 52 7 76 0" fill="none" stroke="#3f4851" stroke-width="3" stroke-linecap="round" opacity="0.5"></path>
+                    <circle cx="27" cy="75" r="3.2" fill="#eef2f5" stroke="#626c76" stroke-width="1.5"></circle>
+                    <circle cx="93" cy="75" r="3.2" fill="#eef2f5" stroke="#626c76" stroke-width="1.5"></circle>
+                    <circle cx="60" cy="88" r="10" fill="url(#game3-lock-keyhole)" stroke="#707b85" stroke-width="2"></circle>
+                    <path d="M55 94h10l3 20H52z" fill="url(#game3-lock-keyhole)"></path>
+                    <path d="M57 82c2-1.5 5-1.5 7 0" fill="none" stroke="#858f98" stroke-width="2" stroke-linecap="round" opacity="0.7"></path>
+                </symbol>
+            </defs>
+        </svg>
+        <button class="game3-island-prev" type="button" aria-label="Show previous island" disabled></button>
+        <button class="game3-island-next" type="button" aria-label="Show next island"></button>
         <div class="game1-intro" aria-hidden="true">
             <div class="game1-intro-card">
                 <span class="game1-intro-kicker">Game 3</span>
@@ -282,7 +267,7 @@
             </div>
         </div>
 
-        <a class="game-return-btn loading-link" href="index.html" data-route="start" aria-label="Return to game selection">
+        <a class="game-return-btn" href="#start" aria-label="Return to game selection">
             <span>‹</span>
             Back
         </a>
@@ -635,7 +620,7 @@
     </section>
 
     <section id="learnscape-dragtomatch-page" hidden>
-        <img class="game1-bg-image" src="assets/Backgrounds/skybg.png" alt="" aria-hidden="true">
+        <img class="game1-bg-image" src="assets/Backgrounds/skybg.webp" alt="" aria-hidden="true">
         <div class="game1-overlay" aria-hidden="true"></div>
         <div class="game1-entry-veil" aria-hidden="true"></div>
         <div class="game1-celebration-layer" aria-hidden="true"></div>
@@ -707,7 +692,7 @@
     </section>
 
     <section id="learnscape-poptheword-page" hidden>
-        <img class="game1-bg-image" src="assets/Backgrounds/skybg.png" alt="" aria-hidden="true">
+        <img class="game1-bg-image" src="assets/Backgrounds/skybg.webp" alt="" aria-hidden="true">
         <div class="game1-overlay" aria-hidden="true"></div>
         <div class="game1-entry-veil" aria-hidden="true"></div>
         <div class="game1-intro" aria-hidden="true">
@@ -724,7 +709,7 @@
     </section>
 
     <section id="learnscape-bunnyhop-page" hidden>
-        <img class="game1-bg-image" src="assets/Backgrounds/skybg.png" alt="" aria-hidden="true">
+        <img class="game1-bg-image" src="assets/Backgrounds/skybg.webp" alt="" aria-hidden="true">
         <div class="game1-overlay" aria-hidden="true"></div>
         <div class="game1-entry-veil" aria-hidden="true"></div>
         <div class="game1-intro" aria-hidden="true">
@@ -740,7 +725,7 @@
         </a>
     </section>
 
-    <script src="script.js?v=20260820-24"></script>
+    <script src="script.js?v=20260820-29"></script>
     </div>
 
     <script>
@@ -811,7 +796,9 @@
             const routeAliases = {
                 '': 'title',
                 title: 'title',
+                home: 'title',
                 start: 'start',
+                'game-start': 'start',
                 game1: 'game1',
                 game3: 'game3',
                 shapeCircle: 'shapeCircle',
@@ -1047,7 +1034,7 @@
                     if (event.pointerType === 'mouse' && event.button !== 0) return;
 
                     const target = event.target instanceof Element ? event.target : null;
-                    if (target?.closest('.game3-hotspot, .game-return-btn, .shape-collection-widget, .shape-collection-dashboard')) return;
+                    if (target?.closest('.game-return-btn, .shape-collection-widget, .shape-collection-dashboard')) return;
 
                     activePointerId = event.pointerId;
                     startX = event.clientX;
@@ -1095,12 +1082,6 @@
                 map.addEventListener('click', (event) => {
                     if (!suppressNextClick) return;
 
-                    const target = event.target instanceof Element ? event.target : null;
-                    if (target?.closest('.game3-hotspot')) {
-                        suppressNextClick = false;
-                        return;
-                    }
-
                     suppressNextClick = false;
                     event.preventDefault();
                     event.stopPropagation();
@@ -1112,8 +1093,6 @@
 
                 map.addEventListener('scroll', clampCurrentScroll, { passive: true });
             };
-
-            setupGame3MapDrag();
 
             const setupShapeCollectionChest = () => {
                 const page = pages.game3;
