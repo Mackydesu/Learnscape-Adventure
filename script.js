@@ -999,9 +999,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const finishCircleIllustrationLesson = () => {
         hideCircleIllustrationProgress();
-        startCircleSortActivity();
+        circleIllustrationVideo?.pause();
         circleIllustrationPage?.classList.add('is-lesson-complete');
         setCircleIllustrationPlayButtonVisible(false);
+        setCircleIllustrationSkipButtonVisible(false);
     };
 
     const playCircleIllustrationVideo = async () => {
