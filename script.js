@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260820-29';
+    const appVersion = '20260824-65';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -21,6 +21,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const ensureFreshShell = async () => {
         let storedVersion = null;
+        const currentUrl = new URL(window.location.href);
+        const isFreshRequest = currentUrl.searchParams.get(freshParamKey) === appVersion;
 
         try {
             storedVersion = window.localStorage.getItem(appVersionKey);
@@ -28,17 +30,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             storedVersion = null;
         }
 
-        if (storedVersion === appVersion) return false;
-
-        await clearCachedShell();
+        if (storedVersion === appVersion || isFreshRequest) {
+            try {
+                window.localStorage.setItem(appVersionKey, appVersion);
+            } catch (error) {
+                // The versioned URL is enough when storage is unavailable.
+            }
+            return false;
+        }
 
         try {
             window.localStorage.setItem(appVersionKey, appVersion);
         } catch (error) {
-            // Ignore storage write issues and still continue with the reload.
+            // The fresh query parameter prevents a reload loop when storage is unavailable.
         }
 
-        const nextUrl = new URL(window.location.href);
+        await Promise.race([
+            clearCachedShell(),
+            new Promise((resolve) => window.setTimeout(resolve, 800)),
+        ]);
+
+        const nextUrl = currentUrl;
         nextUrl.searchParams.set(freshParamKey, appVersion);
         window.location.replace(nextUrl.toString());
         return true;
@@ -91,6 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         diamond: { x: 205, y: 569 },
     };
     const game3Hotspots = game3Page?.querySelectorAll('[data-game3-shape]') || [];
+    const fullscreenRestoreButton = document.querySelector('.fullscreen-restore-button');
     const shapeCirclePage = document.getElementById('learnscape-shape-circle-page');
     const circleIllustrationPage = document.getElementById('learnscape-circle-illustration-page');
     const circleIllustrationVideo = circleIllustrationPage?.querySelector('.circle-illustration-video') || null;
@@ -101,6 +114,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const circleIllustrationNextButton = circleIllustrationPage?.querySelector('[data-circle-lesson-next]') || null;
     const circleIllustrationStars = circleIllustrationPage?.querySelector('.circle-lesson-stars') || null;
     const circleIllustrationStarMessage = circleIllustrationPage?.querySelector('.circle-lesson-star-message') || null;
+    const circleMissionGuide = circleIllustrationPage?.querySelector('.circle-mission-guide') || null;
+    const circleMissionGuideText = circleMissionGuide?.querySelector('.circle-mission-guide-text') || null;
     const circleSortBoard = circleIllustrationPage?.querySelector('.circle-lesson-activity-board') || null;
     const circleSortBin = circleSortBoard?.querySelector('.circle-sort-bin') || null;
     const circleSortBinCount = circleSortBin?.querySelector('.circle-sort-bin-count') || null;
@@ -146,6 +161,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     let shapeCircleTimers = [];
     let shapeCircleSession = 0;
     let circleIllustrationCelebrationTimers = [];
+    const circleMissionGuideMessages = [
+        'Para sa ating Circle Mission',
+        'Kailangan natin hanapin at kolektahin ang mga **bagay na bilog** na nakatago sa paligid!',
+        'Handa ka na ba?',
+    ];
+    const circleMissionGuideTypingDelay = 42;
+    const circleMissionGuideMessagePause = 1450;
+    const circleMissionGuideFinalPause = 1900;
+    let circleMissionGuideTimers = [];
+    let circleMissionGuideSession = 0;
     let circleSortCollectedCount = 0;
     let circleSortActiveDrag = null;
     let circleSortResetTimers = [];
@@ -780,6 +805,104 @@ document.addEventListener('DOMContentLoaded', async () => {
         circleIllustrationSkipButton.hidden = !isVisible;
     };
 
+    const clearCircleMissionGuideTimers = () => {
+        circleMissionGuideTimers.forEach((timerId) => window.clearTimeout(timerId));
+        circleMissionGuideTimers = [];
+    };
+
+    const setCircleMissionGuideTypedText = (message, visibleCharacterCount) => {
+        if (!circleMissionGuideText) return;
+
+        const fragment = document.createDocumentFragment();
+        const segments = String(message).split(/(\*\*.*?\*\*)/g).filter(Boolean);
+        let remainingCharacters = visibleCharacterCount;
+
+        segments.forEach((segment) => {
+            if (remainingCharacters <= 0) return;
+
+            const isBold = segment.startsWith('**') && segment.endsWith('**');
+            const segmentText = isBold ? segment.slice(2, -2) : segment;
+            const visibleText = segmentText.slice(0, remainingCharacters);
+            const node = isBold ? document.createElement('strong') : document.createTextNode('');
+            node.textContent = visibleText;
+            fragment.appendChild(node);
+            remainingCharacters -= visibleText.length;
+        });
+
+        circleMissionGuideText.replaceChildren(fragment);
+    };
+
+    const resetCircleMissionGuide = () => {
+        clearCircleMissionGuideTimers();
+        circleMissionGuideSession += 1;
+
+        if (circleMissionGuideText) {
+            circleMissionGuideText.textContent = '';
+        }
+        if (circleMissionGuide) {
+            circleMissionGuide.hidden = true;
+            circleMissionGuide.setAttribute('aria-hidden', 'true');
+            circleMissionGuide.classList.remove('is-active', 'is-bubble-visible', 'is-exiting');
+        }
+    };
+
+    const startCircleMissionGuide = () => {
+        if (!circleMissionGuide || !circleMissionGuideText || !isPageVisible(circleIllustrationPage)) return;
+
+        resetCircleMissionGuide();
+        const session = circleMissionGuideSession;
+        circleMissionGuide.hidden = false;
+        circleMissionGuide.setAttribute('aria-hidden', 'false');
+        circleMissionGuide.getBoundingClientRect();
+        circleMissionGuide.classList.add('is-active');
+
+        const playMessage = (messageIndex) => {
+            if (session !== circleMissionGuideSession || !isPageVisible(circleIllustrationPage)) return;
+
+            if (messageIndex >= circleMissionGuideMessages.length) {
+                circleMissionGuide.classList.remove('is-bubble-visible');
+                circleMissionGuideTimers.push(window.setTimeout(() => {
+                    if (session !== circleMissionGuideSession) return;
+                    circleMissionGuide.classList.add('is-exiting');
+                    circleMissionGuideTimers.push(window.setTimeout(resetCircleMissionGuide, 700));
+                }, 350));
+                return;
+            }
+
+            const message = circleMissionGuideMessages[messageIndex];
+            const plainMessageLength = message.replace(/\*\*/g, '').length;
+            const isLastMessage = messageIndex === circleMissionGuideMessages.length - 1;
+            setCircleMissionGuideTypedText(message, 0);
+            circleMissionGuide.classList.add('is-bubble-visible');
+
+            const typeCharacter = (characterIndex) => {
+                if (session !== circleMissionGuideSession || !isPageVisible(circleIllustrationPage)) return;
+
+                setCircleMissionGuideTypedText(message, characterIndex);
+                if (characterIndex >= plainMessageLength) {
+                    circleMissionGuideTimers.push(window.setTimeout(() => {
+                        if (session !== circleMissionGuideSession) return;
+                        circleMissionGuide.classList.remove('is-bubble-visible');
+                        circleMissionGuideTimers.push(window.setTimeout(() => {
+                            playMessage(messageIndex + 1);
+                        }, 300));
+                    }, isLastMessage ? circleMissionGuideFinalPause : circleMissionGuideMessagePause));
+                    return;
+                }
+
+                circleMissionGuideTimers.push(window.setTimeout(() => {
+                    typeCharacter(characterIndex + 1);
+                }, circleMissionGuideTypingDelay));
+            };
+
+            typeCharacter(1);
+        };
+
+        circleMissionGuideTimers.push(window.setTimeout(() => {
+            playMessage(0);
+        }, 520));
+    };
+
     const hideCircleIllustrationProgress = () => {
         circleIllustrationCelebrationTimers.forEach((timerId) => window.clearTimeout(timerId));
         circleIllustrationCelebrationTimers = [];
@@ -1003,12 +1126,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         circleIllustrationPage?.classList.add('is-lesson-complete');
         setCircleIllustrationPlayButtonVisible(false);
         setCircleIllustrationSkipButtonVisible(false);
+        circleMissionGuideTimers.push(window.setTimeout(startCircleMissionGuide, 280));
     };
 
     const playCircleIllustrationVideo = async () => {
         if (!circleIllustrationVideo || !isPageVisible(circleIllustrationPage)) return;
 
         try {
+            resetCircleMissionGuide();
             hideCircleIllustrationProgress();
             resetCircleSortActivity();
             setCircleIllustrationEarnedStars(0);
@@ -1033,6 +1158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const resetCircleIllustrationVideo = () => {
         if (!circleIllustrationVideo) return;
 
+        resetCircleMissionGuide();
         hideCircleIllustrationProgress();
         resetCircleSortActivity();
         circleIllustrationPage?.classList.remove('is-lesson-complete');
@@ -1079,10 +1205,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    const getAppNavigator = () => {
+        try {
+            return window.top && window.top !== window
+                ? window.top.__learnscapeNavigate
+                : window.__learnscapeNavigate;
+        } catch (error) {
+            return null;
+        }
+    };
+
     const navigateApp = (target) => {
-        const shellNavigate = window.top && window.top !== window
-            ? window.top.__learnscapeNavigate
-            : window.__learnscapeNavigate;
+        const shellNavigate = getAppNavigator();
 
         if (typeof shellNavigate === 'function' && target && !target.startsWith('#')) {
             shellNavigate(target);
@@ -1135,6 +1269,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         return Promise.resolve();
     };
 
+    const exitFullscreen = async () => {
+        const documentsToTry = [document];
+
+        try {
+            if (window.top && window.top.document && window.top.document !== document) {
+                documentsToTry.push(window.top.document);
+            }
+        } catch (error) {
+            // Same-origin access can fail in embedded contexts; the current document is still worth trying.
+        }
+
+        for (const root of documentsToTry) {
+            if (root.exitFullscreen) {
+                return root.exitFullscreen();
+            }
+
+            if (root.webkitExitFullscreen) {
+                return root.webkitExitFullscreen();
+            }
+
+            if (root.msExitFullscreen) {
+                return root.msExitFullscreen();
+            }
+        }
+
+        return Promise.resolve();
+    };
+
     const lockLandscape = async () => {
         const orientation = window.screen?.orientation;
 
@@ -1156,6 +1318,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             await lockLandscape();
+        } catch (error) {
+            console.warn('Fullscreen mode was not available.', error);
+        }
+    };
+
+    const toggleFullscreenFlow = async (targetElement) => {
+        try {
+            if (isFullscreenActive()) {
+                await exitFullscreen();
+                return;
+            }
+
+            await enterFullscreenFlow(targetElement);
         } catch (error) {
             console.warn('Fullscreen mode was not available.', error);
         }
@@ -2014,6 +2189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (control.classList.contains('shape-collection-close')) return 'thunk';
         if (control.classList.contains('circle-illustration-play-button')) return 'chime';
         if (control.classList.contains('circle-illustration-skip-button')) return 'tap';
+        if (control.classList.contains('fullscreen-restore-button')) return 'tap';
         if (control.classList.contains('circle-lesson-progress-button')) return control.matches('[data-circle-lesson-next]') ? 'chime' : 'pop';
         if (control.classList.contains('shape-area-start-button')) return 'chime';
         if (control.classList.contains('game-menu-btn')) return 'pop';
@@ -3184,6 +3360,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             && !circleIllustrationPage?.classList.contains('is-lesson-complete')
         ) {
             setCircleIllustrationPlayButtonVisible(true);
+            setCircleIllustrationSkipButtonVisible(false);
         }
     });
 
@@ -3243,11 +3420,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         resetShapeCircleScene();
     }
 
-    if (isPageVisible(circleIllustrationPage)) {
-        resetCircleIllustrationVideo();
-    } else {
-        resetCircleIllustrationVideo();
-    }
+    resetCircleIllustrationVideo();
 
     renderDragtomatchLevels();
     if (!isPageVisible(lettertracePage)) {
@@ -3271,6 +3444,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
 
             const goNext = () => {
+                const appNavigate = getAppNavigator();
+
+                if (typeof appNavigate === 'function') {
+                    appNavigate(target);
+                    releaseNavigationLock();
+                    return;
+                }
+
                 showLoadingScreen();
 
                 window.setTimeout(() => {
@@ -3290,6 +3471,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             goNext();
         });
+    });
+
+    fullscreenRestoreButton?.addEventListener('click', () => {
+        const fullscreenTarget = getShellContainer() || getAppFrame() || document.documentElement;
+        enterFullscreenFlow(fullscreenTarget).catch(() => {});
     });
 
     document.querySelector('.scroll-down')?.addEventListener('click', () => {
@@ -3351,9 +3537,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     syncFullscreenClass();
-    document.addEventListener('fullscreenchange', syncFullscreenClass);
-    document.addEventListener('webkitfullscreenchange', syncFullscreenClass);
-    document.addEventListener('msfullscreenchange', syncFullscreenClass);
+    document.addEventListener('fullscreenchange', () => {
+        syncFullscreenClass();
+    });
+    document.addEventListener('webkitfullscreenchange', () => {
+        syncFullscreenClass();
+    });
+    document.addEventListener('msfullscreenchange', () => {
+        syncFullscreenClass();
+    });
 
     // Service worker registration is disabled during development to avoid stale cached assets.
 });

@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260820-29">
+    <link rel="stylesheet" href="style.css?v=20260824-65">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -40,6 +40,20 @@
                 <span></span>
             </div>
             <p class="page-loading-text">Loading Adventure</p>
+        </div>
+    </div>
+
+    <div class="fullscreen-restore-overlay">
+        <div class="fullscreen-restore-card" role="dialog" aria-modal="true" aria-labelledby="fullscreen-restore-title" aria-describedby="fullscreen-restore-copy">
+            <p class="fullscreen-restore-kicker">Game Paused</p>
+            <h2 id="fullscreen-restore-title">Fullscreen Paused</h2>
+            <p id="fullscreen-restore-copy" class="fullscreen-restore-copy">Tap the button below to continue your adventure in fullscreen.</p>
+            <button class="fullscreen-restore-button" type="button" aria-label="Return game to fullscreen">
+                <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                    <path d="M38 18H18v20M62 18h20v20M18 62v20h20M82 62v20H62"></path>
+                </svg>
+                <span>Return to Fullscreen</span>
+            </button>
         </div>
     </div>
 
@@ -327,17 +341,47 @@
     </section>
 
     <section id="learnscape-circle-illustration-page" class="circle-illustration-page" hidden>
-        <img class="circle-illustration-bg" src="assets/Backgrounds/Illustration.webp" alt="Circle lesson illustration board">
-        <button class="circle-illustration-play-button" type="button" aria-label="Play circle lesson video">
-            <svg class="circle-illustration-play-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-                <path class="circle-illustration-play-triangle" d="M40 30 L72 50 L40 70 Z"></path>
-            </svg>
-        </button>
+        <div class="circle-illustration-scene">
+            <img class="circle-illustration-bg" src="assets/Backgrounds/Illustration.webp" alt="Circle lesson illustration board">
+            <div class="circle-illustration-shapes" aria-hidden="true">
+                <img class="circle-illustration-shape circle-illustration-shape-1" src="assets/Shape UI/circle1.webp" alt="">
+                <img class="circle-illustration-shape circle-illustration-shape-2" src="assets/Shape UI/circle2.webp" alt="">
+                <img class="circle-illustration-shape circle-illustration-shape-3" src="assets/Shape UI/circle3.webp" alt="">
+                <img class="circle-illustration-shape circle-illustration-shape-4" src="assets/Shape UI/circle4.webp" alt="">
+                <img class="circle-illustration-shape circle-illustration-shape-6" src="assets/Shape UI/circle6.webp" alt="">
+                <span class="circle-illustration-clock-post"></span>
+                <img class="circle-illustration-shape circle-illustration-shape-7" src="assets/Shape UI/circle7.webp" alt="">
+                <img class="circle-illustration-shape circle-illustration-shape-8" src="assets/Shape UI/circle8.webp" alt="">
+                <img class="circle-illustration-shape circle-illustration-shape-9" src="assets/Shape UI/circle9.webp" alt="">
+                <img class="circle-illustration-shape circle-illustration-shape-10" src="assets/Shape UI/circle10.webp" alt="">
+            </div>
+        </div>
+        <div class="circle-mission-guide" aria-hidden="true" hidden>
+            <img class="circle-mission-guide-character" src="assets/Character/ch6.webp" alt="Bibi the circle mission guide">
+            <div class="circle-mission-guide-bubble" role="status" aria-live="polite">
+                <span class="circle-mission-guide-text"></span>
+            </div>
+        </div>
         <div class="circle-illustration-video-stage">
-            <video class="circle-illustration-video" playsinline preload="metadata" aria-label="Circle lesson video">
-                <source src="assets/Videos/Circleshape.mp4" type="video/mp4">
-            </video>
-            <button class="circle-illustration-skip-button" type="button" aria-label="Skip lesson video" hidden>Skip</button>
+            <div class="circle-illustration-tv-frame">
+                <div class="circle-illustration-tv-screen">
+                    <video class="circle-illustration-video" playsinline preload="metadata" aria-label="Circle lesson video">
+                        <source src="assets/Videos/Circleshape.mp4" type="video/mp4">
+                    </video>
+                    <button class="circle-illustration-play-button" type="button" aria-label="Play circle lesson video">
+                        <svg class="circle-illustration-play-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                            <path class="circle-illustration-play-triangle" d="M40 30 L72 50 L40 70 Z"></path>
+                        </svg>
+                    </button>
+                    <div class="circle-illustration-video-controls" aria-label="Video controls">
+                        <button class="circle-illustration-skip-button" type="button" aria-label="Skip lesson video" hidden>Skip</button>
+                    </div>
+                </div>
+                <div class="circle-illustration-tv-stand-row" aria-hidden="true">
+                    <span class="circle-illustration-tv-stand circle-illustration-tv-stand-left"></span>
+                    <span class="circle-illustration-tv-stand circle-illustration-tv-stand-right"></span>
+                </div>
+            </div>
         </div>
         <section class="circle-lesson-progress" aria-label="Lesson progress" aria-hidden="true">
             <div class="circle-lesson-progress-board">
@@ -550,7 +594,7 @@
         </a>
     </section>
 
-    <script src="script.js?v=20260820-29"></script>
+    <script src="script.js?v=20260824-65"></script>
     </div>
 
     <script>
