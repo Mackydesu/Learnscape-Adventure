@@ -1747,7 +1747,6 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
 }
 
 .circle-lesson-stars[data-earned-stars='1'] .circle-lesson-star-slot:nth-child(1) .circle-lesson-star-real,
-.circle-lesson-stars[data-earned-stars='2'] .circle-lesson-star-slot:nth-child(-n + 2) .circle-lesson-star-real,
 .circle-lesson-stars[data-earned-stars='3'] .circle-lesson-star-real {
     opacity: 1;
     transform: scale(1);
@@ -1756,9 +1755,25 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
         circleLessonStarShine 1.15s 0.9s ease-out both;
 }
 
+.circle-lesson-stars[data-earned-stars='2'] .circle-lesson-star-slot:nth-child(1) .circle-lesson-star-real {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.circle-lesson-stars[data-earned-stars='2'] .circle-lesson-star-slot:nth-child(2) .circle-lesson-star-real {
+    opacity: 1;
+    transform: scale(1);
+    animation:
+        circleLessonEarnedStarPop 0.7s 0.7s cubic-bezier(0.2, 1.4, 0.35, 1) both,
+        circleLessonStarShine 1.15s 0.9s ease-out both;
+}
+
 .circle-lesson-stars[data-earned-stars='1'] .circle-lesson-star-slot:nth-child(1)::after,
-.circle-lesson-stars[data-earned-stars='2'] .circle-lesson-star-slot:nth-child(-n + 2)::after,
 .circle-lesson-stars[data-earned-stars='3'] .circle-lesson-star-slot::after {
+    animation: circleLessonStarGlitter 1.25s 0.82s ease-out both;
+}
+
+.circle-lesson-stars[data-earned-stars='2'] .circle-lesson-star-slot:nth-child(2)::after {
     animation: circleLessonStarGlitter 1.25s 0.82s ease-out both;
 }
 
