@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260824-65';
+    const appVersion = '20260825-79';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const circleHuntFeedback = circleHuntUi?.querySelector('.circle-hunt-feedback') || null;
     const circleHuntOverlay = circleHuntUi?.querySelector('.circle-hunt-overlay') || null;
     const circleHuntStartButton = circleHuntUi?.querySelector('.circle-hunt-start-button') || null;
+    const circleHuntPlayAgainButton = circleHuntUi?.querySelector('.circle-hunt-play-again-button') || null;
     const circleHuntCountdown = circleHuntUi?.querySelector('.circle-hunt-countdown') || null;
     const circleHuntCelebration = circleHuntUi?.querySelector('.circle-hunt-celebration') || null;
     const circleHuntConfetti = circleHuntCelebration?.querySelector('.circle-hunt-confetti') || null;
@@ -188,8 +189,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const circleMissionGuideTypingDelay = 42;
     const circleMissionGuideMessagePause = 280;
     const circleMissionGuideFinalPause = 900;
+    const circleHuntCompletedAudioSource = 'assets/Audios/completed.mp3';
     const circleHuntCelebrationAudioSource = 'assets/Audios/Mahusay.mp3';
     const circleHuntKidsCheeringAudioSource = 'assets/Audios/kids cheering.mp3';
+    const circleHuntClockTickingAudioSource = 'assets/Audios/clock ticking.mp3';
+    const circleHuntSecondAudioSource = 'assets/Audios/sec.mp3';
+    const circleHuntTimesUpAudioSource = 'assets/Audios/times up.mp3';
+    const circleHuntLoseAudioSource = 'assets/Audios/lose.mp3';
     let circleMissionGuideTimers = [];
     let circleMissionGuideSession = 0;
     let circleMissionGuideAudio = null;
@@ -199,8 +205,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     let circleHuntIncorrectAttempts = 0;
     let circleHuntInterval = null;
     let circleHuntTimers = [];
+    let circleHuntCompletedAudio = null;
+    let circleHuntCompletedFadeFrame = null;
     let circleHuntCelebrationAudio = null;
     let circleHuntKidsCheeringAudio = null;
+    let circleHuntClockTickingAudio = null;
+    let circleHuntSecondAudio = null;
+    let circleHuntTimesUpAudio = null;
+    let circleHuntLoseAudio = null;
     let circleSortCollectedCount = 0;
     let circleSortActiveDrag = null;
     let circleSortResetTimers = [];
@@ -1074,6 +1086,115 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.clearInterval(circleHuntInterval);
             circleHuntInterval = null;
         }
+        stopCircleHuntClockTickingAudio();
+        stopCircleHuntSecondAudio();
+    };
+
+    const stopCircleHuntClockTickingAudio = () => {
+        if (!circleHuntClockTickingAudio) return;
+
+        circleHuntClockTickingAudio.pause();
+        try {
+            circleHuntClockTickingAudio.currentTime = 0;
+        } catch (error) {
+            // The clip may still be loading, so pausing is enough.
+        }
+        circleHuntClockTickingAudio = null;
+    };
+
+    const syncCircleHuntClockTickingAudio = () => {
+        const shouldTick = circleHuntState === 'playing' && circleHuntSeconds > 0 && circleHuntSeconds <= 5;
+
+        if (!shouldTick) {
+            stopCircleHuntClockTickingAudio();
+            return;
+        }
+
+        if (circleHuntClockTickingAudio) return;
+
+        circleHuntClockTickingAudio = new Audio(circleHuntClockTickingAudioSource);
+        circleHuntClockTickingAudio.loop = true;
+        circleHuntClockTickingAudio.preload = 'auto';
+        circleHuntClockTickingAudio.play().catch(() => {
+            circleHuntClockTickingAudio = null;
+        });
+    };
+
+    const stopCircleHuntSecondAudio = () => {
+        if (!circleHuntSecondAudio) return;
+
+        circleHuntSecondAudio.pause();
+        try {
+            circleHuntSecondAudio.currentTime = 0;
+        } catch (error) {
+            // The clip may still be loading, so pausing is enough.
+        }
+        circleHuntSecondAudio = null;
+    };
+
+    const playCircleHuntSecondAudio = () => {
+        stopCircleHuntSecondAudio();
+        circleHuntSecondAudio = new Audio(circleHuntSecondAudioSource);
+        circleHuntSecondAudio.preload = 'auto';
+        circleHuntSecondAudio.onended = () => {
+            circleHuntSecondAudio = null;
+        };
+        circleHuntSecondAudio.play().catch(() => {
+            circleHuntSecondAudio = null;
+        });
+    };
+
+    const stopCircleHuntTimesUpAudio = () => {
+        if (!circleHuntTimesUpAudio) return;
+
+        circleHuntTimesUpAudio.pause();
+        try {
+            circleHuntTimesUpAudio.currentTime = 0;
+        } catch (error) {
+            // The clip may still be loading, so pausing is enough.
+        }
+        circleHuntTimesUpAudio = null;
+    };
+
+    const playCircleHuntTimesUpAudio = (onFinish = null) => {
+        stopCircleHuntTimesUpAudio();
+        const audio = new Audio(circleHuntTimesUpAudioSource);
+        circleHuntTimesUpAudio = audio;
+        audio.preload = 'auto';
+        audio.onended = () => {
+            if (circleHuntTimesUpAudio !== audio) return;
+            circleHuntTimesUpAudio = null;
+            onFinish?.();
+        };
+        audio.play().catch(() => {
+            if (circleHuntTimesUpAudio !== audio) return;
+            circleHuntTimesUpAudio = null;
+            onFinish?.();
+        });
+    };
+
+    const stopCircleHuntLoseAudio = () => {
+        if (!circleHuntLoseAudio) return;
+
+        circleHuntLoseAudio.pause();
+        try {
+            circleHuntLoseAudio.currentTime = 0;
+        } catch (error) {
+            // The clip may still be loading, so pausing is enough.
+        }
+        circleHuntLoseAudio = null;
+    };
+
+    const playCircleHuntLoseAudio = () => {
+        stopCircleHuntLoseAudio();
+        circleHuntLoseAudio = new Audio(circleHuntLoseAudioSource);
+        circleHuntLoseAudio.preload = 'auto';
+        circleHuntLoseAudio.onended = () => {
+            circleHuntLoseAudio = null;
+        };
+        circleHuntLoseAudio.play().catch(() => {
+            circleHuntLoseAudio = null;
+        });
     };
 
     const updateCircleHuntHud = () => {
@@ -1130,6 +1251,65 @@ document.addEventListener('DOMContentLoaded', async () => {
         circleHuntCelebrationAudio = null;
     };
 
+    const stopCircleHuntCompletedAudio = () => {
+        if (circleHuntCompletedFadeFrame !== null) {
+            window.cancelAnimationFrame(circleHuntCompletedFadeFrame);
+            circleHuntCompletedFadeFrame = null;
+        }
+        if (!circleHuntCompletedAudio) return;
+
+        circleHuntCompletedAudio.onended = null;
+        circleHuntCompletedAudio.pause();
+        try {
+            circleHuntCompletedAudio.currentTime = 0;
+        } catch (error) {
+            // The clip may still be loading, so pausing is enough.
+        }
+        circleHuntCompletedAudio = null;
+    };
+
+    const startCircleHuntWinCelebration = () => {
+        playCircleHuntKidsCheeringAudio();
+        startCircleHuntCelebration();
+    };
+
+    const playCircleHuntCompletedAudio = () => {
+        stopCircleHuntCompletedAudio();
+        const audio = new Audio(circleHuntCompletedAudioSource);
+        audio.preload = 'auto';
+        circleHuntCompletedAudio = audio;
+        audio.onended = () => {
+            if (circleHuntCompletedAudio !== audio) return;
+            if (circleHuntCompletedFadeFrame !== null) {
+                window.cancelAnimationFrame(circleHuntCompletedFadeFrame);
+                circleHuntCompletedFadeFrame = null;
+            }
+            circleHuntCompletedAudio = null;
+            startCircleHuntWinCelebration();
+        };
+        audio.play()
+            .then(() => {
+                const updateCompletedAudioFade = () => {
+                    if (circleHuntCompletedAudio !== audio) return;
+                    const remainingSeconds = audio.duration - audio.currentTime;
+                    if (Number.isFinite(remainingSeconds) && remainingSeconds <= 0.5) {
+                        audio.volume = Math.max(0, remainingSeconds / 0.5);
+                    }
+                    circleHuntCompletedFadeFrame = window.requestAnimationFrame(updateCompletedAudioFade);
+                };
+                updateCompletedAudioFade();
+            })
+            .catch(() => {
+                if (circleHuntCompletedAudio !== audio) return;
+                if (circleHuntCompletedFadeFrame !== null) {
+                    window.cancelAnimationFrame(circleHuntCompletedFadeFrame);
+                    circleHuntCompletedFadeFrame = null;
+                }
+                circleHuntCompletedAudio = null;
+                startCircleHuntWinCelebration();
+            });
+    };
+
     const stopCircleHuntKidsCheeringAudio = () => {
         if (!circleHuntKidsCheeringAudio) return;
 
@@ -1161,6 +1341,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const stopCircleHuntCelebration = () => {
+        stopCircleHuntCompletedAudio();
         stopCircleHuntCelebrationAudio();
         stopCircleHuntKidsCheeringAudio();
         circleHuntCelebration?.classList.remove('is-active', 'is-ch8-visible');
@@ -1173,7 +1354,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         prepareCircleHuntConfetti();
         circleHuntCelebration.setAttribute('aria-hidden', 'false');
         circleHuntCelebration.classList.add('is-active', 'is-ch8-visible');
-        playUiClickSound('pop');
         stopCircleHuntCelebrationAudio();
         circleHuntCelebrationAudio = new Audio(circleHuntCelebrationAudioSource);
         circleHuntCelebrationAudio.preload = 'auto';
@@ -1193,7 +1373,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         stopCircleHuntCelebration();
         circleHuntUi?.setAttribute('aria-hidden', 'true');
         if (circleHuntUi) circleHuntUi.hidden = true;
-        circleIllustrationPage?.classList.remove('is-circle-hunt-active', 'is-circle-hunt-ended');
+        circleIllustrationPage?.classList.remove('is-circle-hunt-active', 'is-circle-hunt-ended', 'is-circle-hunt-timeout', 'is-circle-hunt-timeout-intro', 'is-circle-hunt-timeout-result');
         showCircleIllustrationProgress();
         if (circleIllustrationReplayImage) {
             circleIllustrationReplayImage.src = 'assets/Buttons/Retry.webp';
@@ -1212,17 +1392,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const resetCircleHunt = () => {
         clearCircleHuntTimers();
         stopCircleHuntCelebration();
+        stopCircleHuntTimesUpAudio();
+        stopCircleHuntLoseAudio();
         circleHuntState = 'idle';
         circleHuntSeconds = 10;
         circleHuntCollected = 0;
         circleHuntIncorrectAttempts = 0;
-        circleIllustrationPage?.classList.remove('is-circle-hunt-active', 'is-circle-hunt-playing', 'is-circle-hunt-ended');
+        circleIllustrationPage?.classList.remove('is-circle-hunt-active', 'is-circle-hunt-playing', 'is-circle-hunt-ended', 'is-circle-hunt-timeout', 'is-circle-hunt-timeout-intro', 'is-circle-hunt-timeout-result');
         circleHuntUi?.setAttribute('aria-hidden', 'true');
         if (circleHuntUi) circleHuntUi.hidden = true;
         if (circleHuntStartButton) {
             circleHuntStartButton.hidden = false;
             circleHuntStartButton.textContent = 'START';
         }
+        if (circleHuntPlayAgainButton) circleHuntPlayAgainButton.hidden = true;
         if (circleHuntCountdown) {
             circleHuntCountdown.hidden = true;
             circleHuntCountdown.textContent = '';
@@ -1260,30 +1443,52 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (circleHuntState !== 'playing') return;
 
         clearCircleHuntTimers();
+        stopCircleHuntClockTickingAudio();
         circleHuntState = 'ended';
         circleIllustrationPage?.classList.remove('is-circle-hunt-playing');
         circleIllustrationPage?.classList.add('is-circle-hunt-ended');
+        circleIllustrationPage?.classList.toggle('is-circle-hunt-timeout', !didWin);
+        circleIllustrationPage?.classList.toggle('is-circle-hunt-timeout-intro', !didWin);
+        circleIllustrationPage?.classList.remove('is-circle-hunt-timeout-result');
         circleHuntTargets.forEach((target) => target.setAttribute('tabindex', '-1'));
         if (circleHuntCountdown) {
-            circleHuntCountdown.hidden = false;
-            circleHuntCountdown.textContent = didWin ? 'YOU FOUND THEM ALL!' : "TIME'S UP!";
+            circleHuntCountdown.hidden = !didWin;
+            circleHuntCountdown.textContent = didWin ? 'YOU FOUND THEM ALL!' : '';
             circleHuntCountdown.classList.add('is-result');
             circleHuntCountdown.classList.toggle('is-win', didWin);
         }
         if (circleHuntStartButton) {
             circleHuntStartButton.hidden = true;
         }
+        if (circleHuntPlayAgainButton) {
+            circleHuntPlayAgainButton.hidden = true;
+        }
         if (didWin) {
             if (circleHuntFeedback) {
                 circleHuntFeedback.textContent = '';
                 circleHuntFeedback.classList.remove('is-success', 'is-wrong', 'is-visible');
             }
-            playCircleHuntKidsCheeringAudio();
-            startCircleHuntCelebration();
+            playCircleHuntCompletedAudio();
         } else {
-            setCircleHuntFeedback(`You found ${circleHuntCollected} of ${circleHuntTargets.length} circles.`, 'wrong');
+            if (circleHuntFeedback) {
+                circleHuntFeedback.textContent = '';
+                circleHuntFeedback.classList.remove('is-success', 'is-wrong', 'is-visible');
+            }
+            playCircleHuntTimesUpAudio(() => {
+                if (circleHuntState !== 'ended') return;
+                circleIllustrationPage?.classList.remove('is-circle-hunt-timeout-intro');
+                circleIllustrationPage?.classList.add('is-circle-hunt-timeout-result');
+                if (circleHuntCountdown) {
+                    circleHuntCountdown.textContent = "TIME'S UP!";
+                    circleHuntCountdown.hidden = false;
+                }
+                if (circleHuntPlayAgainButton) {
+                    circleHuntPlayAgainButton.hidden = false;
+                    circleHuntPlayAgainButton.focus({ preventScroll: true });
+                }
+                playCircleHuntLoseAudio();
+            });
         }
-        playUiClickSound(didWin ? 'progressCelebration' : 'soft');
     };
 
     const beginCircleHuntTimer = () => {
@@ -1299,6 +1504,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (circleHuntState !== 'playing') return;
             circleHuntSeconds = Math.max(0, circleHuntSeconds - 1);
             updateCircleHuntHud();
+            syncCircleHuntClockTickingAudio();
+            if (circleHuntSeconds > 0) {
+                playCircleHuntSecondAudio();
+            }
             if (circleHuntSeconds === 0) finishCircleHunt(false);
         }, 1000);
     };
@@ -1307,11 +1516,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!['ready', 'ended'].includes(circleHuntState)) return;
 
         clearCircleHuntTimers();
+        stopCircleHuntTimesUpAudio();
+        stopCircleHuntLoseAudio();
         circleHuntState = 'countdown';
         circleHuntSeconds = 10;
         circleHuntCollected = 0;
         circleHuntIncorrectAttempts = 0;
-        circleIllustrationPage?.classList.remove('is-circle-hunt-ended', 'is-circle-hunt-playing');
+        circleIllustrationPage?.classList.remove('is-circle-hunt-ended', 'is-circle-hunt-playing', 'is-circle-hunt-timeout', 'is-circle-hunt-timeout-intro', 'is-circle-hunt-timeout-result');
         stopCircleHuntCelebration();
         circleHuntTargets.forEach((target) => {
             target.classList.remove('is-collected', 'is-correct', 'is-hinting');
@@ -1320,6 +1531,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         updateCircleHuntHud();
         if (circleHuntStartButton) circleHuntStartButton.hidden = true;
+        if (circleHuntPlayAgainButton) circleHuntPlayAgainButton.hidden = true;
         circleHuntCountdown?.classList.remove('is-result', 'is-win');
         if (!circleHuntCountdown) {
             beginCircleHuntTimer();
@@ -1368,6 +1580,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const timeBonus = circleHuntSeconds < 3 ? 4 : circleHuntSeconds < 5 ? 3 : 2;
         circleHuntSeconds += timeBonus;
         updateCircleHuntHud();
+        syncCircleHuntClockTickingAudio();
         setCircleHuntFeedback(`+${timeBonus} SEC!`, 'success');
         if (circleHuntCollected < circleHuntTargets.length) {
             playUiClickSound('starPop');
@@ -3856,6 +4069,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.addEventListener('pointercancel', (event) => endCircleSortDrag(event, true), true);
 
     circleHuntStartButton?.addEventListener('click', startCircleHuntCountdown);
+    circleHuntPlayAgainButton?.addEventListener('click', startCircleHuntCountdown);
     circleIllustrationScene?.addEventListener('click', (event) => {
         if (circleHuntState !== 'playing') return;
 

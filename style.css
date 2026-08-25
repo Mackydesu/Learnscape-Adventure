@@ -967,8 +967,11 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
 .circle-hunt-overlay {
     position: absolute;
     inset: 0;
-    display: grid;
-    place-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(1rem, 2.2vw, 1.8rem);
     padding-top: clamp(4.5rem, 9vw, 7rem);
     background: radial-gradient(circle at 50% 50%, rgba(255, 252, 200, 0.18), rgba(29, 55, 12, 0.42));
     opacity: 1;
@@ -976,7 +979,8 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
     transition: opacity 0.24s ease, visibility 0.24s ease;
 }
 
-.circle-hunt-start-button {
+.circle-hunt-start-button,
+.circle-hunt-play-again-button {
     min-width: clamp(12rem, 25vw, 21rem);
     padding: clamp(1rem, 2vw, 1.45rem) clamp(2rem, 4vw, 3.5rem);
     border: clamp(0.24rem, 0.42vw, 0.36rem) solid #653413;
@@ -992,18 +996,27 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
     animation: circleHuntStartPulse 1.25s ease-in-out infinite;
 }
 
+.circle-hunt-play-again-button {
+    min-width: clamp(13rem, 26vw, 22rem);
+    font-size: clamp(1.45rem, 3.4vw, 3.2rem);
+}
+
 .circle-hunt-start-button:hover,
-.circle-hunt-start-button:focus-visible {
+.circle-hunt-start-button:focus-visible,
+.circle-hunt-play-again-button:hover,
+.circle-hunt-play-again-button:focus-visible {
     filter: brightness(1.08) saturate(1.08);
     outline: 0.3rem solid rgba(255, 255, 255, 0.9);
     outline-offset: 0.22rem;
 }
 
-.circle-hunt-start-button:active {
+.circle-hunt-start-button:active,
+.circle-hunt-play-again-button:active {
     scale: 0.96;
 }
 
-.circle-hunt-start-button[hidden] {
+.circle-hunt-start-button[hidden],
+.circle-hunt-play-again-button[hidden] {
     display: none;
 }
 
@@ -1043,6 +1056,75 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
         0 0.25rem 0 #bd6b20,
         0 0.75rem 1.2rem rgba(22, 35, 8, 0.4),
         0 0 1.6rem rgba(255, 247, 101, 0.72);
+}
+
+.circle-illustration-page.is-circle-hunt-timeout .circle-hunt-overlay {
+    justify-content: center;
+    padding-top: 0;
+}
+
+.circle-illustration-page.is-circle-hunt-timeout .circle-hunt-countdown.is-result {
+    position: static;
+    top: auto;
+    left: auto;
+    width: min(94vw, 64rem);
+    font-size: clamp(4.6rem, 13vw, 11rem);
+    transform: none;
+    animation: circleHuntTimeoutResultPop 0.65s cubic-bezier(0.2, 1.35, 0.35, 1) both;
+}
+
+.circle-illustration-page.is-circle-hunt-timeout .circle-hunt-play-again-button {
+    margin-top: clamp(0.2rem, 1vw, 0.8rem);
+}
+
+.circle-hunt-timeout-clock {
+    display: none;
+    font-size: clamp(5.5rem, 15vw, 12rem);
+    line-height: 0.8;
+    filter: drop-shadow(0 0.65rem 0.45rem rgba(47, 62, 17, 0.32));
+}
+
+.circle-illustration-page.is-circle-hunt-timeout-intro .circle-hunt-timeout-clock {
+    display: block;
+    animation: circleHuntClockWiggle 0.5s ease-in-out infinite;
+}
+
+.circle-illustration-page.is-circle-hunt-timeout-result .circle-hunt-countdown.is-result {
+    font-size: clamp(4rem, 11vw, 9rem);
+    translate: 0 clamp(-5.5rem, -8vh, -2.5rem);
+    animation: circleHuntTimeoutFall 1.15s cubic-bezier(0.22, 0.76, 0.3, 1) both;
+}
+
+.circle-illustration-page.is-circle-hunt-timeout-result .circle-hunt-play-again-button {
+    animation: circleHuntPlayAgainPop 0.72s cubic-bezier(0.2, 1.38, 0.35, 1) 0.22s both;
+}
+
+.circle-hunt-timeout-character {
+    position: absolute;
+    z-index: 2;
+    bottom: clamp(0.15rem, 0.7vw, 0.65rem);
+    width: clamp(11rem, 22vw, 19rem);
+    max-height: 66vh;
+    object-fit: contain;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(20%) scale(0.85);
+    transition: opacity 0.28s ease, transform 0.45s cubic-bezier(0.2, 1.28, 0.35, 1);
+    filter: drop-shadow(0 0.65rem 0.45rem rgba(47, 62, 17, 0.28));
+}
+
+.circle-hunt-timeout-character-left {
+    left: clamp(0.5rem, 4vw, 4rem);
+}
+
+.circle-hunt-timeout-character-right {
+    right: clamp(0.5rem, 4vw, 4rem);
+    bottom: clamp(-1.1rem, -1.2vw, -0.35rem);
+}
+
+.circle-illustration-page.is-circle-hunt-timeout-result .circle-hunt-timeout-character {
+    opacity: 1;
+    transform: translateY(0) scale(1);
 }
 
 .circle-hunt-celebration {
@@ -1218,6 +1300,32 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
     to { opacity: 1; transform: translateX(-50%) scale(1) rotate(0); }
 }
 
+@keyframes circleHuntTimeoutResultPop {
+    from { opacity: 0; transform: scale(0.45) rotate(-3deg); }
+    68% { opacity: 1; transform: scale(1.08) rotate(1deg); }
+    to { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes circleHuntClockWiggle {
+    0%, 100% { transform: rotate(-8deg) translateY(0); }
+    25% { transform: rotate(8deg) translateY(-0.2rem); }
+    50% { transform: rotate(-6deg) translateY(0); }
+    75% { transform: rotate(6deg) translateY(-0.2rem); }
+}
+
+@keyframes circleHuntTimeoutFall {
+    from { opacity: 0; transform: translateY(-45vh) rotate(-4deg); }
+    72% { opacity: 1; transform: translateY(1.1rem) rotate(1deg); }
+    to { opacity: 1; transform: translateY(0) rotate(0); }
+}
+
+@keyframes circleHuntPlayAgainPop {
+    from { opacity: 0; transform: scale(0.25) translateY(2rem); }
+    62% { opacity: 1; transform: scale(1.12) translateY(-0.3rem); }
+    82% { transform: scale(0.96) translateY(0.1rem); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 @keyframes circleHuntResultGlowPulse {
     0%, 100% {
         filter: brightness(1) drop-shadow(0 0 0.25rem rgba(255, 238, 73, 0.55));
@@ -1305,8 +1413,10 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
 
 @media (prefers-reduced-motion: reduce) {
     .circle-hunt-start-button,
+    .circle-hunt-play-again-button,
     .circle-hunt-countdown.is-popping,
     .circle-hunt-countdown.is-result,
+    .circle-hunt-timeout-clock,
     .circle-hunt-confetti span,
     .circle-hunt-celebration.is-active .circle-hunt-character-ch7,
     .circle-hunt-celebration.is-ch8-visible .circle-hunt-ch8-pop,
