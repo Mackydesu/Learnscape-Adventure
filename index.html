@@ -343,17 +343,18 @@
     <section id="learnscape-circle-illustration-page" class="circle-illustration-page" hidden>
         <div class="circle-illustration-scene">
             <img class="circle-illustration-bg" src="assets/Backgrounds/Illustration.webp" alt="Circle lesson illustration board">
-            <div class="circle-illustration-shapes" aria-hidden="true">
-                <img class="circle-illustration-shape circle-illustration-shape-1" src="assets/Shape UI/circle1.webp" alt="">
-                <img class="circle-illustration-shape circle-illustration-shape-2" src="assets/Shape UI/circle2.webp" alt="">
-                <img class="circle-illustration-shape circle-illustration-shape-3" src="assets/Shape UI/circle3.webp" alt="">
-                <img class="circle-illustration-shape circle-illustration-shape-4" src="assets/Shape UI/circle4.webp" alt="">
-                <img class="circle-illustration-shape circle-illustration-shape-6" src="assets/Shape UI/circle6.webp" alt="">
+            <div class="circle-illustration-shapes" aria-label="Find all ten circle objects">
+                <img class="circle-illustration-shape circle-illustration-shape-1" src="assets/Shape UI/circle1.webp" alt="Circle object 1" data-circle-hunt-target role="button" tabindex="-1">
+                <img class="circle-illustration-shape circle-illustration-shape-2" src="assets/Shape UI/circle2.webp" alt="Circle object 2" data-circle-hunt-target role="button" tabindex="-1">
+                <img class="circle-illustration-shape circle-illustration-shape-3" src="assets/Shape UI/circle3.webp" alt="Circle object 3" data-circle-hunt-target role="button" tabindex="-1">
+                <img class="circle-illustration-shape circle-illustration-shape-4" src="assets/Shape UI/circle4.webp" alt="Circle object 4" data-circle-hunt-target role="button" tabindex="-1">
+                <img class="circle-illustration-shape circle-illustration-shape-5" src="assets/Shape UI/circle5.webp" alt="Circle object 5" data-circle-hunt-target role="button" tabindex="-1">
+                <img class="circle-illustration-shape circle-illustration-shape-6" src="assets/Shape UI/circle6.webp" alt="Circle object 6" data-circle-hunt-target role="button" tabindex="-1">
                 <span class="circle-illustration-clock-post"></span>
-                <img class="circle-illustration-shape circle-illustration-shape-7" src="assets/Shape UI/circle7.webp" alt="">
-                <img class="circle-illustration-shape circle-illustration-shape-8" src="assets/Shape UI/circle8.webp" alt="">
-                <img class="circle-illustration-shape circle-illustration-shape-9" src="assets/Shape UI/circle9.webp" alt="">
-                <img class="circle-illustration-shape circle-illustration-shape-10" src="assets/Shape UI/circle10.webp" alt="">
+                <img class="circle-illustration-shape circle-illustration-shape-7" src="assets/Shape UI/circle7.webp" alt="Circle object 7" data-circle-hunt-target role="button" tabindex="-1">
+                <img class="circle-illustration-shape circle-illustration-shape-8" src="assets/Shape UI/circle8.webp" alt="Circle object 8" data-circle-hunt-target role="button" tabindex="-1">
+                <img class="circle-illustration-shape circle-illustration-shape-9" src="assets/Shape UI/circle9.webp" alt="Circle object 9" data-circle-hunt-target role="button" tabindex="-1">
+                <img class="circle-illustration-shape circle-illustration-shape-10" src="assets/Shape UI/circle10.webp" alt="Circle object 10" data-circle-hunt-target role="button" tabindex="-1">
             </div>
         </div>
         <div class="circle-mission-guide" aria-hidden="true" hidden>
@@ -362,6 +363,25 @@
                 <span class="circle-mission-guide-text"></span>
             </div>
         </div>
+        <section class="circle-hunt-ui" aria-label="Circle hunt" aria-hidden="true" hidden>
+            <div class="circle-hunt-hud" aria-live="polite">
+                <span>🔵 Circles: <strong class="circle-hunt-count">0/10</strong></span>
+                <span class="circle-hunt-hud-divider" aria-hidden="true"></span>
+                <span>⏱ <strong class="circle-hunt-time">10s</strong></span>
+            </div>
+            <p class="circle-hunt-feedback" role="status" aria-live="polite"></p>
+            <div class="circle-hunt-overlay">
+                <button class="circle-hunt-start-button" type="button">START</button>
+                <div class="circle-hunt-countdown" role="status" aria-live="assertive" hidden></div>
+            </div>
+            <div class="circle-hunt-celebration" aria-hidden="true">
+                <div class="circle-hunt-confetti" aria-hidden="true"></div>
+                <img class="circle-hunt-character circle-hunt-character-ch7" src="assets/Character/ch7.webp" alt="Bibi celebrating">
+                <div class="circle-hunt-ch8-pop">
+                    <img class="circle-hunt-character-ch8" src="assets/Character/ch8.webp" alt="Bibi giving a thumbs up">
+                </div>
+            </div>
+        </section>
         <div class="circle-illustration-video-stage">
             <div class="circle-illustration-tv-frame">
                 <div class="circle-illustration-tv-screen">
@@ -397,7 +417,7 @@
                         <img class="circle-lesson-star-real" src="assets/Shape UI/1star.webp" alt="">
                     </span>
                     <span class="circle-lesson-star-slot">
-                        <img class="circle-lesson-star-real" src="assets/Shape UI/1star.webp" alt="">
+                        <img class="circle-lesson-star-real" src="assets/Shape UI/2star.webp" alt="">
                     </span>
                     <span class="circle-lesson-star-slot">
                         <img class="circle-lesson-star-real" src="assets/Shape UI/1star.webp" alt="">

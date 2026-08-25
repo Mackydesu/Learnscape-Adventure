@@ -716,6 +716,14 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
     top: 60.9%;
 }
 
+.circle-illustration-shape-5 {
+    --circle-shape-size: clamp(3.5rem, 5.2vw, 5rem);
+    --circle-shape-rotate: -45deg;
+    z-index: 1;
+    left: 25%;
+    top: 16.5%;
+}
+
 .circle-illustration-shape-6 {
     --circle-shape-size: clamp(3.1rem, 4.6vw, 4.4rem);
     --circle-shape-rotate: 0deg;
@@ -761,14 +769,14 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
     --circle-shape-size: clamp(4.3rem, 6.5vw, 6.2rem);
     --circle-shape-rotate: 0deg;
     left: 53.2%;
-    top: 70%;
+    top: 30%;
 }
 
 .circle-illustration-shape-10 {
     --circle-shape-size: clamp(7.2rem, 11vw, 10.5rem);
     --circle-shape-rotate: 0deg;
     left: 45.2%;
-    top: 79.5%;
+    top: 70%;
 }
 
 .circle-mission-guide {
@@ -876,6 +884,439 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
 .circle-mission-guide-text strong {
     color: #b53a20;
     font-weight: 800;
+}
+
+.circle-hunt-ui {
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    font-family: 'Fredoka', sans-serif;
+    pointer-events: none;
+}
+
+.circle-hunt-ui[hidden] {
+    display: none;
+}
+
+.circle-hunt-hud {
+    position: absolute;
+    top: clamp(0.8rem, 2vw, 1.4rem);
+    left: 50%;
+    display: flex;
+    align-items: center;
+    gap: clamp(0.65rem, 1.5vw, 1.2rem);
+    padding: clamp(0.65rem, 1.3vw, 0.9rem) clamp(1rem, 2.4vw, 1.75rem);
+    border: clamp(0.16rem, 0.25vw, 0.22rem) solid #70401b;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255, 255, 244, 0.98), rgba(255, 232, 137, 0.98));
+    color: #3b2715;
+    font-size: clamp(1rem, 2vw, 1.65rem);
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 0.3rem 0 #a46122, 0 0.75rem 1.2rem rgba(43, 62, 16, 0.28);
+    transform: translateX(-50%);
+}
+
+.circle-hunt-hud strong {
+    color: #173c72;
+    font-weight: 800;
+}
+
+.circle-hunt-hud-divider {
+    width: 0.14rem;
+    height: 1.5em;
+    border-radius: 999px;
+    background: rgba(112, 64, 27, 0.28);
+}
+
+.circle-hunt-feedback {
+    position: absolute;
+    top: clamp(5.2rem, 10vw, 7.2rem);
+    left: 50%;
+    max-width: min(88vw, 34rem);
+    margin: 0;
+    padding: 0.65rem 1.15rem;
+    border: 0.18rem solid #70401b;
+    border-radius: 1.2rem;
+    background: #fff9d9;
+    color: #563819;
+    font-size: clamp(1rem, 2.1vw, 1.6rem);
+    font-weight: 700;
+    text-align: center;
+    box-shadow: 0 0.32rem 0 rgba(112, 64, 27, 0.25), 0 0.65rem 1rem rgba(38, 53, 15, 0.2);
+    opacity: 0;
+    transform: translate(-50%, -0.7rem) scale(0.92);
+    transition: opacity 0.18s ease, transform 0.22s cubic-bezier(0.2, 1.3, 0.35, 1);
+}
+
+.circle-hunt-feedback.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+}
+
+.circle-hunt-feedback.is-success {
+    border-color: #26713b;
+    background: #edffd4;
+    color: #17552b;
+}
+
+.circle-hunt-feedback.is-wrong {
+    animation: circleHuntFriendlyShake 0.42s ease both;
+}
+
+.circle-hunt-overlay {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding-top: clamp(4.5rem, 9vw, 7rem);
+    background: radial-gradient(circle at 50% 50%, rgba(255, 252, 200, 0.18), rgba(29, 55, 12, 0.42));
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.24s ease, visibility 0.24s ease;
+}
+
+.circle-hunt-start-button {
+    min-width: clamp(12rem, 25vw, 21rem);
+    padding: clamp(1rem, 2vw, 1.45rem) clamp(2rem, 4vw, 3.5rem);
+    border: clamp(0.24rem, 0.42vw, 0.36rem) solid #653413;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #fff988 0%, #ffd644 48%, #f2a92e 100%);
+    color: #4a250d;
+    font: 900 clamp(2.2rem, 5.5vw, 4.8rem)/0.95 'Fredoka', sans-serif;
+    letter-spacing: 0.04em;
+    text-shadow: 0 0.12rem 0 #fff4ad;
+    box-shadow: 0 0.5rem 0 #8e4d1b, 0 1rem 1.8rem rgba(44, 44, 8, 0.36), 0 0 2.2rem rgba(255, 235, 81, 0.48);
+    cursor: pointer;
+    pointer-events: auto;
+    animation: circleHuntStartPulse 1.25s ease-in-out infinite;
+}
+
+.circle-hunt-start-button:hover,
+.circle-hunt-start-button:focus-visible {
+    filter: brightness(1.08) saturate(1.08);
+    outline: 0.3rem solid rgba(255, 255, 255, 0.9);
+    outline-offset: 0.22rem;
+}
+
+.circle-hunt-start-button:active {
+    scale: 0.96;
+}
+
+.circle-hunt-start-button[hidden] {
+    display: none;
+}
+
+.circle-hunt-countdown {
+    color: #fff65c;
+    font-size: clamp(5rem, 18vw, 13rem);
+    font-weight: 900;
+    line-height: 0.85;
+    letter-spacing: 0.02em;
+    text-align: center;
+    -webkit-text-stroke: clamp(0.18rem, 0.45vw, 0.38rem) #68350e;
+    paint-order: stroke fill;
+    text-shadow: 0 0.45rem 0 #a75d1e, 0 1rem 1.8rem rgba(22, 35, 8, 0.45);
+}
+
+.circle-hunt-countdown.is-popping {
+    animation: circleHuntCountdownPop 0.5s cubic-bezier(0.2, 1.45, 0.35, 1) both;
+}
+
+.circle-hunt-countdown.is-result {
+    position: absolute;
+    z-index: 5;
+    top: clamp(7rem, 17vh, 10rem);
+    left: 50%;
+    width: min(92vw, 58rem);
+    color: #fff66b;
+    font-size: clamp(2.4rem, 6.5vw, 5.8rem);
+    line-height: 0.95;
+    transform: translateX(-50%);
+    animation:
+        circleHuntResultPop 0.65s cubic-bezier(0.2, 1.35, 0.35, 1) both,
+        circleHuntResultGlowPulse 1.35s ease-in-out 0.65s infinite;
+}
+
+.circle-hunt-countdown.is-result.is-win {
+    text-shadow:
+        0 0.25rem 0 #bd6b20,
+        0 0.75rem 1.2rem rgba(22, 35, 8, 0.4),
+        0 0 1.6rem rgba(255, 247, 101, 0.72);
+}
+
+.circle-hunt-celebration {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.circle-hunt-celebration.is-active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.circle-hunt-confetti {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.circle-hunt-confetti span {
+    position: absolute;
+    left: var(--confetti-x);
+    top: -10%;
+    display: block;
+    width: var(--confetti-size);
+    height: calc(var(--confetti-size) * 0.55);
+    border-radius: 0.12rem;
+    background: var(--confetti-color);
+    box-shadow: 0 0.08rem 0.12rem rgba(61, 43, 10, 0.18);
+    animation: circleHuntConfettiFall var(--confetti-duration) linear var(--confetti-delay) infinite;
+}
+
+.circle-hunt-confetti span:nth-child(3n) {
+    border-radius: 50%;
+}
+
+.circle-hunt-confetti span:nth-child(4n) {
+    height: var(--confetti-size);
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.circle-hunt-character-ch7 {
+    position: absolute;
+    z-index: 2;
+    left: clamp(0.4rem, 1.7vw, 1.6rem);
+    bottom: clamp(-0.4rem, -0.7vw, -0.1rem);
+    display: block;
+    width: clamp(14rem, 29vw, 25rem);
+    max-height: 82vh;
+    object-fit: contain;
+    object-position: left bottom;
+    opacity: 0;
+    transform: translateX(-125%);
+    filter: drop-shadow(0.45rem 0.65rem 0.45rem rgba(47, 62, 17, 0.28));
+}
+
+.circle-hunt-celebration.is-active .circle-hunt-character-ch7 {
+    animation:
+        circleHuntCh7Celebrate 0.75s cubic-bezier(0.16, 0.92, 0.28, 1.18) forwards,
+        circleHuntCh7Jump 1.05s ease-in-out 0.8s infinite;
+}
+
+.circle-hunt-ch8-pop {
+    position: absolute;
+    right: clamp(0.5rem, 2vw, 2rem);
+    bottom: clamp(-0.5rem, -1vw, -0.1rem);
+    z-index: 3;
+    width: clamp(11rem, 22vw, 19rem);
+    opacity: 0;
+    transform: translateY(30%) scale(0.2) rotate(8deg);
+    transform-origin: center bottom;
+}
+
+.circle-hunt-celebration.is-ch8-visible .circle-hunt-ch8-pop {
+    animation:
+        circleHuntCh8Pop 0.68s cubic-bezier(0.2, 1.48, 0.35, 1) forwards,
+        circleHuntCh8Pulse 1.2s ease-in-out 0.72s infinite;
+}
+
+.circle-hunt-character-ch8 {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 66vh;
+    object-fit: contain;
+    object-position: right bottom;
+    filter: drop-shadow(-0.4rem 0.65rem 0.45rem rgba(47, 62, 17, 0.28));
+}
+
+.circle-illustration-page.is-circle-hunt-active .circle-illustration-scene {
+    filter: none;
+    transform: scale(1);
+}
+
+.circle-illustration-page.is-circle-hunt-playing .circle-illustration-scene {
+    pointer-events: auto;
+}
+
+.circle-illustration-page.is-circle-hunt-playing .circle-hunt-overlay {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.circle-illustration-page.is-circle-hunt-playing .circle-illustration-shape:not(.is-collected) {
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.circle-illustration-shape:focus-visible {
+    outline: 0.3rem solid #fff55a;
+    outline-offset: 0.3rem;
+    border-radius: 50%;
+}
+
+.circle-illustration-shape.is-correct {
+    z-index: 3;
+    animation: circleHuntCorrectBounce 0.68s cubic-bezier(0.2, 1.4, 0.35, 1) both;
+}
+
+.circle-illustration-shape.is-collected {
+    opacity: 0.48;
+    cursor: default;
+    filter: grayscale(0.25) brightness(1.1) drop-shadow(0 0 0.7rem rgba(255, 245, 85, 0.95));
+}
+
+.circle-illustration-shape.is-hinting {
+    z-index: 4;
+    animation: circleHuntHintSparkle 0.42s ease-in-out 3;
+}
+
+.circle-hunt-miss-marker {
+    position: absolute;
+    z-index: 5;
+    width: clamp(2.4rem, 5vw, 3.5rem);
+    aspect-ratio: 1;
+    border: 0.22rem solid rgba(126, 71, 26, 0.88);
+    border-radius: 50%;
+    background: rgba(255, 249, 207, 0.9);
+    box-shadow: 0 0.3rem 0 rgba(126, 71, 26, 0.3);
+    translate: -50% -50%;
+    pointer-events: none;
+    animation: circleHuntMissMarker 0.62s ease both;
+}
+
+.circle-hunt-miss-marker::after {
+    content: '?';
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: #8a481f;
+    font: 900 clamp(1.2rem, 2.8vw, 2rem)/1 'Fredoka', sans-serif;
+}
+
+@keyframes circleHuntStartPulse {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-0.35rem) scale(1.035); }
+}
+
+@keyframes circleHuntCountdownPop {
+    from { opacity: 0; transform: scale(0.35) rotate(-8deg); }
+    65% { opacity: 1; transform: scale(1.12) rotate(2deg); }
+    to { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes circleHuntResultPop {
+    from { opacity: 0; transform: translateX(-50%) scale(0.45) rotate(-3deg); }
+    68% { opacity: 1; transform: translateX(-50%) scale(1.08) rotate(1deg); }
+    to { opacity: 1; transform: translateX(-50%) scale(1) rotate(0); }
+}
+
+@keyframes circleHuntResultGlowPulse {
+    0%, 100% {
+        filter: brightness(1) drop-shadow(0 0 0.25rem rgba(255, 238, 73, 0.55));
+    }
+    50% {
+        filter: brightness(1.28) drop-shadow(0 0 0.85rem #fff45b) drop-shadow(0 0 1.6rem rgba(255, 193, 42, 0.9));
+    }
+}
+
+@keyframes circleHuntConfettiFall {
+    0% { translate: 0 -12vh; rotate: 0deg; opacity: 0; }
+    8% { opacity: 1; }
+    88% { opacity: 1; }
+    100% { translate: var(--confetti-drift) 118vh; rotate: 720deg; opacity: 0; }
+}
+
+@keyframes circleHuntCh7Celebrate {
+    0% { opacity: 0; transform: translateX(-125%) rotate(-6deg); }
+    62% { opacity: 1; transform: translateX(5%) rotate(2deg); }
+    82% { transform: translateX(-2%) rotate(-1deg); }
+    100% { opacity: 1; transform: translateX(0) rotate(0); }
+}
+
+@keyframes circleHuntCh7Jump {
+    0%, 100% {
+        translate: 0 0;
+        rotate: 0deg;
+    }
+    42% {
+        translate: 0 -2.2rem;
+        rotate: -2deg;
+    }
+    58% {
+        translate: 0 -2.35rem;
+        rotate: 2deg;
+    }
+    78% {
+        translate: 0 0.18rem;
+        rotate: -1deg;
+    }
+}
+
+@keyframes circleHuntCh8Pop {
+    0% { opacity: 0; transform: translateY(30%) scale(0.2) rotate(8deg); }
+    62% { opacity: 1; transform: translateY(-3%) scale(1.1) rotate(-2deg); }
+    82% { transform: translateY(1%) scale(0.96) rotate(1deg); }
+    100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+}
+
+@keyframes circleHuntCh8Pulse {
+    0%, 100% {
+        scale: 1;
+    }
+    50% {
+        scale: 1.055;
+    }
+}
+
+@keyframes circleHuntCorrectBounce {
+    0% { scale: 1; filter: brightness(1); }
+    38% { scale: 1.28; filter: brightness(1.55) drop-shadow(0 0 1rem #fff45a); }
+    68% { scale: 0.92; }
+    100% { scale: 1; }
+}
+
+@keyframes circleHuntHintSparkle {
+    0%, 100% { scale: 1; filter: brightness(1); }
+    50% { scale: 1.18; filter: brightness(1.65) drop-shadow(0 0 1rem #fff34d) drop-shadow(0 0 1.8rem #ffffff); }
+}
+
+@keyframes circleHuntFriendlyShake {
+    0%, 100% { translate: 0 0; }
+    25% { translate: -0.35rem 0; }
+    55% { translate: 0.3rem 0; }
+    78% { translate: -0.15rem 0; }
+}
+
+@keyframes circleHuntMissMarker {
+    0% { opacity: 0; transform: scale(0.65); }
+    20% { opacity: 1; transform: translateX(-0.3rem) scale(1); }
+    45% { transform: translateX(0.3rem) scale(1); }
+    70% { opacity: 1; transform: translateX(-0.15rem) scale(1); }
+    100% { opacity: 0; transform: translateX(0) scale(0.9); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .circle-hunt-start-button,
+    .circle-hunt-countdown.is-popping,
+    .circle-hunt-countdown.is-result,
+    .circle-hunt-confetti span,
+    .circle-hunt-celebration.is-active .circle-hunt-character-ch7,
+    .circle-hunt-celebration.is-ch8-visible .circle-hunt-ch8-pop,
+    .circle-illustration-shape.is-correct,
+    .circle-illustration-shape.is-hinting,
+    .circle-hunt-feedback.is-wrong,
+    .circle-hunt-miss-marker {
+        animation-duration: 0.01ms;
+        animation-iteration-count: 1;
+    }
 }
 
 .circle-illustration-video-stage {
@@ -1604,6 +2045,12 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
         top: 60.9%;
     }
 
+    .circle-illustration-shape-5 {
+        --circle-shape-size: clamp(3rem, 6.6vw, 4.4rem);
+        left: 31.5%;
+        top: 16.5%;
+    }
+
     .circle-illustration-shape-6 {
         --circle-shape-size: clamp(2.7rem, 5.8vw, 4rem);
         left: 94%;
@@ -1653,6 +2100,7 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
     .circle-illustration-shape-2,
     .circle-illustration-shape-3,
     .circle-illustration-shape-4,
+    .circle-illustration-shape-5,
     .circle-illustration-shape-6,
     .circle-illustration-shape-9,
     .circle-illustration-shape-10 {
@@ -1681,6 +2129,12 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
         --circle-shape-size: clamp(2.8rem, 6.2vw, 4rem);
         left: 11%;
         top: 60.9%;
+    }
+
+    .circle-illustration-shape-5 {
+        --circle-shape-size: clamp(2.8rem, 6.2vw, 4rem);
+        left: 31.5%;
+        top: 16.5%;
     }
 
     .circle-illustration-shape-6 {
