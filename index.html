@@ -197,8 +197,7 @@
             </div>
             <div class="game3-island-card">
                 <img src="assets/Shape UI/2.webp" alt="2. Square Town">
-                <svg class="game3-island-lock" role="img" aria-label="Locked"><use href="#game3-padlock"></use></svg>
-                <button class="game3-island-enter" type="button" disabled>Enter</button>
+                <a class="game3-island-enter loading-link" href="index.html" data-route="shape-square">Enter</a>
             </div>
             <div class="game3-island-card">
                 <img src="assets/Shape UI/3.webp" alt="3. Triangle Mountains">
@@ -334,6 +333,18 @@
             <button class="shape-area-speech-bubble-skip" type="button" aria-label="Skip to the last message">Skip</button>
         </div>
         <img class="shape-area-title" src="assets/Shape UI/Title1.webp" alt="Area 1: Circle Meadow">
+        <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Return to Shape Island">
+            <span>‹</span>
+            Back
+        </a>
+    </section>
+
+    <section id="learnscape-shape-square-page" class="shape-area-page" hidden>
+        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area2.webp" alt="" aria-hidden="true">
+        <div class="shape-area-title shape-area-title-text shape-area-title-square" aria-label="Area 2">
+            <span>Area</span>
+            <strong>2</strong>
+        </div>
         <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Return to Shape Island">
             <span>‹</span>
             Back
@@ -654,6 +665,12 @@
                     pageId: 'learnscape-shape-circle-page',
                     hash: '#shape-circle',
                 },
+                shapeSquare: {
+                    title: 'Learnscape Adventure - Square Town',
+                    bodyClass: 'gameplay-page',
+                    pageId: 'learnscape-shape-square-page',
+                    hash: '#shape-square',
+                },
                 circleIllustration: {
                     title: 'Learnscape Adventure - Circle Lesson',
                     bodyClass: 'gameplay-page',
@@ -696,6 +713,8 @@
                 game3: 'game3',
                 shapeCircle: 'shapeCircle',
                 'shape-circle': 'shapeCircle',
+                shapeSquare: 'shapeSquare',
+                'shape-square': 'shapeSquare',
                 circleIllustration: 'circleIllustration',
                 'circle-illustration': 'circleIllustration',
                 lettertrace: 'lettertrace',
@@ -707,6 +726,7 @@
                 '#game1': 'game1',
                 '#game3': 'game3',
                 '#shape-circle': 'shapeCircle',
+                '#shape-square': 'shapeSquare',
                 '#circle-illustration': 'circleIllustration',
                 '#lettertrace': 'lettertrace',
                 '#dragtomatch': 'dragtomatch',
@@ -718,6 +738,7 @@
                 'game1.html': 'game1',
                 'game3.html': 'game3',
                 'shape-circle.html': 'shapeCircle',
+                'shape-square.html': 'shapeSquare',
                 'circle-illustration.html': 'circleIllustration',
                 'lettertrace.html': 'lettertrace',
                 'dragtomatch.html': 'dragtomatch',
@@ -765,6 +786,7 @@
                 game1: document.getElementById('learnscape-game1-page'),
                 game3: document.getElementById('learnscape-game3-page'),
                 shapeCircle: document.getElementById('learnscape-shape-circle-page'),
+                shapeSquare: document.getElementById('learnscape-shape-square-page'),
                 circleIllustration: document.getElementById('learnscape-circle-illustration-page'),
                 lettertrace: document.getElementById('learnscape-lettertrace-page'),
                 dragtomatch: document.getElementById('learnscape-dragtomatch-page'),

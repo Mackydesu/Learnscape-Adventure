@@ -2734,6 +2734,65 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     will-change: transform;
 }
 
+.shape-area-title-text {
+    width: auto;
+    min-width: clamp(10rem, 18vw, 15rem);
+    padding: clamp(0.55rem, 1vw, 0.9rem) clamp(1.3rem, 2.6vw, 2.4rem);
+    border: clamp(0.18rem, 0.35vw, 0.32rem) solid #6d351a;
+    border-radius: clamp(0.8rem, 1.5vw, 1.35rem);
+    background:
+        linear-gradient(180deg, rgba(255, 236, 141, 0.9), rgba(255, 185, 42, 0.92) 42%, rgba(203, 103, 31, 0.96)),
+        linear-gradient(90deg, #8b471f, #c67830 22%, #6f3518 50%, #d0883c 76%, #8b471f);
+    box-shadow:
+        inset 0 0.18rem 0 rgba(255, 255, 255, 0.58),
+        inset 0 -0.32rem 0 rgba(96, 43, 19, 0.22),
+        0 0.36rem 0 #4b2413,
+        0 0.85rem 1.2rem rgba(47, 24, 8, 0.28);
+    color: #fff06a;
+    font-family: 'Baloo 2', 'Arial Rounded MT Bold', Arial, sans-serif;
+    font-size: clamp(2.1rem, 4.2vw, 4rem);
+    font-weight: 900;
+    line-height: 0.86;
+    text-align: center;
+    text-transform: uppercase;
+    text-shadow:
+        0 0.11em 0 #6b2f14,
+        0.08em 0.08em 0 #2f1a0f,
+        -0.035em 0 #2f1a0f,
+        0.035em 0 #2f1a0f;
+}
+
+.shape-area-title-text::before,
+.shape-area-title-text::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: clamp(0.7rem, 1.2vw, 1rem);
+    height: clamp(0.7rem, 1.2vw, 1rem);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff2a6 0 18%, #c36b27 20% 58%, #613019 60% 100%);
+    transform: translateY(-50%);
+    box-shadow: inset 0 0.08rem 0 rgba(255, 255, 255, 0.42);
+}
+
+.shape-area-title-text::before {
+    left: clamp(0.4rem, 0.9vw, 0.7rem);
+}
+
+.shape-area-title-text::after {
+    right: clamp(0.4rem, 0.9vw, 0.7rem);
+}
+
+.shape-area-title-text span,
+.shape-area-title-text strong {
+    display: inline-block;
+}
+
+.shape-area-title-text strong {
+    margin-left: 0.2em;
+    color: #ffffff;
+}
+
 @keyframes shapeAreaTitleBounceIn {
     0% {
         opacity: 0;
