@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260828-89';
+    const appVersion = '20260828-91';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -136,14 +136,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const circleSortFeedback = circleSortBoard?.querySelector('.circle-sort-feedback') || null;
     const circleSortObjects = Array.from(circleSortBoard?.querySelectorAll('.circle-sort-object') || []);
     const circleSortTargetCount = circleSortObjects.filter((object) => object.hasAttribute('data-circle-object')).length;
-    const shapeCircleCharacter = shapeCirclePage?.querySelector('.shape-area-character-ch2') || null;
     const shapeCircleCharacter3 = shapeCirclePage?.querySelector('.shape-area-character-ch3') || null;
     const shapeCircleCharacter4 = shapeCirclePage?.querySelector('.shape-area-character-ch4') || null;
     const shapeCircleCharacter5 = shapeCirclePage?.querySelector('.shape-area-character-ch5') || null;
     const shapeCircleSpeakerCharacters = [shapeCircleCharacter3, shapeCircleCharacter4, shapeCircleCharacter5];
     const shapeCircleLearningGoal = shapeCirclePage?.querySelector('.shape-area-learning-goal') || null;
-    const shapeCircleBubble = shapeCirclePage?.querySelector('.shape-area-speech-bubble') || null;
-    const shapeCircleBubbleText = shapeCircleBubble?.querySelector('.shape-area-speech-bubble-text') || null;
     const shapeCircleBubbleCh3 = shapeCirclePage?.querySelector('.shape-area-speech-bubble-ch3') || null;
     const shapeCircleBubbleCh3Text = shapeCircleBubbleCh3?.querySelector('.shape-area-speech-bubble-text') || null;
     const shapeCircleBubbleCh3SkipButton = shapeCircleBubbleCh3?.querySelector('.shape-area-speech-bubble-skip') || null;
@@ -155,6 +152,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeSquareBubble = shapeSquarePage?.querySelector('.shape-area-square-speech-bubble') || null;
     const shapeSquareBubbleText = shapeSquareBubble?.querySelector('span') || null;
     const shapeSquareStartButton = shapeSquarePage?.querySelector('.shape-area-square-start-button') || null;
+    const shapeSquareBackButton = shapeSquarePage?.querySelector('.game-return-btn') || null;
     const shapeSquareVideoStage = shapeSquarePage?.querySelector('.square-illustration-video-stage') || null;
     const shapeSquareVideo = shapeSquarePage?.querySelector('.square-illustration-video') || null;
     const shapeSquarePlayButton = shapeSquarePage?.querySelector('.square-illustration-play-button') || null;
@@ -180,18 +178,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             'Handa ka na ba?',
         ];
     }
-    const shapeCircleMessage = 'Hello! Kumusta ka, Kaibigan?';
-    const shapeCircleCharacterExitDuration = 100;
-    const shapeCircleCh3TransitionDelay = 250;
-    const shapeCircleIntroAudioSource = 'assets/Audios/introcircle.mp3';
+    const shapeCircleIntroAudioSource = 'assets/Audios/introcircle.mp3?v=20260828-91';
     const shapeCircleFinalAudioSource = 'assets/Audios/Handa ka na ba.mp3';
     const shapeCircleIntroSegments = [
-        { start: 0, end: 2 },
-        { start: 2.1, end: 4.6 },
-        { start: 4.7, end: 6.8 },
-        { start: 6.9, end: 10.1 },
-        { start: 10.2, end: 13 },
-        { start: 13.1, end: 15.9 },
+        { start: 0, end: 2.5 },
+        { start: 2.6, end: 4.7 },
+        { start: 4.8, end: 8 },
+        { start: 8.1, end: 10.9 },
+        { start: 11, end: 13.8 },
     ];
     let shapeCircleTimers = [];
     let shapeCircleSession = 0;
@@ -321,15 +315,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         clearShapeCircleTimers();
         stopShapeCircleIntroAudio();
 
-        if (shapeCircleBubble) {
-            shapeCircleBubble.hidden = true;
-            shapeCircleBubble.classList.remove('is-visible', 'is-fading', 'is-timed-exit');
-        }
-        if (shapeCircleCharacter) {
-            shapeCircleCharacter.hidden = true;
-            shapeCircleCharacter.classList.remove('is-fading', 'is-sliding-left', 'is-timed-exit');
-        }
-
         const lastMessageIndex = shapeCircleBubbleCh3Messages.length - 1;
         const lastMessage = String(shapeCircleBubbleCh3Messages[lastMessageIndex] || '');
 
@@ -405,19 +390,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         stopShapeCircleIntroAudio();
         shapeCircleSession += 1;
 
-        if (shapeCircleBubbleText) {
-            shapeCircleBubbleText.textContent = '';
-            shapeCircleBubbleText.classList.remove('is-fading');
-        }
-
         if (shapeCircleBubbleCh3Text) {
             shapeCircleBubbleCh3Text.textContent = '';
             shapeCircleBubbleCh3Text.classList.remove('is-fading');
-        }
-
-        if (shapeCircleBubble) {
-            shapeCircleBubble.hidden = false;
-            shapeCircleBubble.classList.remove('is-visible', 'is-fading', 'is-timed-exit');
         }
 
         if (shapeCircleBubbleCh3) {
@@ -435,11 +410,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             shapeCircleLearningGoal.classList.remove('is-start-ready');
         }
 
-        if (shapeCircleCharacter) {
-            shapeCircleCharacter.hidden = false;
-            shapeCircleCharacter.classList.remove('is-fading', 'is-sliding-left', 'is-timed-exit');
-        }
-
         shapeCircleSpeakerCharacters.forEach((character) => {
             if (!character) return;
             character.hidden = true;
@@ -448,7 +418,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const startShapeCircleScene = () => {
-        if (!shapeCirclePage || !shapeCircleBubble || !shapeCircleBubbleText || !shapeCircleCharacter) return;
+        if (!shapeCirclePage) return;
         if (!isPageVisible(shapeCirclePage)) return;
 
         resetShapeCircleScene();
@@ -465,68 +435,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         ];
         let activeSegmentIndex = -1;
         let hasShownFinalMessage = false;
-        let hasStartedCh2Exit = false;
-        let hasAppliedCh3TransitionDelay = false;
-
-        const finishCh2Exit = () => {
-            if (session !== shapeCircleSession) return;
-            shapeCircleBubble.hidden = true;
-            shapeCircleCharacter.hidden = true;
-        };
-
-        const startCh2Exit = () => {
-            if (hasStartedCh2Exit) return;
-            hasStartedCh2Exit = true;
-            shapeCircleBubble.classList.add('is-timed-exit', 'is-fading');
-            shapeCircleCharacter.classList.add('is-timed-exit', 'is-sliding-left');
-            shapeCircleTimers.push(window.setTimeout(finishCh2Exit, shapeCircleCharacterExitDuration));
-        };
 
         const showTimedSegment = (segmentIndex) => {
             if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
             if (segmentIndex === activeSegmentIndex) return;
             activeSegmentIndex = segmentIndex;
 
-            if (segmentIndex === 0) {
-                shapeCircleBubble.hidden = false;
-                shapeCircleBubble.classList.add('is-visible');
-                shapeCircleBubble.classList.remove('is-fading', 'is-timed-exit');
-                shapeCircleBubbleText.classList.remove('is-fading');
-                shapeCircleBubbleText.textContent = shapeCircleMessage;
-                shapeCircleCharacter.hidden = false;
-                shapeCircleCharacter.classList.remove('is-sliding-left', 'is-timed-exit');
-                shapeCircleBubbleCh3.hidden = true;
-                shapeCircleSpeakerCharacters.forEach((character) => {
-                    if (character) character.hidden = true;
-                });
-                return;
+            shapeCircleBubbleCh3.classList.remove('is-triggering');
+            syncShapeCircleCh3SpeakerCharacters(segmentIndex);
+            shapeCircleLearningGoal?.classList.remove('is-start-ready');
+
+            if (shapeCircleBubbleCh3SkipButton) {
+                shapeCircleBubbleCh3SkipButton.onclick = showShapeCircleCh3FinalMessage;
+                shapeCircleBubbleCh3SkipButton.hidden = false;
+                shapeCircleBubbleCh3SkipButton.style.display = '';
             }
 
-            startCh2Exit();
-            finishCh2Exit();
-            const showSpeakerSegment = () => {
-                if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
-
-                shapeCircleBubbleCh3.classList.remove('is-triggering');
-
-                const speakerMessageIndex = segmentIndex - 1;
-                syncShapeCircleCh3SpeakerCharacters(speakerMessageIndex);
-                shapeCircleLearningGoal?.classList.remove('is-start-ready');
-
-                if (shapeCircleBubbleCh3SkipButton) {
-                    shapeCircleBubbleCh3SkipButton.onclick = showShapeCircleCh3FinalMessage;
-                    shapeCircleBubbleCh3SkipButton.hidden = false;
-                    shapeCircleBubbleCh3SkipButton.style.display = '';
-                }
-
-                shapeCircleBubbleCh3.hidden = false;
-                shapeCircleBubbleCh3.classList.add('is-visible');
-                shapeCircleBubbleCh3.classList.remove('is-fading');
-                shapeCircleBubbleCh3Text.classList.remove('is-fading');
-                shapeCircleBubbleCh3Text.textContent = timedSpeakerMessages[segmentIndex - 1];
-            };
-
-            showSpeakerSegment();
+            shapeCircleBubbleCh3.hidden = false;
+            shapeCircleBubbleCh3.classList.add('is-visible');
+            shapeCircleBubbleCh3.classList.remove('is-fading');
+            shapeCircleBubbleCh3Text.classList.remove('is-fading');
+            shapeCircleBubbleCh3Text.textContent = timedSpeakerMessages[segmentIndex];
         };
 
         const showFinalMessage = () => {
@@ -538,17 +467,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         const playTimedMessagesWithoutAudio = () => {
-            const firstSegment = shapeCircleIntroSegments[0];
-            shapeCircleTimers.push(window.setTimeout(startCh2Exit, firstSegment.end * 1000));
             shapeCircleIntroSegments.slice(1).forEach((segment, segmentIndex) => {
                 shapeCircleTimers.push(window.setTimeout(() => {
                     showTimedSegment(segmentIndex + 1);
-                }, (segment.start * 1000) + shapeCircleCh3TransitionDelay));
+                }, segment.start * 1000));
             });
             const finalSegment = shapeCircleIntroSegments[shapeCircleIntroSegments.length - 1];
             shapeCircleTimers.push(window.setTimeout(
                 showFinalMessage,
-                (finalSegment.end * 1000) + shapeCircleCh3TransitionDelay,
+                finalSegment.end * 1000,
             ));
         };
 
@@ -569,41 +496,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (shapeCircleIntroAudio !== introAudio || hasShownFinalMessage) return;
 
             const currentTime = introAudio.currentTime;
-            if (currentTime >= shapeCircleIntroSegments[0].end) {
-                startCh2Exit();
-            }
-
-            const firstSegment = shapeCircleIntroSegments[0];
-            const ch3Segment = shapeCircleIntroSegments[1];
-            if (currentTime >= firstSegment.end && !hasAppliedCh3TransitionDelay) {
-                hasAppliedCh3TransitionDelay = true;
-                introAudio.pause();
-                shapeCircleTimers.push(window.setTimeout(() => {
-                    if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
-                    if (shapeCircleIntroAudio !== introAudio || hasShownFinalMessage) return;
-
-                    introAudio.currentTime = ch3Segment.start;
-                    showTimedSegment(1);
-                    shapeCircleAudioFrame = window.requestAnimationFrame(() => {
-                        introAudio.play().then(() => {
-                            shapeCircleAudioFrame = window.requestAnimationFrame(syncMessageToAudio);
-                        }).catch(() => {
-                            shapeCircleIntroSegments.slice(2).forEach((segment, segmentIndex) => {
-                                shapeCircleTimers.push(window.setTimeout(() => {
-                                    showTimedSegment(segmentIndex + 2);
-                                }, (segment.start - ch3Segment.start) * 1000));
-                            });
-                            const finalSegment = shapeCircleIntroSegments[shapeCircleIntroSegments.length - 1];
-                            shapeCircleTimers.push(window.setTimeout(
-                                showFinalMessage,
-                                (finalSegment.end - ch3Segment.start) * 1000,
-                            ));
-                        });
-                    });
-                }, shapeCircleCharacterExitDuration + shapeCircleCh3TransitionDelay));
-                return;
-            }
-
             let segmentIndex = 0;
             shapeCircleIntroSegments.forEach((segment, currentSegmentIndex) => {
                 if (currentTime >= segment.start) segmentIndex = currentSegmentIndex;
@@ -767,6 +659,56 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeSquareVideoStage?.setAttribute('aria-hidden', 'true');
         setShapeSquarePlayButtonVisible(false);
         setShapeSquareSkipButtonVisible(false);
+    };
+
+    const showShapeSquareFinalMessage = () => {
+        if (!shapeSquarePage || !isPageVisible(shapeSquarePage)) return;
+
+        clearShapeSquareTimers();
+        stopShapeSquareIntroAudio();
+        stopShapeSquareReadyAudio();
+        resetShapeSquareLessonVideo();
+        shapeSquareSession += 1;
+        shapeSquareStartButton?.classList.remove('is-clicking');
+
+        [shapeSquareCharacter3, shapeSquareCharacter9, shapeSquareCharacter4, shapeSquareCharacter5].forEach((character) => {
+            if (!character) return;
+            character.hidden = true;
+            character.classList.remove('is-entering', 'is-exiting');
+        });
+
+        if (shapeSquareCharacter5) {
+            shapeSquareCharacter5.hidden = false;
+            shapeSquareCharacter5.getBoundingClientRect();
+            shapeSquareCharacter5.classList.add('is-entering');
+        }
+
+        if (shapeSquareBubble) {
+            shapeSquareBubble.classList.remove('is-ch9', 'is-ch4', 'is-entering', 'is-exiting', 'is-message-changing');
+            shapeSquareBubble.classList.add('is-ch5');
+            shapeSquareBubble.getBoundingClientRect();
+            shapeSquareBubble.classList.add('is-entering');
+        }
+        if (shapeSquareBubbleText) {
+            shapeSquareBubbleText.textContent = shapeSquareReadyMessage;
+        }
+        if (shapeSquareBgImage) {
+            shapeSquareBgImage.src = shapeSquareAreaBackgroundSource;
+        }
+        shapeSquarePage.classList.remove('is-illustration-background');
+    };
+
+    const transitionBackToShapeSquareArea = () => {
+        if (!shapeSquarePage?.classList.contains('is-illustration-background')) return false;
+
+        const runWithLoading = getAppLoadingTransition();
+        if (typeof runWithLoading === 'function') {
+            runWithLoading(showShapeSquareFinalMessage);
+            return true;
+        }
+
+        showShapeSquareFinalMessage();
+        return true;
     };
 
     const resetShapeSquareScene = () => {
@@ -4733,6 +4675,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const target = link.getAttribute('data-route') || link.getAttribute('href');
 
             event.preventDefault();
+
+            if (link === shapeSquareBackButton && shapeSquarePage?.classList.contains('is-illustration-background')) {
+                transitionBackToShapeSquareArea();
+                return;
+            }
 
             if (target === 'square-illustration') {
                 transitionToShapeSquareIllustration();
