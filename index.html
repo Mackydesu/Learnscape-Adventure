@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260824-65">
+    <link rel="stylesheet" href="style.css?v=20260828-84">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -341,10 +341,18 @@
 
     <section id="learnscape-shape-square-page" class="shape-area-page" hidden>
         <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area2.webp" alt="" aria-hidden="true">
+        <img class="shape-area-square-character shape-area-square-character-ch3" src="assets/Character/ch3.webp" alt="" aria-hidden="true">
+        <img class="shape-area-square-character shape-area-square-character-ch9" src="assets/Character/ch9.webp" alt="" aria-hidden="true" hidden>
+        <img class="shape-area-square-character shape-area-square-character-ch4" src="assets/Character/ch4.webp" alt="" aria-hidden="true" hidden>
+        <img class="shape-area-square-character shape-area-square-character-ch5" src="assets/Character/ch5.webp" alt="" aria-hidden="true" hidden>
+        <div class="shape-area-square-speech-bubble" role="status" aria-live="polite">
+            <span>Maligayang pagbabalik!</span>
+        </div>
         <div class="shape-area-title shape-area-title-text shape-area-title-square" aria-label="Area 2">
             <span>Area</span>
             <strong>2</strong>
         </div>
+        <button class="shape-area-square-start-button" type="button">Start</button>
         <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Return to Shape Island">
             <span>‹</span>
             Back
@@ -629,7 +637,7 @@
         </a>
     </section>
 
-    <script src="script.js?v=20260824-65"></script>
+    <script src="script.js?v=20260828-85"></script>
     </div>
 
     <script>
@@ -1177,6 +1185,19 @@
                 if (!target) return;
 
                 navigateWithLoading(target);
+            };
+
+            window.__learnscapeRunWithLoading = (callback) => {
+                if (typeof callback !== 'function' || isNavigating) return false;
+
+                isNavigating = true;
+                showLoading();
+                loadingTimer = window.setTimeout(() => {
+                    hideLoading();
+                    callback();
+                    isNavigating = false;
+                }, 1000);
+                return true;
             };
 
             const circleHotspot = pages.game3?.querySelector('[data-game3-shape="circle"]');

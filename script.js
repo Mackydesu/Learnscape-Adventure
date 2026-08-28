@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260825-79';
+    const appVersion = '20260828-85';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -105,6 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const game3Hotspots = game3Page?.querySelectorAll('[data-game3-shape]') || [];
     const fullscreenRestoreButton = document.querySelector('.fullscreen-restore-button');
     const shapeCirclePage = document.getElementById('learnscape-shape-circle-page');
+    const shapeSquarePage = document.getElementById('learnscape-shape-square-page');
     const circleIllustrationPage = document.getElementById('learnscape-circle-illustration-page');
     const circleIllustrationVideo = circleIllustrationPage?.querySelector('.circle-illustration-video') || null;
     const circleIllustrationPlayButton = circleIllustrationPage?.querySelector('.circle-illustration-play-button') || null;
@@ -146,6 +147,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeCircleBubbleCh3 = shapeCirclePage?.querySelector('.shape-area-speech-bubble-ch3') || null;
     const shapeCircleBubbleCh3Text = shapeCircleBubbleCh3?.querySelector('.shape-area-speech-bubble-text') || null;
     const shapeCircleBubbleCh3SkipButton = shapeCircleBubbleCh3?.querySelector('.shape-area-speech-bubble-skip') || null;
+    const shapeSquareBgImage = shapeSquarePage?.querySelector('.shape-area-bg') || null;
+    const shapeSquareCharacter3 = shapeSquarePage?.querySelector('.shape-area-square-character-ch3') || null;
+    const shapeSquareCharacter9 = shapeSquarePage?.querySelector('.shape-area-square-character-ch9') || null;
+    const shapeSquareCharacter4 = shapeSquarePage?.querySelector('.shape-area-square-character-ch4') || null;
+    const shapeSquareCharacter5 = shapeSquarePage?.querySelector('.shape-area-square-character-ch5') || null;
+    const shapeSquareBubble = shapeSquarePage?.querySelector('.shape-area-square-speech-bubble') || null;
+    const shapeSquareBubbleText = shapeSquareBubble?.querySelector('span') || null;
+    const shapeSquareStartButton = shapeSquarePage?.querySelector('.shape-area-square-start-button') || null;
     let shapeCircleBubbleCh3Messages = [];
     try {
         shapeCircleBubbleCh3Messages = JSON.parse(shapeCircleBubbleCh3?.dataset.messages || '[]');
@@ -163,16 +172,45 @@ document.addEventListener('DOMContentLoaded', async () => {
         ];
     }
     const shapeCircleMessage = 'Hello! Kumusta ka, Kaibigan?';
-    const shapeCircleTypingDelay = 55;
-    const shapeCirclePauseAfterTyping = 900;
-    const shapeCircleCh3PauseAfterTyping = 900;
-    const shapeCircleCh3FinalPauseAfterTyping = 2200;
-    const shapeCircleCh3BetweenMessageDelay = 200;
-    const shapeCircleTextFadeDuration = 450;
-    const shapeCircleCharacterSlideDuration = 450;
-    const shapeCircleCharacterPopDelay = 120;
+    const shapeCircleCharacterExitDuration = 100;
+    const shapeCircleCh3TransitionDelay = 250;
+    const shapeCircleIntroAudioSource = 'assets/Audios/introcircle.mp3';
+    const shapeCircleFinalAudioSource = 'assets/Audios/Handa ka na ba.mp3';
+    const shapeCircleIntroSegments = [
+        { start: 0, end: 2 },
+        { start: 2.1, end: 4.6 },
+        { start: 4.7, end: 6.8 },
+        { start: 6.9, end: 10.1 },
+        { start: 10.2, end: 13 },
+        { start: 13.1, end: 15.9 },
+    ];
     let shapeCircleTimers = [];
     let shapeCircleSession = 0;
+    let shapeCircleIntroAudio = null;
+    let shapeCircleAudioFrame = null;
+    const shapeSquareWelcomeMessage = 'Maligayang pagbabalik!';
+    const shapeSquareCelebrationMessages = [
+        'Matagumpay mong natapos ang Circle Mission!',
+        'Binabati kita sa iyong tagumpay!',
+    ];
+    const shapeSquareNextShapeMessage = 'Ngayon, panibagong hugis ang ating aalamin!';
+    const shapeSquareReadyMessage = 'Handa ka na ba?';
+    const shapeSquareIntroAudioSource = 'assets/Audios/introsquare.mp3';
+    const shapeSquareReadyAudioSource = 'assets/Audios/Handa ka na ba.mp3';
+    const shapeSquareAreaBackgroundSource = 'assets/Backgrounds/Area2.webp';
+    const shapeSquareIllustrationBackgroundSource = 'assets/Backgrounds/Illustration2.webp';
+    const shapeSquareIntroStages = [
+        { start: 0, character: shapeSquareCharacter3, bubbleClass: null, message: shapeSquareWelcomeMessage },
+        { start: 1.7, character: shapeSquareCharacter9, bubbleClass: 'is-ch9', message: shapeSquareCelebrationMessages[0] },
+        { start: 4.6, character: shapeSquareCharacter9, bubbleClass: 'is-ch9', message: shapeSquareCelebrationMessages[1] },
+        { start: 7.1, character: shapeSquareCharacter4, bubbleClass: 'is-ch4', message: shapeSquareNextShapeMessage },
+        { start: 10.9, character: shapeSquareCharacter5, bubbleClass: 'is-ch5', message: shapeSquareReadyMessage },
+    ];
+    let shapeSquareTimers = [];
+    let shapeSquareSession = 0;
+    let shapeSquareIntroAudio = null;
+    let shapeSquareReadyAudio = null;
+    let shapeSquareAudioFrame = null;
     let circleIllustrationCelebrationTimers = [];
     const circleMissionGuideMessages = [
         'Para sa ating Circle Mission',
@@ -265,11 +303,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     };
 
-    const showShapeCircleCh3FinalMessage = () => {
+    const showShapeCircleCh3FinalMessage = (shouldPlayAudio = true) => {
         if (!shapeCircleBubbleCh3 || !shapeCircleBubbleCh3Text || !shapeCircleBubbleCh3Messages.length) return;
         if (!isPageVisible(shapeCirclePage)) return;
 
         clearShapeCircleTimers();
+        stopShapeCircleIntroAudio();
+
+        if (shapeCircleBubble) {
+            shapeCircleBubble.hidden = true;
+            shapeCircleBubble.classList.remove('is-visible', 'is-fading', 'is-timed-exit');
+        }
+        if (shapeCircleCharacter) {
+            shapeCircleCharacter.hidden = true;
+            shapeCircleCharacter.classList.remove('is-fading', 'is-sliding-left', 'is-timed-exit');
+        }
 
         const lastMessageIndex = shapeCircleBubbleCh3Messages.length - 1;
         const lastMessage = String(shapeCircleBubbleCh3Messages[lastMessageIndex] || '');
@@ -286,6 +334,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             shapeCircleBubbleCh3SkipButton.hidden = true;
             shapeCircleBubbleCh3SkipButton.style.display = 'none';
         }
+
+        if (shouldPlayAudio !== false) {
+            playShapeCircleAudio(shapeCircleFinalAudioSource);
+        }
     };
 
     const clearShapeCircleTimers = () => {
@@ -293,8 +345,53 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeCircleTimers = [];
     };
 
+    const stopShapeCircleIntroAudio = () => {
+        if (shapeCircleAudioFrame !== null) {
+            window.cancelAnimationFrame(shapeCircleAudioFrame);
+            shapeCircleAudioFrame = null;
+        }
+
+        if (!shapeCircleIntroAudio) return;
+
+        shapeCircleIntroAudio.onended = null;
+        shapeCircleIntroAudio.pause();
+        try {
+            shapeCircleIntroAudio.currentTime = 0;
+        } catch (error) {
+            // The clip may still be loading; pausing is enough if rewinding is unavailable.
+        }
+        shapeCircleIntroAudio = null;
+    };
+
+    const playShapeCircleAudio = (source, onEnded = null, onPlaybackFailed = null) => {
+        stopShapeCircleIntroAudio();
+
+        const AudioCtor = window.Audio;
+        if (!AudioCtor) return null;
+
+        const audio = new AudioCtor(source);
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = 1;
+        shapeCircleIntroAudio = audio;
+        audio.load?.();
+        audio.onended = () => {
+            if (shapeCircleIntroAudio !== audio) return;
+            shapeCircleIntroAudio = null;
+            onEnded?.();
+        };
+        audio.play().catch(() => {
+            if (shapeCircleIntroAudio !== audio) return;
+            shapeCircleIntroAudio = null;
+            onPlaybackFailed?.();
+        });
+
+        return audio;
+    };
+
     const resetShapeCircleScene = () => {
         clearShapeCircleTimers();
+        stopShapeCircleIntroAudio();
         shapeCircleSession += 1;
 
         if (shapeCircleBubbleText) {
@@ -309,7 +406,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (shapeCircleBubble) {
             shapeCircleBubble.hidden = false;
-            shapeCircleBubble.classList.remove('is-visible', 'is-fading');
+            shapeCircleBubble.classList.remove('is-visible', 'is-fading', 'is-timed-exit');
         }
 
         if (shapeCircleBubbleCh3) {
@@ -329,7 +426,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (shapeCircleCharacter) {
             shapeCircleCharacter.hidden = false;
-            shapeCircleCharacter.classList.remove('is-fading', 'is-sliding-left');
+            shapeCircleCharacter.classList.remove('is-fading', 'is-sliding-left', 'is-timed-exit');
         }
 
         shapeCircleSpeakerCharacters.forEach((character) => {
@@ -346,140 +443,378 @@ document.addEventListener('DOMContentLoaded', async () => {
         resetShapeCircleScene();
 
         const session = shapeCircleSession;
-        const message = String(shapeCircleMessage);
+        if (!shapeCircleBubbleCh3 || !shapeCircleBubbleCh3Text) return;
 
-        shapeCircleBubble.hidden = false;
-        shapeCircleBubble.classList.add('is-visible');
+        const timedSpeakerMessages = [
+            String(shapeCircleBubbleCh3Messages[0] || ''),
+            String(shapeCircleBubbleCh3Messages[1] || ''),
+            String(shapeCircleBubbleCh3Messages[2] || ''),
+            String(shapeCircleBubbleCh3Messages[3] || ''),
+            String(shapeCircleBubbleCh3Messages[4] || ''),
+        ];
+        let activeSegmentIndex = -1;
+        let hasShownFinalMessage = false;
+        let hasStartedCh2Exit = false;
+        let hasAppliedCh3TransitionDelay = false;
 
-        const showCh3Bubble = () => {
-            if (!shapeCircleBubbleCh3 || !shapeCircleBubbleCh3Text) return;
-            if (shapeCircleBubbleCh3SkipButton) {
-                shapeCircleBubbleCh3SkipButton.onclick = showShapeCircleCh3FinalMessage;
-                shapeCircleBubbleCh3SkipButton.hidden = shapeCircleBubbleCh3Messages.length <= 1;
-                shapeCircleBubbleCh3SkipButton.style.display = shapeCircleBubbleCh3Messages.length <= 1 ? 'none' : '';
+        const finishCh2Exit = () => {
+            if (session !== shapeCircleSession) return;
+            shapeCircleBubble.hidden = true;
+            shapeCircleCharacter.hidden = true;
+        };
+
+        const startCh2Exit = () => {
+            if (hasStartedCh2Exit) return;
+            hasStartedCh2Exit = true;
+            shapeCircleBubble.classList.add('is-timed-exit', 'is-fading');
+            shapeCircleCharacter.classList.add('is-timed-exit', 'is-sliding-left');
+            shapeCircleTimers.push(window.setTimeout(finishCh2Exit, shapeCircleCharacterExitDuration));
+        };
+
+        const showTimedSegment = (segmentIndex) => {
+            if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
+            if (segmentIndex === activeSegmentIndex) return;
+            activeSegmentIndex = segmentIndex;
+
+            if (segmentIndex === 0) {
+                shapeCircleBubble.hidden = false;
+                shapeCircleBubble.classList.add('is-visible');
+                shapeCircleBubble.classList.remove('is-fading', 'is-timed-exit');
+                shapeCircleBubbleText.classList.remove('is-fading');
+                shapeCircleBubbleText.textContent = shapeCircleMessage;
+                shapeCircleCharacter.hidden = false;
+                shapeCircleCharacter.classList.remove('is-sliding-left', 'is-timed-exit');
+                shapeCircleBubbleCh3.hidden = true;
+                shapeCircleSpeakerCharacters.forEach((character) => {
+                    if (character) character.hidden = true;
+                });
+                return;
             }
 
-            const playCh3Message = (messageIndex) => {
+            startCh2Exit();
+            finishCh2Exit();
+            const showSpeakerSegment = () => {
                 if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
-
-                if (messageIndex >= shapeCircleBubbleCh3Messages.length) {
-                    shapeCircleBubbleCh3.classList.add('is-triggering');
-                    return;
-                }
 
                 shapeCircleBubbleCh3.classList.remove('is-triggering');
 
-                syncShapeCircleCh3SpeakerCharacters(messageIndex);
+                const speakerMessageIndex = segmentIndex - 1;
+                syncShapeCircleCh3SpeakerCharacters(speakerMessageIndex);
+                shapeCircleLearningGoal?.classList.remove('is-start-ready');
 
-                const currentMessage = String(shapeCircleBubbleCh3Messages[messageIndex] || '');
-                const isLastCh3Message = messageIndex === shapeCircleBubbleCh3Messages.length - 1;
-                shapeCircleLearningGoal?.classList.toggle('is-start-ready', isLastCh3Message);
-                const pauseAfterTyping = isLastCh3Message
-                    ? shapeCircleCh3FinalPauseAfterTyping
-                    : shapeCircleCh3PauseAfterTyping;
                 if (shapeCircleBubbleCh3SkipButton) {
-                    shapeCircleBubbleCh3SkipButton.hidden = isLastCh3Message;
-                    shapeCircleBubbleCh3SkipButton.style.display = isLastCh3Message ? 'none' : '';
+                    shapeCircleBubbleCh3SkipButton.onclick = showShapeCircleCh3FinalMessage;
+                    shapeCircleBubbleCh3SkipButton.hidden = false;
+                    shapeCircleBubbleCh3SkipButton.style.display = '';
                 }
+
                 shapeCircleBubbleCh3.hidden = false;
                 shapeCircleBubbleCh3.classList.add('is-visible');
                 shapeCircleBubbleCh3.classList.remove('is-fading');
                 shapeCircleBubbleCh3Text.classList.remove('is-fading');
-                shapeCircleBubbleCh3Text.textContent = '';
-
-                const typeCh3Character = (index) => {
-                    if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
-
-                    shapeCircleBubbleCh3Text.textContent = currentMessage.slice(0, index);
-
-                    if (index >= currentMessage.length) {
-                        shapeCircleTimers.push(window.setTimeout(() => {
-                            if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
-
-                            if (isLastCh3Message) {
-                                shapeCircleBubbleCh3.classList.add('is-triggering');
-                                return;
-                            }
-
-                            shapeCircleBubbleCh3Text.classList.add('is-fading');
-
-                            shapeCircleTimers.push(window.setTimeout(() => {
-                                if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
-
-                                shapeCircleBubbleCh3Text.textContent = '';
-                                shapeCircleBubbleCh3Text.classList.remove('is-fading');
-                                shapeCircleTimers.push(window.setTimeout(() => {
-                                    playCh3Message(messageIndex + 1);
-                                }, shapeCircleCh3BetweenMessageDelay));
-                            }, shapeCircleTextFadeDuration));
-                        }, pauseAfterTyping));
-                        return;
-                    }
-
-                    shapeCircleTimers.push(window.setTimeout(() => {
-                        typeCh3Character(index + 1);
-                    }, shapeCircleTypingDelay));
-                };
-
-                typeCh3Character(1);
+                shapeCircleBubbleCh3Text.textContent = timedSpeakerMessages[segmentIndex - 1];
             };
 
-            playCh3Message(0);
+            showSpeakerSegment();
         };
 
-        const typeNextCharacter = (index) => {
+        const showFinalMessage = () => {
+            if (hasShownFinalMessage) return;
             if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
 
-            shapeCircleBubbleText.textContent = message.slice(0, index);
+            hasShownFinalMessage = true;
+            showShapeCircleCh3FinalMessage();
+        };
 
-            if (index >= message.length) {
+        const playTimedMessagesWithoutAudio = () => {
+            const firstSegment = shapeCircleIntroSegments[0];
+            shapeCircleTimers.push(window.setTimeout(startCh2Exit, firstSegment.end * 1000));
+            shapeCircleIntroSegments.slice(1).forEach((segment, segmentIndex) => {
+                shapeCircleTimers.push(window.setTimeout(() => {
+                    showTimedSegment(segmentIndex + 1);
+                }, (segment.start * 1000) + shapeCircleCh3TransitionDelay));
+            });
+            const finalSegment = shapeCircleIntroSegments[shapeCircleIntroSegments.length - 1];
+            shapeCircleTimers.push(window.setTimeout(
+                showFinalMessage,
+                (finalSegment.end * 1000) + shapeCircleCh3TransitionDelay,
+            ));
+        };
+
+        const introAudio = playShapeCircleAudio(
+            shapeCircleIntroAudioSource,
+            showFinalMessage,
+            playTimedMessagesWithoutAudio,
+        );
+        showTimedSegment(0);
+
+        if (!introAudio) {
+            playTimedMessagesWithoutAudio();
+            return;
+        }
+
+        const syncMessageToAudio = () => {
+            if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
+            if (shapeCircleIntroAudio !== introAudio || hasShownFinalMessage) return;
+
+            const currentTime = introAudio.currentTime;
+            if (currentTime >= shapeCircleIntroSegments[0].end) {
+                startCh2Exit();
+            }
+
+            const firstSegment = shapeCircleIntroSegments[0];
+            const ch3Segment = shapeCircleIntroSegments[1];
+            if (currentTime >= firstSegment.end && !hasAppliedCh3TransitionDelay) {
+                hasAppliedCh3TransitionDelay = true;
+                introAudio.pause();
                 shapeCircleTimers.push(window.setTimeout(() => {
                     if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
+                    if (shapeCircleIntroAudio !== introAudio || hasShownFinalMessage) return;
 
-                    shapeCircleBubbleText.classList.add('is-fading');
-
-                    shapeCircleTimers.push(window.setTimeout(() => {
-                        if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
-
-                        shapeCircleBubble.hidden = true;
-                        shapeCircleCharacter.classList.add('is-sliding-left');
-
-                        shapeCircleTimers.push(window.setTimeout(() => {
-                            if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
-
-                            shapeCircleCharacter.hidden = true;
-
-                            if (!shapeCircleCharacter3) return;
-
-                            shapeCircleTimers.push(window.setTimeout(() => {
-                                if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
-
-                                shapeCircleCharacter3.hidden = false;
-                                shapeCircleCharacter3.classList.remove('is-popping');
-                                shapeCircleCharacter3.getBoundingClientRect();
-                                shapeCircleCharacter3.classList.add('is-popping');
-
+                    introAudio.currentTime = ch3Segment.start;
+                    showTimedSegment(1);
+                    shapeCircleAudioFrame = window.requestAnimationFrame(() => {
+                        introAudio.play().then(() => {
+                            shapeCircleAudioFrame = window.requestAnimationFrame(syncMessageToAudio);
+                        }).catch(() => {
+                            shapeCircleIntroSegments.slice(2).forEach((segment, segmentIndex) => {
                                 shapeCircleTimers.push(window.setTimeout(() => {
-                                    if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
-
-                                    showCh3Bubble();
-                                }, shapeCircleCharacterPopDelay));
-                            }, shapeCircleCharacterSlideDuration));
-                        }, shapeCircleTextFadeDuration));
-                    }, shapeCirclePauseAfterTyping));
-
-                    return;
-                }, shapeCirclePauseAfterTyping));
-
+                                    showTimedSegment(segmentIndex + 2);
+                                }, (segment.start - ch3Segment.start) * 1000));
+                            });
+                            const finalSegment = shapeCircleIntroSegments[shapeCircleIntroSegments.length - 1];
+                            shapeCircleTimers.push(window.setTimeout(
+                                showFinalMessage,
+                                (finalSegment.end - ch3Segment.start) * 1000,
+                            ));
+                        });
+                    });
+                }, shapeCircleCharacterExitDuration + shapeCircleCh3TransitionDelay));
                 return;
             }
 
-            shapeCircleTimers.push(window.setTimeout(() => {
-                typeNextCharacter(index + 1);
-            }, shapeCircleTypingDelay));
+            let segmentIndex = 0;
+            shapeCircleIntroSegments.forEach((segment, currentSegmentIndex) => {
+                if (currentTime >= segment.start) segmentIndex = currentSegmentIndex;
+            });
+            showTimedSegment(segmentIndex);
+
+            const finalSegment = shapeCircleIntroSegments[shapeCircleIntroSegments.length - 1];
+            if (currentTime >= finalSegment.end) {
+                showFinalMessage();
+                return;
+            }
+
+            shapeCircleAudioFrame = window.requestAnimationFrame(syncMessageToAudio);
         };
 
-        typeNextCharacter(1);
+        shapeCircleAudioFrame = window.requestAnimationFrame(syncMessageToAudio);
+    };
+
+    const clearShapeSquareTimers = () => {
+        shapeSquareTimers.forEach((timerId) => window.clearTimeout(timerId));
+        shapeSquareTimers = [];
+    };
+
+    const stopShapeSquareIntroAudio = () => {
+        if (shapeSquareAudioFrame !== null) {
+            window.cancelAnimationFrame(shapeSquareAudioFrame);
+            shapeSquareAudioFrame = null;
+        }
+
+        if (!shapeSquareIntroAudio) return;
+
+        shapeSquareIntroAudio.onended = null;
+        shapeSquareIntroAudio.pause();
+        try {
+            shapeSquareIntroAudio.currentTime = 0;
+        } catch (error) {
+            // Pausing is enough while the audio metadata is still loading.
+        }
+        shapeSquareIntroAudio = null;
+    };
+
+    const stopShapeSquareReadyAudio = () => {
+        if (!shapeSquareReadyAudio) return;
+
+        shapeSquareReadyAudio.onended = null;
+        shapeSquareReadyAudio.pause();
+        try {
+            shapeSquareReadyAudio.currentTime = 0;
+        } catch (error) {
+            // Pausing is enough while the audio metadata is still loading.
+        }
+        shapeSquareReadyAudio = null;
+    };
+
+    const resetShapeSquareScene = () => {
+        clearShapeSquareTimers();
+        stopShapeSquareIntroAudio();
+        stopShapeSquareReadyAudio();
+        shapeSquareSession += 1;
+
+        if (shapeSquareCharacter3) {
+            shapeSquareCharacter3.hidden = false;
+            shapeSquareCharacter3.classList.remove('is-entering', 'is-exiting');
+        }
+        if (shapeSquareCharacter9) {
+            shapeSquareCharacter9.hidden = true;
+            shapeSquareCharacter9.classList.remove('is-entering', 'is-exiting');
+        }
+        if (shapeSquareCharacter4) {
+            shapeSquareCharacter4.hidden = true;
+            shapeSquareCharacter4.classList.remove('is-entering', 'is-exiting');
+        }
+        if (shapeSquareCharacter5) {
+            shapeSquareCharacter5.hidden = true;
+            shapeSquareCharacter5.classList.remove('is-entering', 'is-exiting');
+        }
+        if (shapeSquareBubble) {
+            shapeSquareBubble.classList.remove('is-ch9', 'is-ch4', 'is-ch5', 'is-entering', 'is-exiting', 'is-message-changing');
+        }
+        if (shapeSquareBubbleText) {
+            shapeSquareBubbleText.textContent = shapeSquareWelcomeMessage;
+        }
+        if (shapeSquareBgImage) {
+            shapeSquareBgImage.src = shapeSquareAreaBackgroundSource;
+        }
+        shapeSquarePage?.classList.remove('is-illustration-background');
+    };
+
+    const showShapeSquareIllustration = () => {
+        if (!shapeSquarePage || !isPageVisible(shapeSquarePage)) return;
+
+        clearShapeSquareTimers();
+        stopShapeSquareIntroAudio();
+        stopShapeSquareReadyAudio();
+        shapeSquareSession += 1;
+        if (shapeSquareBgImage) {
+            shapeSquareBgImage.src = shapeSquareIllustrationBackgroundSource;
+        }
+        shapeSquarePage.classList.add('is-illustration-background');
+    };
+
+    const transitionToShapeSquareIllustration = () => {
+        const runWithLoading = getAppLoadingTransition();
+        if (typeof runWithLoading === 'function' && runWithLoading(showShapeSquareIllustration)) return;
+        showShapeSquareIllustration();
+    };
+
+    const startShapeSquareScene = () => {
+        if (!shapeSquarePage || !shapeSquareCharacter3 || !shapeSquareCharacter9 || !shapeSquareCharacter4 || !shapeSquareCharacter5 || !shapeSquareBubble || !shapeSquareBubbleText) return;
+        if (!isPageVisible(shapeSquarePage)) return;
+
+        resetShapeSquareScene();
+        const session = shapeSquareSession;
+
+        shapeSquareCharacter3.getBoundingClientRect();
+        shapeSquareCharacter3.classList.add('is-entering');
+        shapeSquareBubble.getBoundingClientRect();
+        shapeSquareBubble.classList.add('is-entering');
+
+        let activeStageIndex = 0;
+        const showStage = (stageIndex) => {
+            if (session !== shapeSquareSession || !isPageVisible(shapeSquarePage)) return;
+            if (stageIndex === activeStageIndex || !shapeSquareIntroStages[stageIndex]) return;
+
+            const previousCharacter = shapeSquareIntroStages[activeStageIndex]?.character || null;
+            activeStageIndex = stageIndex;
+            const stage = shapeSquareIntroStages[stageIndex];
+            if (stage.character === previousCharacter) {
+                shapeSquareBubbleText.textContent = stage.message;
+                return;
+            }
+
+            [shapeSquareCharacter3, shapeSquareCharacter9, shapeSquareCharacter4, shapeSquareCharacter5].forEach((character) => {
+                if (!character) return;
+                character.hidden = character !== stage.character;
+                character.classList.remove('is-entering', 'is-exiting');
+            });
+
+            stage.character.hidden = false;
+            stage.character.getBoundingClientRect();
+            stage.character.classList.add('is-entering');
+
+            shapeSquareBubble.classList.remove('is-ch9', 'is-ch4', 'is-ch5', 'is-entering', 'is-exiting', 'is-message-changing');
+            if (stage.bubbleClass) shapeSquareBubble.classList.add(stage.bubbleClass);
+            shapeSquareBubbleText.textContent = stage.message;
+            shapeSquareBubble.getBoundingClientRect();
+            shapeSquareBubble.classList.add('is-entering');
+
+            if (stageIndex === shapeSquareIntroStages.length - 1) {
+                const AudioCtor = window.Audio;
+                if (!AudioCtor) return;
+
+                stopShapeSquareReadyAudio();
+                const readyAudio = new AudioCtor(shapeSquareReadyAudioSource);
+                shapeSquareReadyAudio = readyAudio;
+                readyAudio.preload = 'auto';
+                readyAudio.playsInline = true;
+                readyAudio.volume = 1;
+                readyAudio.onended = () => {
+                    if (shapeSquareReadyAudio === readyAudio) shapeSquareReadyAudio = null;
+                };
+                readyAudio.play().catch(() => {
+                    if (shapeSquareReadyAudio === readyAudio) shapeSquareReadyAudio = null;
+                });
+            }
+        };
+
+        const playTimedStagesWithoutAudio = () => {
+            shapeSquareIntroStages.slice(1).forEach((stage, stageOffset) => {
+                shapeSquareTimers.push(window.setTimeout(
+                    () => showStage(stageOffset + 1),
+                    stage.start * 1000,
+                ));
+            });
+        };
+
+        const AudioCtor = window.Audio;
+        if (!AudioCtor) {
+            playTimedStagesWithoutAudio();
+            return;
+        }
+
+        const introAudio = new AudioCtor(shapeSquareIntroAudioSource);
+        shapeSquareIntroAudio = introAudio;
+        introAudio.preload = 'auto';
+        introAudio.playsInline = true;
+        introAudio.volume = 1;
+        introAudio.load?.();
+        introAudio.onended = () => {
+            if (shapeSquareIntroAudio !== introAudio) return;
+            shapeSquareIntroAudio = null;
+            showStage(shapeSquareIntroStages.length - 1);
+        };
+
+        introAudio.play().then(() => {
+            const syncStageToAudio = () => {
+                if (session !== shapeSquareSession || !isPageVisible(shapeSquarePage)) return;
+                if (shapeSquareIntroAudio !== introAudio) return;
+
+                let stageIndex = 0;
+                shapeSquareIntroStages.forEach((stage, currentStageIndex) => {
+                    if (introAudio.currentTime >= stage.start) stageIndex = currentStageIndex;
+                });
+                showStage(stageIndex);
+
+                if (introAudio.currentTime >= shapeSquareIntroStages[shapeSquareIntroStages.length - 1].start) {
+                    introAudio.pause();
+                    shapeSquareIntroAudio = null;
+                    shapeSquareAudioFrame = null;
+                    return;
+                }
+
+                shapeSquareAudioFrame = window.requestAnimationFrame(syncStageToAudio);
+            };
+
+            shapeSquareAudioFrame = window.requestAnimationFrame(syncStageToAudio);
+        }).catch(() => {
+            if (shapeSquareIntroAudio !== introAudio) return;
+            introAudio.onended = null;
+            shapeSquareIntroAudio = null;
+            playTimedStagesWithoutAudio();
+        });
     };
 
     const lettertraceTraceGuidePaths = {
@@ -1947,6 +2282,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    const getAppLoadingTransition = () => {
+        try {
+            return window.top && window.top !== window
+                ? window.top.__learnscapeRunWithLoading
+                : window.__learnscapeRunWithLoading;
+        } catch (error) {
+            return null;
+        }
+    };
+
     const navigateApp = (target) => {
         const shellNavigate = getAppNavigator();
 
@@ -2924,6 +3269,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (control.classList.contains('fullscreen-restore-button')) return 'tap';
         if (control.classList.contains('circle-lesson-progress-button')) return control.matches('[data-circle-lesson-next]') ? 'chime' : 'pop';
         if (control.classList.contains('shape-area-start-button')) return 'chime';
+        if (control.classList.contains('shape-area-square-start-button')) return 'chime';
         if (control.classList.contains('game-menu-btn')) return 'pop';
         if (control.classList.contains('rotate-button')) return 'spark';
         if (control.classList.contains('game1-tutorial-button')) return 'spark';
@@ -4070,6 +4416,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     circleHuntStartButton?.addEventListener('click', startCircleHuntCountdown);
     circleHuntPlayAgainButton?.addEventListener('click', startCircleHuntCountdown);
+    shapeSquareStartButton?.addEventListener('click', transitionToShapeSquareIllustration);
     circleIllustrationScene?.addEventListener('click', (event) => {
         if (circleHuntState !== 'playing') return;
 
@@ -4131,9 +4478,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    let activeLearnscapeRoute = isPageVisible(circleIllustrationPage)
+        ? 'circleIllustration'
+        : isPageVisible(shapeCirclePage)
+            ? 'shapeCircle'
+            : isPageVisible(shapeSquarePage) ? 'shapeSquare' : null;
+
     window.addEventListener('learnscape:routechange', (event) => {
+        const previousRoute = activeLearnscapeRoute;
+        activeLearnscapeRoute = event.detail?.route || null;
+
         if (event.detail?.route !== 'circleIllustration') {
             resetCircleIllustrationVideo();
+        }
+        if (event.detail?.route !== 'shapeSquare') {
+            resetShapeSquareScene();
         }
 
         if (event.detail?.route === 'lettertrace') {
@@ -4151,7 +4510,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (event.detail?.route === 'shapeCircle') {
-            startShapeCircleScene();
+            if (previousRoute === 'circleIllustration') {
+                resetShapeCircleScene();
+                showShapeCircleCh3FinalMessage(false);
+            } else {
+                startShapeCircleScene();
+            }
+            return;
+        }
+
+        if (event.detail?.route === 'shapeSquare') {
+            resetShapeCircleScene();
+            startShapeSquareScene();
             return;
         }
 
@@ -4177,6 +4547,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         startShapeCircleScene();
     } else {
         resetShapeCircleScene();
+    }
+
+    if (isPageVisible(shapeSquarePage)) {
+        startShapeSquareScene();
+    } else {
+        resetShapeSquareScene();
     }
 
     resetCircleIllustrationVideo();

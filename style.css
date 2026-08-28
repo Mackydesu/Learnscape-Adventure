@@ -2460,6 +2460,14 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
     transform: translateX(-4rem) translateY(0.4rem) scale(0.96);
 }
 
+.shape-area-character.is-timed-exit {
+    transition-duration: 0.1s;
+}
+
+.shape-area-character-ch2[hidden] {
+    display: none;
+}
+
 .shape-area-character-speaker {
     left: clamp(2.2rem, 5vw, 5rem);
     bottom: 0;
@@ -2653,6 +2661,10 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     transform: translateY(0.7rem) scale(0.96);
 }
 
+.shape-area-speech-bubble.is-timed-exit {
+    transition-duration: 0.1s;
+}
+
 .shape-area-speech-bubble:not(.shape-area-speech-bubble-ch3),
 .shape-area-speech-bubble:not(.shape-area-speech-bubble-ch3).is-visible,
 .shape-area-speech-bubble:not(.shape-area-speech-bubble-ch3).is-fading {
@@ -2793,6 +2805,320 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     color: #ffffff;
 }
 
+.shape-area-square-character {
+    position: absolute;
+    left: clamp(-1.5rem, 1vw, 1rem);
+    bottom: 0;
+    z-index: 2;
+    display: block;
+    width: auto;
+    height: clamp(16rem, 36vw, 35rem);
+    pointer-events: none;
+    user-select: none;
+    filter: drop-shadow(0 0.9rem 1rem rgba(34, 20, 4, 0.3));
+    transform-origin: center bottom;
+    animation:
+        shapeAreaSquareCharacterIn 0.7s cubic-bezier(0.2, 1.15, 0.35, 1) both,
+        shapeAreaSquareCharacterFloat 3s ease-in-out 0.7s infinite;
+}
+
+.shape-area-square-character[hidden] {
+    display: none;
+}
+
+#learnscape-shape-square-page.is-illustration-background .shape-area-square-character {
+    display: none;
+}
+
+#learnscape-shape-square-page.is-illustration-background .shape-area-square-speech-bubble,
+#learnscape-shape-square-page.is-illustration-background .shape-area-title-square,
+#learnscape-shape-square-page.is-illustration-background .shape-area-square-start-button {
+    display: none;
+}
+
+.shape-area-square-character-ch4 {
+    left: calc(clamp(-1.5rem, 1vw, 1rem) + clamp(2rem, 6vw, 6rem));
+}
+
+.shape-area-square-character.is-exiting {
+    animation: shapeAreaSquareCharacterOut 0.45s ease both;
+}
+
+.shape-area-square-character.is-entering {
+    animation:
+        shapeAreaSquareCharacterCh9In 0.65s cubic-bezier(0.2, 1.15, 0.35, 1) both,
+        shapeAreaSquareCharacterFloat 3s ease-in-out 0.65s infinite;
+}
+
+.shape-area-square-speech-bubble {
+    position: absolute;
+    left: calc(clamp(-1.5rem, 1vw, 1rem) + clamp(8rem, 18vw, 17.5rem));
+    bottom: calc(clamp(16rem, 36vw, 35rem) + clamp(0.45rem, 1vw, 1rem));
+    z-index: 3;
+    width: fit-content;
+    max-width: min(36vw, 22rem);
+    padding: 0.85rem 1rem;
+    border: clamp(0.12rem, 0.22vw, 0.2rem) solid rgba(113, 71, 37, 0.72);
+    border-radius: 1.35rem 1.35rem 1.2rem 0.85rem;
+    background:
+        radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.95) 0 14%, rgba(255, 255, 255, 0) 32%),
+        linear-gradient(180deg, rgba(255, 252, 236, 0.98), rgba(255, 235, 161, 0.98)),
+        #ffeaa2;
+    color: #4b250d;
+    font: 800 clamp(1.35rem, 2.2vw, 2rem) 'Fredoka', 'Baloo 2', sans-serif;
+    line-height: 1.08;
+    text-align: center;
+    text-shadow: 0 0.06rem 0 rgba(255, 255, 255, 0.88);
+    box-shadow:
+        inset 0 0.12rem 0 rgba(255, 255, 255, 0.72),
+        inset 0 -0.18rem 0 rgba(126, 73, 29, 0.1),
+        0 0.32rem 0.2rem rgba(92, 54, 22, 0.16),
+        0 0.95rem 1.35rem rgba(39, 23, 10, 0.24);
+    pointer-events: none;
+    translate: -50% 0;
+    animation: shapeAreaSquareBubbleIn 0.55s cubic-bezier(0.2, 1.2, 0.35, 1) 0.35s both;
+}
+
+.shape-area-square-speech-bubble span {
+    display: block;
+    opacity: 1;
+    transition: opacity 0.22s ease;
+}
+
+.shape-area-square-speech-bubble.is-exiting {
+    animation: shapeAreaSquareBubbleOut 0.45s ease both;
+}
+
+.shape-area-square-speech-bubble.is-entering {
+    animation: shapeAreaSquareBubbleReturn 0.5s cubic-bezier(0.2, 1.15, 0.35, 1) both;
+}
+
+.shape-area-square-speech-bubble.is-ch9 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    max-width: min(42vw, 29rem);
+    box-sizing: border-box;
+    font-size: clamp(1.35rem, 2vw, 1.85rem);
+}
+
+.shape-area-square-speech-bubble.is-ch4 {
+    left: calc(clamp(-1.5rem, 1vw, 1rem) + clamp(8rem, 18vw, 17.5rem) + clamp(2rem, 6vw, 6rem));
+    width: fit-content;
+    max-width: min(44vw, 31rem);
+    font-size: clamp(1.3rem, 1.95vw, 1.8rem);
+}
+
+.shape-area-square-speech-bubble.is-ch5 {
+    width: fit-content;
+    max-width: min(36vw, 22rem);
+    font-size: clamp(1.65rem, 2.45vw, 2.25rem);
+}
+
+.shape-area-square-speech-bubble.is-message-changing span {
+    opacity: 0;
+}
+
+.shape-area-square-speech-bubble::before,
+.shape-area-square-speech-bubble::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    width: clamp(1rem, 1.7vw, 1.35rem);
+    height: clamp(1rem, 1.7vw, 1.35rem);
+    transform: translateX(-50%) rotate(45deg) skew(5deg, 5deg);
+    transform-origin: center;
+}
+
+.shape-area-square-speech-bubble::before {
+    bottom: clamp(-0.82rem, -1.05vw, -0.62rem);
+    background: rgba(113, 71, 37, 0.68);
+    box-shadow: 0.28rem 0.38rem 0.55rem rgba(39, 23, 10, 0.2);
+}
+
+.shape-area-square-speech-bubble::after {
+    bottom: clamp(-0.64rem, -0.88vw, -0.48rem);
+    left: calc(50% + 0.08rem);
+    background: linear-gradient(135deg, rgba(255, 239, 171, 0.98), rgba(255, 229, 137, 0.98));
+}
+
+@keyframes shapeAreaSquareCharacterIn {
+    from {
+        opacity: 0;
+        transform: translateY(1.5rem) scale(0.72);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes shapeAreaSquareCharacterFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-0.35rem);
+    }
+}
+
+@keyframes shapeAreaSquareCharacterOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(-2.5rem) translateY(0.5rem) scale(0.9);
+    }
+}
+
+@keyframes shapeAreaSquareCharacterCh9In {
+    from {
+        opacity: 0;
+        transform: translateY(1.5rem) scale(0.68);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes shapeAreaSquareBubbleIn {
+    from {
+        opacity: 0;
+        transform: translateY(0.8rem) scale(0.82);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes shapeAreaSquareBubbleOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(0.5rem) scale(0.9);
+    }
+}
+
+@keyframes shapeAreaSquareBubbleReturn {
+    from {
+        opacity: 0;
+        transform: translateY(0.75rem) scale(0.84);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-height: 500px) {
+    .shape-area-square-character-ch9 {
+        height: clamp(14rem, 62vh, 15rem);
+    }
+
+    .shape-area-square-speech-bubble {
+        left: calc(clamp(-1.5rem, 1vw, 1rem) + clamp(7rem, 17vw, 14rem));
+        bottom: clamp(15.5rem, 34vw, 17rem);
+    }
+
+    .shape-area-square-speech-bubble.is-ch9 {
+        width: fit-content;
+        max-width: min(26rem, 44vw);
+        font-size: clamp(1.1rem, 2vw, 1.45rem);
+    }
+
+    .shape-area-square-speech-bubble.is-ch4,
+    .shape-area-square-speech-bubble.is-ch5 {
+        width: fit-content;
+        max-width: min(28rem, 48vw);
+        font-size: clamp(1.15rem, 2.05vw, 1.55rem);
+    }
+
+    .shape-area-square-speech-bubble.is-ch4 {
+        left: calc(clamp(-1.5rem, 1vw, 1rem) + clamp(7rem, 17vw, 14rem) + clamp(2rem, 6vw, 6rem));
+    }
+}
+
+.shape-area-square-start-button {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(1.5rem, 5vh, 4rem);
+    z-index: 2;
+    min-width: clamp(8.5rem, 15vw, 14.5rem);
+    padding: clamp(0.7rem, 1.25vw, 1.05rem) clamp(1.65rem, 3.1vw, 3.1rem);
+    border: clamp(0.16rem, 0.3vw, 0.3rem) solid #663116;
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, rgba(255, 248, 152, 0.96) 0%, rgba(255, 202, 67, 0.98) 48%, rgba(213, 111, 33, 0.98) 100%),
+        linear-gradient(90deg, #73411c, #d58838 24%, #5a2915 50%, #d88a3a 76%, #73411c);
+    color: #4b250d;
+    font: 900 clamp(1.45rem, 2.8vw, 2.8rem) 'Fredoka', 'Baloo 2', sans-serif;
+    line-height: 1;
+    text-transform: uppercase;
+    text-shadow: 0 0.1rem 0 rgba(255, 244, 177, 0.95);
+    box-shadow:
+        inset 0 0.14rem 0 rgba(255, 255, 255, 0.62),
+        inset 0 -0.28rem 0 rgba(102, 49, 22, 0.22),
+        0 0.38rem 0 #552711,
+        0 0.85rem 1.25rem rgba(36, 20, 8, 0.32),
+        0 0 0 0.35rem rgba(255, 230, 92, 0.2);
+    cursor: pointer;
+    transform: translateX(-50%);
+    animation: shapeAreaSquareStartFloat 2.4s ease-in-out infinite;
+    transition:
+        transform 0.16s ease,
+        filter 0.16s ease,
+        box-shadow 0.16s ease;
+}
+
+.shape-area-square-start-button:hover,
+.shape-area-square-start-button:focus-visible {
+    outline: none;
+    filter: brightness(1.08) saturate(1.1);
+    box-shadow:
+        inset 0 0.14rem 0 rgba(255, 255, 255, 0.68),
+        inset 0 -0.28rem 0 rgba(102, 49, 22, 0.2),
+        0 0.5rem 0 #4b210f,
+        0 1rem 1.45rem rgba(36, 20, 8, 0.36),
+        0 0 0 0.42rem rgba(255, 238, 104, 0.3);
+    transform: translateX(-50%) translateY(-0.18rem) scale(1.05);
+}
+
+.shape-area-square-start-button:active {
+    filter: brightness(0.98) saturate(1.04);
+    box-shadow:
+        inset 0 0.1rem 0 rgba(255, 255, 255, 0.55),
+        inset 0 -0.16rem 0 rgba(102, 49, 22, 0.24),
+        0 0.14rem 0 #4b210f,
+        0 0.42rem 0.75rem rgba(36, 20, 8, 0.28),
+        0 0 0 0.26rem rgba(255, 238, 104, 0.24);
+    transform: translateX(-50%) translateY(0.18rem) scale(0.96);
+}
+
+@keyframes shapeAreaSquareStartFloat {
+    0%, 100% {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    50% {
+        transform: translateX(-50%) translateY(-0.32rem);
+    }
+}
+
 @keyframes shapeAreaTitleBounceIn {
     0% {
         opacity: 0;
@@ -2829,8 +3155,19 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .shape-area-title {
+    .shape-area-title,
+    .shape-area-square-character,
+    .shape-area-square-character.is-entering,
+    .shape-area-square-character.is-exiting,
+    .shape-area-square-speech-bubble,
+    .shape-area-square-speech-bubble.is-entering,
+    .shape-area-square-speech-bubble.is-exiting,
+    .shape-area-square-start-button {
         animation: none;
+    }
+
+    .shape-area-square-speech-bubble span {
+        transition: none;
     }
 
     .circle-sort-object img,
