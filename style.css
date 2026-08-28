@@ -1932,7 +1932,8 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
     transition: transform 0.18s ease, filter 0.18s ease;
 }
 
-.circle-lesson-progress-button[data-circle-lesson-next] {
+.circle-lesson-progress-button[data-circle-lesson-next],
+.circle-lesson-progress-button[data-square-lesson-next] {
     aspect-ratio: 308 / 250;
 }
 
@@ -2836,6 +2837,44 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     display: none;
 }
 
+#learnscape-shape-square-page .shape-area-bg {
+    transition: filter 0.5s ease, transform 0.5s ease;
+}
+
+#learnscape-shape-square-page.is-illustration-background:not(.is-lesson-complete) .shape-area-bg {
+    filter: blur(7px);
+    transform: scale(1.025);
+}
+
+.square-illustration-video-stage {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 4;
+    display: none;
+    transform: translate(-50%, -50%);
+}
+
+#learnscape-shape-square-page.is-illustration-background:not(.is-progress-visible):not(.is-lesson-complete) .square-illustration-video-stage {
+    display: block;
+}
+
+#learnscape-shape-square-page.is-progress-visible .square-illustration-video-stage,
+#learnscape-shape-square-page.is-lesson-complete .square-illustration-video-stage {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+#learnscape-shape-square-page.is-progress-visible .square-lesson-progress {
+    display: grid;
+}
+
+#learnscape-shape-square-page.is-lesson-complete .shape-area-bg {
+    filter: none;
+    transform: scale(1);
+}
+
 .shape-area-square-character-ch4 {
     left: calc(clamp(-1.5rem, 1vw, 1rem) + clamp(2rem, 6vw, 6rem));
 }
@@ -3109,6 +3148,22 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     transform: translateX(-50%) translateY(0.18rem) scale(0.96);
 }
 
+.shape-area-square-start-button.is-clicking,
+.shape-area-square-start-button.is-clicking:hover,
+.shape-area-square-start-button.is-clicking:focus-visible {
+    animation: shapeAreaSquareStartPress 0.18s cubic-bezier(0.18, 0.9, 0.2, 1) both;
+    background:
+        linear-gradient(180deg, rgba(255, 253, 177, 0.98) 0%, rgba(255, 222, 85, 0.98) 46%, rgba(229, 128, 38, 0.98) 100%),
+        linear-gradient(90deg, #73411c, #d58838 24%, #5a2915 50%, #d88a3a 76%, #73411c);
+    filter: brightness(1.08) saturate(1.12);
+    box-shadow:
+        inset 0 0.16rem 0 rgba(255, 255, 255, 0.78),
+        inset 0 -0.16rem 0 rgba(102, 49, 22, 0.22),
+        0 0.16rem 0 #4b210f,
+        0 0.5rem 0.8rem rgba(36, 20, 8, 0.3),
+        0 0 0 0.42rem rgba(255, 244, 95, 0.34);
+}
+
 @keyframes shapeAreaSquareStartFloat {
     0%, 100% {
         transform: translateX(-50%) translateY(0);
@@ -3116,6 +3171,20 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 
     50% {
         transform: translateX(-50%) translateY(-0.32rem);
+    }
+}
+
+@keyframes shapeAreaSquareStartPress {
+    0% {
+        transform: translateX(-50%) translateY(-0.12rem) scale(1.04);
+    }
+
+    58% {
+        transform: translateX(-50%) translateY(0.24rem) scale(0.94);
+    }
+
+    100% {
+        transform: translateX(-50%) translateY(0.04rem) scale(0.99);
     }
 }
 

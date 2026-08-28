@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260828-85';
+    const appVersion = '20260828-89';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -155,6 +155,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeSquareBubble = shapeSquarePage?.querySelector('.shape-area-square-speech-bubble') || null;
     const shapeSquareBubbleText = shapeSquareBubble?.querySelector('span') || null;
     const shapeSquareStartButton = shapeSquarePage?.querySelector('.shape-area-square-start-button') || null;
+    const shapeSquareVideoStage = shapeSquarePage?.querySelector('.square-illustration-video-stage') || null;
+    const shapeSquareVideo = shapeSquarePage?.querySelector('.square-illustration-video') || null;
+    const shapeSquarePlayButton = shapeSquarePage?.querySelector('.square-illustration-play-button') || null;
+    const shapeSquareSkipButton = shapeSquarePage?.querySelector('.square-illustration-skip-button') || null;
+    const shapeSquareProgress = shapeSquarePage?.querySelector('.square-lesson-progress') || null;
+    const shapeSquareReplayButton = shapeSquarePage?.querySelector('[data-square-lesson-replay]') || null;
+    const shapeSquareNextButton = shapeSquarePage?.querySelector('[data-square-lesson-next]') || null;
+    const shapeSquareStars = shapeSquarePage?.querySelector('.square-lesson-stars') || null;
+    const shapeSquareStarMessage = shapeSquarePage?.querySelector('.square-lesson-star-message') || null;
     let shapeCircleBubbleCh3Messages = [];
     try {
         shapeCircleBubbleCh3Messages = JSON.parse(shapeCircleBubbleCh3?.dataset.messages || '[]');
@@ -211,6 +220,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     let shapeSquareIntroAudio = null;
     let shapeSquareReadyAudio = null;
     let shapeSquareAudioFrame = null;
+    let shapeSquareStartPressTimer = null;
+    let shapeSquareCelebrationTimers = [];
     let circleIllustrationCelebrationTimers = [];
     const circleMissionGuideMessages = [
         'Para sa ating Circle Mission',
@@ -647,11 +658,128 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeSquareReadyAudio = null;
     };
 
+    const setShapeSquarePlayButtonVisible = (isVisible) => {
+        if (!shapeSquarePlayButton) return;
+
+        shapeSquarePlayButton.hidden = !isVisible;
+        shapeSquarePlayButton.style.display = isVisible ? '' : 'none';
+    };
+
+    const setShapeSquareSkipButtonVisible = (isVisible) => {
+        if (!shapeSquareSkipButton) return;
+
+        shapeSquareSkipButton.hidden = !isVisible;
+    };
+
+    const hideShapeSquareProgress = () => {
+        shapeSquareCelebrationTimers.forEach((timerId) => window.clearTimeout(timerId));
+        shapeSquareCelebrationTimers = [];
+        shapeSquarePage?.classList.remove('is-progress-visible');
+        shapeSquareProgress?.setAttribute('aria-hidden', 'true');
+    };
+
+    const setShapeSquareEarnedStars = (count) => {
+        if (!shapeSquareStars) return;
+
+        const earnedStars = Math.max(0, Math.min(3, Number(count) || 0));
+        const messages = ['', 'Well done!', 'Great job!', "Wow! You're a shape superstar!"];
+        shapeSquareStars.dataset.earnedStars = String(earnedStars);
+        shapeSquareStars.setAttribute('aria-label', `${earnedStars} of 3 stars earned`);
+        if (shapeSquareStarMessage) {
+            shapeSquareStarMessage.textContent = messages[earnedStars];
+        }
+    };
+
+    const resetShapeSquareLessonVideo = () => {
+        hideShapeSquareProgress();
+        shapeSquarePage?.classList.remove('is-lesson-complete');
+        setShapeSquareEarnedStars(0);
+        setShapeSquareSkipButtonVisible(false);
+        shapeSquareVideo?.pause?.();
+
+        if (shapeSquareVideo) {
+            try {
+                shapeSquareVideo.currentTime = 0;
+            } catch (error) {
+                // Pausing is enough while the video metadata is still loading.
+            }
+        }
+
+        shapeSquareVideoStage?.setAttribute('aria-hidden', 'true');
+        setShapeSquarePlayButtonVisible(true);
+    };
+
+    const showShapeSquareProgress = () => {
+        if (!shapeSquarePage || !shapeSquareProgress) return;
+
+        const wasAlreadyVisible = shapeSquarePage.classList.contains('is-progress-visible');
+        shapeSquareVideo?.pause();
+        setShapeSquarePlayButtonVisible(false);
+        setShapeSquareSkipButtonVisible(false);
+        shapeSquarePage.classList.remove('is-lesson-complete');
+        shapeSquarePage.classList.add('is-progress-visible');
+        setShapeSquareEarnedStars(1);
+        shapeSquareProgress.setAttribute('aria-hidden', 'false');
+        shapeSquareVideoStage?.setAttribute('aria-hidden', 'true');
+        shapeSquareNextButton?.focus({ preventScroll: true });
+
+        if (!wasAlreadyVisible) {
+            playUiClickSound('boardSuccess');
+            const starSoundTimer = window.setTimeout(() => {
+                playUiClickSound('starPop');
+                shapeSquareCelebrationTimers = shapeSquareCelebrationTimers.filter(
+                    (timerId) => timerId !== starSoundTimer,
+                );
+            }, 700);
+            shapeSquareCelebrationTimers.push(starSoundTimer);
+        }
+    };
+
+    const playShapeSquareLessonVideo = async () => {
+        if (!shapeSquareVideo || !shapeSquarePage?.classList.contains('is-illustration-background') || !isPageVisible(shapeSquarePage)) return;
+
+        try {
+            hideShapeSquareProgress();
+            shapeSquarePage.classList.remove('is-lesson-complete');
+            setShapeSquareEarnedStars(0);
+            setShapeSquarePlayButtonVisible(false);
+            setShapeSquareSkipButtonVisible(true);
+            shapeSquareVideoStage?.setAttribute('aria-hidden', 'false');
+
+            try {
+                shapeSquareVideo.currentTime = 0;
+            } catch (error) {
+                // The clip can still begin while its metadata is preparing.
+            }
+
+            await shapeSquareVideo.play();
+        } catch (error) {
+            setShapeSquarePlayButtonVisible(true);
+            setShapeSquareSkipButtonVisible(false);
+            console.warn('Square lesson video could not play.', error);
+        }
+    };
+
+    const finishShapeSquareLesson = () => {
+        hideShapeSquareProgress();
+        shapeSquareVideo?.pause();
+        shapeSquarePage?.classList.add('is-lesson-complete');
+        shapeSquareVideoStage?.setAttribute('aria-hidden', 'true');
+        setShapeSquarePlayButtonVisible(false);
+        setShapeSquareSkipButtonVisible(false);
+    };
+
     const resetShapeSquareScene = () => {
         clearShapeSquareTimers();
         stopShapeSquareIntroAudio();
         stopShapeSquareReadyAudio();
+        resetShapeSquareLessonVideo();
         shapeSquareSession += 1;
+        if (shapeSquareStartPressTimer !== null) {
+            window.clearTimeout(shapeSquareStartPressTimer);
+            shapeSquareStartPressTimer = null;
+        }
+        shapeSquareStartButton?.classList.remove('is-clicking');
 
         if (shapeSquareCharacter3) {
             shapeSquareCharacter3.hidden = false;
@@ -688,16 +816,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         stopShapeSquareIntroAudio();
         stopShapeSquareReadyAudio();
         shapeSquareSession += 1;
+        shapeSquareStartButton?.classList.remove('is-clicking');
         if (shapeSquareBgImage) {
             shapeSquareBgImage.src = shapeSquareIllustrationBackgroundSource;
         }
+        resetShapeSquareLessonVideo();
         shapeSquarePage.classList.add('is-illustration-background');
+        shapeSquareVideoStage?.setAttribute('aria-hidden', 'false');
     };
 
     const transitionToShapeSquareIllustration = () => {
-        const runWithLoading = getAppLoadingTransition();
-        if (typeof runWithLoading === 'function' && runWithLoading(showShapeSquareIllustration)) return;
-        showShapeSquareIllustration();
+        if (!shapeSquarePage || !isPageVisible(shapeSquarePage)) return false;
+        if (shapeSquareStartPressTimer !== null) return true;
+
+        shapeSquareStartButton?.classList.add('is-clicking');
+        shapeSquareStartPressTimer = window.setTimeout(() => {
+            shapeSquareStartPressTimer = null;
+            const runWithLoading = getAppLoadingTransition();
+            if (typeof runWithLoading === 'function') {
+                runWithLoading(showShapeSquareIllustration);
+                return;
+            }
+            showShapeSquareIllustration();
+        }, 160);
+        return true;
     };
 
     const startShapeSquareScene = () => {
@@ -3267,7 +3409,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (control.classList.contains('circle-illustration-play-button')) return 'chime';
         if (control.classList.contains('circle-illustration-skip-button')) return 'tap';
         if (control.classList.contains('fullscreen-restore-button')) return 'tap';
-        if (control.classList.contains('circle-lesson-progress-button')) return control.matches('[data-circle-lesson-next]') ? 'chime' : 'pop';
+        if (control.classList.contains('circle-lesson-progress-button')) {
+            return control.matches('[data-circle-lesson-next], [data-square-lesson-next]') ? 'chime' : 'pop';
+        }
         if (control.classList.contains('shape-area-start-button')) return 'chime';
         if (control.classList.contains('shape-area-square-start-button')) return 'chime';
         if (control.classList.contains('game-menu-btn')) return 'pop';
@@ -4416,7 +4560,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     circleHuntStartButton?.addEventListener('click', startCircleHuntCountdown);
     circleHuntPlayAgainButton?.addEventListener('click', startCircleHuntCountdown);
-    shapeSquareStartButton?.addEventListener('click', transitionToShapeSquareIllustration);
     circleIllustrationScene?.addEventListener('click', (event) => {
         if (circleHuntState !== 'playing') return;
 
@@ -4467,6 +4610,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         ) {
             setCircleIllustrationPlayButtonVisible(true);
             setCircleIllustrationSkipButtonVisible(false);
+        }
+    });
+
+    shapeSquarePlayButton?.addEventListener('click', playShapeSquareLessonVideo);
+    shapeSquareSkipButton?.addEventListener('click', showShapeSquareProgress);
+    shapeSquareVideo?.addEventListener('ended', showShapeSquareProgress);
+    shapeSquareReplayButton?.addEventListener('click', playShapeSquareLessonVideo);
+    shapeSquareNextButton?.addEventListener('click', finishShapeSquareLesson);
+
+    shapeSquareVideo?.addEventListener('play', () => {
+        setShapeSquarePlayButtonVisible(false);
+        setShapeSquareSkipButtonVisible(true);
+    });
+
+    shapeSquareVideo?.addEventListener('pause', () => {
+        if (
+            shapeSquareVideo.currentTime > 0
+            && !shapeSquareVideo.ended
+            && !shapeSquarePage?.classList.contains('is-progress-visible')
+            && !shapeSquarePage?.classList.contains('is-lesson-complete')
+        ) {
+            setShapeSquarePlayButtonVisible(true);
+            setShapeSquareSkipButtonVisible(false);
         }
     });
 
@@ -4567,6 +4733,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const target = link.getAttribute('data-route') || link.getAttribute('href');
 
             event.preventDefault();
+
+            if (target === 'square-illustration') {
+                transitionToShapeSquareIllustration();
+                return;
+            }
 
             if (!target || target.startsWith('#') || isNavigating) return;
 

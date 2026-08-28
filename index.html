@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260828-84">
+    <link rel="stylesheet" href="style.css?v=20260828-89">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -352,7 +352,59 @@
             <span>Area</span>
             <strong>2</strong>
         </div>
-        <button class="shape-area-square-start-button" type="button">Start</button>
+        <button class="shape-area-square-start-button loading-link" type="button" data-route="square-illustration">Start</button>
+        <div class="circle-illustration-video-stage square-illustration-video-stage" aria-hidden="true">
+            <div class="circle-illustration-tv-frame">
+                <div class="circle-illustration-tv-screen">
+                    <video class="circle-illustration-video square-illustration-video" playsinline preload="metadata" aria-label="Square lesson video">
+                        <source src="assets/Videos/squareshape.mp4" type="video/mp4">
+                    </video>
+                    <button class="circle-illustration-play-button square-illustration-play-button" type="button" aria-label="Play square lesson video">
+                        <svg class="circle-illustration-play-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                            <path class="circle-illustration-play-triangle" d="M40 30 L72 50 L40 70 Z"></path>
+                        </svg>
+                    </button>
+                    <div class="circle-illustration-video-controls" aria-label="Video controls">
+                        <button class="circle-illustration-skip-button square-illustration-skip-button" type="button" aria-label="Skip square lesson video" hidden>Skip</button>
+                    </div>
+                </div>
+                <div class="circle-illustration-tv-stand-row" aria-hidden="true">
+                    <span class="circle-illustration-tv-stand circle-illustration-tv-stand-left"></span>
+                    <span class="circle-illustration-tv-stand circle-illustration-tv-stand-right"></span>
+                </div>
+            </div>
+        </div>
+        <section class="circle-lesson-progress square-lesson-progress" aria-label="Square lesson progress" aria-hidden="true">
+            <div class="circle-lesson-progress-board">
+                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/progressboard.webp" alt="">
+                <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Lesson Complete!">
+                    <path id="squareLessonTitleCurve" d="M 4 44 Q 100 32 196 44" fill="none"></path>
+                    <text textLength="184" lengthAdjust="spacingAndGlyphs">
+                        <textPath href="#squareLessonTitleCurve" startOffset="50%" text-anchor="middle">Lesson Complete!</textPath>
+                    </text>
+                </svg>
+                <div class="circle-lesson-stars square-lesson-stars" data-earned-stars="0" role="img" aria-label="0 of 3 stars earned">
+                    <span class="circle-lesson-star-slot">
+                        <img class="circle-lesson-star-real" src="assets/Shape UI/1star.webp" alt="">
+                    </span>
+                    <span class="circle-lesson-star-slot">
+                        <img class="circle-lesson-star-real" src="assets/Shape UI/2star.webp" alt="">
+                    </span>
+                    <span class="circle-lesson-star-slot">
+                        <img class="circle-lesson-star-real" src="assets/Shape UI/1star.webp" alt="">
+                    </span>
+                </div>
+                <p class="circle-lesson-star-message square-lesson-star-message" aria-live="polite"></p>
+                <div class="circle-lesson-progress-actions">
+                    <button class="circle-lesson-progress-button" type="button" data-square-lesson-replay aria-label="Replay square lesson">
+                        <img src="assets/Buttons/replay.webp" alt="">
+                    </button>
+                    <button class="circle-lesson-progress-button" type="button" data-square-lesson-next aria-label="Continue">
+                        <img src="assets/Buttons/next.webp" alt="">
+                    </button>
+                </div>
+            </div>
+        </section>
         <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Return to Shape Island">
             <span>‹</span>
             Back
@@ -637,7 +689,7 @@
         </a>
     </section>
 
-    <script src="script.js?v=20260828-85"></script>
+    <script src="script.js?v=20260828-89"></script>
     </div>
 
     <script>
