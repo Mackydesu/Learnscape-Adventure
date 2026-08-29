@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260829-104';
+    const appVersion = '20260829-109';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -162,6 +162,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeSquareNextButton = shapeSquarePage?.querySelector('[data-square-lesson-next]') || null;
     const shapeSquareStars = shapeSquarePage?.querySelector('.square-lesson-stars') || null;
     const shapeSquareStarMessage = shapeSquarePage?.querySelector('.square-lesson-star-message') || null;
+    const squareObjectPanel = shapeSquarePage?.querySelector('.square-object-panel') || null;
+    const squareObjectPieces = Array.from(shapeSquarePage?.querySelectorAll('[data-square-piece]') || []);
+    const squareObjectTargets = Array.from(shapeSquarePage?.querySelectorAll('[data-square-target]') || []);
     let shapeCircleBubbleCh3Messages = [];
     try {
         shapeCircleBubbleCh3Messages = JSON.parse(shapeCircleBubbleCh3?.dataset.messages || '[]');
@@ -178,7 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             'Handa ka na ba?',
         ];
     }
-    const shapeCircleIntroAudioSource = 'assets/Audios/introcircle.mp3?v=20260829-104';
+    const shapeCircleIntroAudioSource = 'assets/Audios/introcircle.mp3?v=20260829-109';
     const shapeCircleFinalAudioSource = 'assets/Audios/Handa ka na ba.mp3';
     const shapeCircleIntroStartDelay = 750;
     const shapeCircleIntroSegments = [
@@ -217,6 +220,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     let shapeSquareAudioFrame = null;
     let shapeSquareStartPressTimer = null;
     let shapeSquareCelebrationTimers = [];
+    let squareObjectActiveDrag = null;
+    const squareObjectSnapTimers = new Map();
+    const squareObjectTargetSpecs = {
+        1: { x: 801, y: 206, width: 122, height: 121 },
+        2: { x: 234, y: 367, width: 118, height: 117 },
+        3: { x: 1528, y: 448, width: 90, height: 91 },
+        4: { x: 1285, y: 576, width: 129, height: 127 },
+        5: { x: 770, y: 639, width: 154, height: 152 },
+    };
     let circleIllustrationCelebrationTimers = [];
     const circleMissionGuideMessages = [
         'Para sa ating Circle Mission',
@@ -590,6 +602,193 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeSquareSkipButton.hidden = !isVisible;
     };
 
+    const getSquareObjectTargetRect = (pieceNumber) => {
+        if (!shapeSquarePage) return null;
+
+        const spec = squareObjectTargetSpecs[pieceNumber];
+        if (!spec) return null;
+
+        const viewportWidth = shapeSquarePage.clientWidth || window.innerWidth;
+        const viewportHeight = shapeSquarePage.clientHeight || window.innerHeight;
+        const sourceWidth = shapeSquareBgImage?.naturalWidth || 1680;
+        const sourceHeight = shapeSquareBgImage?.naturalHeight || 945;
+        const coverScale = Math.max(viewportWidth / sourceWidth, viewportHeight / sourceHeight);
+        const renderedWidth = sourceWidth * coverScale;
+        const renderedHeight = sourceHeight * coverScale;
+        const offsetX = (viewportWidth - renderedWidth) / 2;
+        const offsetY = (viewportHeight - renderedHeight) / 2;
+
+        return {
+            left: offsetX + (spec.x * coverScale),
+            top: offsetY + (spec.y * coverScale),
+            width: spec.width * coverScale,
+            height: spec.height * coverScale,
+        };
+    };
+
+    const applySquareObjectRect = (element, rect) => {
+        if (!element || !rect) return;
+
+        element.style.left = `${rect.left}px`;
+        element.style.top = `${rect.top}px`;
+        element.style.width = `${rect.width}px`;
+        element.style.height = `${rect.height}px`;
+    };
+
+    const updateSquareObjectTargets = () => {
+        squareObjectTargets.forEach((target) => {
+            applySquareObjectRect(target, getSquareObjectTargetRect(target.dataset.squareTarget));
+        });
+
+        squareObjectPieces.forEach((piece) => {
+            if (piece.dataset.squarePlaced !== 'true') return;
+            applySquareObjectRect(piece, getSquareObjectTargetRect(piece.dataset.squarePiece));
+        });
+    };
+
+    const resetSquareObjectPuzzle = () => {
+        squareObjectActiveDrag = null;
+        squareObjectSnapTimers.forEach((timerId) => window.clearTimeout(timerId));
+        squareObjectSnapTimers.clear();
+        squareObjectTargets.forEach((target) => target.classList.remove('is-active'));
+        squareObjectPanel?.classList.remove('is-complete');
+
+        squareObjectPieces.forEach((piece) => {
+            const slot = squareObjectPanel?.querySelector(`[data-square-slot="${piece.dataset.squarePiece}"]`);
+            slot?.appendChild(piece);
+            slot?.classList.remove('is-empty', 'is-drag-source');
+            piece.classList.remove('is-dragging', 'is-returning', 'is-snapping', 'is-placed');
+            piece.style.removeProperty('--square-drag-x');
+            piece.style.removeProperty('--square-drag-y');
+            piece.style.removeProperty('left');
+            piece.style.removeProperty('top');
+            piece.style.removeProperty('width');
+            piece.style.removeProperty('height');
+            delete piece.dataset.squarePlaced;
+            piece.removeAttribute('aria-disabled');
+            piece.tabIndex = 0;
+        });
+    };
+
+    const placeSquareObjectPiece = (piece) => {
+        if (!piece || piece.dataset.squarePlaced === 'true' || !shapeSquarePage) return;
+
+        const targetRect = getSquareObjectTargetRect(piece.dataset.squarePiece);
+        if (!targetRect) return;
+
+        const pageRect = shapeSquarePage.getBoundingClientRect();
+        const currentRect = piece.getBoundingClientRect();
+        const slot = piece.closest('.square-object-slot');
+        slot?.classList.add('is-empty');
+        slot?.classList.remove('is-drag-source');
+        shapeSquarePage.appendChild(piece);
+        piece.classList.remove('is-dragging', 'is-returning');
+        piece.classList.add('is-snapping');
+        piece.dataset.squarePlaced = 'true';
+        piece.setAttribute('aria-disabled', 'true');
+        piece.tabIndex = -1;
+        piece.style.removeProperty('--square-drag-x');
+        piece.style.removeProperty('--square-drag-y');
+        applySquareObjectRect(piece, {
+            left: currentRect.left - pageRect.left,
+            top: currentRect.top - pageRect.top,
+            width: currentRect.width,
+            height: currentRect.height,
+        });
+        piece.getBoundingClientRect();
+
+        window.requestAnimationFrame(() => applySquareObjectRect(piece, targetRect));
+        playUiClickSound('chime');
+
+        const snapTimer = window.setTimeout(() => {
+            piece.classList.remove('is-snapping');
+            piece.classList.add('is-placed');
+            squareObjectSnapTimers.delete(piece);
+            updateSquareObjectTargets();
+
+            if (squareObjectPieces.every((currentPiece) => currentPiece.dataset.squarePlaced === 'true')) {
+                squareObjectPanel?.classList.add('is-complete');
+                playUiClickSound('boardSuccess');
+            }
+        }, 440);
+        squareObjectSnapTimers.set(piece, snapTimer);
+    };
+
+    const isSquareObjectDropCorrect = (piece, clientX, clientY) => {
+        const target = squareObjectTargets.find(
+            (currentTarget) => currentTarget.dataset.squareTarget === piece?.dataset.squarePiece,
+        );
+        if (!target) return false;
+
+        const rect = target.getBoundingClientRect();
+        const toleranceX = Math.max(12, rect.width * 0.28);
+        const toleranceY = Math.max(12, rect.height * 0.28);
+        return clientX >= rect.left - toleranceX
+            && clientX <= rect.right + toleranceX
+            && clientY >= rect.top - toleranceY
+            && clientY <= rect.bottom + toleranceY;
+    };
+
+    const beginSquareObjectDrag = (event) => {
+        const piece = event.currentTarget;
+        if (
+            !piece
+            || piece.dataset.squarePlaced === 'true'
+            || squareObjectActiveDrag
+            || !shapeSquarePage?.classList.contains('is-lesson-complete')
+            || (event.pointerType === 'mouse' && event.button !== 0)
+        ) return;
+
+        squareObjectActiveDrag = {
+            piece,
+            pointerId: event.pointerId,
+            startX: event.clientX,
+            startY: event.clientY,
+        };
+        piece.classList.remove('is-returning');
+        piece.classList.add('is-dragging');
+        piece.closest('.square-object-slot')?.classList.add('is-drag-source');
+        piece.setPointerCapture?.(event.pointerId);
+        squareObjectTargets.find(
+            (target) => target.dataset.squareTarget === piece.dataset.squarePiece,
+        )?.classList.add('is-active');
+        event.preventDefault();
+    };
+
+    const moveSquareObjectDrag = (event) => {
+        const drag = squareObjectActiveDrag;
+        if (!drag || drag.pointerId !== event.pointerId || drag.piece !== event.currentTarget) return;
+
+        drag.piece.style.setProperty('--square-drag-x', `${event.clientX - drag.startX}px`);
+        drag.piece.style.setProperty('--square-drag-y', `${event.clientY - drag.startY}px`);
+        event.preventDefault();
+    };
+
+    const endSquareObjectDrag = (event, wasCancelled = false) => {
+        const drag = squareObjectActiveDrag;
+        if (!drag || drag.pointerId !== event.pointerId) return;
+
+        const piece = drag.piece;
+        piece.releasePointerCapture?.(event.pointerId);
+        squareObjectTargets.forEach((target) => target.classList.remove('is-active'));
+        squareObjectActiveDrag = null;
+
+        if (!wasCancelled && isSquareObjectDropCorrect(piece, event.clientX, event.clientY)) {
+            placeSquareObjectPiece(piece);
+            return;
+        }
+
+        piece.classList.remove('is-dragging');
+        piece.classList.add('is-returning');
+        piece.style.setProperty('--square-drag-x', '0px');
+        piece.style.setProperty('--square-drag-y', '0px');
+        playUiClickSound('thunk');
+        window.setTimeout(() => {
+            piece.classList.remove('is-returning');
+            piece.closest('.square-object-slot')?.classList.remove('is-drag-source');
+        }, 330);
+    };
+
     const hideShapeSquareProgress = () => {
         shapeSquareCelebrationTimers.forEach((timerId) => window.clearTimeout(timerId));
         shapeSquareCelebrationTimers = [];
@@ -612,6 +811,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const resetShapeSquareLessonVideo = () => {
         hideShapeSquareProgress();
         shapeSquarePage?.classList.remove('is-lesson-complete');
+        resetSquareObjectPuzzle();
         setShapeSquareEarnedStars(0);
         setShapeSquareSkipButtonVisible(false);
         shapeSquareVideo?.pause?.();
@@ -683,6 +883,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         hideShapeSquareProgress();
         shapeSquareVideo?.pause();
         shapeSquarePage?.classList.add('is-lesson-complete');
+        updateSquareObjectTargets();
         shapeSquareVideoStage?.setAttribute('aria-hidden', 'true');
         setShapeSquarePlayButtonVisible(false);
         setShapeSquareSkipButtonVisible(false);
@@ -4604,6 +4805,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     shapeSquareVideo?.addEventListener('ended', showShapeSquareProgress);
     shapeSquareReplayButton?.addEventListener('click', playShapeSquareLessonVideo);
     shapeSquareNextButton?.addEventListener('click', finishShapeSquareLesson);
+    shapeSquareBgImage?.addEventListener('load', updateSquareObjectTargets);
+
+    squareObjectPieces.forEach((piece) => {
+        piece.addEventListener('pointerdown', beginSquareObjectDrag);
+        piece.addEventListener('pointermove', moveSquareObjectDrag);
+        piece.addEventListener('pointerup', (event) => endSquareObjectDrag(event));
+        piece.addEventListener('pointercancel', (event) => endSquareObjectDrag(event, true));
+        piece.addEventListener('dragstart', (event) => event.preventDefault());
+        piece.addEventListener('keydown', (event) => {
+            if (!['Enter', ' '].includes(event.key) || piece.dataset.squarePlaced === 'true') return;
+            event.preventDefault();
+            placeSquareObjectPiece(piece);
+        });
+    });
+    document.addEventListener('pointerup', (event) => endSquareObjectDrag(event), true);
+    document.addEventListener('pointercancel', (event) => endSquareObjectDrag(event, true), true);
 
     shapeSquareVideo?.addEventListener('play', () => {
         setShapeSquarePlayButtonVisible(false);
@@ -4623,6 +4840,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     window.addEventListener('resize', () => {
+        updateSquareObjectTargets();
         if (isPageVisible(lettertracePage)) {
             resizeLettertraceCanvas();
             clearLettertraceCanvas();
