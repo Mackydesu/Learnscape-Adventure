@@ -1444,6 +1444,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (session !== shapeSquareSession || !isPageVisible(shapeSquarePage)) return;
                 shapeSquareMissionBubble.hidden = false;
                 shapeSquareMissionBubble.classList.toggle('is-ch11', isReadyStage);
+                shapeSquareMissionBubble.classList.toggle('is-short-message', String(stage.message || '').length <= 28);
                 shapeSquareMissionBubbleText.textContent = stage.message;
                 shapeSquareMissionBubble.classList.remove('is-exiting', 'is-message-changing', 'is-entering');
                 shapeSquareMissionBubble.getBoundingClientRect();
@@ -1476,7 +1477,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         if (session !== shapeSquareSession || !isPageVisible(shapeSquarePage) || !shapeSquareMissionStartButton) return;
                         if (shapeSquareMissionBubble) {
                             shapeSquareMissionBubble.hidden = true;
-                            shapeSquareMissionBubble.classList.remove('is-exiting', 'is-ch11', 'is-entering');
+                            shapeSquareMissionBubble.classList.remove('is-exiting', 'is-ch11', 'is-short-message', 'is-entering');
                         }
                         if (shapeSquareMissionBubbleText) {
                             shapeSquareMissionBubbleText.textContent = '';
@@ -2380,7 +2381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         circleMissionGuideBubble?.classList.remove('is-short-message');
         if (circleMissionStartButton) {
             circleMissionStartButton.hidden = true;
-            circleMissionStartButton.classList.remove('is-visible');
+            circleMissionStartButton.classList.remove('is-visible', 'is-clicking');
         }
     };
 
@@ -5584,9 +5585,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     circleHuntPlayAgainButton?.addEventListener('click', startCircleHuntCountdown);
     circleMissionStartButton?.addEventListener('click', () => {
         playUiClickSound('chime');
-        resetCircleMissionGuide();
-        showCircleHuntStart();
-        startCircleHuntCountdown();
+        circleMissionStartButton.classList.add('is-clicking');
+        const startCircleMissionTimerId = window.setTimeout(() => {
+            resetCircleMissionGuide();
+            showCircleHuntStart();
+            startCircleHuntCountdown();
+            circleMissionGuideTimers = circleMissionGuideTimers.filter((timerId) => timerId !== startCircleMissionTimerId);
+        }, 180);
+        circleMissionGuideTimers.push(startCircleMissionTimerId);
     });
     circleIllustrationScene?.addEventListener('click', (event) => {
         if (circleHuntState !== 'playing') return;

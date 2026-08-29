@@ -906,8 +906,8 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
         0 0.5rem 0 #6c3417,
         0 1rem 1.8rem rgba(39, 23, 10, 0.36),
         0 0 2.2rem rgba(255, 232, 105, 0.48);
-    opacity: 0;
-    transform: translate(-50%, calc(-50% + 0.7rem)) scale(0.9);
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
     cursor: pointer;
     pointer-events: auto;
     transition:
@@ -929,22 +929,32 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
 
 .circle-mission-start-button:hover,
 .circle-mission-start-button:focus-visible {
+    animation: none;
+    opacity: 1;
+    background: linear-gradient(180deg, #fffca0 0%, #ffe35d 52%, #f7ba3d 100%);
     filter: brightness(1.08) saturate(1.08);
     box-shadow:
-        inset 0 0.16rem 0 rgba(255, 255, 255, 0.72),
-        0 0.48rem 0 #603015,
-        0 0.95rem 1.45rem rgba(39, 23, 10, 0.38),
-        0 0 0 0.28rem rgba(255, 232, 105, 0.34);
+        0 0.48rem 0 #8b4a18,
+        0 0.95rem 1.4rem rgba(70, 35, 8, 0.34),
+        0 0 0 0.32rem rgba(255, 244, 95, 0.3);
     outline: none;
+    transform: translate(-50%, -56%) scale(1.08);
 }
 
-.circle-mission-start-button:active {
-    filter: brightness(0.98);
-    transform: translate(-50%, calc(-50% + 0.2rem)) scale(0.97);
+.circle-mission-start-button:active,
+.circle-mission-start-button.is-clicking,
+.circle-mission-start-button.is-clicking:hover,
+.circle-mission-start-button.is-clicking:focus-visible {
+    animation: none;
+    opacity: 1;
+    background: linear-gradient(180deg, #fffca0 0%, #ffe35d 52%, #f7ba3d 100%);
+    filter: brightness(0.98) saturate(1.04);
+    outline: none;
     box-shadow:
-        inset 0 0.12rem 0 rgba(255, 255, 255, 0.58),
-        0 0.16rem 0 #603015,
-        0 0.45rem 0.85rem rgba(39, 23, 10, 0.28);
+        0 0.12rem 0 #8b4a18,
+        0 0.35rem 0.65rem rgba(70, 35, 8, 0.24),
+        0 0 0 0.18rem rgba(255, 244, 95, 0.22);
+    transform: translate(-50%, -47%) scale(0.96);
 }
 
 .circle-mission-guide-text {
@@ -3476,9 +3486,9 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 
 .square-mission-bubble {
     position: absolute;
-    left: clamp(10.5rem, 18vw, 20rem);
+    left: clamp(11rem, 21vw, 18rem);
     bottom: clamp(27rem, 38vw, 36rem);
-    max-width: min(40vw, 32rem);
+    max-width: min(52vw, 34rem);
     box-sizing: border-box;
     padding: clamp(0.8rem, 1.4vw, 1.2rem) clamp(1rem, 1.8vw, 1.45rem);
     border: clamp(0.14rem, 0.24vw, 0.22rem) solid rgba(91, 48, 20, 0.78);
@@ -3504,10 +3514,20 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 }
 
 .square-mission-bubble.is-ch11 {
-    left: clamp(10rem, 17vw, 19rem);
+    left: clamp(11rem, 21vw, 18rem);
     bottom: clamp(25rem, 35vw, 33rem);
     max-width: min(34vw, 23rem);
     font-size: clamp(1.55rem, 2.4vw, 2.25rem);
+}
+
+.square-mission-bubble.is-short-message {
+    left: clamp(6.4rem, 13.5vw, 11.5rem);
+    max-width: min(34vw, 22rem);
+}
+
+.square-mission-bubble.is-ch11.is-short-message {
+    left: clamp(6rem, 12.8vw, 11rem);
+    max-width: min(34vw, 22rem);
 }
 
 .square-mission-bubble span {
@@ -3585,8 +3605,8 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
         0 0.5rem 0 #6c3417,
         0 1rem 1.55rem rgba(39, 23, 10, 0.36),
         0 0 0 0.24rem rgba(255, 232, 105, 0.28);
-    opacity: 0;
-    transform: translate(-50%, calc(-50% + 0.7rem)) scale(0.9);
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
     cursor: pointer;
     pointer-events: auto;
     transition:
@@ -3603,11 +3623,13 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 .square-mission-start-button.is-visible {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
-    animation: squareMissionStartPulse 1.35s ease-in-out 0.35s infinite;
+    animation: squareMissionStartPulse 1.35s ease-in-out infinite;
 }
 
 .square-mission-start-button:hover,
 .square-mission-start-button:focus-visible {
+    animation: none;
+    opacity: 1;
     filter: brightness(1.08) saturate(1.08);
     box-shadow:
         inset 0 0.16rem 0 rgba(255, 255, 255, 0.72),
@@ -3615,9 +3637,12 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
         0 0.95rem 1.45rem rgba(39, 23, 10, 0.38),
         0 0 0 0.28rem rgba(255, 232, 105, 0.34);
     outline: none;
+    transform: translate(-50%, calc(-50% - 0.32rem)) scale(1.06);
 }
 
 .square-mission-start-button:active {
+    animation: none;
+    opacity: 1;
     filter: brightness(0.98);
     transform: translate(-50%, calc(-50% + 0.2rem)) scale(0.97);
     box-shadow:
@@ -4265,90 +4290,84 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     padding: clamp(0.7rem, 1.25vw, 1.05rem) clamp(1.65rem, 3.1vw, 3.1rem);
     border: clamp(0.16rem, 0.3vw, 0.3rem) solid #663116;
     border-radius: 999px;
-    background:
-        linear-gradient(180deg, rgba(255, 248, 152, 0.96) 0%, rgba(255, 202, 67, 0.98) 48%, rgba(213, 111, 33, 0.98) 100%),
-        linear-gradient(90deg, #73411c, #d58838 24%, #5a2915 50%, #d88a3a 76%, #73411c);
+    background: linear-gradient(180deg, #fff879 0%, #ffd34f 52%, #f0a92f 100%);
     color: #4b250d;
     font: 900 clamp(1.45rem, 2.8vw, 2.8rem) 'Fredoka', 'Baloo 2', sans-serif;
     line-height: 1;
     text-transform: uppercase;
-    text-shadow: 0 0.1rem 0 rgba(255, 244, 177, 0.95);
+    text-shadow: 0 0.1rem 0 #fff4b1;
     box-shadow:
-        inset 0 0.14rem 0 rgba(255, 255, 255, 0.62),
-        inset 0 -0.28rem 0 rgba(102, 49, 22, 0.22),
-        0 0.38rem 0 #552711,
-        0 0.85rem 1.25rem rgba(36, 20, 8, 0.32),
-        0 0 0 0.35rem rgba(255, 230, 92, 0.2);
+        0 0.35rem 0 #9a591f,
+        0 0.7rem 1.1rem rgba(70, 35, 8, 0.28);
+    opacity: 1;
     cursor: pointer;
-    transform: translateX(-50%);
-    animation: shapeAreaSquareStartFloat 2.4s ease-in-out infinite;
+    transform: translateX(-50%) scale(1);
+    animation: shapeAreaSquareStartButtonPulse 1.25s ease-in-out infinite;
     transition:
-        transform 0.16s ease,
-        filter 0.16s ease,
-        box-shadow 0.16s ease;
+        transform 0.18s ease,
+        filter 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease;
 }
 
 .shape-area-square-start-button:hover,
 .shape-area-square-start-button:focus-visible {
+    animation: none;
+    opacity: 1;
     outline: none;
-    filter: brightness(1.08) saturate(1.1);
+    background: linear-gradient(180deg, #fffca0 0%, #ffe35d 52%, #f7ba3d 100%);
+    filter: brightness(1.08) saturate(1.08);
     box-shadow:
-        inset 0 0.14rem 0 rgba(255, 255, 255, 0.68),
-        inset 0 -0.28rem 0 rgba(102, 49, 22, 0.2),
-        0 0.5rem 0 #4b210f,
-        0 1rem 1.45rem rgba(36, 20, 8, 0.36),
-        0 0 0 0.42rem rgba(255, 238, 104, 0.3);
-    transform: translateX(-50%) translateY(-0.18rem) scale(1.05);
+        0 0.48rem 0 #8b4a18,
+        0 0.95rem 1.4rem rgba(70, 35, 8, 0.34),
+        0 0 0 0.32rem rgba(255, 244, 95, 0.3);
+    transform: translateX(-50%) translateY(-0.36rem) scale(1.08);
 }
 
 .shape-area-square-start-button:active {
+    animation: none;
+    opacity: 1;
     filter: brightness(0.98) saturate(1.04);
     box-shadow:
-        inset 0 0.1rem 0 rgba(255, 255, 255, 0.55),
-        inset 0 -0.16rem 0 rgba(102, 49, 22, 0.24),
-        0 0.14rem 0 #4b210f,
-        0 0.42rem 0.75rem rgba(36, 20, 8, 0.28),
-        0 0 0 0.26rem rgba(255, 238, 104, 0.24);
+        0 0.12rem 0 #8b4a18,
+        0 0.35rem 0.65rem rgba(70, 35, 8, 0.24),
+        0 0 0 0.18rem rgba(255, 244, 95, 0.22);
     transform: translateX(-50%) translateY(0.18rem) scale(0.96);
 }
 
 .shape-area-square-start-button.is-clicking,
 .shape-area-square-start-button.is-clicking:hover,
 .shape-area-square-start-button.is-clicking:focus-visible {
-    animation: shapeAreaSquareStartPress 0.18s cubic-bezier(0.18, 0.9, 0.2, 1) both;
-    background:
-        linear-gradient(180deg, rgba(255, 253, 177, 0.98) 0%, rgba(255, 222, 85, 0.98) 46%, rgba(229, 128, 38, 0.98) 100%),
-        linear-gradient(90deg, #73411c, #d58838 24%, #5a2915 50%, #d88a3a 76%, #73411c);
-    filter: brightness(1.08) saturate(1.12);
+    animation: none;
+    opacity: 1;
+    background: linear-gradient(180deg, #fffca0 0%, #ffe35d 52%, #f7ba3d 100%);
+    filter: brightness(0.98) saturate(1.04);
     box-shadow:
-        inset 0 0.16rem 0 rgba(255, 255, 255, 0.78),
-        inset 0 -0.16rem 0 rgba(102, 49, 22, 0.22),
-        0 0.16rem 0 #4b210f,
-        0 0.5rem 0.8rem rgba(36, 20, 8, 0.3),
-        0 0 0 0.42rem rgba(255, 244, 95, 0.34);
+        0 0.12rem 0 #8b4a18,
+        0 0.35rem 0.65rem rgba(70, 35, 8, 0.24),
+        0 0 0 0.18rem rgba(255, 244, 95, 0.22);
+    transform: translateX(-50%) translateY(0.18rem) scale(0.96);
 }
 
-@keyframes shapeAreaSquareStartFloat {
+@keyframes shapeAreaSquareStartButtonIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.72);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+}
+
+@keyframes shapeAreaSquareStartButtonPulse {
     0%, 100% {
-        transform: translateX(-50%) translateY(0);
+        transform: translateX(-50%) scale(1);
     }
 
     50% {
-        transform: translateX(-50%) translateY(-0.32rem);
-    }
-}
-
-@keyframes shapeAreaSquareStartPress {
-    0% {
-        transform: translateX(-50%) translateY(-0.12rem) scale(1.04);
-    }
-
-    58% {
-        transform: translateX(-50%) translateY(0.24rem) scale(0.94);
-    }
-
-    100% {
-        transform: translateX(-50%) translateY(0.04rem) scale(0.99);
+        transform: translateX(-50%) translateY(-0.32rem) scale(1.04);
     }
 }
 
