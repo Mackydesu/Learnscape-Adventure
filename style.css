@@ -3025,6 +3025,47 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     transition: transform 0.32s cubic-bezier(0.2, 0.85, 0.3, 1), filter 0.2s ease;
 }
 
+.square-object-piece.is-scattered,
+.square-object-piece.is-collecting {
+    position: absolute;
+    z-index: 8;
+    display: none;
+    margin: 0;
+    border-radius: 5px;
+    outline: 0.16rem solid rgba(255, 239, 116, 0.9);
+    outline-offset: 0.12rem;
+    box-shadow: 0 0.45rem 0.8rem rgba(47, 24, 7, 0.34), 0 0 0.8rem rgba(255, 225, 66, 0.62);
+    cursor: pointer;
+    transform: none;
+}
+
+#learnscape-shape-square-page.is-lesson-complete .square-object-piece.is-scattered,
+#learnscape-shape-square-page.is-lesson-complete .square-object-piece.is-collecting {
+    display: block;
+}
+
+.square-object-piece.is-scattered {
+    animation: squareObjectFoundPulse 1.4s ease-in-out infinite;
+}
+
+.square-object-piece.is-scattered:hover,
+.square-object-piece.is-scattered:focus-visible {
+    outline-color: #fff8b8;
+    filter: brightness(1.12) saturate(1.08);
+}
+
+.square-object-piece.is-collecting {
+    pointer-events: none;
+    animation: none;
+    transition:
+        left 0.48s cubic-bezier(0.2, 0.9, 0.25, 1),
+        top 0.48s cubic-bezier(0.2, 0.9, 0.25, 1),
+        width 0.48s cubic-bezier(0.2, 0.9, 0.25, 1),
+        height 0.48s cubic-bezier(0.2, 0.9, 0.25, 1),
+        filter 0.2s ease;
+    filter: brightness(1.16) drop-shadow(0 0 0.75rem rgba(255, 229, 84, 0.9));
+}
+
 .square-object-piece.is-snapping,
 .square-object-piece.is-placed {
     position: absolute;
@@ -3098,6 +3139,11 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     50% { filter: brightness(1.24); }
 }
 
+@keyframes squareObjectFoundPulse {
+    0%, 100% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.055); filter: brightness(1.12); }
+}
+
 @media (max-width: 900px), (orientation: portrait) {
     .square-object-panel {
         left: clamp(0.35rem, 1vw, 0.65rem);
@@ -3114,7 +3160,8 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     }
 
     .square-object-target.is-active,
-    .square-object-piece.is-snapping {
+    .square-object-piece.is-snapping,
+    .square-object-piece.is-scattered {
         animation: none;
         transition-duration: 0.01ms;
     }
@@ -3188,7 +3235,7 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 }
 
 .shape-area-square-speech-bubble.is-ch4 {
-    left: calc(clamp(-1.5rem, 1vw, 1rem) + clamp(8rem, 18vw, 17.5rem) + clamp(2rem, 6vw, 6rem));
+    left: calc(clamp(-1.5rem, 1vw, 1rem) + clamp(8rem, 18vw, 17.5rem) + clamp(1rem, 4.5vw, 4.8rem));
     width: fit-content;
     max-width: min(44vw, 31rem);
     font-size: clamp(1.3rem, 1.95vw, 1.8rem);
@@ -3333,7 +3380,7 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     }
 
     .shape-area-square-speech-bubble.is-ch4 {
-        left: calc(clamp(-1.5rem, 1vw, 1rem) + clamp(7rem, 17vw, 14rem) + clamp(2rem, 6vw, 6rem));
+        left: calc(clamp(-1.5rem, 1vw, 1rem) + clamp(7rem, 17vw, 14rem) + clamp(1rem, 4.5vw, 4.8rem));
     }
 }
 

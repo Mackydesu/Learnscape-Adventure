@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260829-109';
+    const appVersion = '20260829-118';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             'Handa ka na ba?',
         ];
     }
-    const shapeCircleIntroAudioSource = 'assets/Audios/introcircle.mp3?v=20260829-109';
+    const shapeCircleIntroAudioSource = 'assets/Audios/introcircle.mp3?v=20260829-116';
     const shapeCircleFinalAudioSource = 'assets/Audios/Handa ka na ba.mp3';
     const shapeCircleIntroStartDelay = 750;
     const shapeCircleIntroSegments = [
@@ -223,11 +223,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     let squareObjectActiveDrag = null;
     const squareObjectSnapTimers = new Map();
     const squareObjectTargetSpecs = {
-        1: { x: 801, y: 206, width: 122, height: 121 },
-        2: { x: 234, y: 367, width: 118, height: 117 },
-        3: { x: 1528, y: 448, width: 90, height: 91 },
+        1: { x: 793, y: 198, width: 138, height: 137 },
+        2: { x: 230, y: 363, width: 126, height: 125 },
+        3: { x: 1524, y: 444, width: 98, height: 99 },
         4: { x: 1285, y: 576, width: 129, height: 127 },
         5: { x: 770, y: 639, width: 154, height: 152 },
+    };
+    const squareObjectScatterSpecs = {
+        1: { x: 360, y: 735, width: 88, height: 88 },
+        2: { x: 520, y: 610, width: 84, height: 84 },
+        3: { x: 1060, y: 650, width: 76, height: 76 },
+        4: { x: 1450, y: 730, width: 88, height: 88 },
+        5: { x: 1180, y: 560, width: 94, height: 94 },
     };
     let circleIllustrationCelebrationTimers = [];
     const circleMissionGuideMessages = [
@@ -236,11 +243,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         'Hanapin ang mga ito bago maubos ang oras!',
         'Handa ka na ba?',
     ];
-    const circleMissionGuideAudioSources = [
-        'assets/Audios/Para sa circle mission.mp3',
-        'assets/Audios/Kailangan natin hanapin.mp3',
-        'assets/Audios/Hanapin ang mga ito bago maubos ang oras.mp3',
-        'assets/Audios/Handa ka na ba.mp3',
+    const circleMissionGuideAudioSource = 'assets/Audios/circlemission.mp3';
+    const circleMissionGuideReadyAudioSource = 'assets/Audios/Handa ka na ba.mp3';
+    const circleMissionGuideSegments = [
+        { start: 0, end: 1.9, messageIndex: 0 },
+        { start: 2.0, end: 7.6, messageIndex: 1 },
+        { start: 7.7, end: 10.8, messageIndex: 2 },
     ];
     const circleMissionGuideTypingDelay = 42;
     const circleMissionGuideMessagePause = 280;
@@ -255,8 +263,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     let circleMissionGuideTimers = [];
     let circleMissionGuideSession = 0;
     let circleMissionGuideAudio = null;
+    let circleMissionGuideAudioFrame = null;
     let circleHuntState = 'idle';
-    let circleHuntSeconds = 10;
+    const circleHuntStartingSeconds = 60;
+    const circleHuntCorrectTimeBonus = 1;
+    let circleHuntSeconds = circleHuntStartingSeconds;
     let circleHuntCollected = 0;
     let circleHuntIncorrectAttempts = 0;
     let circleHuntInterval = null;
@@ -602,10 +613,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeSquareSkipButton.hidden = !isVisible;
     };
 
-    const getSquareObjectTargetRect = (pieceNumber) => {
-        if (!shapeSquarePage) return null;
-
-        const spec = squareObjectTargetSpecs[pieceNumber];
+    const getSquareObjectSceneRect = (spec) => {
+        if (!shapeSquarePage || !spec) return null;
         if (!spec) return null;
 
         const viewportWidth = shapeSquarePage.clientWidth || window.innerWidth;
@@ -626,6 +635,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     };
 
+    const getSquareObjectTargetRect = (pieceNumber) => (
+        getSquareObjectSceneRect(squareObjectTargetSpecs[pieceNumber])
+    );
+
+    const getSquareObjectScatterRect = (pieceNumber) => (
+        getSquareObjectSceneRect(squareObjectScatterSpecs[pieceNumber])
+    );
+
     const applySquareObjectRect = (element, rect) => {
         if (!element || !rect) return;
 
@@ -641,8 +658,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         squareObjectPieces.forEach((piece) => {
-            if (piece.dataset.squarePlaced !== 'true') return;
-            applySquareObjectRect(piece, getSquareObjectTargetRect(piece.dataset.squarePiece));
+            if (piece.dataset.squarePlaced === 'true') {
+                applySquareObjectRect(piece, getSquareObjectTargetRect(piece.dataset.squarePiece));
+                return;
+            }
+            if (piece.classList.contains('is-scattered')) {
+                applySquareObjectRect(piece, getSquareObjectScatterRect(piece.dataset.squarePiece));
+            }
         });
     };
 
@@ -655,23 +677,70 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         squareObjectPieces.forEach((piece) => {
             const slot = squareObjectPanel?.querySelector(`[data-square-slot="${piece.dataset.squarePiece}"]`);
-            slot?.appendChild(piece);
-            slot?.classList.remove('is-empty', 'is-drag-source');
-            piece.classList.remove('is-dragging', 'is-returning', 'is-snapping', 'is-placed');
+            shapeSquarePage?.appendChild(piece);
+            slot?.classList.add('is-empty');
+            slot?.classList.remove('is-drag-source');
+            piece.classList.remove('is-dragging', 'is-returning', 'is-collecting', 'is-snapping', 'is-placed');
+            piece.classList.add('is-scattered');
             piece.style.removeProperty('--square-drag-x');
             piece.style.removeProperty('--square-drag-y');
-            piece.style.removeProperty('left');
-            piece.style.removeProperty('top');
-            piece.style.removeProperty('width');
-            piece.style.removeProperty('height');
+            applySquareObjectRect(piece, getSquareObjectScatterRect(piece.dataset.squarePiece));
             delete piece.dataset.squarePlaced;
+            delete piece.dataset.squareCollected;
             piece.removeAttribute('aria-disabled');
             piece.tabIndex = 0;
         });
     };
 
+    const collectSquareObjectPiece = (piece) => {
+        if (!piece?.classList.contains('is-scattered') || !shapeSquarePage) return;
+
+        const slot = squareObjectPanel?.querySelector(`[data-square-slot="${piece.dataset.squarePiece}"]`);
+        if (!slot) return;
+
+        const pageRect = shapeSquarePage.getBoundingClientRect();
+        const currentRect = piece.getBoundingClientRect();
+        const slotRect = slot.getBoundingClientRect();
+        piece.classList.remove('is-scattered');
+        piece.classList.add('is-collecting');
+        applySquareObjectRect(piece, {
+            left: currentRect.left - pageRect.left,
+            top: currentRect.top - pageRect.top,
+            width: currentRect.width,
+            height: currentRect.height,
+        });
+        piece.getBoundingClientRect();
+        window.requestAnimationFrame(() => applySquareObjectRect(piece, {
+            left: slotRect.left - pageRect.left,
+            top: slotRect.top - pageRect.top,
+            width: slotRect.width,
+            height: slotRect.height,
+        }));
+        playUiClickSound('chime');
+
+        const collectTimer = window.setTimeout(() => {
+            slot.appendChild(piece);
+            slot.classList.remove('is-empty');
+            piece.classList.remove('is-collecting');
+            piece.style.removeProperty('left');
+            piece.style.removeProperty('top');
+            piece.style.removeProperty('width');
+            piece.style.removeProperty('height');
+            piece.dataset.squareCollected = 'true';
+            squareObjectSnapTimers.delete(piece);
+            piece.focus({ preventScroll: true });
+            playUiClickSound('pop');
+        }, 500);
+        squareObjectSnapTimers.set(piece, collectTimer);
+    };
+
     const placeSquareObjectPiece = (piece) => {
-        if (!piece || piece.dataset.squarePlaced === 'true' || !shapeSquarePage) return;
+        if (
+            !piece
+            || piece.dataset.squareCollected !== 'true'
+            || piece.dataset.squarePlaced === 'true'
+            || !shapeSquarePage
+        ) return;
 
         const targetRect = getSquareObjectTargetRect(piece.dataset.squarePiece);
         if (!targetRect) return;
@@ -734,6 +803,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (
             !piece
             || piece.dataset.squarePlaced === 'true'
+            || piece.dataset.squareCollected !== 'true'
             || squareObjectActiveDrag
             || !shapeSquarePage?.classList.contains('is-lesson-complete')
             || (event.pointerType === 'mouse' && event.button !== 0)
@@ -1517,6 +1587,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const stopCircleMissionGuideAudio = () => {
+        if (circleMissionGuideAudioFrame !== null) {
+            window.cancelAnimationFrame(circleMissionGuideAudioFrame);
+            circleMissionGuideAudioFrame = null;
+        }
         if (!circleMissionGuideAudio) return;
 
         circleMissionGuideAudio.onended = null;
@@ -1667,10 +1741,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const message = circleMissionGuideMessages[messageIndex];
-            const audioSrc = circleMissionGuideAudioSources[messageIndex] || null;
-            const audio = createCircleMissionGuideAudio(audioSrc);
             const plainMessageLength = message.replace(/\*\*/g, '').length;
             const isLastMessage = messageIndex === circleMissionGuideMessages.length - 1;
+            const audioSrc = isLastMessage ? circleMissionGuideReadyAudioSource : null;
+            const audio = createCircleMissionGuideAudio(audioSrc);
             let typingDelay = circleMissionGuideTypingDelay;
             let messageCompleted = false;
             let audioCompleted = !audio;
@@ -1738,8 +1812,87 @@ document.addEventListener('DOMContentLoaded', async () => {
             typeCharacter(1);
         };
 
+        const playSyncedMissionMessages = () => {
+            const lastSegment = circleMissionGuideSegments[circleMissionGuideSegments.length - 1];
+            let activeSegmentIndex = -1;
+            let hasFinished = false;
+
+            const showSegment = (segmentIndex) => {
+                if (segmentIndex === activeSegmentIndex || !circleMissionGuideSegments[segmentIndex]) return;
+                activeSegmentIndex = segmentIndex;
+                const messageIndex = circleMissionGuideSegments[segmentIndex].messageIndex;
+                const message = circleMissionGuideMessages[messageIndex] || '';
+                setCircleMissionGuideTypedText(message, message.replace(/\*\*/g, '').length);
+                circleMissionGuide.classList.add('is-bubble-visible');
+            };
+
+            const playReadyMessage = () => {
+                if (hasFinished) return;
+                hasFinished = true;
+                if (circleMissionGuideAudioFrame !== null) {
+                    window.cancelAnimationFrame(circleMissionGuideAudioFrame);
+                    circleMissionGuideAudioFrame = null;
+                }
+                if (circleMissionGuideAudio) {
+                    circleMissionGuideAudio.onended = null;
+                    circleMissionGuideAudio.pause();
+                    circleMissionGuideAudio = null;
+                }
+                circleMissionGuideTimers.push(window.setTimeout(() => {
+                    playMessage(circleMissionGuideMessages.length - 1).catch(() => {});
+                }, circleMissionGuideMessagePause));
+            };
+
+            const playWithoutAudio = () => {
+                circleMissionGuideSegments.forEach((segment, segmentIndex) => {
+                    circleMissionGuideTimers.push(window.setTimeout(() => {
+                        if (session !== circleMissionGuideSession || !isPageVisible(circleIllustrationPage)) return;
+                        showSegment(segmentIndex);
+                    }, segment.start * 1000));
+                });
+                circleMissionGuideTimers.push(window.setTimeout(playReadyMessage, lastSegment.end * 1000));
+            };
+
+            const audio = createCircleMissionGuideAudio(circleMissionGuideAudioSource);
+            if (!audio) {
+                playWithoutAudio();
+                return;
+            }
+
+            circleMissionGuideAudio = audio;
+            audio.onended = playReadyMessage;
+            audio.play().then(() => {
+                const syncMessagesToAudio = () => {
+                    if (
+                        session !== circleMissionGuideSession
+                        || !isPageVisible(circleIllustrationPage)
+                        || circleMissionGuideAudio !== audio
+                    ) return;
+
+                    let segmentIndex = 0;
+                    circleMissionGuideSegments.forEach((segment, currentIndex) => {
+                        if (audio.currentTime >= segment.start) segmentIndex = currentIndex;
+                    });
+                    showSegment(segmentIndex);
+
+                    if (audio.currentTime >= lastSegment.end) {
+                        playReadyMessage();
+                        return;
+                    }
+                    circleMissionGuideAudioFrame = window.requestAnimationFrame(syncMessagesToAudio);
+                };
+
+                syncMessagesToAudio();
+            }).catch(() => {
+                if (circleMissionGuideAudio !== audio) return;
+                audio.onended = null;
+                circleMissionGuideAudio = null;
+                playWithoutAudio();
+            });
+        };
+
         circleMissionGuideTimers.push(window.setTimeout(() => {
-            playMessage(0).catch(() => {});
+            playSyncedMissionMessages();
         }, 520));
     };
 
@@ -2059,7 +2212,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         stopCircleHuntTimesUpAudio();
         stopCircleHuntLoseAudio();
         circleHuntState = 'idle';
-        circleHuntSeconds = 10;
+        circleHuntSeconds = circleHuntStartingSeconds;
         circleHuntCollected = 0;
         circleHuntIncorrectAttempts = 0;
         circleIllustrationPage?.classList.remove('is-circle-hunt-active', 'is-circle-hunt-playing', 'is-circle-hunt-ended', 'is-circle-hunt-timeout', 'is-circle-hunt-timeout-intro', 'is-circle-hunt-timeout-result');
@@ -2183,7 +2336,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         stopCircleHuntTimesUpAudio();
         stopCircleHuntLoseAudio();
         circleHuntState = 'countdown';
-        circleHuntSeconds = 10;
+        circleHuntSeconds = circleHuntStartingSeconds;
         circleHuntCollected = 0;
         circleHuntIncorrectAttempts = 0;
         circleIllustrationPage?.classList.remove('is-circle-hunt-ended', 'is-circle-hunt-playing', 'is-circle-hunt-timeout', 'is-circle-hunt-timeout-intro', 'is-circle-hunt-timeout-result');
@@ -2241,11 +2394,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         target.setAttribute('tabindex', '-1');
         target.setAttribute('aria-disabled', 'true');
         circleHuntCollected += 1;
-        const timeBonus = circleHuntSeconds < 3 ? 4 : circleHuntSeconds < 5 ? 3 : 2;
-        circleHuntSeconds += timeBonus;
+        circleHuntSeconds += circleHuntCorrectTimeBonus;
         updateCircleHuntHud();
         syncCircleHuntClockTickingAudio();
-        setCircleHuntFeedback(`+${timeBonus} SEC!`, 'success');
+        setCircleHuntFeedback(`+${circleHuntCorrectTimeBonus} SEC!`, 'success');
         if (circleHuntCollected < circleHuntTargets.length) {
             playUiClickSound('starPop');
         }
@@ -4813,9 +4965,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         piece.addEventListener('pointerup', (event) => endSquareObjectDrag(event));
         piece.addEventListener('pointercancel', (event) => endSquareObjectDrag(event, true));
         piece.addEventListener('dragstart', (event) => event.preventDefault());
+        piece.addEventListener('click', () => {
+            if (piece.classList.contains('is-scattered')) {
+                collectSquareObjectPiece(piece);
+            }
+        });
         piece.addEventListener('keydown', (event) => {
             if (!['Enter', ' '].includes(event.key) || piece.dataset.squarePlaced === 'true') return;
             event.preventDefault();
+            if (piece.classList.contains('is-scattered')) {
+                collectSquareObjectPiece(piece);
+                return;
+            }
             placeSquareObjectPiece(piece);
         });
     });
