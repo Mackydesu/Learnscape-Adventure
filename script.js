@@ -117,6 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const circleIllustrationStars = circleIllustrationPage?.querySelector('.circle-lesson-stars') || null;
     const circleIllustrationStarMessage = circleIllustrationPage?.querySelector('.circle-lesson-star-message') || null;
     const circleMissionGuide = circleIllustrationPage?.querySelector('.circle-mission-guide') || null;
+    const circleMissionGuideBubble = circleMissionGuide?.querySelector('.circle-mission-guide-bubble') || null;
     const circleMissionGuideText = circleMissionGuide?.querySelector('.circle-mission-guide-text') || null;
     const circleMissionStartButton = circleMissionGuide?.querySelector('.circle-mission-start-button') || null;
     const circleIllustrationScene = circleIllustrationPage?.querySelector('.circle-illustration-scene') || null;
@@ -2357,6 +2358,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         circleMissionGuideText.replaceChildren(fragment);
     };
 
+    const updateCircleMissionGuideBubbleSize = (message) => {
+        if (!circleMissionGuideBubble) return;
+        const plainMessageLength = String(message || '').replace(/\*\*/g, '').length;
+        circleMissionGuideBubble.classList.toggle('is-short-message', plainMessageLength <= 28);
+    };
+
     const resetCircleMissionGuide = () => {
         clearCircleMissionGuideTimers();
         stopCircleMissionGuideAudio();
@@ -2370,6 +2377,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             circleMissionGuide.setAttribute('aria-hidden', 'true');
             circleMissionGuide.classList.remove('is-active', 'is-bubble-visible', 'is-exiting');
         }
+        circleMissionGuideBubble?.classList.remove('is-short-message');
         if (circleMissionStartButton) {
             circleMissionStartButton.hidden = true;
             circleMissionStartButton.classList.remove('is-visible');
@@ -2433,6 +2441,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             };
 
+            updateCircleMissionGuideBubbleSize(message);
             setCircleMissionGuideTypedText(message, isLastMessage ? plainMessageLength : 0);
             circleMissionGuide.classList.add('is-bubble-visible');
 
@@ -2494,6 +2503,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 activeSegmentIndex = segmentIndex;
                 const messageIndex = circleMissionGuideSegments[segmentIndex].messageIndex;
                 const message = circleMissionGuideMessages[messageIndex] || '';
+                updateCircleMissionGuideBubbleSize(message);
                 setCircleMissionGuideTypedText(message, message.replace(/\*\*/g, '').length);
                 circleMissionGuide.classList.add('is-bubble-visible');
             };

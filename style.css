@@ -821,11 +821,12 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
 }
 
 .circle-mission-guide-bubble {
+    --circle-guide-tail-x: clamp(7.8rem, 18vw, 11.2rem);
     position: absolute;
-    left: clamp(12rem, 23vw, 20rem);
-    bottom: clamp(14rem, 28vw, 24rem);
+    left: clamp(14rem, 22vw, 18.5rem);
+    bottom: clamp(20rem, 35vw, 30rem);
     width: max-content;
-    max-width: min(43vw, 31rem);
+    max-width: min(56vw, 34rem);
     min-width: min(25vw, 12rem);
     padding: clamp(0.75rem, 1.4vw, 1.05rem) clamp(0.95rem, 1.8vw, 1.3rem);
     border: clamp(0.14rem, 0.24vw, 0.2rem) solid #74421f;
@@ -843,7 +844,7 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
         0 0.35rem 0 rgba(116, 66, 31, 0.2),
         0 0.9rem 1.35rem rgba(36, 45, 13, 0.2);
     opacity: 0;
-    transform: translate(-0.55rem, 0.45rem) scale(0.96);
+    transform: translate(-50%, 0.45rem) scale(0.96);
     transition: opacity 0.32s ease, transform 0.32s ease;
 }
 
@@ -851,7 +852,8 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
 .circle-mission-guide-bubble::after {
     content: '';
     position: absolute;
-    left: clamp(1.4rem, 2.5vw, 2.2rem);
+    left: var(--circle-guide-tail-x);
+    transform: translateX(-50%);
     width: 0;
     height: 0;
 }
@@ -865,41 +867,47 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
 
 .circle-mission-guide-bubble::after {
     bottom: -0.72rem;
-    margin-left: 0.17rem;
     border-left: 0.73rem solid transparent;
     border-right: 0.73rem solid transparent;
     border-top: 0.86rem solid #fff1b8;
 }
 
+.circle-mission-guide-bubble.is-short-message {
+    --circle-guide-tail-x: 50%;
+    left: clamp(7rem, 14.5vw, 12.6rem);
+    max-width: min(34vw, 22rem);
+}
+
 .circle-mission-guide.is-bubble-visible .circle-mission-guide-bubble {
     opacity: 1;
-    transform: translate(0, 0) scale(1);
+    transform: translate(-50%, 0) scale(1);
 }
 
 .circle-mission-start-button {
     position: absolute;
     left: 50%;
-    bottom: clamp(4.2rem, 9vh, 7rem);
+    top: 50%;
+    bottom: auto;
     z-index: 4;
-    min-width: clamp(8.8rem, 14vw, 13.5rem);
-    padding: clamp(0.7rem, 1.15vw, 1rem) clamp(1.8rem, 3vw, 3rem);
-    border: clamp(0.16rem, 0.3vw, 0.28rem) solid #5b2d14;
+    min-width: clamp(13rem, 25vw, 22rem);
+    padding: clamp(1rem, 2vw, 1.45rem) clamp(2rem, 4vw, 3.5rem);
+    border: clamp(0.24rem, 0.42vw, 0.36rem) solid #5b2d14;
     border-radius: 999px;
     background:
         linear-gradient(180deg, #fff7a8 0%, #ffd661 48%, #d98631 100%),
         linear-gradient(90deg, #70401c, #d08a38 24%, #5a2b14 52%, #d08a38 78%, #70401c);
     color: #4b250d;
-    font: 900 clamp(1.45rem, 2.6vw, 2.45rem) 'Fredoka', 'Baloo 2', sans-serif;
-    line-height: 1;
+    font: 900 clamp(2.2rem, 5.5vw, 4.8rem)/0.95 'Fredoka', 'Baloo 2', sans-serif;
     text-transform: uppercase;
-    text-shadow: 0 0.08rem 0 rgba(255, 255, 210, 0.9);
+    letter-spacing: 0.04em;
+    text-shadow: 0 0.12rem 0 rgba(255, 255, 210, 0.9);
     box-shadow:
         inset 0 0.16rem 0 rgba(255, 255, 255, 0.62),
-        0 0.36rem 0 #6c3417,
-        0 0.85rem 1.25rem rgba(39, 23, 10, 0.32),
-        0 0 0 0.18rem rgba(255, 232, 105, 0.24);
+        0 0.5rem 0 #6c3417,
+        0 1rem 1.8rem rgba(39, 23, 10, 0.36),
+        0 0 2.2rem rgba(255, 232, 105, 0.48);
     opacity: 0;
-    transform: translate(-50%, 0.7rem) scale(0.9);
+    transform: translate(-50%, calc(-50% + 0.7rem)) scale(0.9);
     cursor: pointer;
     pointer-events: auto;
     transition:
@@ -915,7 +923,7 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
 
 .circle-mission-start-button.is-visible {
     opacity: 1;
-    transform: translate(-50%, 0) scale(1);
+    transform: translate(-50%, -50%) scale(1);
     animation: squareMissionStartPulse 1.35s ease-in-out 0.35s infinite;
 }
 
@@ -932,7 +940,7 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
 
 .circle-mission-start-button:active {
     filter: brightness(0.98);
-    transform: translate(-50%, 0.2rem) scale(0.97);
+    transform: translate(-50%, calc(-50% + 0.2rem)) scale(0.97);
     box-shadow:
         inset 0 0.12rem 0 rgba(255, 255, 255, 0.58),
         0 0.16rem 0 #603015,
