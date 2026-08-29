@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260829-118';
+    const appVersion = '20260829-151';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -118,6 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const circleIllustrationStarMessage = circleIllustrationPage?.querySelector('.circle-lesson-star-message') || null;
     const circleMissionGuide = circleIllustrationPage?.querySelector('.circle-mission-guide') || null;
     const circleMissionGuideText = circleMissionGuide?.querySelector('.circle-mission-guide-text') || null;
+    const circleMissionStartButton = circleMissionGuide?.querySelector('.circle-mission-start-button') || null;
     const circleIllustrationScene = circleIllustrationPage?.querySelector('.circle-illustration-scene') || null;
     const circleHuntUi = circleIllustrationPage?.querySelector('.circle-hunt-ui') || null;
     const circleHuntCount = circleHuntUi?.querySelector('.circle-hunt-count') || null;
@@ -162,7 +163,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeSquareNextButton = shapeSquarePage?.querySelector('[data-square-lesson-next]') || null;
     const shapeSquareStars = shapeSquarePage?.querySelector('.square-lesson-stars') || null;
     const shapeSquareStarMessage = shapeSquarePage?.querySelector('.square-lesson-star-message') || null;
+    const shapeSquareMissionGuide = shapeSquarePage?.querySelector('.square-mission-guide') || null;
+    const shapeSquareMissionCharacter10 = shapeSquarePage?.querySelector('.square-mission-character-ch10') || null;
+    const shapeSquareMissionCharacter11 = shapeSquarePage?.querySelector('.square-mission-character-ch11') || null;
+    const shapeSquareCharacter12 = shapeSquarePage?.querySelector('.square-mission-character-ch12') || null;
+    const shapeSquareCharacter13 = shapeSquarePage?.querySelector('.square-mission-character-ch13') || null;
+    const shapeSquareCelebrationText = shapeSquarePage?.querySelector('.square-puzzle-celebration-text') || null;
+    const shapeSquareConfetti = shapeSquarePage?.querySelector('.square-puzzle-confetti') || null;
+    const shapeSquarePuzzleNextButton = shapeSquarePage?.querySelector('.square-puzzle-next-button') || null;
+    const shapeSquarePuzzleRetryButton = shapeSquarePage?.querySelector('.square-puzzle-retry-button') || null;
+    const shapeSquareMissionBubble = shapeSquarePage?.querySelector('.square-mission-bubble') || null;
+    const shapeSquareMissionBubbleText = shapeSquarePage?.querySelector('.square-mission-bubble-text') || null;
+    const shapeSquareMissionStartButton = shapeSquarePage?.querySelector('.square-mission-start-button') || null;
     const squareObjectPanel = shapeSquarePage?.querySelector('.square-object-panel') || null;
+    const shapeSquareCookieSquare = shapeSquarePage?.querySelector('.square-cookie-square') || null;
+    const shapeSquareAnswerBar = shapeSquarePage?.querySelector('.square-answer-bar') || null;
+    const shapeSquareAnswerInput = shapeSquarePage?.querySelector('.square-answer-input') || null;
     const squareObjectPieces = Array.from(shapeSquarePage?.querySelectorAll('[data-square-piece]') || []);
     const squareObjectTargets = Array.from(shapeSquarePage?.querySelectorAll('[data-square-target]') || []);
     let shapeCircleBubbleCh3Messages = [];
@@ -202,8 +218,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     ];
     const shapeSquareNextShapeMessage = 'Ngayon, panibagong hugis ang ating aalamin!';
     const shapeSquareReadyMessage = 'Handa ka na ba?';
+    const shapeSquareMissionStages = [
+        {
+            character: 'ch10',
+            message: 'Para sa ating Square Mission!',
+            start: 0,
+            end: 1.9,
+        },
+        {
+            character: 'ch10',
+            message: 'Kailangan nating hanapin ang mga nawawalang bagay sa Square town at ibalik ito sa tamang ayos',
+            start: 2.0,
+            end: 8.5,
+        },
+        {
+            character: 'ch11',
+            message: 'Handa ka na ba?',
+            start: 8.8,
+        },
+    ];
     const shapeSquareIntroAudioSource = 'assets/Audios/introsquare.mp3';
+    const shapeSquareMissionAudioSource = 'assets/Audios/squaremission.mp3';
     const shapeSquareReadyAudioSource = 'assets/Audios/Handa ka na ba.mp3';
+    const shapeSquareCelebrationAudioSource = 'assets/Audios/Mahusay.mp3';
     const shapeSquareAreaBackgroundSource = 'assets/Backgrounds/Area2.webp';
     const shapeSquareIllustrationBackgroundSource = 'assets/Backgrounds/Illustration2.webp';
     const shapeSquareIntroStages = [
@@ -216,7 +253,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     let shapeSquareTimers = [];
     let shapeSquareSession = 0;
     let shapeSquareIntroAudio = null;
+    let shapeSquareMissionAudio = null;
     let shapeSquareReadyAudio = null;
+    let shapeSquareCelebrationAudio = null;
     let shapeSquareAudioFrame = null;
     let shapeSquareStartPressTimer = null;
     let shapeSquareCelebrationTimers = [];
@@ -587,6 +626,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeSquareIntroAudio = null;
     };
 
+    const stopShapeSquareMissionAudio = () => {
+        if (!shapeSquareMissionAudio) return;
+
+        shapeSquareMissionAudio.onended = null;
+        shapeSquareMissionAudio.pause();
+        try {
+            shapeSquareMissionAudio.currentTime = 0;
+        } catch (error) {
+            // Pausing is enough while the audio metadata is still loading.
+        }
+        shapeSquareMissionAudio = null;
+    };
+
     const stopShapeSquareReadyAudio = () => {
         if (!shapeSquareReadyAudio) return;
 
@@ -600,6 +652,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeSquareReadyAudio = null;
     };
 
+    const stopShapeSquareCelebrationAudio = () => {
+        if (!shapeSquareCelebrationAudio) return;
+
+        shapeSquareCelebrationAudio.onended = null;
+        shapeSquareCelebrationAudio.pause();
+        try {
+            shapeSquareCelebrationAudio.currentTime = 0;
+        } catch (error) {
+            // Pausing is enough while the audio metadata is still loading.
+        }
+        shapeSquareCelebrationAudio = null;
+    };
+
     const setShapeSquarePlayButtonVisible = (isVisible) => {
         if (!shapeSquarePlayButton) return;
 
@@ -611,6 +676,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!shapeSquareSkipButton) return;
 
         shapeSquareSkipButton.hidden = !isVisible;
+    };
+
+    const setShapeSquareVideoStageVisible = (isVisible) => {
+        if (!shapeSquareVideoStage) return;
+
+        shapeSquareVideoStage.hidden = !isVisible;
+        shapeSquareVideoStage.setAttribute('aria-hidden', String(!isVisible));
     };
 
     const getSquareObjectSceneRect = (spec) => {
@@ -668,8 +740,54 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     };
 
+    shapeSquareAnswerInput?.addEventListener('input', () => {
+        const wholeNumber = shapeSquareAnswerInput.value.replace(/\D/g, '');
+        if (!wholeNumber) {
+            shapeSquareAnswerInput.value = '';
+            return;
+        }
+
+        const answer = Math.min(20, Math.max(1, Number(wholeNumber)));
+        shapeSquareAnswerInput.value = String(answer);
+    });
+
     const resetSquareObjectPuzzle = () => {
         squareObjectActiveDrag = null;
+        stopShapeSquareCelebrationAudio();
+        shapeSquarePage?.classList.remove('is-square-puzzle-complete');
+        shapeSquarePage?.classList.remove('is-square-puzzle-followup');
+        if (shapeSquareCelebrationText) shapeSquareCelebrationText.hidden = true;
+        if (shapeSquareConfetti) shapeSquareConfetti.hidden = true;
+        if (shapeSquarePuzzleNextButton) {
+            shapeSquarePuzzleNextButton.hidden = true;
+            shapeSquarePuzzleNextButton.classList.remove('is-visible');
+        }
+        if (shapeSquareCookieSquare) shapeSquareCookieSquare.hidden = true;
+        if (shapeSquareAnswerBar) shapeSquareAnswerBar.hidden = true;
+        if (shapeSquareAnswerInput) shapeSquareAnswerInput.value = '';
+        if (shapeSquarePuzzleRetryButton) {
+            shapeSquarePuzzleRetryButton.hidden = true;
+            shapeSquarePuzzleRetryButton.classList.remove('is-visible');
+        }
+        if (shapeSquareCharacter12) {
+            shapeSquareCharacter12.hidden = true;
+            shapeSquareCharacter12.classList.remove('is-entering');
+        }
+        if (shapeSquareCharacter13) {
+            shapeSquareCharacter13.hidden = true;
+            shapeSquareCharacter13.classList.remove('is-entering');
+        }
+        if (shapeSquarePuzzleNextButton) {
+            shapeSquarePuzzleNextButton.hidden = true;
+            shapeSquarePuzzleNextButton.classList.remove('is-visible');
+        }
+        if (shapeSquareCookieSquare) shapeSquareCookieSquare.hidden = true;
+        if (shapeSquareAnswerBar) shapeSquareAnswerBar.hidden = true;
+        if (shapeSquareAnswerInput) shapeSquareAnswerInput.value = '';
+        if (shapeSquarePuzzleRetryButton) {
+            shapeSquarePuzzleRetryButton.hidden = true;
+            shapeSquarePuzzleRetryButton.classList.remove('is-visible');
+        }
         squareObjectSnapTimers.forEach((timerId) => window.clearTimeout(timerId));
         squareObjectSnapTimers.clear();
         squareObjectTargets.forEach((target) => target.classList.remove('is-active'));
@@ -690,6 +808,106 @@ document.addEventListener('DOMContentLoaded', async () => {
             piece.removeAttribute('aria-disabled');
             piece.tabIndex = 0;
         });
+    };
+
+    const triggerShapeSquarePuzzleFollowup = () => {
+        if (!shapeSquarePage || shapeSquarePage.classList.contains('is-square-puzzle-followup')) return;
+
+        shapeSquarePage.classList.add('is-square-puzzle-followup');
+        if (shapeSquarePuzzleNextButton) {
+            shapeSquarePuzzleNextButton.hidden = true;
+            shapeSquarePuzzleNextButton.classList.remove('is-visible');
+        }
+        if (shapeSquareCookieSquare) shapeSquareCookieSquare.hidden = false;
+        if (shapeSquareAnswerBar) shapeSquareAnswerBar.hidden = false;
+        if (shapeSquareAnswerInput) {
+            shapeSquareAnswerInput.value = '';
+            shapeSquareAnswerInput.focus({ preventScroll: true });
+        }
+        if (shapeSquarePuzzleRetryButton) {
+            shapeSquarePuzzleRetryButton.hidden = true;
+            shapeSquarePuzzleRetryButton.classList.remove('is-visible');
+        }
+        if (shapeSquarePuzzleRetryButton) {
+            shapeSquarePuzzleRetryButton.hidden = true;
+            shapeSquarePuzzleRetryButton.classList.remove('is-visible');
+        }
+        if (shapeSquareCharacter13) {
+            shapeSquareCharacter13.hidden = false;
+            shapeSquareCharacter13.getBoundingClientRect();
+            shapeSquareCharacter13.classList.add('is-entering');
+        }
+        shapeSquareCharacter12?.classList.remove('is-entering');
+    };
+
+    const returnToShapeSquareMissionStart = () => {
+        if (!shapeSquarePage || !shapeSquareMissionGuide || !shapeSquareMissionStartButton) return;
+
+        stopShapeSquareCelebrationAudio();
+        resetSquareObjectPuzzle();
+        shapeSquarePage.classList.remove('is-lesson-complete', 'is-square-puzzle-followup');
+        shapeSquarePage.classList.add('is-square-mission-guide');
+        shapeSquareMissionGuide.hidden = false;
+        shapeSquareMissionGuide.setAttribute('aria-hidden', 'false');
+        shapeSquareMissionCharacter10.hidden = true;
+        shapeSquareMissionCharacter11.hidden = true;
+        shapeSquareMissionBubble.hidden = true;
+        shapeSquareMissionStartButton.hidden = false;
+        shapeSquareMissionStartButton.classList.add('is-visible');
+        shapeSquareMissionStartButton.focus({ preventScroll: true });
+    };
+
+    const showShapeSquarePuzzleCelebration = () => {
+        if (!shapeSquarePage || !shapeSquareCharacter12) return;
+
+        shapeSquarePage.classList.add('is-square-puzzle-complete');
+        if (shapeSquareCelebrationText) {
+            shapeSquareCelebrationText.hidden = false;
+        }
+        if (shapeSquareConfetti) {
+            shapeSquareConfetti.hidden = false;
+        }
+        shapeSquareCharacter12.hidden = false;
+        shapeSquareCharacter12.classList.remove('is-entering');
+        shapeSquareCharacter12.getBoundingClientRect();
+        shapeSquareCharacter12.classList.add('is-entering');
+
+        if (shapeSquareCharacter13) {
+            shapeSquareCharacter13.hidden = true;
+            shapeSquareCharacter13.classList.remove('is-entering');
+        }
+
+        stopShapeSquareCelebrationAudio();
+        const AudioCtor = window.Audio;
+        if (!AudioCtor) return;
+        const celebrationAudio = new AudioCtor(shapeSquareCelebrationAudioSource);
+        shapeSquareCelebrationAudio = celebrationAudio;
+        celebrationAudio.preload = 'auto';
+        celebrationAudio.playsInline = true;
+        celebrationAudio.volume = 1;
+        celebrationAudio.onended = () => {
+            if (shapeSquareCelebrationAudio === celebrationAudio) shapeSquareCelebrationAudio = null;
+        };
+        celebrationAudio.play().catch(() => {
+            if (shapeSquareCelebrationAudio === celebrationAudio) shapeSquareCelebrationAudio = null;
+        });
+
+        const followupTimerId = window.setTimeout(() => {
+            if (!isPageVisible(shapeSquarePage)) return;
+            if (shapeSquarePuzzleNextButton) {
+                shapeSquarePuzzleNextButton.hidden = false;
+                shapeSquarePuzzleNextButton.getBoundingClientRect();
+                shapeSquarePuzzleNextButton.classList.add('is-visible');
+            }
+            if (shapeSquarePuzzleRetryButton) {
+                shapeSquarePuzzleRetryButton.hidden = false;
+                shapeSquarePuzzleRetryButton.getBoundingClientRect();
+                shapeSquarePuzzleRetryButton.classList.add('is-visible');
+            }
+            shapeSquarePuzzleNextButton?.focus({ preventScroll: true });
+            shapeSquareTimers = shapeSquareTimers.filter((timerId) => timerId !== followupTimerId);
+        }, 2100);
+        shapeSquareTimers.push(followupTimerId);
     };
 
     const collectSquareObjectPiece = (piece) => {
@@ -778,6 +996,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (squareObjectPieces.every((currentPiece) => currentPiece.dataset.squarePlaced === 'true')) {
                 squareObjectPanel?.classList.add('is-complete');
                 playUiClickSound('boardSuccess');
+                showShapeSquarePuzzleCelebration();
             }
         }, 440);
         squareObjectSnapTimers.set(piece, snapTimer);
@@ -878,8 +1097,196 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    const hideShapeSquareMissionGuide = () => {
+        stopShapeSquareMissionAudio();
+        shapeSquarePage?.classList.remove('is-square-mission-guide');
+        shapeSquareMissionGuide?.setAttribute('aria-hidden', 'true');
+        if (shapeSquareMissionGuide) shapeSquareMissionGuide.hidden = true;
+        if (shapeSquareMissionCharacter10) {
+            shapeSquareMissionCharacter10.hidden = false;
+            shapeSquareMissionCharacter10.classList.remove('is-entering', 'is-exiting');
+        }
+        if (shapeSquareMissionCharacter11) {
+            shapeSquareMissionCharacter11.hidden = true;
+            shapeSquareMissionCharacter11.classList.remove('is-entering', 'is-exiting');
+        }
+        if (shapeSquareMissionBubble) {
+            shapeSquareMissionBubble.hidden = false;
+            shapeSquareMissionBubble.classList.remove('is-entering', 'is-ch11', 'is-message-changing');
+        }
+        if (shapeSquareMissionBubbleText) {
+            shapeSquareMissionBubbleText.textContent = '';
+        }
+        if (shapeSquareMissionStartButton) {
+            shapeSquareMissionStartButton.hidden = true;
+            shapeSquareMissionStartButton.classList.remove('is-visible');
+        }
+    };
+
+    const showShapeSquareObjectGame = () => {
+        hideShapeSquareMissionGuide();
+        stopShapeSquareReadyAudio();
+        shapeSquareVideo?.pause();
+        shapeSquarePage?.classList.add('is-lesson-complete');
+        updateSquareObjectTargets();
+        setShapeSquareVideoStageVisible(false);
+        setShapeSquarePlayButtonVisible(false);
+        setShapeSquareSkipButtonVisible(false);
+    };
+
+    const startShapeSquareMissionGuide = () => {
+        if (!shapeSquarePage || !shapeSquareMissionGuide || !shapeSquareMissionBubble || !shapeSquareMissionBubbleText) {
+            showShapeSquareObjectGame();
+            return;
+        }
+
+        clearShapeSquareTimers();
+        stopShapeSquareMissionAudio();
+        stopShapeSquareReadyAudio();
+        hideShapeSquareProgress();
+        shapeSquareVideo?.pause();
+        shapeSquarePage.classList.remove('is-lesson-complete');
+        shapeSquarePage.classList.add('is-square-mission-guide');
+        setShapeSquareVideoStageVisible(false);
+        setShapeSquarePlayButtonVisible(false);
+        setShapeSquareSkipButtonVisible(false);
+        shapeSquareMissionGuide.hidden = false;
+        shapeSquareMissionGuide.setAttribute('aria-hidden', 'false');
+        if (shapeSquareMissionStartButton) {
+            shapeSquareMissionStartButton.hidden = true;
+            shapeSquareMissionStartButton.classList.remove('is-visible');
+        }
+
+        const session = shapeSquareSession;
+        let activeMissionCharacter = '';
+        const showMissionStage = (stageIndex) => {
+            const stage = shapeSquareMissionStages[stageIndex];
+            if (!stage || session !== shapeSquareSession || !isPageVisible(shapeSquarePage)) return;
+
+            const activeCharacter = stage.character === 'ch11' ? shapeSquareMissionCharacter11 : shapeSquareMissionCharacter10;
+            const inactiveCharacter = stage.character === 'ch11' ? shapeSquareMissionCharacter10 : shapeSquareMissionCharacter11;
+            const didChangeCharacter = stage.character !== activeMissionCharacter;
+            activeMissionCharacter = stage.character;
+
+            if (didChangeCharacter && inactiveCharacter) {
+                inactiveCharacter.classList.remove('is-entering');
+                inactiveCharacter.classList.add('is-exiting');
+                const hideInactiveTimerId = window.setTimeout(() => {
+                    inactiveCharacter.hidden = true;
+                    inactiveCharacter.classList.remove('is-exiting');
+                    shapeSquareTimers = shapeSquareTimers.filter((timerId) => timerId !== hideInactiveTimerId);
+                }, 420);
+                shapeSquareTimers.push(hideInactiveTimerId);
+            }
+            if (didChangeCharacter && activeCharacter) {
+                activeCharacter.hidden = false;
+                activeCharacter.classList.remove('is-entering', 'is-exiting');
+                activeCharacter.getBoundingClientRect();
+                activeCharacter.classList.add('is-entering');
+            }
+
+            shapeSquareMissionBubble.classList.toggle('is-ch11', stage.character === 'ch11');
+            shapeSquareMissionBubble.classList.add('is-message-changing');
+            window.setTimeout(() => {
+                if (session !== shapeSquareSession || !isPageVisible(shapeSquarePage)) return;
+                shapeSquareMissionBubbleText.textContent = stage.message;
+                shapeSquareMissionBubble.classList.remove('is-message-changing', 'is-entering');
+                shapeSquareMissionBubble.getBoundingClientRect();
+                shapeSquareMissionBubble.classList.add('is-entering');
+            }, 90);
+
+            if (stage.character === 'ch11') {
+                const AudioCtor = window.Audio;
+                if (AudioCtor) {
+                    stopShapeSquareReadyAudio();
+                    const readyAudio = new AudioCtor(shapeSquareReadyAudioSource);
+                    shapeSquareReadyAudio = readyAudio;
+                    readyAudio.preload = 'auto';
+                    readyAudio.playsInline = true;
+                    readyAudio.volume = 1;
+                    readyAudio.onended = () => {
+                        if (shapeSquareReadyAudio === readyAudio) shapeSquareReadyAudio = null;
+                    };
+                    readyAudio.play().catch(() => {
+                        if (shapeSquareReadyAudio === readyAudio) shapeSquareReadyAudio = null;
+                    });
+                }
+
+                const startButtonTimerId = window.setTimeout(() => {
+                    if (session !== shapeSquareSession || !isPageVisible(shapeSquarePage) || !shapeSquareMissionStartButton) return;
+                    if (shapeSquareMissionBubble) {
+                        shapeSquareMissionBubble.classList.remove('is-entering');
+                        shapeSquareMissionBubble.classList.add('is-exiting');
+                    }
+                    if (shapeSquareMissionCharacter11) {
+                        shapeSquareMissionCharacter11.classList.remove('is-entering');
+                        shapeSquareMissionCharacter11.classList.add('is-exiting');
+                        const hideCh11TimerId = window.setTimeout(() => {
+                            shapeSquareMissionCharacter11.hidden = true;
+                            shapeSquareMissionCharacter11.classList.remove('is-exiting');
+                            shapeSquareTimers = shapeSquareTimers.filter((timerId) => timerId !== hideCh11TimerId);
+                        }, 420);
+                        shapeSquareTimers.push(hideCh11TimerId);
+                    }
+                    const showStartTimerId = window.setTimeout(() => {
+                        if (session !== shapeSquareSession || !isPageVisible(shapeSquarePage) || !shapeSquareMissionStartButton) return;
+                        if (shapeSquareMissionBubble) {
+                            shapeSquareMissionBubble.hidden = true;
+                            shapeSquareMissionBubble.classList.remove('is-exiting', 'is-ch11', 'is-entering');
+                        }
+                        if (shapeSquareMissionBubbleText) {
+                            shapeSquareMissionBubbleText.textContent = '';
+                        }
+                        shapeSquareMissionStartButton.hidden = false;
+                        shapeSquareMissionStartButton.getBoundingClientRect();
+                        shapeSquareMissionStartButton.classList.add('is-visible');
+                        shapeSquareMissionStartButton.focus({ preventScroll: true });
+                        shapeSquareTimers = shapeSquareTimers.filter((timerId) => timerId !== showStartTimerId);
+                    }, 430);
+                    shapeSquareTimers.push(showStartTimerId);
+                    shapeSquareTimers = shapeSquareTimers.filter((timerId) => timerId !== startButtonTimerId);
+                }, 1400);
+                shapeSquareTimers.push(startButtonTimerId);
+            }
+        };
+
+        const ch10Stages = shapeSquareMissionStages.filter((stage) => stage.character === 'ch10');
+        const readyStageIndex = shapeSquareMissionStages.findIndex((stage) => stage.character === 'ch11');
+        ch10Stages.forEach((stage) => {
+            const stageIndex = shapeSquareMissionStages.indexOf(stage);
+            const timerId = window.setTimeout(() => showMissionStage(stageIndex), stage.start * 1000);
+            shapeSquareTimers.push(timerId);
+        });
+
+        const AudioCtor = window.Audio;
+        if (AudioCtor) {
+            const missionAudio = new AudioCtor(shapeSquareMissionAudioSource);
+            shapeSquareMissionAudio = missionAudio;
+            missionAudio.preload = 'auto';
+            missionAudio.playsInline = true;
+            missionAudio.volume = 1;
+            missionAudio.onended = () => {
+                if (shapeSquareMissionAudio === missionAudio) shapeSquareMissionAudio = null;
+            };
+            missionAudio.play().catch(() => {
+                if (shapeSquareMissionAudio === missionAudio) shapeSquareMissionAudio = null;
+            });
+
+            const stopMissionAudioTimerId = window.setTimeout(() => {
+                if (shapeSquareMissionAudio !== missionAudio) return;
+                stopShapeSquareMissionAudio();
+            }, 8500);
+            shapeSquareTimers.push(stopMissionAudioTimerId);
+        }
+
+        const readyTimerId = window.setTimeout(() => showMissionStage(readyStageIndex), 8800);
+        shapeSquareTimers.push(readyTimerId);
+
+    };
+
     const resetShapeSquareLessonVideo = () => {
         hideShapeSquareProgress();
+        hideShapeSquareMissionGuide();
         shapeSquarePage?.classList.remove('is-lesson-complete');
         resetSquareObjectPuzzle();
         setShapeSquareEarnedStars(0);
@@ -894,7 +1301,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        shapeSquareVideoStage?.setAttribute('aria-hidden', 'true');
+        setShapeSquareVideoStageVisible(false);
         setShapeSquarePlayButtonVisible(true);
     };
 
@@ -905,11 +1312,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeSquareVideo?.pause();
         setShapeSquarePlayButtonVisible(false);
         setShapeSquareSkipButtonVisible(false);
+        hideShapeSquareMissionGuide();
         shapeSquarePage.classList.remove('is-lesson-complete');
         shapeSquarePage.classList.add('is-progress-visible');
         setShapeSquareEarnedStars(1);
         shapeSquareProgress.setAttribute('aria-hidden', 'false');
-        shapeSquareVideoStage?.setAttribute('aria-hidden', 'true');
+        setShapeSquareVideoStageVisible(false);
         shapeSquareNextButton?.focus({ preventScroll: true });
 
         if (!wasAlreadyVisible) {
@@ -933,7 +1341,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             setShapeSquareEarnedStars(0);
             setShapeSquarePlayButtonVisible(false);
             setShapeSquareSkipButtonVisible(true);
-            shapeSquareVideoStage?.setAttribute('aria-hidden', 'false');
+            setShapeSquareVideoStageVisible(true);
 
             try {
                 shapeSquareVideo.currentTime = 0;
@@ -950,13 +1358,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const finishShapeSquareLesson = () => {
-        hideShapeSquareProgress();
-        shapeSquareVideo?.pause();
-        shapeSquarePage?.classList.add('is-lesson-complete');
-        updateSquareObjectTargets();
-        shapeSquareVideoStage?.setAttribute('aria-hidden', 'true');
-        setShapeSquarePlayButtonVisible(false);
-        setShapeSquareSkipButtonVisible(false);
+        startShapeSquareMissionGuide();
     };
 
     const showShapeSquareFinalMessage = () => {
@@ -964,6 +1366,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         clearShapeSquareTimers();
         stopShapeSquareIntroAudio();
+        stopShapeSquareMissionAudio();
         stopShapeSquareReadyAudio();
         resetShapeSquareLessonVideo();
         shapeSquareSession += 1;
@@ -1013,6 +1416,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const resetShapeSquareScene = () => {
         clearShapeSquareTimers();
         stopShapeSquareIntroAudio();
+        stopShapeSquareMissionAudio();
         stopShapeSquareReadyAudio();
         resetShapeSquareLessonVideo();
         shapeSquareSession += 1;
@@ -1056,6 +1460,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         clearShapeSquareTimers();
         stopShapeSquareIntroAudio();
+        stopShapeSquareMissionAudio();
         stopShapeSquareReadyAudio();
         shapeSquareSession += 1;
         shapeSquareStartButton?.classList.remove('is-clicking');
@@ -1065,7 +1470,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         resetShapeSquareLessonVideo();
         shapeSquarePage.classList.add('is-illustration-background');
-        shapeSquareVideoStage?.setAttribute('aria-hidden', 'false');
+        setShapeSquareVideoStageVisible(true);
     };
 
     const transitionToShapeSquareIllustration = () => {
@@ -1712,6 +2117,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             circleMissionGuide.setAttribute('aria-hidden', 'true');
             circleMissionGuide.classList.remove('is-active', 'is-bubble-visible', 'is-exiting');
         }
+        if (circleMissionStartButton) {
+            circleMissionStartButton.hidden = true;
+            circleMissionStartButton.classList.remove('is-visible');
+        }
     };
 
     const startCircleMissionGuide = () => {
@@ -1728,15 +2137,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (session !== circleMissionGuideSession || !isPageVisible(circleIllustrationPage)) return;
 
             if (messageIndex >= circleMissionGuideMessages.length) {
-                circleMissionGuide.classList.remove('is-bubble-visible');
-                circleMissionGuideTimers.push(window.setTimeout(() => {
+                const startButtonTimerId = window.setTimeout(() => {
                     if (session !== circleMissionGuideSession) return;
-                    circleMissionGuide.classList.add('is-exiting');
-                    circleMissionGuideTimers.push(window.setTimeout(() => {
+                    if (!circleMissionStartButton) {
                         resetCircleMissionGuide();
                         showCircleHuntStart();
-                    }, 700));
-                }, 350));
+                        return;
+                    }
+                    circleMissionStartButton.hidden = false;
+                    circleMissionStartButton.getBoundingClientRect();
+                    circleMissionStartButton.classList.add('is-visible');
+                    circleMissionStartButton.focus({ preventScroll: true });
+                    circleMissionGuideTimers = circleMissionGuideTimers.filter((timerId) => timerId !== startButtonTimerId);
+                }, 350);
+                circleMissionGuideTimers.push(startButtonTimerId);
                 return;
             }
 
@@ -4899,6 +5313,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     circleHuntStartButton?.addEventListener('click', startCircleHuntCountdown);
     circleHuntPlayAgainButton?.addEventListener('click', startCircleHuntCountdown);
+    circleMissionStartButton?.addEventListener('click', () => {
+        playUiClickSound('chime');
+        resetCircleMissionGuide();
+        showCircleHuntStart();
+        startCircleHuntCountdown();
+    });
     circleIllustrationScene?.addEventListener('click', (event) => {
         if (circleHuntState !== 'playing') return;
 
@@ -4957,6 +5377,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     shapeSquareVideo?.addEventListener('ended', showShapeSquareProgress);
     shapeSquareReplayButton?.addEventListener('click', playShapeSquareLessonVideo);
     shapeSquareNextButton?.addEventListener('click', finishShapeSquareLesson);
+    shapeSquareMissionStartButton?.addEventListener('click', () => {
+        playUiClickSound('chime');
+        showShapeSquareObjectGame();
+    });
+    shapeSquarePuzzleNextButton?.addEventListener('click', () => {
+        playUiClickSound('chime');
+        triggerShapeSquarePuzzleFollowup();
+    });
+    shapeSquarePuzzleRetryButton?.addEventListener('click', () => {
+        playUiClickSound('chime');
+        returnToShapeSquareMissionStart();
+    });
     shapeSquareBgImage?.addEventListener('load', updateSquareObjectTargets);
 
     squareObjectPieces.forEach((piece) => {
@@ -4993,6 +5425,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             shapeSquareVideo.currentTime > 0
             && !shapeSquareVideo.ended
             && !shapeSquarePage?.classList.contains('is-progress-visible')
+            && !shapeSquarePage?.classList.contains('is-square-mission-guide')
             && !shapeSquarePage?.classList.contains('is-lesson-complete')
         ) {
             setShapeSquarePlayButtonVisible(true);

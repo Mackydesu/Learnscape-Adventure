@@ -876,6 +876,69 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
     transform: translate(0, 0) scale(1);
 }
 
+.circle-mission-start-button {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(4.2rem, 9vh, 7rem);
+    z-index: 4;
+    min-width: clamp(8.8rem, 14vw, 13.5rem);
+    padding: clamp(0.7rem, 1.15vw, 1rem) clamp(1.8rem, 3vw, 3rem);
+    border: clamp(0.16rem, 0.3vw, 0.28rem) solid #5b2d14;
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, #fff7a8 0%, #ffd661 48%, #d98631 100%),
+        linear-gradient(90deg, #70401c, #d08a38 24%, #5a2b14 52%, #d08a38 78%, #70401c);
+    color: #4b250d;
+    font: 900 clamp(1.45rem, 2.6vw, 2.45rem) 'Fredoka', 'Baloo 2', sans-serif;
+    line-height: 1;
+    text-transform: uppercase;
+    text-shadow: 0 0.08rem 0 rgba(255, 255, 210, 0.9);
+    box-shadow:
+        inset 0 0.16rem 0 rgba(255, 255, 255, 0.62),
+        0 0.36rem 0 #6c3417,
+        0 0.85rem 1.25rem rgba(39, 23, 10, 0.32),
+        0 0 0 0.18rem rgba(255, 232, 105, 0.24);
+    opacity: 0;
+    transform: translate(-50%, 0.7rem) scale(0.9);
+    cursor: pointer;
+    pointer-events: auto;
+    transition:
+        opacity 0.28s ease,
+        transform 0.28s cubic-bezier(0.2, 1.15, 0.35, 1),
+        filter 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.circle-mission-start-button[hidden] {
+    display: none;
+}
+
+.circle-mission-start-button.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+    animation: squareMissionStartPulse 1.35s ease-in-out 0.35s infinite;
+}
+
+.circle-mission-start-button:hover,
+.circle-mission-start-button:focus-visible {
+    filter: brightness(1.08) saturate(1.08);
+    box-shadow:
+        inset 0 0.16rem 0 rgba(255, 255, 255, 0.72),
+        0 0.48rem 0 #603015,
+        0 0.95rem 1.45rem rgba(39, 23, 10, 0.38),
+        0 0 0 0.28rem rgba(255, 232, 105, 0.34);
+    outline: none;
+}
+
+.circle-mission-start-button:active {
+    filter: brightness(0.98);
+    transform: translate(-50%, 0.2rem) scale(0.97);
+    box-shadow:
+        inset 0 0.12rem 0 rgba(255, 255, 255, 0.58),
+        0 0.16rem 0 #603015,
+        0 0.45rem 0.85rem rgba(39, 23, 10, 0.28);
+}
+
 .circle-mission-guide-text {
     display: inline;
     white-space: pre-wrap;
@@ -1412,6 +1475,7 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .circle-mission-start-button,
     .circle-hunt-start-button,
     .circle-hunt-play-again-button,
     .circle-hunt-countdown.is-popping,
@@ -2868,6 +2932,12 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     transform: none;
 }
 
+#learnscape-shape-square-page.is-illustration-background.is-square-mission-guide:not(.is-lesson-complete) .shape-area-bg,
+#learnscape-shape-square-page.is-square-mission-guide .shape-area-bg {
+    filter: none !important;
+    transform: scale(1);
+}
+
 .square-illustration-video-stage {
     position: absolute;
     left: 50%;
@@ -2878,6 +2948,10 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     visibility: hidden;
     transform: translate(-50%, -50%);
     transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+
+.square-illustration-video-stage[hidden] {
+    display: none !important;
 }
 
 #learnscape-shape-square-page.is-illustration-background:not(.is-progress-visible):not(.is-lesson-complete) .square-illustration-video-stage {
@@ -2897,9 +2971,546 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     display: grid;
 }
 
+#learnscape-shape-square-page.is-square-mission-guide .square-illustration-video-stage {
+    display: none;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
 #learnscape-shape-square-page.is-lesson-complete .shape-area-bg {
     filter: none;
     transform: scale(1);
+}
+
+.square-mission-guide {
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    display: none;
+    pointer-events: none;
+}
+
+#learnscape-shape-square-page.is-square-mission-guide .square-mission-guide {
+    display: block;
+}
+
+.square-mission-character {
+    position: absolute;
+    left: clamp(1rem, 4vw, 4rem);
+    bottom: clamp(0rem, 1.2vh, 0.8rem);
+    width: auto;
+    height: clamp(17rem, 36vw, 34rem);
+    filter: drop-shadow(0 0.9rem 1rem rgba(31, 21, 9, 0.34));
+    transform-origin: center bottom;
+    user-select: none;
+}
+
+.square-mission-character[hidden] {
+    display: none;
+}
+
+.square-mission-character-ch11 {
+    left: clamp(0.8rem, 3.4vw, 3.4rem);
+    height: clamp(16rem, 34vw, 32rem);
+}
+
+.square-mission-character-ch12 {
+    left: 50%;
+    bottom: clamp(0rem, 1.2vh, 0.8rem);
+    z-index: 30;
+    height: clamp(20rem, 44vw, 40rem);
+    transform: translateX(-50%);
+}
+
+#learnscape-shape-square-page .square-mission-character-ch12.is-entering {
+    animation: squareMissionCharacterCh12In 0.58s cubic-bezier(0.2, 1.15, 0.35, 1) both;
+}
+
+.square-mission-character-ch13 {
+    left: clamp(0.8rem, 4vw, 4rem);
+    bottom: clamp(0rem, 1.2vh, 0.8rem);
+    z-index: 30;
+    height: clamp(16rem, 34vw, 32rem);
+}
+
+.square-cookie-square {
+    --chocolate-size: min(42vw, 32rem);
+    position: absolute;
+    left: 50%;
+    top: 38%;
+    z-index: 9;
+    width: var(--chocolate-size);
+    height: auto;
+    max-height: min(52vh, 32rem);
+    object-fit: contain;
+    filter: drop-shadow(0 0.8rem 1.3rem rgba(49, 25, 8, 0.42));
+    transform: translate(-50%, -50%);
+}
+
+.square-cookie-square[hidden] {
+    display: none;
+}
+
+.square-answer-bar {
+    position: absolute;
+    left: 50%;
+    top: min(73%, calc(38% + min(26vw, 20rem)));
+    z-index: 31;
+    width: min(42vw, 32rem);
+    transform: translateX(-50%);
+    animation: squareAnswerBarIn 0.55s 0.15s cubic-bezier(0.2, 1.15, 0.35, 1) both;
+}
+
+.square-answer-bar[hidden] {
+    display: none;
+}
+
+.square-answer-input {
+    width: 100%;
+    min-height: clamp(3.3rem, 6.2vw, 5.2rem);
+    padding: 0 clamp(1.1rem, 2.2vw, 1.8rem);
+    border: clamp(0.16rem, 0.28vw, 0.26rem) solid #643417;
+    border-radius: clamp(0.85rem, 1.4vw, 1.2rem);
+    background: linear-gradient(180deg, #fff9df, #ffe69a);
+    color: #4b250d;
+    font: 900 clamp(1.1rem, 2.5vw, 2rem) 'Fredoka', sans-serif;
+    line-height: 1;
+    text-align: center;
+    box-shadow:
+        inset 0 0.18rem 0 rgba(255, 255, 255, 0.72),
+        0 0.35rem 0 #7b411e,
+        0 0.8rem 1.2rem rgba(39, 23, 10, 0.28);
+    outline: none;
+}
+
+.square-answer-input::placeholder {
+    color: rgba(75, 37, 13, 0.58);
+}
+
+.square-answer-input:focus {
+    border-color: #fff45f;
+    box-shadow:
+        inset 0 0.18rem 0 rgba(255, 255, 255, 0.72),
+        0 0.35rem 0 #7b411e,
+        0 0 0 0.22rem rgba(255, 244, 95, 0.58),
+        0 0.8rem 1.2rem rgba(39, 23, 10, 0.28);
+}
+
+#learnscape-shape-square-page.is-square-puzzle-followup .square-cookie-square {
+    animation: squareCookieSquareIn 0.7s cubic-bezier(0.2, 1.15, 0.35, 1) both;
+}
+
+@keyframes squareCookieSquareIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes squareAnswerBarIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0.8rem) scale(0.94);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+}
+
+#learnscape-shape-square-page .square-mission-character-ch13.is-entering {
+    animation: squareMissionCharacterCh13In 0.7s cubic-bezier(0.2, 1.15, 0.35, 1) both;
+}
+
+@keyframes squareMissionCharacterCh13In {
+    from {
+        opacity: 0;
+        transform: translateX(-3rem) translateY(0.5rem) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) translateY(0) scale(1);
+    }
+}
+
+.square-puzzle-celebration-text {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(21rem, 46vw, 43rem);
+    z-index: 31;
+    color: #6a3214;
+    font: italic 800 clamp(2.5rem, 6vw, 5.5rem) 'Nunito', sans-serif;
+    line-height: 1;
+    text-align: center;
+    text-shadow: 0.08rem 0.1rem 0 #fff1ad, 0 0 0.8rem rgba(255, 236, 142, 0.78);
+    transform: translateX(-50%);
+    animation: squarePuzzleCelebrationTextIn 0.55s 0.12s cubic-bezier(0.2, 1.15, 0.35, 1) both;
+    white-space: nowrap;
+}
+
+.square-puzzle-celebration-text[hidden] {
+    display: none;
+}
+
+#learnscape-shape-square-page.is-square-puzzle-followup .square-mission-character-ch12 {
+    animation: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(110vw, -7rem) scale(0.74);
+    transition: opacity 0.6s ease, transform 0.85s cubic-bezier(0.2, 0.85, 0.3, 1), visibility 0s linear 0.85s;
+}
+
+#learnscape-shape-square-page.is-square-puzzle-followup .square-puzzle-celebration-text {
+    animation: none;
+    transform: translate(-50%, -8rem);
+    transition: transform 0.75s cubic-bezier(0.2, 0.85, 0.3, 1);
+}
+
+.square-puzzle-confetti {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(1rem, 4vw, 3rem);
+    z-index: 29;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.square-puzzle-confetti[hidden] {
+    display: none;
+}
+
+.square-puzzle-confetti span {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: var(--size);
+    height: calc(var(--size) * 0.62);
+    border-radius: 0.18rem;
+    background: var(--color);
+    box-shadow: 0 0.16rem 0.24rem rgba(58, 27, 8, 0.2);
+    animation: squarePuzzleConfettiBurst 1.55s cubic-bezier(0.16, 0.8, 0.25, 1) var(--delay) both;
+}
+
+.square-puzzle-confetti span:nth-child(1) { --size: 1.1rem; --color: #ffdc46; --x: -18rem; --y: -15rem; --r: -42deg; --delay: 0s; }
+.square-puzzle-confetti span:nth-child(2) { --size: 0.72rem; --color: #f47b48; --x: -14rem; --y: -21rem; --r: 58deg; --delay: 0.06s; }
+.square-puzzle-confetti span:nth-child(3) { --size: 1.45rem; --color: #65c7a1; --x: -10rem; --y: -27rem; --r: -28deg; --delay: 0.12s; }
+.square-puzzle-confetti span:nth-child(4) { --size: 0.88rem; --color: #f28db2; --x: -6rem; --y: -19rem; --r: 72deg; --delay: 0.04s; }
+.square-puzzle-confetti span:nth-child(5) { --size: 1.22rem; --color: #ffe98b; --x: -23rem; --y: -9rem; --r: 35deg; --delay: 0.1s; }
+.square-puzzle-confetti span:nth-child(6) { --size: 0.66rem; --color: #72a9e8; --x: -4rem; --y: -31rem; --r: -64deg; --delay: 0.18s; }
+.square-puzzle-confetti span:nth-child(7) { --size: 1rem; --color: #ed6b5f; --x: -27rem; --y: -19rem; --r: 48deg; --delay: 0.16s; }
+.square-puzzle-confetti span:nth-child(8) { --size: 1.3rem; --color: #ffdc46; --x: 18rem; --y: -15rem; --r: 42deg; --delay: 0.02s; }
+.square-puzzle-confetti span:nth-child(9) { --size: 0.72rem; --color: #65c7a1; --x: 14rem; --y: -21rem; --r: -58deg; --delay: 0.08s; }
+.square-puzzle-confetti span:nth-child(10) { --size: 1.45rem; --color: #f47b48; --x: 10rem; --y: -27rem; --r: 28deg; --delay: 0.14s; }
+.square-puzzle-confetti span:nth-child(11) { --size: 0.88rem; --color: #72a9e8; --x: 6rem; --y: -19rem; --r: -72deg; --delay: 0.06s; }
+.square-puzzle-confetti span:nth-child(12) { --size: 1.22rem; --color: #f28db2; --x: 23rem; --y: -9rem; --r: -35deg; --delay: 0.12s; }
+.square-puzzle-confetti span:nth-child(13) { --size: 0.66rem; --color: #ffe98b; --x: 4rem; --y: -31rem; --r: 64deg; --delay: 0.2s; }
+.square-puzzle-confetti span:nth-child(14) { --size: 1rem; --color: #ed6b5f; --x: 27rem; --y: -19rem; --r: -48deg; --delay: 0.18s; }
+
+@keyframes squarePuzzleConfettiBurst {
+    from {
+        opacity: 0;
+        transform: translate(0, 0) scale(0.2) rotate(0deg);
+    }
+
+    18% {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+        transform: translate(var(--x), var(--y)) scale(1) rotate(var(--r));
+    }
+}
+
+@keyframes squarePuzzleCelebrationTextIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0.6rem) scale(0.86);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+}
+
+@keyframes squareMissionCharacterCh12In {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0.8rem) scale(0.88);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+}
+
+.square-mission-character.is-entering {
+    animation:
+        shapeAreaSquareCharacterCh9In 0.58s cubic-bezier(0.2, 1.15, 0.35, 1) both,
+        shapeAreaSquareCharacterFloat 3s ease-in-out 0.58s infinite;
+}
+
+.square-mission-character.is-exiting {
+    animation: squareMissionCharacterOut 0.42s ease both;
+}
+
+@keyframes squareMissionCharacterOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(0.45rem) scale(0.94);
+    }
+}
+
+.square-mission-bubble {
+    position: absolute;
+    left: clamp(10.5rem, 18vw, 20rem);
+    bottom: clamp(27rem, 38vw, 36rem);
+    max-width: min(40vw, 32rem);
+    box-sizing: border-box;
+    padding: clamp(0.8rem, 1.4vw, 1.2rem) clamp(1rem, 1.8vw, 1.45rem);
+    border: clamp(0.14rem, 0.24vw, 0.22rem) solid rgba(91, 48, 20, 0.78);
+    border-radius: 1.35rem 1.35rem 1.35rem 0.75rem;
+    background:
+        radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.96) 0 13%, rgba(255, 255, 255, 0) 34%),
+        linear-gradient(180deg, rgba(255, 253, 233, 0.98), rgba(255, 222, 121, 0.98) 72%, rgba(232, 153, 58, 0.98)),
+        #ffeaa2;
+    color: #48240d;
+    font: 800 clamp(1.2rem, 2vw, 1.9rem) 'Fredoka', 'Baloo 2', sans-serif;
+    line-height: 1.12;
+    text-align: center;
+    text-shadow: 0 0.06rem 0 rgba(255, 255, 255, 0.82);
+    box-shadow:
+        inset 0 0.13rem 0 rgba(255, 255, 255, 0.76),
+        inset 0 -0.22rem 0 rgba(121, 68, 24, 0.12),
+        0 0.36rem 0.25rem rgba(85, 50, 21, 0.18),
+        0 0.9rem 1.3rem rgba(38, 24, 11, 0.28);
+}
+
+.square-mission-bubble[hidden] {
+    display: none;
+}
+
+.square-mission-bubble.is-ch11 {
+    left: clamp(10rem, 17vw, 19rem);
+    bottom: clamp(25rem, 35vw, 33rem);
+    max-width: min(34vw, 23rem);
+    font-size: clamp(1.55rem, 2.4vw, 2.25rem);
+}
+
+.square-mission-bubble span {
+    display: block;
+    opacity: 1;
+    transition: opacity 0.18s ease;
+}
+
+.square-mission-bubble.is-message-changing span {
+    opacity: 0;
+}
+
+.square-mission-bubble.is-entering {
+    animation: shapeAreaSquareBubbleReturn 0.48s cubic-bezier(0.2, 1.15, 0.35, 1) both;
+}
+
+.square-mission-bubble.is-exiting {
+    animation: squareMissionBubbleOut 0.42s ease both;
+}
+
+@keyframes squareMissionBubbleOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(0.45rem) scale(0.96);
+    }
+}
+
+.square-mission-bubble::before,
+.square-mission-bubble::after {
+    content: '';
+    position: absolute;
+    left: clamp(1.05rem, 2vw, 1.55rem);
+    bottom: clamp(-1rem, -1.15vw, -0.7rem);
+    width: clamp(1rem, 1.65vw, 1.35rem);
+    height: clamp(1rem, 1.65vw, 1.35rem);
+    border: clamp(0.12rem, 0.2vw, 0.18rem) solid rgba(91, 48, 20, 0.78);
+    border-top: 0;
+    border-left: 0;
+    background: #efb15d;
+    transform: rotate(45deg);
+}
+
+.square-mission-bubble::after {
+    left: clamp(1.2rem, 2.1vw, 1.7rem);
+    bottom: clamp(-0.72rem, -0.86vw, -0.5rem);
+    border: 0;
+    background: #efb15d;
+}
+
+.square-mission-start-button {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    bottom: auto;
+    z-index: 7;
+    min-width: clamp(13rem, 24vw, 22rem);
+    padding: clamp(1rem, 1.9vw, 1.45rem) clamp(2.8rem, 5vw, 4.7rem);
+    border: clamp(0.24rem, 0.42vw, 0.38rem) solid #5b2d14;
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, #fff7a8 0%, #ffd661 48%, #d98631 100%),
+        linear-gradient(90deg, #70401c, #d08a38 24%, #5a2b14 52%, #d08a38 78%, #70401c);
+    color: #4b250d;
+    font: 900 clamp(2.1rem, 4.2vw, 4rem) 'Fredoka', 'Baloo 2', sans-serif;
+    line-height: 1;
+    text-transform: uppercase;
+    text-shadow: 0 0.08rem 0 rgba(255, 255, 210, 0.9);
+    box-shadow:
+        inset 0 0.16rem 0 rgba(255, 255, 255, 0.62),
+        0 0.5rem 0 #6c3417,
+        0 1rem 1.55rem rgba(39, 23, 10, 0.36),
+        0 0 0 0.24rem rgba(255, 232, 105, 0.28);
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 0.7rem)) scale(0.9);
+    cursor: pointer;
+    pointer-events: auto;
+    transition:
+        opacity 0.28s ease,
+        transform 0.28s cubic-bezier(0.2, 1.15, 0.35, 1),
+        filter 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.square-mission-start-button[hidden] {
+    display: none;
+}
+
+.square-mission-start-button.is-visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    animation: squareMissionStartPulse 1.35s ease-in-out 0.35s infinite;
+}
+
+.square-mission-start-button:hover,
+.square-mission-start-button:focus-visible {
+    filter: brightness(1.08) saturate(1.08);
+    box-shadow:
+        inset 0 0.16rem 0 rgba(255, 255, 255, 0.72),
+        0 0.48rem 0 #603015,
+        0 0.95rem 1.45rem rgba(39, 23, 10, 0.38),
+        0 0 0 0.28rem rgba(255, 232, 105, 0.34);
+    outline: none;
+}
+
+.square-mission-start-button:active {
+    filter: brightness(0.98);
+    transform: translate(-50%, calc(-50% + 0.2rem)) scale(0.97);
+    box-shadow:
+        inset 0 0.12rem 0 rgba(255, 255, 255, 0.58),
+        0 0.16rem 0 #603015,
+        0 0.45rem 0.85rem rgba(39, 23, 10, 0.28);
+}
+
+.square-puzzle-next-button {
+    position: absolute;
+    right: clamp(1rem, 2.5vw, 2.8rem);
+    bottom: clamp(1rem, 2.5vw, 2.5rem);
+    z-index: 32;
+    min-width: clamp(7rem, 11vw, 11rem);
+    padding: clamp(0.7rem, 1.2vw, 1rem) clamp(1.3rem, 2.3vw, 2.2rem);
+    border: 0.2rem solid #5b2d14;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #fff7a8, #ffd661 50%, #d98631);
+    color: #4b250d;
+    font: 900 clamp(1.2rem, 2.2vw, 2rem) 'Fredoka', sans-serif;
+    line-height: 1;
+    box-shadow: 0 0.35rem 0 #6c3417, 0 0.7rem 1rem rgba(39, 23, 10, 0.3);
+    opacity: 0;
+    transform: translateY(0.6rem);
+    pointer-events: none;
+    cursor: pointer;
+    transition: opacity 0.3s ease, transform 0.3s ease, filter 0.18s ease;
+}
+
+.square-puzzle-next-button[hidden] {
+    display: none;
+}
+
+.square-puzzle-next-button.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.square-puzzle-next-button:hover,
+.square-puzzle-next-button:focus-visible {
+    filter: brightness(1.08) saturate(1.08);
+    outline: none;
+}
+
+.square-puzzle-retry-button {
+    position: absolute;
+    left: clamp(1rem, 2.5vw, 2.8rem);
+    bottom: clamp(1rem, 2.5vw, 2.5rem);
+    z-index: 32;
+    min-width: clamp(7rem, 11vw, 11rem);
+    padding: clamp(0.7rem, 1.2vw, 1rem) clamp(1.3rem, 2.3vw, 2.2rem);
+    border: 0.2rem solid #5b2d14;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #fff7a8, #ffd661 50%, #d98631);
+    color: #4b250d;
+    font: 900 clamp(1.2rem, 2.2vw, 2rem) 'Fredoka', sans-serif;
+    line-height: 1;
+    box-shadow: 0 0.35rem 0 #6c3417, 0 0.7rem 1rem rgba(39, 23, 10, 0.3);
+    opacity: 0;
+    transform: translateY(0.6rem);
+    pointer-events: none;
+    cursor: pointer;
+    transition: opacity 0.3s ease, transform 0.3s ease, filter 0.18s ease;
+}
+
+.square-puzzle-retry-button[hidden] {
+    display: none;
+}
+
+.square-puzzle-retry-button.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.square-puzzle-retry-button:hover,
+.square-puzzle-retry-button:focus-visible {
+    filter: brightness(1.08) saturate(1.08);
+    outline: none;
+}
+
+@keyframes squareMissionStartPulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    50% {
+        transform: translate(-50%, calc(-50% - 0.28rem)) scale(1.04);
+    }
 }
 
 .square-object-panel {
@@ -2953,6 +3564,14 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 .square-object-panel::after {
     top: auto;
     bottom: 0.2rem;
+}
+
+#learnscape-shape-square-page.is-square-puzzle-complete .square-object-panel {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+    transform: translate(-120%, -50%);
+    transition: opacity 0.48s ease, transform 0.48s ease, visibility 0s linear 0.48s;
 }
 
 #learnscape-shape-square-page.is-lesson-complete .square-object-panel {
@@ -3145,6 +3764,39 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 }
 
 @media (max-width: 900px), (orientation: portrait) {
+    .square-mission-character {
+        left: clamp(0.3rem, 1.4vw, 0.8rem);
+        height: clamp(12rem, 32vw, 18rem);
+    }
+
+    .square-mission-character-ch11 {
+        left: clamp(0.2rem, 1.1vw, 0.7rem);
+        height: clamp(11rem, 30vw, 17rem);
+    }
+
+    .square-mission-bubble {
+        left: clamp(6.8rem, 18vw, 11rem);
+        bottom: clamp(14.4rem, 36vw, 21.5rem);
+        max-width: min(50vw, 26rem);
+        font-size: clamp(0.95rem, 2.6vw, 1.35rem);
+    }
+
+    .square-mission-bubble.is-ch11 {
+        left: clamp(6.4rem, 17vw, 10.5rem);
+        bottom: clamp(13.2rem, 33vw, 19.8rem);
+        max-width: min(42vw, 18rem);
+        font-size: clamp(1.2rem, 3vw, 1.6rem);
+    }
+
+    .square-mission-start-button {
+        left: 50%;
+        top: 50%;
+        bottom: auto;
+        min-width: clamp(10rem, 30vw, 15rem);
+        padding: clamp(0.8rem, 2.2vw, 1.05rem) clamp(2rem, 5vw, 3rem);
+        font-size: clamp(1.7rem, 5vw, 2.4rem);
+    }
+
     .square-object-panel {
         left: clamp(0.35rem, 1vw, 0.65rem);
         top: 57%;
@@ -3159,6 +3811,11 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
         animation: none;
     }
 
+    .square-mission-character.is-entering,
+    .square-mission-character.is-exiting,
+    .square-mission-bubble.is-entering,
+    .square-mission-bubble.is-exiting,
+    .square-mission-start-button.is-visible,
     .square-object-target.is-active,
     .square-object-piece.is-snapping,
     .square-object-piece.is-scattered {
