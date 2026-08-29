@@ -2969,6 +2969,7 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 
 #learnscape-shape-square-page.is-progress-visible .square-lesson-progress {
     display: grid;
+    z-index: 35;
 }
 
 #learnscape-shape-square-page.is-square-mission-guide .square-illustration-video-stage {
@@ -3034,6 +3035,57 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     height: clamp(16rem, 34vw, 32rem);
 }
 
+.square-kids-cheer-character[hidden] {
+    display: none;
+}
+
+.square-kids-cheer-character-ch7 {
+    position: absolute;
+    left: clamp(0.4rem, 1.7vw, 1.6rem);
+    bottom: clamp(-0.4rem, -0.7vw, -0.1rem);
+    z-index: 33;
+    width: clamp(14rem, 29vw, 25rem);
+    max-height: 82vh;
+    object-fit: contain;
+    object-position: left bottom;
+    opacity: 0;
+    transform: translateX(-125%);
+    filter: drop-shadow(0.45rem 0.65rem 0.45rem rgba(47, 62, 17, 0.28));
+}
+
+#learnscape-shape-square-page.is-square-kids-cheering .square-kids-cheer-character-ch7 {
+    animation:
+        circleHuntCh7Celebrate 0.75s cubic-bezier(0.16, 0.92, 0.28, 1.18) forwards,
+        circleHuntCh7Jump 1.05s ease-in-out 0.8s infinite;
+}
+
+.square-kids-cheer-character-ch8 {
+    position: absolute;
+    right: clamp(0.5rem, 2vw, 2rem);
+    bottom: clamp(-0.5rem, -1vw, -0.1rem);
+    z-index: 34;
+    width: clamp(11rem, 22vw, 19rem);
+    opacity: 0;
+    transform: translateY(30%) scale(0.2) rotate(8deg);
+    transform-origin: center bottom;
+}
+
+.square-kids-cheer-character-ch8 img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 66vh;
+    object-fit: contain;
+    object-position: right bottom;
+    filter: drop-shadow(-0.4rem 0.65rem 0.45rem rgba(47, 62, 17, 0.28));
+}
+
+#learnscape-shape-square-page.is-square-kids-cheering .square-kids-cheer-character-ch8 {
+    animation:
+        circleHuntCh8Pop 0.68s cubic-bezier(0.2, 1.48, 0.35, 1) forwards,
+        circleHuntCh8Pulse 1.2s ease-in-out 0.72s infinite;
+}
+
 .square-cookie-square {
     --chocolate-size: min(42vw, 32rem);
     position: absolute;
@@ -3052,49 +3104,74 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     display: none;
 }
 
-.square-answer-bar {
+.square-answer-tiles {
     position: absolute;
     left: 50%;
-    top: min(73%, calc(38% + min(26vw, 20rem)));
+    top: 73%;
     z-index: 31;
-    width: min(42vw, 32rem);
+    display: grid;
+    grid-template-columns: repeat(4, clamp(6rem, 10vw, 9.2rem));
+    gap: clamp(0.5rem, 1vw, 0.9rem);
     transform: translateX(-50%);
-    animation: squareAnswerBarIn 0.55s 0.15s cubic-bezier(0.2, 1.15, 0.35, 1) both;
+    animation: squareAnswerTilesIn 0.55s 0.12s cubic-bezier(0.2, 1.15, 0.35, 1) both;
 }
 
-.square-answer-bar[hidden] {
+.square-answer-tiles[hidden] {
     display: none;
 }
 
-.square-answer-input {
-    width: 100%;
-    min-height: clamp(3.3rem, 6.2vw, 5.2rem);
-    padding: 0 clamp(1.1rem, 2.2vw, 1.8rem);
-    border: clamp(0.16rem, 0.28vw, 0.26rem) solid #643417;
-    border-radius: clamp(0.85rem, 1.4vw, 1.2rem);
-    background: linear-gradient(180deg, #fff9df, #ffe69a);
+.square-answer-tile {
+    aspect-ratio: 1;
+    border: clamp(0.16rem, 0.3vw, 0.26rem) solid rgba(92, 56, 28, 0.92);
+    border-radius: clamp(0.55rem, 1vw, 0.8rem);
+    background:
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.55), transparent 24%),
+        linear-gradient(155deg, rgba(255, 235, 154, 0.98), rgba(236, 168, 76, 0.98) 48%, rgba(165, 91, 42, 0.98));
     color: #4b250d;
-    font: 900 clamp(1.1rem, 2.5vw, 2rem) 'Fredoka', sans-serif;
+    font: 900 clamp(3.2rem, 6vw, 5.6rem) 'Fredoka', sans-serif;
     line-height: 1;
     text-align: center;
+    text-shadow: 0 0.08rem 0 rgba(255, 249, 223, 0.86);
     box-shadow:
-        inset 0 0.18rem 0 rgba(255, 255, 255, 0.72),
-        0 0.35rem 0 #7b411e,
-        0 0.8rem 1.2rem rgba(39, 23, 10, 0.28);
+        inset 0 0.18rem 0 rgba(255, 255, 255, 0.48),
+        inset 0 -0.25rem 0 rgba(91, 45, 20, 0.18),
+        0 0.32rem 0 #7b411e,
+        0 0.78rem 1.05rem rgba(39, 23, 10, 0.28);
+    cursor: pointer;
+    transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+}
+
+.square-answer-tile:hover,
+.square-answer-tile:focus-visible {
+    filter: brightness(1.08) saturate(1.06);
     outline: none;
+    transform: translateY(-0.18rem) scale(1.03);
 }
 
-.square-answer-input::placeholder {
-    color: rgba(75, 37, 13, 0.58);
-}
-
-.square-answer-input:focus {
-    border-color: #fff45f;
+.square-answer-tile:active {
+    transform: translateY(0.2rem) scale(0.98);
     box-shadow:
-        inset 0 0.18rem 0 rgba(255, 255, 255, 0.72),
-        0 0.35rem 0 #7b411e,
-        0 0 0 0.22rem rgba(255, 244, 95, 0.58),
-        0 0.8rem 1.2rem rgba(39, 23, 10, 0.28);
+        inset 0 0.18rem 0 rgba(255, 255, 255, 0.48),
+        inset 0 -0.25rem 0 rgba(91, 45, 20, 0.18),
+        0 0.12rem 0 #7b411e,
+        0 0.45rem 0.72rem rgba(39, 23, 10, 0.24);
+}
+
+.square-answer-tile:disabled {
+    color: #4b250d;
+    opacity: 1;
+    cursor: default;
+}
+
+.square-answer-tile.is-correct {
+    border-color: #fff45f;
+    filter: brightness(1.12) saturate(1.12);
+    animation: squareAnswerTileCorrect 0.45s cubic-bezier(0.2, 1.25, 0.35, 1) both;
+}
+
+.square-answer-tile.is-wrong {
+    border-color: #dc5b45;
+    animation: squareAnswerTileWrong 0.34s ease both;
 }
 
 #learnscape-shape-square-page.is-square-puzzle-followup .square-cookie-square {
@@ -3113,7 +3190,7 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     }
 }
 
-@keyframes squareAnswerBarIn {
+@keyframes squareAnswerTilesIn {
     from {
         opacity: 0;
         transform: translateX(-50%) translateY(0.8rem) scale(0.94);
@@ -3122,6 +3199,38 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     to {
         opacity: 1;
         transform: translateX(-50%) translateY(0) scale(1);
+    }
+}
+
+@keyframes squareAnswerTileCorrect {
+    0% {
+        transform: scale(1);
+    }
+
+    55% {
+        transform: scale(1.16);
+    }
+
+    100% {
+        transform: scale(1.08);
+    }
+}
+
+@keyframes squareAnswerTileWrong {
+    0%, 100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-0.35rem);
+    }
+
+    50% {
+        transform: translateX(0.35rem);
+    }
+
+    75% {
+        transform: translateX(-0.18rem);
     }
 }
 
@@ -3215,6 +3324,60 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 .square-puzzle-confetti span:nth-child(13) { --size: 0.66rem; --color: #ffe98b; --x: 4rem; --y: -31rem; --r: 64deg; --delay: 0.2s; }
 .square-puzzle-confetti span:nth-child(14) { --size: 1rem; --color: #ed6b5f; --x: 27rem; --y: -19rem; --r: -48deg; --delay: 0.18s; }
 
+#learnscape-shape-square-page.is-square-answer-completing .square-puzzle-celebration-text,
+#learnscape-shape-square-page.is-square-kids-cheering .square-puzzle-celebration-text {
+    top: clamp(2rem, 7vh, 4.5rem);
+    bottom: auto;
+    z-index: 40;
+    width: min(86vw, 58rem);
+    padding: clamp(0.45rem, 1vw, 0.85rem) clamp(1rem, 2.2vw, 2rem);
+    border: clamp(0.14rem, 0.24vw, 0.22rem) solid rgba(255, 244, 95, 0.88);
+    border-radius: clamp(1rem, 1.8vw, 1.45rem);
+    background: rgba(55, 30, 12, 0.78);
+    color: #fff7a8;
+    font: 900 clamp(2rem, 4.35vw, 4.1rem) 'Fredoka', sans-serif;
+    line-height: 1.04;
+    white-space: normal;
+    text-shadow:
+        0 0.12rem 0 #4b250d,
+        0 0.2rem 0.16rem rgba(0, 0, 0, 0.62),
+        0 0 0.8rem rgba(255, 244, 95, 0.76);
+    box-shadow:
+        inset 0 0.12rem 0 rgba(255, 255, 255, 0.24),
+        0 0.35rem 0 rgba(73, 36, 16, 0.72),
+        0 0 1.3rem rgba(255, 244, 95, 0.42);
+    animation:
+        squareCorrectAnswerTextIn 0.48s cubic-bezier(0.2, 1.15, 0.35, 1) both,
+        squareCorrectAnswerTextFloat 1.8s ease-in-out 0.48s infinite;
+}
+
+#learnscape-shape-square-page.is-square-kids-cheering .square-puzzle-confetti {
+    inset: 0;
+    z-index: 32;
+    width: auto;
+    height: 100%;
+    overflow: hidden;
+}
+
+#learnscape-shape-square-page.is-square-kids-cheering .square-puzzle-confetti span {
+    left: var(--confetti-x);
+    top: -10%;
+    width: var(--confetti-size);
+    height: calc(var(--confetti-size) * 0.55);
+    border-radius: 0.12rem;
+    background: var(--confetti-color);
+    animation: circleHuntConfettiFall var(--confetti-duration) linear var(--confetti-delay) infinite;
+}
+
+#learnscape-shape-square-page.is-square-kids-cheering .square-puzzle-confetti span:nth-child(3n) {
+    border-radius: 50%;
+}
+
+#learnscape-shape-square-page.is-square-kids-cheering .square-puzzle-confetti span:nth-child(4n) {
+    height: var(--confetti-size);
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
 @keyframes squarePuzzleConfettiBurst {
     from {
         opacity: 0;
@@ -3240,6 +3403,32 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     to {
         opacity: 1;
         transform: translateX(-50%) translateY(0) scale(1);
+    }
+}
+
+@keyframes squareCorrectAnswerTextIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0.8rem) scale(0.84);
+        filter: brightness(1);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+        filter: brightness(1.18) drop-shadow(0 0 0.65rem rgba(255, 244, 95, 0.95));
+    }
+}
+
+@keyframes squareCorrectAnswerTextFloat {
+    0%, 100% {
+        transform: translateX(-50%) translateY(0) scale(1);
+        filter: brightness(1.15) drop-shadow(0 0 0.65rem rgba(255, 244, 95, 0.9));
+    }
+
+    50% {
+        transform: translateX(-50%) translateY(-0.55rem) scale(1.025);
+        filter: brightness(1.32) drop-shadow(0 0 1rem rgba(255, 244, 95, 1));
     }
 }
 
@@ -3566,17 +3755,19 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     bottom: 0.2rem;
 }
 
-#learnscape-shape-square-page.is-square-puzzle-complete .square-object-panel {
-    opacity: 0;
+#learnscape-shape-square-page .square-object-panel.is-complete {
+    display: grid;
     pointer-events: none;
-    visibility: hidden;
-    transform: translate(-120%, -50%);
-    transition: opacity 0.48s ease, transform 0.48s ease, visibility 0s linear 0.48s;
+    animation: squareObjectPanelExitLeft 0.56s cubic-bezier(0.42, 0, 0.25, 1) both;
 }
 
 #learnscape-shape-square-page.is-lesson-complete .square-object-panel {
     display: grid;
     animation: squareObjectPanelIn 0.4s ease both;
+}
+
+#learnscape-shape-square-page.is-lesson-complete .square-object-panel.is-complete {
+    animation: squareObjectPanelExitLeft 0.56s cubic-bezier(0.42, 0, 0.25, 1) both;
 }
 
 .square-object-slot {
@@ -3753,6 +3944,20 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     to { opacity: 1; }
 }
 
+@keyframes squareObjectPanelExitLeft {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+        visibility: visible;
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(-145%);
+        visibility: hidden;
+    }
+}
+
 @keyframes squareObjectTargetPulse {
     0%, 100% { filter: brightness(1); }
     50% { filter: brightness(1.24); }
@@ -3818,7 +4023,9 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     .square-mission-start-button.is-visible,
     .square-object-target.is-active,
     .square-object-piece.is-snapping,
-    .square-object-piece.is-scattered {
+    .square-object-piece.is-scattered,
+    #learnscape-shape-square-page.is-square-kids-cheering .square-kids-cheer-character-ch7,
+    #learnscape-shape-square-page.is-square-kids-cheering .square-kids-cheer-character-ch8 {
         animation: none;
         transition-duration: 0.01ms;
     }

@@ -160,7 +160,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeSquareSkipButton = shapeSquarePage?.querySelector('.square-illustration-skip-button') || null;
     const shapeSquareProgress = shapeSquarePage?.querySelector('.square-lesson-progress') || null;
     const shapeSquareReplayButton = shapeSquarePage?.querySelector('[data-square-lesson-replay]') || null;
+    const shapeSquareReplayButtonImage = shapeSquareReplayButton?.querySelector('img') || null;
     const shapeSquareNextButton = shapeSquarePage?.querySelector('[data-square-lesson-next]') || null;
+    const shapeSquareNextButtonImage = shapeSquareNextButton?.querySelector('img') || null;
     const shapeSquareStars = shapeSquarePage?.querySelector('.square-lesson-stars') || null;
     const shapeSquareStarMessage = shapeSquarePage?.querySelector('.square-lesson-star-message') || null;
     const shapeSquareMissionGuide = shapeSquarePage?.querySelector('.square-mission-guide') || null;
@@ -168,6 +170,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeSquareMissionCharacter11 = shapeSquarePage?.querySelector('.square-mission-character-ch11') || null;
     const shapeSquareCharacter12 = shapeSquarePage?.querySelector('.square-mission-character-ch12') || null;
     const shapeSquareCharacter13 = shapeSquarePage?.querySelector('.square-mission-character-ch13') || null;
+    const shapeSquareKidsCheerCharacters = Array.from(shapeSquarePage?.querySelectorAll('.square-kids-cheer-character') || []);
     const shapeSquareCelebrationText = shapeSquarePage?.querySelector('.square-puzzle-celebration-text') || null;
     const shapeSquareConfetti = shapeSquarePage?.querySelector('.square-puzzle-confetti') || null;
     const shapeSquarePuzzleNextButton = shapeSquarePage?.querySelector('.square-puzzle-next-button') || null;
@@ -177,8 +180,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeSquareMissionStartButton = shapeSquarePage?.querySelector('.square-mission-start-button') || null;
     const squareObjectPanel = shapeSquarePage?.querySelector('.square-object-panel') || null;
     const shapeSquareCookieSquare = shapeSquarePage?.querySelector('.square-cookie-square') || null;
-    const shapeSquareAnswerBar = shapeSquarePage?.querySelector('.square-answer-bar') || null;
-    const shapeSquareAnswerInput = shapeSquarePage?.querySelector('.square-answer-input') || null;
+    const shapeSquareAnswerTiles = shapeSquarePage?.querySelector('.square-answer-tiles') || null;
+    const shapeSquareAnswerTileButtons = Array.from(shapeSquarePage?.querySelectorAll('.square-answer-tile') || []);
     const squareObjectPieces = Array.from(shapeSquarePage?.querySelectorAll('[data-square-piece]') || []);
     const squareObjectTargets = Array.from(shapeSquarePage?.querySelectorAll('[data-square-target]') || []);
     let shapeCircleBubbleCh3Messages = [];
@@ -240,7 +243,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeSquareIntroAudioSource = 'assets/Audios/introsquare.mp3';
     const shapeSquareMissionAudioSource = 'assets/Audios/squaremission.mp3';
     const shapeSquareReadyAudioSource = 'assets/Audios/Handa ka na ba.mp3';
+    const shapeSquareCompletedAudioSource = 'assets/Audios/completed.mp3';
     const shapeSquareCelebrationAudioSource = 'assets/Audios/Mahusay.mp3';
+    const shapeSquareKidsCheeringAudioSource = 'assets/Audios/kids cheering.mp3';
     const shapeSquareAreaBackgroundSource = 'assets/Backgrounds/Area2.webp';
     const shapeSquareIllustrationBackgroundSource = 'assets/Backgrounds/Illustration2.webp';
     const shapeSquareIntroStages = [
@@ -261,6 +266,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let shapeSquareCelebrationTimers = [];
     let squareObjectActiveDrag = null;
     const squareObjectSnapTimers = new Map();
+    let squareObjectPanelExitTimer = null;
     const squareObjectTargetSpecs = {
         1: { x: 793, y: 198, width: 138, height: 137 },
         2: { x: 230, y: 363, width: 126, height: 125 },
@@ -740,31 +746,199 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     };
 
-    shapeSquareAnswerInput?.addEventListener('input', () => {
-        const wholeNumber = shapeSquareAnswerInput.value.replace(/\D/g, '');
-        if (!wholeNumber) {
-            shapeSquareAnswerInput.value = '';
+    const shuffleValues = (values) => {
+        const shuffled = [...values];
+        for (let index = shuffled.length - 1; index > 0; index -= 1) {
+            const randomIndex = Math.floor(Math.random() * (index + 1));
+            [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+        }
+        return shuffled;
+    };
+
+    const setShapeSquareAnswerTiles = () => {
+        if (!shapeSquareAnswerTileButtons.length) return;
+
+        const values = [14];
+        while (values.length < shapeSquareAnswerTileButtons.length) {
+            const candidate = Math.floor(Math.random() * 20) + 1;
+            if (!values.includes(candidate)) values.push(candidate);
+        }
+
+        shuffleValues(values).forEach((value, index) => {
+            const tile = shapeSquareAnswerTileButtons[index];
+            if (!tile) return;
+            tile.textContent = String(value);
+            tile.dataset.answer = String(value);
+            tile.dataset.correct = String(value === 14);
+            tile.classList.remove('is-correct', 'is-wrong');
+            tile.disabled = false;
+            tile.setAttribute('aria-label', `Answer ${value}`);
+        });
+    };
+
+    const hideShapeSquareAnswerChoices = () => {
+        if (shapeSquareCookieSquare) shapeSquareCookieSquare.hidden = true;
+        if (shapeSquareAnswerTiles) shapeSquareAnswerTiles.hidden = true;
+        shapeSquareAnswerTileButtons.forEach((tile) => {
+            tile.classList.remove('is-correct', 'is-wrong');
+            tile.disabled = false;
+        });
+    };
+
+    const showShapeSquareAnswerCelebration = () => {
+        if (!shapeSquarePage) return;
+
+        hideShapeSquareAnswerChoices();
+        if (shapeSquareCharacter13) {
+            shapeSquareCharacter13.hidden = true;
+            shapeSquareCharacter13.classList.remove('is-entering');
+        }
+        shapeSquarePage.classList.remove('is-progress-visible');
+        shapeSquarePage.classList.add('is-square-answer-completing');
+        shapeSquareProgress?.setAttribute('aria-hidden', 'true');
+        if (shapeSquareCelebrationText) {
+            shapeSquareCelebrationText.textContent = 'YOU GOT THE CORRECT ANSWER!';
+            shapeSquareCelebrationText.hidden = true;
+            shapeSquareCelebrationText.getBoundingClientRect();
+            shapeSquareCelebrationText.hidden = false;
+        }
+        stopShapeSquareCelebrationAudio();
+
+        const prepareKidsCheeringConfetti = () => {
+            if (!shapeSquareConfetti) return;
+
+            const colors = ['#ff4f64', '#ffd83d', '#38c7e8', '#70d34b', '#ff8f32', '#ffffff'];
+            Array.from(shapeSquareConfetti.children).forEach((piece, index) => {
+                piece.style.setProperty('--confetti-x', `${(index * 37) % 101}%`);
+                piece.style.setProperty('--confetti-color', colors[index % colors.length]);
+                piece.style.setProperty('--confetti-delay', `${-((index * 0.17) % 3.2)}s`);
+                piece.style.setProperty('--confetti-duration', `${2.5 + ((index * 11) % 13) / 10}s`);
+                piece.style.setProperty('--confetti-drift', `${((index * 29) % 150) - 75}px`);
+                piece.style.setProperty('--confetti-size', `${0.35 + ((index * 5) % 13) / 10}rem`);
+            });
+        };
+
+        const startKidsCheering = () => {
+            if (!isPageVisible(shapeSquarePage)) return;
+            prepareKidsCheeringConfetti();
+            shapeSquarePage.classList.remove('is-square-answer-completing');
+            shapeSquarePage.classList.add('is-square-kids-cheering');
+            shapeSquareKidsCheerCharacters.forEach((character) => {
+                character.hidden = false;
+            });
+            showShapeSquarePuzzleCelebration(shapeSquareKidsCheeringAudioSource, {
+                message: 'YOU GOT THE CORRECT ANSWER!',
+                onAudioEnded: showShapeSquareSecondProgress,
+                showFollowupButtons: false,
+                showMainCharacter: false,
+            });
+        };
+
+        const AudioCtor = window.Audio;
+        if (!AudioCtor) {
+            startKidsCheering();
             return;
         }
 
-        const answer = Math.min(20, Math.max(1, Number(wholeNumber)));
-        shapeSquareAnswerInput.value = String(answer);
-    });
+        const completedAudio = new AudioCtor(shapeSquareCompletedAudioSource);
+        shapeSquareCelebrationAudio = completedAudio;
+        completedAudio.preload = 'auto';
+        completedAudio.playsInline = true;
+        completedAudio.onended = () => {
+            if (shapeSquareCelebrationAudio !== completedAudio) return;
+            shapeSquareCelebrationAudio = null;
+            startKidsCheering();
+        };
+        completedAudio.play().catch(() => {
+            if (shapeSquareCelebrationAudio !== completedAudio) return;
+            shapeSquareCelebrationAudio = null;
+            startKidsCheering();
+        });
+    };
+
+    const showShapeSquareSecondProgress = () => {
+        if (!shapeSquarePage || !shapeSquareProgress) return;
+
+        shapeSquarePage.classList.remove('is-square-puzzle-complete', 'is-square-puzzle-followup', 'is-square-kids-cheering');
+        if (shapeSquareCelebrationText) shapeSquareCelebrationText.hidden = true;
+        if (shapeSquareConfetti) shapeSquareConfetti.hidden = true;
+        shapeSquareKidsCheerCharacters.forEach((character) => {
+            character.hidden = true;
+        });
+        if (shapeSquarePuzzleNextButton) {
+            shapeSquarePuzzleNextButton.hidden = true;
+            shapeSquarePuzzleNextButton.classList.remove('is-visible');
+        }
+        if (shapeSquarePuzzleRetryButton) {
+            shapeSquarePuzzleRetryButton.hidden = true;
+            shapeSquarePuzzleRetryButton.classList.remove('is-visible');
+        }
+
+        shapeSquarePage.classList.add('is-progress-visible');
+        shapeSquareProgress.dataset.progressStage = 'answer';
+        shapeSquareProgress.setAttribute('aria-hidden', 'false');
+        if (shapeSquareReplayButtonImage) shapeSquareReplayButtonImage.src = 'assets/Buttons/Retry.webp';
+        shapeSquareReplayButton?.setAttribute('aria-label', 'Retry square mission');
+        if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.src = 'assets/Buttons/next.webp';
+        shapeSquareNextButton?.setAttribute('aria-label', 'Continue');
+        setShapeSquareEarnedStars(2);
+        playUiClickSound('boardSuccess');
+        const starSoundTimer = window.setTimeout(() => {
+            playUiClickSound('starPop');
+            shapeSquareCelebrationTimers = shapeSquareCelebrationTimers.filter(
+                (timerId) => timerId !== starSoundTimer,
+            );
+        }, 650);
+        shapeSquareCelebrationTimers.push(starSoundTimer);
+        shapeSquareNextButton?.focus({ preventScroll: true });
+    };
+
+    const handleShapeSquareAnswerTileClick = (event) => {
+        const tile = event.currentTarget;
+        if (!tile || tile.disabled) return;
+
+        if (tile.dataset.correct === 'true') {
+            shapeSquareAnswerTileButtons.forEach((button) => {
+                button.disabled = true;
+            });
+            tile.classList.add('is-correct');
+            playUiClickSound('chime');
+            const completionTimer = window.setTimeout(() => {
+                showShapeSquareAnswerCelebration();
+                shapeSquareTimers = shapeSquareTimers.filter((timerId) => timerId !== completionTimer);
+            }, 520);
+            shapeSquareTimers.push(completionTimer);
+            return;
+        }
+
+        tile.classList.remove('is-wrong');
+        tile.getBoundingClientRect();
+        tile.classList.add('is-wrong');
+        playUiClickSound('thunk');
+        const wrongTimer = window.setTimeout(() => {
+            tile.classList.remove('is-wrong');
+            shapeSquareTimers = shapeSquareTimers.filter((timerId) => timerId !== wrongTimer);
+        }, 360);
+        shapeSquareTimers.push(wrongTimer);
+    };
 
     const resetSquareObjectPuzzle = () => {
         squareObjectActiveDrag = null;
         stopShapeSquareCelebrationAudio();
         shapeSquarePage?.classList.remove('is-square-puzzle-complete');
         shapeSquarePage?.classList.remove('is-square-puzzle-followup');
+        shapeSquarePage?.classList.remove('is-square-answer-completing');
+        shapeSquarePage?.classList.remove('is-square-kids-cheering');
         if (shapeSquareCelebrationText) shapeSquareCelebrationText.hidden = true;
         if (shapeSquareConfetti) shapeSquareConfetti.hidden = true;
+        shapeSquareKidsCheerCharacters.forEach((character) => {
+            character.hidden = true;
+        });
         if (shapeSquarePuzzleNextButton) {
             shapeSquarePuzzleNextButton.hidden = true;
             shapeSquarePuzzleNextButton.classList.remove('is-visible');
         }
-        if (shapeSquareCookieSquare) shapeSquareCookieSquare.hidden = true;
-        if (shapeSquareAnswerBar) shapeSquareAnswerBar.hidden = true;
-        if (shapeSquareAnswerInput) shapeSquareAnswerInput.value = '';
+        hideShapeSquareAnswerChoices();
         if (shapeSquarePuzzleRetryButton) {
             shapeSquarePuzzleRetryButton.hidden = true;
             shapeSquarePuzzleRetryButton.classList.remove('is-visible');
@@ -781,17 +955,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             shapeSquarePuzzleNextButton.hidden = true;
             shapeSquarePuzzleNextButton.classList.remove('is-visible');
         }
-        if (shapeSquareCookieSquare) shapeSquareCookieSquare.hidden = true;
-        if (shapeSquareAnswerBar) shapeSquareAnswerBar.hidden = true;
-        if (shapeSquareAnswerInput) shapeSquareAnswerInput.value = '';
+        hideShapeSquareAnswerChoices();
         if (shapeSquarePuzzleRetryButton) {
             shapeSquarePuzzleRetryButton.hidden = true;
             shapeSquarePuzzleRetryButton.classList.remove('is-visible');
         }
         squareObjectSnapTimers.forEach((timerId) => window.clearTimeout(timerId));
         squareObjectSnapTimers.clear();
+        if (squareObjectPanelExitTimer !== null) {
+            window.clearTimeout(squareObjectPanelExitTimer);
+            squareObjectPanelExitTimer = null;
+        }
         squareObjectTargets.forEach((target) => target.classList.remove('is-active'));
-        squareObjectPanel?.classList.remove('is-complete');
+        if (squareObjectPanel) {
+            squareObjectPanel.hidden = false;
+            squareObjectPanel.classList.remove('is-complete');
+        }
 
         squareObjectPieces.forEach((piece) => {
             const slot = squareObjectPanel?.querySelector(`[data-square-slot="${piece.dataset.squarePiece}"]`);
@@ -819,11 +998,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             shapeSquarePuzzleNextButton.classList.remove('is-visible');
         }
         if (shapeSquareCookieSquare) shapeSquareCookieSquare.hidden = false;
-        if (shapeSquareAnswerBar) shapeSquareAnswerBar.hidden = false;
-        if (shapeSquareAnswerInput) {
-            shapeSquareAnswerInput.value = '';
-            shapeSquareAnswerInput.focus({ preventScroll: true });
-        }
+        setShapeSquareAnswerTiles();
+        if (shapeSquareAnswerTiles) shapeSquareAnswerTiles.hidden = false;
         if (shapeSquarePuzzleRetryButton) {
             shapeSquarePuzzleRetryButton.hidden = true;
             shapeSquarePuzzleRetryButton.classList.remove('is-visible');
@@ -845,7 +1021,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         stopShapeSquareCelebrationAudio();
         resetSquareObjectPuzzle();
-        shapeSquarePage.classList.remove('is-lesson-complete', 'is-square-puzzle-followup');
+        shapeSquarePage.classList.remove('is-lesson-complete', 'is-square-puzzle-followup', 'is-progress-visible');
+        shapeSquareProgress?.setAttribute('aria-hidden', 'true');
+        if (shapeSquareProgress) shapeSquareProgress.dataset.progressStage = 'lesson';
+        if (shapeSquareReplayButtonImage) shapeSquareReplayButtonImage.src = 'assets/Buttons/replay.webp';
+        shapeSquareReplayButton?.setAttribute('aria-label', 'Replay square lesson');
+        if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.src = 'assets/Buttons/next.webp';
+        shapeSquareNextButton?.setAttribute('aria-label', 'Continue');
         shapeSquarePage.classList.add('is-square-mission-guide');
         shapeSquareMissionGuide.hidden = false;
         shapeSquareMissionGuide.setAttribute('aria-hidden', 'false');
@@ -857,20 +1039,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeSquareMissionStartButton.focus({ preventScroll: true });
     };
 
-    const showShapeSquarePuzzleCelebration = () => {
-        if (!shapeSquarePage || !shapeSquareCharacter12) return;
+    const showShapeSquarePuzzleCelebration = (audioSource = shapeSquareCelebrationAudioSource, options = {}) => {
+        if (!shapeSquarePage) return;
 
         shapeSquarePage.classList.add('is-square-puzzle-complete');
         if (shapeSquareCelebrationText) {
+            shapeSquareCelebrationText.textContent = options.message || 'You fix them all!';
+            shapeSquareCelebrationText.hidden = true;
+            shapeSquareCelebrationText.getBoundingClientRect();
             shapeSquareCelebrationText.hidden = false;
         }
         if (shapeSquareConfetti) {
+            shapeSquareConfetti.hidden = true;
+            shapeSquareConfetti.getBoundingClientRect();
             shapeSquareConfetti.hidden = false;
         }
-        shapeSquareCharacter12.hidden = false;
-        shapeSquareCharacter12.classList.remove('is-entering');
-        shapeSquareCharacter12.getBoundingClientRect();
-        shapeSquareCharacter12.classList.add('is-entering');
+        if (options.showMainCharacter !== false && shapeSquareCharacter12) {
+            shapeSquareCharacter12.hidden = false;
+            shapeSquareCharacter12.classList.remove('is-entering');
+            shapeSquareCharacter12.getBoundingClientRect();
+            shapeSquareCharacter12.classList.add('is-entering');
+        } else if (shapeSquareCharacter12) {
+            shapeSquareCharacter12.hidden = true;
+            shapeSquareCharacter12.classList.remove('is-entering');
+        }
 
         if (shapeSquareCharacter13) {
             shapeSquareCharacter13.hidden = true;
@@ -880,34 +1072,47 @@ document.addEventListener('DOMContentLoaded', async () => {
         stopShapeSquareCelebrationAudio();
         const AudioCtor = window.Audio;
         if (!AudioCtor) return;
-        const celebrationAudio = new AudioCtor(shapeSquareCelebrationAudioSource);
+        const celebrationAudio = new AudioCtor(audioSource);
         shapeSquareCelebrationAudio = celebrationAudio;
         celebrationAudio.preload = 'auto';
         celebrationAudio.playsInline = true;
         celebrationAudio.volume = 1;
         celebrationAudio.onended = () => {
-            if (shapeSquareCelebrationAudio === celebrationAudio) shapeSquareCelebrationAudio = null;
+            if (shapeSquareCelebrationAudio !== celebrationAudio) return;
+            shapeSquareCelebrationAudio = null;
+            options.onAudioEnded?.();
         };
         celebrationAudio.play().catch(() => {
-            if (shapeSquareCelebrationAudio === celebrationAudio) shapeSquareCelebrationAudio = null;
+            if (shapeSquareCelebrationAudio !== celebrationAudio) return;
+            shapeSquareCelebrationAudio = null;
+            options.onAudioEnded?.();
         });
 
-        const followupTimerId = window.setTimeout(() => {
-            if (!isPageVisible(shapeSquarePage)) return;
-            if (shapeSquarePuzzleNextButton) {
-                shapeSquarePuzzleNextButton.hidden = false;
-                shapeSquarePuzzleNextButton.getBoundingClientRect();
-                shapeSquarePuzzleNextButton.classList.add('is-visible');
-            }
-            if (shapeSquarePuzzleRetryButton) {
-                shapeSquarePuzzleRetryButton.hidden = false;
-                shapeSquarePuzzleRetryButton.getBoundingClientRect();
-                shapeSquarePuzzleRetryButton.classList.add('is-visible');
-            }
-            shapeSquarePuzzleNextButton?.focus({ preventScroll: true });
-            shapeSquareTimers = shapeSquareTimers.filter((timerId) => timerId !== followupTimerId);
-        }, 2100);
-        shapeSquareTimers.push(followupTimerId);
+        if (typeof options.onAfterDelay === 'function') {
+            const followupTimerId = window.setTimeout(() => {
+                if (!isPageVisible(shapeSquarePage)) return;
+                options.onAfterDelay();
+                shapeSquareTimers = shapeSquareTimers.filter((timerId) => timerId !== followupTimerId);
+            }, options.afterDelayMs || 2100);
+            shapeSquareTimers.push(followupTimerId);
+        } else if (options.showFollowupButtons !== false) {
+            const followupTimerId = window.setTimeout(() => {
+                if (!isPageVisible(shapeSquarePage)) return;
+                if (shapeSquarePuzzleNextButton) {
+                    shapeSquarePuzzleNextButton.hidden = false;
+                    shapeSquarePuzzleNextButton.getBoundingClientRect();
+                    shapeSquarePuzzleNextButton.classList.add('is-visible');
+                }
+                if (shapeSquarePuzzleRetryButton) {
+                    shapeSquarePuzzleRetryButton.hidden = false;
+                    shapeSquarePuzzleRetryButton.getBoundingClientRect();
+                    shapeSquarePuzzleRetryButton.classList.add('is-visible');
+                }
+                shapeSquarePuzzleNextButton?.focus({ preventScroll: true });
+                shapeSquareTimers = shapeSquareTimers.filter((timerId) => timerId !== followupTimerId);
+            }, 2100);
+            shapeSquareTimers.push(followupTimerId);
+        }
     };
 
     const collectSquareObjectPiece = (piece) => {
@@ -994,7 +1199,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             updateSquareObjectTargets();
 
             if (squareObjectPieces.every((currentPiece) => currentPiece.dataset.squarePlaced === 'true')) {
-                squareObjectPanel?.classList.add('is-complete');
+                if (squareObjectPanel) {
+                    squareObjectPanel.classList.add('is-complete');
+                    squareObjectPanelExitTimer = window.setTimeout(() => {
+                        squareObjectPanel.hidden = true;
+                        squareObjectPanelExitTimer = null;
+                    }, 560);
+                }
                 playUiClickSound('boardSuccess');
                 showShapeSquarePuzzleCelebration();
             }
@@ -1127,6 +1338,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         hideShapeSquareMissionGuide();
         stopShapeSquareReadyAudio();
         shapeSquareVideo?.pause();
+        if (squareObjectPanel) {
+            squareObjectPanel.hidden = false;
+            squareObjectPanel.classList.remove('is-complete');
+        }
         shapeSquarePage?.classList.add('is-lesson-complete');
         updateSquareObjectTargets();
         setShapeSquareVideoStageVisible(false);
@@ -1166,6 +1381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const activeCharacter = stage.character === 'ch11' ? shapeSquareMissionCharacter11 : shapeSquareMissionCharacter10;
             const inactiveCharacter = stage.character === 'ch11' ? shapeSquareMissionCharacter10 : shapeSquareMissionCharacter11;
             const didChangeCharacter = stage.character !== activeMissionCharacter;
+            const isReadyStage = stage.character === 'ch11';
             activeMissionCharacter = stage.character;
 
             if (didChangeCharacter && inactiveCharacter) {
@@ -1179,39 +1395,66 @@ document.addEventListener('DOMContentLoaded', async () => {
                 shapeSquareTimers.push(hideInactiveTimerId);
             }
             if (didChangeCharacter && activeCharacter) {
-                activeCharacter.hidden = false;
-                activeCharacter.classList.remove('is-entering', 'is-exiting');
-                activeCharacter.getBoundingClientRect();
-                activeCharacter.classList.add('is-entering');
+                const showActiveCharacter = () => {
+                    if (session !== shapeSquareSession || !isPageVisible(shapeSquarePage)) return;
+                    activeCharacter.hidden = false;
+                    activeCharacter.classList.remove('is-entering', 'is-exiting');
+                    activeCharacter.getBoundingClientRect();
+                    activeCharacter.classList.add('is-entering');
+                };
+
+                if (isReadyStage) {
+                    const showActiveCharacterTimerId = window.setTimeout(() => {
+                        showActiveCharacter();
+                        shapeSquareTimers = shapeSquareTimers.filter((timerId) => timerId !== showActiveCharacterTimerId);
+                    }, 430);
+                    shapeSquareTimers.push(showActiveCharacterTimerId);
+                } else {
+                    showActiveCharacter();
+                }
             }
 
-            shapeSquareMissionBubble.classList.toggle('is-ch11', stage.character === 'ch11');
-            shapeSquareMissionBubble.classList.add('is-message-changing');
-            window.setTimeout(() => {
+            if (didChangeCharacter) {
+                shapeSquareMissionBubble.classList.remove('is-entering', 'is-message-changing');
+                shapeSquareMissionBubble.classList.add('is-exiting');
+            } else {
+                shapeSquareMissionBubble.classList.add('is-message-changing');
+            }
+
+            const playReadyPromptAudio = () => {
+                const AudioCtor = window.Audio;
+                if (!AudioCtor) return;
+                stopShapeSquareReadyAudio();
+                const readyAudio = new AudioCtor(shapeSquareReadyAudioSource);
+                shapeSquareReadyAudio = readyAudio;
+                readyAudio.preload = 'auto';
+                readyAudio.playsInline = true;
+                readyAudio.volume = 1;
+                readyAudio.onended = () => {
+                    if (shapeSquareReadyAudio === readyAudio) shapeSquareReadyAudio = null;
+                };
+                readyAudio.play().catch(() => {
+                    if (shapeSquareReadyAudio === readyAudio) shapeSquareReadyAudio = null;
+                });
+            };
+
+            const bubbleDelay = didChangeCharacter ? 430 : 90;
+            const bubbleTimerId = window.setTimeout(() => {
                 if (session !== shapeSquareSession || !isPageVisible(shapeSquarePage)) return;
+                shapeSquareMissionBubble.hidden = false;
+                shapeSquareMissionBubble.classList.toggle('is-ch11', isReadyStage);
                 shapeSquareMissionBubbleText.textContent = stage.message;
-                shapeSquareMissionBubble.classList.remove('is-message-changing', 'is-entering');
+                shapeSquareMissionBubble.classList.remove('is-exiting', 'is-message-changing', 'is-entering');
                 shapeSquareMissionBubble.getBoundingClientRect();
                 shapeSquareMissionBubble.classList.add('is-entering');
-            }, 90);
-
-            if (stage.character === 'ch11') {
-                const AudioCtor = window.Audio;
-                if (AudioCtor) {
-                    stopShapeSquareReadyAudio();
-                    const readyAudio = new AudioCtor(shapeSquareReadyAudioSource);
-                    shapeSquareReadyAudio = readyAudio;
-                    readyAudio.preload = 'auto';
-                    readyAudio.playsInline = true;
-                    readyAudio.volume = 1;
-                    readyAudio.onended = () => {
-                        if (shapeSquareReadyAudio === readyAudio) shapeSquareReadyAudio = null;
-                    };
-                    readyAudio.play().catch(() => {
-                        if (shapeSquareReadyAudio === readyAudio) shapeSquareReadyAudio = null;
-                    });
+                if (isReadyStage) {
+                    playReadyPromptAudio();
                 }
+                shapeSquareTimers = shapeSquareTimers.filter((timerId) => timerId !== bubbleTimerId);
+            }, bubbleDelay);
+            shapeSquareTimers.push(bubbleTimerId);
 
+            if (isReadyStage) {
                 const startButtonTimerId = window.setTimeout(() => {
                     if (session !== shapeSquareSession || !isPageVisible(shapeSquarePage) || !shapeSquareMissionStartButton) return;
                     if (shapeSquareMissionBubble) {
@@ -1245,7 +1488,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }, 430);
                     shapeSquareTimers.push(showStartTimerId);
                     shapeSquareTimers = shapeSquareTimers.filter((timerId) => timerId !== startButtonTimerId);
-                }, 1400);
+                }, bubbleDelay + 1400);
                 shapeSquareTimers.push(startButtonTimerId);
             }
         };
@@ -1290,6 +1533,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeSquarePage?.classList.remove('is-lesson-complete');
         resetSquareObjectPuzzle();
         setShapeSquareEarnedStars(0);
+        if (shapeSquareProgress) shapeSquareProgress.dataset.progressStage = 'lesson';
+        if (shapeSquareReplayButtonImage) shapeSquareReplayButtonImage.src = 'assets/Buttons/replay.webp';
+        shapeSquareReplayButton?.setAttribute('aria-label', 'Replay square lesson');
+        if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.src = 'assets/Buttons/next.webp';
+        shapeSquareNextButton?.setAttribute('aria-label', 'Continue');
         setShapeSquareSkipButtonVisible(false);
         shapeSquareVideo?.pause?.();
 
@@ -1315,6 +1563,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         hideShapeSquareMissionGuide();
         shapeSquarePage.classList.remove('is-lesson-complete');
         shapeSquarePage.classList.add('is-progress-visible');
+        shapeSquareProgress.dataset.progressStage = 'lesson';
+        if (shapeSquareReplayButtonImage) shapeSquareReplayButtonImage.src = 'assets/Buttons/replay.webp';
+        shapeSquareReplayButton?.setAttribute('aria-label', 'Replay square lesson');
+        if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.src = 'assets/Buttons/next.webp';
+        shapeSquareNextButton?.setAttribute('aria-label', 'Continue');
         setShapeSquareEarnedStars(1);
         shapeSquareProgress.setAttribute('aria-hidden', 'false');
         setShapeSquareVideoStageVisible(false);
@@ -2180,7 +2433,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             };
 
-            setCircleMissionGuideTypedText(message, 0);
+            setCircleMissionGuideTypedText(message, isLastMessage ? plainMessageLength : 0);
             circleMissionGuide.classList.add('is-bubble-visible');
 
             if (audio) {
@@ -2207,6 +2460,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // If playback is blocked, keep the text animation running.
                     audioCompleted = true;
                 }
+            }
+
+            if (isLastMessage) {
+                finishMessage();
+                return;
             }
 
             const typeCharacter = (characterIndex) => {
@@ -4155,6 +4413,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (control.matches('button[disabled], [aria-disabled="true"]')) return null;
         if (control.classList.contains('game1-object-card')) return null;
         if (control.classList.contains('circle-sort-object')) return null;
+        if (control.classList.contains('square-answer-tile')) return null;
 
         if (control.classList.contains('game-return-btn')) return 'backChime';
         if (control.classList.contains('shape-collection-chest')) return 'chestChime';
@@ -5375,8 +5634,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     shapeSquarePlayButton?.addEventListener('click', playShapeSquareLessonVideo);
     shapeSquareSkipButton?.addEventListener('click', showShapeSquareProgress);
     shapeSquareVideo?.addEventListener('ended', showShapeSquareProgress);
-    shapeSquareReplayButton?.addEventListener('click', playShapeSquareLessonVideo);
-    shapeSquareNextButton?.addEventListener('click', finishShapeSquareLesson);
+    shapeSquareReplayButton?.addEventListener('click', () => {
+        if (shapeSquareProgress?.dataset.progressStage === 'answer') {
+            returnToShapeSquareMissionStart();
+            return;
+        }
+        playShapeSquareLessonVideo();
+    });
+    shapeSquareNextButton?.addEventListener('click', () => {
+        finishShapeSquareLesson();
+    });
     shapeSquareMissionStartButton?.addEventListener('click', () => {
         playUiClickSound('chime');
         showShapeSquareObjectGame();
@@ -5388,6 +5655,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     shapeSquarePuzzleRetryButton?.addEventListener('click', () => {
         playUiClickSound('chime');
         returnToShapeSquareMissionStart();
+    });
+    shapeSquareAnswerTileButtons.forEach((tile) => {
+        tile.addEventListener('click', handleShapeSquareAnswerTileClick);
     });
     shapeSquareBgImage?.addEventListener('load', updateSquareObjectTargets);
 
