@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260828-91';
+    const appVersion = '20260829-104';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -178,11 +178,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             'Handa ka na ba?',
         ];
     }
-    const shapeCircleIntroAudioSource = 'assets/Audios/introcircle.mp3?v=20260828-91';
+    const shapeCircleIntroAudioSource = 'assets/Audios/introcircle.mp3?v=20260829-104';
     const shapeCircleFinalAudioSource = 'assets/Audios/Handa ka na ba.mp3';
+    const shapeCircleIntroStartDelay = 750;
     const shapeCircleIntroSegments = [
-        { start: 0, end: 2.5 },
-        { start: 2.6, end: 4.7 },
+        { start: 0, end: 2.3 },
+        { start: 2.4, end: 4.7 },
         { start: 4.8, end: 8 },
         { start: 8.1, end: 10.9 },
         { start: 11, end: 13.8 },
@@ -359,12 +360,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeCircleIntroAudio = null;
     };
 
-    const playShapeCircleAudio = (source, onEnded = null, onPlaybackFailed = null) => {
+    const playShapeCircleAudio = (source, onEnded = null, onPlaybackFailed = null, options = {}) => {
         stopShapeCircleIntroAudio();
 
         const AudioCtor = window.Audio;
         if (!AudioCtor) return null;
 
+        const startDelay = Number(options.startDelay) || 0;
+        const onStarted = typeof options.onStarted === 'function' ? options.onStarted : null;
         const audio = new AudioCtor(source);
         audio.preload = 'auto';
         audio.playsInline = true;
@@ -376,11 +379,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             shapeCircleIntroAudio = null;
             onEnded?.();
         };
-        audio.play().catch(() => {
+        const startPlayback = () => {
             if (shapeCircleIntroAudio !== audio) return;
-            shapeCircleIntroAudio = null;
-            onPlaybackFailed?.();
-        });
+
+            audio.play()
+                .then(() => {
+                    if (shapeCircleIntroAudio === audio) onStarted?.();
+                })
+                .catch(() => {
+                    if (shapeCircleIntroAudio !== audio) return;
+                    shapeCircleIntroAudio = null;
+                    onPlaybackFailed?.();
+                });
+        };
+
+        if (startDelay > 0) {
+            shapeCircleTimers.push(window.setTimeout(startPlayback, startDelay));
+        } else {
+            startPlayback();
+        }
 
         return audio;
     };
@@ -467,6 +484,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         const playTimedMessagesWithoutAudio = () => {
+            showTimedSegment(0);
             shapeCircleIntroSegments.slice(1).forEach((segment, segmentIndex) => {
                 shapeCircleTimers.push(window.setTimeout(() => {
                     showTimedSegment(segmentIndex + 1);
@@ -479,39 +497,48 @@ document.addEventListener('DOMContentLoaded', async () => {
             ));
         };
 
-        const introAudio = playShapeCircleAudio(
-            shapeCircleIntroAudioSource,
-            showFinalMessage,
-            playTimedMessagesWithoutAudio,
-        );
-        showTimedSegment(0);
-
-        if (!introAudio) {
-            playTimedMessagesWithoutAudio();
-            return;
-        }
-
-        const syncMessageToAudio = () => {
+        const startIntroSync = (introAudio) => {
             if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
-            if (shapeCircleIntroAudio !== introAudio || hasShownFinalMessage) return;
+            showTimedSegment(0);
 
-            const currentTime = introAudio.currentTime;
-            let segmentIndex = 0;
-            shapeCircleIntroSegments.forEach((segment, currentSegmentIndex) => {
-                if (currentTime >= segment.start) segmentIndex = currentSegmentIndex;
-            });
-            showTimedSegment(segmentIndex);
+            const syncMessageToAudio = () => {
+                if (session !== shapeCircleSession || !isPageVisible(shapeCirclePage)) return;
+                if (shapeCircleIntroAudio !== introAudio || hasShownFinalMessage) return;
 
-            const finalSegment = shapeCircleIntroSegments[shapeCircleIntroSegments.length - 1];
-            if (currentTime >= finalSegment.end) {
-                showFinalMessage();
-                return;
-            }
+                const currentTime = introAudio.currentTime;
+                let segmentIndex = 0;
+                shapeCircleIntroSegments.forEach((segment, currentSegmentIndex) => {
+                    if (currentTime >= segment.start) segmentIndex = currentSegmentIndex;
+                });
+                showTimedSegment(segmentIndex);
+
+                const finalSegment = shapeCircleIntroSegments[shapeCircleIntroSegments.length - 1];
+                if (currentTime >= finalSegment.end) {
+                    showFinalMessage();
+                    return;
+                }
+
+                shapeCircleAudioFrame = window.requestAnimationFrame(syncMessageToAudio);
+            };
 
             shapeCircleAudioFrame = window.requestAnimationFrame(syncMessageToAudio);
         };
 
-        shapeCircleAudioFrame = window.requestAnimationFrame(syncMessageToAudio);
+        const introAudio = playShapeCircleAudio(
+            shapeCircleIntroAudioSource,
+            showFinalMessage,
+            playTimedMessagesWithoutAudio,
+            {
+                startDelay: shapeCircleIntroStartDelay,
+                onStarted: () => startIntroSync(introAudio),
+            },
+        );
+
+        if (!introAudio) {
+            shapeCircleTimers.push(window.setTimeout(() => {
+                playTimedMessagesWithoutAudio();
+            }, shapeCircleIntroStartDelay));
+        }
     };
 
     const clearShapeSquareTimers = () => {
@@ -670,6 +697,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         resetShapeSquareLessonVideo();
         shapeSquareSession += 1;
         shapeSquareStartButton?.classList.remove('is-clicking');
+        shapeSquarePage?.classList.remove('is-transitioning-to-illustration', 'is-preparing-illustration-background');
 
         [shapeSquareCharacter3, shapeSquareCharacter9, shapeSquareCharacter4, shapeSquareCharacter5].forEach((character) => {
             if (!character) return;
@@ -722,6 +750,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             shapeSquareStartPressTimer = null;
         }
         shapeSquareStartButton?.classList.remove('is-clicking');
+        shapeSquarePage?.classList.remove('is-transitioning-to-illustration', 'is-preparing-illustration-background');
 
         if (shapeSquareCharacter3) {
             shapeSquareCharacter3.hidden = false;
@@ -759,6 +788,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         stopShapeSquareReadyAudio();
         shapeSquareSession += 1;
         shapeSquareStartButton?.classList.remove('is-clicking');
+        shapeSquarePage.classList.remove('is-transitioning-to-illustration', 'is-preparing-illustration-background');
         if (shapeSquareBgImage) {
             shapeSquareBgImage.src = shapeSquareIllustrationBackgroundSource;
         }
@@ -771,16 +801,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!shapeSquarePage || !isPageVisible(shapeSquarePage)) return false;
         if (shapeSquareStartPressTimer !== null) return true;
 
-        shapeSquareStartButton?.classList.add('is-clicking');
-        shapeSquareStartPressTimer = window.setTimeout(() => {
+        const illustrationPreloader = window.Image ? new window.Image() : null;
+        if (illustrationPreloader) {
+            illustrationPreloader.src = shapeSquareIllustrationBackgroundSource;
+        }
+        shapeSquareVideo?.load?.();
+
+        const revealIllustration = () => {
             shapeSquareStartPressTimer = null;
-            const runWithLoading = getAppLoadingTransition();
-            if (typeof runWithLoading === 'function') {
-                runWithLoading(showShapeSquareIllustration);
-                return;
-            }
+            if (!shapeSquarePage || !isPageVisible(shapeSquarePage)) return;
             showShapeSquareIllustration();
-        }, 160);
+        };
+
+        const runWithLoading = getAppLoadingTransition();
+        if (typeof runWithLoading === 'function') {
+            shapeSquareStartPressTimer = -1;
+            const didStartLoading = runWithLoading(revealIllustration);
+            if (didStartLoading !== false) {
+                return true;
+            }
+            shapeSquareStartPressTimer = null;
+        }
+
+        shapeSquareStartPressTimer = window.setTimeout(revealIllustration, 1000);
+        shapeSquareTimers.push(shapeSquareStartPressTimer);
         return true;
     };
 

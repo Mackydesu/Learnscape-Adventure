@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260828-91">
+    <link rel="stylesheet" href="style.css?v=20260829-104">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -352,7 +352,7 @@
         <div class="circle-illustration-video-stage square-illustration-video-stage" aria-hidden="true">
             <div class="circle-illustration-tv-frame">
                 <div class="circle-illustration-tv-screen">
-                    <video class="circle-illustration-video square-illustration-video" playsinline preload="metadata" aria-label="Square lesson video">
+                    <video class="circle-illustration-video square-illustration-video" playsinline preload="auto" aria-label="Square lesson video">
                         <source src="assets/Videos/squareshape.mp4" type="video/mp4">
                     </video>
                     <button class="circle-illustration-play-button square-illustration-play-button" type="button" aria-label="Play square lesson video">
@@ -685,7 +685,7 @@
         </a>
     </section>
 
-    <script src="script.js?v=20260828-91"></script>
+    <script src="script.js?v=20260829-104"></script>
     </div>
 
     <script>
@@ -854,6 +854,7 @@
             const body = document.body;
             const routeBodyClasses = ['title-page', 'game-start-page', 'game1-page', 'game3-page', 'gameplay-page'];
             let loadingTimer = null;
+            let loadingHideTimer = null;
             let currentRoute = 'title';
             let currentRouteKey = 'title';
             let isNavigating = false;
@@ -1192,21 +1193,38 @@
                 }));
             };
 
-            const hideLoading = () => {
+            const hideLoading = (onHidden = null) => {
                 if (loadingTimer) {
                     window.clearTimeout(loadingTimer);
                     loadingTimer = null;
                 }
 
-                if (loadingOverlay) {
-                    loadingOverlay.hidden = true;
-                    body.classList.remove('is-page-loading');
+                if (loadingHideTimer) {
+                    window.clearTimeout(loadingHideTimer);
+                    loadingHideTimer = null;
                 }
+
+                if (loadingOverlay) {
+                    body.classList.remove('is-page-loading');
+                    loadingHideTimer = window.setTimeout(() => {
+                        loadingOverlay.hidden = true;
+                        loadingHideTimer = null;
+                        onHidden?.();
+                    }, 300);
+                    return;
+                }
+
+                onHidden?.();
             };
 
             const showLoading = () => {
                 if (loadingOverlay) {
+                    if (loadingHideTimer) {
+                        window.clearTimeout(loadingHideTimer);
+                        loadingHideTimer = null;
+                    }
                     loadingOverlay.hidden = false;
+                    loadingOverlay.getBoundingClientRect();
                     body.classList.add('is-page-loading');
                 }
             };
@@ -1223,8 +1241,8 @@
                 showLoading();
 
                 loadingTimer = window.setTimeout(() => {
-                    hideLoading();
                     setRoute(routeData);
+                    hideLoading();
                     isNavigating = false;
                 }, 1000);
             };
@@ -1235,14 +1253,22 @@
                 navigateWithLoading(target);
             };
 
-            window.__learnscapeRunWithLoading = (callback) => {
+            window.__learnscapeRunWithLoading = (callback, options = {}) => {
                 if (typeof callback !== 'function' || isNavigating) return false;
 
                 isNavigating = true;
                 showLoading();
                 loadingTimer = window.setTimeout(() => {
-                    hideLoading();
+                    if (options.afterFade === true) {
+                        hideLoading(() => {
+                            callback();
+                            isNavigating = false;
+                        });
+                        return;
+                    }
+
                     callback();
+                    hideLoading();
                     isNavigating = false;
                 }, 1000);
                 return true;
