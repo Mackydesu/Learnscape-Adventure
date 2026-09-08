@@ -1764,10 +1764,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!page) return;
 
         const background = page.querySelector('.shape-area-bg');
+        const videoStage = page.querySelector('.shape-preview-video-stage');
+        const video = page.querySelector('.shape-preview-video');
+        const playButton = page.querySelector('.shape-preview-play-button');
+        const skipButton = page.querySelector('.shape-preview-skip-button');
         const areaBackgroundSource = page.dataset.areaBackground;
         if (background && areaBackgroundSource) {
             background.src = areaBackgroundSource;
         }
+        video?.pause?.();
+        if (video) {
+            video.removeAttribute('src');
+            video.load();
+        }
+        if (playButton) playButton.hidden = false;
+        if (skipButton) skipButton.hidden = true;
+        videoStage?.setAttribute('aria-hidden', 'true');
         page.classList.remove('is-transitioning-to-illustration', 'is-illustration-background');
     };
 
@@ -1775,10 +1787,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!page || !isPageVisible(page)) return;
 
         const background = page.querySelector('.shape-area-bg');
+        const videoStage = page.querySelector('.shape-preview-video-stage');
+        const video = page.querySelector('.shape-preview-video');
+        const playButton = page.querySelector('.shape-preview-play-button');
+        const skipButton = page.querySelector('.shape-preview-skip-button');
         const illustrationBackgroundSource = page.dataset.illustrationBackground;
+        const videoSource = page.dataset.videoSource;
         if (background && illustrationBackgroundSource) {
             background.src = illustrationBackgroundSource;
         }
+        if (video && videoSource) {
+            video.src = videoSource;
+            video.load();
+        }
+        if (playButton) playButton.hidden = false;
+        if (skipButton) skipButton.hidden = true;
+        videoStage?.setAttribute('aria-hidden', videoSource ? 'false' : 'true');
         page.classList.remove('is-transitioning-to-illustration');
         page.classList.add('is-illustration-background');
     };
@@ -1787,11 +1811,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!page || !isPageVisible(page) || page.classList.contains('is-transitioning-to-illustration')) return false;
 
         const illustrationBackgroundSource = page.dataset.illustrationBackground;
+        const videoSource = page.dataset.videoSource;
         if (!illustrationBackgroundSource) return false;
 
         const illustrationPreloader = window.Image ? new window.Image() : null;
         if (illustrationPreloader) {
             illustrationPreloader.src = illustrationBackgroundSource;
+        }
+        const video = page.querySelector('.shape-preview-video');
+        if (video && videoSource) {
+            video.src = videoSource;
+            video.load();
         }
         page.classList.add('is-transitioning-to-illustration');
 
@@ -1807,7 +1837,40 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     shapePreviewPages.forEach((page) => {
         const startButton = page.querySelector('.shape-area-preview-start-button');
+        const video = page.querySelector('.shape-preview-video');
+        const playButton = page.querySelector('.shape-preview-play-button');
+        const skipButton = page.querySelector('.shape-preview-skip-button');
         startButton?.addEventListener('click', () => transitionToShapePreviewIllustration(page));
+
+        const resetVideoControls = () => {
+            video?.pause?.();
+            if (video) {
+                try {
+                    video.currentTime = 0;
+                } catch (error) {
+                    // The video can reset after its metadata becomes available.
+                }
+            }
+            if (playButton) playButton.hidden = false;
+            if (skipButton) skipButton.hidden = true;
+        };
+
+        playButton?.addEventListener('click', async () => {
+            if (!video || !isPageVisible(page) || !page.classList.contains('is-illustration-background')) return;
+
+            if (playButton) playButton.hidden = true;
+            if (skipButton) skipButton.hidden = false;
+            try {
+                video.currentTime = 0;
+                await video.play();
+            } catch (error) {
+                resetVideoControls();
+                console.warn('Shape lesson video could not play.', error);
+            }
+        });
+
+        skipButton?.addEventListener('click', resetVideoControls);
+        video?.addEventListener('ended', resetVideoControls);
     });
 
     const startShapeSquareScene = () => {
