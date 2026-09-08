@@ -2015,7 +2015,8 @@ body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-full
 }
 
 .circle-lesson-progress-button[data-circle-lesson-next],
-.circle-lesson-progress-button[data-square-lesson-next] {
+.circle-lesson-progress-button[data-square-lesson-next],
+.circle-lesson-progress-button[data-shape-preview-next] {
     aspect-ratio: 308 / 250;
 }
 
@@ -3102,7 +3103,7 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     display: none;
 }
 
-.shape-area-preview-page[data-video-source].is-illustration-background .shape-area-bg {
+.shape-area-preview-page.is-illustration-background .shape-area-bg {
     filter: blur(7px);
     transform: none;
 }
@@ -3125,6 +3126,271 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
+}
+
+.shape-area-preview-page.is-progress-visible .shape-preview-video-stage {
+    display: none;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.shape-area-preview-page.is-progress-visible .shape-preview-progress {
+    display: grid;
+}
+
+.shape-preview-progress-title {
+    position: absolute;
+    left: 50%;
+    top: 7%;
+    z-index: 2;
+    width: 72%;
+    color: #fff8c8;
+    font: 900 clamp(1.15rem, 3.2vw, 2.45rem)/1 'Fredoka', 'Baloo 2', sans-serif;
+    letter-spacing: 0;
+    text-align: center;
+    text-shadow: 0 0.1em 0 #07558d, 0 0.18em 0.2em rgba(0, 0, 0, 0.3);
+    transform: translateX(-50%);
+}
+
+.shape-preview-video[hidden],
+.shape-preview-lesson-image[hidden],
+.shape-tv-lesson-image[hidden],
+.circle-illustration-video[hidden],
+.shape-tv-mascot[hidden],
+.shape-tv-question-panel[hidden] {
+    display: none;
+}
+
+.shape-preview-lesson-image,
+.shape-tv-lesson-image {
+    object-fit: cover;
+}
+
+.shape-tv-lesson-image {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+}
+
+.is-tv-lesson-image-visible .circle-illustration-tv-screen > video {
+    display: none;
+}
+
+.is-tv-lesson-image-visible .shape-tv-lesson-image {
+    display: block;
+}
+
+.shape-tv-mascot {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(4rem, 14%, 6rem);
+    z-index: 4;
+    width: clamp(9rem, 36%, 20rem);
+    height: auto;
+    max-height: 52%;
+    object-fit: contain;
+    object-position: center bottom;
+    filter: drop-shadow(0 0.45rem 0.35rem rgba(0, 0, 0, 0.28));
+    pointer-events: none;
+    transform: translateX(-50%);
+}
+
+.shape-tv-question-panel {
+    --tv-question-border: #714018;
+    --tv-question-top: rgba(255, 244, 174, 0.96);
+    --tv-question-bottom: rgba(242, 177, 52, 0.98);
+    --tv-question-copy: #3f260d;
+    --tv-question-outline: #fff8cf;
+    position: absolute;
+    left: 50%;
+    bottom: clamp(0.55rem, 3%, 1.2rem);
+    z-index: 5;
+    box-sizing: border-box;
+    width: min(64%, 31rem);
+    padding: clamp(0.5rem, 1.2vw, 0.85rem) clamp(0.8rem, 2vw, 1.5rem);
+    border: clamp(0.12rem, 0.24vw, 0.22rem) solid var(--tv-question-border);
+    border-radius: clamp(0.55rem, 1vw, 0.85rem);
+    background: linear-gradient(180deg, var(--tv-question-top), var(--tv-question-bottom));
+    color: var(--tv-question-copy);
+    font: 900 clamp(1rem, 2.2vw, 2rem)/1.08 'Fredoka', 'Baloo 2', sans-serif;
+    text-align: center;
+    text-transform: none;
+    -webkit-text-stroke: 0.018em var(--tv-question-outline);
+    paint-order: stroke fill;
+    text-shadow:
+        0 0.08em 0 var(--tv-question-outline),
+        0 0.12em 0 rgba(37, 20, 8, 0.3);
+    box-shadow:
+        inset 0 0.12rem 0 rgba(255, 255, 255, 0.58),
+        0 0.28rem 0 var(--tv-question-border),
+        0 0.6rem 0.9rem rgba(0, 0, 0, 0.24);
+    pointer-events: none;
+    transform: translateX(-50%);
+}
+
+.shape-tv-choices {
+    --tv-question-border: #714018;
+    --tv-question-top: rgba(255, 244, 174, 0.96);
+    --tv-question-bottom: rgba(242, 177, 52, 0.98);
+    --tv-question-copy: #3f260d;
+    --tv-question-outline: #fff8cf;
+    position: absolute;
+    inset: 6% 3% 23%;
+    z-index: 5;
+    display: none;
+    align-items: stretch;
+    justify-content: space-between;
+    pointer-events: none;
+}
+
+.is-tv-lesson-image-visible .shape-tv-choices {
+    display: flex;
+}
+
+.shape-tv-choice-column {
+    width: min(28%, 15rem);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: clamp(0.65rem, 1.7vw, 1.3rem);
+}
+
+.shape-tv-choice {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: clamp(3rem, 6.3vw, 5.2rem);
+    padding: clamp(0.55rem, 1.15vw, 0.9rem) clamp(0.45rem, 1vw, 0.9rem);
+    border: clamp(0.1rem, 0.2vw, 0.18rem) solid var(--tv-question-border);
+    border-radius: clamp(0.45rem, 0.8vw, 0.7rem);
+    background: linear-gradient(180deg, var(--tv-question-top), var(--tv-question-bottom));
+    color: var(--tv-question-copy);
+    font: 900 clamp(0.9rem, 1.9vw, 1.65rem)/1.05 'Fredoka', 'Baloo 2', sans-serif;
+    letter-spacing: 0;
+    text-align: center;
+    white-space: nowrap;
+    -webkit-text-stroke: 0.014em var(--tv-question-outline);
+    paint-order: stroke fill;
+    text-shadow: 0 0.08em 0 var(--tv-question-outline);
+    box-shadow:
+        inset 0 0.1rem 0 rgba(255, 255, 255, 0.6),
+        0 0.22rem 0 var(--tv-question-border),
+        0 0.4rem 0.55rem rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    pointer-events: auto;
+    transition: transform 0.16s ease, filter 0.16s ease, background 0.16s ease;
+}
+
+.shape-tv-choice:hover,
+.shape-tv-choice:focus-visible {
+    filter: brightness(1.08) saturate(1.08);
+    outline: none;
+    transform: translateY(-0.16rem) scale(1.03);
+}
+
+.shape-tv-choice:active {
+    transform: translateY(0.12rem) scale(0.97);
+}
+
+.shape-tv-choice.is-correct {
+    border-color: #246e2d;
+    background: linear-gradient(180deg, #d9ffc2, #65c95f);
+    color: #174d20;
+    box-shadow: 0 0.22rem 0 #246e2d, 0 0 1rem rgba(111, 255, 108, 0.72);
+    animation: shapeTvCorrectChoice 0.55s ease both;
+}
+
+.shape-tv-choice.is-wrong {
+    border-color: #942632;
+    background: linear-gradient(180deg, #ffd0d5, #ed6772);
+    color: #6d1722;
+    animation: shapeTvWrongChoice 0.35s ease both;
+}
+
+@keyframes shapeTvCorrectChoice {
+    0% { transform: scale(1); }
+    55% { transform: scale(1.12); }
+    100% { transform: scale(1.05); }
+}
+
+@keyframes shapeTvWrongChoice {
+    0%, 100% { transform: translateX(0); }
+    30% { transform: translateX(-0.32rem); }
+    70% { transform: translateX(0.32rem); }
+}
+
+#learnscape-circle-illustration-page .shape-tv-question-panel,
+#learnscape-circle-illustration-page .shape-tv-choices {
+    --tv-question-border: #155d96;
+    --tv-question-top: rgba(190, 241, 255, 0.97);
+    --tv-question-bottom: rgba(66, 174, 235, 0.98);
+    --tv-question-copy: #103f68;
+    --tv-question-outline: #effcff;
+}
+
+#learnscape-shape-square-page .shape-tv-question-panel,
+#learnscape-shape-square-page .shape-tv-choices {
+    --tv-question-border: #542087;
+    --tv-question-top: rgba(235, 205, 255, 0.97);
+    --tv-question-bottom: rgba(157, 74, 224, 0.98);
+    --tv-question-copy: #351052;
+    --tv-question-outline: #fff1ff;
+}
+
+#learnscape-shape-area-3-page .shape-tv-question-panel,
+#learnscape-shape-area-3-page .shape-tv-choices {
+    --tv-question-border: #286d18;
+    --tv-question-top: rgba(221, 255, 173, 0.97);
+    --tv-question-bottom: rgba(103, 195, 51, 0.98);
+    --tv-question-copy: #17460d;
+    --tv-question-outline: #f5ffe8;
+}
+
+#learnscape-shape-area-4-page .shape-tv-question-panel,
+#learnscape-shape-area-4-page .shape-tv-choices {
+    --tv-question-border: #9b4b0f;
+    --tv-question-top: rgba(255, 235, 166, 0.97);
+    --tv-question-bottom: rgba(244, 135, 43, 0.98);
+    --tv-question-copy: #68300b;
+    --tv-question-outline: #fff8df;
+}
+
+#learnscape-shape-area-5-page .shape-tv-question-panel,
+#learnscape-shape-area-5-page .shape-tv-choices {
+    --tv-question-border: #a52d69;
+    --tv-question-top: rgba(255, 218, 239, 0.97);
+    --tv-question-bottom: rgba(236, 103, 171, 0.98);
+    --tv-question-copy: #68143f;
+    --tv-question-outline: #fff4fa;
+}
+
+#learnscape-shape-area-6-page .shape-tv-question-panel,
+#learnscape-shape-area-6-page .shape-tv-choices {
+    --tv-question-border: #a51f3b;
+    --tv-question-top: rgba(255, 222, 226, 0.97);
+    --tv-question-bottom: rgba(242, 82, 105, 0.98);
+    --tv-question-copy: #74152b;
+    --tv-question-outline: #fff7e5;
+}
+
+#learnscape-shape-area-7-page .shape-tv-question-panel,
+#learnscape-shape-area-7-page .shape-tv-choices {
+    --tv-question-border: #8b5a00;
+    --tv-question-top: rgba(255, 255, 194, 0.98);
+    --tv-question-bottom: rgba(255, 214, 32, 0.99);
+    --tv-question-copy: #493200;
+    --tv-question-outline: #fffef0;
+}
+
+#learnscape-shape-area-8-page .shape-tv-question-panel,
+#learnscape-shape-area-8-page .shape-tv-choices {
+    --tv-question-border: #412781;
+    --tv-question-top: rgba(220, 247, 255, 0.97);
+    --tv-question-bottom: rgba(125, 139, 245, 0.98);
+    --tv-question-copy: #27205f;
+    --tv-question-outline: #f7fcff;
 }
 
 .shape-area-preview-start-button {

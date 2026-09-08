@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260829-151';
+    const appVersion = '20260909-162';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -107,8 +107,81 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeCirclePage = document.getElementById('learnscape-shape-circle-page');
     const shapeSquarePage = document.getElementById('learnscape-shape-square-page');
     const shapePreviewPages = Array.from(document.querySelectorAll('.shape-area-preview-page'));
+    const shapePreviewProgressByPage = new Map();
+
+    shapePreviewPages.forEach((page) => {
+        const progress = document.createElement('section');
+        progress.className = 'circle-lesson-progress shape-preview-progress';
+        progress.setAttribute('aria-label', 'Lesson progress');
+        progress.setAttribute('aria-hidden', 'true');
+
+        const board = document.createElement('div');
+        board.className = 'circle-lesson-progress-board';
+
+        const boardImage = document.createElement('img');
+        boardImage.className = 'circle-lesson-progress-board-image';
+        boardImage.src = 'assets/Shape UI/progressboard.webp';
+        boardImage.alt = '';
+
+        const title = document.createElement('div');
+        title.className = 'shape-preview-progress-title';
+        title.textContent = 'Lesson Complete!';
+
+        const stars = document.createElement('div');
+        stars.className = 'circle-lesson-stars';
+        stars.dataset.earnedStars = '1';
+        stars.setAttribute('role', 'img');
+        stars.setAttribute('aria-label', '1 of 3 stars earned');
+
+        ['1star.webp', '2star.webp', '1star.webp'].forEach((source) => {
+            const slot = document.createElement('span');
+            slot.className = 'circle-lesson-star-slot';
+            const star = document.createElement('img');
+            star.className = 'circle-lesson-star-real';
+            star.src = `assets/Shape UI/${source}`;
+            star.alt = '';
+            slot.appendChild(star);
+            stars.appendChild(slot);
+        });
+
+        const message = document.createElement('p');
+        message.className = 'circle-lesson-star-message';
+        message.textContent = 'Well done!';
+
+        const actions = document.createElement('div');
+        actions.className = 'circle-lesson-progress-actions';
+
+        const replayButton = document.createElement('button');
+        replayButton.className = 'circle-lesson-progress-button';
+        replayButton.type = 'button';
+        replayButton.setAttribute('data-shape-preview-replay', '');
+        replayButton.setAttribute('aria-label', 'Replay shape lesson');
+        const replayImage = document.createElement('img');
+        replayImage.src = 'assets/Buttons/replay.webp';
+        replayImage.alt = '';
+        replayButton.appendChild(replayImage);
+
+        const nextButton = document.createElement('button');
+        nextButton.className = 'circle-lesson-progress-button';
+        nextButton.type = 'button';
+        nextButton.setAttribute('data-shape-preview-next', '');
+        nextButton.setAttribute('aria-label', 'Continue to Shape Island');
+        const nextImage = document.createElement('img');
+        nextImage.src = 'assets/Buttons/next.webp';
+        nextImage.alt = '';
+        nextButton.appendChild(nextImage);
+
+        actions.append(replayButton, nextButton);
+        board.append(boardImage, title, stars, message, actions);
+        progress.appendChild(board);
+        page.insertBefore(progress, page.querySelector('.game-return-btn'));
+        shapePreviewProgressByPage.set(page, progress);
+    });
     const circleIllustrationPage = document.getElementById('learnscape-circle-illustration-page');
     const circleIllustrationVideo = circleIllustrationPage?.querySelector('.circle-illustration-video') || null;
+    const circleTvLessonImage = circleIllustrationPage?.querySelector('.circle-tv-lesson-image') || null;
+    const circleTvMascot = circleIllustrationPage?.querySelector('.circle-tv-mascot') || null;
+    const circleTvQuestionPanel = circleIllustrationPage?.querySelector('.circle-tv-question-panel') || null;
     const circleIllustrationPlayButton = circleIllustrationPage?.querySelector('.circle-illustration-play-button') || null;
     const circleIllustrationSkipButton = circleIllustrationPage?.querySelector('.circle-illustration-skip-button') || null;
     const circleIllustrationProgress = circleIllustrationPage?.querySelector('.circle-lesson-progress') || null;
@@ -158,6 +231,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeSquareBackButton = shapeSquarePage?.querySelector('.game-return-btn') || null;
     const shapeSquareVideoStage = shapeSquarePage?.querySelector('.square-illustration-video-stage') || null;
     const shapeSquareVideo = shapeSquarePage?.querySelector('.square-illustration-video') || null;
+    const squareTvLessonImage = shapeSquarePage?.querySelector('.square-tv-lesson-image') || null;
+    const squareTvMascot = shapeSquarePage?.querySelector('.square-tv-mascot') || null;
+    const squareTvQuestionPanel = shapeSquarePage?.querySelector('.square-tv-question-panel') || null;
     const shapeSquarePlayButton = shapeSquarePage?.querySelector('.square-illustration-play-button') || null;
     const shapeSquareSkipButton = shapeSquarePage?.querySelector('.square-illustration-skip-button') || null;
     const shapeSquareProgress = shapeSquarePage?.querySelector('.square-lesson-progress') || null;
@@ -249,7 +325,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeSquareCelebrationAudioSource = 'assets/Audios/Mahusay.mp3';
     const shapeSquareKidsCheeringAudioSource = 'assets/Audios/kids cheering.mp3';
     const shapeSquareAreaBackgroundSource = 'assets/Backgrounds/Area2.webp';
-    const shapeSquareIllustrationBackgroundSource = 'assets/Backgrounds/square.webp';
+    const shapeSquareIllustrationBackgroundSource = 'assets/Backgrounds/squaregame.webp';
     const shapeSquareIntroStages = [
         { start: 0, character: shapeSquareCharacter3, bubbleClass: null, message: shapeSquareWelcomeMessage },
         { start: 1.7, character: shapeSquareCharacter9, bubbleClass: 'is-ch9', message: shapeSquareCelebrationMessages[0] },
@@ -1530,10 +1606,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     };
 
+    const resetShapeTvChoices = (page) => {
+        page?.querySelectorAll('.shape-tv-choice').forEach((choice) => {
+            choice.disabled = false;
+            choice.classList.remove('is-correct', 'is-wrong');
+            choice.removeAttribute('aria-pressed');
+        });
+    };
+
     const resetShapeSquareLessonVideo = () => {
         hideShapeSquareProgress();
         hideShapeSquareMissionGuide();
-        shapeSquarePage?.classList.remove('is-lesson-complete');
+        shapeSquarePage?.classList.remove('is-lesson-complete', 'is-tv-lesson-image-visible');
+        resetShapeTvChoices(shapeSquarePage);
         resetSquareObjectPuzzle();
         setShapeSquareEarnedStars(0);
         if (shapeSquareProgress) shapeSquareProgress.dataset.progressStage = 'lesson';
@@ -1545,18 +1630,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeSquareVideo?.pause?.();
 
         if (shapeSquareVideo) {
+            shapeSquareVideo.hidden = false;
             try {
                 shapeSquareVideo.currentTime = 0;
             } catch (error) {
                 // Pausing is enough while the video metadata is still loading.
             }
         }
+        if (squareTvLessonImage) squareTvLessonImage.hidden = true;
+        if (squareTvMascot) squareTvMascot.hidden = true;
+        if (squareTvQuestionPanel) squareTvQuestionPanel.hidden = true;
 
         setShapeSquareVideoStageVisible(false);
         setShapeSquarePlayButtonVisible(true);
     };
 
-    const showShapeSquareProgress = () => {
+    const showShapeSquareProgress = (playRevealSound = true) => {
         if (!shapeSquarePage || !shapeSquareProgress) return;
 
         const wasAlreadyVisible = shapeSquarePage.classList.contains('is-progress-visible');
@@ -1576,7 +1665,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setShapeSquareVideoStageVisible(false);
         shapeSquareNextButton?.focus({ preventScroll: true });
 
-        if (!wasAlreadyVisible) {
+        if (!wasAlreadyVisible && playRevealSound) {
             playUiClickSound('boardSuccess');
             const starSoundTimer = window.setTimeout(() => {
                 playUiClickSound('starPop');
@@ -1593,11 +1682,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             hideShapeSquareProgress();
-            shapeSquarePage.classList.remove('is-lesson-complete');
+            shapeSquarePage.classList.remove('is-lesson-complete', 'is-tv-lesson-image-visible');
+            resetShapeTvChoices(shapeSquarePage);
             setShapeSquareEarnedStars(0);
             setShapeSquarePlayButtonVisible(false);
             setShapeSquareSkipButtonVisible(true);
             setShapeSquareVideoStageVisible(true);
+            shapeSquareVideo.hidden = false;
+            if (squareTvLessonImage) squareTvLessonImage.hidden = true;
+            if (squareTvMascot) squareTvMascot.hidden = true;
+            if (squareTvQuestionPanel) squareTvQuestionPanel.hidden = true;
 
             try {
                 shapeSquareVideo.currentTime = 0;
@@ -1611,6 +1705,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             setShapeSquareSkipButtonVisible(false);
             console.warn('Square lesson video could not play.', error);
         }
+    };
+
+    const showShapeSquareTvLessonImage = () => {
+        if (!shapeSquarePage || !shapeSquareVideo || !squareTvLessonImage) return;
+
+        hideShapeSquareProgress();
+        shapeSquareVideo.pause();
+        shapeSquareVideo.hidden = true;
+        squareTvLessonImage.hidden = false;
+        if (squareTvMascot) squareTvMascot.hidden = false;
+        if (squareTvQuestionPanel) squareTvQuestionPanel.hidden = false;
+        setShapeSquarePlayButtonVisible(false);
+        setShapeSquareSkipButtonVisible(false);
+        setShapeSquareVideoStageVisible(true);
+        shapeSquarePage.classList.add('is-tv-lesson-image-visible');
     };
 
     const finishShapeSquareLesson = () => {
@@ -1766,6 +1875,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const background = page.querySelector('.shape-area-bg');
         const videoStage = page.querySelector('.shape-preview-video-stage');
         const video = page.querySelector('.shape-preview-video');
+        const lessonImage = page.querySelector('.shape-preview-lesson-image');
+        const mascot = page.querySelector('.shape-preview-mascot');
+        const questionPanel = page.querySelector('.shape-preview-question-panel');
         const playButton = page.querySelector('.shape-preview-play-button');
         const skipButton = page.querySelector('.shape-preview-skip-button');
         const areaBackgroundSource = page.dataset.areaBackground;
@@ -1776,11 +1888,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (video) {
             video.removeAttribute('src');
             video.load();
+            video.hidden = false;
         }
+        if (lessonImage) lessonImage.hidden = true;
+        if (mascot) mascot.hidden = true;
+        if (questionPanel) questionPanel.hidden = true;
         if (playButton) playButton.hidden = false;
         if (skipButton) skipButton.hidden = true;
         videoStage?.setAttribute('aria-hidden', 'true');
-        page.classList.remove('is-transitioning-to-illustration', 'is-illustration-background');
+        shapePreviewProgressByPage.get(page)?.setAttribute('aria-hidden', 'true');
+        page.classList.remove('is-transitioning-to-illustration', 'is-illustration-background', 'is-tv-lesson-image-visible', 'is-progress-visible');
+        resetShapeTvChoices(page);
+    };
+
+    const showShapePreviewProgress = (page) => {
+        if (!page || !isPageVisible(page)) return;
+
+        const videoStage = page.querySelector('.shape-preview-video-stage');
+        const progress = shapePreviewProgressByPage.get(page);
+        page.classList.remove('is-tv-lesson-image-visible');
+        page.classList.add('is-progress-visible');
+        videoStage?.setAttribute('aria-hidden', 'true');
+        progress?.setAttribute('aria-hidden', 'false');
+        playUiClickSound('boardSuccess');
+        window.setTimeout(() => {
+            if (isPageVisible(page) && page.classList.contains('is-progress-visible')) {
+                playUiClickSound('starPop');
+            }
+        }, 700);
     };
 
     const showShapePreviewIllustration = (page) => {
@@ -1789,22 +1924,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         const background = page.querySelector('.shape-area-bg');
         const videoStage = page.querySelector('.shape-preview-video-stage');
         const video = page.querySelector('.shape-preview-video');
+        const lessonImage = page.querySelector('.shape-preview-lesson-image');
+        const mascot = page.querySelector('.shape-preview-mascot');
+        const questionPanel = page.querySelector('.shape-preview-question-panel');
         const playButton = page.querySelector('.shape-preview-play-button');
         const skipButton = page.querySelector('.shape-preview-skip-button');
         const illustrationBackgroundSource = page.dataset.illustrationBackground;
         const videoSource = page.dataset.videoSource;
-        if (background && illustrationBackgroundSource) {
+        if (background && illustrationBackgroundSource && !videoSource && !lessonImage) {
             background.src = illustrationBackgroundSource;
         }
         if (video && videoSource) {
             video.src = videoSource;
             video.load();
+            video.hidden = false;
         }
+        if (lessonImage) lessonImage.hidden = Boolean(videoSource);
+        if (mascot) mascot.hidden = Boolean(videoSource);
+        if (questionPanel) questionPanel.hidden = Boolean(videoSource);
         if (playButton) playButton.hidden = false;
         if (skipButton) skipButton.hidden = true;
-        videoStage?.setAttribute('aria-hidden', videoSource ? 'false' : 'true');
+        videoStage?.setAttribute('aria-hidden', videoSource || lessonImage ? 'false' : 'true');
         page.classList.remove('is-transitioning-to-illustration');
         page.classList.add('is-illustration-background');
+        page.classList.toggle('is-tv-lesson-image-visible', !videoSource && Boolean(lessonImage));
     };
 
     const transitionToShapePreviewIllustration = (page) => {
@@ -1836,10 +1979,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     shapePreviewPages.forEach((page) => {
+        const videoStage = page.querySelector('.shape-preview-video-stage');
         const startButton = page.querySelector('.shape-area-preview-start-button');
         const video = page.querySelector('.shape-preview-video');
+        const lessonImage = page.querySelector('.shape-preview-lesson-image');
+        const mascot = page.querySelector('.shape-preview-mascot');
+        const questionPanel = page.querySelector('.shape-preview-question-panel');
         const playButton = page.querySelector('.shape-preview-play-button');
         const skipButton = page.querySelector('.shape-preview-skip-button');
+        const progress = shapePreviewProgressByPage.get(page);
+        const replayButton = progress?.querySelector('[data-shape-preview-replay]') || null;
+        const nextButton = progress?.querySelector('[data-shape-preview-next]') || null;
         startButton?.addEventListener('click', () => transitionToShapePreviewIllustration(page));
 
         const resetVideoControls = () => {
@@ -1853,6 +2003,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             if (playButton) playButton.hidden = false;
             if (skipButton) skipButton.hidden = true;
+        };
+
+        const showLessonBackground = () => {
+            video?.pause?.();
+            if (video) video.hidden = true;
+            if (lessonImage) lessonImage.hidden = false;
+            if (mascot) mascot.hidden = false;
+            if (questionPanel) questionPanel.hidden = false;
+            if (playButton) playButton.hidden = true;
+            if (skipButton) skipButton.hidden = true;
+            videoStage?.setAttribute('aria-hidden', 'false');
+            page.classList.add('is-tv-lesson-image-visible');
         };
 
         playButton?.addEventListener('click', async () => {
@@ -1869,8 +2031,66 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        skipButton?.addEventListener('click', resetVideoControls);
-        video?.addEventListener('ended', resetVideoControls);
+        skipButton?.addEventListener('click', showLessonBackground);
+        video?.addEventListener('ended', showLessonBackground);
+
+        replayButton?.addEventListener('click', async () => {
+            page.classList.remove('is-progress-visible');
+            progress?.setAttribute('aria-hidden', 'true');
+            resetShapeTvChoices(page);
+            showShapePreviewIllustration(page);
+
+            if (!video) return;
+            if (playButton) playButton.hidden = true;
+            if (skipButton) skipButton.hidden = false;
+            try {
+                video.currentTime = 0;
+                await video.play();
+            } catch (error) {
+                resetVideoControls();
+                console.warn('Shape lesson video could not replay.', error);
+            }
+        });
+
+        nextButton?.addEventListener('click', () => navigateApp('game3'));
+    });
+
+    document.querySelectorAll('.shape-tv-choices').forEach((choiceGroup) => {
+        const choices = Array.from(choiceGroup.querySelectorAll('.shape-tv-choice'));
+        const lessonPage = choiceGroup.closest('.circle-illustration-page, .shape-area-page');
+
+        choices.forEach((choice) => {
+            choice.addEventListener('click', () => {
+                if (choice.hasAttribute('data-correct-answer')) {
+                    choices.forEach((item) => {
+                        item.disabled = true;
+                        item.classList.remove('is-wrong');
+                        item.setAttribute('aria-pressed', item === choice ? 'true' : 'false');
+                    });
+                    choice.classList.add('is-correct');
+                    playUiClickSound('chime');
+                    window.setTimeout(() => {
+                        if (!lessonPage || !isPageVisible(lessonPage)) return;
+                        if (lessonPage === circleIllustrationPage) {
+                            showCircleIllustrationProgress();
+                            return;
+                        }
+                        if (lessonPage === shapeSquarePage) {
+                            showShapeSquareProgress();
+                            return;
+                        }
+                        showShapePreviewProgress(lessonPage);
+                    }, 650);
+                    return;
+                }
+
+                playUiClickSound('tap');
+                choice.classList.remove('is-wrong');
+                choice.getBoundingClientRect();
+                choice.classList.add('is-wrong');
+                window.setTimeout(() => choice.classList.remove('is-wrong'), 500);
+            });
+        });
     });
 
     const startShapeSquareScene = () => {
@@ -3427,7 +3647,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         event.preventDefault();
     };
 
-    const showCircleIllustrationProgress = () => {
+    const showCircleIllustrationProgress = (playRevealSound = true) => {
         if (!circleIllustrationPage || !circleIllustrationProgress) return;
 
         const wasAlreadyVisible = circleIllustrationPage.classList.contains('is-progress-visible');
@@ -3445,7 +3665,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         circleIllustrationProgress.setAttribute('aria-hidden', 'false');
         circleIllustrationNextButton?.focus({ preventScroll: true });
 
-        if (!wasAlreadyVisible) {
+        if (!wasAlreadyVisible && playRevealSound) {
             playUiClickSound('boardSuccess');
             const starSoundTimer = window.setTimeout(() => {
                 playUiClickSound('starPop');
@@ -3481,9 +3701,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             resetCircleSortActivity();
             resetCircleHunt();
             setCircleIllustrationEarnedStars(0);
-            circleIllustrationPage?.classList.remove('is-lesson-complete');
+            circleIllustrationPage?.classList.remove('is-lesson-complete', 'is-tv-lesson-image-visible');
+            resetShapeTvChoices(circleIllustrationPage);
             setCircleIllustrationPlayButtonVisible(false);
             setCircleIllustrationSkipButtonVisible(true);
+            circleIllustrationVideo.hidden = false;
+            if (circleTvLessonImage) circleTvLessonImage.hidden = true;
+            if (circleTvMascot) circleTvMascot.hidden = true;
+            if (circleTvQuestionPanel) circleTvQuestionPanel.hidden = true;
 
             try {
                 circleIllustrationVideo.currentTime = 0;
@@ -3499,6 +3724,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    const showCircleTvLessonImage = () => {
+        if (!circleIllustrationPage || !circleIllustrationVideo || !circleTvLessonImage) return;
+
+        hideCircleIllustrationProgress();
+        circleIllustrationVideo.pause();
+        circleIllustrationVideo.hidden = true;
+        circleTvLessonImage.hidden = false;
+        if (circleTvMascot) circleTvMascot.hidden = false;
+        if (circleTvQuestionPanel) circleTvQuestionPanel.hidden = false;
+        setCircleIllustrationPlayButtonVisible(false);
+        setCircleIllustrationSkipButtonVisible(false);
+        circleIllustrationPage.classList.add('is-tv-lesson-image-visible');
+    };
+
     const resetCircleIllustrationVideo = () => {
         if (!circleIllustrationVideo) return;
 
@@ -3506,10 +3745,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         hideCircleIllustrationProgress();
         resetCircleSortActivity();
         resetCircleHunt();
-        circleIllustrationPage?.classList.remove('is-lesson-complete');
+        circleIllustrationPage?.classList.remove('is-lesson-complete', 'is-tv-lesson-image-visible');
+        resetShapeTvChoices(circleIllustrationPage);
         setCircleIllustrationEarnedStars(0);
         setCircleIllustrationSkipButtonVisible(false);
         circleIllustrationVideo.pause?.();
+        circleIllustrationVideo.hidden = false;
+        if (circleTvLessonImage) circleTvLessonImage.hidden = true;
+        if (circleTvMascot) circleTvMascot.hidden = true;
+        if (circleTvQuestionPanel) circleTvQuestionPanel.hidden = true;
 
         try {
             circleIllustrationVideo.currentTime = 0;
@@ -4539,6 +4783,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (control.classList.contains('game1-object-card')) return null;
         if (control.classList.contains('circle-sort-object')) return null;
         if (control.classList.contains('square-answer-tile')) return null;
+        if (control.classList.contains('shape-tv-choice')) return null;
 
         if (control.classList.contains('game-return-btn')) return 'backChime';
         if (control.classList.contains('shape-collection-chest')) return 'chestChime';
@@ -4547,7 +4792,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (control.classList.contains('circle-illustration-skip-button')) return 'tap';
         if (control.classList.contains('fullscreen-restore-button')) return 'tap';
         if (control.classList.contains('circle-lesson-progress-button')) {
-            return control.matches('[data-circle-lesson-next], [data-square-lesson-next]') ? 'chime' : 'pop';
+            return control.matches('[data-circle-lesson-next], [data-square-lesson-next], [data-shape-preview-next]') ? 'chime' : 'pop';
         }
         if (control.classList.contains('shape-area-start-button')) return 'chime';
         if (control.classList.contains('shape-area-square-start-button')) return 'chime';
@@ -5732,14 +5977,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         playCircleIllustrationVideo();
     });
 
-    circleIllustrationSkipButton?.addEventListener('click', showCircleIllustrationProgress);
+    circleIllustrationSkipButton?.addEventListener('click', showCircleTvLessonImage);
 
     circleIllustrationVideo?.addEventListener('play', () => {
         setCircleIllustrationPlayButtonVisible(false);
         setCircleIllustrationSkipButtonVisible(true);
     });
 
-    circleIllustrationVideo?.addEventListener('ended', showCircleIllustrationProgress);
+    circleIllustrationVideo?.addEventListener('ended', showCircleTvLessonImage);
 
     circleIllustrationReplayButton?.addEventListener('click', () => {
         if (circleIllustrationProgress?.dataset.progressStage === 'hunt') {
@@ -5756,6 +6001,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             && !circleIllustrationVideo.ended
             && !circleIllustrationPage?.classList.contains('is-progress-visible')
             && !circleIllustrationPage?.classList.contains('is-lesson-complete')
+            && !circleIllustrationPage?.classList.contains('is-tv-lesson-image-visible')
         ) {
             setCircleIllustrationPlayButtonVisible(true);
             setCircleIllustrationSkipButtonVisible(false);
@@ -5763,8 +6009,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     shapeSquarePlayButton?.addEventListener('click', playShapeSquareLessonVideo);
-    shapeSquareSkipButton?.addEventListener('click', showShapeSquareProgress);
-    shapeSquareVideo?.addEventListener('ended', showShapeSquareProgress);
+    shapeSquareSkipButton?.addEventListener('click', showShapeSquareTvLessonImage);
+    shapeSquareVideo?.addEventListener('ended', showShapeSquareTvLessonImage);
     shapeSquareReplayButton?.addEventListener('click', () => {
         if (shapeSquareProgress?.dataset.progressStage === 'answer') {
             returnToShapeSquareMissionStart();
@@ -5828,6 +6074,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             && !shapeSquarePage?.classList.contains('is-progress-visible')
             && !shapeSquarePage?.classList.contains('is-square-mission-guide')
             && !shapeSquarePage?.classList.contains('is-lesson-complete')
+            && !shapeSquarePage?.classList.contains('is-tv-lesson-image-visible')
         ) {
             setShapeSquarePlayButtonVisible(true);
             setShapeSquareSkipButtonVisible(false);
