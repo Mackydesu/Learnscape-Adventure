@@ -106,6 +106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const fullscreenRestoreButton = document.querySelector('.fullscreen-restore-button');
     const shapeCirclePage = document.getElementById('learnscape-shape-circle-page');
     const shapeSquarePage = document.getElementById('learnscape-shape-square-page');
+    const shapePreviewPages = Array.from(document.querySelectorAll('.shape-area-preview-page'));
     const circleIllustrationPage = document.getElementById('learnscape-circle-illustration-page');
     const circleIllustrationVideo = circleIllustrationPage?.querySelector('.circle-illustration-video') || null;
     const circleIllustrationPlayButton = circleIllustrationPage?.querySelector('.circle-illustration-play-button') || null;
@@ -248,7 +249,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeSquareCelebrationAudioSource = 'assets/Audios/Mahusay.mp3';
     const shapeSquareKidsCheeringAudioSource = 'assets/Audios/kids cheering.mp3';
     const shapeSquareAreaBackgroundSource = 'assets/Backgrounds/Area2.webp';
-    const shapeSquareIllustrationBackgroundSource = 'assets/Backgrounds/Illustration2.webp';
+    const shapeSquareIllustrationBackgroundSource = 'assets/Backgrounds/square.webp';
     const shapeSquareIntroStages = [
         { start: 0, character: shapeSquareCharacter3, bubbleClass: null, message: shapeSquareWelcomeMessage },
         { start: 1.7, character: shapeSquareCharacter9, bubbleClass: 'is-ch9', message: shapeSquareCelebrationMessages[0] },
@@ -1758,6 +1759,56 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeSquareTimers.push(shapeSquareStartPressTimer);
         return true;
     };
+
+    const resetShapePreviewPage = (page) => {
+        if (!page) return;
+
+        const background = page.querySelector('.shape-area-bg');
+        const areaBackgroundSource = page.dataset.areaBackground;
+        if (background && areaBackgroundSource) {
+            background.src = areaBackgroundSource;
+        }
+        page.classList.remove('is-transitioning-to-illustration', 'is-illustration-background');
+    };
+
+    const showShapePreviewIllustration = (page) => {
+        if (!page || !isPageVisible(page)) return;
+
+        const background = page.querySelector('.shape-area-bg');
+        const illustrationBackgroundSource = page.dataset.illustrationBackground;
+        if (background && illustrationBackgroundSource) {
+            background.src = illustrationBackgroundSource;
+        }
+        page.classList.remove('is-transitioning-to-illustration');
+        page.classList.add('is-illustration-background');
+    };
+
+    const transitionToShapePreviewIllustration = (page) => {
+        if (!page || !isPageVisible(page) || page.classList.contains('is-transitioning-to-illustration')) return false;
+
+        const illustrationBackgroundSource = page.dataset.illustrationBackground;
+        if (!illustrationBackgroundSource) return false;
+
+        const illustrationPreloader = window.Image ? new window.Image() : null;
+        if (illustrationPreloader) {
+            illustrationPreloader.src = illustrationBackgroundSource;
+        }
+        page.classList.add('is-transitioning-to-illustration');
+
+        const revealIllustration = () => showShapePreviewIllustration(page);
+        const runWithLoading = getAppLoadingTransition();
+        if (typeof runWithLoading === 'function' && runWithLoading(revealIllustration) !== false) {
+            return true;
+        }
+
+        window.setTimeout(revealIllustration, loadingDuration);
+        return true;
+    };
+
+    shapePreviewPages.forEach((page) => {
+        const startButton = page.querySelector('.shape-area-preview-start-button');
+        startButton?.addEventListener('click', () => transitionToShapePreviewIllustration(page));
+    });
 
     const startShapeSquareScene = () => {
         if (!shapeSquarePage || !shapeSquareCharacter3 || !shapeSquareCharacter9 || !shapeSquareCharacter4 || !shapeSquareCharacter5 || !shapeSquareBubble || !shapeSquareBubbleText) return;
@@ -4437,6 +4488,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         if (control.classList.contains('shape-area-start-button')) return 'chime';
         if (control.classList.contains('shape-area-square-start-button')) return 'chime';
+        if (control.classList.contains('shape-area-preview-start-button')) return 'chime';
         if (control.classList.contains('game-menu-btn')) return 'pop';
         if (control.classList.contains('rotate-button')) return 'spark';
         if (control.classList.contains('game1-tutorial-button')) return 'spark';
@@ -5737,6 +5789,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.addEventListener('learnscape:routechange', (event) => {
         const previousRoute = activeLearnscapeRoute;
         activeLearnscapeRoute = event.detail?.route || null;
+
+        shapePreviewPages.forEach((page) => {
+            if (!isPageVisible(page)) resetShapePreviewPage(page);
+        });
 
         if (event.detail?.route !== 'circleIllustration') {
             resetCircleIllustrationVideo();
