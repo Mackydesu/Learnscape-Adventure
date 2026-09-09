@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260909-162';
+    const appVersion = '20260909-163';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
