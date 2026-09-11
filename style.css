@@ -3091,7 +3091,9 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 }
 
 .shape-area-preview-page.is-transitioning-to-illustration .shape-area-preview-title,
-.shape-area-preview-page.is-transitioning-to-illustration .shape-area-preview-start-button {
+.shape-area-preview-page.is-transitioning-to-illustration .shape-area-preview-start-button,
+.shape-area-preview-page.is-transitioning-to-illustration .shape-preview-intro-character,
+.shape-area-preview-page.is-transitioning-to-illustration .shape-preview-intro-bubble {
     opacity: 0;
     pointer-events: none;
     animation: none;
@@ -3099,8 +3101,32 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 }
 
 .shape-area-preview-page.is-illustration-background .shape-area-preview-title,
-.shape-area-preview-page.is-illustration-background .shape-area-preview-start-button {
+.shape-area-preview-page.is-illustration-background .shape-area-preview-start-button,
+.shape-area-preview-page.is-illustration-background .shape-preview-intro-character,
+.shape-area-preview-page.is-illustration-background .shape-preview-intro-bubble {
     display: none;
+}
+
+.shape-area-preview-start-button[hidden],
+.shape-preview-intro-character[hidden] {
+    display: none;
+}
+
+#learnscape-shape-area-4-page .shape-preview-intro-character {
+    left: auto;
+    right: clamp(-1.5rem, 1vw, 1rem);
+    scale: -1 1;
+}
+
+#learnscape-shape-area-4-page .shape-preview-intro-bubble {
+    left: auto;
+    right: calc(clamp(-1.5rem, 1vw, 1rem) + clamp(8rem, 18vw, 17.5rem));
+    translate: 50% 0;
+}
+
+#learnscape-shape-area-4-page .shape-preview-intro-bubble.is-ch4 {
+    left: auto;
+    right: calc(clamp(-1.5rem, 1vw, 1rem) + clamp(8rem, 18vw, 17.5rem) + clamp(1rem, 4.5vw, 4.8rem));
 }
 
 .shape-area-preview-page.is-illustration-background .shape-area-bg {
@@ -4616,6 +4642,15 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     left: calc(clamp(-1.5rem, 1vw, 1rem) + clamp(2rem, 6vw, 6rem));
 }
 
+.shape-area-square-character-next {
+    left: calc(clamp(-1.5rem, 1vw, 1rem) + clamp(0.5rem, 1.5vw, 1.5rem));
+}
+
+#learnscape-shape-area-4-page .shape-preview-intro-character.shape-area-square-character-next {
+    left: auto;
+    right: calc(clamp(-1.5rem, 1vw, 1rem) + clamp(1.5rem, 3vw, 3.5rem));
+}
+
 .shape-area-square-character.is-exiting {
     animation: shapeAreaSquareCharacterOut 0.45s ease both;
 }
@@ -4717,6 +4752,150 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     bottom: clamp(-0.64rem, -0.88vw, -0.48rem);
     left: calc(50% + 0.08rem);
     background: linear-gradient(135deg, rgba(255, 239, 171, 0.98), rgba(255, 229, 137, 0.98));
+}
+
+#learnscape-shape-square-page .shape-area-square-speech-bubble,
+.shape-area-preview-page .shape-preview-intro-bubble {
+    left: clamp(16rem, 29vw, 28rem);
+    right: auto;
+    bottom: clamp(1rem, 3vh, 2.25rem);
+    translate: 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    width: min(
+        var(--shape-intro-panel-width, calc(43ch + 4.5rem)),
+        calc(100vw - clamp(16rem, 29vw, 28rem) - 1rem)
+    );
+    max-width: calc(100vw - 2rem);
+    min-height: clamp(4.5rem, 11vh, 6.5rem);
+    box-sizing: border-box;
+    font-size: 1.55rem;
+    line-height: 1.15;
+    white-space: nowrap;
+    text-align: left;
+}
+
+#learnscape-shape-square-page .shape-area-square-start-button,
+.shape-area-preview-page .shape-area-preview-start-button {
+    bottom: clamp(8.5rem, 14vh, 11rem);
+}
+
+#learnscape-shape-square-page,
+#learnscape-shape-area-3-page,
+#learnscape-shape-area-6-page,
+#learnscape-shape-area-7-page,
+#learnscape-shape-area-8-page {
+    --shape-intro-panel-width: calc(41ch + 3.25rem);
+}
+
+#learnscape-shape-area-4-page {
+    --shape-intro-panel-width: calc(43ch + 3.25rem);
+}
+
+#learnscape-shape-area-5-page {
+    --shape-intro-panel-width: calc(44ch + 3.25rem);
+}
+
+#learnscape-shape-square-page .shape-area-square-speech-bubble::before,
+#learnscape-shape-square-page .shape-area-square-speech-bubble::after,
+.shape-area-preview-page .shape-preview-intro-bubble::before,
+.shape-area-preview-page .shape-preview-intro-bubble::after {
+    content: none;
+}
+
+#learnscape-shape-area-4-page .shape-preview-intro-bubble,
+#learnscape-shape-area-4-page .shape-preview-intro-bubble.is-ch4 {
+    left: auto;
+    right: clamp(16rem, 29vw, 28rem);
+    translate: 0 0;
+}
+
+.shape-area-square-speech-bubble .shape-intro-bubble-text {
+    display: inline;
+    white-space: nowrap;
+}
+
+.shape-area-square-speech-bubble .shape-intro-message-dots {
+    display: none;
+    align-items: flex-end;
+    min-width: 1.8em;
+    margin-left: 0.08em;
+}
+
+.shape-area-square-speech-bubble.is-message-complete .shape-intro-message-dots {
+    display: inline-flex;
+}
+
+.shape-intro-message-dots i {
+    opacity: 0.2;
+    font-style: normal;
+    animation: shapeIntroDotBlink 0.9s ease-in-out infinite;
+}
+
+.shape-intro-message-dots i:nth-child(2) {
+    animation-delay: 0.18s;
+}
+
+.shape-intro-message-dots i:nth-child(3) {
+    animation-delay: 0.36s;
+}
+
+.shape-area-page.is-intro-click-ready {
+    cursor: pointer;
+}
+
+@keyframes shapeIntroDotBlink {
+    0%, 20%, 100% {
+        opacity: 0.2;
+        transform: translateY(0);
+    }
+
+    40% {
+        opacity: 1;
+        transform: translateY(-0.18em);
+    }
+}
+
+@media (min-width: 721px) and (max-width: 1100px) {
+    #learnscape-shape-square-page .shape-area-square-speech-bubble,
+    .shape-area-preview-page .shape-preview-intro-bubble {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 720px) {
+    #learnscape-shape-square-page .shape-area-square-speech-bubble,
+    .shape-area-preview-page .shape-preview-intro-bubble {
+        left: 0.5rem;
+        right: 0.5rem;
+        bottom: 1rem;
+        translate: 0 0;
+        width: min(var(--shape-intro-panel-width), calc(100vw - 1rem));
+        min-height: 4.5rem;
+        padding-right: 0.75rem;
+        padding-left: 0.75rem;
+        font-size: 1rem;
+    }
+
+    #learnscape-shape-square-page .shape-area-square-start-button,
+    .shape-area-preview-page .shape-area-preview-start-button {
+        bottom: 6.25rem;
+    }
+
+    #learnscape-shape-area-4-page .shape-preview-intro-bubble,
+    #learnscape-shape-area-4-page .shape-preview-intro-bubble.is-ch4 {
+        left: 0.5rem;
+        right: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    #learnscape-shape-square-page .shape-area-square-speech-bubble,
+    .shape-area-preview-page .shape-preview-intro-bubble {
+        font-size: 0.76rem;
+    }
 }
 
 @keyframes shapeAreaSquareCharacterIn {
@@ -7091,6 +7270,10 @@ body.is-touch-dragging {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+}
+
+.game3-island-prev:disabled {
+    display: none;
 }
 
 @media (max-width: 700px) {

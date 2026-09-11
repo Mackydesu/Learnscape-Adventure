@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260911-178';
+    const appVersion = '20260911-198';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -108,6 +108,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeSquarePage = document.getElementById('learnscape-shape-square-page');
     const shapePreviewPages = Array.from(document.querySelectorAll('.shape-area-preview-page'));
     const shapePreviewProgressByPage = new Map();
+    const shapePreviewIntroStates = new Map();
 
     shapePreviewPages.forEach((page, pageIndex) => {
         const progress = document.createElement('section');
@@ -244,10 +245,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeSquareBgImage = shapeSquarePage?.querySelector('.shape-area-bg') || null;
     const shapeSquareCharacter3 = shapeSquarePage?.querySelector('.shape-area-square-character-ch3') || null;
     const shapeSquareCharacter9 = shapeSquarePage?.querySelector('.shape-area-square-character-ch9') || null;
-    const shapeSquareCharacter4 = shapeSquarePage?.querySelector('.shape-area-square-character-ch4') || null;
+    const shapeSquareCharacter4 = shapeSquarePage?.querySelector('.shape-area-square-character-next') || null;
     const shapeSquareCharacter5 = shapeSquarePage?.querySelector('.shape-area-square-character-ch5') || null;
     const shapeSquareBubble = shapeSquarePage?.querySelector('.shape-area-square-speech-bubble') || null;
     const shapeSquareBubbleText = shapeSquareBubble?.querySelector('span') || null;
+    const shapeSquareBubbleDots = shapeSquareBubble ? document.createElement('span') : null;
+    if (shapeSquareBubbleText) shapeSquareBubbleText.classList.add('shape-intro-bubble-text');
+    if (shapeSquareBubbleDots && shapeSquareBubble) {
+        shapeSquareBubbleDots.className = 'shape-intro-message-dots';
+        shapeSquareBubbleDots.setAttribute('aria-hidden', 'true');
+        shapeSquareBubbleDots.innerHTML = '<i>.</i><i>.</i><i>.</i>';
+        shapeSquareBubble.appendChild(shapeSquareBubbleDots);
+    }
     const shapeSquareStartButton = shapeSquarePage?.querySelector('.shape-area-square-start-button') || null;
     const shapeSquareBackButton = shapeSquarePage?.querySelector('.game-return-btn') || null;
     const shapeSquareVideoStage = shapeSquarePage?.querySelector('.square-illustration-video-stage') || null;
@@ -401,6 +410,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let shapeSquareReadyAudio = null;
     let shapeSquareCelebrationAudio = null;
     let shapeSquareAreaIntroFrame = null;
+    let shapeSquareAdvanceIntro = null;
     let shapeSquareStartPressTimer = null;
     let shapeSquareCelebrationTimers = [];
     let squareObjectActiveDrag = null;
@@ -751,6 +761,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const clearShapeSquareTimers = () => {
         shapeSquareTimers.forEach((timerId) => window.clearTimeout(timerId));
         shapeSquareTimers = [];
+        shapeSquareAdvanceIntro = null;
+        shapeSquarePage?.classList.remove('is-intro-click-ready');
+        shapeSquareBubble?.classList.remove('is-message-complete');
     };
 
     const stopShapeMissionCompletionAudio = () => {
@@ -2031,8 +2044,266 @@ document.addEventListener('DOMContentLoaded', async () => {
         return true;
     };
 
+    const getShapePreviewIntroState = (page) => {
+        if (shapePreviewIntroStates.has(page)) return shapePreviewIntroStates.get(page);
+
+        const background = page.querySelector('.shape-area-bg');
+        const startButton = page.querySelector('.shape-area-preview-start-button');
+        const characterSpecs = [
+            { role: 'welcome', source: 'assets/Character/ch6.webp', extraClass: '' },
+            { role: 'success', source: 'assets/Character/ch9.webp', extraClass: 'shape-area-square-character-ch9' },
+            { role: 'next', source: 'assets/Character/ch14.webp', extraClass: 'shape-area-square-character-next' },
+            { role: 'ready', source: 'assets/Character/ch5.webp', extraClass: '' },
+        ];
+        const characters = {};
+        const fragment = document.createDocumentFragment();
+        characterSpecs.forEach((spec, index) => {
+            const character = document.createElement('img');
+            character.className = `shape-area-square-character shape-preview-intro-character ${spec.extraClass}`.trim();
+            character.src = spec.source;
+            character.alt = '';
+            character.setAttribute('aria-hidden', 'true');
+            character.hidden = index !== 0;
+            characters[spec.role] = character;
+            fragment.appendChild(character);
+        });
+
+        const bubble = document.createElement('div');
+        bubble.className = 'shape-area-square-speech-bubble shape-preview-intro-bubble';
+        bubble.setAttribute('role', 'status');
+        bubble.setAttribute('aria-live', 'polite');
+        const bubbleText = document.createElement('span');
+        bubbleText.className = 'shape-intro-bubble-text';
+        bubbleText.textContent = shapeSquareWelcomeMessage;
+        bubble.appendChild(bubbleText);
+        const dots = document.createElement('span');
+        dots.className = 'shape-intro-message-dots';
+        dots.setAttribute('aria-hidden', 'true');
+        dots.innerHTML = '<i>.</i><i>.</i><i>.</i>';
+        bubble.appendChild(dots);
+        fragment.appendChild(bubble);
+        background?.after(fragment);
+
+        const state = {
+            session: 0,
+            timers: [],
+            audio: null,
+            frame: null,
+            usesMissionAudio: false,
+            activeStage: 0,
+            characters,
+            bubble,
+            bubbleText,
+            dots,
+            startButton,
+            advance: null,
+        };
+        page.addEventListener('click', (event) => {
+            if (event.target.closest('a, button') || typeof state.advance !== 'function') return;
+            const advance = state.advance;
+            state.advance = null;
+            advance();
+        });
+        shapePreviewIntroStates.set(page, state);
+        return state;
+    };
+
+    const stopShapePreviewIntro = (page) => {
+        const state = getShapePreviewIntroState(page);
+        state.session += 1;
+        state.timers.forEach((timerId) => window.clearTimeout(timerId));
+        state.timers = [];
+        if (state.frame !== null) {
+            window.cancelAnimationFrame(state.frame);
+            state.frame = null;
+        }
+        if (state.audio) {
+            state.audio.onended = null;
+            state.audio.pause?.();
+            state.audio = null;
+        }
+        if (state.usesMissionAudio) {
+            stopShapeMissionCompletionAudio();
+            state.usesMissionAudio = false;
+        }
+        Object.entries(state.characters).forEach(([role, character]) => {
+            character.hidden = role !== 'welcome';
+            character.classList.remove('is-entering', 'is-exiting');
+        });
+        state.bubble.classList.remove('is-ch9', 'is-ch4', 'is-ch5', 'is-entering', 'is-exiting', 'is-message-changing');
+        state.bubbleText.textContent = shapeSquareWelcomeMessage;
+        state.activeStage = 0;
+        state.advance = null;
+        if (state.startButton) state.startButton.hidden = true;
+        page.classList.remove('is-preview-intro-active', 'is-intro-click-ready');
+    };
+
+    const startShapePreviewIntro = (page) => {
+        if (!page || !isPageVisible(page) || page.classList.contains('is-illustration-background')) return;
+
+        stopShapePreviewIntro(page);
+        const state = getShapePreviewIntroState(page);
+        const session = state.session;
+        const completedShape = String(page.dataset.completedShape || '').trim().toLowerCase();
+        const completedShapeLabel = completedShape.charAt(0).toUpperCase() + completedShape.slice(1);
+        const stages = [
+            { role: 'welcome', bubbleClass: null, message: shapeSquareWelcomeMessage },
+            { role: 'success', bubbleClass: 'is-ch9', message: `Matagumpay mong natapos ang ${completedShapeLabel} Mission!` },
+            { role: 'success', bubbleClass: 'is-ch9', message: shapeSquareCelebrationMessages[1] },
+            { role: 'next', bubbleClass: 'is-ch4', message: shapeSquareNextShapeMessage },
+            { role: 'ready', bubbleClass: 'is-ch5', message: shapeSquareReadyMessage },
+        ];
+        page.classList.add('is-preview-intro-active');
+        state.characters.welcome.getBoundingClientRect();
+        state.characters.welcome.classList.add('is-entering');
+        state.bubble.getBoundingClientRect();
+        state.bubble.classList.add('is-entering');
+
+        const showStage = (stageIndex) => {
+            if (session !== state.session || !isPageVisible(page) || !stages[stageIndex]) return;
+            const stage = stages[stageIndex];
+            const previousRole = stages[state.activeStage]?.role || null;
+            state.activeStage = stageIndex;
+            if (stage.role !== previousRole) {
+                Object.entries(state.characters).forEach(([role, character]) => {
+                    character.hidden = role !== stage.role;
+                    character.classList.remove('is-entering', 'is-exiting');
+                });
+                const character = state.characters[stage.role];
+                character.hidden = false;
+                character.getBoundingClientRect();
+                character.classList.add('is-entering');
+            }
+            state.bubble.classList.remove('is-ch9', 'is-ch4', 'is-ch5', 'is-exiting', 'is-message-changing', 'is-message-complete');
+            if (stage.bubbleClass) state.bubble.classList.add(stage.bubbleClass);
+        };
+
+        const typeMessage = (message, onComplete) => {
+            let characterIndex = 0;
+            state.bubbleText.textContent = '';
+            const typeNextCharacter = () => {
+                if (session !== state.session) return;
+                characterIndex += 1;
+                state.bubbleText.textContent = message.slice(0, characterIndex);
+                if (characterIndex < message.length) {
+                    state.timers.push(window.setTimeout(typeNextCharacter, 28));
+                    return;
+                }
+                onComplete();
+            };
+            typeNextCharacter();
+        };
+
+        const playClip = (source, onEnded) => {
+            if (session !== state.session) return;
+            const AudioCtor = window.Audio;
+            if (!AudioCtor) {
+                onEnded();
+                return;
+            }
+            const audio = new AudioCtor(source);
+            state.audio = audio;
+            audio.preload = 'auto';
+            audio.playsInline = true;
+            audio.onended = () => {
+                if (session !== state.session || state.audio !== audio) return;
+                state.audio = null;
+                onEnded();
+            };
+            audio.play().catch(() => {
+                if (session !== state.session || state.audio !== audio) return;
+                state.audio = null;
+                onEnded();
+            });
+        };
+
+        const playSegment = (source, start, end, onEnded) => {
+            const AudioCtor = window.Audio;
+            if (!AudioCtor) {
+                onEnded();
+                return;
+            }
+            const audio = new AudioCtor(source);
+            state.audio = audio;
+            audio.preload = 'auto';
+            audio.playsInline = true;
+            try {
+                audio.currentTime = start;
+            } catch (error) {
+                // The start point is applied once the segment begins loading.
+            }
+            audio.play().then(() => {
+                const stopAtEnd = () => {
+                    if (session !== state.session || state.audio !== audio) return;
+                    if (audio.currentTime >= end || audio.ended) {
+                        audio.pause();
+                        state.audio = null;
+                        state.frame = null;
+                        onEnded();
+                        return;
+                    }
+                    state.frame = window.requestAnimationFrame(stopAtEnd);
+                };
+                state.frame = window.requestAnimationFrame(stopAtEnd);
+            }).catch(() => {
+                if (session !== state.session || state.audio !== audio) return;
+                state.audio = null;
+                onEnded();
+            });
+        };
+
+        const playStage = (stageIndex) => {
+            if (session !== state.session || !stages[stageIndex]) return;
+            showStage(stageIndex);
+            state.advance = null;
+            page.classList.remove('is-intro-click-ready');
+            let textFinished = false;
+            let audioFinished = false;
+            const unlockMessage = () => {
+                if (!textFinished || !audioFinished || session !== state.session) return;
+                state.bubble.classList.add('is-message-complete');
+                if (stageIndex >= stages.length - 1) {
+                    if (state.startButton) state.startButton.hidden = false;
+                    return;
+                }
+                page.classList.add('is-intro-click-ready');
+                state.advance = () => playStage(stageIndex + 1);
+            };
+            typeMessage(stages[stageIndex].message, () => {
+                textFinished = true;
+                state.bubble.classList.add('is-message-complete');
+                unlockMessage();
+            });
+            const finishAudio = () => {
+                audioFinished = true;
+                unlockMessage();
+            };
+
+            if (stageIndex === 0) {
+                playClip(shapeSquareGreetingAudioSource, finishAudio);
+            } else if (stageIndex === 1) {
+                state.usesMissionAudio = true;
+                playShapeMissionCompletionAudio(completedShape, () => {
+                    if (session !== state.session) return;
+                    state.usesMissionAudio = false;
+                    finishAudio();
+                });
+            } else if (stageIndex === 2) {
+                playSegment(shapeSquareAreaIntroAudioSource, 0, 2.4, finishAudio);
+            } else if (stageIndex === 3) {
+                playSegment(shapeSquareAreaIntroAudioSource, 2.5, 6.1, finishAudio);
+            } else {
+                playClip(shapeSquareReadyAudioSource, finishAudio);
+            }
+        };
+
+        playStage(0);
+    };
+
     const resetShapePreviewPage = (page) => {
         if (!page) return;
+
+        stopShapePreviewIntro(page);
 
         const background = page.querySelector('.shape-area-bg');
         const videoStage = page.querySelector('.shape-preview-video-stage');
@@ -2152,7 +2423,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const progress = shapePreviewProgressByPage.get(page);
         const replayButton = progress?.querySelector('[data-shape-preview-replay]') || null;
         const nextButton = progress?.querySelector('[data-shape-preview-next]') || null;
-        startButton?.addEventListener('click', () => transitionToShapePreviewIllustration(page));
+        startButton?.addEventListener('click', () => {
+            stopShapePreviewIntro(page);
+            transitionToShapePreviewIllustration(page);
+        });
 
         const resetVideoControls = () => {
             video?.pause?.();
@@ -2354,13 +2628,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         let activeStageIndex = 0;
         const showStage = (stageIndex) => {
             if (session !== shapeSquareSession || !isPageVisible(shapeSquarePage)) return;
-            if (stageIndex === activeStageIndex || !shapeSquareIntroStages[stageIndex]) return;
+            if (!shapeSquareIntroStages[stageIndex]) return;
 
             const previousCharacter = shapeSquareIntroStages[activeStageIndex]?.character || null;
             activeStageIndex = stageIndex;
             const stage = shapeSquareIntroStages[stageIndex];
             if (stage.character === previousCharacter) {
-                shapeSquareBubbleText.textContent = stage.message;
+                shapeSquareBubble.classList.remove('is-message-complete');
                 return;
             }
 
@@ -2374,31 +2648,126 @@ document.addEventListener('DOMContentLoaded', async () => {
             stage.character.getBoundingClientRect();
             stage.character.classList.add('is-entering');
 
-            shapeSquareBubble.classList.remove('is-ch9', 'is-ch4', 'is-ch5', 'is-entering', 'is-exiting', 'is-message-changing');
+            shapeSquareBubble.classList.remove('is-ch9', 'is-ch4', 'is-ch5', 'is-exiting', 'is-message-changing', 'is-message-complete');
             if (stage.bubbleClass) shapeSquareBubble.classList.add(stage.bubbleClass);
-            shapeSquareBubbleText.textContent = stage.message;
-            shapeSquareBubble.getBoundingClientRect();
-            shapeSquareBubble.classList.add('is-entering');
+            shapeSquareBubbleText.textContent = '';
+        };
 
-            if (stageIndex === shapeSquareIntroStages.length - 1) {
-                if (shapeSquareStartButton) shapeSquareStartButton.hidden = false;
-                const AudioCtor = window.Audio;
-                if (!AudioCtor) return;
+        const typeManualMessage = (message, onComplete) => {
+            let characterIndex = 0;
+            shapeSquareBubbleText.textContent = '';
+            const typeNextCharacter = () => {
+                if (session !== shapeSquareSession) return;
+                characterIndex += 1;
+                shapeSquareBubbleText.textContent = message.slice(0, characterIndex);
+                if (characterIndex < message.length) {
+                    shapeSquareTimers.push(window.setTimeout(typeNextCharacter, 28));
+                    return;
+                }
+                onComplete();
+            };
+            typeNextCharacter();
+        };
 
-                stopShapeSquareReadyAudio();
-                const readyAudio = new AudioCtor(shapeSquareReadyAudioSource);
-                shapeSquareReadyAudio = readyAudio;
-                readyAudio.preload = 'auto';
-                readyAudio.playsInline = true;
-                readyAudio.volume = 1;
-                readyAudio.onended = () => {
-                    if (shapeSquareReadyAudio === readyAudio) shapeSquareReadyAudio = null;
+        const playManualClip = (source, onEnded) => {
+            const AudioCtor = window.Audio;
+            if (!AudioCtor) {
+                onEnded();
+                return;
+            }
+            const audio = new AudioCtor(source);
+            shapeSquareIntroAudio = audio;
+            audio.preload = 'auto';
+            audio.playsInline = true;
+            audio.onended = () => {
+                if (session !== shapeSquareSession || shapeSquareIntroAudio !== audio) return;
+                shapeSquareIntroAudio = null;
+                onEnded();
+            };
+            audio.play().catch(() => {
+                if (session !== shapeSquareSession || shapeSquareIntroAudio !== audio) return;
+                shapeSquareIntroAudio = null;
+                onEnded();
+            });
+        };
+
+        const playManualSegment = (start, end, onEnded) => {
+            const AudioCtor = window.Audio;
+            if (!AudioCtor) {
+                onEnded();
+                return;
+            }
+            const audio = new AudioCtor(shapeSquareAreaIntroAudioSource);
+            shapeSquareIntroAudio = audio;
+            audio.preload = 'auto';
+            audio.playsInline = true;
+            try {
+                audio.currentTime = start;
+            } catch (error) {
+                // The start point is applied once the segment begins loading.
+            }
+            audio.play().then(() => {
+                const stopAtEnd = () => {
+                    if (session !== shapeSquareSession || shapeSquareIntroAudio !== audio) return;
+                    if (audio.currentTime >= end || audio.ended) {
+                        audio.pause();
+                        shapeSquareIntroAudio = null;
+                        shapeSquareAreaIntroFrame = null;
+                        onEnded();
+                        return;
+                    }
+                    shapeSquareAreaIntroFrame = window.requestAnimationFrame(stopAtEnd);
                 };
-                readyAudio.play().catch(() => {
-                    if (shapeSquareReadyAudio === readyAudio) shapeSquareReadyAudio = null;
-                });
+                shapeSquareAreaIntroFrame = window.requestAnimationFrame(stopAtEnd);
+            }).catch(() => {
+                if (session !== shapeSquareSession || shapeSquareIntroAudio !== audio) return;
+                shapeSquareIntroAudio = null;
+                onEnded();
+            });
+        };
+
+        const playManualStage = (stageIndex) => {
+            if (session !== shapeSquareSession || !shapeSquareIntroStages[stageIndex]) return;
+            showStage(stageIndex);
+            shapeSquareAdvanceIntro = null;
+            shapeSquarePage.classList.remove('is-intro-click-ready');
+            let textFinished = false;
+            let audioFinished = false;
+            const unlockMessage = () => {
+                if (!textFinished || !audioFinished || session !== shapeSquareSession) return;
+                shapeSquareBubble.classList.add('is-message-complete');
+                if (stageIndex >= shapeSquareIntroStages.length - 1) {
+                    if (shapeSquareStartButton) shapeSquareStartButton.hidden = false;
+                    return;
+                }
+                shapeSquarePage.classList.add('is-intro-click-ready');
+                shapeSquareAdvanceIntro = () => playManualStage(stageIndex + 1);
+            };
+            typeManualMessage(shapeSquareIntroStages[stageIndex].message, () => {
+                textFinished = true;
+                shapeSquareBubble.classList.add('is-message-complete');
+                unlockMessage();
+            });
+            const finishAudio = () => {
+                audioFinished = true;
+                unlockMessage();
+            };
+
+            if (stageIndex === 0) {
+                playManualClip(shapeSquareGreetingAudioSource, finishAudio);
+            } else if (stageIndex === 1) {
+                playShapeMissionCompletionAudio('circle', finishAudio);
+            } else if (stageIndex === 2) {
+                playManualSegment(0, 2.4, finishAudio);
+            } else if (stageIndex === 3) {
+                playManualSegment(2.5, 6.1, finishAudio);
+            } else {
+                playManualClip(shapeSquareReadyAudioSource, finishAudio);
             }
         };
+
+        playManualStage(0);
+        return;
 
         const AudioCtor = window.Audio;
         if (!AudioCtor) {
@@ -2483,6 +2852,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             playCompletedMissionMessage();
         });
     };
+
+    shapeSquarePage?.addEventListener('click', (event) => {
+        if (event.target.closest('a, button') || typeof shapeSquareAdvanceIntro !== 'function') return;
+        const advance = shapeSquareAdvanceIntro;
+        shapeSquareAdvanceIntro = null;
+        advance();
+    });
 
     const lettertraceTraceGuidePaths = {
         upper: {
@@ -6391,6 +6767,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             resetShapeSquareScene();
         }
 
+        if (/^shapeArea[3-8]$/.test(event.detail?.route || '')) {
+            const activePreviewPage = shapePreviewPages.find((page) => isPageVisible(page));
+            if (activePreviewPage) startShapePreviewIntro(activePreviewPage);
+            return;
+        }
+
         if (event.detail?.route === 'lettertrace') {
             updateLettertraceBackground(event.detail?.params || {});
             renderLettertraceScreen(event.detail?.params?.letter || getDragtomatchLetterFromHash());
@@ -6450,6 +6832,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
         resetShapeSquareScene();
     }
+
+    shapePreviewPages.forEach((page) => {
+        if (isPageVisible(page)) startShapePreviewIntro(page);
+    });
 
     resetCircleIllustrationVideo();
 
