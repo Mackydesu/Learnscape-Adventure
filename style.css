@@ -3139,20 +3139,6 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     display: grid;
 }
 
-.shape-preview-progress-title {
-    position: absolute;
-    left: 50%;
-    top: 7%;
-    z-index: 2;
-    width: 72%;
-    color: #fff8c8;
-    font: 900 clamp(1.15rem, 3.2vw, 2.45rem)/1 'Fredoka', 'Baloo 2', sans-serif;
-    letter-spacing: 0;
-    text-align: center;
-    text-shadow: 0 0.1em 0 #07558d, 0 0.18em 0.2em rgba(0, 0, 0, 0.3);
-    transform: translateX(-50%);
-}
-
 .shape-preview-video[hidden],
 .shape-preview-lesson-image[hidden],
 .shape-tv-lesson-image[hidden],
