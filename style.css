@@ -2695,7 +2695,7 @@ body.is-fullscreen-mode .shape-area-character-speaker {
 }
 
 .shape-area-speech-bubble-ch3[data-active-character="ch4"] {
-    --shape-area-bubble-character-shift: clamp(1.8rem, 3vw, 3rem);
+    --shape-area-bubble-character-shift: clamp(0.15rem, 0.8vw, 0.9rem);
 }
 
 .shape-area-speech-bubble-ch3[data-active-character="ch5"] {
@@ -3590,11 +3590,12 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 
 .square-mission-character {
     position: absolute;
-    left: clamp(1rem, 4vw, 4rem);
+    left: 50%;
     bottom: clamp(0rem, 1.2vh, 0.8rem);
     width: auto;
     height: clamp(17rem, 36vw, 34rem);
     filter: drop-shadow(0 0.9rem 1rem rgba(31, 21, 9, 0.34));
+    translate: -50% 0;
     transform-origin: center bottom;
     user-select: none;
 }
@@ -3604,7 +3605,7 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 }
 
 .square-mission-character-ch11 {
-    left: clamp(0.8rem, 3.4vw, 3.4rem);
+    left: 50%;
     height: clamp(16rem, 34vw, 32rem);
 }
 
@@ -3620,11 +3621,81 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     animation: squareMissionCharacterCh12In 0.58s cubic-bezier(0.2, 1.15, 0.35, 1) both;
 }
 
+@media (min-width: 901px) and (orientation: landscape) {
+    .square-mission-character-ch12 {
+        transform: none;
+    }
+
+    #learnscape-shape-square-page .square-mission-character-ch12.is-entering {
+        animation: squareMissionCharacterCh12CenterIn 0.58s cubic-bezier(0.2, 1.15, 0.35, 1) both;
+    }
+}
+
 .square-mission-character-ch13 {
     left: clamp(0.8rem, 4vw, 4rem);
     bottom: clamp(0rem, 1.2vh, 0.8rem);
     z-index: 30;
     height: clamp(16rem, 34vw, 32rem);
+}
+
+.square-chocolate-question-bubble {
+    position: absolute;
+    left: clamp(13rem, 22vw, 22rem);
+    bottom: clamp(18rem, 31vw, 30rem);
+    z-index: 31;
+    max-width: min(43vw, 34rem);
+    box-sizing: border-box;
+    padding: clamp(0.8rem, 1.3vw, 1.15rem) clamp(1rem, 1.8vw, 1.45rem);
+    border: clamp(0.14rem, 0.24vw, 0.22rem) solid rgba(91, 48, 20, 0.78);
+    border-radius: 1.35rem 1.35rem 1.35rem 0.75rem;
+    background:
+        radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.96) 0 13%, rgba(255, 255, 255, 0) 34%),
+        linear-gradient(180deg, rgba(255, 253, 233, 0.98), rgba(255, 222, 121, 0.98) 72%, rgba(232, 153, 58, 0.98)),
+        #ffeaa2;
+    color: #48240d;
+    font: 800 clamp(1.1rem, 1.85vw, 1.65rem) 'Fredoka', 'Baloo 2', sans-serif;
+    line-height: 1.13;
+    text-align: center;
+    text-shadow: 0 0.06rem 0 rgba(255, 255, 255, 0.82);
+    box-shadow:
+        inset 0 0.13rem 0 rgba(255, 255, 255, 0.76),
+        inset 0 -0.22rem 0 rgba(121, 68, 24, 0.12),
+        0 0.36rem 0.25rem rgba(85, 50, 21, 0.18),
+        0 0.9rem 1.3rem rgba(38, 24, 11, 0.28);
+    opacity: 0;
+    transform: translateY(0.45rem) scale(0.96);
+    transition: opacity 0.28s ease, transform 0.32s cubic-bezier(0.2, 1.15, 0.35, 1);
+}
+
+.square-chocolate-question-bubble[hidden] {
+    display: none;
+}
+
+.square-chocolate-question-bubble.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.square-chocolate-question-bubble::before,
+.square-chocolate-question-bubble::after {
+    content: '';
+    position: absolute;
+    left: clamp(1.05rem, 2vw, 1.55rem);
+    bottom: clamp(-1rem, -1.15vw, -0.7rem);
+    width: clamp(1rem, 1.65vw, 1.35rem);
+    height: clamp(1rem, 1.65vw, 1.35rem);
+    border: clamp(0.12rem, 0.2vw, 0.18rem) solid rgba(91, 48, 20, 0.78);
+    border-top: 0;
+    border-left: 0;
+    background: #efb15d;
+    transform: rotate(45deg);
+}
+
+.square-chocolate-question-bubble::after {
+    left: clamp(1.2rem, 2.1vw, 1.7rem);
+    bottom: clamp(-0.72rem, -0.86vw, -0.5rem);
+    border: 0;
+    background: #efb15d;
 }
 
 .square-kids-cheer-character[hidden] {
@@ -3830,10 +3901,48 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     animation: squareMissionCharacterCh13In 0.7s cubic-bezier(0.2, 1.15, 0.35, 1) both;
 }
 
+@media (min-width: 901px) and (orientation: landscape) {
+    .square-mission-character-ch13 {
+        left: clamp(5rem, 9vw, 9rem);
+    }
+
+    .square-chocolate-question-bubble {
+        left: clamp(9.5rem, 16.8vw, 16.3rem);
+        bottom: calc(clamp(0rem, 1.2vh, 0.8rem) + clamp(16rem, 34vw, 32rem) + 0.55rem);
+        width: clamp(21rem, 29vw, 28rem);
+        max-width: clamp(21rem, 29vw, 28rem);
+        padding: clamp(1rem, 1.55vw, 1.35rem) clamp(1.3rem, 2.1vw, 1.8rem);
+        font-size: clamp(1.25rem, 1.9vw, 1.75rem);
+        translate: -50% 0;
+    }
+
+    .square-chocolate-question-bubble::before,
+    .square-chocolate-question-bubble::after {
+        left: 50%;
+        transform: translateX(-50%) rotate(45deg);
+    }
+
+    #learnscape-shape-square-page .square-mission-character-ch13.is-entering {
+        animation: squareMissionCharacterCh13DesktopIn 0.7s cubic-bezier(0.2, 1.15, 0.35, 1) both;
+    }
+}
+
 @keyframes squareMissionCharacterCh13In {
     from {
         opacity: 0;
         transform: translateX(-3rem) translateY(0.5rem) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) translateY(0) scale(1);
+    }
+}
+
+@keyframes squareMissionCharacterCh13DesktopIn {
+    from {
+        opacity: 0;
+        transform: translateX(-0.85rem) translateY(0.5rem) scale(0.9);
     }
 
     to {
@@ -4036,6 +4145,18 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     }
 }
 
+@keyframes squareMissionCharacterCh12CenterIn {
+    from {
+        opacity: 0;
+        transform: translateY(0.8rem) scale(0.88);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 .square-mission-character.is-entering {
     animation:
         shapeAreaSquareCharacterCh9In 0.58s cubic-bezier(0.2, 1.15, 0.35, 1) both,
@@ -4060,9 +4181,9 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 
 .square-mission-bubble {
     position: absolute;
-    left: clamp(11rem, 21vw, 18rem);
-    bottom: clamp(27rem, 38vw, 36rem);
-    max-width: min(52vw, 34rem);
+    left: 50%;
+    bottom: clamp(27rem, 38vw, 36.5rem);
+    max-width: min(56vw, 36rem);
     box-sizing: border-box;
     padding: clamp(0.8rem, 1.4vw, 1.2rem) clamp(1rem, 1.8vw, 1.45rem);
     border: clamp(0.14rem, 0.24vw, 0.22rem) solid rgba(91, 48, 20, 0.78);
@@ -4081,6 +4202,7 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
         inset 0 -0.22rem 0 rgba(121, 68, 24, 0.12),
         0 0.36rem 0.25rem rgba(85, 50, 21, 0.18),
         0 0.9rem 1.3rem rgba(38, 24, 11, 0.28);
+    translate: -50% 0;
 }
 
 .square-mission-bubble[hidden] {
@@ -4088,19 +4210,19 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 }
 
 .square-mission-bubble.is-ch11 {
-    left: clamp(11rem, 21vw, 18rem);
-    bottom: clamp(25rem, 35vw, 33rem);
+    left: 50%;
+    bottom: clamp(25.5rem, 36vw, 34rem);
     max-width: min(34vw, 23rem);
     font-size: clamp(1.55rem, 2.4vw, 2.25rem);
 }
 
 .square-mission-bubble.is-short-message {
-    left: clamp(6.4rem, 13.5vw, 11.5rem);
+    left: 50%;
     max-width: min(34vw, 22rem);
 }
 
 .square-mission-bubble.is-ch11.is-short-message {
-    left: clamp(6rem, 12.8vw, 11rem);
+    left: 50%;
     max-width: min(34vw, 22rem);
 }
 
@@ -4138,7 +4260,7 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 .square-mission-bubble::after {
     content: '';
     position: absolute;
-    left: clamp(1.05rem, 2vw, 1.55rem);
+    left: 50%;
     bottom: clamp(-1rem, -1.15vw, -0.7rem);
     width: clamp(1rem, 1.65vw, 1.35rem);
     height: clamp(1rem, 1.65vw, 1.35rem);
@@ -4146,11 +4268,11 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     border-top: 0;
     border-left: 0;
     background: #efb15d;
-    transform: rotate(45deg);
+    transform: translateX(-50%) rotate(45deg);
 }
 
 .square-mission-bubble::after {
-    left: clamp(1.2rem, 2.1vw, 1.7rem);
+    left: 50%;
     bottom: clamp(-0.72rem, -0.86vw, -0.5rem);
     border: 0;
     background: #efb15d;
@@ -4577,26 +4699,26 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 
 @media (max-width: 900px), (orientation: portrait) {
     .square-mission-character {
-        left: clamp(0.3rem, 1.4vw, 0.8rem);
+        left: 50%;
         height: clamp(12rem, 32vw, 18rem);
     }
 
     .square-mission-character-ch11 {
-        left: clamp(0.2rem, 1.1vw, 0.7rem);
+        left: 50%;
         height: clamp(11rem, 30vw, 17rem);
     }
 
     .square-mission-bubble {
-        left: clamp(6.8rem, 18vw, 11rem);
+        left: 50%;
         bottom: clamp(14.4rem, 36vw, 21.5rem);
-        max-width: min(50vw, 26rem);
+        max-width: min(70vw, 26rem);
         font-size: clamp(0.95rem, 2.6vw, 1.35rem);
     }
 
     .square-mission-bubble.is-ch11 {
-        left: clamp(6.4rem, 17vw, 10.5rem);
+        left: 50%;
         bottom: clamp(13.2rem, 33vw, 19.8rem);
-        max-width: min(42vw, 18rem);
+        max-width: min(62vw, 18rem);
         font-size: clamp(1.2rem, 3vw, 1.6rem);
     }
 
@@ -4817,15 +4939,28 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     white-space: nowrap;
 }
 
-.shape-area-square-speech-bubble .shape-intro-message-dots {
+.shape-area-speech-bubble-ch3 .shape-intro-bubble-text {
+    display: inline;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.shape-area-square-speech-bubble .shape-intro-message-dots,
+.shape-area-speech-bubble-ch3 .shape-intro-message-dots {
     display: none;
     align-items: flex-end;
     min-width: 1.8em;
     margin-left: 0.08em;
 }
 
-.shape-area-square-speech-bubble.is-message-complete .shape-intro-message-dots {
+.shape-area-square-speech-bubble.is-message-complete .shape-intro-message-dots,
+.shape-area-speech-bubble-ch3.is-message-complete .shape-intro-message-dots {
     display: inline-flex;
+}
+
+.shape-area-square-speech-bubble.is-final-message .shape-intro-message-dots,
+.shape-area-speech-bubble-ch3.is-final-message .shape-intro-message-dots {
+    display: none;
 }
 
 .shape-intro-message-dots i {
