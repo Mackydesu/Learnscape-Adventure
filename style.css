@@ -3631,6 +3631,443 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     }
 }
 
+#learnscape-shape-area-3-page.is-next-background .shape-preview-intro-character,
+#learnscape-shape-area-3-page.is-next-background .shape-preview-intro-bubble {
+    display: none;
+}
+
+#learnscape-shape-area-3-page.is-fading-to-triangle-game {
+    pointer-events: none;
+    animation: triangleBridgePageFadeOut 0.55s ease-in forwards;
+}
+
+.triangle-game-page .shape-area-bg {
+    object-fit: cover;
+}
+
+.triangle-game-character[hidden],
+.triangle-game-message-panel[hidden] {
+    display: none !important;
+}
+
+@media (min-width: 901px) and (orientation: landscape) {
+    .triangle-game-tree-group {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        pointer-events: none;
+    }
+
+    .triangle-game-tree-group.is-active {
+        pointer-events: auto;
+    }
+
+    .triangle-game-tree-group.is-over-tree {
+        cursor: pointer;
+    }
+
+    .triangle-game-tree {
+        --tree-shift-x: 0%;
+        position: absolute;
+        width: auto;
+        object-fit: contain;
+        object-position: center bottom;
+        filter: drop-shadow(0.35rem 0.55rem 0.45rem rgba(28, 72, 27, 0.28));
+        transform: translateX(var(--tree-shift-x)) scaleX(-1);
+        transform-origin: center bottom;
+        transition: filter 0.2s ease;
+        user-select: none;
+        -webkit-user-drag: none;
+    }
+
+    .triangle-game-tree.is-clickable {
+        pointer-events: none;
+    }
+
+    .triangle-game-tree.is-clickable:focus-visible {
+        filter:
+            drop-shadow(0.35rem 0.55rem 0.45rem rgba(28, 72, 27, 0.28))
+            drop-shadow(0 0 0.9rem rgba(255, 236, 84, 0.78));
+        outline: none;
+    }
+
+    .triangle-game-tree.is-hit {
+        animation: triangleGameTreeHit 0.38s ease-out;
+    }
+
+    .triangle-game-tree-group .triangle-game-tree.is-fallen {
+        cursor: default;
+    }
+
+    .triangle-game-tree-one {
+        left: 39%;
+        bottom: 14%;
+        height: clamp(39rem, 94vh, 62rem);
+    }
+
+    .triangle-game-tree-two {
+        left: 60%;
+        bottom: 15%;
+        height: clamp(45rem, 112vh, 74rem);
+    }
+
+    .triangle-game-tree-three {
+        right: -5%;
+        left: auto;
+        bottom: 14%;
+        height: clamp(37rem, 88vh, 58rem);
+    }
+
+    .triangle-game-tree-one[data-tree-stage="1"],
+    .triangle-game-tree-two[data-tree-stage="1"] {
+        --tree-shift-x: -1%;
+    }
+
+    .triangle-game-tree-one[data-tree-stage="2"],
+    .triangle-game-tree-two[data-tree-stage="2"] {
+        --tree-shift-x: -12%;
+    }
+
+    .triangle-game-tree-one[data-tree-stage="3"] {
+        --tree-shift-x: -38%;
+        height: clamp(33.5rem, 81vh, 53.5rem);
+    }
+
+    .triangle-game-tree-one[data-tree-stage="4"] {
+        --tree-shift-x: -44%;
+        height: clamp(17.8rem, 43vh, 28.5rem);
+    }
+
+    .triangle-game-tree-two[data-tree-stage="3"] {
+        --tree-shift-x: -38%;
+        height: clamp(38.7rem, 96vh, 63.6rem);
+    }
+
+    .triangle-game-tree-two[data-tree-stage="4"] {
+        --tree-shift-x: -44%;
+        height: clamp(20.6rem, 51vh, 33.8rem);
+    }
+
+    .triangle-game-tree-three[data-tree-stage="2"] {
+        --tree-shift-x: -9%;
+    }
+
+    .triangle-game-tree-three[data-tree-stage="3"] {
+        --tree-shift-x: -9%;
+        height: clamp(31.8rem, 76vh, 50rem);
+    }
+
+    .triangle-game-tree-three[data-tree-stage="4"] {
+        --tree-shift-x: -9%;
+        height: clamp(16.9rem, 40vh, 26.5rem);
+    }
+
+    .triangle-game-character {
+        position: absolute;
+        left: clamp(2rem, 5vw, 5rem);
+        bottom: clamp(3rem, 8vh, 6rem);
+        z-index: 8;
+        display: block;
+        width: auto;
+        height: clamp(19rem, 50vh, 31rem);
+        object-fit: contain;
+        object-position: left bottom;
+        filter: drop-shadow(0.45rem 0.7rem 0.65rem rgba(31, 48, 24, 0.3));
+        opacity: 0;
+        transform: translateY(0.7rem) scale(0.95);
+        transition: opacity 0.3s ease, transform 0.38s cubic-bezier(0.2, 1.15, 0.35, 1);
+    }
+
+    .triangle-game-character.is-visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    .triangle-game-start-button {
+        z-index: 10;
+    }
+
+    .triangle-game-message-panel {
+        position: absolute;
+        right: clamp(2rem, 5vw, 5rem);
+        bottom: clamp(1.5rem, 4vh, 3rem);
+        z-index: 9;
+        width: 50rem;
+        max-width: calc(100vw - 4rem);
+        min-height: clamp(6rem, 13vh, 8.5rem);
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        padding: clamp(1rem, 1.7vw, 1.5rem) clamp(1rem, 1.5vw, 1.4rem);
+        border: clamp(0.2rem, 0.32vw, 0.3rem) solid #5b3518;
+        border-radius: 0.5rem;
+        background: linear-gradient(180deg, rgba(255, 231, 142, 0.98), rgba(205, 145, 57, 0.98) 54%, rgba(111, 69, 28, 0.98));
+        box-shadow:
+            inset 0 0.2rem 0 rgba(255, 255, 255, 0.58),
+            inset 0 -0.32rem 0 rgba(67, 38, 13, 0.28),
+            0 0.38rem 0 #3e240f,
+            0 0.9rem 1.25rem rgba(27, 48, 24, 0.3);
+        color: #fffbd8;
+        font-family: 'Baloo 2', 'Nunito', sans-serif;
+        font-size: clamp(1.3rem, 1.95vw, 1.85rem);
+        font-weight: 900;
+        line-height: 1.25;
+        letter-spacing: 0;
+        text-align: left;
+        text-shadow: 0 0.09em 0 #663713, 0.06em 0.06em 0 #35200c;
+        opacity: 0;
+        transform: translateY(0.55rem) scale(0.97);
+        transition: opacity 0.28s ease, transform 0.34s cubic-bezier(0.2, 1.15, 0.35, 1);
+    }
+
+    .triangle-game-message-content {
+        display: block;
+        width: 100%;
+        white-space: nowrap;
+    }
+
+    .triangle-game-message-panel.is-visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    .triangle-game-message-dots {
+        display: none;
+        margin-left: 0.08em;
+    }
+
+    .triangle-game-message-ending {
+        white-space: nowrap;
+    }
+
+    .triangle-game-message-panel.is-message-complete:not(.is-final-message) .triangle-game-message-dots {
+        display: inline-flex;
+    }
+
+    .triangle-game-message-dots i {
+        display: inline-block;
+        font-style: normal;
+        animation: shapeIntroDotBlink 1.05s ease-in-out infinite;
+    }
+
+    .triangle-game-message-dots i:nth-child(2) {
+        animation-delay: 0.18s;
+    }
+
+    .triangle-game-message-dots i:nth-child(3) {
+        animation-delay: 0.36s;
+    }
+
+    .triangle-game-page.is-dialog-ready {
+        cursor: pointer;
+    }
+}
+
+@keyframes triangleGameTreeHit {
+    0% { transform: translateX(var(--tree-shift-x)) scaleX(-1) rotate(0deg) scale(1); }
+    35% { transform: translateX(var(--tree-shift-x)) scaleX(-1) rotate(-3deg) scale(1.035); }
+    68% { transform: translateX(var(--tree-shift-x)) scaleX(-1) rotate(2deg) scale(0.985); }
+    100% { transform: translateX(var(--tree-shift-x)) scaleX(-1) rotate(0deg) scale(1); }
+}
+
+#learnscape-shape-area-3-page.is-next-background .shape-area-preview-title.is-bridge-repair-title {
+    --area-panel-border: #6f3518;
+    --area-panel-top: #ffd46a;
+    --area-panel-mid: #d8842c;
+    --area-panel-bottom: #914719;
+    --area-panel-rail-a: #5b2a12;
+    --area-panel-rail-b: #efaa42;
+    --area-panel-rail-c: #7a3815;
+    --area-panel-rail-d: #ffc957;
+    --area-panel-shadow: #48200e;
+    --area-panel-copy: #fff7c7;
+    --area-panel-copy-shadow: #703312;
+    top: clamp(1rem, 2.4vh, 1.65rem);
+    min-width: clamp(20rem, 34vw, 30rem);
+    padding: clamp(0.7rem, 1.15vw, 1rem) clamp(1.7rem, 3vw, 2.7rem);
+    border-radius: 0.5rem;
+    font-size: clamp(2.2rem, 3.8vw, 3.7rem);
+    line-height: 1;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+.triangle-bridge-character-sequence[hidden],
+.triangle-bridge-walking-character[hidden],
+.triangle-bridge-arrival-character[hidden],
+.triangle-bridge-message-panel[hidden],
+.triangle-bridge-yes-button[hidden] {
+    display: none !important;
+}
+
+@media (min-width: 901px) and (orientation: landscape) {
+    .triangle-bridge-character-sequence {
+        position: absolute;
+        left: 11.5%;
+        bottom: 42.7%;
+        z-index: 8;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        width: clamp(10rem, 24vh, 16rem);
+        height: clamp(15rem, 35vh, 24rem);
+        pointer-events: none;
+        transform: translateX(-50%);
+    }
+
+    .triangle-bridge-character-sequence img {
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        display: block;
+        width: auto;
+        height: 100%;
+        object-fit: contain;
+        object-position: center bottom;
+        filter: drop-shadow(0 0.7rem 0.65rem rgba(38, 45, 22, 0.3));
+        transform: translateX(-50%);
+    }
+
+    .triangle-bridge-character-sequence.is-walking {
+        animation: triangleBridgeWalkDesktop 2.19s linear forwards;
+    }
+
+    .triangle-bridge-message-panel {
+        position: absolute;
+        left: 50%;
+        bottom: clamp(1.4rem, 3vh, 2.5rem);
+        z-index: 9;
+        width: min(72vw, 58rem);
+        min-height: clamp(6rem, 12vh, 8rem);
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        padding: clamp(1rem, 1.7vw, 1.45rem) clamp(1.35rem, 2.2vw, 2rem);
+        border: clamp(0.2rem, 0.32vw, 0.3rem) solid #6f3518;
+        border-radius: 0.5rem;
+        background:
+            linear-gradient(180deg, rgba(255, 218, 117, 0.98), rgba(220, 135, 45, 0.98) 52%, rgba(145, 71, 25, 0.98));
+        box-shadow:
+            inset 0 0.2rem 0 rgba(255, 255, 255, 0.55),
+            inset 0 -0.3rem 0 rgba(82, 35, 12, 0.25),
+            0 0.38rem 0 #48200e,
+            0 0.85rem 1.2rem rgba(34, 39, 18, 0.3);
+        color: #fff9d2;
+        font-family: 'Baloo 2', 'Nunito', sans-serif;
+        font-size: clamp(1.25rem, 2vw, 1.85rem);
+        font-weight: 900;
+        line-height: 1.25;
+        letter-spacing: 0;
+        text-align: left;
+        text-shadow: 0 0.09em 0 #6c3010, 0.06em 0.06em 0 #3b1b0b;
+        opacity: 0;
+        translate: -50% 0;
+        transform: translateY(0.55rem) scale(0.97);
+        transition: opacity 0.25s ease, transform 0.32s cubic-bezier(0.2, 1.15, 0.35, 1);
+    }
+
+    .triangle-bridge-message-content {
+        display: inline;
+    }
+
+    .triangle-bridge-message-dots {
+        display: none;
+        margin-left: 0.12em;
+        white-space: nowrap;
+    }
+
+    .triangle-bridge-message-panel.is-message-complete:not(.is-final-message) .triangle-bridge-message-dots {
+        display: inline-flex;
+    }
+
+    .triangle-bridge-message-dots i {
+        display: inline-block;
+        font-style: normal;
+        animation: shapeIntroDotBlink 1.05s ease-in-out infinite;
+    }
+
+    .triangle-bridge-message-dots i:nth-child(2) {
+        animation-delay: 0.18s;
+    }
+
+    .triangle-bridge-message-dots i:nth-child(3) {
+        animation-delay: 0.36s;
+    }
+
+    .triangle-bridge-message-panel.is-visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    .triangle-bridge-yes-button {
+        position: absolute;
+        left: 50%;
+        bottom: clamp(9rem, 16vh, 11rem);
+        z-index: 10;
+        min-width: clamp(7.5rem, 12vw, 10rem);
+        min-height: clamp(3.5rem, 7vh, 4.8rem);
+        padding: 0.45rem 1.5rem;
+        border: clamp(0.18rem, 0.28vw, 0.26rem) solid #633015;
+        border-radius: 0.5rem;
+        background: linear-gradient(180deg, #fff18a 0%, #efae35 54%, #b9631f 100%);
+        box-shadow:
+            inset 0 0.18rem 0 rgba(255, 255, 255, 0.62),
+            inset 0 -0.28rem 0 rgba(91, 39, 12, 0.25),
+            0 0.34rem 0 #48200e,
+            0 0.8rem 1rem rgba(34, 39, 18, 0.28);
+        color: #fffbd3;
+        font-family: 'Baloo 2', 'Nunito', sans-serif;
+        font-size: clamp(1.7rem, 2.8vw, 2.5rem);
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: 0;
+        text-shadow: 0 0.1em 0 #753512, 0.06em 0.06em 0 #3b1b0b;
+        cursor: pointer;
+        opacity: 0;
+        transform: translate(-50%, 0.5rem) scale(0.94);
+        transition: opacity 0.24s ease, transform 0.3s cubic-bezier(0.2, 1.15, 0.35, 1), filter 0.2s ease;
+    }
+
+    .triangle-bridge-yes-button.is-visible {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+    }
+
+    .triangle-bridge-yes-button:is(:hover, :focus-visible) {
+        filter: brightness(1.1);
+        transform: translate(-50%, -0.12rem) scale(1.04);
+    }
+
+    .triangle-bridge-yes-button:active {
+        transform: translate(-50%, 0.22rem) scale(0.98);
+        box-shadow: inset 0 0.16rem 0 rgba(255, 255, 255, 0.45), 0 0.12rem 0 #48200e;
+    }
+
+    #learnscape-shape-area-3-page.is-bridge-dialog-ready {
+        cursor: pointer;
+    }
+}
+
+@keyframes triangleBridgeWalkDesktop {
+    from {
+        left: -12%;
+    }
+
+    to {
+        left: 11.5%;
+    }
+}
+
+@keyframes triangleBridgePageFadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
 .square-mission-character-ch13 {
     left: clamp(0.8rem, 4vw, 4rem);
     bottom: clamp(0rem, 1.2vh, 0.8rem);

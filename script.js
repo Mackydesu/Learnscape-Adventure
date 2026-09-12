@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260912-218';
+    const appVersion = '20260913-254';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -106,9 +106,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const fullscreenRestoreButton = document.querySelector('.fullscreen-restore-button');
     const shapeCirclePage = document.getElementById('learnscape-shape-circle-page');
     const shapeSquarePage = document.getElementById('learnscape-shape-square-page');
+    const triangleGamePage = document.getElementById('learnscape-triangle-game-page');
     const shapePreviewPages = Array.from(document.querySelectorAll('.shape-area-preview-page'));
     const shapePreviewProgressByPage = new Map();
     const shapePreviewIntroStates = new Map();
+    const shapePreviewBridgeCleanupByPage = new Map();
 
     shapePreviewPages.forEach((page, pageIndex) => {
         const progress = document.createElement('section');
@@ -2466,6 +2468,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const resetShapePreviewPage = (page) => {
         if (!page) return;
 
+        shapePreviewBridgeCleanupByPage.get(page)?.();
         stopShapePreviewIntro(page);
 
         const background = page.querySelector('.shape-area-bg');
@@ -2476,6 +2479,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const questionPanel = page.querySelector('.shape-preview-question-panel');
         const playButton = page.querySelector('.shape-preview-play-button');
         const skipButton = page.querySelector('.shape-preview-skip-button');
+        const areaTitle = page.querySelector('.shape-area-preview-title');
+        const bridgeCharacterSequence = page.querySelector('.triangle-bridge-character-sequence');
+        const bridgeWalkingCharacter = page.querySelector('.triangle-bridge-walking-character');
+        const bridgeArrivalCharacter = page.querySelector('.triangle-bridge-arrival-character');
         const areaBackgroundSource = page.dataset.areaBackground;
         if (background && areaBackgroundSource) {
             background.src = areaBackgroundSource;
@@ -2491,9 +2498,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (questionPanel) questionPanel.hidden = true;
         if (playButton) playButton.hidden = false;
         if (skipButton) skipButton.hidden = true;
+        if (areaTitle?.classList.contains('is-bridge-repair-title')) {
+            areaTitle.innerHTML = '<span>Area</span><strong>3</strong>';
+            areaTitle.setAttribute('aria-label', 'Area 3');
+            areaTitle.classList.remove('is-bridge-repair-title');
+        }
+        if (bridgeCharacterSequence) {
+            bridgeCharacterSequence.hidden = true;
+            bridgeCharacterSequence.classList.remove('is-walking');
+        }
+        if (bridgeWalkingCharacter) bridgeWalkingCharacter.hidden = false;
+        if (bridgeArrivalCharacter) bridgeArrivalCharacter.hidden = true;
         videoStage?.setAttribute('aria-hidden', 'true');
         shapePreviewProgressByPage.get(page)?.setAttribute('aria-hidden', 'true');
-        page.classList.remove('is-transitioning-to-illustration', 'is-illustration-background', 'is-tv-lesson-image-visible', 'is-progress-visible');
+        page.classList.remove('is-transitioning-to-illustration', 'is-illustration-background', 'is-tv-lesson-image-visible', 'is-progress-visible', 'is-next-background', 'is-fading-to-triangle-game');
         resetShapeTvChoices(page);
     };
 
@@ -2586,6 +2604,175 @@ document.addEventListener('DOMContentLoaded', async () => {
         const progress = shapePreviewProgressByPage.get(page);
         const replayButton = progress?.querySelector('[data-shape-preview-replay]') || null;
         const nextButton = progress?.querySelector('[data-shape-preview-next]') || null;
+        const bridgeCharacterSequence = page.querySelector('.triangle-bridge-character-sequence');
+        const bridgeWalkingCharacter = page.querySelector('.triangle-bridge-walking-character');
+        const bridgeArrivalCharacter = page.querySelector('.triangle-bridge-arrival-character');
+        const bridgeWalkingCharacterSource = bridgeWalkingCharacter?.getAttribute('src') || '';
+        const bridgeMessagePanel = page.querySelector('.triangle-bridge-message-panel');
+        const bridgeMessageText = page.querySelector('.triangle-bridge-message-text');
+        const bridgeYesButton = page.querySelector('.triangle-bridge-yes-button');
+        const bridgeDialogueMessages = [
+            'Naku! Sira ang tulay! Hindi ako makakatawid papunta sa bundok',
+            'Kaibigan, maaari mo ba akong tulungang ayusin ito?',
+        ];
+        const bridgeDialogueSegments = [
+            { start: 0, end: 4.9 },
+            { start: 4.9, end: 8.8 },
+        ];
+        let bridgeDialogueSession = 0;
+        let bridgeDialogueAudio = null;
+        let bridgeDialogueFrame = null;
+        let bridgeDialogueTimers = [];
+        let bridgeDialogueAdvance = null;
+
+        const stopBridgeDialogue = () => {
+            bridgeDialogueSession += 1;
+            bridgeDialogueTimers.forEach((timerId) => window.clearTimeout(timerId));
+            bridgeDialogueTimers = [];
+            if (bridgeDialogueFrame !== null) {
+                window.cancelAnimationFrame(bridgeDialogueFrame);
+                bridgeDialogueFrame = null;
+            }
+            if (bridgeDialogueAudio) {
+                bridgeDialogueAudio.pause?.();
+                bridgeDialogueAudio = null;
+            }
+            bridgeDialogueAdvance = null;
+            page.classList.remove('is-bridge-dialog-ready');
+            if (bridgeMessagePanel) {
+                bridgeMessagePanel.hidden = true;
+                bridgeMessagePanel.classList.remove('is-visible', 'is-message-complete', 'is-final-message');
+            }
+            if (bridgeMessageText) bridgeMessageText.textContent = '';
+            if (bridgeYesButton) {
+                bridgeYesButton.hidden = true;
+                bridgeYesButton.classList.remove('is-visible');
+                bridgeYesButton.disabled = false;
+            }
+        };
+
+        const startBridgeDialogue = () => {
+            if (!bridgeMessagePanel || !bridgeMessageText || !isPageVisible(page)) return;
+
+            stopBridgeDialogue();
+            const session = bridgeDialogueSession;
+            bridgeMessagePanel.hidden = false;
+            bridgeMessagePanel.getBoundingClientRect();
+            bridgeMessagePanel.classList.add('is-visible');
+
+            const playStage = (stageIndex) => {
+                const message = bridgeDialogueMessages[stageIndex];
+                const segment = bridgeDialogueSegments[stageIndex];
+                if (!message || !segment || session !== bridgeDialogueSession) return;
+
+                bridgeDialogueAdvance = null;
+                page.classList.remove('is-bridge-dialog-ready');
+                bridgeMessagePanel.classList.remove('is-message-complete', 'is-final-message');
+                bridgeMessagePanel.classList.toggle('is-final-message', stageIndex >= bridgeDialogueMessages.length - 1);
+                bridgeMessageText.textContent = '';
+                if (bridgeYesButton) {
+                    bridgeYesButton.hidden = true;
+                    bridgeYesButton.classList.remove('is-visible');
+                }
+                let textFinished = false;
+                let audioFinished = false;
+
+                const unlockStage = () => {
+                    if (!textFinished || !audioFinished || session !== bridgeDialogueSession) return;
+                    if (stageIndex < bridgeDialogueMessages.length - 1) {
+                        bridgeDialogueAdvance = () => playStage(stageIndex + 1);
+                        page.classList.add('is-bridge-dialog-ready');
+                    } else if (bridgeYesButton) {
+                        bridgeYesButton.hidden = false;
+                        bridgeYesButton.getBoundingClientRect();
+                        bridgeYesButton.classList.add('is-visible');
+                    }
+                };
+
+                let characterIndex = 0;
+                const typeNextCharacter = () => {
+                    if (session !== bridgeDialogueSession) return;
+                    characterIndex += 1;
+                    bridgeMessageText.textContent = message.slice(0, characterIndex);
+                    if (characterIndex < message.length) {
+                        bridgeDialogueTimers.push(window.setTimeout(typeNextCharacter, 28));
+                        return;
+                    }
+                    textFinished = true;
+                    bridgeMessagePanel.classList.add('is-message-complete');
+                    unlockStage();
+                };
+                typeNextCharacter();
+
+                const AudioCtor = window.Audio;
+                if (!AudioCtor) {
+                    audioFinished = true;
+                    unlockStage();
+                    return;
+                }
+
+                const audio = new AudioCtor('assets/Audios/Voice over/Naku.mp3');
+                bridgeDialogueAudio = audio;
+                audio.preload = 'auto';
+                audio.playsInline = true;
+                try {
+                    audio.currentTime = segment.start;
+                } catch (error) {
+                    // The timestamp is applied as soon as the audio can play.
+                }
+
+                const finishAudio = () => {
+                    if (session !== bridgeDialogueSession || bridgeDialogueAudio !== audio) return;
+                    audio.pause?.();
+                    bridgeDialogueAudio = null;
+                    bridgeDialogueFrame = null;
+                    audioFinished = true;
+                    unlockStage();
+                };
+
+                audio.play().then(() => {
+                    const stopAtSegmentEnd = () => {
+                        if (session !== bridgeDialogueSession || bridgeDialogueAudio !== audio) return;
+                        if (audio.currentTime >= segment.end || audio.ended) {
+                            finishAudio();
+                            return;
+                        }
+                        bridgeDialogueFrame = window.requestAnimationFrame(stopAtSegmentEnd);
+                    };
+                    bridgeDialogueFrame = window.requestAnimationFrame(stopAtSegmentEnd);
+                }).catch(finishAudio);
+            };
+
+            playStage(0);
+        };
+
+        shapePreviewBridgeCleanupByPage.set(page, stopBridgeDialogue);
+        page.addEventListener('click', (event) => {
+            if (event.target.closest('a, button') || typeof bridgeDialogueAdvance !== 'function') return;
+            const advance = bridgeDialogueAdvance;
+            bridgeDialogueAdvance = null;
+            advance();
+        });
+
+        bridgeYesButton?.addEventListener('click', () => {
+            if (!isPageVisible(page) || !page.classList.contains('is-next-background') || bridgeYesButton.disabled) return;
+            bridgeYesButton.disabled = true;
+            page.classList.add('is-fading-to-triangle-game');
+            const openTriangleGameTimer = window.setTimeout(() => {
+                window.location.hash = '#triangle-game';
+                bridgeDialogueTimers = bridgeDialogueTimers.filter((timerId) => timerId !== openTriangleGameTimer);
+            }, 550);
+            bridgeDialogueTimers.push(openTriangleGameTimer);
+        });
+
+        bridgeCharacterSequence?.addEventListener('animationend', (event) => {
+            if (event.target !== bridgeCharacterSequence || event.animationName !== 'triangleBridgeWalkDesktop') return;
+            if (bridgeWalkingCharacter) bridgeWalkingCharacter.hidden = true;
+            if (bridgeArrivalCharacter) bridgeArrivalCharacter.hidden = false;
+            bridgeCharacterSequence.classList.remove('is-walking');
+            startBridgeDialogue();
+        });
+
         startButton?.addEventListener('click', () => {
             stopShapePreviewIntro(page);
             transitionToShapePreviewIllustration(page);
@@ -2643,8 +2830,382 @@ document.addEventListener('DOMContentLoaded', async () => {
             showShapePreviewIllustration(page);
         });
 
-        nextButton?.addEventListener('click', () => navigateApp('game3'));
+        nextButton?.addEventListener('click', () => {
+            const nextBackgroundSource = page.dataset.nextBackground;
+            if (!nextBackgroundSource) {
+                window.location.hash = '#game3';
+                return;
+            }
+
+            const background = page.querySelector('.shape-area-bg');
+            const areaTitle = page.querySelector('.shape-area-preview-title');
+            const revealNextBackground = () => {
+                if (!isPageVisible(page)) return;
+                if (background) background.src = nextBackgroundSource;
+                page.classList.remove('is-progress-visible', 'is-tv-lesson-image-visible', 'is-illustration-background');
+                page.classList.add('is-next-background');
+                progress?.setAttribute('aria-hidden', 'true');
+                videoStage?.setAttribute('aria-hidden', 'true');
+                if (areaTitle && page.dataset.nextTitle) {
+                    areaTitle.textContent = page.dataset.nextTitle;
+                    areaTitle.setAttribute('aria-label', page.dataset.nextTitle);
+                    areaTitle.classList.add('is-bridge-repair-title');
+                }
+                if (bridgeCharacterSequence) {
+                    bridgeCharacterSequence.hidden = true;
+                    bridgeCharacterSequence.classList.remove('is-walking');
+                    if (bridgeWalkingCharacter) {
+                        bridgeWalkingCharacter.hidden = false;
+                        if (bridgeWalkingCharacterSource) {
+                            bridgeWalkingCharacter.src = `${bridgeWalkingCharacterSource}?play=${Date.now()}`;
+                        }
+                    }
+                    if (bridgeArrivalCharacter) bridgeArrivalCharacter.hidden = true;
+                    bridgeCharacterSequence.getBoundingClientRect();
+
+                    let hasStartedWalking = false;
+                    const startBridgeWalk = () => {
+                        if (hasStartedWalking || !isPageVisible(page) || !page.classList.contains('is-next-background')) return;
+                        hasStartedWalking = true;
+                        bridgeCharacterSequence.classList.add('is-walking');
+                        bridgeCharacterSequence.hidden = false;
+                    };
+
+                    if (!bridgeWalkingCharacter || bridgeWalkingCharacter.complete) {
+                        startBridgeWalk();
+                    } else {
+                        bridgeWalkingCharacter.addEventListener('load', startBridgeWalk, { once: true });
+                        bridgeWalkingCharacter.addEventListener('error', startBridgeWalk, { once: true });
+                    }
+                }
+            };
+
+            const preloader = window.Image ? new window.Image() : null;
+            if (preloader) preloader.src = nextBackgroundSource;
+            revealNextBackground();
+        });
     });
+
+    const triangleGameCharacter = triangleGamePage?.querySelector('.triangle-game-character') || null;
+    const triangleGameMessagePanel = triangleGamePage?.querySelector('.triangle-game-message-panel') || null;
+    const triangleGameMessageText = triangleGamePage?.querySelector('.triangle-game-message-text') || null;
+    const triangleGameMessageLastWord = triangleGamePage?.querySelector('.triangle-game-message-last-word') || null;
+    const triangleGameStartButton = triangleGamePage?.querySelector('.triangle-game-start-button') || null;
+    const triangleGameTreeGroup = triangleGamePage?.querySelector('.triangle-game-tree-group') || null;
+    const triangleGameTrees = Array.from(triangleGamePage?.querySelectorAll('[data-triangle-game-tree]') || []);
+    const triangleGameTreeSources = [
+        'assets/Shape UI/tree1.webp',
+        'assets/Shape UI/tree2.webp',
+        'assets/Shape UI/tree3.webp',
+        'assets/Shape UI/tree4.webp',
+    ];
+    const triangleGameMessages = [
+        'Para sa ating triangle mission.',
+        'Kailangan nating ayusin ang tulay upang makapagpatuloy!',
+        'Aha! May nakita akong mga puno!',
+        'Gamitin natin ang mga kahoy para ayusin ang tulay!',
+        'Handa ka na ba?',
+    ];
+    const triangleGameAudioSegments = [
+        { start: 0, end: 2.5 },
+        { start: 2.5, end: 6.6 },
+        { start: 6.6, end: 9.5 },
+        { start: 9.5, end: 13.3 },
+        { start: 0, end: Number.POSITIVE_INFINITY, source: 'assets/Audios/Voice over/Handa ka na ba.mp3' },
+    ];
+    let triangleGameDialogueSession = 0;
+    let triangleGameDialogueAudio = null;
+    let triangleGameDialogueFrame = null;
+    let triangleGameDialogueTimers = [];
+    let triangleGameDialogueAdvance = null;
+    const triangleGameTreePixelData = new Map();
+
+    triangleGameTreeSources.forEach((source) => {
+        const image = new Image();
+        image.src = source;
+    });
+
+    const resetTriangleGameTrees = () => {
+        triangleGameTreeGroup?.classList.remove('is-active', 'is-over-tree');
+        triangleGameTrees.forEach((tree, treeIndex) => {
+            tree.src = 'assets/Shape UI/tree.webp';
+            tree.dataset.treeStage = '0';
+            tree.tabIndex = -1;
+            tree.classList.remove('is-clickable', 'is-hit', 'is-fallen');
+            tree.setAttribute('aria-label', `Tree ${treeIndex + 1}`);
+        });
+    };
+
+    const stopTriangleGameDialogue = () => {
+        triangleGameDialogueSession += 1;
+        triangleGameDialogueTimers.forEach((timerId) => window.clearTimeout(timerId));
+        triangleGameDialogueTimers = [];
+        if (triangleGameDialogueFrame !== null) {
+            window.cancelAnimationFrame(triangleGameDialogueFrame);
+            triangleGameDialogueFrame = null;
+        }
+        if (triangleGameDialogueAudio) {
+            triangleGameDialogueAudio.pause?.();
+            triangleGameDialogueAudio = null;
+        }
+        triangleGameDialogueAdvance = null;
+        triangleGamePage?.classList.remove('is-dialog-ready');
+        if (triangleGameCharacter) {
+            triangleGameCharacter.hidden = true;
+            triangleGameCharacter.classList.remove('is-visible');
+        }
+        if (triangleGameMessagePanel) {
+            triangleGameMessagePanel.hidden = true;
+            triangleGameMessagePanel.classList.remove('is-visible', 'is-message-complete', 'is-final-message');
+        }
+        if (triangleGameMessageText) triangleGameMessageText.textContent = '';
+        if (triangleGameMessageLastWord) triangleGameMessageLastWord.textContent = '';
+        if (triangleGameStartButton) {
+            triangleGameStartButton.hidden = true;
+            triangleGameStartButton.classList.remove('is-visible');
+        }
+        resetTriangleGameTrees();
+    };
+
+    const startTriangleGameDialogue = () => {
+        if (!triangleGamePage || triangleGamePage.hidden || !triangleGameCharacter || !triangleGameMessagePanel || !triangleGameMessageText) return;
+
+        stopTriangleGameDialogue();
+        const session = triangleGameDialogueSession;
+        triangleGameCharacter.hidden = false;
+        triangleGameMessagePanel.hidden = false;
+        triangleGameCharacter.getBoundingClientRect();
+        triangleGameMessagePanel.getBoundingClientRect();
+        triangleGameCharacter.classList.add('is-visible');
+        triangleGameMessagePanel.classList.add('is-visible');
+
+        const playStage = (stageIndex) => {
+            const message = triangleGameMessages[stageIndex];
+            const segment = triangleGameAudioSegments[stageIndex];
+            if (!message || !segment || session !== triangleGameDialogueSession || triangleGamePage.hidden) return;
+
+            triangleGameCharacter.src = stageIndex === 4
+                ? 'assets/Character/ch17.webp'
+                : stageIndex === 2
+                    ? 'assets/Character/ch16.webp'
+                    : 'assets/Character/ch6.webp';
+            triangleGameDialogueAdvance = null;
+            triangleGamePage.classList.remove('is-dialog-ready');
+            triangleGameMessagePanel.classList.remove('is-message-complete', 'is-final-message');
+            triangleGameMessagePanel.classList.toggle('is-final-message', stageIndex >= triangleGameMessages.length - 1);
+            triangleGameMessageText.textContent = '';
+            if (triangleGameMessageLastWord) triangleGameMessageLastWord.textContent = '';
+            let textFinished = false;
+            let audioFinished = false;
+
+            const unlockStage = () => {
+                if (!textFinished || !audioFinished || session !== triangleGameDialogueSession) return;
+                if (stageIndex < triangleGameMessages.length - 1) {
+                    triangleGameDialogueAdvance = () => playStage(stageIndex + 1);
+                    triangleGamePage.classList.add('is-dialog-ready');
+                    return;
+                }
+
+                triangleGameCharacter.classList.remove('is-visible');
+                triangleGameMessagePanel.classList.remove('is-visible');
+                triangleGameDialogueTimers.push(window.setTimeout(() => {
+                    if (session !== triangleGameDialogueSession || triangleGamePage.hidden) return;
+                    triangleGameCharacter.hidden = true;
+                    triangleGameMessagePanel.hidden = true;
+                    if (!triangleGameStartButton) return;
+                    triangleGameStartButton.hidden = false;
+                    triangleGameStartButton.getBoundingClientRect();
+                    triangleGameStartButton.classList.add('is-visible');
+                }, 420));
+            };
+
+            const lastWordStart = message.lastIndexOf(' ') + 1;
+            const messageLead = message.slice(0, lastWordStart);
+            const messageLastWord = message.slice(lastWordStart);
+            let characterIndex = 0;
+            const typeNextCharacter = () => {
+                if (session !== triangleGameDialogueSession) return;
+                characterIndex += 1;
+                if (triangleGameMessageLastWord && characterIndex > messageLead.length) {
+                    triangleGameMessageText.textContent = messageLead;
+                    triangleGameMessageLastWord.textContent = messageLastWord.slice(0, characterIndex - messageLead.length);
+                } else {
+                    triangleGameMessageText.textContent = message.slice(0, characterIndex);
+                }
+                if (characterIndex < message.length) {
+                    triangleGameDialogueTimers.push(window.setTimeout(typeNextCharacter, 28));
+                    return;
+                }
+                textFinished = true;
+                triangleGameMessagePanel.classList.add('is-message-complete');
+                unlockStage();
+            };
+            typeNextCharacter();
+
+            const AudioCtor = window.Audio;
+            if (!AudioCtor) {
+                audioFinished = true;
+                unlockStage();
+                return;
+            }
+
+            const audio = new AudioCtor(segment.source || 'assets/Audios/Voice over/trianglemisson.mp3');
+            triangleGameDialogueAudio = audio;
+            audio.preload = 'auto';
+            audio.playsInline = true;
+            try {
+                audio.currentTime = segment.start;
+            } catch (error) {
+                // The timestamp is applied as soon as the audio can play.
+            }
+
+            const finishAudio = () => {
+                if (session !== triangleGameDialogueSession || triangleGameDialogueAudio !== audio) return;
+                audio.pause?.();
+                triangleGameDialogueAudio = null;
+                triangleGameDialogueFrame = null;
+                audioFinished = true;
+                unlockStage();
+            };
+
+            audio.play().then(() => {
+                const stopAtSegmentEnd = () => {
+                    if (session !== triangleGameDialogueSession || triangleGameDialogueAudio !== audio) return;
+                    if (audio.currentTime >= segment.end || audio.ended) {
+                        finishAudio();
+                        return;
+                    }
+                    triangleGameDialogueFrame = window.requestAnimationFrame(stopAtSegmentEnd);
+                };
+                triangleGameDialogueFrame = window.requestAnimationFrame(stopAtSegmentEnd);
+            }).catch(finishAudio);
+        };
+
+        playStage(0);
+    };
+
+    triangleGamePage?.addEventListener('click', (event) => {
+        if (event.target.closest('a, button') || typeof triangleGameDialogueAdvance !== 'function') return;
+        const advance = triangleGameDialogueAdvance;
+        triangleGameDialogueAdvance = null;
+        advance();
+    });
+
+    const advanceTriangleGameTree = (tree) => {
+        if (!triangleGameTreeGroup?.classList.contains('is-active') || !tree.classList.contains('is-clickable')) return;
+        const currentStage = Number.parseInt(tree.dataset.treeStage || '0', 10);
+        const nextStage = Math.min(currentStage + 1, 3);
+        tree.dataset.treeStage = String(nextStage);
+        tree.src = triangleGameTreeSources[nextStage - 1];
+        tree.classList.remove('is-hit');
+        tree.getBoundingClientRect();
+        tree.classList.add('is-hit');
+
+        const treeNumber = triangleGameTrees.indexOf(tree) + 1;
+        const tapsRemaining = 3 - nextStage;
+        if (nextStage >= 3) {
+            tree.classList.remove('is-clickable');
+            tree.tabIndex = -1;
+            tree.setAttribute('aria-label', `Tree ${treeNumber} is falling`);
+            triangleGameDialogueTimers.push(window.setTimeout(() => {
+                if (triangleGamePage?.hidden || tree.dataset.treeStage !== '3') return;
+                tree.src = triangleGameTreeSources[3];
+                tree.dataset.treeStage = '4';
+                tree.classList.add('is-fallen');
+                tree.setAttribute('aria-label', `Tree ${treeNumber} has fallen`);
+            }, 380));
+            return;
+        }
+        tree.setAttribute('aria-label', `Tree ${treeNumber}, ${tapsRemaining} taps remaining`);
+    };
+
+    const isPointOnTriangleGameTree = (tree, clientX, clientY) => {
+        if (!tree.complete || !tree.naturalWidth || !tree.naturalHeight) return false;
+        const rect = tree.getBoundingClientRect();
+        if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return false;
+
+        const scale = Math.min(rect.width / tree.naturalWidth, rect.height / tree.naturalHeight);
+        const renderedWidth = tree.naturalWidth * scale;
+        const renderedHeight = tree.naturalHeight * scale;
+        const offsetX = (rect.width - renderedWidth) / 2;
+        const offsetY = rect.height - renderedHeight;
+        const mirroredX = rect.right - clientX;
+        const localY = clientY - rect.top;
+        if (mirroredX < offsetX || mirroredX >= offsetX + renderedWidth || localY < offsetY || localY >= offsetY + renderedHeight) return false;
+
+        const source = tree.currentSrc || tree.src;
+        let pixelData = triangleGameTreePixelData.get(source);
+        if (!pixelData) {
+            const canvas = document.createElement('canvas');
+            canvas.width = tree.naturalWidth;
+            canvas.height = tree.naturalHeight;
+            const context = canvas.getContext('2d', { willReadFrequently: true });
+            if (!context) return true;
+            context.drawImage(tree, 0, 0);
+            try {
+                pixelData = context.getImageData(0, 0, canvas.width, canvas.height);
+                triangleGameTreePixelData.set(source, pixelData);
+            } catch (error) {
+                return true;
+            }
+        }
+
+        const pixelX = Math.min(pixelData.width - 1, Math.floor(((mirroredX - offsetX) / renderedWidth) * pixelData.width));
+        const pixelY = Math.min(pixelData.height - 1, Math.floor(((localY - offsetY) / renderedHeight) * pixelData.height));
+        return pixelData.data[((pixelY * pixelData.width) + pixelX) * 4 + 3] > 24;
+    };
+
+    const findTriangleGameTreeAtPoint = (clientX, clientY) => [...triangleGameTrees]
+        .reverse()
+        .find((tree) => tree.classList.contains('is-clickable') && isPointOnTriangleGameTree(tree, clientX, clientY));
+
+    triangleGameStartButton?.addEventListener('click', () => {
+        triangleGameStartButton.classList.remove('is-visible');
+        triangleGameStartButton.hidden = true;
+        triangleGameTreeGroup?.classList.add('is-active');
+        triangleGameTrees.forEach((tree, treeIndex) => {
+            tree.src = 'assets/Shape UI/tree.webp';
+            tree.dataset.treeStage = '0';
+            tree.tabIndex = 0;
+            tree.classList.add('is-clickable');
+            tree.classList.remove('is-hit', 'is-fallen');
+            tree.setAttribute('aria-label', `Tree ${treeIndex + 1}, 3 taps remaining`);
+        });
+    });
+
+    triangleGameTreeGroup?.addEventListener('click', (event) => {
+        const tree = findTriangleGameTreeAtPoint(event.clientX, event.clientY);
+        if (tree) advanceTriangleGameTree(tree);
+    });
+
+    triangleGameTreeGroup?.addEventListener('pointermove', (event) => {
+        triangleGameTreeGroup.classList.toggle('is-over-tree', Boolean(findTriangleGameTreeAtPoint(event.clientX, event.clientY)));
+    });
+
+    triangleGameTreeGroup?.addEventListener('pointerleave', () => {
+        triangleGameTreeGroup.classList.remove('is-over-tree');
+    });
+
+    triangleGameTrees.forEach((tree) => {
+        tree.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            event.preventDefault();
+            advanceTriangleGameTree(tree);
+        });
+        tree.addEventListener('animationend', () => tree.classList.remove('is-hit'));
+    });
+
+    window.addEventListener('learnscape:routechange', (event) => {
+        if (event.detail?.route === 'triangleGame') {
+            startTriangleGameDialogue();
+        } else {
+            stopTriangleGameDialogue();
+        }
+    });
+
+    if (triangleGamePage && !triangleGamePage.hidden) {
+        startTriangleGameDialogue();
+    }
 
     const stopShapeChoiceAudio = () => {
         shapeChoiceAudioSession += 1;
