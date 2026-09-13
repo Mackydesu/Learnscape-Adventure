@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260913-254';
+    const appVersion = '20260913-272';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -2893,6 +2893,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const triangleGameStartButton = triangleGamePage?.querySelector('.triangle-game-start-button') || null;
     const triangleGameTreeGroup = triangleGamePage?.querySelector('.triangle-game-tree-group') || null;
     const triangleGameTrees = Array.from(triangleGamePage?.querySelectorAll('[data-triangle-game-tree]') || []);
+    const triangleWoodStorage = triangleGamePage?.querySelector('.triangle-wood-storage') || null;
+    const triangleWoodStorageImage = triangleWoodStorage?.querySelector('.triangle-wood-storage-image') || null;
+    const triangleWoodStorageCount = triangleWoodStorage?.querySelector('[data-triangle-wood-count]') || null;
+    const triangleCraftingPanel = triangleGamePage?.querySelector('.triangle-crafting-panel') || null;
+    const triangleCraftingShapes = triangleCraftingPanel?.querySelector('.triangle-crafting-shapes') || null;
+    const triangleCraftingSlots = Array.from(triangleCraftingPanel?.querySelectorAll('[data-triangle-craft-slot]') || []);
+    const triangleBridgeBuildOverlay = triangleCraftingPanel?.querySelector('.triangle-bridge-build-overlay') || null;
+    const triangleCraftedBridge = triangleCraftingPanel?.querySelector('.triangle-crafted-bridge') || null;
     const triangleGameTreeSources = [
         'assets/Shape UI/tree1.webp',
         'assets/Shape UI/tree2.webp',
@@ -2919,6 +2927,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     let triangleGameDialogueTimers = [];
     let triangleGameDialogueAdvance = null;
     const triangleGameTreePixelData = new Map();
+    let triangleWoodCollected = 0;
+    let triangleWoodCollectionSession = 0;
+    let triangleWoodDrag = null;
+    let triangleWoodSnapInProgress = false;
+    let triangleBridgeBuildSession = 0;
+    let triangleBridgeBuildTimers = [];
 
     triangleGameTreeSources.forEach((source) => {
         const image = new Image();
@@ -2926,7 +2940,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const resetTriangleGameTrees = () => {
+        triangleWoodCollectionSession += 1;
+        triangleBridgeBuildSession += 1;
+        triangleBridgeBuildTimers.forEach((timerId) => window.clearTimeout(timerId));
+        triangleBridgeBuildTimers = [];
+        triangleWoodCollected = 0;
         triangleGameTreeGroup?.classList.remove('is-active', 'is-over-tree');
+        triangleGamePage?.querySelectorAll('.triangle-wood-collectible').forEach((collectible) => collectible.remove());
+        triangleWoodDrag?.ghost?.remove();
+        triangleWoodDrag = null;
+        triangleWoodSnapInProgress = false;
+        if (triangleWoodStorageCount) triangleWoodStorageCount.textContent = '0';
+        if (triangleWoodStorage) {
+            triangleWoodStorage.hidden = true;
+            triangleWoodStorage.classList.remove('is-visible', 'is-storing', 'is-crafting');
+        }
+        if (triangleWoodStorageImage) {
+            triangleWoodStorageImage.classList.remove('is-drag-source');
+            triangleWoodStorageImage.removeAttribute('role');
+            triangleWoodStorageImage.removeAttribute('tabindex');
+            triangleWoodStorageImage.removeAttribute('aria-label');
+        }
+        if (triangleCraftingPanel) {
+            triangleCraftingPanel.hidden = true;
+            triangleCraftingPanel.classList.remove('is-visible', 'is-complete', 'is-building', 'is-bridge-revealed');
+        }
+        triangleCraftingShapes?.classList.remove('is-built-away');
+        if (triangleBridgeBuildOverlay) {
+            triangleBridgeBuildOverlay.hidden = true;
+            triangleBridgeBuildOverlay.classList.remove('is-building', 'is-clearing');
+        }
+        if (triangleCraftedBridge) {
+            triangleCraftedBridge.hidden = true;
+            triangleCraftedBridge.classList.remove('is-visible');
+        }
+        triangleCraftingSlots.forEach((slot) => {
+            slot.classList.remove('is-filled', 'is-snapping');
+            const wood = slot.querySelector('img');
+            if (wood) wood.hidden = true;
+        });
         triangleGameTrees.forEach((tree, treeIndex) => {
             tree.src = 'assets/Shape UI/tree.webp';
             tree.dataset.treeStage = '0';
@@ -2952,7 +3004,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         triangleGamePage?.classList.remove('is-dialog-ready');
         if (triangleGameCharacter) {
             triangleGameCharacter.hidden = true;
-            triangleGameCharacter.classList.remove('is-visible');
+            triangleGameCharacter.classList.remove('is-visible', 'is-ch17');
         }
         if (triangleGameMessagePanel) {
             triangleGameMessagePanel.hidden = true;
@@ -2989,6 +3041,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 : stageIndex === 2
                     ? 'assets/Character/ch16.webp'
                     : 'assets/Character/ch6.webp';
+            triangleGameCharacter.classList.toggle('is-ch17', stageIndex === 4);
             triangleGameDialogueAdvance = null;
             triangleGamePage.classList.remove('is-dialog-ready');
             triangleGameMessagePanel.classList.remove('is-message-complete', 'is-final-message');
@@ -3091,6 +3144,327 @@ document.addEventListener('DOMContentLoaded', async () => {
         advance();
     });
 
+    const showTriangleCraftingPanel = (session) => {
+        if (session !== triangleWoodCollectionSession || !triangleCraftingPanel || !triangleWoodStorage) return;
+        triangleCraftingPanel.hidden = false;
+        triangleCraftingPanel.getBoundingClientRect();
+        triangleCraftingPanel.classList.add('is-visible');
+        triangleWoodStorage.classList.add('is-crafting');
+        triangleWoodStorageImage?.setAttribute('role', 'button');
+        triangleWoodStorageImage?.setAttribute('tabindex', '0');
+        triangleWoodStorageImage?.setAttribute('aria-label', 'Drag a wood block to the triangle crafting panel');
+        playUiClickSound('chime');
+    };
+
+    const storeTriangleWoodBlock = (session) => {
+        if (session !== triangleWoodCollectionSession || !triangleWoodStorage || !triangleWoodStorageCount) return;
+        triangleWoodCollected = Math.min(9, triangleWoodCollected + 1);
+        triangleWoodStorageCount.textContent = String(triangleWoodCollected);
+        playUiClickSound('woodStore');
+        triangleWoodStorage.classList.remove('is-storing');
+        triangleWoodStorage.getBoundingClientRect();
+        triangleWoodStorage.classList.add('is-storing');
+        triangleGameDialogueTimers.push(window.setTimeout(() => {
+            if (session === triangleWoodCollectionSession) triangleWoodStorage.classList.remove('is-storing');
+        }, 380));
+        if (triangleWoodCollected === 9) {
+            triangleGameDialogueTimers.push(window.setTimeout(() => showTriangleCraftingPanel(session), 520));
+        }
+    };
+
+    const releaseTriangleWoodBlocks = (tree) => {
+        if (!triangleGamePage || !triangleWoodStorageImage) return;
+        const session = triangleWoodCollectionSession;
+        window.requestAnimationFrame(() => {
+            if (session !== triangleWoodCollectionSession || triangleGamePage.hidden) return;
+            const pageRect = triangleGamePage.getBoundingClientRect();
+            const treeRect = tree.getBoundingClientRect();
+            const storageRect = triangleWoodStorageImage.getBoundingClientRect();
+            const startX = treeRect.left - pageRect.left + (treeRect.width * 0.78);
+            const startY = treeRect.bottom - pageRect.top - (treeRect.height * 0.34);
+            const targetX = storageRect.left - pageRect.left + (storageRect.width / 2);
+            const targetY = storageRect.top - pageRect.top + (storageRect.height / 2);
+            const burstOffsets = [
+                { x: -105, y: -120, rotation: -18 },
+                { x: 0, y: -165, rotation: 8 },
+                { x: 105, y: -115, rotation: 20 },
+            ];
+
+            burstOffsets.forEach((burst, blockIndex) => {
+                triangleGameDialogueTimers.push(window.setTimeout(() => {
+                    if (session !== triangleWoodCollectionSession || triangleGamePage.hidden) return;
+                    const collectible = document.createElement('img');
+                    collectible.className = 'triangle-wood-collectible';
+                    collectible.src = 'assets/Shape UI/wood-block-stylized.png';
+                    collectible.alt = '';
+                    collectible.setAttribute('aria-hidden', 'true');
+                    collectible.style.left = `${startX}px`;
+                    collectible.style.top = `${startY}px`;
+                    triangleGamePage.appendChild(collectible);
+                    playUiClickSound('woodCollectPop');
+
+                    const animation = collectible.animate([
+                        {
+                            left: `${startX}px`,
+                            top: `${startY}px`,
+                            opacity: 0,
+                            transform: `translate(-50%, -50%) scale(0.22) rotate(${burst.rotation - 12}deg)`,
+                        },
+                        {
+                            offset: 0.48,
+                            left: `${startX + burst.x}px`,
+                            top: `${startY + burst.y}px`,
+                            opacity: 1,
+                            transform: `translate(-50%, -50%) scale(1.08) rotate(${burst.rotation}deg)`,
+                        },
+                        {
+                            left: `${targetX}px`,
+                            top: `${targetY}px`,
+                            opacity: 0.94,
+                            transform: 'translate(-50%, -50%) scale(0.3) rotate(0deg)',
+                        },
+                    ], {
+                        duration: 1120,
+                        easing: 'cubic-bezier(0.2, 0.82, 0.28, 1)',
+                        fill: 'forwards',
+                    });
+
+                    animation.finished.then(() => {
+                        collectible.remove();
+                        storeTriangleWoodBlock(session);
+                    }).catch(() => collectible.remove());
+                }, blockIndex * 180));
+            });
+        });
+    };
+
+    const getNextTriangleCraftingSlot = () => triangleCraftingSlots.find((slot) => !slot.classList.contains('is-filled')) || null;
+
+    const createTriangleWoodDragGhost = (clientX, clientY) => {
+        if (!triangleGamePage) return null;
+        const pageRect = triangleGamePage.getBoundingClientRect();
+        const ghost = document.createElement('img');
+        ghost.className = 'triangle-wood-drag-ghost';
+        ghost.src = 'assets/Shape UI/wood-block-stylized.png';
+        ghost.alt = '';
+        ghost.setAttribute('aria-hidden', 'true');
+        ghost.style.left = `${clientX - pageRect.left}px`;
+        ghost.style.top = `${clientY - pageRect.top}px`;
+        triangleGamePage.appendChild(ghost);
+        return ghost;
+    };
+
+    const bumpTriangleWoodStorageImage = (session) => {
+        if (session !== triangleWoodCollectionSession || !triangleWoodStorage) return;
+        triangleWoodStorage.classList.remove('is-storing');
+        triangleWoodStorage.getBoundingClientRect();
+        triangleWoodStorage.classList.add('is-storing');
+        triangleGameDialogueTimers.push(window.setTimeout(() => {
+            if (session === triangleWoodCollectionSession) triangleWoodStorage.classList.remove('is-storing');
+        }, 380));
+    };
+
+    const startTriangleBridgeBuildSequence = (collectionSession) => {
+        if (
+            !triangleCraftingPanel
+            || !triangleBridgeBuildOverlay
+            || !triangleCraftedBridge
+            || collectionSession !== triangleWoodCollectionSession
+        ) return;
+
+        triangleBridgeBuildSession += 1;
+        const buildSession = triangleBridgeBuildSession;
+        triangleBridgeBuildTimers.forEach((timerId) => window.clearTimeout(timerId));
+        triangleBridgeBuildTimers = [];
+        const scheduleBuildStep = (callback, delay) => {
+            const timerId = window.setTimeout(() => {
+                triangleBridgeBuildTimers = triangleBridgeBuildTimers.filter((currentId) => currentId !== timerId);
+                if (
+                    buildSession !== triangleBridgeBuildSession
+                    || collectionSession !== triangleWoodCollectionSession
+                    || triangleGamePage?.hidden
+                ) return;
+                callback();
+            }, delay);
+            triangleBridgeBuildTimers.push(timerId);
+        };
+
+        triangleCraftingPanel.classList.remove('is-complete', 'is-bridge-revealed');
+        triangleCraftingPanel.classList.add('is-building');
+        triangleCraftingShapes?.classList.remove('is-built-away');
+        triangleCraftedBridge.hidden = true;
+        triangleCraftedBridge.classList.remove('is-visible');
+        triangleBridgeBuildOverlay.hidden = false;
+        triangleBridgeBuildOverlay.classList.remove('is-building', 'is-clearing');
+        triangleBridgeBuildOverlay.getBoundingClientRect();
+        triangleBridgeBuildOverlay.classList.add('is-building');
+
+        [180, 620, 1060, 1500, 1940, 2380, 2820].forEach((delay) => {
+            scheduleBuildStep(() => playUiClickSound('wood'), delay);
+        });
+
+        scheduleBuildStep(() => {
+            triangleCraftingShapes?.classList.add('is-built-away');
+            triangleCraftedBridge.hidden = false;
+            triangleCraftedBridge.getBoundingClientRect();
+            triangleCraftedBridge.classList.add('is-visible');
+            triangleCraftingPanel.classList.add('is-bridge-revealed');
+            triangleBridgeBuildOverlay.classList.add('is-clearing');
+            playUiClickSound('boardSuccess');
+        }, 3200);
+
+        scheduleBuildStep(() => {
+            triangleBridgeBuildOverlay.hidden = true;
+            triangleBridgeBuildOverlay.classList.remove('is-building', 'is-clearing');
+            triangleCraftingPanel.classList.remove('is-building');
+            triangleCraftingPanel.classList.add('is-complete');
+        }, 5000);
+    };
+
+    const snapTriangleWoodIntoSlot = (ghost, slot, session) => {
+        if (!triangleGamePage || !ghost || !slot || session !== triangleWoodCollectionSession) {
+            ghost?.remove();
+            return;
+        }
+        triangleWoodSnapInProgress = true;
+        const pageRect = triangleGamePage.getBoundingClientRect();
+        const slotRect = slot.getBoundingClientRect();
+        const targetX = slotRect.left - pageRect.left + (slotRect.width / 2);
+        const targetY = slotRect.top - pageRect.top + (slotRect.height / 2);
+        const slotAngle = Number.parseFloat(slot.dataset.slotAngle || '0');
+        ghost.src = 'assets/Shape UI/wood-plank-side.webp';
+        ghost.classList.add('is-side-view');
+        const animation = ghost.animate([
+            {
+                left: ghost.style.left,
+                top: ghost.style.top,
+                opacity: 1,
+                transform: 'translate(-50%, -50%) rotate(0deg) scale(1)',
+            },
+            {
+                left: `${targetX}px`,
+                top: `${targetY}px`,
+                opacity: 1,
+                transform: `translate(-50%, -50%) rotate(${slotAngle}deg) scale(0.72)`,
+            },
+        ], {
+            duration: 420,
+            easing: 'cubic-bezier(0.2, 0.88, 0.3, 1)',
+            fill: 'forwards',
+        });
+
+        animation.finished.then(() => {
+            ghost.remove();
+            triangleWoodSnapInProgress = false;
+            if (session !== triangleWoodCollectionSession || slot.classList.contains('is-filled')) return;
+            const wood = slot.querySelector('img');
+            if (wood) wood.hidden = false;
+            slot.classList.add('is-filled', 'is-snapping');
+            triangleWoodCollected = Math.max(0, triangleWoodCollected - 1);
+            if (triangleWoodStorageCount) triangleWoodStorageCount.textContent = String(triangleWoodCollected);
+            playUiClickSound('woodStore');
+            bumpTriangleWoodStorageImage(session);
+            triangleGameDialogueTimers.push(window.setTimeout(() => slot.classList.remove('is-snapping'), 420));
+
+            if (triangleCraftingSlots.every((craftingSlot) => craftingSlot.classList.contains('is-filled'))) {
+                triangleWoodStorage?.classList.remove('is-crafting');
+                triangleWoodStorageImage?.setAttribute('tabindex', '-1');
+                triangleWoodStorageImage?.setAttribute('aria-label', 'All wood blocks have been placed');
+                startTriangleBridgeBuildSequence(session);
+            }
+        }).catch(() => {
+            triangleWoodSnapInProgress = false;
+            ghost.remove();
+        });
+    };
+
+    const returnTriangleWoodToStorage = (ghost) => {
+        if (!ghost || !triangleGamePage || !triangleWoodStorageImage) return;
+        const pageRect = triangleGamePage.getBoundingClientRect();
+        const storageRect = triangleWoodStorageImage.getBoundingClientRect();
+        const targetX = storageRect.left - pageRect.left + (storageRect.width / 2);
+        const targetY = storageRect.top - pageRect.top + (storageRect.height / 2);
+        const animation = ghost.animate([
+            { left: ghost.style.left, top: ghost.style.top, opacity: 1, transform: 'translate(-50%, -50%) scale(1)' },
+            { left: `${targetX}px`, top: `${targetY}px`, opacity: 0, transform: 'translate(-50%, -50%) scale(0.32)' },
+        ], {
+            duration: 280,
+            easing: 'ease-in',
+            fill: 'forwards',
+        });
+        animation.finished.then(() => ghost.remove()).catch(() => ghost.remove());
+    };
+
+    const beginTriangleWoodDrag = (event) => {
+        if (
+            !triangleWoodStorage?.classList.contains('is-crafting') ||
+            triangleWoodCollected <= 0 ||
+            triangleWoodDrag ||
+            triangleWoodSnapInProgress ||
+            (event.pointerType === 'mouse' && event.button !== 0)
+        ) return;
+        const ghost = createTriangleWoodDragGhost(event.clientX, event.clientY);
+        if (!ghost) return;
+        triangleWoodDrag = {
+            ghost,
+            pointerId: event.pointerId,
+            session: triangleWoodCollectionSession,
+        };
+        triangleWoodStorageImage?.classList.add('is-drag-source');
+        triangleWoodStorageImage?.setPointerCapture?.(event.pointerId);
+        playUiClickSound('wood');
+        event.preventDefault();
+    };
+
+    const moveTriangleWoodDrag = (event) => {
+        if (!triangleWoodDrag || event.pointerId !== triangleWoodDrag.pointerId || !triangleGamePage) return;
+        const pageRect = triangleGamePage.getBoundingClientRect();
+        triangleWoodDrag.ghost.style.left = `${event.clientX - pageRect.left}px`;
+        triangleWoodDrag.ghost.style.top = `${event.clientY - pageRect.top}px`;
+        event.preventDefault();
+    };
+
+    const endTriangleWoodDrag = (event, cancelled = false) => {
+        if (!triangleWoodDrag || event.pointerId !== triangleWoodDrag.pointerId) return;
+        const drag = triangleWoodDrag;
+        triangleWoodDrag = null;
+        triangleWoodStorageImage?.classList.remove('is-drag-source');
+        try {
+            triangleWoodStorageImage?.releasePointerCapture?.(event.pointerId);
+        } catch (error) {
+            // Pointer capture may already be released by the browser.
+        }
+
+        const panelRect = triangleCraftingPanel?.getBoundingClientRect();
+        const droppedOnPanel = !cancelled && panelRect &&
+            event.clientX >= panelRect.left && event.clientX <= panelRect.right &&
+            event.clientY >= panelRect.top && event.clientY <= panelRect.bottom;
+        const nextSlot = droppedOnPanel ? getNextTriangleCraftingSlot() : null;
+        if (nextSlot) {
+            snapTriangleWoodIntoSlot(drag.ghost, nextSlot, drag.session);
+        } else {
+            returnTriangleWoodToStorage(drag.ghost);
+        }
+    };
+
+    triangleWoodStorageImage?.addEventListener('pointerdown', beginTriangleWoodDrag);
+    triangleWoodStorageImage?.addEventListener('pointermove', moveTriangleWoodDrag);
+    triangleWoodStorageImage?.addEventListener('pointerup', (event) => endTriangleWoodDrag(event));
+    triangleWoodStorageImage?.addEventListener('pointercancel', (event) => endTriangleWoodDrag(event, true));
+    triangleWoodStorageImage?.addEventListener('dragstart', (event) => event.preventDefault());
+    triangleWoodStorageImage?.addEventListener('keydown', (event) => {
+        if ((event.key !== 'Enter' && event.key !== ' ') || triangleWoodCollected <= 0 || triangleWoodSnapInProgress) return;
+        const nextSlot = getNextTriangleCraftingSlot();
+        if (!nextSlot) return;
+        const storageRect = triangleWoodStorageImage.getBoundingClientRect();
+        const ghost = createTriangleWoodDragGhost(
+            storageRect.left + (storageRect.width / 2),
+            storageRect.top + (storageRect.height / 2),
+        );
+        snapTriangleWoodIntoSlot(ghost, nextSlot, triangleWoodCollectionSession);
+        event.preventDefault();
+    });
+
     const advanceTriangleGameTree = (tree) => {
         if (!triangleGameTreeGroup?.classList.contains('is-active') || !tree.classList.contains('is-clickable')) return;
         const currentStage = Number.parseInt(tree.dataset.treeStage || '0', 10);
@@ -3113,6 +3487,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 tree.dataset.treeStage = '4';
                 tree.classList.add('is-fallen');
                 tree.setAttribute('aria-label', `Tree ${treeNumber} has fallen`);
+                releaseTriangleWoodBlocks(tree);
             }, 380));
             return;
         }
@@ -3163,6 +3538,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         triangleGameStartButton.classList.remove('is-visible');
         triangleGameStartButton.hidden = true;
         triangleGameTreeGroup?.classList.add('is-active');
+        if (triangleWoodStorage) {
+            triangleWoodStorage.hidden = false;
+            triangleWoodStorage.getBoundingClientRect();
+            triangleWoodStorage.classList.add('is-visible');
+        }
         triangleGameTrees.forEach((tree, treeIndex) => {
             tree.src = 'assets/Shape UI/tree.webp';
             tree.dataset.treeStage = '0';
@@ -6028,6 +6408,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         wood: [
             { frequency: 220, type: 'square', gain: 0.13, duration: 0.055, attack: 0.006 },
             { frequency: 164.81, type: 'triangle', gain: 0.1, duration: 0.11, delay: 0.028, attack: 0.008 },
+        ],
+        woodCollectPop: [
+            { frequency: 180, type: 'square', gain: 0.12, duration: 0.055, attack: 0.005 },
+            { frequency: 360, type: 'triangle', gain: 0.13, duration: 0.09, delay: 0.02, attack: 0.006 },
+            { frequency: 720, type: 'sine', gain: 0.1, duration: 0.14, delay: 0.055, attack: 0.008 },
+        ],
+        woodStore: [
+            { frequency: 392, type: 'triangle', gain: 0.11, duration: 0.08, attack: 0.006 },
+            { frequency: 659.25, type: 'triangle', gain: 0.14, duration: 0.14, delay: 0.04, attack: 0.008 },
+            { frequency: 987.77, type: 'sine', gain: 0.09, duration: 0.2, delay: 0.1, attack: 0.01 },
         ],
         soft: [
             { frequency: 587.33, type: 'sine', gain: 0.13, duration: 0.08, attack: 0.01 },

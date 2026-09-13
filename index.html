@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260913-254">
+    <link rel="stylesheet" href="style.css?v=20260913-272">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -532,6 +532,62 @@
             <img class="triangle-game-tree triangle-game-tree-two" src="assets/Shape UI/tree.webp" alt="Tree 2" role="button" tabindex="-1" data-triangle-game-tree>
             <img class="triangle-game-tree triangle-game-tree-three" src="assets/Shape UI/tree.webp" alt="Tree 3" role="button" tabindex="-1" data-triangle-game-tree>
         </div>
+        <div class="triangle-wood-storage" role="status" aria-live="polite" aria-label="Collected wood blocks" hidden>
+            <img class="triangle-wood-storage-image" src="assets/Shape UI/wood-block-stylized.png" alt="">
+            <strong class="triangle-wood-storage-count"><span data-triangle-wood-count>0</span>/9</strong>
+        </div>
+        <section class="triangle-crafting-panel" aria-label="Bridge crafting" hidden>
+            <h2>Bridge Crafting</h2>
+            <div class="triangle-crafting-shapes" aria-label="Three-triangle wooden bridge frame">
+                <span class="triangle-crafting-slot triangle-crafting-slot-diagonal triangle-crafting-slot-left-1" data-triangle-craft-slot data-slot-angle="-60">
+                    <img src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
+                </span>
+                <span class="triangle-crafting-slot triangle-crafting-slot-diagonal triangle-crafting-slot-right-1" data-triangle-craft-slot data-slot-angle="60">
+                    <img src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
+                </span>
+                <span class="triangle-crafting-slot triangle-crafting-slot-diagonal triangle-crafting-slot-left-2" data-triangle-craft-slot data-slot-angle="-60">
+                    <img src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
+                </span>
+                <span class="triangle-crafting-slot triangle-crafting-slot-diagonal triangle-crafting-slot-right-2" data-triangle-craft-slot data-slot-angle="60">
+                    <img src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
+                </span>
+                <span class="triangle-crafting-slot triangle-crafting-slot-diagonal triangle-crafting-slot-left-3" data-triangle-craft-slot data-slot-angle="-60">
+                    <img src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
+                </span>
+                <span class="triangle-crafting-slot triangle-crafting-slot-diagonal triangle-crafting-slot-right-3" data-triangle-craft-slot data-slot-angle="60">
+                    <img src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
+                </span>
+                <span class="triangle-crafting-slot triangle-crafting-slot-top triangle-crafting-slot-top-1" data-triangle-craft-slot data-slot-angle="0">
+                    <img src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
+                </span>
+                <span class="triangle-crafting-slot triangle-crafting-slot-top triangle-crafting-slot-top-2" data-triangle-craft-slot data-slot-angle="0">
+                    <img src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
+                </span>
+                <span class="triangle-crafting-slot triangle-crafting-slot-foundation" data-triangle-craft-slot data-slot-angle="0">
+                    <img src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
+                </span>
+            </div>
+            <img class="triangle-crafted-bridge" src="assets/Shape UI/bridge.webp" alt="Completed wooden bridge" hidden>
+            <div class="triangle-bridge-build-overlay" aria-hidden="true" hidden>
+                <div class="triangle-build-hammer-path">
+                    <img class="triangle-build-hammer" src="assets/Shape UI/hammer-build.png" alt="">
+                </div>
+                <div class="triangle-build-smoke">
+                    <img src="assets/Shape UI/clouds.webp" alt="">
+                    <img src="assets/Shape UI/clouds.webp" alt="">
+                    <img src="assets/Shape UI/clouds.webp" alt="">
+                    <img src="assets/Shape UI/clouds.webp" alt="">
+                    <img src="assets/Shape UI/clouds.webp" alt="">
+                    <img src="assets/Shape UI/clouds.webp" alt="">
+                    <img src="assets/Shape UI/clouds.webp" alt="">
+                    <img src="assets/Shape UI/clouds.webp" alt="">
+                    <img src="assets/Shape UI/clouds.webp" alt="">
+                    <img src="assets/Shape UI/clouds.webp" alt="">
+                    <img src="assets/Shape UI/clouds.webp" alt="">
+                    <img src="assets/Shape UI/clouds.webp" alt="">
+                </div>
+            </div>
+        </section>
         <img class="triangle-game-character" src="assets/Character/ch6.webp" alt="" aria-hidden="true" hidden>
         <div class="triangle-game-message-panel" role="status" aria-live="polite" hidden>
             <span class="triangle-game-message-content">
@@ -1037,7 +1093,7 @@
         </a>
     </section>
 
-    <script src="script.js?v=20260913-254"></script>
+    <script src="script.js?v=20260913-272"></script>
     </div>
 
     <script>
