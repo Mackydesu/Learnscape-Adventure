@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260913-276';
+    const appVersion = '20260913-287';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -2897,15 +2897,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const triangleWoodStorage = triangleGamePage?.querySelector('.triangle-wood-storage') || null;
     const triangleWoodStorageImage = triangleWoodStorage?.querySelector('.triangle-wood-storage-image') || null;
     const triangleWoodStorageCount = triangleWoodStorage?.querySelector('[data-triangle-wood-count]') || null;
+    const triangleWoodDragGuide = triangleGamePage?.querySelector('.triangle-wood-drag-guide') || null;
     const triangleCraftingPanel = triangleGamePage?.querySelector('.triangle-crafting-panel') || null;
     const triangleCraftingShapes = triangleCraftingPanel?.querySelector('.triangle-crafting-shapes') || null;
     const triangleCraftingSlots = Array.from(triangleCraftingPanel?.querySelectorAll('[data-triangle-craft-slot]') || []);
     const triangleBridgeBuildOverlay = triangleCraftingPanel?.querySelector('.triangle-bridge-build-overlay') || null;
     const triangleCraftedBridge = triangleCraftingPanel?.querySelector('.triangle-crafted-bridge') || null;
     const triangleGameCompleteTitle = triangleGamePage?.querySelector('.triangle-game-complete-title') || null;
+    const triangleGameCompleteConfetti = triangleGamePage?.querySelector('.triangle-game-complete-confetti') || null;
     const triangleGameCompleteCharacterSequence = triangleGamePage?.querySelector('.triangle-game-complete-character-sequence') || null;
     const triangleGameCompleteWalkingCharacter = triangleGamePage?.querySelector('.triangle-game-complete-walking-character') || null;
     const triangleGameCompleteArrivalCharacter = triangleGamePage?.querySelector('.triangle-game-complete-arrival-character') || null;
+    const triangleGameCompleteProgress = triangleGamePage?.querySelector('.triangle-game-complete-progress') || null;
+    const triangleGameCompleteReplayButton = triangleGameCompleteProgress?.querySelector('[data-triangle-game-replay]') || null;
+    const triangleGameCompleteNextButton = triangleGameCompleteProgress?.querySelector('[data-triangle-game-next]') || null;
     const triangleGameTreeSources = [
         'assets/Shape UI/tree1.webp',
         'assets/Shape UI/tree2.webp',
@@ -2943,10 +2948,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     let triangleWoodSnapInProgress = false;
     let triangleBridgeBuildSession = 0;
     let triangleBridgeBuildTimers = [];
+    let triangleWoodGuideIdleTimer = null;
     let triangleGameCompleteVoiceAudio = null;
     let triangleGameCompleteCheeringAudio = null;
+    let triangleGameCompleteWalkLoopTimer = null;
+
+    const prepareTriangleGameCompleteConfetti = () => {
+        if (!triangleGameCompleteConfetti || triangleGameCompleteConfetti.childElementCount) return;
+        const colors = ['#ff4f64', '#ffd83d', '#38c7e8', '#70d34b', '#ff8f32', '#f17ac6', '#ffffff'];
+        Array.from({ length: 56 }, (_, index) => {
+            const piece = document.createElement('span');
+            piece.style.setProperty('--confetti-x', `${(index * 37) % 101}%`);
+            piece.style.setProperty('--confetti-color', colors[index % colors.length]);
+            piece.style.setProperty('--confetti-delay', `${-((index * 0.19) % 4.1)}s`);
+            piece.style.setProperty('--confetti-duration', `${2.8 + ((index * 13) % 16) / 10}s`);
+            piece.style.setProperty('--confetti-drift', `${((index * 31) % 180) - 90}px`);
+            piece.style.setProperty('--confetti-size', `${0.42 + ((index * 7) % 12) / 10}rem`);
+            triangleGameCompleteConfetti.appendChild(piece);
+            return piece;
+        });
+    };
 
     const stopTriangleGameCompletionSequence = () => {
+        if (triangleGameCompleteWalkLoopTimer !== null) {
+            window.clearTimeout(triangleGameCompleteWalkLoopTimer);
+            triangleGameCompleteWalkLoopTimer = null;
+        }
         triangleGameCompleteVoiceAudio?.pause?.();
         triangleGameCompleteCheeringAudio?.pause?.();
         triangleGameCompleteVoiceAudio = null;
@@ -2955,28 +2982,90 @@ document.addEventListener('DOMContentLoaded', async () => {
             triangleGameCompleteTitle.hidden = true;
             triangleGameCompleteTitle.classList.remove('is-visible');
         }
+        if (triangleGameCompleteConfetti) {
+            triangleGameCompleteConfetti.hidden = true;
+            triangleGameCompleteConfetti.classList.remove('is-active');
+        }
         if (triangleGameCompleteCharacterSequence) {
             triangleGameCompleteCharacterSequence.hidden = true;
-            triangleGameCompleteCharacterSequence.classList.remove('is-walking', 'is-arrived');
+            triangleGameCompleteCharacterSequence.classList.remove('is-walking', 'is-arrived', 'is-leaving');
         }
         if (triangleGameCompleteWalkingCharacter) triangleGameCompleteWalkingCharacter.hidden = false;
         if (triangleGameCompleteArrivalCharacter) triangleGameCompleteArrivalCharacter.hidden = true;
+        if (triangleGameCompleteProgress) triangleGameCompleteProgress.setAttribute('aria-hidden', 'true');
+        triangleGamePage?.classList.remove('is-game-progress-visible');
+    };
+
+    const showTriangleGameCompleteProgress = () => {
+        if (!triangleGamePage?.classList.contains('is-bridge-complete-scene') || !triangleGameCompleteProgress) return;
+        if (triangleGameCompleteTitle) {
+            triangleGameCompleteTitle.classList.remove('is-visible');
+            triangleGameCompleteTitle.hidden = true;
+        }
+        if (triangleGameCompleteConfetti) {
+            triangleGameCompleteConfetti.classList.remove('is-active');
+            triangleGameCompleteConfetti.hidden = true;
+        }
+        triangleGameCompleteProgress.setAttribute('aria-hidden', 'false');
+        triangleGamePage.classList.add('is-game-progress-visible');
+        playUiClickSound('boardSuccess');
+        triangleBridgeBuildTimers.push(window.setTimeout(() => {
+            if (triangleGamePage.classList.contains('is-game-progress-visible')) playUiClickSound('starPop');
+        }, 650));
+    };
+
+    const startTriangleGameCompletionExitWalk = () => {
+        if (!triangleGameCompleteCharacterSequence || !triangleGamePage?.classList.contains('is-bridge-complete-scene')) return;
+        triangleGameCompleteCharacterSequence.classList.remove('is-walking', 'is-arrived', 'is-leaving');
+        if (triangleGameCompleteArrivalCharacter) triangleGameCompleteArrivalCharacter.hidden = true;
+        if (triangleGameCompleteWalkingCharacter) {
+            triangleGameCompleteWalkingCharacter.hidden = false;
+            triangleGameCompleteWalkingCharacter.src = `${triangleGameCompleteWalkingSource}?leave=${Date.now()}`;
+        }
+        triangleGameCompleteCharacterSequence.getBoundingClientRect();
+
+        let hasStarted = false;
+        const startLeaving = () => {
+            if (hasStarted || !triangleGamePage.classList.contains('is-bridge-complete-scene')) return;
+            hasStarted = true;
+            triangleGameCompleteCharacterSequence.hidden = false;
+            triangleGameCompleteCharacterSequence.classList.add('is-leaving');
+            triangleGameCompleteWalkLoopTimer = window.setTimeout(() => {
+                triangleGameCompleteWalkLoopTimer = null;
+                if (
+                    triangleGameCompleteCharacterSequence.classList.contains('is-leaving')
+                    && triangleGameCompleteWalkingCharacter
+                ) triangleGameCompleteWalkingCharacter.src = `${triangleGameCompleteWalkingSource}?leave-loop=${Date.now()}`;
+            }, 2140);
+        };
+        if (!triangleGameCompleteWalkingCharacter || triangleGameCompleteWalkingCharacter.complete) {
+            startLeaving();
+        } else {
+            triangleGameCompleteWalkingCharacter.addEventListener('load', startLeaving, { once: true });
+            triangleGameCompleteWalkingCharacter.addEventListener('error', startLeaving, { once: true });
+        }
     };
 
     const playTriangleGameCompletionAudio = () => {
         if (!window.Audio || !triangleGamePage?.classList.contains('is-bridge-complete-scene')) return;
 
+        let cheeringStarted = false;
         const playCheering = () => {
-            if (!triangleGamePage?.classList.contains('is-bridge-complete-scene')) return;
+            if (cheeringStarted || !triangleGamePage?.classList.contains('is-bridge-complete-scene')) return;
+            cheeringStarted = true;
             const cheeringAudio = new window.Audio(triangleGameCompleteCheeringSource);
             triangleGameCompleteCheeringAudio = cheeringAudio;
             cheeringAudio.preload = 'auto';
             cheeringAudio.playsInline = true;
             cheeringAudio.onended = () => {
-                if (triangleGameCompleteCheeringAudio === cheeringAudio) triangleGameCompleteCheeringAudio = null;
+                if (triangleGameCompleteCheeringAudio !== cheeringAudio) return;
+                triangleGameCompleteCheeringAudio = null;
+                startTriangleGameCompletionExitWalk();
             };
             cheeringAudio.play().catch(() => {
-                if (triangleGameCompleteCheeringAudio === cheeringAudio) triangleGameCompleteCheeringAudio = null;
+                if (triangleGameCompleteCheeringAudio !== cheeringAudio) return;
+                triangleGameCompleteCheeringAudio = null;
+                startTriangleGameCompletionExitWalk();
             });
         };
 
@@ -2990,6 +3079,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             playCheering();
         };
         voiceAudio.onended = finishVoice;
+        voiceAudio.addEventListener('timeupdate', () => {
+            if (
+                Number.isFinite(voiceAudio.duration)
+                && voiceAudio.duration - voiceAudio.currentTime <= 0.65
+            ) playCheering();
+        });
         voiceAudio.play().catch(finishVoice);
     };
 
@@ -3002,7 +3097,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             triangleGameCompleteTitle.classList.add('is-visible');
         }
         triangleGameCompleteCharacterSequence.hidden = true;
-        triangleGameCompleteCharacterSequence.classList.remove('is-walking', 'is-arrived');
+        triangleGameCompleteCharacterSequence.classList.remove('is-walking', 'is-arrived', 'is-leaving');
         if (triangleGameCompleteArrivalCharacter) triangleGameCompleteArrivalCharacter.hidden = true;
         if (triangleGameCompleteWalkingCharacter) {
             triangleGameCompleteWalkingCharacter.hidden = false;
@@ -3027,6 +3122,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     triangleGameCompleteCharacterSequence?.addEventListener('animationend', (event) => {
         if (
+            event.target === triangleGameCompleteCharacterSequence
+            && event.animationName === 'triangleGameCompletedBridgeExitDesktop'
+            && triangleGamePage?.classList.contains('is-bridge-complete-scene')
+        ) {
+            if (triangleGameCompleteWalkLoopTimer !== null) {
+                window.clearTimeout(triangleGameCompleteWalkLoopTimer);
+                triangleGameCompleteWalkLoopTimer = null;
+            }
+            triangleGameCompleteCharacterSequence.hidden = true;
+            triangleGameCompleteCharacterSequence.classList.remove('is-leaving');
+            showTriangleGameCompleteProgress();
+            return;
+        }
+        if (
             event.target !== triangleGameCompleteCharacterSequence
             || event.animationName !== 'triangleGameCompletedBridgeWalkDesktop'
             || !triangleGamePage?.classList.contains('is-bridge-complete-scene')
@@ -3035,7 +3144,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (triangleGameCompleteArrivalCharacter) triangleGameCompleteArrivalCharacter.hidden = false;
         triangleGameCompleteCharacterSequence.classList.remove('is-walking');
         triangleGameCompleteCharacterSequence.classList.add('is-arrived');
+        if (triangleGameCompleteConfetti) {
+            prepareTriangleGameCompleteConfetti();
+            triangleGameCompleteConfetti.hidden = false;
+            triangleGameCompleteConfetti.classList.remove('is-active');
+            triangleGameCompleteConfetti.getBoundingClientRect();
+            triangleGameCompleteConfetti.classList.add('is-active');
+        }
         playTriangleGameCompletionAudio();
+    });
+
+    triangleGameCompleteReplayButton?.addEventListener('click', () => {
+        triangleGamePage?.classList.remove('is-game-progress-visible');
+        triangleGameCompleteProgress?.setAttribute('aria-hidden', 'true');
+        startTriangleGameDialogue();
+    });
+
+    triangleGameCompleteNextButton?.addEventListener('click', () => {
+        window.location.hash = '#game3';
     });
 
     triangleGameTreeSources.forEach((source) => {
@@ -3049,7 +3175,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         triangleBridgeBuildTimers.forEach((timerId) => window.clearTimeout(timerId));
         triangleBridgeBuildTimers = [];
         triangleWoodCollected = 0;
-        triangleGamePage?.classList.remove('is-switching-completed-background', 'is-bridge-complete-scene');
+        hideTriangleWoodDragGuide();
+        triangleGamePage?.classList.remove('is-switching-completed-background', 'is-bridge-complete-scene', 'is-game-progress-visible');
         stopTriangleGameCompletionSequence();
         if (triangleGameBackground) triangleGameBackground.src = triangleGameBackgroundSource;
         triangleGameTreeGroup?.classList.remove('is-active', 'is-over-tree', 'is-exiting');
@@ -3251,6 +3378,53 @@ document.addEventListener('DOMContentLoaded', async () => {
         advance();
     });
 
+    const getNextTriangleCraftingSlot = () => triangleCraftingSlots.find((slot) => !slot.classList.contains('is-filled')) || null;
+
+    const hideTriangleWoodDragGuide = () => {
+        if (triangleWoodGuideIdleTimer !== null) {
+            window.clearTimeout(triangleWoodGuideIdleTimer);
+            triangleWoodGuideIdleTimer = null;
+        }
+        if (!triangleWoodDragGuide) return;
+        triangleWoodDragGuide.hidden = true;
+        triangleWoodDragGuide.classList.remove('is-active');
+    };
+
+    const showTriangleWoodDragGuide = () => {
+        const nextSlot = getNextTriangleCraftingSlot();
+        if (
+            !triangleGamePage
+            || !triangleWoodDragGuide
+            || !triangleWoodStorageImage
+            || !nextSlot
+            || !triangleWoodStorage?.classList.contains('is-crafting')
+            || triangleWoodCollected <= 0
+            || triangleWoodDrag
+            || triangleWoodSnapInProgress
+        ) return;
+
+        const pageRect = triangleGamePage.getBoundingClientRect();
+        const storageRect = triangleWoodStorageImage.getBoundingClientRect();
+        const slotRect = nextSlot.getBoundingClientRect();
+        triangleWoodDragGuide.style.setProperty('--guide-start-x', `${storageRect.left - pageRect.left + (storageRect.width / 2)}px`);
+        triangleWoodDragGuide.style.setProperty('--guide-start-y', `${storageRect.top - pageRect.top + (storageRect.height / 2)}px`);
+        triangleWoodDragGuide.style.setProperty('--guide-target-x', `${slotRect.left - pageRect.left + (slotRect.width / 2)}px`);
+        triangleWoodDragGuide.style.setProperty('--guide-target-y', `${slotRect.top - pageRect.top + (slotRect.height / 2)}px`);
+        triangleWoodDragGuide.hidden = false;
+        triangleWoodDragGuide.classList.remove('is-active');
+        triangleWoodDragGuide.getBoundingClientRect();
+        triangleWoodDragGuide.classList.add('is-active');
+    };
+
+    const scheduleTriangleWoodDragGuide = (delay = 5600) => {
+        hideTriangleWoodDragGuide();
+        const session = triangleWoodCollectionSession;
+        triangleWoodGuideIdleTimer = window.setTimeout(() => {
+            triangleWoodGuideIdleTimer = null;
+            if (session === triangleWoodCollectionSession) showTriangleWoodDragGuide();
+        }, delay);
+    };
+
     const showTriangleCraftingPanel = (session) => {
         if (session !== triangleWoodCollectionSession || !triangleCraftingPanel || !triangleWoodStorage) return;
         triangleCraftingPanel.hidden = false;
@@ -3261,6 +3435,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         triangleWoodStorageImage?.setAttribute('tabindex', '0');
         triangleWoodStorageImage?.setAttribute('aria-label', 'Drag a wood block to the triangle crafting panel');
         playUiClickSound('chime');
+        scheduleTriangleWoodDragGuide(700);
     };
 
     const storeTriangleWoodBlock = (session) => {
@@ -3344,8 +3519,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         });
     };
-
-    const getNextTriangleCraftingSlot = () => triangleCraftingSlots.find((slot) => !slot.classList.contains('is-filled')) || null;
 
     const createTriangleWoodDragGhost = (clientX, clientY) => {
         if (!triangleGamePage) return null;
@@ -3499,6 +3672,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             triangleGameDialogueTimers.push(window.setTimeout(() => slot.classList.remove('is-snapping'), 420));
 
             if (triangleCraftingSlots.every((craftingSlot) => craftingSlot.classList.contains('is-filled'))) {
+                hideTriangleWoodDragGuide();
                 triangleWoodStorage?.classList.remove('is-crafting');
                 triangleWoodStorageImage?.setAttribute('tabindex', '-1');
                 triangleWoodStorageImage?.setAttribute('aria-label', 'All wood blocks have been placed');
@@ -3537,6 +3711,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ) return;
         const ghost = createTriangleWoodDragGhost(event.clientX, event.clientY);
         if (!ghost) return;
+        hideTriangleWoodDragGuide();
         triangleWoodDrag = {
             ghost,
             pointerId: event.pointerId,
@@ -3577,6 +3752,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             returnTriangleWoodToStorage(drag.ghost);
         }
+        scheduleTriangleWoodDragGuide();
     };
 
     triangleWoodStorageImage?.addEventListener('pointerdown', beginTriangleWoodDrag);
@@ -3588,13 +3764,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         if ((event.key !== 'Enter' && event.key !== ' ') || triangleWoodCollected <= 0 || triangleWoodSnapInProgress) return;
         const nextSlot = getNextTriangleCraftingSlot();
         if (!nextSlot) return;
+        hideTriangleWoodDragGuide();
         const storageRect = triangleWoodStorageImage.getBoundingClientRect();
         const ghost = createTriangleWoodDragGhost(
             storageRect.left + (storageRect.width / 2),
             storageRect.top + (storageRect.height / 2),
         );
         snapTriangleWoodIntoSlot(ghost, nextSlot, triangleWoodCollectionSession);
+        scheduleTriangleWoodDragGuide();
         event.preventDefault();
+    });
+
+    triangleGamePage?.addEventListener('pointermove', () => {
+        if (
+            triangleWoodDragGuide?.hidden
+            && triangleWoodStorage?.classList.contains('is-crafting')
+            && !triangleWoodDrag
+            && !triangleWoodSnapInProgress
+        ) scheduleTriangleWoodDragGuide();
     });
 
     const advanceTriangleGameTree = (tree) => {

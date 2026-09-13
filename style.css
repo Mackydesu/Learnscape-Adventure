@@ -3654,6 +3654,7 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 .triangle-game-character[hidden],
 .triangle-game-message-panel[hidden],
 .triangle-game-complete-title[hidden],
+.triangle-game-complete-confetti[hidden],
 .triangle-game-complete-character-sequence[hidden],
 .triangle-game-complete-walking-character[hidden],
 .triangle-game-complete-arrival-character[hidden] {
@@ -3697,16 +3698,50 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
         transform: translate(-50%, 0) scale(1);
     }
 
+    .triangle-game-complete-confetti {
+        position: absolute;
+        inset: 0;
+        z-index: 9;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .triangle-game-complete-confetti span {
+        position: absolute;
+        left: var(--confetti-x);
+        top: -10%;
+        display: block;
+        width: var(--confetti-size);
+        height: calc(var(--confetti-size) * 0.55);
+        border-radius: 0.12rem;
+        background: var(--confetti-color);
+        box-shadow: 0 0.08rem 0.12rem rgba(61, 43, 10, 0.18);
+        opacity: 0;
+    }
+
+    .triangle-game-complete-confetti.is-active span {
+        animation: circleHuntConfettiFall var(--confetti-duration) linear var(--confetti-delay) infinite;
+    }
+
+    .triangle-game-complete-confetti span:nth-child(3n) {
+        border-radius: 50%;
+    }
+
+    .triangle-game-complete-confetti span:nth-child(4n) {
+        height: var(--confetti-size);
+        clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    }
+
     .triangle-game-complete-character-sequence {
         position: absolute;
-        left: 10%;
-        bottom: 46.5%;
+        left: 11.5%;
+        bottom: 42.7%;
         z-index: 10;
         display: flex;
         align-items: flex-end;
         justify-content: center;
-        width: clamp(9rem, 21vh, 14rem);
-        height: clamp(14rem, 31vh, 21rem);
+        width: clamp(10rem, 24vh, 16rem);
+        height: clamp(15rem, 35vh, 24rem);
         pointer-events: none;
         transform: translateX(-50%);
     }
@@ -3725,11 +3760,20 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     }
 
     .triangle-game-complete-character-sequence.is-walking {
-        animation: triangleGameCompletedBridgeWalkDesktop 4.2s linear forwards;
+        animation: triangleGameCompletedBridgeWalkDesktop 2.19s linear forwards;
     }
 
     .triangle-game-complete-character-sequence.is-arrived {
-        left: 88%;
+        left: 11.5%;
+    }
+
+    .triangle-game-complete-character-sequence.is-leaving {
+        animation: triangleGameCompletedBridgeExitDesktop 4.38s linear forwards;
+    }
+
+    .triangle-game-page.is-game-progress-visible .triangle-game-complete-progress {
+        display: grid;
+        z-index: 14;
     }
 
     .triangle-game-tree-group {
@@ -3749,6 +3793,40 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 
     .triangle-wood-storage[hidden] {
         display: none !important;
+    }
+
+    .triangle-wood-drag-guide[hidden] {
+        display: none !important;
+    }
+
+    .triangle-wood-drag-guide {
+        position: absolute;
+        left: var(--guide-start-x);
+        top: var(--guide-start-y);
+        z-index: 28;
+        width: clamp(7.5rem, 12vw, 11rem);
+        height: clamp(7.5rem, 12vw, 11rem);
+        opacity: 0;
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+    }
+
+    .triangle-wood-drag-guide.is-active {
+        animation: triangleWoodDragGuideMove 2.65s cubic-bezier(0.3, 0.05, 0.28, 1) infinite;
+    }
+
+    .triangle-wood-guide-hand {
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        filter:
+            drop-shadow(0 0.32rem 0.28rem rgba(48, 29, 11, 0.34))
+            drop-shadow(0 0 0.7rem rgba(255, 237, 94, 0.72));
+        transform: translateX(-50%) rotate(170deg);
     }
 
     .triangle-wood-storage {
@@ -4434,11 +4512,65 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 
 @keyframes triangleGameCompletedBridgeWalkDesktop {
     from {
-        left: 10%;
+        left: -12%;
     }
 
     to {
-        left: 88%;
+        left: 11.5%;
+    }
+}
+
+@keyframes triangleGameCompletedBridgeExitDesktop {
+    0% { left: 11.5%; bottom: 42.7%; }
+    7% { left: 16%; bottom: 48.5%; }
+    14% { left: 21%; bottom: 46.5%; }
+    70% { left: 80%; bottom: 46.5%; }
+    75% { left: 85%; bottom: 50%; }
+    82% { left: 93%; bottom: 42.7%; }
+    100% { left: 112%; bottom: 42.7%; }
+}
+
+@keyframes triangleWoodDragGuideMove {
+    0% {
+        left: var(--guide-start-x);
+        top: var(--guide-start-y);
+        opacity: 0;
+        transform: translate(-50%, -50%) rotate(-5deg) scale(1);
+    }
+    10% {
+        left: var(--guide-start-x);
+        top: var(--guide-start-y);
+        opacity: 1;
+    }
+    22% {
+        left: var(--guide-start-x);
+        top: var(--guide-start-y);
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(-5deg) scale(0.84);
+    }
+    34% {
+        left: var(--guide-start-x);
+        top: var(--guide-start-y);
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(-5deg) scale(0.92);
+    }
+    72% {
+        left: var(--guide-target-x);
+        top: var(--guide-target-y);
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(4deg) scale(0.92);
+    }
+    82% {
+        left: var(--guide-target-x);
+        top: var(--guide-target-y);
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(4deg) scale(1.08);
+    }
+    94%, 100% {
+        left: var(--guide-target-x);
+        top: var(--guide-target-y);
+        opacity: 0;
+        transform: translate(-50%, -50%) rotate(4deg) scale(1);
     }
 }
 

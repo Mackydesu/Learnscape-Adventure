@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260913-276">
+    <link rel="stylesheet" href="style.css?v=20260913-287">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -528,6 +528,7 @@
     <section id="learnscape-triangle-game-page" class="shape-area-page triangle-game-page" hidden>
         <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/trianglegame.webp" alt="Triangle bridge repair game" aria-hidden="true">
         <div class="triangle-game-complete-title" role="status" hidden>Bridge Complete</div>
+        <div class="triangle-game-complete-confetti" aria-hidden="true" hidden></div>
         <div class="triangle-game-complete-character-sequence" aria-hidden="true" hidden>
             <img class="triangle-game-complete-walking-character" src="assets/Character/walking.gif" alt="">
             <img class="triangle-game-complete-arrival-character" src="assets/Character/ch8.webp" alt="" hidden>
@@ -540,6 +541,9 @@
         <div class="triangle-wood-storage" role="status" aria-live="polite" aria-label="Collected wood blocks" hidden>
             <img class="triangle-wood-storage-image" src="assets/Shape UI/wood-block-stylized.png" alt="">
             <strong class="triangle-wood-storage-count"><span data-triangle-wood-count>0</span>/9</strong>
+        </div>
+        <div class="triangle-wood-drag-guide" aria-hidden="true" hidden>
+            <img class="triangle-wood-guide-hand" src="assets/Shape UI/drag-guide-hand.png?v=20260913-287" alt="">
         </div>
         <section class="triangle-crafting-panel" aria-label="Bridge crafting" hidden>
             <h2>Bridge Crafting</h2>
@@ -600,6 +604,31 @@
             </span>
         </div>
         <button class="circle-mission-start-button triangle-game-start-button" type="button" hidden>Start</button>
+        <section class="circle-lesson-progress triangle-game-complete-progress" aria-label="Bridge progress" aria-hidden="true">
+            <div class="circle-lesson-progress-board">
+                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/progressboard.webp" alt="">
+                <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Mission Complete!">
+                    <path id="triangleBridgeCompleteTitleCurve" d="M 4 44 Q 100 32 196 44" fill="none"></path>
+                    <text textLength="184" lengthAdjust="spacingAndGlyphs">
+                        <textPath href="#triangleBridgeCompleteTitleCurve" startOffset="50%" text-anchor="middle">Mission Complete!</textPath>
+                    </text>
+                </svg>
+                <div class="circle-lesson-stars" data-earned-stars="2" role="img" aria-label="2 of 3 stars earned">
+                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/1star.webp" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/2star.webp" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/1star.webp" alt=""></span>
+                </div>
+                <p class="circle-lesson-star-message">Well done!</p>
+                <div class="circle-lesson-progress-actions">
+                    <button class="circle-lesson-progress-button" type="button" data-triangle-game-replay aria-label="Replay bridge mission">
+                        <img src="assets/Buttons/replay.webp" alt="">
+                    </button>
+                    <button class="circle-lesson-progress-button" type="button" data-triangle-game-next aria-label="Continue to Shape Island">
+                        <img src="assets/Buttons/next.webp" alt="">
+                    </button>
+                </div>
+            </div>
+        </section>
         <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-3" aria-label="Return to Area 3">
             <span>‹</span>
             Back
@@ -1098,7 +1127,7 @@
         </a>
     </section>
 
-    <script src="script.js?v=20260913-276"></script>
+    <script src="script.js?v=20260913-287"></script>
     </div>
 
     <script>
