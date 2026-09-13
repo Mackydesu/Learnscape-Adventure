@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260913-272';
+    const appVersion = '20260913-276';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -2891,6 +2891,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const triangleGameMessageText = triangleGamePage?.querySelector('.triangle-game-message-text') || null;
     const triangleGameMessageLastWord = triangleGamePage?.querySelector('.triangle-game-message-last-word') || null;
     const triangleGameStartButton = triangleGamePage?.querySelector('.triangle-game-start-button') || null;
+    const triangleGameBackground = triangleGamePage?.querySelector('.shape-area-bg') || null;
     const triangleGameTreeGroup = triangleGamePage?.querySelector('.triangle-game-tree-group') || null;
     const triangleGameTrees = Array.from(triangleGamePage?.querySelectorAll('[data-triangle-game-tree]') || []);
     const triangleWoodStorage = triangleGamePage?.querySelector('.triangle-wood-storage') || null;
@@ -2901,12 +2902,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     const triangleCraftingSlots = Array.from(triangleCraftingPanel?.querySelectorAll('[data-triangle-craft-slot]') || []);
     const triangleBridgeBuildOverlay = triangleCraftingPanel?.querySelector('.triangle-bridge-build-overlay') || null;
     const triangleCraftedBridge = triangleCraftingPanel?.querySelector('.triangle-crafted-bridge') || null;
+    const triangleGameCompleteTitle = triangleGamePage?.querySelector('.triangle-game-complete-title') || null;
+    const triangleGameCompleteCharacterSequence = triangleGamePage?.querySelector('.triangle-game-complete-character-sequence') || null;
+    const triangleGameCompleteWalkingCharacter = triangleGamePage?.querySelector('.triangle-game-complete-walking-character') || null;
+    const triangleGameCompleteArrivalCharacter = triangleGamePage?.querySelector('.triangle-game-complete-arrival-character') || null;
     const triangleGameTreeSources = [
         'assets/Shape UI/tree1.webp',
         'assets/Shape UI/tree2.webp',
         'assets/Shape UI/tree3.webp',
         'assets/Shape UI/tree4.webp',
     ];
+    const triangleGameBackgroundSource = 'assets/Backgrounds/trianglegame.webp';
+    const triangleGameCompletedBackgroundSource = 'assets/Backgrounds/trianglegame1.webp';
+    const triangleGameCompleteWalkingSource = 'assets/Character/walking.gif';
+    const triangleGameCompleteVoiceSource = 'assets/Audios/Voice over/Mahusay.mp3';
+    const triangleGameCompleteCheeringSource = 'assets/Audios/Sound effects/kids cheering.mp3';
     const triangleGameMessages = [
         'Para sa ating triangle mission.',
         'Kailangan nating ayusin ang tulay upang makapagpatuloy!',
@@ -2933,6 +2943,100 @@ document.addEventListener('DOMContentLoaded', async () => {
     let triangleWoodSnapInProgress = false;
     let triangleBridgeBuildSession = 0;
     let triangleBridgeBuildTimers = [];
+    let triangleGameCompleteVoiceAudio = null;
+    let triangleGameCompleteCheeringAudio = null;
+
+    const stopTriangleGameCompletionSequence = () => {
+        triangleGameCompleteVoiceAudio?.pause?.();
+        triangleGameCompleteCheeringAudio?.pause?.();
+        triangleGameCompleteVoiceAudio = null;
+        triangleGameCompleteCheeringAudio = null;
+        if (triangleGameCompleteTitle) {
+            triangleGameCompleteTitle.hidden = true;
+            triangleGameCompleteTitle.classList.remove('is-visible');
+        }
+        if (triangleGameCompleteCharacterSequence) {
+            triangleGameCompleteCharacterSequence.hidden = true;
+            triangleGameCompleteCharacterSequence.classList.remove('is-walking', 'is-arrived');
+        }
+        if (triangleGameCompleteWalkingCharacter) triangleGameCompleteWalkingCharacter.hidden = false;
+        if (triangleGameCompleteArrivalCharacter) triangleGameCompleteArrivalCharacter.hidden = true;
+    };
+
+    const playTriangleGameCompletionAudio = () => {
+        if (!window.Audio || !triangleGamePage?.classList.contains('is-bridge-complete-scene')) return;
+
+        const playCheering = () => {
+            if (!triangleGamePage?.classList.contains('is-bridge-complete-scene')) return;
+            const cheeringAudio = new window.Audio(triangleGameCompleteCheeringSource);
+            triangleGameCompleteCheeringAudio = cheeringAudio;
+            cheeringAudio.preload = 'auto';
+            cheeringAudio.playsInline = true;
+            cheeringAudio.onended = () => {
+                if (triangleGameCompleteCheeringAudio === cheeringAudio) triangleGameCompleteCheeringAudio = null;
+            };
+            cheeringAudio.play().catch(() => {
+                if (triangleGameCompleteCheeringAudio === cheeringAudio) triangleGameCompleteCheeringAudio = null;
+            });
+        };
+
+        const voiceAudio = new window.Audio(triangleGameCompleteVoiceSource);
+        triangleGameCompleteVoiceAudio = voiceAudio;
+        voiceAudio.preload = 'auto';
+        voiceAudio.playsInline = true;
+        const finishVoice = () => {
+            if (triangleGameCompleteVoiceAudio !== voiceAudio) return;
+            triangleGameCompleteVoiceAudio = null;
+            playCheering();
+        };
+        voiceAudio.onended = finishVoice;
+        voiceAudio.play().catch(finishVoice);
+    };
+
+    const startTriangleGameCompletionSequence = () => {
+        if (!triangleGameCompleteCharacterSequence || !triangleGamePage?.classList.contains('is-bridge-complete-scene')) return;
+
+        if (triangleGameCompleteTitle) {
+            triangleGameCompleteTitle.hidden = false;
+            triangleGameCompleteTitle.getBoundingClientRect();
+            triangleGameCompleteTitle.classList.add('is-visible');
+        }
+        triangleGameCompleteCharacterSequence.hidden = true;
+        triangleGameCompleteCharacterSequence.classList.remove('is-walking', 'is-arrived');
+        if (triangleGameCompleteArrivalCharacter) triangleGameCompleteArrivalCharacter.hidden = true;
+        if (triangleGameCompleteWalkingCharacter) {
+            triangleGameCompleteWalkingCharacter.hidden = false;
+            triangleGameCompleteWalkingCharacter.src = `${triangleGameCompleteWalkingSource}?play=${Date.now()}`;
+        }
+        triangleGameCompleteCharacterSequence.getBoundingClientRect();
+
+        let hasStarted = false;
+        const startWalking = () => {
+            if (hasStarted || !triangleGamePage.classList.contains('is-bridge-complete-scene')) return;
+            hasStarted = true;
+            triangleGameCompleteCharacterSequence.hidden = false;
+            triangleGameCompleteCharacterSequence.classList.add('is-walking');
+        };
+        if (!triangleGameCompleteWalkingCharacter || triangleGameCompleteWalkingCharacter.complete) {
+            startWalking();
+        } else {
+            triangleGameCompleteWalkingCharacter.addEventListener('load', startWalking, { once: true });
+            triangleGameCompleteWalkingCharacter.addEventListener('error', startWalking, { once: true });
+        }
+    };
+
+    triangleGameCompleteCharacterSequence?.addEventListener('animationend', (event) => {
+        if (
+            event.target !== triangleGameCompleteCharacterSequence
+            || event.animationName !== 'triangleGameCompletedBridgeWalkDesktop'
+            || !triangleGamePage?.classList.contains('is-bridge-complete-scene')
+        ) return;
+        if (triangleGameCompleteWalkingCharacter) triangleGameCompleteWalkingCharacter.hidden = true;
+        if (triangleGameCompleteArrivalCharacter) triangleGameCompleteArrivalCharacter.hidden = false;
+        triangleGameCompleteCharacterSequence.classList.remove('is-walking');
+        triangleGameCompleteCharacterSequence.classList.add('is-arrived');
+        playTriangleGameCompletionAudio();
+    });
 
     triangleGameTreeSources.forEach((source) => {
         const image = new Image();
@@ -2945,7 +3049,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         triangleBridgeBuildTimers.forEach((timerId) => window.clearTimeout(timerId));
         triangleBridgeBuildTimers = [];
         triangleWoodCollected = 0;
-        triangleGameTreeGroup?.classList.remove('is-active', 'is-over-tree');
+        triangleGamePage?.classList.remove('is-switching-completed-background', 'is-bridge-complete-scene');
+        stopTriangleGameCompletionSequence();
+        if (triangleGameBackground) triangleGameBackground.src = triangleGameBackgroundSource;
+        triangleGameTreeGroup?.classList.remove('is-active', 'is-over-tree', 'is-exiting');
         triangleGamePage?.querySelectorAll('.triangle-wood-collectible').forEach((collectible) => collectible.remove());
         triangleWoodDrag?.ghost?.remove();
         triangleWoodDrag = null;
@@ -2953,7 +3060,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (triangleWoodStorageCount) triangleWoodStorageCount.textContent = '0';
         if (triangleWoodStorage) {
             triangleWoodStorage.hidden = true;
-            triangleWoodStorage.classList.remove('is-visible', 'is-storing', 'is-crafting');
+            triangleWoodStorage.classList.remove('is-visible', 'is-storing', 'is-crafting', 'is-exiting');
         }
         if (triangleWoodStorageImage) {
             triangleWoodStorageImage.classList.remove('is-drag-source');
@@ -2963,7 +3070,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         if (triangleCraftingPanel) {
             triangleCraftingPanel.hidden = true;
-            triangleCraftingPanel.classList.remove('is-visible', 'is-complete', 'is-building', 'is-bridge-revealed');
+            triangleCraftingPanel.classList.remove('is-visible', 'is-complete', 'is-building', 'is-bridge-revealed', 'is-exiting');
         }
         triangleCraftingShapes?.classList.remove('is-built-away');
         if (triangleBridgeBuildOverlay) {
@@ -3298,6 +3405,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         triangleBridgeBuildOverlay.classList.remove('is-building', 'is-clearing');
         triangleBridgeBuildOverlay.getBoundingClientRect();
         triangleBridgeBuildOverlay.classList.add('is-building');
+        const completedBackgroundPreloader = window.Image ? new window.Image() : null;
+        if (completedBackgroundPreloader) completedBackgroundPreloader.src = triangleGameCompletedBackgroundSource;
 
         [180, 620, 1060, 1500, 1940, 2380, 2820].forEach((delay) => {
             scheduleBuildStep(() => playUiClickSound('wood'), delay);
@@ -3319,6 +3428,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             triangleCraftingPanel.classList.remove('is-building');
             triangleCraftingPanel.classList.add('is-complete');
         }, 5000);
+
+        scheduleBuildStep(() => {
+            triangleGamePage?.classList.add('is-switching-completed-background');
+            triangleCraftingPanel.classList.add('is-exiting');
+            triangleWoodStorage?.classList.add('is-exiting');
+            triangleGameTreeGroup?.classList.add('is-exiting');
+        }, 6000);
+
+        scheduleBuildStep(() => {
+            if (triangleGameBackground) triangleGameBackground.src = triangleGameCompletedBackgroundSource;
+            triangleCraftingPanel.hidden = true;
+            if (triangleWoodStorage) triangleWoodStorage.hidden = true;
+            triangleGamePage?.classList.add('is-bridge-complete-scene');
+            window.requestAnimationFrame(() => {
+                if (
+                    buildSession === triangleBridgeBuildSession
+                    && collectionSession === triangleWoodCollectionSession
+                ) {
+                    triangleGamePage?.classList.remove('is-switching-completed-background');
+                    startTriangleGameCompletionSequence();
+                }
+            });
+        }, 6500);
     };
 
     const snapTriangleWoodIntoSlot = (ghost, slot, session) => {

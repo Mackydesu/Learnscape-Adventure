@@ -3643,14 +3643,95 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 
 .triangle-game-page .shape-area-bg {
     object-fit: cover;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+.triangle-game-page.is-switching-completed-background .shape-area-bg {
+    opacity: 0;
 }
 
 .triangle-game-character[hidden],
-.triangle-game-message-panel[hidden] {
+.triangle-game-message-panel[hidden],
+.triangle-game-complete-title[hidden],
+.triangle-game-complete-character-sequence[hidden],
+.triangle-game-complete-walking-character[hidden],
+.triangle-game-complete-arrival-character[hidden] {
     display: none !important;
 }
 
 @media (min-width: 901px) and (orientation: landscape) {
+    .triangle-game-complete-title {
+        position: absolute;
+        left: 50%;
+        top: clamp(1rem, 2.4vh, 1.65rem);
+        z-index: 12;
+        min-width: clamp(22rem, 36vw, 32rem);
+        box-sizing: border-box;
+        padding: clamp(0.7rem, 1.15vw, 1rem) clamp(1.7rem, 3vw, 2.7rem);
+        border: clamp(0.2rem, 0.32vw, 0.3rem) solid #6f3518;
+        border-radius: 0.5rem;
+        background: linear-gradient(180deg, #ffe27a 0%, #e99b32 54%, #9e4f1c 100%);
+        box-shadow:
+            inset 0 0.2rem 0 rgba(255, 255, 255, 0.68),
+            inset 0 -0.32rem 0 rgba(91, 39, 12, 0.24),
+            0 0.4rem 0 #48200e,
+            0 0.9rem 1.25rem rgba(34, 39, 18, 0.28);
+        color: #fffbd3;
+        font-family: 'Baloo 2', 'Nunito', sans-serif;
+        font-size: clamp(2.2rem, 3.8vw, 3.7rem);
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: 0;
+        text-align: center;
+        text-shadow: 0 0.1em 0 #753512, 0.06em 0.06em 0 #3b1b0b;
+        white-space: nowrap;
+        opacity: 0;
+        transform: translate(-50%, -0.55rem) scale(0.96);
+        transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.2, 1.12, 0.35, 1);
+        pointer-events: none;
+    }
+
+    .triangle-game-complete-title.is-visible {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+    }
+
+    .triangle-game-complete-character-sequence {
+        position: absolute;
+        left: 10%;
+        bottom: 46.5%;
+        z-index: 10;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        width: clamp(9rem, 21vh, 14rem);
+        height: clamp(14rem, 31vh, 21rem);
+        pointer-events: none;
+        transform: translateX(-50%);
+    }
+
+    .triangle-game-complete-character-sequence img {
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        display: block;
+        width: auto;
+        height: 100%;
+        object-fit: contain;
+        object-position: center bottom;
+        filter: drop-shadow(0 0.7rem 0.65rem rgba(38, 45, 22, 0.3));
+        transform: translateX(-50%);
+    }
+
+    .triangle-game-complete-character-sequence.is-walking {
+        animation: triangleGameCompletedBridgeWalkDesktop 4.2s linear forwards;
+    }
+
+    .triangle-game-complete-character-sequence.is-arrived {
+        left: 88%;
+    }
+
     .triangle-game-tree-group {
         position: absolute;
         inset: 0;
@@ -3697,12 +3778,20 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
         opacity: 0;
         transform: translate(-50%, 1rem) scale(0.82);
         pointer-events: none;
+        opacity: 1;
+        transition: opacity 0.42s ease;
     }
 
     .triangle-wood-storage.is-visible {
         opacity: 1;
         transform: translate(-50%, 0) scale(1);
         transition: opacity 0.3s ease, transform 0.42s cubic-bezier(0.2, 1.25, 0.35, 1);
+    }
+
+    .triangle-wood-storage.is-exiting {
+        opacity: 0;
+        transform: translate(-50%, 0.8rem) scale(0.9);
+        transition: opacity 0.38s ease, transform 0.42s ease;
     }
 
     .triangle-wood-storage.is-visible.is-storing .triangle-wood-storage-image {
@@ -3800,6 +3889,22 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     .triangle-crafting-panel.is-visible {
         opacity: 1;
         transform: translate(-50%, -50%) scale(1);
+    }
+
+    .triangle-crafting-panel.is-exiting {
+        opacity: 0;
+        transform: translate(-50%, -48%) scale(0.94);
+        transition: opacity 0.42s ease, transform 0.48s ease;
+    }
+
+    .triangle-game-tree-group.is-exiting {
+        opacity: 0;
+    }
+
+    .triangle-game-page.is-bridge-complete-scene .triangle-game-tree-group,
+    .triangle-game-page.is-bridge-complete-scene .triangle-wood-storage,
+    .triangle-game-page.is-bridge-complete-scene .triangle-crafting-panel {
+        display: none !important;
     }
 
     .triangle-crafting-panel h2 {
@@ -4023,8 +4128,8 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 
     .triangle-build-hammer-path {
         position: absolute;
-        left: 8%;
-        top: 5%;
+        left: 5%;
+        top: 35%;
         z-index: 6;
         width: clamp(8rem, 15vw, 14rem);
         aspect-ratio: 1;
@@ -4327,6 +4432,16 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
+@keyframes triangleGameCompletedBridgeWalkDesktop {
+    from {
+        left: 10%;
+    }
+
+    to {
+        left: 88%;
+    }
+}
+
 @keyframes triangleBuildHammerStrike {
     0%, 100% { transform: rotate(-24deg) scale(1); }
     42% { transform: rotate(18deg) scale(0.98); }
@@ -4335,12 +4450,9 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 }
 
 @keyframes triangleBuildHammerTravel {
-    0%, 16% { left: 6%; top: 3%; }
-    20%, 35% { left: 29%; top: 16%; }
-    39%, 54% { left: 53%; top: 4%; }
-    58%, 73% { left: 76%; top: 17%; }
-    77%, 88% { left: 58%; top: 43%; }
-    92%, 100% { left: 23%; top: 46%; }
+    0% { left: 5%; top: 35%; opacity: 1; }
+    84% { left: 78%; top: 35%; opacity: 1; }
+    100% { left: 78%; top: 35%; opacity: 0; }
 }
 
 @keyframes triangleBuildSmokeCloud {
