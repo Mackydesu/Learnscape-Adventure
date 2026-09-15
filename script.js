@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260913-287';
+    const appVersion = '20260915-289';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapePreviewPages = Array.from(document.querySelectorAll('.shape-area-preview-page'));
     const shapePreviewProgressByPage = new Map();
     const shapePreviewIntroStates = new Map();
-    const shapePreviewBridgeCleanupByPage = new Map();
+    const shapePreviewSceneCleanupByPage = new Map();
 
     shapePreviewPages.forEach((page, pageIndex) => {
         const progress = document.createElement('section');
@@ -332,7 +332,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     let shapeCircleSession = 0;
     let shapeCircleIntroAudio = null;
     let shapeCircleAudioFrame = null;
-    let shapeCircleAdvanceIntro = null;
     const shapeSquareWelcomeMessage = 'Maligayang pagbabalik!';
     const shapeSquareCelebrationMessages = [
         'Matagumpay mong natapos ang Circle Mission!',
@@ -423,7 +422,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     let shapeSquareCelebrationAudio = null;
     let shapeSquareChocolateQuestionAudio = null;
     let shapeSquareAreaIntroFrame = null;
-    let shapeSquareAdvanceIntro = null;
     let shapeSquareStartPressTimer = null;
     let shapeSquareCelebrationTimers = [];
     let squareObjectActiveDrag = null;
@@ -546,7 +544,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         clearShapeCircleTimers();
         stopShapeCircleIntroAudio();
-        shapeCircleAdvanceIntro = null;
         shapeCirclePage?.classList.remove('is-intro-click-ready');
 
         const lastMessageIndex = shapeCircleBubbleCh3Messages.length - 1;
@@ -573,7 +570,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const clearShapeCircleTimers = () => {
         shapeCircleTimers.forEach((timerId) => window.clearTimeout(timerId));
         shapeCircleTimers = [];
-        shapeCircleAdvanceIntro = null;
         shapeCirclePage?.classList.remove('is-intro-click-ready');
     };
 
@@ -769,12 +765,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         const playStage = (stageIndex) => {
             if (session !== shapeCircleSession || !introStages[stageIndex]) return;
             showStage(stageIndex);
-            shapeCircleAdvanceIntro = null;
             shapeCirclePage.classList.remove('is-intro-click-ready');
             let textFinished = false;
             let audioFinished = false;
+            let stageComplete = false;
+            let audioCompletionScheduled = false;
+            const stageStartedAt = performance.now();
+            const minimumAudioMs = introStages[stageIndex].audio?.type === 'segment'
+                ? (introStages[stageIndex].audio.end - introStages[stageIndex].audio.start) * 1000
+                : 1200;
             const unlockMessage = () => {
-                if (!textFinished || !audioFinished || session !== shapeCircleSession) return;
+                if (!textFinished || !audioFinished || stageComplete || session !== shapeCircleSession) return;
+                stageComplete = true;
                 shapeCircleBubbleCh3.classList.add('is-message-complete');
                 if (stageIndex >= introStages.length - 1) {
                     shapeCircleLearningGoal?.classList.add('is-start-ready');
@@ -784,8 +786,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                     return;
                 }
-                shapeCirclePage.classList.add('is-intro-click-ready');
-                shapeCircleAdvanceIntro = () => playStage(stageIndex + 1);
+                playStage(stageIndex + 1);
             };
             typeMessage(introStages[stageIndex].message, () => {
                 textFinished = true;
@@ -793,8 +794,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 unlockMessage();
             });
             const finishAudio = () => {
-                audioFinished = true;
-                unlockMessage();
+                if (audioCompletionScheduled) return;
+                audioCompletionScheduled = true;
+                const remainingMs = Math.max(0, minimumAudioMs - (performance.now() - stageStartedAt));
+                shapeCircleTimers.push(window.setTimeout(() => {
+                    audioFinished = true;
+                    unlockMessage();
+                }, remainingMs));
             };
 
             const audio = introStages[stageIndex].audio;
@@ -811,7 +817,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const clearShapeSquareTimers = () => {
         shapeSquareTimers.forEach((timerId) => window.clearTimeout(timerId));
         shapeSquareTimers = [];
-        shapeSquareAdvanceIntro = null;
         shapeSquarePage?.classList.remove('is-intro-click-ready');
         shapeSquareBubble?.classList.remove('is-message-complete');
     };
@@ -2260,14 +2265,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             bubbleText,
             dots,
             startButton,
-            advance: null,
         };
-        page.addEventListener('click', (event) => {
-            if (event.target.closest('a, button') || typeof state.advance !== 'function') return;
-            const advance = state.advance;
-            state.advance = null;
-            advance();
-        });
         shapePreviewIntroStates.set(page, state);
         return state;
     };
@@ -2297,7 +2295,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         state.bubble.classList.remove('is-ch9', 'is-ch4', 'is-ch5', 'is-entering', 'is-exiting', 'is-message-changing');
         state.bubbleText.textContent = shapeSquareWelcomeMessage;
         state.activeStage = 0;
-        state.advance = null;
         if (state.startButton) state.startButton.hidden = true;
         page.classList.remove('is-preview-intro-active', 'is-intro-click-ready');
     };
@@ -2420,19 +2417,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         const playStage = (stageIndex) => {
             if (session !== state.session || !stages[stageIndex]) return;
             showStage(stageIndex);
-            state.advance = null;
             page.classList.remove('is-intro-click-ready');
             let textFinished = false;
             let audioFinished = false;
+            let stageComplete = false;
+            let audioCompletionScheduled = false;
+            const stageStartedAt = performance.now();
+            const minimumAudioMs = [1200, 3000, 2400, 3600, 1200][stageIndex];
             const unlockMessage = () => {
-                if (!textFinished || !audioFinished || session !== state.session) return;
+                if (!textFinished || !audioFinished || stageComplete || session !== state.session) return;
+                stageComplete = true;
                 state.bubble.classList.add('is-message-complete');
                 if (stageIndex >= stages.length - 1) {
                     if (state.startButton) state.startButton.hidden = false;
                     return;
                 }
-                page.classList.add('is-intro-click-ready');
-                state.advance = () => playStage(stageIndex + 1);
+                playStage(stageIndex + 1);
             };
             typeMessage(stages[stageIndex].message, () => {
                 textFinished = true;
@@ -2440,8 +2440,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 unlockMessage();
             });
             const finishAudio = () => {
-                audioFinished = true;
-                unlockMessage();
+                if (audioCompletionScheduled) return;
+                audioCompletionScheduled = true;
+                const remainingMs = Math.max(0, minimumAudioMs - (performance.now() - stageStartedAt));
+                state.timers.push(window.setTimeout(() => {
+                    audioFinished = true;
+                    unlockMessage();
+                }, remainingMs));
             };
 
             if (stageIndex === 0) {
@@ -2468,7 +2473,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const resetShapePreviewPage = (page) => {
         if (!page) return;
 
-        shapePreviewBridgeCleanupByPage.get(page)?.();
+        shapePreviewSceneCleanupByPage.get(page)?.();
         stopShapePreviewIntro(page);
 
         const background = page.querySelector('.shape-area-bg');
@@ -2483,6 +2488,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const bridgeCharacterSequence = page.querySelector('.triangle-bridge-character-sequence');
         const bridgeWalkingCharacter = page.querySelector('.triangle-bridge-walking-character');
         const bridgeArrivalCharacter = page.querySelector('.triangle-bridge-arrival-character');
+        const jeepSequence = page.querySelector('.rectangle-jeep-sequence');
+        const drivingJeep = page.querySelector('.rectangle-jeep-driving');
+        const arrivedJeep = page.querySelector('.rectangle-jeep-arrived');
         const areaBackgroundSource = page.dataset.areaBackground;
         if (background && areaBackgroundSource) {
             background.src = areaBackgroundSource;
@@ -2509,6 +2517,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         if (bridgeWalkingCharacter) bridgeWalkingCharacter.hidden = false;
         if (bridgeArrivalCharacter) bridgeArrivalCharacter.hidden = true;
+        if (jeepSequence) {
+            jeepSequence.hidden = true;
+            jeepSequence.classList.remove('is-driving', 'is-arrived');
+        }
+        if (drivingJeep) drivingJeep.hidden = false;
+        if (arrivedJeep) arrivedJeep.hidden = true;
         videoStage?.setAttribute('aria-hidden', 'true');
         shapePreviewProgressByPage.get(page)?.setAttribute('aria-hidden', 'true');
         page.classList.remove('is-transitioning-to-illustration', 'is-illustration-background', 'is-tv-lesson-image-visible', 'is-progress-visible', 'is-next-background', 'is-fading-to-triangle-game');
@@ -2607,6 +2621,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const bridgeCharacterSequence = page.querySelector('.triangle-bridge-character-sequence');
         const bridgeWalkingCharacter = page.querySelector('.triangle-bridge-walking-character');
         const bridgeArrivalCharacter = page.querySelector('.triangle-bridge-arrival-character');
+        const jeepSequence = page.querySelector('.rectangle-jeep-sequence');
+        const drivingJeep = page.querySelector('.rectangle-jeep-driving');
+        const arrivedJeep = page.querySelector('.rectangle-jeep-arrived');
+        const rectangleMessagePanel = page.querySelector('.rectangle-village-message-panel');
+        const rectangleMessageText = page.querySelector('.rectangle-village-message-text');
+        const rectangleGoButton = page.querySelector('.rectangle-village-go-button');
         const bridgeWalkingCharacterSource = bridgeWalkingCharacter?.getAttribute('src') || '';
         const bridgeMessagePanel = page.querySelector('.triangle-bridge-message-panel');
         const bridgeMessageText = page.querySelector('.triangle-bridge-message-text');
@@ -2746,7 +2766,125 @@ document.addEventListener('DOMContentLoaded', async () => {
             playStage(0);
         };
 
-        shapePreviewBridgeCleanupByPage.set(page, stopBridgeDialogue);
+        const rectangleDialogueMessages = [
+            'Hello explorer!',
+            'Para sa ating Rectangle Mission, tulungan mo akong ihatid ang mga gamit sa Rectangle Village.',
+            'Handa ka na ba sa isang masayang biyahe?',
+            'Tara na! Sumakay na at simulan natin ang Bibi\u2019s Rectangle Delivery!',
+        ];
+        const rectangleDialogueSegments = [
+            { start: 0, end: 1.4 },
+            { start: 1.4, end: 7.3 },
+            { start: 0, end: 2.5 },
+            { start: 9.8, end: 14.8 },
+        ];
+        const rectangleMessagePauseMs = 420;
+        let rectangleDialogueSession = 0;
+        let rectangleDialogueAudio = null;
+        let rectangleDialogueReplacementAudio = null;
+        let rectangleDialogueFrame = null;
+        let rectangleDialogueTimers = [];
+
+        const stopRectangleDialogue = () => {
+            rectangleDialogueSession += 1;
+            rectangleDialogueTimers.forEach((timerId) => window.clearTimeout(timerId));
+            rectangleDialogueTimers = [];
+            if (rectangleDialogueFrame !== null) {
+                window.cancelAnimationFrame(rectangleDialogueFrame);
+                rectangleDialogueFrame = null;
+            }
+            if (rectangleDialogueAudio) {
+                rectangleDialogueAudio.onended = null;
+                rectangleDialogueAudio.pause?.();
+                rectangleDialogueAudio = null;
+            }
+            if (rectangleDialogueReplacementAudio) {
+                rectangleDialogueReplacementAudio.pause?.();
+                rectangleDialogueReplacementAudio = null;
+            }
+            if (rectangleMessagePanel) rectangleMessagePanel.hidden = true;
+            if (rectangleMessageText) rectangleMessageText.textContent = '';
+            if (rectangleGoButton) rectangleGoButton.hidden = true;
+        };
+
+        const startRectangleDialogue = () => {
+            if (!rectangleMessagePanel || !rectangleMessageText || !isPageVisible(page)) return;
+            stopRectangleDialogue();
+            const session = rectangleDialogueSession;
+            rectangleMessagePanel.hidden = false;
+            rectangleMessageText.textContent = '';
+
+            const AudioCtor = window.Audio;
+            if (AudioCtor) {
+                rectangleDialogueAudio = new AudioCtor('assets/Audios/Voice over/rectanglemission.mp3');
+                rectangleDialogueAudio.preload = 'auto';
+                rectangleDialogueAudio.playsInline = true;
+                rectangleDialogueAudio.load?.();
+                rectangleDialogueReplacementAudio = new AudioCtor('assets/Audios/Voice over/Masayang biyahe.mp3');
+                rectangleDialogueReplacementAudio.preload = 'auto';
+                rectangleDialogueReplacementAudio.playsInline = true;
+                rectangleDialogueReplacementAudio.load?.();
+            }
+            const playStage = (stageIndex) => {
+                if (session !== rectangleDialogueSession || !isPageVisible(page) || !rectangleDialogueMessages[stageIndex]) return;
+                const segment = rectangleDialogueSegments[stageIndex];
+                const audio = stageIndex === 2 ? rectangleDialogueReplacementAudio : rectangleDialogueAudio;
+                rectangleMessageText.textContent = rectangleDialogueMessages[stageIndex];
+                if (rectangleGoButton) rectangleGoButton.hidden = true;
+                let stageFinished = false;
+                const finishStage = () => {
+                    if (stageFinished || session !== rectangleDialogueSession) return;
+                    stageFinished = true;
+                    audio?.pause?.();
+                    if (audio) audio.onended = null;
+                    if (rectangleDialogueFrame !== null) {
+                        window.cancelAnimationFrame(rectangleDialogueFrame);
+                        rectangleDialogueFrame = null;
+                    }
+                    if (stageIndex >= rectangleDialogueMessages.length - 1) {
+                        if (rectangleGoButton) rectangleGoButton.hidden = false;
+                        return;
+                    }
+                    rectangleDialogueTimers.push(window.setTimeout(() => playStage(stageIndex + 1), rectangleMessagePauseMs));
+                };
+
+                if (!audio) {
+                    rectangleDialogueTimers.push(window.setTimeout(finishStage, (segment.end - segment.start) * 1000));
+                    return;
+                }
+                try {
+                    audio.currentTime = segment.start;
+                } catch (error) {
+                    // The start point is applied once metadata is available.
+                }
+                audio.onended = finishStage;
+                audio.play().then(() => {
+                    const stopAtSegmentEnd = () => {
+                        if (stageFinished || session !== rectangleDialogueSession) return;
+                        if (audio.currentTime >= segment.end || audio.ended) {
+                            finishStage();
+                            return;
+                        }
+                        rectangleDialogueFrame = window.requestAnimationFrame(stopAtSegmentEnd);
+                    };
+                    rectangleDialogueFrame = window.requestAnimationFrame(stopAtSegmentEnd);
+                }).catch(() => {
+                    if (session !== rectangleDialogueSession) return;
+                    rectangleDialogueTimers.push(window.setTimeout(finishStage, (segment.end - segment.start) * 1000));
+                });
+            };
+
+            rectangleDialogueTimers.push(window.setTimeout(() => playStage(0), rectangleMessagePauseMs));
+        };
+
+        shapePreviewSceneCleanupByPage.set(page, () => {
+            stopBridgeDialogue();
+            stopRectangleDialogue();
+        });
+        rectangleGoButton?.addEventListener('click', () => {
+            if (!isPageVisible(page) || rectangleGoButton.hidden) return;
+            window.location.hash = '#rectangle-delivery';
+        });
         page.addEventListener('click', (event) => {
             if (event.target.closest('a, button') || typeof bridgeDialogueAdvance !== 'function') return;
             const advance = bridgeDialogueAdvance;
@@ -2771,6 +2909,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (bridgeArrivalCharacter) bridgeArrivalCharacter.hidden = false;
             bridgeCharacterSequence.classList.remove('is-walking');
             startBridgeDialogue();
+        });
+
+        jeepSequence?.addEventListener('animationend', (event) => {
+            if (event.target !== jeepSequence || event.animationName !== 'rectangleJeepDriveDesktop') return;
+            if (!isPageVisible(page) || !page.classList.contains('is-next-background')) return;
+            if (drivingJeep) drivingJeep.hidden = true;
+            if (arrivedJeep) arrivedJeep.hidden = false;
+            jeepSequence.classList.remove('is-driving');
+            jeepSequence.classList.add('is-arrived');
+            startRectangleDialogue();
         });
 
         startButton?.addEventListener('click', () => {
@@ -2850,6 +2998,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     areaTitle.textContent = page.dataset.nextTitle;
                     areaTitle.setAttribute('aria-label', page.dataset.nextTitle);
                     areaTitle.classList.add('is-bridge-repair-title');
+                }
+                if (jeepSequence) {
+                    stopRectangleDialogue();
+                    jeepSequence.hidden = true;
+                    jeepSequence.classList.remove('is-driving', 'is-arrived');
+                    if (drivingJeep) drivingJeep.hidden = false;
+                    if (arrivedJeep) arrivedJeep.hidden = true;
+                    jeepSequence.getBoundingClientRect();
+                    jeepSequence.hidden = false;
+                    jeepSequence.classList.add('is-driving');
                 }
                 if (bridgeCharacterSequence) {
                     bridgeCharacterSequence.hidden = true;
@@ -4153,19 +4311,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         const playManualStage = (stageIndex) => {
             if (session !== shapeSquareSession || !shapeSquareIntroStages[stageIndex]) return;
             showStage(stageIndex);
-            shapeSquareAdvanceIntro = null;
             shapeSquarePage.classList.remove('is-intro-click-ready');
             let textFinished = false;
             let audioFinished = false;
+            let stageComplete = false;
+            let audioCompletionScheduled = false;
+            const stageStartedAt = performance.now();
+            const minimumAudioMs = [1200, 3000, 2400, 3600, 1200][stageIndex];
             const unlockMessage = () => {
-                if (!textFinished || !audioFinished || session !== shapeSquareSession) return;
+                if (!textFinished || !audioFinished || stageComplete || session !== shapeSquareSession) return;
+                stageComplete = true;
                 shapeSquareBubble.classList.add('is-message-complete');
                 if (stageIndex >= shapeSquareIntroStages.length - 1) {
                     if (shapeSquareStartButton) shapeSquareStartButton.hidden = false;
                     return;
                 }
-                shapeSquarePage.classList.add('is-intro-click-ready');
-                shapeSquareAdvanceIntro = () => playManualStage(stageIndex + 1);
+                playManualStage(stageIndex + 1);
             };
             typeManualMessage(shapeSquareIntroStages[stageIndex].message, () => {
                 textFinished = true;
@@ -4173,8 +4334,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 unlockMessage();
             });
             const finishAudio = () => {
-                audioFinished = true;
-                unlockMessage();
+                if (audioCompletionScheduled) return;
+                audioCompletionScheduled = true;
+                const remainingMs = Math.max(0, minimumAudioMs - (performance.now() - stageStartedAt));
+                shapeSquareTimers.push(window.setTimeout(() => {
+                    audioFinished = true;
+                    unlockMessage();
+                }, remainingMs));
             };
 
             if (stageIndex === 0) {
@@ -4276,20 +4442,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             playCompletedMissionMessage();
         });
     };
-
-    shapeCirclePage?.addEventListener('click', (event) => {
-        if (event.target.closest('a, button') || typeof shapeCircleAdvanceIntro !== 'function') return;
-        const advance = shapeCircleAdvanceIntro;
-        shapeCircleAdvanceIntro = null;
-        advance();
-    });
-
-    shapeSquarePage?.addEventListener('click', (event) => {
-        if (event.target.closest('a, button') || typeof shapeSquareAdvanceIntro !== 'function') return;
-        const advance = shapeSquareAdvanceIntro;
-        shapeSquareAdvanceIntro = null;
-        advance();
-    });
 
     const lettertraceTraceGuidePaths = {
         upper: {

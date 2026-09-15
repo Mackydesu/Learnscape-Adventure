@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260913-287">
+    <link rel="stylesheet" href="style.css?v=20260916-301">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -635,8 +635,20 @@
         </a>
     </section>
 
-    <section id="learnscape-shape-area-4-page" class="shape-area-page shape-area-preview-page" data-completed-shape="triangle" data-area-background="assets/Backgrounds/Area4.webp" data-illustration-background="assets/Backgrounds/rectangle.webp" data-video-source="assets/Videos/rectangleshape.mp4" hidden>
+    <section id="learnscape-shape-area-4-page" class="shape-area-page shape-area-preview-page" data-completed-shape="triangle" data-area-background="assets/Backgrounds/Area4.webp" data-illustration-background="assets/Backgrounds/rectangle.webp" data-next-background="assets/Backgrounds/rectangle1.webp" data-video-source="assets/Videos/rectangleshape.mp4" hidden>
         <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area4.webp" alt="" aria-hidden="true">
+        <div class="rectangle-jeep-sequence" aria-hidden="true" hidden>
+            <img class="rectangle-jeep-driving" src="assets/Character/jeep.webp" alt="">
+            <img class="rectangle-jeep-arrived" src="assets/Character/jeep1.webp" alt="" hidden>
+        </div>
+        <div class="rectangle-village-welcome">
+            <span>Welcome to</span>
+            <strong>Rectangle Village</strong>
+        </div>
+        <div class="rectangle-village-message-panel" role="status" aria-live="polite" hidden>
+            <span class="rectangle-village-message-text"></span>
+            <button class="rectangle-village-go-button" type="button" hidden>Go &gt;</button>
+        </div>
         <div class="shape-area-title shape-area-title-text shape-area-preview-title" aria-label="Area 4">
             <span>Area</span>
             <strong>4</strong>
@@ -670,6 +682,14 @@
             </div>
         </div>
         <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Return to Shape Island">
+            <span>‹</span>
+            Back
+        </a>
+    </section>
+
+    <section id="learnscape-rectangle-delivery-page" class="shape-area-page rectangle-delivery-page" hidden>
+        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/rectanglegame.webp" alt="" aria-hidden="true">
+        <a class="game-return-btn" href="index.html#shape-area-4" aria-label="Return to Rectangle Village">
             <span>‹</span>
             Back
         </a>
@@ -1127,7 +1147,7 @@
         </a>
     </section>
 
-    <script src="script.js?v=20260913-287"></script>
+    <script src="script.js?v=20260916-301"></script>
     </div>
 
     <script>
@@ -1186,6 +1206,12 @@
                     bodyClass: 'gameplay-page',
                     pageId: 'learnscape-shape-area-4-page',
                     hash: '#shape-area-4',
+                },
+                rectangleDelivery: {
+                    title: 'Learnscape Adventure - Rectangle Delivery',
+                    bodyClass: 'gameplay-page',
+                    pageId: 'learnscape-rectangle-delivery-page',
+                    hash: '#rectangle-delivery',
                 },
                 shapeArea5: {
                     title: 'Learnscape Adventure - Area 5',
@@ -1261,6 +1287,8 @@
                 'triangle-game': 'triangleGame',
                 shapeArea4: 'shapeArea4',
                 'shape-area-4': 'shapeArea4',
+                rectangleDelivery: 'rectangleDelivery',
+                'rectangle-delivery': 'rectangleDelivery',
                 shapeArea5: 'shapeArea5',
                 'shape-area-5': 'shapeArea5',
                 shapeArea6: 'shapeArea6',
@@ -1284,6 +1312,7 @@
                 '#shape-area-3': 'shapeArea3',
                 '#triangle-game': 'triangleGame',
                 '#shape-area-4': 'shapeArea4',
+                '#rectangle-delivery': 'rectangleDelivery',
                 '#shape-area-5': 'shapeArea5',
                 '#shape-area-6': 'shapeArea6',
                 '#shape-area-7': 'shapeArea7',
@@ -1303,6 +1332,7 @@
                 'shape-area-3.html': 'shapeArea3',
                 'triangle-game.html': 'triangleGame',
                 'shape-area-4.html': 'shapeArea4',
+                'rectangle-delivery.html': 'rectangleDelivery',
                 'shape-area-5.html': 'shapeArea5',
                 'shape-area-6.html': 'shapeArea6',
                 'shape-area-7.html': 'shapeArea7',
@@ -1358,6 +1388,7 @@
                 shapeArea3: document.getElementById('learnscape-shape-area-3-page'),
                 triangleGame: document.getElementById('learnscape-triangle-game-page'),
                 shapeArea4: document.getElementById('learnscape-shape-area-4-page'),
+                rectangleDelivery: document.getElementById('learnscape-rectangle-delivery-page'),
                 shapeArea5: document.getElementById('learnscape-shape-area-5-page'),
                 shapeArea6: document.getElementById('learnscape-shape-area-6-page'),
                 shapeArea7: document.getElementById('learnscape-shape-area-7-page'),

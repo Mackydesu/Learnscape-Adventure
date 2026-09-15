@@ -3632,8 +3632,177 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 }
 
 #learnscape-shape-area-3-page.is-next-background .shape-preview-intro-character,
-#learnscape-shape-area-3-page.is-next-background .shape-preview-intro-bubble {
+#learnscape-shape-area-3-page.is-next-background .shape-preview-intro-bubble,
+#learnscape-shape-area-4-page.is-next-background .shape-preview-intro-character,
+#learnscape-shape-area-4-page.is-next-background .shape-preview-intro-bubble,
+#learnscape-shape-area-4-page.is-next-background .shape-area-preview-title {
     display: none;
+}
+
+.rectangle-village-welcome {
+    display: none;
+    position: absolute;
+    top: 1.5rem;
+    left: 50%;
+    z-index: 9;
+    width: min(32rem, calc(100% - 10rem));
+    padding: 0.55rem 1.3rem 0.65rem;
+    border: 0.3rem solid #ae5b2e;
+    border-radius: 7px;
+    background: linear-gradient(180deg, #fff8db, #ffe4a5);
+    box-shadow: inset 0 0 0 0.12rem #fffdf0, 0 0.4rem 0 #763e28, 0 0.65rem 0.8rem rgba(61, 43, 29, 0.25);
+    color: #215474;
+    font-family: 'Baloo 2', 'Nunito', sans-serif;
+    text-align: center;
+    line-height: 1.1;
+    pointer-events: none;
+    transform: translateX(-50%);
+}
+
+#learnscape-shape-area-4-page.is-next-background .rectangle-village-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.rectangle-village-welcome span {
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.rectangle-village-welcome strong {
+    font-size: 2.15rem;
+    font-weight: 800;
+    color: #a94728;
+    text-shadow: 0 0.08rem 0 #fff9da;
+}
+
+.rectangle-village-message-panel[hidden] {
+    display: none !important;
+}
+
+.rectangle-village-message-panel {
+    position: absolute;
+    left: 50%;
+    bottom: 0.75rem;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    width: min(61rem, calc(100% - 2.5rem));
+    height: 4.5rem;
+    box-sizing: border-box;
+    padding: 0.55rem 1.25rem;
+    border: 0.25rem solid #ae5b2e;
+    border-radius: 7px;
+    background: linear-gradient(180deg, #fff8db, #ffe4a5);
+    box-shadow: inset 0 0 0 0.1rem #fffdf0, 0 0.3rem 0 #763e28, 0 0.45rem 0.8rem rgba(61, 43, 29, 0.25);
+    color: #215474;
+    font-family: 'Baloo 2', 'Nunito', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1.15;
+    justify-content: center;
+    text-align: center;
+    pointer-events: none;
+    transform: translateX(-50%);
+}
+
+.rectangle-village-message-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.rectangle-village-go-button[hidden] {
+    display: none !important;
+}
+
+.rectangle-village-go-button {
+    flex: 0 0 auto;
+    min-width: 6.5rem;
+    height: 2.9rem;
+    margin-left: 0.8rem;
+    border: 0.2rem solid #8b482c;
+    border-radius: 6px;
+    background: linear-gradient(180deg, #ffde83, #f6a947);
+    box-shadow: inset 0 0.1rem 0 #fff3bc, 0 0.18rem 0 #763e28;
+    color: #4f321f;
+    font: 800 1.4rem 'Baloo 2', 'Nunito', sans-serif;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: transform 160ms ease, filter 160ms ease;
+}
+
+.rectangle-village-go-button:hover {
+    filter: brightness(1.07);
+    transform: translateY(-0.1rem);
+}
+
+.rectangle-village-go-button:active {
+    transform: translateY(0.15rem);
+}
+
+.rectangle-village-go-button:focus-visible {
+    outline: 0.2rem solid #215474;
+    outline-offset: 0.15rem;
+}
+
+@media (max-width: 900px) {
+    .rectangle-village-welcome {
+        top: 1rem;
+        width: calc(100% - 7rem);
+        padding: 0.35rem 0.55rem 0.45rem;
+    }
+
+    .rectangle-village-welcome span { font-size: 0.95rem; }
+    .rectangle-village-welcome strong { font-size: 1.45rem; }
+
+    .rectangle-village-message-panel {
+        width: calc(100% - 2rem);
+        height: auto;
+        min-height: 4.5rem;
+        font-size: 1rem;
+    }
+}
+
+.rectangle-jeep-sequence[hidden],
+.rectangle-jeep-sequence img[hidden] {
+    display: none !important;
+}
+
+@media (min-width: 901px) and (orientation: landscape) {
+    .rectangle-jeep-sequence {
+        position: absolute;
+        left: -23%;
+        bottom: 13.5%;
+        z-index: 8;
+        width: clamp(13rem, 20vw, 24rem);
+        aspect-ratio: 1;
+        pointer-events: none;
+        transform: translateX(-50%);
+    }
+
+    .rectangle-jeep-sequence img {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 0.65rem 0.55rem rgba(35, 40, 45, 0.28));
+    }
+
+    .rectangle-jeep-sequence.is-driving {
+        animation: rectangleJeepDriveDesktop 3.4s linear forwards;
+    }
+
+    .rectangle-jeep-sequence.is-arrived {
+        left: 50%;
+    }
+}
+
+@keyframes rectangleJeepDriveDesktop {
+    from { left: -23%; }
+    to { left: 50%; }
 }
 
 #learnscape-shape-area-3-page.is-fading-to-triangle-game {
@@ -6147,10 +6316,6 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 
 .shape-intro-message-dots i:nth-child(3) {
     animation-delay: 0.36s;
-}
-
-.shape-area-page.is-intro-click-ready {
-    cursor: pointer;
 }
 
 @keyframes shapeIntroDotBlink {
