@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260915-289';
+    const appVersion = '20260917-337';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
 
@@ -107,6 +107,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeCirclePage = document.getElementById('learnscape-shape-circle-page');
     const shapeSquarePage = document.getElementById('learnscape-shape-square-page');
     const triangleGamePage = document.getElementById('learnscape-triangle-game-page');
+    const rectangleDeliveryPage = document.getElementById('learnscape-rectangle-delivery-page');
+    const rectangleDeliveryJeepSequence = rectangleDeliveryPage?.querySelector('.rectangle-delivery-jeep-sequence') || null;
+    const rectangleDeliveryDrivingJeep = rectangleDeliveryPage?.querySelector('.rectangle-delivery-jeep-driving') || null;
+    const rectangleDeliveryArrivedJeep = rectangleDeliveryPage?.querySelector('.rectangle-delivery-jeep-arrived') || null;
+    const rectangleDeliveryInstructionPanel = rectangleDeliveryPage?.querySelector('.rectangle-delivery-instruction-panel') || null;
+    const rectangleDeliveryTaskPanel = rectangleDeliveryPage?.querySelector('.rectangle-delivery-task-panel') || null;
+    const rectangleDeliveryBackground = rectangleDeliveryPage?.querySelector('.shape-area-bg') || null;
+    const rectangleBuildingHotspots = Array.from(rectangleDeliveryPage?.querySelectorAll('[data-rectangle-building]') || []);
+    const rectangleDestinationPages = Array.from(document.querySelectorAll('.rectangle-destination-page'));
+    const rectangleParkingShapes = Array.from(document.querySelectorAll('.rectangle-parking-shape'));
+    let rectangleDeliveryArrivalTimer = null;
+    let rectangleDeliveryInstructionAudio = null;
+    let rectangleDeliveryInstructionShown = false;
+    let rectangleParkingInstructionAudio = null;
     const shapePreviewPages = Array.from(document.querySelectorAll('.shape-area-preview-page'));
     const shapePreviewProgressByPage = new Map();
     const shapePreviewIntroStates = new Map();
@@ -2519,13 +2533,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (bridgeArrivalCharacter) bridgeArrivalCharacter.hidden = true;
         if (jeepSequence) {
             jeepSequence.hidden = true;
-            jeepSequence.classList.remove('is-driving', 'is-arrived');
+            jeepSequence.classList.remove('is-driving', 'is-arrived', 'is-exiting');
         }
         if (drivingJeep) drivingJeep.hidden = false;
         if (arrivedJeep) arrivedJeep.hidden = true;
         videoStage?.setAttribute('aria-hidden', 'true');
         shapePreviewProgressByPage.get(page)?.setAttribute('aria-hidden', 'true');
-        page.classList.remove('is-transitioning-to-illustration', 'is-illustration-background', 'is-tv-lesson-image-visible', 'is-progress-visible', 'is-next-background', 'is-fading-to-triangle-game');
+        page.classList.remove('is-transitioning-to-illustration', 'is-illustration-background', 'is-tv-lesson-image-visible', 'is-progress-visible', 'is-next-background', 'is-fading-to-triangle-game', 'is-rectangle-village-departing');
         resetShapeTvChoices(page);
     };
 
@@ -2627,6 +2641,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const rectangleMessagePanel = page.querySelector('.rectangle-village-message-panel');
         const rectangleMessageText = page.querySelector('.rectangle-village-message-text');
         const rectangleGoButton = page.querySelector('.rectangle-village-go-button');
+        const rectangleMissionGuideCharacter = page.querySelector('.rectangle-mission-guide-character');
+        const rectangleMissionObjectPanel = page.querySelector('.rectangle-mission-object-panel');
+        const rectangleMissionObjects = Array.from(page.querySelectorAll('.rectangle-mission-object'));
+        const rectangleMissionStorage = page.querySelector('.rectangle-mission-storage-slots');
+        const rectangleMissionStorageSlots = Array.from(page.querySelectorAll('.rectangle-mission-storage-slot'));
+        let rectangleMissionActiveDrag = null;
         const bridgeWalkingCharacterSource = bridgeWalkingCharacter?.getAttribute('src') || '';
         const bridgeMessagePanel = page.querySelector('.triangle-bridge-message-panel');
         const bridgeMessageText = page.querySelector('.triangle-bridge-message-text');
@@ -2769,21 +2789,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         const rectangleDialogueMessages = [
             'Hello explorer!',
             'Para sa ating Rectangle Mission, tulungan mo akong ihatid ang mga gamit sa Rectangle Village.',
-            'Handa ka na ba sa isang masayang biyahe?',
-            'Tara na! Sumakay na at simulan natin ang Bibi\u2019s Rectangle Delivery!',
+            'Piliin ang tatlong bagay na hugis rectangle at ilagay ito sa jeep.',
         ];
         const rectangleDialogueSegments = [
             { start: 0, end: 1.4 },
             { start: 1.4, end: 7.3 },
-            { start: 0, end: 2.5 },
-            { start: 9.8, end: 14.8 },
+            { start: 0, end: null },
         ];
         const rectangleMessagePauseMs = 420;
         let rectangleDialogueSession = 0;
         let rectangleDialogueAudio = null;
         let rectangleDialogueReplacementAudio = null;
+        let rectangleDialogueCompletionAudio = null;
         let rectangleDialogueFrame = null;
         let rectangleDialogueTimers = [];
+        let rectangleMissionCompleted = false;
 
         const stopRectangleDialogue = () => {
             rectangleDialogueSession += 1;
@@ -2802,9 +2822,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                 rectangleDialogueReplacementAudio.pause?.();
                 rectangleDialogueReplacementAudio = null;
             }
+            if (rectangleDialogueCompletionAudio) {
+                rectangleDialogueCompletionAudio.pause?.();
+                rectangleDialogueCompletionAudio = null;
+            }
+            rectangleMissionCompleted = false;
             if (rectangleMessagePanel) rectangleMessagePanel.hidden = true;
             if (rectangleMessageText) rectangleMessageText.textContent = '';
             if (rectangleGoButton) rectangleGoButton.hidden = true;
+            if (rectangleGoButton) rectangleGoButton.disabled = false;
+            if (rectangleMissionGuideCharacter) rectangleMissionGuideCharacter.hidden = true;
+            if (rectangleMissionObjectPanel) rectangleMissionObjectPanel.hidden = true;
+            if (rectangleMissionStorage) rectangleMissionStorage.hidden = true;
+            rectangleMissionActiveDrag = null;
+            rectangleMissionStorageSlots.forEach((slot) => {
+                slot.classList.remove('is-over', 'is-filled');
+            });
+            rectangleMissionObjects.forEach((object) => {
+                object.hidden = false;
+                object.disabled = true;
+                object.classList.remove('is-selected', 'is-dragging', 'is-returning', 'is-stored');
+                object.setAttribute('aria-pressed', 'false');
+                object.style.setProperty('--drag-x', '0px');
+                object.style.setProperty('--drag-y', '0px');
+                object.style.setProperty('--snap-scale', '1');
+            });
         };
 
         const startRectangleDialogue = () => {
@@ -2813,6 +2855,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             const session = rectangleDialogueSession;
             rectangleMessagePanel.hidden = false;
             rectangleMessageText.textContent = '';
+            if (rectangleMissionGuideCharacter) rectangleMissionGuideCharacter.hidden = false;
+            if (rectangleMissionObjectPanel) rectangleMissionObjectPanel.hidden = false;
+            if (rectangleMissionStorage) rectangleMissionStorage.hidden = false;
+            alignRectangleMissionStorageSlots();
+            rectangleMissionObjects.forEach((object) => {
+                object.hidden = false;
+                object.disabled = true;
+                object.classList.remove('is-selected', 'is-dragging', 'is-returning', 'is-stored');
+                object.setAttribute('aria-pressed', 'false');
+                object.style.setProperty('--drag-x', '0px');
+                object.style.setProperty('--drag-y', '0px');
+                object.style.setProperty('--snap-scale', '1');
+            });
 
             const AudioCtor = window.Audio;
             if (AudioCtor) {
@@ -2820,10 +2875,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 rectangleDialogueAudio.preload = 'auto';
                 rectangleDialogueAudio.playsInline = true;
                 rectangleDialogueAudio.load?.();
-                rectangleDialogueReplacementAudio = new AudioCtor('assets/Audios/Voice over/Masayang biyahe.mp3');
+                rectangleDialogueReplacementAudio = new AudioCtor('assets/Audios/Voice over/piliin.mp3?v=20260917-1');
                 rectangleDialogueReplacementAudio.preload = 'auto';
                 rectangleDialogueReplacementAudio.playsInline = true;
                 rectangleDialogueReplacementAudio.load?.();
+                rectangleDialogueCompletionAudio = new AudioCtor('assets/Audios/Voice over/Masayang biyahe.mp3');
+                rectangleDialogueCompletionAudio.preload = 'auto';
+                rectangleDialogueCompletionAudio.playsInline = true;
+                rectangleDialogueCompletionAudio.load?.();
             }
             const playStage = (stageIndex) => {
                 if (session !== rectangleDialogueSession || !isPageVisible(page) || !rectangleDialogueMessages[stageIndex]) return;
@@ -2842,14 +2901,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                         rectangleDialogueFrame = null;
                     }
                     if (stageIndex >= rectangleDialogueMessages.length - 1) {
-                        if (rectangleGoButton) rectangleGoButton.hidden = false;
+                        rectangleMissionObjects.forEach((object) => {
+                            object.disabled = false;
+                        });
                         return;
                     }
                     rectangleDialogueTimers.push(window.setTimeout(() => playStage(stageIndex + 1), rectangleMessagePauseMs));
                 };
 
                 if (!audio) {
-                    rectangleDialogueTimers.push(window.setTimeout(finishStage, (segment.end - segment.start) * 1000));
+                    const fallbackDuration = Number.isFinite(segment.end)
+                        ? (segment.end - segment.start) * 1000
+                        : 4200;
+                    rectangleDialogueTimers.push(window.setTimeout(finishStage, fallbackDuration));
                     return;
                 }
                 try {
@@ -2861,7 +2925,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 audio.play().then(() => {
                     const stopAtSegmentEnd = () => {
                         if (stageFinished || session !== rectangleDialogueSession) return;
-                        if (audio.currentTime >= segment.end || audio.ended) {
+                        if ((Number.isFinite(segment.end) && audio.currentTime >= segment.end) || audio.ended) {
                             finishStage();
                             return;
                         }
@@ -2870,20 +2934,280 @@ document.addEventListener('DOMContentLoaded', async () => {
                     rectangleDialogueFrame = window.requestAnimationFrame(stopAtSegmentEnd);
                 }).catch(() => {
                     if (session !== rectangleDialogueSession) return;
-                    rectangleDialogueTimers.push(window.setTimeout(finishStage, (segment.end - segment.start) * 1000));
+                    const fallbackDuration = Number.isFinite(segment.end)
+                        ? (segment.end - segment.start) * 1000
+                        : 4200;
+                    rectangleDialogueTimers.push(window.setTimeout(finishStage, fallbackDuration));
                 });
             };
 
             rectangleDialogueTimers.push(window.setTimeout(() => playStage(0), rectangleMessagePauseMs));
         };
 
+        const startRectangleCompletionDialogue = () => {
+            if (rectangleMissionCompleted || !rectangleMessageText || !isPageVisible(page)) return;
+            rectangleMissionCompleted = true;
+            const session = rectangleDialogueSession;
+            const completionStages = [
+                {
+                    message: 'Handa ka na ba sa isang masayang biyahe?',
+                    audio: rectangleDialogueCompletionAudio,
+                    start: 0,
+                    end: 2.5,
+                },
+                {
+                    message: 'Tara na! Sumakay na at simulan natin ang Bibi\u2019s Rectangle Delivery!',
+                    audio: rectangleDialogueAudio,
+                    start: 9.8,
+                    end: 14.8,
+                },
+            ];
+
+            rectangleMissionObjects.forEach((object) => {
+                object.disabled = true;
+            });
+
+            const playCompletionStage = (stageIndex) => {
+                const stage = completionStages[stageIndex];
+                if (!stage || session !== rectangleDialogueSession || !isPageVisible(page)) return;
+                rectangleMessageText.textContent = stage.message;
+                if (rectangleGoButton) rectangleGoButton.hidden = true;
+
+                let stageFinished = false;
+                const finishStage = () => {
+                    if (stageFinished || session !== rectangleDialogueSession) return;
+                    stageFinished = true;
+                    stage.audio?.pause?.();
+                    if (stage.audio) stage.audio.onended = null;
+                    if (rectangleDialogueFrame !== null) {
+                        window.cancelAnimationFrame(rectangleDialogueFrame);
+                        rectangleDialogueFrame = null;
+                    }
+                    if (stageIndex < completionStages.length - 1) {
+                        rectangleDialogueTimers.push(window.setTimeout(
+                            () => playCompletionStage(stageIndex + 1),
+                            rectangleMessagePauseMs,
+                        ));
+                    } else if (rectangleGoButton) {
+                        rectangleGoButton.hidden = false;
+                    }
+                };
+
+                const audio = stage.audio;
+                if (!audio) {
+                    rectangleDialogueTimers.push(window.setTimeout(
+                        finishStage,
+                        (stage.end - stage.start) * 1000,
+                    ));
+                    return;
+                }
+
+                try {
+                    audio.currentTime = stage.start;
+                } catch (error) {
+                    // The timestamp is applied as soon as the audio can play.
+                }
+                audio.onended = finishStage;
+                audio.play().then(() => {
+                    const stopAtCompletionEnd = () => {
+                        if (stageFinished || session !== rectangleDialogueSession) return;
+                        if (audio.currentTime >= stage.end || audio.ended) {
+                            finishStage();
+                            return;
+                        }
+                        rectangleDialogueFrame = window.requestAnimationFrame(stopAtCompletionEnd);
+                    };
+                    rectangleDialogueFrame = window.requestAnimationFrame(stopAtCompletionEnd);
+                }).catch(() => {
+                    if (session !== rectangleDialogueSession) return;
+                    rectangleDialogueTimers.push(window.setTimeout(
+                        finishStage,
+                        (stage.end - stage.start) * 1000,
+                    ));
+                });
+            };
+
+            rectangleDialogueTimers.push(window.setTimeout(
+                () => playCompletionStage(0),
+                rectangleMessagePauseMs,
+            ));
+        };
+
+        const alignRectangleMissionStorageSlots = () => {
+            if (!rectangleMissionStorage || !rectangleMissionStorageSlots.length || page.hidden) return;
+            const background = page.querySelector('.shape-area-bg');
+            if (!background) return;
+
+            const pageRect = page.getBoundingClientRect();
+            const sourceWidth = background.naturalWidth || 1672;
+            const sourceHeight = background.naturalHeight || 941;
+            if (!pageRect.width || !pageRect.height) return;
+
+            const scale = Math.max(pageRect.width / sourceWidth, pageRect.height / sourceHeight);
+            const offsetX = (pageRect.width - (sourceWidth * scale)) / 2;
+            const offsetY = (pageRect.height - (sourceHeight * scale)) / 2;
+
+            rectangleMissionStorageSlots.forEach((slot) => {
+                slot.style.left = `${offsetX + (Number(slot.dataset.sourceX) * scale)}px`;
+                slot.style.top = `${offsetY + (Number(slot.dataset.sourceY) * scale)}px`;
+                slot.style.width = `${Number(slot.dataset.sourceWidth) * scale}px`;
+                slot.style.height = `${Number(slot.dataset.sourceHeight) * scale}px`;
+            });
+        };
+
+        const getNearbyRectangleStorageSlot = (clientX, clientY) => {
+            let nearestSlot = null;
+            let nearestDistance = Number.POSITIVE_INFINITY;
+
+            rectangleMissionStorageSlots.forEach((slot) => {
+                if (slot.classList.contains('is-filled')) return;
+                const rect = slot.getBoundingClientRect();
+                const distance = Math.hypot(
+                    clientX - (rect.left + (rect.width / 2)),
+                    clientY - (rect.top + (rect.height / 2)),
+                );
+                const snapDistance = Math.max(rect.width, rect.height) * 1.2;
+                if (distance <= snapDistance && distance < nearestDistance) {
+                    nearestSlot = slot;
+                    nearestDistance = distance;
+                }
+            });
+
+            return nearestSlot;
+        };
+
+        const clearRectangleStorageHover = () => {
+            rectangleMissionStorageSlots.forEach((slot) => slot.classList.remove('is-over'));
+        };
+
+        const returnRectangleMissionObject = (object) => {
+            if (!object) return;
+            object.classList.remove('is-dragging');
+            object.classList.add('is-returning');
+            object.style.setProperty('--drag-x', '0px');
+            object.style.setProperty('--drag-y', '0px');
+            const timerId = window.setTimeout(() => {
+                object.classList.remove('is-returning');
+                rectangleDialogueTimers = rectangleDialogueTimers.filter((id) => id !== timerId);
+            }, 420);
+            rectangleDialogueTimers.push(timerId);
+        };
+
+        const snapRectangleMissionObject = (object, slot, dragX, dragY) => {
+            if (!object || !slot) return;
+            const objectRect = object.getBoundingClientRect();
+            const slotRect = slot.getBoundingClientRect();
+            const targetX = dragX + (slotRect.left + (slotRect.width / 2)) - (objectRect.left + (objectRect.width / 2));
+            const targetY = dragY + (slotRect.top + (slotRect.height / 2)) - (objectRect.top + (objectRect.height / 2));
+            const snapScale = Math.min(
+                (slotRect.width * 0.92) / objectRect.width,
+                (slotRect.height * 0.92) / objectRect.height,
+                1,
+            );
+
+            object.classList.remove('is-dragging');
+            object.classList.add('is-stored');
+            object.disabled = true;
+            object.style.setProperty('--drag-x', `${targetX}px`);
+            object.style.setProperty('--drag-y', `${targetY}px`);
+            object.style.setProperty('--snap-scale', String(snapScale));
+            slot.classList.remove('is-over');
+            slot.classList.add('is-filled');
+            if (rectangleMissionStorageSlots.every((storageSlot) => storageSlot.classList.contains('is-filled'))) {
+                startRectangleCompletionDialogue();
+            }
+        };
+
+        const beginRectangleMissionObjectDrag = (event) => {
+            const object = event.currentTarget;
+            if (
+                !object
+                || object.disabled
+                || object.classList.contains('is-stored')
+                || rectangleMissionActiveDrag
+                || (event.pointerType === 'mouse' && event.button !== 0)
+            ) return;
+
+            rectangleMissionActiveDrag = {
+                object,
+                pointerId: event.pointerId,
+                startX: event.clientX,
+                startY: event.clientY,
+                dragX: 0,
+                dragY: 0,
+            };
+            object.classList.remove('is-returning');
+            object.classList.add('is-dragging');
+            object.setPointerCapture?.(event.pointerId);
+            event.preventDefault();
+        };
+
+        const moveRectangleMissionObjectDrag = (event) => {
+            const drag = rectangleMissionActiveDrag;
+            if (!drag || drag.pointerId !== event.pointerId || drag.object !== event.currentTarget) return;
+
+            drag.dragX = event.clientX - drag.startX;
+            drag.dragY = event.clientY - drag.startY;
+            drag.object.style.setProperty('--drag-x', `${drag.dragX}px`);
+            drag.object.style.setProperty('--drag-y', `${drag.dragY}px`);
+            clearRectangleStorageHover();
+            if (drag.object.hasAttribute('data-rectangle-correct')) {
+                getNearbyRectangleStorageSlot(event.clientX, event.clientY)?.classList.add('is-over');
+            }
+            event.preventDefault();
+        };
+
+        const endRectangleMissionObjectDrag = (event, wasCancelled = false) => {
+            const drag = rectangleMissionActiveDrag;
+            if (!drag || drag.pointerId !== event.pointerId) return;
+
+            const object = drag.object;
+            const slot = !wasCancelled && object.hasAttribute('data-rectangle-correct')
+                ? getNearbyRectangleStorageSlot(event.clientX, event.clientY)
+                : null;
+            object.releasePointerCapture?.(event.pointerId);
+            clearRectangleStorageHover();
+            rectangleMissionActiveDrag = null;
+
+            if (slot) {
+                snapRectangleMissionObject(object, slot, drag.dragX, drag.dragY);
+            } else {
+                returnRectangleMissionObject(object);
+            }
+            event.preventDefault();
+        };
+
+        rectangleMissionObjects.forEach((object) => {
+            object.setAttribute('aria-pressed', 'false');
+            object.addEventListener('pointerdown', beginRectangleMissionObjectDrag);
+            object.addEventListener('pointermove', moveRectangleMissionObjectDrag);
+            object.addEventListener('pointerup', (event) => endRectangleMissionObjectDrag(event));
+            object.addEventListener('pointercancel', (event) => endRectangleMissionObjectDrag(event, true));
+            object.addEventListener('dragstart', (event) => event.preventDefault());
+        });
+        page.querySelector('.shape-area-bg')?.addEventListener('load', alignRectangleMissionStorageSlots);
+        window.addEventListener('resize', alignRectangleMissionStorageSlots);
+
         shapePreviewSceneCleanupByPage.set(page, () => {
             stopBridgeDialogue();
             stopRectangleDialogue();
         });
         rectangleGoButton?.addEventListener('click', () => {
-            if (!isPageVisible(page) || rectangleGoButton.hidden) return;
-            window.location.hash = '#rectangle-delivery';
+            if (!isPageVisible(page) || rectangleGoButton.hidden || rectangleGoButton.disabled) return;
+            stopRectangleDialogue();
+            rectangleGoButton.disabled = true;
+            page.classList.add('is-rectangle-village-departing');
+            if (jeepSequence) {
+                jeepSequence.classList.remove('is-driving', 'is-arrived');
+                if (arrivedJeep) arrivedJeep.hidden = true;
+                if (drivingJeep) drivingJeep.hidden = false;
+                jeepSequence.getBoundingClientRect();
+                jeepSequence.classList.add('is-exiting');
+            }
+            const openRectangleDeliveryTimer = window.setTimeout(() => {
+                window.location.hash = '#rectangle-delivery';
+            }, 2600);
+            rectangleDialogueTimers.push(openRectangleDeliveryTimer);
         });
         page.addEventListener('click', (event) => {
             if (event.target.closest('a, button') || typeof bridgeDialogueAdvance !== 'function') return;
@@ -2999,7 +3323,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     areaTitle.setAttribute('aria-label', page.dataset.nextTitle);
                     areaTitle.classList.add('is-bridge-repair-title');
                 }
-                if (jeepSequence) {
+                if (rectangleMissionGuideCharacter || rectangleMissionObjectPanel) {
+                    if (jeepSequence) {
+                        jeepSequence.hidden = true;
+                        jeepSequence.classList.remove('is-driving', 'is-arrived', 'is-exiting');
+                    }
+                    startRectangleDialogue();
+                } else if (jeepSequence) {
                     stopRectangleDialogue();
                     jeepSequence.hidden = true;
                     jeepSequence.classList.remove('is-driving', 'is-arrived');
@@ -3043,6 +3373,275 @@ document.addEventListener('DOMContentLoaded', async () => {
             revealNextBackground();
         });
     });
+
+    const resetRectangleDeliveryJeep = () => {
+        if (rectangleDeliveryArrivalTimer !== null) {
+            window.clearTimeout(rectangleDeliveryArrivalTimer);
+            rectangleDeliveryArrivalTimer = null;
+        }
+        if (rectangleDeliveryTaskPanel) {
+            rectangleDeliveryTaskPanel.hidden = true;
+            rectangleDeliveryTaskPanel.classList.remove('is-visible');
+        }
+        if (rectangleDeliveryInstructionPanel) {
+            rectangleDeliveryInstructionPanel.hidden = true;
+            rectangleDeliveryInstructionPanel.classList.remove('is-visible');
+        }
+        if (rectangleDeliveryInstructionAudio) {
+            rectangleDeliveryInstructionAudio.pause();
+            rectangleDeliveryInstructionAudio.currentTime = 0;
+            rectangleDeliveryInstructionAudio = null;
+        }
+        rectangleDeliveryInstructionShown = false;
+        if (!rectangleDeliveryJeepSequence) return;
+        rectangleDeliveryJeepSequence.hidden = true;
+        rectangleDeliveryJeepSequence.classList.remove('is-driving', 'is-arrived');
+        if (rectangleDeliveryDrivingJeep) rectangleDeliveryDrivingJeep.hidden = false;
+        if (rectangleDeliveryArrivedJeep) rectangleDeliveryArrivedJeep.hidden = true;
+    };
+
+    const rectangleBuildingSourceBounds = {
+        bakery: { x: 127, y: 164, width: 310, height: 180 },
+        bookstore: { x: 663, y: 196, width: 346, height: 147 },
+        'toy-shop': { x: 1235, y: 164, width: 310, height: 180 },
+    };
+
+    const alignRectangleBuildingHotspots = () => {
+        if (!rectangleDeliveryPage || !rectangleDeliveryBackground || rectangleDeliveryPage.hidden) return;
+        const pageRect = rectangleDeliveryPage.getBoundingClientRect();
+        const sourceWidth = rectangleDeliveryBackground.naturalWidth || 1672;
+        const sourceHeight = rectangleDeliveryBackground.naturalHeight || 941;
+        if (!pageRect.width || !pageRect.height || !sourceWidth || !sourceHeight) return;
+
+        const scale = Math.max(pageRect.width / sourceWidth, pageRect.height / sourceHeight);
+        const offsetX = (pageRect.width - (sourceWidth * scale)) / 2;
+        const offsetY = (pageRect.height - (sourceHeight * scale)) / 2;
+
+        rectangleBuildingHotspots.forEach((hotspot) => {
+            const bounds = rectangleBuildingSourceBounds[hotspot.dataset.rectangleBuilding];
+            if (!bounds) return;
+            hotspot.style.left = `${offsetX + (bounds.x * scale)}px`;
+            hotspot.style.top = `${offsetY + (bounds.y * scale)}px`;
+            hotspot.style.width = `${bounds.width * scale}px`;
+            hotspot.style.height = `${bounds.height * scale}px`;
+        });
+    };
+
+    const showRectangleDeliveryInstruction = () => {
+        if (rectangleDeliveryInstructionShown || !rectangleDeliveryPage || rectangleDeliveryPage.hidden) return;
+        rectangleDeliveryInstructionShown = true;
+
+        if (rectangleDeliveryInstructionPanel) {
+            rectangleDeliveryInstructionPanel.hidden = false;
+            rectangleDeliveryInstructionPanel.getBoundingClientRect();
+            rectangleDeliveryInstructionPanel.classList.add('is-visible');
+        }
+
+        if (window.Audio) {
+            rectangleDeliveryInstructionAudio = new window.Audio('assets/Audios/Voice over/ihatid.mp3');
+            rectangleDeliveryInstructionAudio.play().catch(() => {});
+        }
+    };
+
+    const showRectangleDeliveryTask = () => {
+        if (!rectangleDeliveryPage || !rectangleDeliveryTaskPanel || rectangleDeliveryPage.hidden) return;
+        rectangleDeliveryTaskPanel.hidden = false;
+        rectangleDeliveryTaskPanel.getBoundingClientRect();
+        rectangleDeliveryTaskPanel.classList.add('is-visible');
+        showRectangleDeliveryInstruction();
+    };
+
+    const startRectangleDeliveryJeep = () => {
+        if (!rectangleDeliveryPage || !rectangleDeliveryJeepSequence || rectangleDeliveryPage.hidden) return;
+        alignRectangleBuildingHotspots();
+        resetRectangleDeliveryJeep();
+        rectangleDeliveryJeepSequence.getBoundingClientRect();
+        rectangleDeliveryJeepSequence.hidden = false;
+        rectangleDeliveryJeepSequence.classList.add('is-driving');
+        rectangleDeliveryArrivalTimer = window.setTimeout(showRectangleDeliveryTask, 3600);
+    };
+
+    rectangleDeliveryBackground?.addEventListener('load', alignRectangleBuildingHotspots);
+    window.addEventListener('resize', alignRectangleBuildingHotspots);
+    rectangleBuildingHotspots.forEach((hotspot) => {
+        hotspot.addEventListener('click', () => {
+            rectangleBuildingHotspots.forEach((candidate) => {
+                candidate.classList.remove('is-pressed');
+                candidate.setAttribute('aria-pressed', 'false');
+            });
+            hotspot.classList.add('is-pressed');
+            hotspot.setAttribute('aria-pressed', 'true');
+            const destinationRoutes = {
+                bakery: 'rectangleBakery',
+                bookstore: 'rectangleBookstore',
+                'toy-shop': 'rectangleToyShop',
+            };
+            const destinationRoute = destinationRoutes[hotspot.dataset.rectangleBuilding];
+
+            window.setTimeout(() => {
+                hotspot.classList.remove('is-pressed');
+                if (destinationRoute) navigateApp(destinationRoute);
+            }, 180);
+        });
+    });
+
+    rectangleDeliveryJeepSequence?.addEventListener('animationend', (event) => {
+        if (event.target !== rectangleDeliveryJeepSequence || event.animationName !== 'rectangleDeliveryJeepDriveDesktop') return;
+        if (!rectangleDeliveryPage || rectangleDeliveryPage.hidden) return;
+        if (rectangleDeliveryDrivingJeep) rectangleDeliveryDrivingJeep.hidden = true;
+        if (rectangleDeliveryArrivedJeep) rectangleDeliveryArrivedJeep.hidden = false;
+        rectangleDeliveryJeepSequence.classList.remove('is-driving');
+        rectangleDeliveryJeepSequence.classList.add('is-arrived');
+        if (rectangleDeliveryArrivalTimer !== null) {
+            window.clearTimeout(rectangleDeliveryArrivalTimer);
+            rectangleDeliveryArrivalTimer = null;
+        }
+        showRectangleDeliveryTask();
+    });
+
+    window.addEventListener('learnscape:routechange', (event) => {
+        if (event.detail?.route === 'rectangleDelivery') {
+            startRectangleDeliveryJeep();
+        } else {
+            resetRectangleDeliveryJeep();
+        }
+    });
+
+    if (rectangleDeliveryPage && !rectangleDeliveryPage.hidden) {
+        startRectangleDeliveryJeep();
+    }
+
+    const resetRectangleDestinationJeeps = () => {
+        if (rectangleParkingInstructionAudio) {
+            rectangleParkingInstructionAudio.pause();
+            rectangleParkingInstructionAudio.currentTime = 0;
+            rectangleParkingInstructionAudio = null;
+        }
+
+        rectangleDestinationPages.forEach((page) => {
+            const jeep = page.querySelector('.rectangle-destination-jeep');
+            const instructionPanel = page.querySelector('.rectangle-parking-instruction-panel');
+            const parkingShapes = page.querySelector('.rectangle-parking-shapes');
+            if (parkingShapes) parkingShapes.hidden = true;
+            page.querySelectorAll('.rectangle-parking-shape').forEach((shape) => {
+                shape.classList.remove('is-selected');
+                shape.setAttribute('aria-pressed', 'false');
+            });
+            if (instructionPanel) {
+                instructionPanel.hidden = true;
+                instructionPanel.classList.remove('is-visible');
+            }
+            if (!jeep) return;
+            jeep.hidden = true;
+            jeep.classList.remove('is-entering', 'is-arrived');
+        });
+    };
+
+    const startRectangleDestinationJeep = (routeName) => {
+        const destinationRouteIds = {
+            rectangleBakery: 'learnscape-rectangle-bakery-page',
+            rectangleBookstore: 'learnscape-rectangle-bookstore-page',
+            rectangleToyShop: 'learnscape-rectangle-toy-shop-page',
+        };
+        const destinationPage = document.getElementById(destinationRouteIds[routeName]);
+        const jeep = destinationPage?.querySelector('.rectangle-destination-jeep');
+        if (!destinationPage || destinationPage.hidden || !jeep) return;
+
+        resetRectangleDestinationJeeps();
+        jeep.hidden = false;
+        jeep.getBoundingClientRect();
+        jeep.classList.add('is-entering');
+    };
+
+    const alignRectangleParkingShapes = (page) => {
+        const background = page?.querySelector('.shape-area-bg');
+        const parkingShapes = page?.querySelector('.rectangle-parking-shapes');
+        if (!page || page.hidden || !background || !parkingShapes) return;
+
+        const pageRect = page.getBoundingClientRect();
+        const sourceWidth = background.naturalWidth || 1672;
+        const sourceHeight = background.naturalHeight || 941;
+        if (!pageRect.width || !pageRect.height) return;
+
+        const scale = Math.max(pageRect.width / sourceWidth, pageRect.height / sourceHeight);
+        const offsetX = (pageRect.width - (sourceWidth * scale)) / 2;
+        const offsetY = (pageRect.height - (sourceHeight * scale)) / 2;
+
+        parkingShapes.querySelectorAll('.rectangle-parking-shape').forEach((shape) => {
+            const x = Number(shape.dataset.sourceX);
+            const y = Number(shape.dataset.sourceY);
+            const width = Number(shape.dataset.sourceWidth);
+            const height = Number(shape.dataset.sourceHeight);
+            shape.style.left = `${offsetX + (x * scale)}px`;
+            shape.style.top = `${offsetY + (y * scale)}px`;
+            shape.style.width = `${width * scale}px`;
+            shape.style.height = `${height * scale}px`;
+        });
+    };
+
+    rectangleDestinationPages.forEach((page) => {
+        const jeep = page.querySelector('.rectangle-destination-jeep');
+        jeep?.addEventListener('animationend', (event) => {
+            if (event.target !== jeep || event.animationName !== 'rectangleDestinationJeepEnterDesktop') return;
+            jeep.classList.remove('is-entering');
+            jeep.classList.add('is-arrived');
+
+            const instructionPanel = page.querySelector('.rectangle-parking-instruction-panel');
+            if (instructionPanel) {
+                instructionPanel.hidden = false;
+                instructionPanel.getBoundingClientRect();
+                instructionPanel.classList.add('is-visible');
+            }
+
+            if (window.Audio) {
+                rectangleParkingInstructionAudio = new window.Audio('assets/Audios/Voice over/iparada.mp3');
+                rectangleParkingInstructionAudio.play().catch(() => {});
+            }
+
+            const parkingShapes = page.querySelector('.rectangle-parking-shapes');
+            if (parkingShapes) {
+                alignRectangleParkingShapes(page);
+                parkingShapes.hidden = false;
+            }
+        });
+    });
+
+    rectangleDestinationPages.forEach((page) => {
+        page.querySelector('.shape-area-bg')?.addEventListener('load', () => alignRectangleParkingShapes(page));
+    });
+    window.addEventListener('resize', () => {
+        rectangleDestinationPages.forEach(alignRectangleParkingShapes);
+    });
+
+    rectangleParkingShapes.forEach((shape) => {
+        shape.addEventListener('click', () => {
+            const page = shape.closest('.rectangle-destination-page');
+            page?.querySelectorAll('.rectangle-parking-shape').forEach((candidate) => {
+                const isSelected = candidate === shape;
+                candidate.classList.toggle('is-selected', isSelected);
+                candidate.setAttribute('aria-pressed', String(isSelected));
+            });
+        });
+    });
+
+    window.addEventListener('learnscape:routechange', (event) => {
+        const routeName = event.detail?.route;
+        if (['rectangleBakery', 'rectangleBookstore', 'rectangleToyShop'].includes(routeName)) {
+            startRectangleDestinationJeep(routeName);
+        } else {
+            resetRectangleDestinationJeeps();
+        }
+    });
+
+    const visibleRectangleDestination = rectangleDestinationPages.find((page) => !page.hidden);
+    if (visibleRectangleDestination) {
+        const initialDestinationRoutes = {
+            'learnscape-rectangle-bakery-page': 'rectangleBakery',
+            'learnscape-rectangle-bookstore-page': 'rectangleBookstore',
+            'learnscape-rectangle-toy-shop-page': 'rectangleToyShop',
+        };
+        startRectangleDestinationJeep(initialDestinationRoutes[visibleRectangleDestination.id]);
+    }
 
     const triangleGameCharacter = triangleGamePage?.querySelector('.triangle-game-character') || null;
     const triangleGameMessagePanel = triangleGamePage?.querySelector('.triangle-game-message-panel') || null;
@@ -6084,21 +6683,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     );
 
     const requestFullscreen = async (targetElement) => {
-        const root = targetElement || document.documentElement;
+        const targets = [document.documentElement, targetElement].filter((target, index, list) => (
+            target && list.indexOf(target) === index
+        ));
+        let lastError = null;
 
-        if (root.requestFullscreen) {
-            return root.requestFullscreen();
+        for (const root of targets) {
+            try {
+                if (root.requestFullscreen) {
+                    await root.requestFullscreen();
+                    return true;
+                }
+
+                if (root.webkitRequestFullscreen) {
+                    await root.webkitRequestFullscreen();
+                    return true;
+                }
+
+                if (root.msRequestFullscreen) {
+                    await root.msRequestFullscreen();
+                    return true;
+                }
+            } catch (error) {
+                lastError = error;
+            }
         }
 
-        if (root.webkitRequestFullscreen) {
-            return root.webkitRequestFullscreen();
-        }
-
-        if (root.msRequestFullscreen) {
-            return root.msRequestFullscreen();
-        }
-
-        return Promise.resolve();
+        if (lastError) throw lastError;
+        return false;
     };
 
     const exitFullscreen = async () => {
@@ -6149,9 +6761,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await requestFullscreen(targetElement);
             }
 
+            if (!isFullscreenActive()) return false;
             await lockLandscape();
+            document.body.classList.remove('is-windowed-fallback');
+            syncFullscreenClass();
+            return true;
         } catch (error) {
             console.warn('Fullscreen mode was not available.', error);
+            return false;
         }
     };
 
@@ -8495,11 +9112,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    fullscreenRestoreButton?.addEventListener('click', () => {
-        const fullscreenTarget = getShellContainer() || getAppFrame() || document.documentElement;
-        enterFullscreenFlow(fullscreenTarget).catch(() => {});
-    });
-
     document.querySelector('.scroll-down')?.addEventListener('click', () => {
         document.getElementById('worlds')?.scrollIntoView({ behavior: 'smooth' });
     });
@@ -8560,12 +9172,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     syncFullscreenClass();
     document.addEventListener('fullscreenchange', () => {
+        if (isFullscreenActive()) document.body.classList.remove('is-windowed-fallback');
         syncFullscreenClass();
     });
     document.addEventListener('webkitfullscreenchange', () => {
+        if (isFullscreenActive()) document.body.classList.remove('is-windowed-fallback');
         syncFullscreenClass();
     });
     document.addEventListener('msfullscreenchange', () => {
+        if (isFullscreenActive()) document.body.classList.remove('is-windowed-fallback');
         syncFullscreenClass();
     });
 

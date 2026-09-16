@@ -322,7 +322,7 @@ body.is-page-loading .page-loading-overlay {
     backdrop-filter: blur(14px) saturate(0.65);
 }
 
-body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-fullscreen-mode) .fullscreen-restore-overlay {
+body:is(.game-start-page, .game1-page, .game3-page, .gameplay-page):not(.is-fullscreen-mode):not(.is-windowed-fallback) .fullscreen-restore-overlay {
     display: grid;
 }
 
@@ -3665,6 +3665,15 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     align-items: center;
 }
 
+#learnscape-shape-area-4-page.is-rectangle-village-departing {
+    pointer-events: none;
+}
+
+#learnscape-shape-area-4-page.is-rectangle-village-departing .shape-area-bg,
+#learnscape-shape-area-4-page.is-rectangle-village-departing .rectangle-village-welcome {
+    animation: rectangleVillageBackgroundFade 1.25s ease-in 0.8s forwards;
+}
+
 .rectangle-village-welcome span {
     font-size: 1.15rem;
     font-weight: 700;
@@ -3712,21 +3721,178 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     min-width: 0;
 }
 
+.rectangle-mission-object-panel[hidden],
+.rectangle-mission-guide-character[hidden],
+.rectangle-mission-storage-slots[hidden] {
+    display: none !important;
+}
+
+.rectangle-mission-storage-slots {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.rectangle-mission-storage-slot {
+    position: absolute;
+    box-sizing: border-box;
+    border: 0.16rem solid transparent;
+    border-radius: 0.45rem;
+    transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.rectangle-mission-storage-slot.is-over {
+    border-color: #8dff79;
+    background: rgba(105, 255, 104, 0.18);
+    box-shadow: inset 0 0 0.85rem rgba(89, 255, 106, 0.8), 0 0 0.8rem rgba(76, 255, 105, 0.8);
+}
+
+.rectangle-mission-storage-slot.is-filled {
+    background: rgba(87, 230, 255, 0.08);
+}
+
+@media (min-width: 901px) and (orientation: landscape) {
+    .rectangle-mission-object-panel {
+        position: absolute;
+        top: 5.6rem;
+        bottom: 5.9rem;
+        left: 1.25rem;
+        z-index: 12;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: repeat(3, minmax(0, 1fr));
+        gap: 0.55rem;
+        width: clamp(17rem, 23vw, 20rem);
+        box-sizing: border-box;
+        padding: 0.8rem;
+        border: 0.32rem solid #8a4b21;
+        border-radius: 0.7rem;
+        background: linear-gradient(180deg, rgba(255, 239, 160, 0.97), rgba(225, 160, 67, 0.97));
+        box-shadow: inset 0 0 0 0.13rem #fff8ca, 0 0.42rem 0 #552d18, 0 0.8rem 1.2rem rgba(51, 37, 22, 0.35);
+    }
+
+    .rectangle-mission-object {
+        display: grid;
+        place-items: center;
+        min-width: 0;
+        min-height: 0;
+        box-sizing: border-box;
+        padding: 0.25rem;
+        border: 0.2rem solid #ba6b29;
+        border-radius: 0.45rem;
+        background: linear-gradient(180deg, #fffdf0, #ffe7a4);
+        box-shadow: inset 0 0 0 0.08rem #ffffff, 0 0.2rem 0 #7a3f20;
+        cursor: pointer;
+        touch-action: none;
+        user-select: none;
+        --drag-x: 0px;
+        --drag-y: 0px;
+        --snap-scale: 1;
+        transform: translate(var(--drag-x), var(--drag-y));
+        transition: transform 160ms ease, filter 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .rectangle-mission-object img {
+        display: block;
+        width: 96%;
+        height: 96%;
+        object-fit: contain;
+        filter: drop-shadow(0 0.22rem 0.2rem rgba(67, 42, 24, 0.3));
+        pointer-events: none;
+    }
+
+    .rectangle-mission-object:disabled {
+        cursor: default;
+        filter: saturate(0.9);
+    }
+
+    .rectangle-mission-object:not(:disabled):hover,
+    .rectangle-mission-object:not(:disabled):focus-visible {
+        border-color: #ffd927;
+        box-shadow: inset 0 0 0 0.08rem #ffffff, 0 0.2rem 0 #7a3f20, 0 0 0.75rem rgba(255, 224, 43, 0.95);
+        filter: brightness(1.06);
+        outline: none;
+        transform: translateY(-0.12rem) scale(1.035);
+    }
+
+    .rectangle-mission-object:not(:disabled):active {
+        transform: translateY(0.12rem) scale(0.97);
+    }
+
+    .rectangle-mission-object.is-selected {
+        border-color: #20a958;
+        box-shadow: inset 0 0 0 0.12rem #aaff9d, 0 0.2rem 0 #146536, 0 0 0.85rem rgba(50, 235, 105, 0.9);
+        background: linear-gradient(180deg, #f3ffe8, #c8f59c);
+    }
+
+    .rectangle-mission-object.is-dragging:not(:disabled) {
+        z-index: 30;
+        border-color: #ffd927;
+        box-shadow: inset 0 0 0 0.08rem #ffffff, 0 0.35rem 0.65rem rgba(72, 42, 19, 0.34), 0 0 0.9rem rgba(255, 224, 43, 0.92);
+        cursor: grabbing;
+        filter: brightness(1.06);
+        transform: translate(var(--drag-x), var(--drag-y)) scale(1.04);
+        transition: none;
+    }
+
+    .rectangle-mission-object.is-returning:not(:disabled) {
+        z-index: 20;
+        transform: translate(var(--drag-x), var(--drag-y));
+        transition: transform 400ms cubic-bezier(0.25, 0.8, 0.25, 1.08);
+    }
+
+    .rectangle-mission-object.is-stored,
+    .rectangle-mission-object.is-stored:disabled {
+        z-index: 25;
+        border-color: transparent;
+        background: transparent;
+        box-shadow: none;
+        filter: none;
+        pointer-events: none;
+        transform: translate(var(--drag-x), var(--drag-y)) scale(var(--snap-scale));
+        transition: transform 330ms cubic-bezier(0.2, 0.9, 0.25, 1.12), opacity 180ms ease;
+    }
+
+    .rectangle-mission-guide-character {
+        position: absolute;
+        left: 41.5%;
+        bottom: 7rem;
+        z-index: 11;
+        display: block;
+        width: clamp(12rem, 18vw, 19rem);
+        max-height: 72vh;
+        object-fit: contain;
+        filter: drop-shadow(0 0.55rem 0.4rem rgba(45, 46, 35, 0.3));
+        pointer-events: none;
+        transform: translateX(-50%);
+        animation: rectangleMissionGuideEnter 520ms cubic-bezier(0.2, 0.95, 0.3, 1.15) both;
+    }
+}
+
+@keyframes rectangleMissionGuideEnter {
+    from { opacity: 0; transform: translateX(calc(-50% + 2.5rem)) scale(0.92); }
+    to { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+
 .rectangle-village-go-button[hidden] {
     display: none !important;
 }
 
 .rectangle-village-go-button {
-    flex: 0 0 auto;
-    min-width: 6.5rem;
-    height: 2.9rem;
-    margin-left: 0.8rem;
-    border: 0.2rem solid #8b482c;
-    border-radius: 6px;
-    background: linear-gradient(180deg, #ffde83, #f6a947);
-    box-shadow: inset 0 0.1rem 0 #fff3bc, 0 0.18rem 0 #763e28;
-    color: #4f321f;
-    font: 800 1.4rem 'Baloo 2', 'Nunito', sans-serif;
+    position: absolute;
+    right: 3.5%;
+    bottom: 6.7rem;
+    z-index: 12;
+    width: 13rem;
+    height: 6rem;
+    border: 0.28rem solid #087c32;
+    border-radius: 2rem;
+    background: linear-gradient(180deg, #9bff45 0%, #36df4f 48%, #12b942 100%);
+    box-shadow: inset 0 0.18rem 0 #e7ffd1, 0 0.32rem 0 #075e29, 0 0 1.15rem rgba(98, 255, 82, 0.7);
+    color: #ffffff;
+    text-shadow: 0 0.12rem 0 #08712f;
+    font: 800 2.7rem 'Baloo 2', 'Nunito', sans-serif;
     cursor: pointer;
     pointer-events: auto;
     transition: transform 160ms ease, filter 160ms ease;
@@ -3798,9 +3964,452 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     .rectangle-jeep-sequence.is-arrived {
         left: 50%;
     }
+
+    .rectangle-jeep-sequence.is-exiting {
+        left: 50%;
+        z-index: 14;
+        animation: rectangleJeepExitDesktop 2.6s linear forwards;
+    }
 }
 
 @keyframes rectangleJeepDriveDesktop {
+    from { left: -23%; }
+    to { left: 50%; }
+}
+
+@keyframes rectangleJeepExitDesktop {
+    from { left: 50%; }
+    to { left: 125%; }
+}
+
+@keyframes rectangleVillageBackgroundFade {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.rectangle-delivery-jeep-sequence[hidden],
+.rectangle-delivery-jeep-sequence img[hidden] {
+    display: none !important;
+}
+
+.rectangle-destination-page .shape-area-bg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.rectangle-destination-jeep[hidden] {
+    display: none !important;
+}
+
+.rectangle-parking-instruction-panel[hidden] {
+    display: none !important;
+}
+
+.rectangle-parking-shapes[hidden] {
+    display: none !important;
+}
+
+.rectangle-parking-shapes {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.rectangle-parking-shape {
+    position: absolute;
+    box-sizing: border-box;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    pointer-events: auto;
+    touch-action: manipulation;
+}
+
+.rectangle-parking-shape svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    fill: transparent;
+    stroke: transparent;
+    stroke-width: 5;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+    transition: filter 180ms ease, stroke 180ms ease, transform 180ms ease;
+}
+
+.rectangle-parking-shape:hover svg,
+.rectangle-parking-shape:focus-visible svg {
+    stroke: #fff16a;
+    filter: drop-shadow(0 0 0.45rem rgba(255, 231, 55, 0.95));
+    transform: scale(1.04);
+}
+
+.rectangle-parking-shape:focus-visible {
+    outline: none;
+}
+
+.rectangle-parking-shape:active svg {
+    transform: scale(0.96);
+}
+
+.rectangle-parking-shape.is-selected svg {
+    stroke: #74ff79;
+    filter: drop-shadow(0 0 0.55rem rgba(55, 255, 102, 0.95));
+}
+
+.rectangle-parking-instruction-panel {
+    position: absolute;
+    left: 50%;
+    bottom: 0.9rem;
+    z-index: 13;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: min(35rem, calc(100% - 3rem));
+    min-height: 4.6rem;
+    box-sizing: border-box;
+    padding: 0.65rem 1.5rem;
+    border: 0.28rem solid #b45a24;
+    border-radius: 0.65rem;
+    background: linear-gradient(180deg, #fffceb 0%, #ffe4a0 100%);
+    box-shadow: inset 0 0 0 0.12rem #ffffff, 0 0.34rem 0 #74371d, 0 0.65rem 1rem rgba(66, 42, 24, 0.3);
+    color: #174f7f;
+    font: 800 1.7rem/1.1 'Baloo 2', 'Nunito', sans-serif;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 0.8rem) scale(0.96);
+    transition: opacity 280ms ease, transform 360ms cubic-bezier(0.2, 0.9, 0.25, 1.18);
+}
+
+.rectangle-parking-instruction-panel.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+}
+
+@media (min-width: 901px) and (orientation: landscape) {
+    .rectangle-destination-jeep {
+        position: absolute;
+        left: -23%;
+        bottom: 19%;
+        z-index: 8;
+        width: clamp(13rem, 20vw, 24rem);
+        aspect-ratio: 1;
+        pointer-events: none;
+        transform: translateX(-50%);
+    }
+
+    .rectangle-destination-jeep img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 0.65rem 0.55rem rgba(35, 40, 45, 0.28));
+    }
+
+    .rectangle-destination-jeep.is-entering {
+        animation: rectangleDestinationJeepEnterDesktop 2.8s linear forwards;
+    }
+
+    .rectangle-destination-jeep.is-arrived {
+        left: 25%;
+    }
+}
+
+@keyframes rectangleDestinationJeepEnterDesktop {
+    from { left: -23%; }
+    to { left: 25%; }
+}
+
+.rectangle-delivery-task-panel[hidden],
+.rectangle-delivery-item[hidden],
+.rectangle-delivery-instruction-panel[hidden] {
+    display: none !important;
+}
+
+.rectangle-delivery-instruction-panel {
+    position: absolute;
+    left: 50%;
+    bottom: 0.9rem;
+    z-index: 13;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: min(39rem, calc(100% - 3rem));
+    min-height: 4.6rem;
+    box-sizing: border-box;
+    padding: 0.65rem 1.5rem;
+    border: 0.28rem solid #b45a24;
+    border-radius: 0.65rem;
+    background: linear-gradient(180deg, #fffceb 0%, #ffe4a0 100%);
+    box-shadow: inset 0 0 0 0.12rem #ffffff, 0 0.34rem 0 #74371d, 0 0.65rem 1rem rgba(66, 42, 24, 0.3);
+    color: #174f7f;
+    font: 800 1.7rem/1.1 'Baloo 2', 'Nunito', sans-serif;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 0.8rem) scale(0.96);
+    transition: opacity 280ms ease, transform 360ms cubic-bezier(0.2, 0.9, 0.25, 1.18);
+}
+
+.rectangle-delivery-instruction-panel.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+}
+
+.rectangle-delivery-task-panel {
+    position: absolute;
+    top: 0.65rem;
+    left: 50%;
+    z-index: 12;
+    display: grid;
+    grid-template-columns: 8.7rem max-content minmax(6.5rem, 1fr) max-content;
+    align-items: center;
+    width: min(44rem, calc(100% - 12rem));
+    min-height: 7.8rem;
+    box-sizing: border-box;
+    padding: 0.4rem 0.9rem 0.45rem 0.55rem;
+    border: 0.28rem solid #c86a2b;
+    border-radius: 1rem;
+    background: linear-gradient(180deg, #fffdf1 0%, #fff0bd 100%);
+    box-shadow: inset 0 0 0 0.12rem #ffffff, 0 0.42rem 0 #83401f, 0 0.7rem 1.1rem rgba(74, 48, 30, 0.3);
+    color: #174c7b;
+    font-family: 'Baloo 2', 'Nunito', sans-serif;
+    opacity: 0;
+    transform: translate(-50%, -1rem) scale(0.96);
+    transition: opacity 320ms ease, transform 380ms cubic-bezier(0.2, 0.9, 0.25, 1.2);
+    pointer-events: none;
+}
+
+.rectangle-delivery-task-panel.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+}
+
+.rectangle-delivery-item-stage {
+    display: grid;
+    place-items: center;
+    width: 8.2rem;
+    height: 7.2rem;
+}
+
+.rectangle-delivery-item {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0.32rem 0.28rem rgba(92, 55, 27, 0.3));
+    animation: rectangleDeliveryItemFloat 2.2s ease-in-out infinite;
+}
+
+.rectangle-delivery-task-copy,
+.rectangle-delivery-task-destination {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.05;
+    text-align: center;
+}
+
+.rectangle-delivery-task-copy span,
+.rectangle-delivery-task-destination span {
+    color: #5c4434;
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.rectangle-delivery-task-copy strong,
+.rectangle-delivery-task-destination strong {
+    margin-top: 0.35rem;
+    color: #11559b;
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 0.95;
+}
+
+.rectangle-delivery-task-arrow {
+    position: relative;
+    top: 0.7rem;
+    display: block;
+    justify-self: center;
+    width: 6rem;
+    height: 1.6rem;
+    color: transparent;
+    font-size: 0;
+    animation: rectangleDeliveryArrowNudge 1.25s ease-in-out infinite;
+}
+
+.rectangle-delivery-task-arrow::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 4.9rem;
+    height: 0.42rem;
+    border: 0.12rem solid #c96a15;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #ffd43e, #ff9d12);
+    box-shadow: 0 0.14rem 0.24rem rgba(180, 88, 17, 0.28);
+    transform: translateY(-50%);
+}
+
+.rectangle-delivery-task-arrow::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-top: 0.78rem solid transparent;
+    border-bottom: 0.78rem solid transparent;
+    border-left: 1.35rem solid #f89b13;
+    filter: drop-shadow(0.1rem 0.1rem 0 #b45f16);
+    transform: translateY(-50%);
+}
+
+@keyframes rectangleDeliveryItemFloat {
+    0%, 100% { transform: translateY(0) rotate(-1deg); }
+    50% { transform: translateY(-0.45rem) rotate(1deg); }
+}
+
+@keyframes rectangleDeliveryArrowNudge {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(0.3rem); }
+}
+
+.rectangle-building-hotspots {
+    position: absolute;
+    inset: 0;
+    z-index: 11;
+    pointer-events: none;
+}
+
+.rectangle-building-hotspot {
+    position: absolute;
+    box-sizing: border-box;
+    padding: 0;
+    border: 0;
+    border-radius: 1rem;
+    background: transparent;
+    cursor: pointer;
+    pointer-events: auto;
+    touch-action: manipulation;
+    transition: background-color 160ms ease, box-shadow 160ms ease, transform 120ms ease;
+}
+
+.rectangle-building-board-asset {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    pointer-events: none;
+    transform-origin: center center;
+    filter: drop-shadow(0 0.15rem 0.14rem rgba(36, 54, 42, 0.24));
+    animation: rectangleBuildingBoardPulse 1.8s ease-in-out infinite;
+}
+
+.rectangle-building-hotspot[data-rectangle-building="bookstore"] .rectangle-building-board-asset {
+    animation-delay: 0.14s;
+}
+
+.rectangle-building-hotspot[data-rectangle-building="toy-shop"] .rectangle-building-board-asset {
+    animation-delay: 0.28s;
+}
+
+.rectangle-building-hotspot[data-rectangle-building="bakery"] {
+    left: 7.6%;
+    top: 17.4%;
+    width: 18.5%;
+    height: 19.1%;
+}
+
+.rectangle-building-hotspot[data-rectangle-building="bookstore"] {
+    left: 39.7%;
+    top: 20.8%;
+    width: 20.7%;
+    height: 15.6%;
+}
+
+.rectangle-building-hotspot[data-rectangle-building="toy-shop"] {
+    left: 73.9%;
+    top: 17.4%;
+    width: 18.5%;
+    height: 19.1%;
+}
+
+.rectangle-building-hotspot:hover,
+.rectangle-building-hotspot:focus-visible {
+    background: rgba(255, 245, 113, 0.12);
+    box-shadow: 0 0 0 0.22rem rgba(15, 112, 67, 0.78), 0 0 1.1rem rgba(255, 243, 106, 0.9);
+    outline: none;
+}
+
+.rectangle-building-hotspot:active,
+.rectangle-building-hotspot.is-pressed {
+    transform: scale(0.96);
+    background: rgba(255, 245, 113, 0.22);
+}
+
+.rectangle-building-hotspot:hover .rectangle-building-board-asset,
+.rectangle-building-hotspot:focus-visible .rectangle-building-board-asset {
+    animation-duration: 0.9s;
+    filter: drop-shadow(0 0.28rem 0.32rem rgba(255, 244, 83, 0.95));
+}
+
+@keyframes rectangleBuildingBoardPulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: brightness(1) drop-shadow(0 0.15rem 0.14rem rgba(36, 54, 42, 0.24));
+    }
+    42% {
+        transform: scale(1.09);
+        filter: brightness(1.12) drop-shadow(0 0 0.38rem rgba(255, 244, 83, 0.95)) drop-shadow(0 0 0.85rem rgba(69, 255, 116, 0.72));
+    }
+    62% { transform: scale(1.035); }
+}
+
+@media (min-width: 901px) and (orientation: landscape) {
+    .rectangle-delivery-jeep-sequence {
+        position: absolute;
+        left: -23%;
+        bottom: 13.5%;
+        z-index: 8;
+        width: clamp(13rem, 20vw, 24rem);
+        aspect-ratio: 1;
+        pointer-events: none;
+        transform: translateX(-50%);
+    }
+
+    .rectangle-delivery-jeep-sequence img {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 0.65rem 0.55rem rgba(35, 40, 45, 0.28));
+    }
+
+    .rectangle-delivery-jeep-sequence.is-driving {
+        animation: rectangleDeliveryJeepDriveDesktop 3.4s linear forwards;
+    }
+
+    .rectangle-delivery-jeep-sequence.is-arrived {
+        left: 50%;
+    }
+}
+
+@keyframes rectangleDeliveryJeepDriveDesktop {
     from { left: -23%; }
     to { left: 50%; }
 }
