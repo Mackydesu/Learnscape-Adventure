@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260917-337">
+    <link rel="stylesheet" href="style.css?v=20260918-388">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -59,23 +59,51 @@
 
     <main id="learnscape-title-page">
         <section class="hero" id="home">
-            <video class="hero-bg-video" autoplay muted loop playsinline preload="auto" poster="assets/Backgrounds/bgintro.webp" aria-hidden="true">
-                <source src="assets/Videos/bgintro.webm" type="video/webm">
-            </video>
+            <img class="hero-bg-video" src="assets/Backgrounds/bgintro.webp" alt="" aria-hidden="true">
+            <img class="hero-title-art" src="assets/Backgrounds/title.webp" alt="Learnscape Adventure: Explore Shapes, Discover a Brighter World">
 
-            <div class="hero-title">
-                <h1 class="title-top">
-                    <span>L</span><span>E</span><span>A</span><span>R</span><span>N</span><span>S</span><span>C</span><span>A</span><span>P</span><span>E</span>
-                </h1>
-                <h1 class="title-bottom">ADVENTURE</h1>
+            <div class="intro-settings">
+                <button class="intro-settings-button" type="button" aria-label="Settings" aria-expanded="false" aria-controls="intro-settings-panel">
+                    <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M20.2 3.5h7.6l1.1 5.1a16 16 0 0 1 3.2 1.3l4.5-2.5 5.4 5.4-2.5 4.5a16 16 0 0 1 1.3 3.2l5.1 1.1v7.6l-5.1 1.1a16 16 0 0 1-1.3 3.2l2.5 4.5-5.4 5.4-4.5-2.5a16 16 0 0 1-3.2 1.3l-1.1 5.1h-7.6l-1.1-5.1a16 16 0 0 1-3.2-1.3l-4.5 2.5L6 38.1l2.5-4.5a16 16 0 0 1-1.3-3.2l-5.1-1.1v-7.6l5.1-1.1a16 16 0 0 1 1.3-3.2L6 12.9l5.4-5.4 4.5 2.5a16 16 0 0 1 3.2-1.3l1.1-5.2Z"/><circle cx="24" cy="24" r="7"/></svg>
+                </button>
+                <div class="intro-settings-panel" id="intro-settings-panel" role="group" aria-label="Display settings" hidden>
+                    <label class="intro-settings-toggle" for="intro-fullscreen-toggle">
+                        <span>Fullscreen</span>
+                        <input id="intro-fullscreen-toggle" type="checkbox">
+                    </label>
+                    <label class="intro-settings-toggle" for="intro-sound-muted">
+                        <span>Mute sound</span>
+                        <input id="intro-sound-muted" type="checkbox">
+                    </label>
+                    <label class="intro-volume-control" for="intro-volume-slider">
+                        <span>Sound volume <output id="intro-volume-value" for="intro-volume-slider">100%</output></span>
+                        <input id="intro-volume-slider" type="range" min="0" max="100" step="1" value="100">
+                    </label>
+                </div>
             </div>
 
-            <p class="hero-subtitle">
-                Learn letters, numbers & shapes through epic quests!
-            </p>
+            <nav class="intro-signpost" aria-label="Adventure menu">
+                <img class="intro-signpost-art" src="assets/Shape UI/post.webp" alt="">
+                <button class="intro-sign-button intro-sign-button-shop" type="button" data-intro-panel="shop" aria-label="Shop">
+                    <img src="assets/Shape UI/Shop.webp" alt="Shop">
+                </button>
+                <button class="intro-sign-button intro-sign-button-character" type="button" data-intro-panel="character" aria-label="Character">
+                    <img src="assets/Shape UI/character.webp" alt="Character">
+                </button>
+            </nav>
 
-            <a href="index.html" class="btn btn-enter loading-link" data-route="start">
-                <span>▶</span> ENTER
+            <div class="intro-menu-panel shape-collection-dashboard" role="dialog" aria-modal="true" aria-labelledby="intro-menu-title" hidden>
+                <div class="shape-collection-dashboard-card intro-menu-card">
+                    <button class="shape-collection-close intro-menu-close" type="button" aria-label="Close menu">&times;</button>
+                    <p class="shape-collection-kicker" id="intro-menu-kicker">Adventure Menu</p>
+                    <h2 id="intro-menu-title"></h2>
+                    <div class="intro-menu-copy" hidden></div>
+                </div>
+            </div>
+
+            <a href="index.html#game3" class="btn btn-enter loading-link" data-route="game3">
+                <span class="btn-enter-icon" aria-hidden="true">▶</span>
+                <span class="btn-enter-label">ENTER</span>
             </a>
 
             <img class="hero-character hero-character-ground" src="assets/Character/ch1.svg" alt="Peeking adventure character">
@@ -88,94 +116,6 @@
         </section>
 
     </main>
-
-    <section id="learnscape-game-start-page" hidden>
-        <img class="game-start-bg" src="assets/Backgrounds/bg1.webp" alt="Learnscape game background">
-        <a class="game-return-btn loading-link" href="index.html" data-route="title" aria-label="Return to title screen">
-            <span>‹</span>
-            Back
-        </a>
-        <nav class="game-menu-bar" aria-label="Game menu">
-            <button class="game-menu-btn" type="button">
-                <span class="game-menu-icon" aria-hidden="true">⚙</span>
-                Settings
-            </button>
-            <button class="game-menu-btn" type="button">
-                <span class="game-menu-icon" aria-hidden="true">👤</span>
-                Character
-            </button>
-            <button class="game-menu-btn" type="button">
-                <span class="game-menu-icon" aria-hidden="true">🛒</span>
-                Shop
-            </button>
-        </nav>
-        <main class="game-start-stage" aria-label="Game selection">
-            <section class="game-grid">
-                <a class="game-card game-card-1 loading-link" href="index.html" data-route="game1" aria-label="Open Game 1">
-                    <div class="game-card-media">
-                        <img class="game-card-image" src="assets/Backgrounds/dragtomatch.webp" alt="Game 1 preview">
-                        <div class="game-card-overlay">
-                            <h2 class="game-card-title">ABC Forest</h2>
-                        </div>
-                    </div>
-                </a>
-
-                <a class="game-card game-card-2 loading-link" href="#" aria-label="Game 2">
-                    <div class="game-card-media">
-                        <img class="game-card-image" src="assets/Backgrounds/Game2.webp" alt="Game 2 preview">
-                        <div class="game-card-overlay">
-                            <h2 class="game-card-title">Math Meadow</h2>
-                        </div>
-                    </div>
-                </a>
-
-                <a class="game-card game-card-3 loading-link" href="index.html" data-route="game3" aria-label="Open Shape Island">
-                    <div class="game-card-media">
-                        <img class="game-card-image" src="assets/Backgrounds/shape.webp" alt="Game 3 preview">
-                        <div class="game-card-overlay">
-                            <h2 class="game-card-title">Shape Island</h2>
-                        </div>
-                    </div>
-                </a>
-
-                <div class="game-card game-card-4" aria-label="Game 4 coming soon">
-                    <div class="game-card-media game-card-placeholder">
-                        <div class="game-card-overlay">
-                            <h2 class="game-card-title">Coming Soon</h2>
-                            <p class="game-card-copy">Reserved for your next quest</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <div class="game-start-prompt" aria-hidden="true">
-                <span class="game-start-prompt-kicker">Choose a Game</span>
-            </div>
-        </main>
-    </section>
-
-    <section id="learnscape-game1-page" hidden>
-        <video class="game1-bg-image" loop playsinline preload="auto" aria-hidden="true">
-            <source src="assets/Videos/abcbg.mp4" type="video/mp4">
-        </video>
-        <div class="game1-overlay">
-            <div class="game1-level-grid" aria-label="Level selector"></div>
-        </div>
-        <img class="game1-tap-cue" src="assets/ABC UI/Tap.png" alt="" aria-hidden="true">
-        <div class="game1-entry-veil" aria-hidden="true"></div>
-        <div class="game1-intro" aria-hidden="true">
-            <div class="game1-intro-card">
-                <span class="game1-intro-kicker">Welcome</span>
-                <h2 class="game1-intro-title">ABC Forest</h2>
-            </div>
-        </div>
-
-        <a class="game-return-btn game1-home-btn loading-link" href="index.html" data-route="start" aria-label="Return to game selection">
-            <img src="assets/Buttons/Home.png" alt="" aria-hidden="true">
-        </a>
-
-        <main class="game1-stage" aria-label="Alphabet learning game">
-        </main>
-    </section>
 
     <section id="learnscape-game3-page" class="game3-page" hidden>
         <img class="game1-bg-image" src="assets/Backgrounds/skybg.webp" alt="" aria-hidden="true">
@@ -280,7 +220,7 @@
             </div>
         </div>
 
-        <a class="game-return-btn" href="#start" aria-label="Return to game selection">
+        <a class="game-return-btn loading-link" href="index.html" data-route="title" aria-label="Return to intro page">
             <span>‹</span>
             Back
         </a>
@@ -662,6 +602,7 @@
             </button>
         </aside>
         <img class="rectangle-mission-guide-character" src="assets/Character/ch6.webp" alt="Bibi guiding the Rectangle Mission" hidden>
+        <img class="rectangle-mission-guide-character rectangle-mission-guide-character-ch5" src="assets/Character/ch5.webp" alt="" aria-hidden="true" hidden>
         <div class="rectangle-mission-storage-slots" aria-hidden="true" hidden>
             <span class="rectangle-mission-storage-slot" data-storage-slot="1" data-source-x="984" data-source-y="424" data-source-width="128" data-source-height="112"></span>
             <span class="rectangle-mission-storage-slot" data-storage-slot="2" data-source-x="1130" data-source-y="424" data-source-width="122" data-source-height="112"></span>
@@ -714,30 +655,73 @@
     </section>
 
     <section id="learnscape-rectangle-delivery-page" class="shape-area-page rectangle-delivery-page" hidden>
-        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/rectanglegame.webp" alt="" aria-hidden="true">
-        <div class="rectangle-building-hotspots" aria-label="Choose a delivery building">
-            <button class="rectangle-building-hotspot" type="button" data-rectangle-building="bakery" aria-label="Bakery" aria-pressed="false">
-                <img class="rectangle-building-board-asset" src="assets/Shape UI/bakery-title-board.webp" alt="" draggable="false">
-            </button>
-            <button class="rectangle-building-hotspot" type="button" data-rectangle-building="bookstore" aria-label="Bookstore" aria-pressed="false">
-                <img class="rectangle-building-board-asset" src="assets/Shape UI/bookstore-title-board.webp" alt="" draggable="false">
-            </button>
-            <button class="rectangle-building-hotspot" type="button" data-rectangle-building="toy-shop" aria-label="Toy Shop" aria-pressed="false">
-                <img class="rectangle-building-board-asset" src="assets/Shape UI/toy-shop-title-board.webp" alt="" draggable="false">
-            </button>
+        <div class="rectangle-road-scroll" tabindex="0" role="region" aria-label="Rectangle town scrolling road">
+            <div class="rectangle-road-strip">
+                <img src="assets/Backgrounds/way1.webp" alt="" draggable="false">
+                <img src="assets/Backgrounds/way2.webp" alt="" draggable="false">
+                <img src="assets/Backgrounds/way3.webp" alt="" draggable="false">
+                <img src="assets/Backgrounds/way4.webp" alt="" draggable="false">
+                <img src="assets/Backgrounds/way5.webp" alt="" draggable="false">
+            </div>
+        </div>
+        <button class="rectangle-road-toggle" type="button" aria-label="Stop at this delivery" aria-pressed="false" disabled>Stop</button>
+        <div class="rectangle-gas-meter" role="progressbar" aria-label="Gas remaining" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+            <svg class="rectangle-gas-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+                <defs>
+                    <linearGradient id="gasPumpBody" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#ffef8a"></stop>
+                        <stop offset="0.48" stop-color="#f6b72f"></stop>
+                        <stop offset="1" stop-color="#bb5d17"></stop>
+                    </linearGradient>
+                    <linearGradient id="gasPumpGlass" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#e9fbff"></stop>
+                        <stop offset="0.52" stop-color="#71cde6"></stop>
+                        <stop offset="1" stop-color="#1c759e"></stop>
+                    </linearGradient>
+                    <linearGradient id="gasPumpMetal" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0" stop-color="#eef3f4"></stop>
+                        <stop offset="0.5" stop-color="#8f9da2"></stop>
+                        <stop offset="1" stop-color="#f8fbfb"></stop>
+                    </linearGradient>
+                </defs>
+                <path d="M43 15c8 0 11 4 11 11v20c0 4 5 4 5 0V26" fill="none" stroke="#352922" stroke-width="5" stroke-linecap="round"></path>
+                <path d="M55 10l5 5-1 12-7-2 1-11z" fill="url(#gasPumpMetal)" stroke="#493226" stroke-width="2"></path>
+                <path d="M10 57V11c0-4 3-7 7-7h24c4 0 7 3 7 7v46z" fill="url(#gasPumpBody)" stroke="#5e321a" stroke-width="2.5" stroke-linejoin="round"></path>
+                <path d="M14 56V12c0-2 2-4 4-4" fill="none" stroke="#fff5bd" stroke-width="2.4" stroke-linecap="round" opacity="0.8"></path>
+                <rect x="16" y="11" width="26" height="20" rx="3" fill="#243b43" stroke="#61371e" stroke-width="2"></rect>
+                <rect x="19" y="14" width="20" height="14" rx="1.5" fill="url(#gasPumpGlass)"></rect>
+                <path d="M21 16h9l-8 9h-2z" fill="#ffffff" opacity="0.5"></path>
+                <rect x="16" y="36" width="26" height="8" rx="2" fill="#a94123" stroke="#713019" stroke-width="1.5"></rect>
+                <circle cx="21" cy="40" r="2" fill="#f7e97a"></circle>
+                <path d="M27 40h11" stroke="#ffd977" stroke-width="2" stroke-linecap="round"></path>
+                <path d="M7 57h44v4H7z" fill="url(#gasPumpMetal)" stroke="#543326" stroke-width="2" stroke-linejoin="round"></path>
+            </svg>
+            <span class="rectangle-gas-track" aria-hidden="true">
+                <span class="rectangle-gas-fill"></span>
+            </span>
+            <strong class="rectangle-gas-value">100%</strong>
+        </div>
+        <div class="rectangle-game-over-overlay" role="dialog" aria-modal="true" aria-labelledby="rectangle-game-over-title" hidden>
+            <div class="rectangle-game-over-panel">
+                <div class="rectangle-game-over-gauge" aria-hidden="true"><span>0%</span></div>
+                <p>Out of Gas!</p>
+                <h2 id="rectangle-game-over-title">Game Over</h2>
+                <button class="rectangle-game-over-retry" type="button">Retry</button>
+            </div>
         </div>
         <div class="rectangle-delivery-jeep-sequence" aria-hidden="true" hidden>
+            <div class="rectangle-jeep-smoke"><span></span><span></span><span></span></div>
             <img class="rectangle-delivery-jeep-driving" src="assets/Character/jeep.webp" alt="">
-            <img class="rectangle-delivery-jeep-arrived" src="assets/Character/jeep2.webp" alt="" hidden>
+            <img class="rectangle-delivery-jeep-arrived" src="assets/Character/jeep.webp" alt="" hidden>
         </div>
         <div class="rectangle-delivery-instruction-panel" role="status" aria-live="polite" hidden>
             Ihatid ang gamit sa tamang lugar.
         </div>
         <section class="rectangle-delivery-task-panel" aria-label="Current delivery" hidden>
             <div class="rectangle-delivery-item-stage" aria-hidden="true">
-                <img class="rectangle-delivery-item" src="assets/Shape UI/rectangle-books.webp" alt="">
-                <img class="rectangle-delivery-item" src="assets/Shape UI/rectangle-bread-tray.webp" alt="" hidden>
-                <img class="rectangle-delivery-item" src="assets/Shape UI/rectangle-toy-box.webp" alt="" hidden>
+                <img class="rectangle-delivery-item" data-delivery-item="books" src="assets/Shape UI/rectangle-books.webp" alt="">
+                <img class="rectangle-delivery-item" data-delivery-item="bread-tray" src="assets/Shape UI/rectangle-bread-tray.webp" alt="" hidden>
+                <img class="rectangle-delivery-item" data-delivery-item="toy-box" src="assets/Shape UI/rectangle-toy-box.webp" alt="" hidden>
             </div>
             <div class="rectangle-delivery-task-copy">
                 <span>Deliver this:</span>
@@ -758,14 +742,11 @@
     <section id="learnscape-rectangle-bakery-page" class="shape-area-page rectangle-destination-page" hidden>
         <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/bakery.webp" alt="Bakery" draggable="false">
         <div class="rectangle-parking-shapes" aria-label="Choose a parking shape" hidden>
-            <button class="rectangle-parking-shape" type="button" data-parking-shape="star" data-source-x="613" data-source-y="626" data-source-width="172" data-source-height="115" aria-label="Star parking space" aria-pressed="false">
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M50 0 62 34 100 36 70 58 80 100 50 75 18 100 29 58 0 36 38 34Z"></path></svg>
+            <button class="rectangle-parking-shape" type="button" data-parking-shape="star" data-source-x="616" data-source-y="629" data-source-width="166" data-source-height="109" aria-label="Star parking space" aria-pressed="false">
             </button>
-            <button class="rectangle-parking-shape" type="button" data-parking-shape="diamond" data-source-x="913" data-source-y="623" data-source-width="180" data-source-height="125" aria-label="Diamond parking space" aria-pressed="false">
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M50 0 100 50 50 100 0 50Z"></path></svg>
+            <button class="rectangle-parking-shape" type="button" data-parking-shape="diamond" data-source-x="916" data-source-y="626" data-source-width="174" data-source-height="119" aria-label="Diamond parking space" aria-pressed="false">
             </button>
-            <button class="rectangle-parking-shape" type="button" data-parking-shape="rectangle" data-correct-parking data-source-x="1209" data-source-y="649" data-source-width="209" data-source-height="77" aria-label="Rectangle parking space" aria-pressed="false">
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect x="1.5" y="1.5" width="97" height="97" rx="2"></rect></svg>
+            <button class="rectangle-parking-shape" type="button" data-parking-shape="rectangle" data-correct-parking data-source-x="1212" data-source-y="652" data-source-width="209" data-source-height="71" aria-label="Rectangle parking space" aria-pressed="false">
             </button>
         </div>
         <div class="rectangle-destination-jeep" aria-hidden="true" hidden>
@@ -783,14 +764,11 @@
     <section id="learnscape-rectangle-bookstore-page" class="shape-area-page rectangle-destination-page" hidden>
         <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/bookstore.webp" alt="Bookstore" draggable="false">
         <div class="rectangle-parking-shapes" aria-label="Choose a parking shape" hidden>
-            <button class="rectangle-parking-shape" type="button" data-parking-shape="circle" data-source-x="746" data-source-y="639" data-source-width="142" data-source-height="104" aria-label="Circle parking space" aria-pressed="false">
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><ellipse cx="50" cy="50" rx="48.5" ry="48.5"></ellipse></svg>
+            <button class="rectangle-parking-shape" type="button" data-parking-shape="circle" data-source-x="749" data-source-y="642" data-source-width="137" data-source-height="98" aria-label="Circle parking space" aria-pressed="false">
             </button>
-            <button class="rectangle-parking-shape" type="button" data-parking-shape="rectangle" data-correct-parking data-source-x="1014" data-source-y="650" data-source-width="200" data-source-height="82" aria-label="Rectangle parking space" aria-pressed="false">
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect x="1.5" y="1.5" width="97" height="97" rx="2"></rect></svg>
+            <button class="rectangle-parking-shape" type="button" data-parking-shape="rectangle" data-correct-parking data-source-x="1017" data-source-y="653" data-source-width="194" data-source-height="76" aria-label="Rectangle parking space" aria-pressed="false">
             </button>
-            <button class="rectangle-parking-shape" type="button" data-parking-shape="triangle" data-source-x="1362" data-source-y="642" data-source-width="151" data-source-height="92" aria-label="Triangle parking space" aria-pressed="false">
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M50 1.5 98.5 98.5 1.5 98.5Z"></path></svg>
+            <button class="rectangle-parking-shape" type="button" data-parking-shape="triangle" data-source-x="1347" data-source-y="644" data-source-width="148" data-source-height="87" aria-label="Triangle parking space" aria-pressed="false">
             </button>
         </div>
         <div class="rectangle-destination-jeep" aria-hidden="true" hidden>
@@ -808,14 +786,11 @@
     <section id="learnscape-rectangle-toy-shop-page" class="shape-area-page rectangle-destination-page" hidden>
         <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/toyshop.webp" alt="Toy Shop" draggable="false">
         <div class="rectangle-parking-shapes" aria-label="Choose a parking shape" hidden>
-            <button class="rectangle-parking-shape" type="button" data-parking-shape="rectangle" data-correct-parking data-source-x="557" data-source-y="647" data-source-width="229" data-source-height="80" aria-label="Rectangle parking space" aria-pressed="false">
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M4 1.5 98.5 1.5 94 98.5 1.5 98.5Z"></path></svg>
+            <button class="rectangle-parking-shape" type="button" data-parking-shape="rectangle" data-correct-parking data-source-x="564" data-source-y="663" data-source-width="219" data-source-height="61" aria-label="Rectangle parking space" aria-pressed="false">
             </button>
-            <button class="rectangle-parking-shape" type="button" data-parking-shape="heart" data-source-x="915" data-source-y="646" data-source-width="177" data-source-height="100" aria-label="Heart parking space" aria-pressed="false">
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M50 98 8 57C-10 38 3 1.5 29 3 41 4 47 12 50 21 54 12 60 4 71 3 97 1.5 110 38 92 57Z"></path></svg>
+            <button class="rectangle-parking-shape" type="button" data-parking-shape="heart" data-source-x="918" data-source-y="649" data-source-width="171" data-source-height="94" aria-label="Heart parking space" aria-pressed="false">
             </button>
-            <button class="rectangle-parking-shape" type="button" data-parking-shape="square" data-source-x="1257" data-source-y="645" data-source-width="170" data-source-height="96" aria-label="Square parking space" aria-pressed="false">
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect x="1.5" y="1.5" width="97" height="97" rx="2"></rect></svg>
+            <button class="rectangle-parking-shape" type="button" data-parking-shape="square" data-source-x="1253" data-source-y="648" data-source-width="171" data-source-height="90" aria-label="Square parking space" aria-pressed="false">
             </button>
         </div>
         <div class="rectangle-destination-jeep" aria-hidden="true" hidden>
@@ -1108,181 +1083,15 @@
         </a>
     </section>
 
-    <section id="learnscape-lettertrace-page" hidden>
-        <img class="game1-bg-image lettertrace-bg-image" src="assets/Backgrounds/abcbg.webp" alt="" aria-hidden="true">
-        <div class="game1-overlay lettertrace-overlay">
-            <a class="game-return-btn game1-home-btn loading-link lettertrace-home-btn" href="index.html" data-route="start" aria-label="Return to game selection">
-                <img src="assets/Buttons/Home.png" alt="" aria-hidden="true">
-            </a>
-            <button class="lettertrace-sound-btn" type="button" aria-label="Toggle sound" aria-pressed="false">
-                <svg class="lettertrace-sound-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-                    <path d="M12 24v16h10l16 12V12L22 24z"></path>
-                    <path class="lettertrace-sound-wave lettertrace-sound-wave-one" d="M43 24c4 2.5 6 5.5 6 8s-2 5.5-6 8"></path>
-                    <path class="lettertrace-sound-wave lettertrace-sound-wave-two" d="M48 17c6 4.5 9 9.5 9 15s-3 10.5-9 15"></path>
-                </svg>
-            </button>
+    
 
-            <main class="lettertrace-stage" aria-label="Letter tracing preview">
-                <section class="lettertrace-board lettertrace-board-letter" aria-label="Letter board">
-                    <img class="lettertrace-board-image" src="assets/ABC UI/letterboard.png" alt="" aria-hidden="true">
-                    <div class="lettertrace-board-content">
-                        <div class="lettertrace-letter-stack" aria-live="polite">
-                            <span class="lettertrace-letter lettertrace-letter-upper">A</span>
-                            <span class="lettertrace-letter lettertrace-letter-lower">a</span>
-                        </div>
-                    </div>
-                </section>
+    
 
-                <section class="lettertrace-board lettertrace-board-trace" aria-label="Trace board">
-                    <img class="lettertrace-board-image" src="assets/ABC UI/traceboard.png" alt="" aria-hidden="true">
-                    <div class="lettertrace-board-content lettertrace-board-content-center">
-                        <div class="lettertrace-trace-stage" aria-label="Trace the selected letter">
-                            <svg class="lettertrace-trace-svg" viewBox="0 0 1000 1000" aria-hidden="true" focusable="false">
-                                <defs>
-                                    <mask id="lettertrace-trace-outline-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="1000">
-                                        <rect width="1000" height="1000" fill="black"></rect>
-                                        <path class="lettertrace-trace-mask-path lettertrace-trace-mask-outer" d="M300 780 L500 220 L700 780 M380 570 H620"></path>
-                                        <path class="lettertrace-trace-mask-path lettertrace-trace-mask-inner" d="M300 780 L500 220 L700 780 M380 570 H620"></path>
-                                    </mask>
-                                </defs>
-                                <path class="lettertrace-trace-glyph" mask="url(#lettertrace-trace-outline-mask)" d="M300 780 L500 220 L700 780 M380 570 H620" aria-hidden="true"></path>
-                                <path class="lettertrace-trace-glyph-guide" d="M300 780 L500 220 L700 780 M380 570 H620" aria-hidden="true"></path>
-                                <g class="lettertrace-trace-progress-group" aria-hidden="true"></g>
-                            </svg>
-                            <canvas class="lettertrace-trace-canvas" aria-hidden="true"></canvas>
-                        </div>
-                    </div>
-                </section>
+    
 
-                <section class="lettertrace-board lettertrace-board-tips" aria-label="Tips">
-                    <img class="lettertrace-board-image" src="assets/ABC UI/tips.png" alt="Tracing tips" aria-hidden="true">
-                </section>
+    
 
-            </main>
-
-            <div class="lettertrace-progress-label" aria-live="polite">0%</div>
-
-            <div class="lettertrace-nav" aria-label="Trace controls">
-                <button class="lettertrace-nav-button is-active" type="button" data-letter-case="upper" aria-pressed="true">
-                    Uppercase
-                </button>
-                <button class="lettertrace-nav-button lettertrace-nav-clear" type="button" data-trace-clear="true" aria-label="Erase all drawings">
-                    Erase
-                </button>
-                <button class="lettertrace-nav-button" type="button" data-letter-case="lower" aria-pressed="false">
-                    Lowercase
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <section id="learnscape-dragtomatch-page" hidden>
-        <img class="game1-bg-image" src="assets/Backgrounds/skybg.webp" alt="" aria-hidden="true">
-        <div class="game1-overlay" aria-hidden="true"></div>
-        <div class="game1-entry-veil" aria-hidden="true"></div>
-        <div class="game1-celebration-layer" aria-hidden="true"></div>
-        <div class="game1-dragmatch-sun" aria-hidden="true" data-reaction="happy">
-            <svg class="game1-dragmatch-sun-svg" viewBox="0 0 200 200" focusable="false">
-                <defs>
-                    <radialGradient id="sunGradient" cx="40%" cy="40%" r="60%">
-                        <stop offset="0%" stop-color="#fff176"></stop>
-                        <stop offset="40%" stop-color="#ffeb3b"></stop>
-                        <stop offset="85%" stop-color="#ffc107"></stop>
-                        <stop offset="100%" stop-color="#ff8f00"></stop>
-                    </radialGradient>
-                    <clipPath id="circleClip">
-                        <circle cx="100" cy="100" r="60"></circle>
-                    </clipPath>
-                </defs>
-
-                <circle cx="100" cy="100" r="60" fill="url(#sunGradient)" stroke="#e65100" stroke-width="3"></circle>
-                <ellipse cx="135" cy="70" rx="35" ry="15" fill="#ffffff" opacity="0.4" transform="rotate(45 135 70)" clip-path="url(#circleClip)"></ellipse>
-                <ellipse cx="120" cy="85" rx="15" ry="5" fill="#ffffff" opacity="0.7" transform="rotate(45 120 85)" clip-path="url(#circleClip)"></ellipse>
-
-                <g class="game1-sun-face game1-sun-face-happy">
-                    <circle cx="75" cy="90" r="7" fill="#d84315"></circle>
-                    <circle cx="125" cy="90" r="7" fill="#d84315"></circle>
-                    <circle cx="73" cy="88" r="2.5" fill="#ffffff"></circle>
-                    <circle cx="123" cy="88" r="2.5" fill="#ffffff"></circle>
-                    <path d="M 75 115 Q 100 145, 125 115" fill="none" stroke="#d84315" stroke-width="5" stroke-linecap="round"></path>
-                    <ellipse cx="60" cy="105" rx="12" ry="6" fill="#ff8a80" opacity="0.7"></ellipse>
-                    <ellipse cx="140" cy="105" rx="12" ry="6" fill="#ff8a80" opacity="0.7"></ellipse>
-                </g>
-
-                <g class="game1-sun-face game1-sun-face-sad">
-                    <path d="M 68 90 Q 75 95, 82 90" fill="none" stroke="#d84315" stroke-width="5" stroke-linecap="round"></path>
-                    <path d="M 118 90 Q 125 95, 132 90" fill="none" stroke="#d84315" stroke-width="5" stroke-linecap="round"></path>
-                    <path d="M 75 135 Q 100 105, 125 135" fill="none" stroke="#d84315" stroke-width="5" stroke-linecap="round"></path>
-                    <path d="M 120 100 Q 122 115, 120 120 Q 118 115, 120 100 Z" fill="#64b5f6"></path>
-                </g>
-            </svg>
-        </div>
-        <div class="game1-tutorial-overlay game1-dragmatch-tutorial" aria-hidden="true">
-            <div class="game1-tutorial-frame">
-                <video class="game1-tutorial-video" playsinline preload="auto">
-                    <source src="assets/Videos/Tutorialdtm.mp4" type="video/mp4">
-                </video>
-            </div>
-        </div>
-        <button class="game1-tutorial-button" type="button" data-dragtomatch-tutorial-button aria-label="Show Drag to Match tutorial">
-            ?
-        </button>
-        <div class="game1-dragtomatch-objects" aria-label="Drag to Match object cards"></div>
-        <div class="game1-letter-stage" aria-hidden="true">
-            <div class="game1-letter-board-wrap">
-                <img class="game1-letter-board" src="assets/ABC UI/Letterdisplayer.png" alt="">
-                <span class="game1-current-letter" draggable="true" aria-label="Letter A">A</span>
-            </div>
-            <img class="game1-letter-island" src="assets/ABC UI/floatingisland.png" alt="">
-        </div>
-        <div class="game1-intro" aria-hidden="true">
-            <div class="game1-intro-card">
-                <span class="game1-intro-kicker">Game 1</span>
-                <h2 class="game1-intro-title">Drag to Match</h2>
-            </div>
-        </div>
-
-        <a class="game-return-btn loading-link" href="index.html" data-route="lettertrace" aria-label="Return to letter tracing">
-            <span>‹</span>
-            Back
-        </a>
-    </section>
-
-    <section id="learnscape-poptheword-page" hidden>
-        <img class="game1-bg-image" src="assets/Backgrounds/skybg.webp" alt="" aria-hidden="true">
-        <div class="game1-overlay" aria-hidden="true"></div>
-        <div class="game1-entry-veil" aria-hidden="true"></div>
-        <div class="game1-intro" aria-hidden="true">
-            <div class="game1-intro-card">
-                <span class="game1-intro-kicker">Game 1</span>
-                <h2 class="game1-intro-title">Pop the Word</h2>
-            </div>
-        </div>
-
-        <a class="game-return-btn loading-link" href="index.html" data-route="game1" aria-label="Return to game 1 previews">
-            <span>‹</span>
-            Back
-        </a>
-    </section>
-
-    <section id="learnscape-bunnyhop-page" hidden>
-        <img class="game1-bg-image" src="assets/Backgrounds/skybg.webp" alt="" aria-hidden="true">
-        <div class="game1-overlay" aria-hidden="true"></div>
-        <div class="game1-entry-veil" aria-hidden="true"></div>
-        <div class="game1-intro" aria-hidden="true">
-            <div class="game1-intro-card">
-                <span class="game1-intro-kicker">Game 1</span>
-                <h2 class="game1-intro-title">Bunny Hop</h2>
-            </div>
-        </div>
-
-        <a class="game-return-btn loading-link" href="index.html" data-route="game1" aria-label="Return to game 1 previews">
-            <span>‹</span>
-            Back
-        </a>
-    </section>
-
-    <script src="script.js?v=20260917-337"></script>
+    <script src="script.js?v=20260918-372"></script>
     </div>
 
     <script>
@@ -1293,18 +1102,6 @@
                     bodyClass: 'title-page',
                     pageId: 'learnscape-title-page',
                     hash: '#home',
-                },
-                start: {
-                    title: 'Learnscape Adventure - Game',
-                    bodyClass: 'game-start-page',
-                    pageId: 'learnscape-game-start-page',
-                    hash: '#game-start',
-                },
-                game1: {
-                    title: 'Learnscape Adventure - Letter Forest',
-                    bodyClass: 'game1-page',
-                    pageId: 'learnscape-game1-page',
-                    hash: '#game1',
                 },
                 game3: {
                     title: 'Learnscape Adventure - Shape Island',
@@ -1396,39 +1193,14 @@
                     pageId: 'learnscape-circle-illustration-page',
                     hash: '#circle-illustration',
                 },
-                lettertrace: {
-                    title: 'Learnscape Adventure - Trace The Letter',
-                    bodyClass: 'gameplay-page',
-                    pageId: 'learnscape-lettertrace-page',
-                    hash: '#lettertrace',
-                },
-                dragtomatch: {
-                    title: 'Learnscape Adventure - Drag to Match',
-                    bodyClass: 'gameplay-page',
-                    pageId: 'learnscape-dragtomatch-page',
-                    hash: '#dragtomatch',
-                },
-                poptheword: {
-                    title: 'Learnscape Adventure - Pop the Word',
-                    bodyClass: 'gameplay-page',
-                    pageId: 'learnscape-poptheword-page',
-                    hash: '#poptheword',
-                },
-                bunnyhop: {
-                    title: 'Learnscape Adventure - Bunny Hop',
-                    bodyClass: 'gameplay-page',
-                    pageId: 'learnscape-bunnyhop-page',
-                    hash: '#bunnyhop',
-                },
             };
 
             const routeAliases = {
                 '': 'title',
                 title: 'title',
                 home: 'title',
-                start: 'start',
-                'game-start': 'start',
-                game1: 'game1',
+                start: 'title',
+                'game-start': 'title',
                 game3: 'game3',
                 shapeCircle: 'shapeCircle',
                 'shape-circle': 'shapeCircle',
@@ -1458,13 +1230,8 @@
                 'shape-area-8': 'shapeArea8',
                 circleIllustration: 'circleIllustration',
                 'circle-illustration': 'circleIllustration',
-                lettertrace: 'lettertrace',
-                dragtomatch: 'dragtomatch',
-                poptheword: 'poptheword',
-                bunnyhop: 'bunnyhop',
                 '#home': 'title',
-                '#game-start': 'start',
-                '#game1': 'game1',
+                '#game-start': 'title',
                 '#game3': 'game3',
                 '#shape-circle': 'shapeCircle',
                 '#shape-square': 'shapeSquare',
@@ -1480,14 +1247,9 @@
                 '#shape-area-7': 'shapeArea7',
                 '#shape-area-8': 'shapeArea8',
                 '#circle-illustration': 'circleIllustration',
-                '#lettertrace': 'lettertrace',
-                '#dragtomatch': 'dragtomatch',
-                '#poptheword': 'poptheword',
-                '#bunnyhop': 'bunnyhop',
                 'index.html': 'title',
                 'title-screen.html': 'title',
                 'game_start.html': 'start',
-                'game1.html': 'game1',
                 'game3.html': 'game3',
                 'shape-circle.html': 'shapeCircle',
                 'shape-square.html': 'shapeSquare',
@@ -1503,10 +1265,6 @@
                 'shape-area-7.html': 'shapeArea7',
                 'shape-area-8.html': 'shapeArea8',
                 'circle-illustration.html': 'circleIllustration',
-                'lettertrace.html': 'lettertrace',
-                'dragtomatch.html': 'dragtomatch',
-                'poptheword.html': 'poptheword',
-                'bunnyhop.html': 'bunnyhop',
             };
 
             const parseTarget = (target) => {
@@ -1524,29 +1282,13 @@
             };
 
             const buildRouteHash = (routeName, params = {}) => {
-                if ((routeName === 'dragtomatch' || routeName === 'lettertrace') && Object.keys(params).length) {
-                    const searchParams = new URLSearchParams();
-                    Object.entries(params).forEach(([key, value]) => {
-                        if (value !== undefined && value !== null && value !== '') {
-                            searchParams.set(key, value);
-                        }
-                    });
-
-                    return `#${routeName}?${searchParams.toString()}`;
-                 }
-
                 return (routes[routeName] || routes.title).hash;
             };
 
-            const getRouteKey = (routeName, params = {}) => {
-                const letter = params.letter ? String(params.letter).toUpperCase() : '';
-                return letter ? `${routeName}?letter=${letter}` : routeName;
-            };
+            const getRouteKey = (routeName) => routeName;
 
             const pages = {
                 title: document.getElementById('learnscape-title-page'),
-                start: document.getElementById('learnscape-game-start-page'),
-                game1: document.getElementById('learnscape-game1-page'),
                 game3: document.getElementById('learnscape-game3-page'),
                 shapeCircle: document.getElementById('learnscape-shape-circle-page'),
                 shapeSquare: document.getElementById('learnscape-shape-square-page'),
@@ -1562,15 +1304,11 @@
                 shapeArea7: document.getElementById('learnscape-shape-area-7-page'),
                 shapeArea8: document.getElementById('learnscape-shape-area-8-page'),
                 circleIllustration: document.getElementById('learnscape-circle-illustration-page'),
-                lettertrace: document.getElementById('learnscape-lettertrace-page'),
-                dragtomatch: document.getElementById('learnscape-dragtomatch-page'),
-                poptheword: document.getElementById('learnscape-poptheword-page'),
-                bunnyhop: document.getElementById('learnscape-bunnyhop-page'),
             };
 
             const loadingOverlay = document.querySelector('.page-loading-overlay');
             const body = document.body;
-            const routeBodyClasses = ['title-page', 'game-start-page', 'game1-page', 'game3-page', 'gameplay-page'];
+            const routeBodyClasses = ['title-page', 'game3-page', 'gameplay-page'];
             let loadingTimer = null;
             let loadingHideTimer = null;
             let currentRoute = 'title';
@@ -1584,10 +1322,16 @@
             );
 
             const syncFullscreenClass = () => {
-                body.classList.toggle('is-fullscreen-mode', isFullscreenActive());
+                const isFullscreen = isFullscreenActive();
+                body.classList.toggle('is-fullscreen-mode', isFullscreen);
+                if (introFullscreenToggle) introFullscreenToggle.checked = isFullscreen;
             };
 
+            const introFullscreenToggle = document.getElementById('intro-fullscreen-toggle');
             const fullscreenRestoreButton = document.querySelector('.fullscreen-restore-button');
+            const fullscreenRestoreKicker = document.querySelector('.fullscreen-restore-kicker');
+            const fullscreenRestoreTitle = document.getElementById('fullscreen-restore-title');
+            const fullscreenRestoreCopy = document.getElementById('fullscreen-restore-copy');
             fullscreenRestoreButton?.addEventListener('click', () => {
                 if (fullscreenRestoreButton.disabled) return;
                 fullscreenRestoreButton.disabled = true;
@@ -1919,6 +1663,15 @@
                 currentRoute = routeName in routes ? routeName : 'title';
                 currentRouteKey = getRouteKey(currentRoute, params);
 
+                const isIntro = currentRoute === 'title';
+                if (fullscreenRestoreKicker) fullscreenRestoreKicker.textContent = isIntro ? 'Welcome, Adventurer' : 'Game Paused';
+                if (fullscreenRestoreTitle) fullscreenRestoreTitle.textContent = isIntro ? 'Ready to Explore?' : 'Fullscreen Paused';
+                if (fullscreenRestoreCopy) {
+                    fullscreenRestoreCopy.textContent = isIntro
+                        ? 'Tap below to continue your adventure in fullscreen.'
+                        : 'Tap the button below to continue your adventure in fullscreen.';
+                }
+
                 Object.entries(pages).forEach(([name, page]) => {
                     if (!page) return;
                     page.hidden = name !== currentRoute;
@@ -2042,6 +1795,171 @@
                     hideLoading();
                     isNavigating = false;
                     setRoute(parseTarget(location.hash), true);
+                }
+            });
+
+            const introMenuPanel = document.querySelector('.intro-menu-panel');
+            const introMenuTitle = document.getElementById('intro-menu-title');
+            const introMenuKicker = document.getElementById('intro-menu-kicker');
+            const introMenuCopy = introMenuPanel?.querySelector('.intro-menu-copy');
+            const introMenuClose = introMenuPanel?.querySelector('.intro-menu-close');
+            let introMenuTrigger = null;
+            const introMenuContent = {
+                shop: {
+                    kicker: 'Village Shop',
+                    title: 'Adventure Shop',
+                    copy: 'The village shop is getting ready for your next adventure.',
+                },
+                character: {
+                    kicker: 'Your Guide',
+                    title: 'Meet Bibi',
+                    copy: '<img class="intro-guide-portrait" src="assets/Character/ch3.webp" alt="Bibi"> <span>Bibi is ready to explore Shape Island with you.</span>',
+                },
+            };
+
+            const closeIntroMenu = () => {
+                if (!introMenuPanel) return;
+                introMenuPanel.hidden = true;
+                introMenuTrigger?.focus({ preventScroll: true });
+                introMenuTrigger = null;
+            };
+
+            document.querySelectorAll('[data-intro-panel]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const content = introMenuContent[button.dataset.introPanel];
+                    if (!content || !introMenuPanel) return;
+                    introMenuTrigger = button;
+                    introMenuKicker.textContent = content.kicker;
+                    introMenuTitle.textContent = content.title;
+                    introMenuCopy.hidden = false;
+                    introMenuCopy.innerHTML = content.copy || '';
+                    introMenuPanel.hidden = false;
+                    introMenuClose.focus({ preventScroll: true });
+                });
+            });
+
+            introMenuClose?.addEventListener('click', closeIntroMenu);
+            introMenuPanel?.addEventListener('click', (event) => {
+                if (event.target === introMenuPanel) closeIntroMenu();
+            });
+            introMenuPanel?.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') closeIntroMenu();
+            });
+
+            const introSettings = document.querySelector('.intro-settings');
+            const introSettingsButton = introSettings?.querySelector('.intro-settings-button');
+            const introSettingsPanel = introSettings?.querySelector('.intro-settings-panel');
+            const soundMutedToggle = document.getElementById('intro-sound-muted');
+            const soundVolumeSlider = document.getElementById('intro-volume-slider');
+            const soundVolumeValue = document.getElementById('intro-volume-value');
+            const readSoundSetting = (key, fallback) => {
+                try {
+                    const stored = window.localStorage.getItem(key);
+                    return stored === null ? fallback : stored;
+                } catch (error) {
+                    return fallback;
+                }
+            };
+            const writeSoundSetting = (key, value) => {
+                try {
+                    window.localStorage.setItem(key, value);
+                } catch (error) {
+                    // Sound settings still apply for this session if storage is unavailable.
+                }
+            };
+            let masterSoundVolume = Math.min(1, Math.max(0, Number(readSoundSetting('learnscape-sound-volume', '1')) || 0));
+            let isSoundMuted = readSoundSetting('learnscape-sound-muted', 'false') === 'true';
+            const mediaVolumeDescriptor = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'volume');
+            const nativeMediaPlay = HTMLMediaElement.prototype.play;
+            const baseMediaVolumes = new WeakMap();
+            const activeMedia = new Set();
+            const registeredMedia = new WeakSet();
+            const soundScale = () => isSoundMuted ? 0 : masterSoundVolume;
+            window.__learnscapeSoundScale = soundScale;
+            const applyMasterSoundVolume = () => {
+                window.dispatchEvent(new Event('learnscape:soundchange'));
+                if (!mediaVolumeDescriptor?.set) return;
+                activeMedia.forEach((media) => {
+                    const baseVolume = baseMediaVolumes.get(media);
+                    if (baseVolume !== undefined) mediaVolumeDescriptor.set.call(media, baseVolume * soundScale());
+                });
+            };
+
+            if (mediaVolumeDescriptor?.get && mediaVolumeDescriptor?.set && mediaVolumeDescriptor.configurable) {
+                try {
+                    Object.defineProperty(HTMLMediaElement.prototype, 'volume', {
+                        configurable: true,
+                        enumerable: mediaVolumeDescriptor.enumerable,
+                        get() {
+                            return baseMediaVolumes.has(this)
+                                ? baseMediaVolumes.get(this)
+                                : mediaVolumeDescriptor.get.call(this);
+                        },
+                        set(value) {
+                            const nextBaseVolume = Math.min(1, Math.max(0, Number(value)));
+                            baseMediaVolumes.set(this, nextBaseVolume);
+                            mediaVolumeDescriptor.set.call(this, nextBaseVolume * soundScale());
+                        },
+                    });
+                    HTMLMediaElement.prototype.play = function (...args) {
+                        if (!baseMediaVolumes.has(this)) {
+                            baseMediaVolumes.set(this, mediaVolumeDescriptor.get.call(this));
+                        }
+                        activeMedia.add(this);
+                        if (!registeredMedia.has(this)) {
+                            registeredMedia.add(this);
+                            const releaseMedia = () => activeMedia.delete(this);
+                            this.addEventListener('pause', releaseMedia);
+                            this.addEventListener('ended', releaseMedia);
+                        }
+                        mediaVolumeDescriptor.set.call(this, baseMediaVolumes.get(this) * soundScale());
+                        return nativeMediaPlay.apply(this, args);
+                    };
+                } catch (error) {
+                    console.warn('Master sound control could not be initialized.', error);
+                }
+            }
+
+            soundMutedToggle.checked = isSoundMuted;
+            soundVolumeSlider.value = String(Math.round(masterSoundVolume * 100));
+            soundVolumeValue.value = `${soundVolumeSlider.value}%`;
+            soundMutedToggle.addEventListener('change', () => {
+                isSoundMuted = soundMutedToggle.checked;
+                writeSoundSetting('learnscape-sound-muted', String(isSoundMuted));
+                applyMasterSoundVolume();
+            });
+            soundVolumeSlider.addEventListener('input', () => {
+                masterSoundVolume = Number(soundVolumeSlider.value) / 100;
+                soundVolumeValue.value = `${soundVolumeSlider.value}%`;
+                writeSoundSetting('learnscape-sound-volume', String(masterSoundVolume));
+                applyMasterSoundVolume();
+            });
+            introSettingsButton?.addEventListener('click', () => {
+                const shouldOpen = introSettingsPanel.hidden;
+                introSettingsPanel.hidden = !shouldOpen;
+                introSettingsButton.setAttribute('aria-expanded', String(shouldOpen));
+            });
+            introFullscreenToggle?.addEventListener('change', () => {
+                if (introFullscreenToggle.checked) {
+                    fullscreenRestoreButton?.click();
+                    return;
+                }
+                const exitFullscreen = document.exitFullscreen
+                    || document.webkitExitFullscreen
+                    || document.msExitFullscreen;
+                if (exitFullscreen) Promise.resolve(exitFullscreen.call(document)).finally(syncFullscreenClass);
+            });
+            document.addEventListener('click', (event) => {
+                if (!introSettings?.contains(event.target)) {
+                    introSettingsPanel.hidden = true;
+                    introSettingsButton?.setAttribute('aria-expanded', 'false');
+                }
+            });
+            introSettings?.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    introSettingsPanel.hidden = true;
+                    introSettingsButton?.setAttribute('aria-expanded', 'false');
+                    introSettingsButton?.focus({ preventScroll: true });
                 }
             });
 

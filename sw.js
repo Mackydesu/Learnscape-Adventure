@@ -1,4 +1,4 @@
-const CACHE_NAME = 'learnscape-adventure-v158';
+const CACHE_NAME = 'learnscape-adventure-v188';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -9,14 +9,11 @@ const CORE_ASSETS = [
   './app-icon-512.png',
   './apple-touch-icon.png',
   './assets/Backgrounds/bgintro.jpeg',
-  './assets/Backgrounds/bgintro.mp4',
+  './assets/Backgrounds/title.webp',
+  './assets/Shape UI/post.webp',
+  './assets/Shape UI/Shop.webp',
+  './assets/Shape UI/character.webp',
   './assets/Backgrounds/bg1.png',
-  './assets/Backgrounds/Game1.png',
-  './assets/Backgrounds/Game1.jpeg',
-  './assets/Backgrounds/Game1.mp4',
-  './assets/Backgrounds/Game2.png',
-  './assets/Backgrounds/abc.png',
-  './assets/Backgrounds/123.png',
   './assets/Backgrounds/shape.png',
   './assets/Backgrounds/loadingscreen.png',
   './assets/Character/ch1.png'
