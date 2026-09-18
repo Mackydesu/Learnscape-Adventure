@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260918-392">
+    <link rel="stylesheet" href="style.css?v=20260919-407">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -663,8 +663,35 @@
                 <img src="assets/Backgrounds/way4.webp" alt="" draggable="false">
                 <img src="assets/Backgrounds/way5.webp" alt="" draggable="false">
             </div>
+            <div class="rectangle-highway-track" aria-hidden="true">
+                <span class="rectangle-highway-segment is-highway-01"></span>
+                <span class="rectangle-highway-segment is-highway-02"></span>
+            </div>
         </div>
         <button class="rectangle-road-toggle" type="button" aria-label="Stop at this delivery" aria-pressed="false" disabled>Stop</button>
+        <button class="rectangle-boss-jump-button" type="button" aria-label="Jump over the monster spike" hidden>Jump</button>
+        <div class="rectangle-boss-warning" role="dialog" aria-modal="true" aria-labelledby="rectangle-boss-warning-title" hidden>
+            <div class="rectangle-boss-warning-panel">
+                <span class="rectangle-boss-warning-mark" aria-hidden="true">!</span>
+                <p>Monster! Monster!</p>
+                <h2 id="rectangle-boss-warning-title">Defeat the Monster</h2>
+                <button class="rectangle-boss-warning-continue" type="button">Continue</button>
+            </div>
+        </div>
+        <section class="rectangle-boss-encounter" aria-label="Metal monster battle" hidden>
+            <div class="rectangle-boss-health" role="progressbar" aria-label="Metal monster health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+                <span class="rectangle-boss-health-title">Metal Monster</span>
+                <span class="rectangle-boss-health-track" aria-hidden="true"><span class="rectangle-boss-health-fill"></span></span>
+                <strong class="rectangle-boss-health-value">100 HP</strong>
+            </div>
+            <div class="rectangle-boss-monster">
+                <span class="rectangle-boss-mouth-glow" aria-hidden="true"></span>
+                <img class="rectangle-boss-monster-image is-idle" src="assets/Character/metal-monster-boss-idle.png" alt="A huge metal monster">
+                <img class="rectangle-boss-monster-image is-blink" src="assets/Character/metal-monster-boss-blink.png" alt="" aria-hidden="true">
+                <img class="rectangle-boss-monster-image is-attack" src="assets/Character/metal-monster-boss.png" alt="" aria-hidden="true">
+            </div>
+            <div class="rectangle-boss-effects" aria-hidden="true"></div>
+        </section>
         <div class="rectangle-gas-meter" role="progressbar" aria-label="Gas remaining" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
             <svg class="rectangle-gas-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
                 <defs>
@@ -700,6 +727,13 @@
                 <span class="rectangle-gas-fill"></span>
             </span>
             <strong class="rectangle-gas-value">100%</strong>
+        </div>
+        <div class="rectangle-delivery-progress" role="status" aria-live="polite" aria-label="Deliveries completed: 0 of 3">
+            <span class="rectangle-delivery-progress-title">Delivered</span>
+            <strong class="rectangle-delivery-progress-count"><span>0</span>/3</strong>
+            <span class="rectangle-delivery-progress-track" aria-hidden="true">
+                <span class="rectangle-delivery-progress-fill"></span>
+            </span>
         </div>
         <div class="rectangle-game-over-overlay" role="dialog" aria-modal="true" aria-labelledby="rectangle-game-over-title" hidden>
             <div class="rectangle-game-over-panel">
@@ -814,24 +848,156 @@
         </a>
     </section>
 
-    <section id="learnscape-rectangle-bakery1-page" class="shape-area-page rectangle-interior-page" hidden>
+    <section id="learnscape-rectangle-bakery1-page" class="shape-area-page rectangle-interior-page" data-shop-type="bakery" data-right-object="bread-tray" hidden>
         <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/bakery1.webp" alt="Inside the bakery" draggable="false">
+        <div class="rectangle-counter-storage" data-source-x="1000" data-source-y="370" data-source-width="205" data-source-height="120" aria-label="Bakery counter storage" role="region">
+            <div class="rectangle-counter-target-zone" aria-hidden="true">
+                <span class="rectangle-counter-target-dashed"></span>
+                <span class="rectangle-counter-target-label">Place it here!</span>
+            </div>
+            <div class="rectangle-counter-placed-item" aria-hidden="true" hidden>
+                <img class="rectangle-counter-placed-image" src="" alt="Delivered Bread Tray">
+            </div>
+        </div>
+
+        <div class="rectangle-staff-bubble" data-source-x="686" data-source-y="180" data-source-width="300" data-source-height="95" role="status" aria-live="polite" hidden>
+            <div class="rectangle-staff-bubble-content">
+                <span class="rectangle-staff-bubble-text">Thank you for your service!</span>
+            </div>
+            <div class="rectangle-staff-bubble-tail" aria-hidden="true"></div>
+        </div>
+
+        <section class="rectangle-interior-storage-panel" aria-label="Storage panel below containing rectangle objects">
+            <div class="rectangle-interior-storage-header">
+                <span class="rectangle-interior-storage-title">Storage Panel</span>
+                <span class="rectangle-interior-storage-subtitle">Drag the right rectangle object to the counter</span>
+            </div>
+            <div class="rectangle-interior-storage-slots">
+                <div class="rectangle-interior-storage-slot" data-storage-slot="books">
+                    <button class="rectangle-interior-object" type="button" data-rectangle-item="books" aria-label="Books">
+                        <img class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-books.webp" alt="Books" draggable="false">
+                        <span class="rectangle-interior-object-label">Books</span>
+                    </button>
+                </div>
+                <div class="rectangle-interior-storage-slot" data-storage-slot="toy-box">
+                    <button class="rectangle-interior-object" type="button" data-rectangle-item="toy-box" aria-label="Toy Box">
+                        <img class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-toy-box.webp" alt="Toy Box" draggable="false">
+                        <span class="rectangle-interior-object-label">Toy Box</span>
+                    </button>
+                </div>
+                <div class="rectangle-interior-storage-slot" data-storage-slot="bread-tray">
+                    <button class="rectangle-interior-object" type="button" data-rectangle-item="bread-tray" aria-label="Bread Tray">
+                        <img class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-bread-tray.webp" alt="Bread Tray" draggable="false">
+                        <span class="rectangle-interior-object-label">Bread Tray</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
         <a class="game-return-btn loading-link" href="index.html#rectangle-delivery" data-route="rectangleDelivery" aria-label="Return to Rectangle Delivery">
             <span>‹</span>
             Back
         </a>
     </section>
 
-    <section id="learnscape-rectangle-bookstore1-page" class="shape-area-page rectangle-interior-page" hidden>
+    <section id="learnscape-rectangle-bookstore1-page" class="shape-area-page rectangle-interior-page" data-shop-type="bookstore" data-right-object="books" hidden>
         <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/bookstore1.webp" alt="Inside the bookstore" draggable="false">
+        <div class="rectangle-counter-storage" data-source-x="1000" data-source-y="370" data-source-width="205" data-source-height="120" aria-label="Bookstore counter storage" role="region">
+            <div class="rectangle-counter-target-zone" aria-hidden="true">
+                <span class="rectangle-counter-target-dashed"></span>
+                <span class="rectangle-counter-target-label">Place it here!</span>
+            </div>
+            <div class="rectangle-counter-placed-item" aria-hidden="true" hidden>
+                <img class="rectangle-counter-placed-image" src="" alt="Delivered Books">
+            </div>
+        </div>
+
+        <div class="rectangle-staff-bubble" data-source-x="686" data-source-y="180" data-source-width="300" data-source-height="95" role="status" aria-live="polite" hidden>
+            <div class="rectangle-staff-bubble-content">
+                <span class="rectangle-staff-bubble-text">Thank you for your service!</span>
+            </div>
+            <div class="rectangle-staff-bubble-tail" aria-hidden="true"></div>
+        </div>
+
+        <section class="rectangle-interior-storage-panel" aria-label="Storage panel below containing rectangle objects">
+            <div class="rectangle-interior-storage-header">
+                <span class="rectangle-interior-storage-title">Storage Panel</span>
+                <span class="rectangle-interior-storage-subtitle">Drag the right rectangle object to the counter</span>
+            </div>
+            <div class="rectangle-interior-storage-slots">
+                <div class="rectangle-interior-storage-slot" data-storage-slot="books">
+                    <button class="rectangle-interior-object" type="button" data-rectangle-item="books" aria-label="Books">
+                        <img class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-books.webp" alt="Books" draggable="false">
+                        <span class="rectangle-interior-object-label">Books</span>
+                    </button>
+                </div>
+                <div class="rectangle-interior-storage-slot" data-storage-slot="toy-box">
+                    <button class="rectangle-interior-object" type="button" data-rectangle-item="toy-box" aria-label="Toy Box">
+                        <img class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-toy-box.webp" alt="Toy Box" draggable="false">
+                        <span class="rectangle-interior-object-label">Toy Box</span>
+                    </button>
+                </div>
+                <div class="rectangle-interior-storage-slot" data-storage-slot="bread-tray">
+                    <button class="rectangle-interior-object" type="button" data-rectangle-item="bread-tray" aria-label="Bread Tray">
+                        <img class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-bread-tray.webp" alt="Bread Tray" draggable="false">
+                        <span class="rectangle-interior-object-label">Bread Tray</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
         <a class="game-return-btn loading-link" href="index.html#rectangle-delivery" data-route="rectangleDelivery" aria-label="Return to Rectangle Delivery">
             <span>‹</span>
             Back
         </a>
     </section>
 
-    <section id="learnscape-rectangle-toy-shop1-page" class="shape-area-page rectangle-interior-page" hidden>
+    <section id="learnscape-rectangle-toy-shop1-page" class="shape-area-page rectangle-interior-page" data-shop-type="toy-shop" data-right-object="toy-box" hidden>
         <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/toyshop1.webp" alt="Inside the toy shop" draggable="false">
+        <div class="rectangle-counter-storage" data-source-x="1000" data-source-y="370" data-source-width="205" data-source-height="120" aria-label="Toy shop counter storage" role="region">
+            <div class="rectangle-counter-target-zone" aria-hidden="true">
+                <span class="rectangle-counter-target-dashed"></span>
+                <span class="rectangle-counter-target-label">Place it here!</span>
+            </div>
+            <div class="rectangle-counter-placed-item" aria-hidden="true" hidden>
+                <img class="rectangle-counter-placed-image" src="" alt="Delivered Toy Box">
+            </div>
+        </div>
+
+        <div class="rectangle-staff-bubble" data-source-x="686" data-source-y="180" data-source-width="300" data-source-height="95" role="status" aria-live="polite" hidden>
+            <div class="rectangle-staff-bubble-content">
+                <span class="rectangle-staff-bubble-text">Thank you for your service!</span>
+            </div>
+            <div class="rectangle-staff-bubble-tail" aria-hidden="true"></div>
+        </div>
+
+        <section class="rectangle-interior-storage-panel" aria-label="Storage panel below containing rectangle objects">
+            <div class="rectangle-interior-storage-header">
+                <span class="rectangle-interior-storage-title">Storage Panel</span>
+                <span class="rectangle-interior-storage-subtitle">Drag the right rectangle object to the counter</span>
+            </div>
+            <div class="rectangle-interior-storage-slots">
+                <div class="rectangle-interior-storage-slot" data-storage-slot="books">
+                    <button class="rectangle-interior-object" type="button" data-rectangle-item="books" aria-label="Books">
+                        <img class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-books.webp" alt="Books" draggable="false">
+                        <span class="rectangle-interior-object-label">Books</span>
+                    </button>
+                </div>
+                <div class="rectangle-interior-storage-slot" data-storage-slot="toy-box">
+                    <button class="rectangle-interior-object" type="button" data-rectangle-item="toy-box" aria-label="Toy Box">
+                        <img class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-toy-box.webp" alt="Toy Box" draggable="false">
+                        <span class="rectangle-interior-object-label">Toy Box</span>
+                    </button>
+                </div>
+                <div class="rectangle-interior-storage-slot" data-storage-slot="bread-tray">
+                    <button class="rectangle-interior-object" type="button" data-rectangle-item="bread-tray" aria-label="Bread Tray">
+                        <img class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-bread-tray.webp" alt="Bread Tray" draggable="false">
+                        <span class="rectangle-interior-object-label">Bread Tray</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
         <a class="game-return-btn loading-link" href="index.html#rectangle-delivery" data-route="rectangleDelivery" aria-label="Return to Rectangle Delivery">
             <span>‹</span>
             Back
@@ -1124,7 +1290,7 @@
 
     
 
-    <script src="script.js?v=20260918-376"></script>
+    <script src="script.js?v=20260919-395"></script>
     </div>
 
     <script>

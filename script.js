@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260918-376';
+    const appVersion = '20260919-395';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -285,27 +285,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rectangleDeliveryPage = document.getElementById('learnscape-rectangle-delivery-page');
     const rectangleRoadScroll = rectangleDeliveryPage?.querySelector('.rectangle-road-scroll');
     const rectangleRoadStrip = rectangleRoadScroll?.querySelector('.rectangle-road-strip');
+    const rectangleHighwayTrack = rectangleRoadScroll?.querySelector('.rectangle-highway-track');
     const rectangleRoadToggle = rectangleDeliveryPage?.querySelector('.rectangle-road-toggle');
+    const rectangleBossJumpButton = rectangleDeliveryPage?.querySelector('.rectangle-boss-jump-button');
     const rectangleGasMeter = rectangleDeliveryPage?.querySelector('.rectangle-gas-meter');
     const rectangleGasValueText = rectangleDeliveryPage?.querySelector('.rectangle-gas-value');
+    const rectangleDeliveryProgress = rectangleDeliveryPage?.querySelector('.rectangle-delivery-progress');
+    const rectangleDeliveryProgressCount = rectangleDeliveryPage?.querySelector('.rectangle-delivery-progress-count span');
     const rectangleGameOverOverlay = rectangleDeliveryPage?.querySelector('.rectangle-game-over-overlay');
     const rectangleGameOverRetry = rectangleDeliveryPage?.querySelector('.rectangle-game-over-retry');
     let rectangleRoadImages = [];
     let rectangleRoadLoopFrame = null;
     let rectangleRoadLoopWidth = 0;
     let rectangleRoadLoopOffset = 0;
+    let rectangleHighwayOffset = 0;
+    let rectangleHighwayLoopWidth = 0;
     let rectangleRoadLoopTime = 0;
     let rectangleRoadLoopPaused = false;
+    let rectangleResumeFromDelivery = false;
+    const rectangleRoadBaseSpeed = 0.1;
+    const rectangleRoadPostDeliverySpeed = 0.14;
+    const rectangleGasDrainPerMs = 0.00045;
     let rectangleGasLevel = 100;
     let rectangleGasPenaltyRemaining = 0;
     let rectangleWrongStopTimer = null;
     let rectangleGasDepleted = false;
     let rectangleGameOverRevealTimer = null;
     let rectangleGameOverLoseAudio = null;
+    let abortRectangleBossEncounter = () => {};
+    let resumeRectangleBossEncounter = () => {};
     const triggerRectangleGameOver = () => {
         if (rectangleGasDepleted || !rectangleDeliveryPage || rectangleDeliveryPage.hidden) return;
         rectangleGasDepleted = true;
         rectangleGasPenaltyRemaining = 0;
+        abortRectangleBossEncounter();
         rectangleRoadLoopPaused = true;
         rectangleDeliveryPage.classList.add('is-road-stopped', 'is-gas-empty');
         rectangleRoadStrip?.classList.add('is-loop-paused');
@@ -377,6 +390,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else if (rectangleRoadStrip) {
         rectangleRoadImages = Array.from(rectangleRoadStrip.children).slice(0, rectangleRoadStrip.children.length / 2);
     }
+    if (rectangleHighwayTrack && !rectangleHighwayTrack.dataset.loopReady) {
+        const highwaySegments = Array.from(rectangleHighwayTrack.children);
+        highwaySegments.forEach((segment) => rectangleHighwayTrack.append(segment.cloneNode(true)));
+        rectangleHighwayTrack.dataset.loopReady = 'true';
+    }
+    const syncRectangleHighwayPosition = () => {
+        if (!rectangleHighwayTrack) return;
+        const displayedOffset = rectangleHighwayLoopWidth > 0
+            ? rectangleHighwayOffset % rectangleHighwayLoopWidth
+            : rectangleHighwayOffset;
+        rectangleHighwayTrack.style.transform = `translate3d(${-displayedOffset}px, 0, 0)`;
+    };
     const updateRectangleRoadLoopWidth = () => {
         if (!rectangleRoadStrip) return;
         const images = Array.from(rectangleRoadStrip.children).slice(0, rectangleRoadStrip.children.length / 2);
@@ -385,13 +410,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             rectangleRoadLoopWidth = loopWidth;
             rectangleRoadLoopOffset %= loopWidth;
         }
+        if (rectangleHighwayTrack) {
+            const highwaySegments = Array.from(rectangleHighwayTrack.children)
+                .slice(0, rectangleHighwayTrack.children.length / 2);
+            rectangleHighwayLoopWidth = highwaySegments.reduce(
+                (width, segment) => width + segment.getBoundingClientRect().width,
+                0,
+            );
+            syncRectangleHighwayPosition();
+        }
     };
     const tickRectangleRoadLoop = (timestamp) => {
         const elapsedMs = rectangleRoadLoopTime ? Math.min(timestamp - rectangleRoadLoopTime, 100) : 0;
         if (rectangleRoadLoopTime && !rectangleRoadLoopPaused && rectangleRoadLoopWidth > 0) {
-            rectangleRoadLoopOffset = (rectangleRoadLoopOffset + (elapsedMs * 0.1)) % rectangleRoadLoopWidth;
+            const roadSpeed = rectangleDeliveredItems.size >= 1
+                ? rectangleRoadPostDeliverySpeed
+                : rectangleRoadBaseSpeed;
+            const travelDistance = elapsedMs * roadSpeed;
+            rectangleRoadLoopOffset = (rectangleRoadLoopOffset + travelDistance) % rectangleRoadLoopWidth;
+            rectangleHighwayOffset += travelDistance;
             rectangleRoadStrip.style.transform = `translate3d(${-rectangleRoadLoopOffset}px, 0, 0)`;
-            setRectangleGasLevel(rectangleGasLevel - (elapsedMs * 0.00022));
+            syncRectangleHighwayPosition();
+            setRectangleGasLevel(rectangleGasLevel - (elapsedMs * rectangleGasDrainPerMs));
         }
         if (elapsedMs && rectangleGasPenaltyRemaining > 0) {
             const penaltyStep = Math.min(rectangleGasPenaltyRemaining, elapsedMs * 0.01);
@@ -401,22 +441,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleRoadLoopTime = timestamp;
         rectangleRoadLoopFrame = window.requestAnimationFrame(tickRectangleRoadLoop);
     };
-    const startRectangleRoadLoop = () => {
+    const startRectangleRoadLoop = ({ preservePosition = false } = {}) => {
         updateRectangleRoadLoopWidth();
-        rectangleRoadLoopOffset = 0;
+        if (!preservePosition) {
+            rectangleRoadLoopOffset = 0;
+            rectangleHighwayOffset = 0;
+        }
         rectangleRoadLoopTime = 0;
         rectangleRoadLoopPaused = false;
-        if (rectangleRoadStrip) rectangleRoadStrip.style.transform = 'translate3d(0, 0, 0)';
+        if (rectangleRoadStrip) {
+            rectangleRoadStrip.style.transform = `translate3d(${-rectangleRoadLoopOffset}px, 0, 0)`;
+        }
+        syncRectangleHighwayPosition();
         rectangleRoadStrip?.classList.add('is-auto-looping');
         if (rectangleRoadLoopFrame === null) rectangleRoadLoopFrame = window.requestAnimationFrame(tickRectangleRoadLoop);
     };
-    const stopRectangleRoadLoop = () => {
+    const stopRectangleRoadLoop = ({ preservePosition = false } = {}) => {
         if (rectangleRoadLoopFrame !== null) window.cancelAnimationFrame(rectangleRoadLoopFrame);
         rectangleRoadLoopFrame = null;
         rectangleRoadLoopTime = 0;
-        rectangleRoadLoopOffset = 0;
+        if (!preservePosition) {
+            rectangleRoadLoopOffset = 0;
+            rectangleHighwayOffset = 0;
+        }
         rectangleRoadLoopPaused = false;
-        if (rectangleRoadStrip) rectangleRoadStrip.style.removeProperty('transform');
+        if (rectangleRoadStrip) {
+            if (preservePosition) {
+                rectangleRoadStrip.style.transform = `translate3d(${-rectangleRoadLoopOffset}px, 0, 0)`;
+            } else {
+                rectangleRoadStrip.style.removeProperty('transform');
+            }
+        }
+        syncRectangleHighwayPosition();
         rectangleRoadStrip?.classList.remove('is-auto-looping', 'is-loop-paused');
         if (rectangleRoadToggle) {
             rectangleRoadToggle.classList.remove('is-wrong-stop');
@@ -427,6 +483,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     rectangleRoadToggle?.addEventListener('click', () => {
         if (rectangleRoadToggle.disabled || !rectangleDeliveryJeepSequence?.classList.contains('is-arrived')) return;
+        if (rectangleDeliveryPage?.classList.contains('is-boss-battle')) return;
         const job = rectangleDeliveryJobs[rectangleDeliveryJobIndex];
         if (!job) return;
         if (!isRectangleDeliveryStopNear(job)) {
@@ -464,7 +521,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleRoadToggle.textContent = 'Going';
         rectangleRoadToggle.setAttribute('aria-label', `Heading to ${job.destination}`);
         rectangleRoadToggle.setAttribute('aria-pressed', 'true');
-        rectangleDeliveryJobIndex = (rectangleDeliveryJobIndex + 1) % rectangleDeliveryJobs.length;
+        rectangleResumeFromDelivery = true;
         rectangleDeliveryRouteTimer = window.setTimeout(() => {
             rectangleDeliveryRouteTimer = null;
             navigateApp(job.route);
@@ -484,8 +541,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rectangleDeliveryTaskDestinationName = rectangleDeliveryPage?.querySelector('.rectangle-delivery-task-destination strong') || null;
     const rectangleDeliveryJobs = [
         { item: 'books', itemName: 'Books', destination: 'Bookstore', route: 'rectangleBookstore', wayIndex: 1, center: 0.36 },
-        { item: 'toy-box', itemName: 'Toy Box', destination: 'Toy Shop', route: 'rectangleToyShop', wayIndex: 4, center: 0.39 },
         { item: 'bread-tray', itemName: 'Bread Tray', destination: 'Bakery', route: 'rectangleBakery', wayIndex: 2, center: 0.82 },
+        { item: 'toy-box', itemName: 'Toy Box', destination: 'Toy Shop', route: 'rectangleToyShop', wayIndex: 4, center: 0.39 },
     ];
     let rectangleDeliveryJobIndex = 0;
     const rectangleDeliveryBackground = rectangleDeliveryPage?.querySelector('.shape-area-bg') || null;
@@ -3754,8 +3811,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    const resetRectangleDeliveryJeep = () => {
-        stopRectangleRoadLoop();
+    const resetRectangleDeliveryJeep = ({ preserveRoadPosition = false } = {}) => {
+        stopRectangleRoadLoop({ preservePosition: preserveRoadPosition });
         rectangleGasDepleted = false;
         rectangleGasPenaltyRemaining = 0;
         rectangleGasMeter?.classList.remove('is-penalized');
@@ -3858,29 +3915,44 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const showRectangleDeliveryTask = () => {
         if (!rectangleDeliveryPage || !rectangleDeliveryTaskPanel || rectangleDeliveryPage.hidden) return;
+        const isComplete = rectangleDeliveredItems.size >= rectangleDeliveryJobs.length;
         const job = rectangleDeliveryJobs[rectangleDeliveryJobIndex];
         rectangleDeliveryTaskItems.forEach((item) => {
-            item.hidden = item.dataset.deliveryItem !== job?.item;
+            item.hidden = isComplete || item.dataset.deliveryItem !== job?.item;
         });
-        if (rectangleDeliveryTaskItemName) rectangleDeliveryTaskItemName.textContent = job?.itemName || '';
-        if (rectangleDeliveryTaskDestinationName) rectangleDeliveryTaskDestinationName.textContent = job?.destination || '';
+        if (rectangleDeliveryTaskItemName) rectangleDeliveryTaskItemName.textContent = isComplete ? 'All Items' : (job?.itemName || '');
+        if (rectangleDeliveryTaskDestinationName) rectangleDeliveryTaskDestinationName.textContent = isComplete ? 'Complete!' : (job?.destination || '');
         rectangleDeliveryTaskPanel.hidden = false;
         rectangleDeliveryTaskPanel.getBoundingClientRect();
         rectangleDeliveryTaskPanel.classList.add('is-visible');
         if (rectangleRoadToggle && rectangleDeliveryJeepSequence?.classList.contains('is-arrived')) {
-            rectangleRoadToggle.disabled = false;
+            rectangleRoadToggle.disabled = isComplete;
+            if (isComplete) rectangleRoadToggle.textContent = 'Done';
         }
-        showRectangleDeliveryInstruction();
+        if (!isComplete) showRectangleDeliveryInstruction();
     };
 
     const startRectangleDeliveryJeep = () => {
         if (!rectangleDeliveryPage || !rectangleDeliveryJeepSequence || rectangleDeliveryPage.hidden) return;
+        const shouldResume = rectangleResumeFromDelivery;
         alignRectangleBuildingHotspots();
-        resetRectangleDeliveryJeep();
-        startRectangleRoadLoop();
+        resetRectangleDeliveryJeep({ preserveRoadPosition: shouldResume });
+        startRectangleRoadLoop({ preservePosition: shouldResume });
+        rectangleResumeFromDelivery = false;
         rectangleDeliveryPage.classList.add('is-road-entering');
         rectangleDeliveryPage.getBoundingClientRect();
         window.requestAnimationFrame(() => rectangleDeliveryPage.classList.add('is-road-visible'));
+        if (shouldResume) {
+            rectangleDeliveryPage.classList.remove('is-road-entering', 'is-road-stopped');
+            rectangleDeliveryPage.classList.add('is-road-visible');
+            rectangleDeliveryJeepSequence.hidden = false;
+            rectangleDeliveryJeepSequence.classList.remove('is-driving');
+            rectangleDeliveryJeepSequence.classList.add('is-arrived');
+            if (rectangleDeliveryDrivingJeep) rectangleDeliveryDrivingJeep.hidden = true;
+            if (rectangleDeliveryArrivedJeep) rectangleDeliveryArrivedJeep.hidden = false;
+            showRectangleDeliveryTask();
+            return;
+        }
         rectangleDeliveryRevealTimer = window.setTimeout(() => {
             rectangleDeliveryRevealTimer = null;
             if (rectangleDeliveryPage.hidden) return;
@@ -3934,8 +4006,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (event.detail?.route === 'rectangleDelivery') {
             startRectangleDeliveryJeep();
         } else {
-            resetRectangleDeliveryJeep();
-            if (event.detail?.route === 'shapeArea4') setRectangleGasLevel(100);
+            resetRectangleDeliveryJeep({ preserveRoadPosition: rectangleResumeFromDelivery });
+            if (event.detail?.route === 'shapeArea4') {
+                rectangleResumeFromDelivery = false;
+                setRectangleGasLevel(100);
+            }
         }
     });
 
@@ -3946,8 +4021,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     rectangleGameOverRetry?.addEventListener('click', () => {
         if (!rectangleGasDepleted) return;
         rectangleGasDepleted = false;
+        rectangleBossWarningAcknowledged = false;
         setRectangleGasLevel(100);
         startRectangleDeliveryJeep();
+        window.setTimeout(resumeRectangleBossEncounter, 80);
     });
 
     const resetRectangleDestinationJeeps = () => {
@@ -3985,7 +4062,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             jeep.classList.remove('is-entering', 'is-arrived', 'is-parking');
             jeep.style.removeProperty('--parking-shift-x');
             jeep.style.removeProperty('--parking-shift-y');
-            jeep.style.removeProperty('--parking-scale');
+            jeep.style.removeProperty('--parking-duration');
         });
     };
 
@@ -4083,12 +4160,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const jeepRect = jeep.getBoundingClientRect();
             const targetRect = shape.getBoundingClientRect();
             const shiftX = (targetRect.left + (targetRect.width / 2)) - (jeepRect.left + (jeepRect.width / 2));
-            const shiftY = (targetRect.top + (targetRect.height / 2)) - (jeepRect.top + (jeepRect.height / 2));
-            const parkingScale = Math.max(0.4, Math.min(0.64, (targetRect.width / jeepRect.width) * 0.92));
+            const shiftY = 0;
+            const entrancePixelsPerMs = Math.max(0.01, (page.clientWidth * 0.48) / 2800);
+            const parkingDurationMs = Math.max(600, Math.abs(shiftX) / entrancePixelsPerMs);
 
             jeep.style.setProperty('--parking-shift-x', `${shiftX}px`);
             jeep.style.setProperty('--parking-shift-y', `${shiftY}px`);
-            jeep.style.setProperty('--parking-scale', String(parkingScale));
+            jeep.style.setProperty('--parking-duration', `${parkingDurationMs}ms`);
             page.classList.add('is-parking-transition');
             page.querySelectorAll('.rectangle-parking-shape').forEach((candidate) => {
                 candidate.disabled = true;
@@ -4109,7 +4187,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     rectangleParkingRouteTimer = null;
                     navigateApp(targetRoute);
                 }, 560);
-            }, 1080);
+            }, parkingDurationMs + 80);
         });
     });
 
@@ -4119,6 +4197,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             startRectangleDestinationJeep(routeName);
         } else {
             resetRectangleDestinationJeeps();
+        }
+        if (['rectangleBakery1', 'rectangleBookstore1', 'rectangleToyShop1'].includes(routeName)) {
+            const interiorPageId = {
+                rectangleBakery1: 'learnscape-rectangle-bakery1-page',
+                rectangleBookstore1: 'learnscape-rectangle-bookstore1-page',
+                rectangleToyShop1: 'learnscape-rectangle-toy-shop1-page',
+            }[routeName];
+            const interiorPage = document.getElementById(interiorPageId);
+            if (interiorPage) setupRectangleInteriorPage(interiorPage);
         }
     });
 
@@ -4130,6 +4217,701 @@ document.addEventListener('DOMContentLoaded', async () => {
             'learnscape-rectangle-toy-shop-page': 'rectangleToyShop',
         };
         startRectangleDestinationJeep(initialDestinationRoutes[visibleRectangleDestination.id]);
+    }
+
+    const rectangleInteriorPages = Array.from(document.querySelectorAll('.rectangle-interior-page'));
+    const rectangleDeliveredItems = new Set();
+    const rectangleBossEncounter = rectangleDeliveryPage?.querySelector('.rectangle-boss-encounter');
+    const rectangleBossWarning = rectangleDeliveryPage?.querySelector('.rectangle-boss-warning');
+    const rectangleBossWarningContinue = rectangleBossWarning?.querySelector('.rectangle-boss-warning-continue');
+    const rectangleBossHealth = rectangleBossEncounter?.querySelector('.rectangle-boss-health');
+    const rectangleBossHealthValue = rectangleBossEncounter?.querySelector('.rectangle-boss-health-value');
+    const rectangleBossEffects = rectangleBossEncounter?.querySelector('.rectangle-boss-effects');
+    let rectangleBossHealthPoints = 100;
+    let rectangleBossActive = false;
+    let rectangleBossDefeated = false;
+    let rectangleBossWarningAcknowledged = false;
+    let rectangleBossAttackTimer = null;
+    let rectangleBossGasTimer = null;
+    let rectangleBossBlinkTimer = null;
+    let rectangleBossFlashTimer = null;
+    let rectangleBossFinishTimer = null;
+    let rectangleBossLaserReady = true;
+    let rectangleBossJeepInvulnerable = false;
+
+    const rectanglesOverlap = (first, second, padding = 0) => (
+        first.left + padding < second.right - padding
+        && first.right - padding > second.left + padding
+        && first.top + padding < second.bottom - padding
+        && first.bottom - padding > second.top + padding
+    );
+
+    const updateRectangleBossHealth = () => {
+        const health = Math.max(0, Math.min(100, rectangleBossHealthPoints));
+        rectangleBossEncounter?.style.setProperty('--boss-health', `${health}%`);
+        rectangleBossHealth?.setAttribute('aria-valuenow', String(health));
+        if (rectangleBossHealthValue) rectangleBossHealthValue.textContent = `${health} HP`;
+    };
+
+    const clearRectangleBossTimers = () => {
+        [rectangleBossAttackTimer, rectangleBossGasTimer, rectangleBossBlinkTimer, rectangleBossFlashTimer, rectangleBossFinishTimer]
+            .forEach((timer) => {
+                if (timer !== null) window.clearTimeout(timer);
+            });
+        rectangleBossAttackTimer = null;
+        rectangleBossGasTimer = null;
+        rectangleBossBlinkTimer = null;
+        rectangleBossFlashTimer = null;
+        rectangleBossFinishTimer = null;
+    };
+
+    const restoreRectangleDeliveryControls = () => {
+        if (rectangleRoadToggle) {
+            rectangleRoadToggle.disabled = false;
+            rectangleRoadToggle.classList.remove('is-boss-attack');
+            rectangleRoadToggle.textContent = 'Stop';
+            rectangleRoadToggle.setAttribute('aria-label', 'Stop at this delivery');
+        }
+        if (rectangleBossJumpButton) {
+            rectangleBossJumpButton.hidden = true;
+            rectangleBossJumpButton.disabled = false;
+        }
+    };
+
+    const stopRectangleBossEncounter = ({ resetHealth = true } = {}) => {
+        rectangleBossActive = false;
+        clearRectangleBossTimers();
+        rectangleBossEffects?.replaceChildren();
+        rectangleBossEncounter?.classList.remove('is-active', 'is-mouth-open', 'is-blinking', 'is-monster-hit', 'is-defeated');
+        if (rectangleBossEncounter) rectangleBossEncounter.hidden = true;
+        rectangleBossWarning?.classList.remove('is-visible');
+        if (rectangleBossWarning) rectangleBossWarning.hidden = true;
+        rectangleDeliveryPage?.classList.remove('is-boss-battle', 'is-boss-jeep-hit');
+        rectangleDeliveryJeepSequence?.classList.remove('is-boss-jumping');
+        rectangleBossJeepInvulnerable = false;
+        rectangleBossLaserReady = true;
+        restoreRectangleDeliveryControls();
+        if (resetHealth) {
+            rectangleBossHealthPoints = 100;
+            updateRectangleBossHealth();
+        }
+    };
+
+    abortRectangleBossEncounter = () => stopRectangleBossEncounter({ resetHealth: true });
+
+    const watchRectangleBossEntityCollision = (entity, onCollision) => {
+        const checkCollision = () => {
+            if (!rectangleBossActive || !entity.isConnected || !rectangleDeliveryJeepSequence) return;
+            const entityRect = entity.getBoundingClientRect();
+            const jeepRect = rectangleDeliveryJeepSequence.getBoundingClientRect();
+            if (rectanglesOverlap(entityRect, jeepRect, 8)) {
+                onCollision();
+                return;
+            }
+            window.requestAnimationFrame(checkCollision);
+        };
+        window.requestAnimationFrame(checkCollision);
+    };
+
+    const damageRectangleBossJeep = (spike) => {
+        if (
+            !rectangleBossActive
+            || rectangleBossJeepInvulnerable
+            || rectangleDeliveryJeepSequence?.classList.contains('is-boss-jumping')
+        ) return;
+        rectangleBossJeepInvulnerable = true;
+        spike.remove();
+        setRectangleGasLevel(rectangleGasLevel - 20);
+        playUiClickSound('thunk');
+        rectangleDeliveryPage?.classList.remove('is-boss-jeep-hit');
+        rectangleDeliveryPage?.getBoundingClientRect();
+        rectangleDeliveryPage?.classList.add('is-boss-jeep-hit');
+        window.setTimeout(() => {
+            rectangleBossJeepInvulnerable = false;
+            rectangleDeliveryPage?.classList.remove('is-boss-jeep-hit');
+        }, 900);
+    };
+
+    const spawnRectangleBossSpike = () => {
+        if (!rectangleBossActive || !rectangleBossEffects) return;
+        const spike = document.createElement('span');
+        spike.className = 'rectangle-boss-spike';
+        rectangleBossEffects.append(spike);
+        spike.addEventListener('animationend', () => spike.remove(), { once: true });
+        watchRectangleBossEntityCollision(spike, () => damageRectangleBossJeep(spike));
+    };
+
+    const scheduleRectangleBossBlink = (delay = 1100 + Math.random() * 1300) => {
+        if (rectangleBossBlinkTimer !== null) window.clearTimeout(rectangleBossBlinkTimer);
+        rectangleBossBlinkTimer = window.setTimeout(() => {
+            rectangleBossBlinkTimer = null;
+            if (!rectangleBossActive) return;
+            if (!rectangleBossEncounter?.classList.contains('is-mouth-open')) {
+                rectangleBossEncounter?.classList.add('is-blinking');
+                window.setTimeout(() => rectangleBossEncounter?.classList.remove('is-blinking'), 170);
+            }
+            scheduleRectangleBossBlink(1800 + Math.random() * 2600);
+        }, delay);
+    };
+
+    const scheduleRectangleBossSpike = (delay = 2400) => {
+        if (rectangleBossAttackTimer !== null) window.clearTimeout(rectangleBossAttackTimer);
+        rectangleBossAttackTimer = window.setTimeout(() => {
+            rectangleBossAttackTimer = null;
+            if (!rectangleBossActive) return;
+            rectangleBossEncounter?.classList.remove('is-blinking');
+            rectangleBossEncounter?.classList.remove('is-mouth-open');
+            rectangleBossEncounter?.getBoundingClientRect();
+            rectangleBossEncounter?.classList.add('is-mouth-open');
+            window.setTimeout(() => {
+                if (!rectangleBossActive) return;
+                spawnRectangleBossSpike();
+            }, 300);
+            window.setTimeout(() => rectangleBossEncounter?.classList.remove('is-mouth-open'), 620);
+            scheduleRectangleBossSpike(2600 + Math.random() * 1200);
+        }, delay);
+    };
+
+    const collectRectangleBossGas = (pickup) => {
+        if (!rectangleBossActive || !pickup.isConnected) return;
+        pickup.remove();
+        setRectangleGasLevel(rectangleGasLevel + 18);
+        playUiClickSound('chime');
+        rectangleGasMeter?.classList.remove('is-penalized');
+        rectangleGasMeter?.getBoundingClientRect();
+        rectangleGasMeter?.classList.add('is-penalized');
+    };
+
+    const spawnRectangleBossGas = () => {
+        if (!rectangleBossActive || !rectangleBossEffects || !rectangleGasMeter) return;
+        const pickup = document.createElement('span');
+        pickup.className = 'rectangle-boss-gas-pickup';
+        const gasIcon = rectangleGasMeter.querySelector('.rectangle-gas-icon')?.cloneNode(true);
+        if (gasIcon) pickup.append(gasIcon);
+        rectangleBossEffects.append(pickup);
+        pickup.addEventListener('animationend', () => pickup.remove(), { once: true });
+        watchRectangleBossEntityCollision(pickup, () => collectRectangleBossGas(pickup));
+    };
+
+    const scheduleRectangleBossGas = (delay = 2600) => {
+        if (rectangleBossGasTimer !== null) window.clearTimeout(rectangleBossGasTimer);
+        rectangleBossGasTimer = window.setTimeout(() => {
+            rectangleBossGasTimer = null;
+            if (!rectangleBossActive) return;
+            spawnRectangleBossGas();
+            scheduleRectangleBossGas(3400 + Math.random() * 2400);
+        }, delay);
+    };
+
+    const finishRectangleBossBattle = () => {
+        if (!rectangleBossActive) return;
+        rectangleBossActive = false;
+        rectangleBossDefeated = true;
+        clearRectangleBossTimers();
+        rectangleBossEffects?.querySelectorAll('.rectangle-boss-spike, .rectangle-boss-gas-pickup')
+            .forEach((entity) => entity.remove());
+        rectangleBossEncounter?.classList.remove('is-mouth-open', 'is-blinking');
+        rectangleBossEncounter?.classList.add('is-defeated');
+        rectangleDeliveryJeepSequence?.classList.remove('is-boss-jumping');
+        if (rectangleRoadToggle) rectangleRoadToggle.disabled = true;
+        if (rectangleBossJumpButton) rectangleBossJumpButton.disabled = true;
+        if (rectangleDeliveryInstructionPanel) rectangleDeliveryInstructionPanel.textContent = 'Metal Monster defeated!';
+        playUiClickSound('boardSuccess');
+
+        rectangleBossFinishTimer = window.setTimeout(() => {
+            rectangleBossFinishTimer = null;
+            rectangleBossEncounter?.classList.remove('is-active', 'is-defeated', 'is-monster-hit');
+            if (rectangleBossEncounter) rectangleBossEncounter.hidden = true;
+            rectangleDeliveryPage?.classList.remove('is-boss-battle', 'is-boss-jeep-hit');
+            restoreRectangleDeliveryControls();
+            if (rectangleDeliveryInstructionPanel) {
+                rectangleDeliveryInstructionPanel.textContent = rectangleDeliveryInstructionDefaultText;
+            }
+            showRectangleDeliveryTask();
+        }, 1100);
+    };
+
+    const damageRectangleBoss = () => {
+        if (!rectangleBossActive) return;
+        rectangleBossHealthPoints = Math.max(0, rectangleBossHealthPoints - 5);
+        updateRectangleBossHealth();
+        rectangleBossEncounter?.classList.remove('is-monster-hit');
+        rectangleBossEncounter?.getBoundingClientRect();
+        rectangleBossEncounter?.classList.add('is-monster-hit');
+        if (rectangleBossFlashTimer !== null) window.clearTimeout(rectangleBossFlashTimer);
+        rectangleBossFlashTimer = window.setTimeout(() => {
+            rectangleBossFlashTimer = null;
+            rectangleBossEncounter?.classList.remove('is-monster-hit');
+        }, 150);
+        if (rectangleBossHealthPoints === 0) finishRectangleBossBattle();
+    };
+
+    const fireRectangleBossLaser = () => {
+        if (!rectangleBossActive || !rectangleBossLaserReady || !rectangleBossEffects) return;
+        rectangleBossLaserReady = false;
+        const laser = document.createElement('span');
+        laser.className = 'rectangle-boss-laser';
+        rectangleBossEffects.append(laser);
+        playUiClickSound('spark');
+        window.setTimeout(damageRectangleBoss, 330);
+        laser.addEventListener('animationend', () => laser.remove(), { once: true });
+        window.setTimeout(() => {
+            rectangleBossLaserReady = true;
+        }, 420);
+    };
+
+    const jumpRectangleBossJeep = () => {
+        if (!rectangleBossActive || !rectangleDeliveryJeepSequence || rectangleDeliveryJeepSequence.classList.contains('is-boss-jumping')) return;
+        rectangleDeliveryJeepSequence.classList.add('is-boss-jumping');
+        if (rectangleBossJumpButton) rectangleBossJumpButton.disabled = true;
+        window.setTimeout(() => {
+            rectangleDeliveryJeepSequence.classList.remove('is-boss-jumping');
+            if (rectangleBossJumpButton) rectangleBossJumpButton.disabled = false;
+        }, 780);
+    };
+
+    const showRectangleBossWarning = () => {
+        if (!rectangleBossWarning || rectangleBossWarningAcknowledged || rectangleBossDefeated) return;
+        rectangleRoadLoopPaused = true;
+        rectangleRoadStrip?.classList.add('is-loop-paused');
+        rectangleDeliveryTaskPanel?.classList.remove('is-visible');
+        if (rectangleDeliveryTaskPanel) rectangleDeliveryTaskPanel.hidden = true;
+        rectangleDeliveryInstructionPanel?.classList.remove('is-visible');
+        if (rectangleDeliveryInstructionPanel) rectangleDeliveryInstructionPanel.hidden = true;
+        if (rectangleRoadToggle) rectangleRoadToggle.disabled = true;
+        rectangleBossWarning.hidden = false;
+        rectangleBossWarning.getBoundingClientRect();
+        rectangleBossWarning.classList.add('is-visible');
+        rectangleBossWarningContinue?.focus({ preventScroll: true });
+    };
+
+    const startRectangleBossEncounter = () => {
+        if (
+            rectangleBossActive
+            || rectangleBossDefeated
+            || rectangleDeliveredItems.size !== 1
+            || !rectangleDeliveryPage
+            || rectangleDeliveryPage.hidden
+            || !rectangleBossEncounter
+        ) return;
+
+        if (!rectangleBossWarningAcknowledged) {
+            showRectangleBossWarning();
+            return;
+        }
+
+        rectangleBossActive = true;
+        rectangleBossHealthPoints = 100;
+        updateRectangleBossHealth();
+        rectangleBossEffects?.replaceChildren();
+        rectangleDeliveryPage.classList.add('is-boss-battle');
+        rectangleBossEncounter.hidden = false;
+        rectangleBossEncounter.classList.remove('is-defeated', 'is-mouth-open', 'is-blinking', 'is-monster-hit');
+        rectangleBossEncounter.getBoundingClientRect();
+        rectangleBossEncounter.classList.add('is-active');
+        if (rectangleDeliveryJeepSequence) {
+            rectangleDeliveryJeepSequence.hidden = false;
+            rectangleDeliveryJeepSequence.classList.remove('is-driving');
+            rectangleDeliveryJeepSequence.classList.add('is-arrived');
+        }
+        if (rectangleDeliveryDrivingJeep) rectangleDeliveryDrivingJeep.hidden = true;
+        if (rectangleDeliveryArrivedJeep) rectangleDeliveryArrivedJeep.hidden = false;
+        if (rectangleDeliveryTaskPanel) {
+            rectangleDeliveryTaskPanel.hidden = true;
+            rectangleDeliveryTaskPanel.classList.remove('is-visible');
+        }
+        if (rectangleDeliveryInstructionPanel) {
+            rectangleDeliveryInstructionPanel.hidden = true;
+            rectangleDeliveryInstructionPanel.textContent = rectangleDeliveryInstructionDefaultText;
+            rectangleDeliveryInstructionPanel.classList.remove('is-visible');
+        }
+        if (rectangleRoadToggle) {
+            rectangleRoadToggle.disabled = false;
+            rectangleRoadToggle.classList.remove('is-wrong-stop');
+            rectangleRoadToggle.classList.add('is-boss-attack');
+            rectangleRoadToggle.textContent = 'Laser Shot';
+            rectangleRoadToggle.setAttribute('aria-label', 'Fire laser at the metal monster');
+        }
+        if (rectangleBossJumpButton) {
+            rectangleBossJumpButton.hidden = false;
+            rectangleBossJumpButton.disabled = false;
+        }
+        scheduleRectangleBossSpike();
+        scheduleRectangleBossGas();
+        scheduleRectangleBossBlink();
+    };
+
+    resumeRectangleBossEncounter = startRectangleBossEncounter;
+
+    rectangleBossWarningContinue?.addEventListener('click', () => {
+        if (rectangleBossWarningAcknowledged) return;
+        rectangleBossWarningAcknowledged = true;
+        playUiClickSound('chime');
+        rectangleBossWarning?.classList.remove('is-visible');
+        window.setTimeout(() => {
+            if (rectangleBossWarning) rectangleBossWarning.hidden = true;
+            rectangleRoadLoopPaused = false;
+            rectangleRoadStrip?.classList.remove('is-loop-paused');
+            startRectangleBossEncounter();
+        }, 240);
+    });
+
+    rectangleRoadToggle?.addEventListener('click', () => {
+        if (rectangleBossActive) fireRectangleBossLaser();
+    });
+    rectangleBossJumpButton?.addEventListener('click', jumpRectangleBossJeep);
+    window.addEventListener('learnscape:routechange', (event) => {
+        if (event.detail?.route === 'rectangleDelivery') {
+            window.setTimeout(startRectangleBossEncounter, 140);
+        } else {
+            rectangleBossWarning?.classList.remove('is-visible');
+            if (rectangleBossWarning) rectangleBossWarning.hidden = true;
+            if (rectangleBossActive) stopRectangleBossEncounter({ resetHealth: true });
+        }
+    });
+
+    let rectangleInteriorActiveDrag = null;
+    let rectangleInteriorReturnTimer = null;
+    let rectangleCounterCheeringAudio = null;
+    let rectangleCounterCheeringFrame = null;
+
+    const stopRectangleCounterCheering = () => {
+        if (rectangleCounterCheeringFrame !== null) {
+            window.cancelAnimationFrame(rectangleCounterCheeringFrame);
+            rectangleCounterCheeringFrame = null;
+        }
+        if (!rectangleCounterCheeringAudio) return;
+
+        rectangleCounterCheeringAudio.onended = null;
+        rectangleCounterCheeringAudio.pause();
+        rectangleCounterCheeringAudio = null;
+    };
+
+    const playRectangleCounterCheering = () => {
+        if (!window.Audio) return;
+
+        stopRectangleCounterCheering();
+        const audio = new window.Audio('assets/Audios/Sound effects/kids cheering.mp3');
+        rectangleCounterCheeringAudio = audio;
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = 1;
+        audio.onended = () => {
+            if (rectangleCounterCheeringAudio !== audio) return;
+            if (rectangleCounterCheeringFrame !== null) {
+                window.cancelAnimationFrame(rectangleCounterCheeringFrame);
+                rectangleCounterCheeringFrame = null;
+            }
+            rectangleCounterCheeringAudio = null;
+        };
+        audio.play().then(() => {
+            const startedAt = performance.now();
+            const updateCheering = (now) => {
+                if (rectangleCounterCheeringAudio !== audio) return;
+                const elapsed = now - startedAt;
+                if (elapsed >= 3000) {
+                    stopRectangleCounterCheering();
+                    return;
+                }
+                audio.volume = elapsed >= 2500 ? Math.max(0, (3000 - elapsed) / 500) : 1;
+                rectangleCounterCheeringFrame = window.requestAnimationFrame(updateCheering);
+            };
+            rectangleCounterCheeringFrame = window.requestAnimationFrame(updateCheering);
+        }).catch(() => {
+            if (rectangleCounterCheeringAudio === audio) stopRectangleCounterCheering();
+        });
+    };
+
+    const updateRectangleDeliveryProgress = () => {
+        const deliveredCount = Math.min(rectangleDeliveredItems.size, rectangleDeliveryJobs.length);
+        if (rectangleDeliveryProgressCount) rectangleDeliveryProgressCount.textContent = String(deliveredCount);
+        rectangleDeliveryProgress?.style.setProperty('--delivery-progress', `${(deliveredCount / rectangleDeliveryJobs.length) * 100}%`);
+        rectangleDeliveryProgress?.setAttribute('aria-label', `Deliveries completed: ${deliveredCount} of ${rectangleDeliveryJobs.length}`);
+        rectangleDeliveryProgress?.classList.toggle('is-complete', deliveredCount === rectangleDeliveryJobs.length);
+    };
+
+    const completeRectangleCounterDelivery = (page, object, counterStorage) => {
+        const itemType = object.dataset.rectangleItem;
+        if (!itemType || rectangleDeliveredItems.has(itemType)) return;
+
+        rectangleDeliveredItems.add(itemType);
+        updateRectangleDeliveryProgress();
+
+        const placedWrap = counterStorage.querySelector('.rectangle-counter-placed-item');
+        const placedImg = counterStorage.querySelector('.rectangle-counter-placed-image');
+        const sourceImg = object.querySelector('.rectangle-interior-object-image');
+        if (placedImg && sourceImg) placedImg.src = sourceImg.src;
+        if (placedWrap) placedWrap.hidden = false;
+        counterStorage.classList.add('is-delivered');
+
+        const slot = object.closest('.rectangle-interior-storage-slot');
+        slot?.classList.add('is-delivered');
+        object.disabled = true;
+        object.style.setProperty('--drag-x', '0px');
+        object.style.setProperty('--drag-y', '0px');
+
+        playUiClickSound('progressCelebration');
+        if (window.Audio) {
+            const audio = new window.Audio('assets/Audios/Sound effects/completed.mp3');
+            audio.play().catch(() => {});
+        }
+        playRectangleCounterCheering();
+
+        const bubble = page.querySelector('.rectangle-staff-bubble');
+        if (bubble) {
+            bubble.hidden = false;
+            bubble.classList.remove('is-visible');
+            void bubble.offsetWidth;
+            bubble.classList.add('is-visible');
+        }
+
+        const nextJobIndex = rectangleDeliveryJobs.findIndex((job) => !rectangleDeliveredItems.has(job.item));
+        if (nextJobIndex !== -1) rectangleDeliveryJobIndex = nextJobIndex;
+
+        rectangleResumeFromDelivery = true;
+        if (rectangleInteriorReturnTimer !== null) window.clearTimeout(rectangleInteriorReturnTimer);
+        rectangleInteriorReturnTimer = window.setTimeout(() => {
+            rectangleInteriorReturnTimer = null;
+            if (!page.hidden) navigateApp('rectangleDelivery');
+        }, 3100);
+    };
+
+    updateRectangleDeliveryProgress();
+
+    const alignRectangleInteriorScene = (page) => {
+        if (!page || page.hidden) return;
+        const bg = page.querySelector('.shape-area-bg');
+        if (!bg) return;
+        const pageRect = page.getBoundingClientRect();
+        const srcW = bg.naturalWidth || 1672;
+        const srcH = bg.naturalHeight || 941;
+        if (!pageRect.width || !pageRect.height) return;
+
+        const scale = Math.max(pageRect.width / srcW, pageRect.height / srcH);
+        const offsetX = (pageRect.width - (srcW * scale)) / 2;
+        const offsetY = (pageRect.height - (srcH * scale)) / 2;
+
+        const counter = page.querySelector('.rectangle-counter-storage');
+        if (counter) {
+            const cx = Number(counter.dataset.sourceX || 925);
+            const cy = Number(counter.dataset.sourceY || 565);
+            const cw = Number(counter.dataset.sourceWidth || 205);
+            const ch = Number(counter.dataset.sourceHeight || 120);
+            counter.style.left = `${offsetX + (cx * scale)}px`;
+            counter.style.top = `${offsetY + (cy * scale)}px`;
+            counter.style.width = `${cw * scale}px`;
+            counter.style.height = `${ch * scale}px`;
+        }
+
+        const bubble = page.querySelector('.rectangle-staff-bubble');
+        if (bubble) {
+            const bx = Number(bubble.dataset.sourceX || 686);
+            const by = Number(bubble.dataset.sourceY || 180);
+            const bw = Number(bubble.dataset.sourceWidth || 300);
+            bubble.style.left = `${offsetX + ((bx + bw / 2) * scale)}px`;
+            bubble.style.top = `${offsetY + (by * scale)}px`;
+        }
+    };
+
+    const deliverRectangleObjectToCounter = (page, object) => {
+        const itemType = object.dataset.rectangleItem;
+        const rightObject = page.dataset.rightObject;
+        const counterStorage = page.querySelector('.rectangle-counter-storage');
+        if (!counterStorage) return;
+
+        if (itemType === rightObject) {
+            const objectRect = object.getBoundingClientRect();
+            const counterRect = counterStorage.getBoundingClientRect();
+            const deltaX = (counterRect.left + counterRect.width / 2) - (objectRect.left + objectRect.width / 2);
+            const deltaY = (counterRect.top + counterRect.height / 2) - (objectRect.top + objectRect.height / 2);
+
+            object.classList.add('is-dragging');
+            object.style.setProperty('--drag-x', `${deltaX}px`);
+            object.style.setProperty('--drag-y', `${deltaY}px`);
+
+            window.setTimeout(() => {
+                object.classList.remove('is-dragging');
+                object.style.setProperty('--drag-x', '0px');
+                object.style.setProperty('--drag-y', '0px');
+
+                completeRectangleCounterDelivery(page, object, counterStorage);
+            }, 300);
+        } else {
+            playUiClickSound('thunk');
+            object.classList.add('is-wrong', 'is-returning');
+            window.setTimeout(() => {
+                object.classList.remove('is-wrong', 'is-returning');
+            }, 400);
+        }
+    };
+
+    const setupRectangleInteriorPage = (page) => {
+        if (!page) return;
+        alignRectangleInteriorScene(page);
+
+        const rightObject = page.dataset.rightObject;
+        const isDelivered = rectangleDeliveredItems.has(rightObject);
+        const counterStorage = page.querySelector('.rectangle-counter-storage');
+        const bubble = page.querySelector('.rectangle-staff-bubble');
+
+        if (counterStorage) {
+            const placedWrap = counterStorage.querySelector('.rectangle-counter-placed-item');
+            const placedImg = counterStorage.querySelector('.rectangle-counter-placed-image');
+            if (isDelivered) {
+                counterStorage.classList.add('is-delivered');
+                const sourceImg = page.querySelector(`[data-rectangle-item="${rightObject}"] .rectangle-interior-object-image`);
+                if (placedImg && sourceImg) placedImg.src = sourceImg.src;
+                if (placedWrap) placedWrap.hidden = false;
+            } else {
+                counterStorage.classList.remove('is-delivered', 'is-active', 'is-over');
+                if (placedWrap) placedWrap.hidden = true;
+            }
+        }
+
+        if (bubble) {
+            if (isDelivered) {
+                bubble.hidden = false;
+                bubble.classList.add('is-visible');
+            } else {
+                bubble.hidden = true;
+                bubble.classList.remove('is-visible');
+            }
+        }
+
+        page.querySelectorAll('.rectangle-interior-storage-slot').forEach((slot) => {
+            const slotItem = slot.dataset.storageSlot;
+            const objBtn = slot.querySelector('.rectangle-interior-object');
+            const delivered = rectangleDeliveredItems.has(slotItem);
+            slot.classList.toggle('is-delivered', delivered);
+            if (objBtn) {
+                objBtn.disabled = delivered;
+                objBtn.style.setProperty('--drag-x', '0px');
+                objBtn.style.setProperty('--drag-y', '0px');
+                objBtn.classList.remove('is-dragging', 'is-returning', 'is-wrong');
+            }
+        });
+    };
+
+    rectangleInteriorPages.forEach((page) => {
+        const counterStorage = page.querySelector('.rectangle-counter-storage');
+        const objects = Array.from(page.querySelectorAll('.rectangle-interior-object'));
+
+        objects.forEach((object) => {
+            object.addEventListener('pointerdown', (event) => {
+                if (
+                    object.disabled
+                    || object.closest('.rectangle-interior-storage-slot')?.classList.contains('is-delivered')
+                    || rectangleInteriorActiveDrag
+                    || (event.pointerType === 'mouse' && event.button !== 0)
+                ) return;
+
+                rectangleInteriorActiveDrag = {
+                    object,
+                    page,
+                    counterStorage,
+                    startX: event.clientX,
+                    startY: event.clientY,
+                    pointerId: event.pointerId,
+                    dragX: 0,
+                    dragY: 0,
+                };
+
+                object.classList.add('is-dragging');
+                object.classList.remove('is-returning', 'is-wrong');
+                object.setPointerCapture(event.pointerId);
+                counterStorage?.classList.add('is-active');
+            });
+
+            object.addEventListener('pointermove', (event) => {
+                if (!rectangleInteriorActiveDrag || event.pointerId !== rectangleInteriorActiveDrag.pointerId) return;
+                const drag = rectangleInteriorActiveDrag;
+                drag.dragX = event.clientX - drag.startX;
+                drag.dragY = event.clientY - drag.startY;
+                drag.object.style.setProperty('--drag-x', `${drag.dragX}px`);
+                drag.object.style.setProperty('--drag-y', `${drag.dragY}px`);
+
+                if (drag.counterStorage) {
+                    const rect = drag.counterStorage.getBoundingClientRect();
+                    const isOver = event.clientX >= rect.left - 20
+                                && event.clientX <= rect.right + 20
+                                && event.clientY >= rect.top - 20
+                                && event.clientY <= rect.bottom + 20;
+                    drag.counterStorage.classList.toggle('is-over', isOver);
+                }
+            });
+
+            const handlePointerUp = (event) => {
+                if (!rectangleInteriorActiveDrag || event.pointerId !== rectangleInteriorActiveDrag.pointerId) return;
+                const drag = rectangleInteriorActiveDrag;
+                rectangleInteriorActiveDrag = null;
+
+                try {
+                    drag.object.releasePointerCapture(event.pointerId);
+                } catch {
+                    // ignore if already lost
+                }
+
+                drag.object.classList.remove('is-dragging');
+                drag.counterStorage?.classList.remove('is-active', 'is-over');
+
+                const totalDist = Math.hypot(drag.dragX, drag.dragY);
+                if (totalDist < 8) {
+                    // Tap / click activation
+                    deliverRectangleObjectToCounter(drag.page, drag.object);
+                    return;
+                }
+
+                if (drag.counterStorage) {
+                    const rect = drag.counterStorage.getBoundingClientRect();
+                    const isInside = event.clientX >= rect.left - 20
+                                  && event.clientX <= rect.right + 20
+                                  && event.clientY >= rect.top - 20
+                                  && event.clientY <= rect.bottom + 20;
+
+                    if (isInside) {
+                        const itemType = drag.object.dataset.rectangleItem;
+                        const rightObject = drag.page.dataset.rightObject;
+
+                        if (itemType === rightObject) {
+                            completeRectangleCounterDelivery(drag.page, drag.object, drag.counterStorage);
+                            return;
+                        }
+
+                        // Dropped inside counter but wrong item
+                        playUiClickSound('thunk');
+                        drag.object.classList.add('is-wrong', 'is-returning');
+                        drag.object.style.setProperty('--drag-x', '0px');
+                        drag.object.style.setProperty('--drag-y', '0px');
+                        window.setTimeout(() => {
+                            drag.object.classList.remove('is-wrong', 'is-returning');
+                        }, 400);
+                        return;
+                    }
+                }
+
+                // Dropped outside counter
+                drag.object.classList.add('is-returning');
+                drag.object.style.setProperty('--drag-x', '0px');
+                drag.object.style.setProperty('--drag-y', '0px');
+                window.setTimeout(() => {
+                    drag.object.classList.remove('is-returning');
+                }, 350);
+            };
+
+            object.addEventListener('pointerup', handlePointerUp);
+            object.addEventListener('pointercancel', handlePointerUp);
+        });
+    });
+
+    window.addEventListener('resize', () => {
+        rectangleInteriorPages.forEach((page) => {
+            if (!page.hidden) alignRectangleInteriorScene(page);
+        });
+    });
+
+    const visibleRectangleInterior = rectangleInteriorPages.find((page) => !page.hidden);
+    if (visibleRectangleInterior) {
+        setupRectangleInteriorPage(visibleRectangleInterior);
     }
 
     const triangleGameCharacter = triangleGamePage?.querySelector('.triangle-game-character') || null;
