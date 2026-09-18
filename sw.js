@@ -1,4 +1,4 @@
-const CACHE_NAME = 'learnscape-adventure-v188';
+const CACHE_NAME = 'learnscape-adventure-v193';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -13,6 +13,18 @@ const CORE_ASSETS = [
   './assets/Shape UI/post.webp',
   './assets/Shape UI/Shop.webp',
   './assets/Shape UI/character.webp',
+  './assets/Shape UI/Parking/bakery-star.webp',
+  './assets/Shape UI/Parking/bakery-diamond.webp',
+  './assets/Shape UI/Parking/bakery-rectangle.webp',
+  './assets/Shape UI/Parking/bookstore-circle.webp',
+  './assets/Shape UI/Parking/bookstore-rectangle.webp',
+  './assets/Shape UI/Parking/bookstore-triangle.webp',
+  './assets/Shape UI/Parking/toyshop-rectangle.webp',
+  './assets/Shape UI/Parking/toyshop-heart.webp',
+  './assets/Shape UI/Parking/toyshop-square.webp',
+  './assets/Backgrounds/bakery1.webp',
+  './assets/Backgrounds/bookstore1.webp',
+  './assets/Backgrounds/toyshop1.webp',
   './assets/Backgrounds/bg1.png',
   './assets/Backgrounds/shape.png',
   './assets/Backgrounds/loadingscreen.png',

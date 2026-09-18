@@ -4005,55 +4005,59 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     touch-action: manipulation;
 }
 
-.rectangle-parking-shape::before {
-    position: absolute;
-    inset: 0;
-    content: '';
-    box-sizing: border-box;
-    border: 0.22rem solid transparent;
-    background: rgba(255, 255, 255, 0.01);
-    pointer-events: auto;
-    transition: background-color 180ms ease, border-color 180ms ease, filter 180ms ease;
+.rectangle-parking-shape-asset {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    pointer-events: none;
+    user-select: none;
+    transform: scale(1);
+    transform-origin: center;
+    transition: filter 180ms ease, transform 180ms ease;
+    will-change: filter, transform;
 }
 
-.rectangle-parking-shape[data-parking-shape="circle"]::before { border-radius: 50%; }
-.rectangle-parking-shape[data-parking-shape="rectangle"]::before,
-.rectangle-parking-shape[data-parking-shape="square"]::before { border-radius: 0.18rem; }
-.rectangle-parking-shape[data-parking-shape="diamond"]::before { clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
-.rectangle-parking-shape[data-parking-shape="triangle"]::before { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
-.rectangle-parking-shape[data-parking-shape="star"]::before { clip-path: polygon(50% 0, 62% 34%, 100% 36%, 70% 58%, 80% 100%, 50% 75%, 18% 100%, 29% 58%, 0 36%, 38% 34%); }
-.rectangle-parking-shape[data-parking-shape="heart"]::before { clip-path: polygon(50% 100%, 8% 58%, 2% 45%, 2% 25%, 12% 8%, 28% 2%, 42% 8%, 50% 22%, 58% 8%, 72% 2%, 88% 8%, 98% 25%, 98% 45%, 92% 58%); }
-
-.rectangle-parking-shape:hover::before,
-.rectangle-parking-shape:focus-visible::before {
-    border-color: #fff16a;
-    background: rgba(255, 241, 106, 0.2);
-    filter: drop-shadow(0 0 0.45rem rgba(255, 231, 55, 0.95));
+.rectangle-parking-shape:hover .rectangle-parking-shape-asset,
+.rectangle-parking-shape:focus-visible .rectangle-parking-shape-asset {
+    transform: scale(1.045);
+    animation: rectangleParkingShapeGlow 720ms ease-in-out infinite alternate;
 }
 
 .rectangle-parking-shape:focus-visible {
     outline: none;
 }
 
-.rectangle-parking-shape:active::before {
-    filter: drop-shadow(0 0 0.3rem rgba(255, 231, 55, 0.9));
+.rectangle-parking-shape:active .rectangle-parking-shape-asset {
+    transform: scale(0.98);
+    animation: none;
+    filter: brightness(1.3) saturate(1.2) drop-shadow(0 0 0.45rem rgba(255, 239, 79, 1));
 }
 
-.rectangle-parking-shape.is-selected::before {
-    border-color: #74ff79;
-    background: rgba(85, 255, 113, 0.22);
-    filter: drop-shadow(0 0 0.55rem rgba(55, 255, 102, 0.95));
+.rectangle-parking-shape.is-selected .rectangle-parking-shape-asset {
+    transform: scale(1.035);
+    animation: none;
+    filter: brightness(1.24) saturate(1.28) drop-shadow(0 0 0.3rem #ffffff) drop-shadow(0 0 0.75rem rgba(55, 255, 102, 1));
+}
+
+@keyframes rectangleParkingShapeGlow {
+    from {
+        filter: brightness(1.18) saturate(1.12) drop-shadow(0 0 0.2rem #ffffff) drop-shadow(0 0 0.45rem rgba(255, 230, 52, 0.9));
+    }
+    to {
+        filter: brightness(1.42) saturate(1.28) drop-shadow(0 0 0.42rem #fffbd1) drop-shadow(0 0 0.95rem rgba(255, 207, 40, 1));
+    }
 }
 
 .rectangle-parking-instruction-panel {
     position: absolute;
-    left: 50%;
-    bottom: 0.9rem;
+    left: clamp(1rem, 2.5vw, 2.5rem);
+    bottom: 1.15rem;
     z-index: 13;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: min(35rem, calc(100% - 3rem));
+    width: clamp(18rem, 30vw, 32rem);
     min-height: 4.6rem;
     box-sizing: border-box;
     padding: 0.65rem 1.5rem;
@@ -4066,13 +4070,25 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     text-align: center;
     opacity: 0;
     pointer-events: none;
-    transform: translate(-50%, 0.8rem) scale(0.96);
+    transform: translateY(0.8rem) scale(0.96);
+    transform-origin: left bottom;
     transition: opacity 280ms ease, transform 360ms cubic-bezier(0.2, 0.9, 0.25, 1.18);
 }
 
 .rectangle-parking-instruction-panel.is-visible {
     opacity: 1;
-    transform: translate(-50%, 0) scale(1);
+    transform: translateY(0) scale(1);
+}
+
+@media (max-width: 900px) {
+    .rectangle-parking-instruction-panel {
+        left: 0.65rem;
+        bottom: 0.65rem;
+        width: min(18rem, calc(100% - 1.3rem));
+        min-height: 3.4rem;
+        padding: 0.45rem 0.8rem;
+        font-size: 1.15rem;
+    }
 }
 
 @media (min-width: 901px) and (orientation: landscape) {
@@ -4107,6 +4123,45 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 @keyframes rectangleDestinationJeepEnterDesktop {
     from { left: -23%; }
     to { left: 25%; }
+}
+
+.rectangle-destination-page.is-parking-transition {
+    pointer-events: none;
+}
+
+.rectangle-destination-jeep.is-parking {
+    z-index: 14;
+    animation: rectangleDestinationJeepPark 1.05s cubic-bezier(0.3, 0.72, 0.2, 1) forwards;
+}
+
+.rectangle-destination-page.is-parking-fading {
+    animation: rectangleDestinationPageFadeOut 560ms ease-in forwards;
+}
+
+.rectangle-interior-page:not([hidden]) .shape-area-bg {
+    animation: rectangleInteriorPageFadeIn 560ms ease-out both;
+}
+
+@keyframes rectangleDestinationJeepPark {
+    0% {
+        transform: translateX(-50%) translate(0, 0) scale(1);
+    }
+    72% {
+        transform: translateX(-50%) translate(var(--parking-shift-x), var(--parking-shift-y)) scale(calc(var(--parking-scale) + 0.04));
+    }
+    100% {
+        transform: translateX(-50%) translate(var(--parking-shift-x), var(--parking-shift-y)) scale(var(--parking-scale));
+    }
+}
+
+@keyframes rectangleDestinationPageFadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes rectangleInteriorPageFadeIn {
+    from { opacity: 0; transform: scale(1.015); }
+    to { opacity: 1; transform: scale(1); }
 }
 
 .rectangle-delivery-task-panel[hidden],

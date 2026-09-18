@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260918-388">
+    <link rel="stylesheet" href="style.css?v=20260918-392">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -743,10 +743,13 @@
         <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/bakery.webp" alt="Bakery" draggable="false">
         <div class="rectangle-parking-shapes" aria-label="Choose a parking shape" hidden>
             <button class="rectangle-parking-shape" type="button" data-parking-shape="star" data-source-x="616" data-source-y="629" data-source-width="166" data-source-height="109" aria-label="Star parking space" aria-pressed="false">
+                <img class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/bakery-star.webp" alt="" draggable="false">
             </button>
             <button class="rectangle-parking-shape" type="button" data-parking-shape="diamond" data-source-x="916" data-source-y="626" data-source-width="174" data-source-height="119" aria-label="Diamond parking space" aria-pressed="false">
+                <img class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/bakery-diamond.webp" alt="" draggable="false">
             </button>
-            <button class="rectangle-parking-shape" type="button" data-parking-shape="rectangle" data-correct-parking data-source-x="1212" data-source-y="652" data-source-width="209" data-source-height="71" aria-label="Rectangle parking space" aria-pressed="false">
+            <button class="rectangle-parking-shape" type="button" data-parking-shape="rectangle" data-correct-parking data-parking-route="rectangleBakery1" data-source-x="1212" data-source-y="652" data-source-width="209" data-source-height="71" aria-label="Rectangle parking space" aria-pressed="false">
+                <img class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/bakery-rectangle.webp" alt="" draggable="false">
             </button>
         </div>
         <div class="rectangle-destination-jeep" aria-hidden="true" hidden>
@@ -765,10 +768,13 @@
         <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/bookstore.webp" alt="Bookstore" draggable="false">
         <div class="rectangle-parking-shapes" aria-label="Choose a parking shape" hidden>
             <button class="rectangle-parking-shape" type="button" data-parking-shape="circle" data-source-x="749" data-source-y="642" data-source-width="137" data-source-height="98" aria-label="Circle parking space" aria-pressed="false">
+                <img class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/bookstore-circle.webp" alt="" draggable="false">
             </button>
-            <button class="rectangle-parking-shape" type="button" data-parking-shape="rectangle" data-correct-parking data-source-x="1017" data-source-y="653" data-source-width="194" data-source-height="76" aria-label="Rectangle parking space" aria-pressed="false">
+            <button class="rectangle-parking-shape" type="button" data-parking-shape="rectangle" data-correct-parking data-parking-route="rectangleBookstore1" data-source-x="1017" data-source-y="653" data-source-width="194" data-source-height="76" aria-label="Rectangle parking space" aria-pressed="false">
+                <img class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/bookstore-rectangle.webp" alt="" draggable="false">
             </button>
             <button class="rectangle-parking-shape" type="button" data-parking-shape="triangle" data-source-x="1347" data-source-y="644" data-source-width="148" data-source-height="87" aria-label="Triangle parking space" aria-pressed="false">
+                <img class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/bookstore-triangle.webp" alt="" draggable="false">
             </button>
         </div>
         <div class="rectangle-destination-jeep" aria-hidden="true" hidden>
@@ -786,11 +792,14 @@
     <section id="learnscape-rectangle-toy-shop-page" class="shape-area-page rectangle-destination-page" hidden>
         <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/toyshop.webp" alt="Toy Shop" draggable="false">
         <div class="rectangle-parking-shapes" aria-label="Choose a parking shape" hidden>
-            <button class="rectangle-parking-shape" type="button" data-parking-shape="rectangle" data-correct-parking data-source-x="564" data-source-y="663" data-source-width="219" data-source-height="61" aria-label="Rectangle parking space" aria-pressed="false">
+            <button class="rectangle-parking-shape" type="button" data-parking-shape="rectangle" data-correct-parking data-parking-route="rectangleToyShop1" data-source-x="564" data-source-y="663" data-source-width="219" data-source-height="61" aria-label="Rectangle parking space" aria-pressed="false">
+                <img class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/toyshop-rectangle.webp" alt="" draggable="false">
             </button>
             <button class="rectangle-parking-shape" type="button" data-parking-shape="heart" data-source-x="918" data-source-y="649" data-source-width="171" data-source-height="94" aria-label="Heart parking space" aria-pressed="false">
+                <img class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/toyshop-heart.webp" alt="" draggable="false">
             </button>
             <button class="rectangle-parking-shape" type="button" data-parking-shape="square" data-source-x="1253" data-source-y="648" data-source-width="171" data-source-height="90" aria-label="Square parking space" aria-pressed="false">
+                <img class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/toyshop-square.webp" alt="" draggable="false">
             </button>
         </div>
         <div class="rectangle-destination-jeep" aria-hidden="true" hidden>
@@ -799,6 +808,30 @@
         <div class="rectangle-parking-instruction-panel" role="status" aria-live="polite" hidden>
             Iparada ang jeep sa Rectangle.
         </div>
+        <a class="game-return-btn loading-link" href="index.html#rectangle-delivery" data-route="rectangleDelivery" aria-label="Return to Rectangle Delivery">
+            <span>‹</span>
+            Back
+        </a>
+    </section>
+
+    <section id="learnscape-rectangle-bakery1-page" class="shape-area-page rectangle-interior-page" hidden>
+        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/bakery1.webp" alt="Inside the bakery" draggable="false">
+        <a class="game-return-btn loading-link" href="index.html#rectangle-delivery" data-route="rectangleDelivery" aria-label="Return to Rectangle Delivery">
+            <span>‹</span>
+            Back
+        </a>
+    </section>
+
+    <section id="learnscape-rectangle-bookstore1-page" class="shape-area-page rectangle-interior-page" hidden>
+        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/bookstore1.webp" alt="Inside the bookstore" draggable="false">
+        <a class="game-return-btn loading-link" href="index.html#rectangle-delivery" data-route="rectangleDelivery" aria-label="Return to Rectangle Delivery">
+            <span>‹</span>
+            Back
+        </a>
+    </section>
+
+    <section id="learnscape-rectangle-toy-shop1-page" class="shape-area-page rectangle-interior-page" hidden>
+        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/toyshop1.webp" alt="Inside the toy shop" draggable="false">
         <a class="game-return-btn loading-link" href="index.html#rectangle-delivery" data-route="rectangleDelivery" aria-label="Return to Rectangle Delivery">
             <span>‹</span>
             Back
@@ -1091,7 +1124,7 @@
 
     
 
-    <script src="script.js?v=20260918-372"></script>
+    <script src="script.js?v=20260918-376"></script>
     </div>
 
     <script>
@@ -1163,6 +1196,24 @@
                     pageId: 'learnscape-rectangle-toy-shop-page',
                     hash: '#rectangle-toy-shop',
                 },
+                rectangleBakery1: {
+                    title: 'Learnscape Adventure - Inside the Bakery',
+                    bodyClass: 'gameplay-page',
+                    pageId: 'learnscape-rectangle-bakery1-page',
+                    hash: '#rectangle-bakery1',
+                },
+                rectangleBookstore1: {
+                    title: 'Learnscape Adventure - Inside the Bookstore',
+                    bodyClass: 'gameplay-page',
+                    pageId: 'learnscape-rectangle-bookstore1-page',
+                    hash: '#rectangle-bookstore1',
+                },
+                rectangleToyShop1: {
+                    title: 'Learnscape Adventure - Inside the Toy Shop',
+                    bodyClass: 'gameplay-page',
+                    pageId: 'learnscape-rectangle-toy-shop1-page',
+                    hash: '#rectangle-toy-shop1',
+                },
                 shapeArea5: {
                     title: 'Learnscape Adventure - Area 5',
                     bodyClass: 'gameplay-page',
@@ -1220,6 +1271,12 @@
                 'rectangle-bookstore': 'rectangleBookstore',
                 rectangleToyShop: 'rectangleToyShop',
                 'rectangle-toy-shop': 'rectangleToyShop',
+                rectangleBakery1: 'rectangleBakery1',
+                'rectangle-bakery1': 'rectangleBakery1',
+                rectangleBookstore1: 'rectangleBookstore1',
+                'rectangle-bookstore1': 'rectangleBookstore1',
+                rectangleToyShop1: 'rectangleToyShop1',
+                'rectangle-toy-shop1': 'rectangleToyShop1',
                 shapeArea5: 'shapeArea5',
                 'shape-area-5': 'shapeArea5',
                 shapeArea6: 'shapeArea6',
@@ -1242,6 +1299,9 @@
                 '#rectangle-bakery': 'rectangleBakery',
                 '#rectangle-bookstore': 'rectangleBookstore',
                 '#rectangle-toy-shop': 'rectangleToyShop',
+                '#rectangle-bakery1': 'rectangleBakery1',
+                '#rectangle-bookstore1': 'rectangleBookstore1',
+                '#rectangle-toy-shop1': 'rectangleToyShop1',
                 '#shape-area-5': 'shapeArea5',
                 '#shape-area-6': 'shapeArea6',
                 '#shape-area-7': 'shapeArea7',
@@ -1260,6 +1320,9 @@
                 'rectangle-bakery.html': 'rectangleBakery',
                 'rectangle-bookstore.html': 'rectangleBookstore',
                 'rectangle-toy-shop.html': 'rectangleToyShop',
+                'rectangle-bakery1.html': 'rectangleBakery1',
+                'rectangle-bookstore1.html': 'rectangleBookstore1',
+                'rectangle-toy-shop1.html': 'rectangleToyShop1',
                 'shape-area-5.html': 'shapeArea5',
                 'shape-area-6.html': 'shapeArea6',
                 'shape-area-7.html': 'shapeArea7',
@@ -1299,6 +1362,9 @@
                 rectangleBakery: document.getElementById('learnscape-rectangle-bakery-page'),
                 rectangleBookstore: document.getElementById('learnscape-rectangle-bookstore-page'),
                 rectangleToyShop: document.getElementById('learnscape-rectangle-toy-shop-page'),
+                rectangleBakery1: document.getElementById('learnscape-rectangle-bakery1-page'),
+                rectangleBookstore1: document.getElementById('learnscape-rectangle-bookstore1-page'),
+                rectangleToyShop1: document.getElementById('learnscape-rectangle-toy-shop1-page'),
                 shapeArea5: document.getElementById('learnscape-shape-area-5-page'),
                 shapeArea6: document.getElementById('learnscape-shape-area-6-page'),
                 shapeArea7: document.getElementById('learnscape-shape-area-7-page'),

@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260918-372';
+    const appVersion = '20260918-376';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -514,6 +514,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     let rectangleDeliveryInstructionAudio = null;
     let rectangleDeliveryInstructionShown = false;
     let rectangleParkingInstructionAudio = null;
+    let rectangleParkingMoveTimer = null;
+    let rectangleParkingRouteTimer = null;
     const shapePreviewPages = Array.from(document.querySelectorAll('.shape-area-preview-page'));
     const shapePreviewProgressByPage = new Map();
     const shapePreviewIntroStates = new Map();
@@ -3949,6 +3951,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const resetRectangleDestinationJeeps = () => {
+        if (rectangleParkingMoveTimer !== null) {
+            window.clearTimeout(rectangleParkingMoveTimer);
+            rectangleParkingMoveTimer = null;
+        }
+        if (rectangleParkingRouteTimer !== null) {
+            window.clearTimeout(rectangleParkingRouteTimer);
+            rectangleParkingRouteTimer = null;
+        }
         if (rectangleParkingInstructionAudio) {
             rectangleParkingInstructionAudio.pause();
             rectangleParkingInstructionAudio.currentTime = 0;
@@ -3959,8 +3969,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const jeep = page.querySelector('.rectangle-destination-jeep');
             const instructionPanel = page.querySelector('.rectangle-parking-instruction-panel');
             const parkingShapes = page.querySelector('.rectangle-parking-shapes');
+            page.classList.remove('is-parking-transition', 'is-parking-fading');
             if (parkingShapes) parkingShapes.hidden = true;
             page.querySelectorAll('.rectangle-parking-shape').forEach((shape) => {
+                shape.disabled = false;
                 shape.classList.remove('is-selected');
                 shape.setAttribute('aria-pressed', 'false');
             });
@@ -3970,7 +3982,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             if (!jeep) return;
             jeep.hidden = true;
-            jeep.classList.remove('is-entering', 'is-arrived');
+            jeep.classList.remove('is-entering', 'is-arrived', 'is-parking');
+            jeep.style.removeProperty('--parking-shift-x');
+            jeep.style.removeProperty('--parking-shift-y');
+            jeep.style.removeProperty('--parking-scale');
         });
     };
 
@@ -4053,11 +4068,48 @@ document.addEventListener('DOMContentLoaded', async () => {
     rectangleParkingShapes.forEach((shape) => {
         shape.addEventListener('click', () => {
             const page = shape.closest('.rectangle-destination-page');
+            if (!page || page.classList.contains('is-parking-transition')) return;
             page?.querySelectorAll('.rectangle-parking-shape').forEach((candidate) => {
                 const isSelected = candidate === shape;
                 candidate.classList.toggle('is-selected', isSelected);
                 candidate.setAttribute('aria-pressed', String(isSelected));
             });
+            if (!shape.hasAttribute('data-correct-parking')) return;
+
+            const jeep = page.querySelector('.rectangle-destination-jeep');
+            const targetRoute = shape.dataset.parkingRoute;
+            if (!jeep || !targetRoute) return;
+
+            const jeepRect = jeep.getBoundingClientRect();
+            const targetRect = shape.getBoundingClientRect();
+            const shiftX = (targetRect.left + (targetRect.width / 2)) - (jeepRect.left + (jeepRect.width / 2));
+            const shiftY = (targetRect.top + (targetRect.height / 2)) - (jeepRect.top + (jeepRect.height / 2));
+            const parkingScale = Math.max(0.4, Math.min(0.64, (targetRect.width / jeepRect.width) * 0.92));
+
+            jeep.style.setProperty('--parking-shift-x', `${shiftX}px`);
+            jeep.style.setProperty('--parking-shift-y', `${shiftY}px`);
+            jeep.style.setProperty('--parking-scale', String(parkingScale));
+            page.classList.add('is-parking-transition');
+            page.querySelectorAll('.rectangle-parking-shape').forEach((candidate) => {
+                candidate.disabled = true;
+            });
+            page.querySelector('.rectangle-parking-instruction-panel')?.classList.remove('is-visible');
+            if (rectangleParkingInstructionAudio) {
+                rectangleParkingInstructionAudio.pause();
+                rectangleParkingInstructionAudio.currentTime = 0;
+                rectangleParkingInstructionAudio = null;
+            }
+            jeep.classList.add('is-parking');
+
+            rectangleParkingMoveTimer = window.setTimeout(() => {
+                rectangleParkingMoveTimer = null;
+                if (page.hidden) return;
+                page.classList.add('is-parking-fading');
+                rectangleParkingRouteTimer = window.setTimeout(() => {
+                    rectangleParkingRouteTimer = null;
+                    navigateApp(targetRoute);
+                }, 560);
+            }, 1080);
         });
     });
 
