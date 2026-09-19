@@ -11,6 +11,7 @@
     --border-neon-pink: rgba(242, 138, 178, 0.72);
     --border-neon-cyan: rgba(79, 214, 232, 0.72);
     --border-neon-green: rgba(139, 217, 67, 0.72);
+    --settings-safe-right: clamp(5.5rem, 8vw, 7.1rem);
 }
 
 * {
@@ -5914,7 +5915,7 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     --delivery-progress: 0%;
     position: absolute;
     top: 1rem;
-    right: clamp(1rem, 2.5vw, 2.5rem);
+    right: calc(clamp(1rem, 2.5vw, 2.5rem) + var(--settings-safe-right));
     z-index: 21;
     display: grid;
     grid-template-columns: 1fr auto;
@@ -6184,7 +6185,7 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 
     .rectangle-delivery-progress {
         top: 0.55rem;
-        right: 0.55rem;
+        right: calc(0.55rem + var(--settings-safe-right));
         width: 8.4rem;
         padding: 0.45rem 0.55rem 0.5rem;
     }
@@ -10950,7 +10951,7 @@ body.is-fullscreen-mode .shape-collection-widget {
 
 .game3-page .game-return-btn {
     left: auto;
-    right: 1.1vw;
+    right: calc(1.1vw + var(--settings-safe-right));
     z-index: 60;
 }
 
@@ -11023,8 +11024,8 @@ h3 {
 }
 
 .intro-settings {
-    position: absolute;
-    z-index: 7;
+    position: fixed;
+    z-index: 120;
     top: clamp(0.75rem, 2.4vh, 1.5rem);
     right: clamp(0.75rem, 2.4vw, 1.75rem);
 }
@@ -11065,6 +11066,29 @@ h3 {
 }
 
 .intro-settings-panel[hidden] { display: none; }
+.intro-settings-home-button {
+    width: 100%;
+    min-height: 3rem;
+    border: 0.16rem solid #6f3712;
+    border-radius: 0.65rem;
+    background: linear-gradient(180deg, #8de9ff 0%, #29a4f2 55%, #1764c4 100%);
+    box-shadow: inset 0 0.14rem 0 rgba(255, 255, 255, 0.72), 0 0.24rem 0 #693711, 0 0.45rem 0.65rem rgba(62, 38, 16, 0.26);
+    color: #ffffff;
+    font: 900 1.45rem/1 'Fredoka', 'Nunito', sans-serif;
+    text-shadow: 0 0.11rem 0 #134f91;
+    cursor: pointer;
+}
+
+.intro-settings-home-button:hover,
+.intro-settings-home-button:focus-visible {
+    filter: brightness(1.08);
+    transform: translateY(-0.08rem);
+}
+
+.intro-settings-home-button:active {
+    transform: translateY(0.12rem);
+}
+
 .intro-settings-toggle { display: flex; align-items: center; justify-content: space-between; gap: 1rem; font-weight: 900; }
 .intro-settings-toggle input { width: 1.2rem; height: 1.2rem; accent-color: #18864e; }
 .intro-volume-control { display: grid; gap: 0.35rem; font-weight: 900; }

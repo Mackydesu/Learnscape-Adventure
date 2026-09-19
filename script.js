@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260919-413';
+    const appVersion = '20260919-416';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -760,6 +760,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 rectangleRoadLoopPaused = true;
                 rectangleDeliveryPage?.classList.add('is-road-stopped');
                 rectangleRoadStrip?.classList.add('is-loop-paused');
+                clearRectangleRoadShapeObstacles();
                 onStopped();
             }
         }
@@ -5066,6 +5067,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleDeliveryPage?.classList.remove('is-instruction-active');
         rectangleRoadLoopPaused = true;
         rectangleRoadStrip?.classList.add('is-loop-paused');
+        clearRectangleRoadShapeObstacles();
         rectangleDeliveryTaskPanel?.classList.remove('is-visible');
         if (rectangleDeliveryTaskPanel) rectangleDeliveryTaskPanel.hidden = true;
         rectangleDeliveryInstructionPanel?.classList.remove('is-visible');

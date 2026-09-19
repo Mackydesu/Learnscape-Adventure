@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260919-429">
+    <link rel="stylesheet" href="style.css?v=20260919-433">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -57,30 +57,31 @@
         </div>
     </div>
 
+    <div class="intro-settings">
+        <button class="intro-settings-button" type="button" aria-label="Settings" aria-expanded="false" aria-controls="intro-settings-panel">
+            <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M20.2 3.5h7.6l1.1 5.1a16 16 0 0 1 3.2 1.3l4.5-2.5 5.4 5.4-2.5 4.5a16 16 0 0 1 1.3 3.2l5.1 1.1v7.6l-5.1 1.1a16 16 0 0 1-1.3 3.2l2.5 4.5-5.4 5.4-4.5-2.5a16 16 0 0 1-3.2 1.3l-1.1 5.1h-7.6l-1.1-5.1a16 16 0 0 1-3.2-1.3l-4.5 2.5L6 38.1l2.5-4.5a16 16 0 0 1-1.3-3.2l-5.1-1.1v-7.6l5.1-1.1a16 16 0 0 1 1.3-3.2L6 12.9l5.4-5.4 4.5 2.5a16 16 0 0 1 3.2-1.3l1.1-5.2Z"/><circle cx="24" cy="24" r="7"/></svg>
+        </button>
+        <div class="intro-settings-panel" id="intro-settings-panel" role="group" aria-label="Display settings" hidden>
+            <button class="intro-settings-home-button" type="button">Home</button>
+            <label class="intro-settings-toggle" for="intro-fullscreen-toggle">
+                <span>Fullscreen</span>
+                <input id="intro-fullscreen-toggle" type="checkbox">
+            </label>
+            <label class="intro-settings-toggle" for="intro-sound-muted">
+                <span>Mute sound</span>
+                <input id="intro-sound-muted" type="checkbox">
+            </label>
+            <label class="intro-volume-control" for="intro-volume-slider">
+                <span>Sound volume <output id="intro-volume-value" for="intro-volume-slider">100%</output></span>
+                <input id="intro-volume-slider" type="range" min="0" max="100" step="1" value="100">
+            </label>
+        </div>
+    </div>
+
     <main id="learnscape-title-page">
         <section class="hero" id="home">
             <img class="hero-bg-video" src="assets/Backgrounds/bgintro.webp" alt="" aria-hidden="true">
             <img class="hero-title-art" src="assets/Backgrounds/title.webp" alt="Learnscape Adventure: Explore Shapes, Discover a Brighter World">
-
-            <div class="intro-settings">
-                <button class="intro-settings-button" type="button" aria-label="Settings" aria-expanded="false" aria-controls="intro-settings-panel">
-                    <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M20.2 3.5h7.6l1.1 5.1a16 16 0 0 1 3.2 1.3l4.5-2.5 5.4 5.4-2.5 4.5a16 16 0 0 1 1.3 3.2l5.1 1.1v7.6l-5.1 1.1a16 16 0 0 1-1.3 3.2l2.5 4.5-5.4 5.4-4.5-2.5a16 16 0 0 1-3.2 1.3l-1.1 5.1h-7.6l-1.1-5.1a16 16 0 0 1-3.2-1.3l-4.5 2.5L6 38.1l2.5-4.5a16 16 0 0 1-1.3-3.2l-5.1-1.1v-7.6l5.1-1.1a16 16 0 0 1 1.3-3.2L6 12.9l5.4-5.4 4.5 2.5a16 16 0 0 1 3.2-1.3l1.1-5.2Z"/><circle cx="24" cy="24" r="7"/></svg>
-                </button>
-                <div class="intro-settings-panel" id="intro-settings-panel" role="group" aria-label="Display settings" hidden>
-                    <label class="intro-settings-toggle" for="intro-fullscreen-toggle">
-                        <span>Fullscreen</span>
-                        <input id="intro-fullscreen-toggle" type="checkbox">
-                    </label>
-                    <label class="intro-settings-toggle" for="intro-sound-muted">
-                        <span>Mute sound</span>
-                        <input id="intro-sound-muted" type="checkbox">
-                    </label>
-                    <label class="intro-volume-control" for="intro-volume-slider">
-                        <span>Sound volume <output id="intro-volume-value" for="intro-volume-slider">100%</output></span>
-                        <input id="intro-volume-slider" type="range" min="0" max="100" step="1" value="100">
-                    </label>
-                </div>
-            </div>
 
             <nav class="intro-signpost" aria-label="Adventure menu">
                 <img class="intro-signpost-art" src="assets/Shape UI/post.webp" alt="">
@@ -665,16 +666,8 @@
                 <img src="assets/Backgrounds/way5.webp" alt="" draggable="false">
             </div>
             <div class="rectangle-highway-track" aria-hidden="true">
-                <span class="rectangle-highway-segment is-highway-01">
-                    <span class="rectangle-highway-obstacle" data-shape="circle" style="--obstacle-x: 18%"></span>
-                    <span class="rectangle-highway-obstacle" data-shape="triangle" style="--obstacle-x: 48%"></span>
-                    <span class="rectangle-highway-obstacle" data-shape="oval" style="--obstacle-x: 78%"></span>
-                </span>
-                <span class="rectangle-highway-segment is-highway-02">
-                    <span class="rectangle-highway-obstacle" data-shape="diamond" style="--obstacle-x: 18%"></span>
-                    <span class="rectangle-highway-obstacle" data-shape="star" style="--obstacle-x: 48%"></span>
-                    <span class="rectangle-highway-obstacle" data-shape="circle" style="--obstacle-x: 78%"></span>
-                </span>
+                <span class="rectangle-highway-segment is-highway-01"></span>
+                <span class="rectangle-highway-segment is-highway-02"></span>
             </div>
         </div>
         <div class="rectangle-speed-control">
@@ -1342,7 +1335,7 @@
 
     
 
-    <script src="script.js?v=20260919-412"></script>
+    <script src="script.js?v=20260919-416"></script>
     </div>
 
     <script>
@@ -2133,6 +2126,7 @@
             const introSettings = document.querySelector('.intro-settings');
             const introSettingsButton = introSettings?.querySelector('.intro-settings-button');
             const introSettingsPanel = introSettings?.querySelector('.intro-settings-panel');
+            const introSettingsHomeButton = introSettings?.querySelector('.intro-settings-home-button');
             const soundMutedToggle = document.getElementById('intro-sound-muted');
             const soundVolumeSlider = document.getElementById('intro-volume-slider');
             const soundVolumeValue = document.getElementById('intro-volume-value');
@@ -2222,6 +2216,11 @@
                 const shouldOpen = introSettingsPanel.hidden;
                 introSettingsPanel.hidden = !shouldOpen;
                 introSettingsButton.setAttribute('aria-expanded', String(shouldOpen));
+            });
+            introSettingsHomeButton?.addEventListener('click', () => {
+                if (introSettingsPanel) introSettingsPanel.hidden = true;
+                introSettingsButton?.setAttribute('aria-expanded', 'false');
+                navigateWithLoading('title');
             });
             introFullscreenToggle?.addEventListener('change', () => {
                 if (introFullscreenToggle.checked) {
