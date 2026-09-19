@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260919-422">
+    <link rel="stylesheet" href="style.css?v=20260919-429">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -655,6 +655,7 @@
     </section>
 
     <section id="learnscape-rectangle-delivery-page" class="shape-area-page rectangle-delivery-page" hidden>
+        <img class="rectangle-delivery-complete-bg" src="assets/Backgrounds/rectangle1.webp" alt="" draggable="false" hidden>
         <div class="rectangle-road-scroll" tabindex="0" role="region" aria-label="Rectangle town scrolling road">
             <div class="rectangle-road-strip">
                 <img src="assets/Backgrounds/way1.webp" alt="" draggable="false">
@@ -664,8 +665,16 @@
                 <img src="assets/Backgrounds/way5.webp" alt="" draggable="false">
             </div>
             <div class="rectangle-highway-track" aria-hidden="true">
-                <span class="rectangle-highway-segment is-highway-01"></span>
-                <span class="rectangle-highway-segment is-highway-02"></span>
+                <span class="rectangle-highway-segment is-highway-01">
+                    <span class="rectangle-highway-obstacle" data-shape="circle" style="--obstacle-x: 18%"></span>
+                    <span class="rectangle-highway-obstacle" data-shape="triangle" style="--obstacle-x: 48%"></span>
+                    <span class="rectangle-highway-obstacle" data-shape="oval" style="--obstacle-x: 78%"></span>
+                </span>
+                <span class="rectangle-highway-segment is-highway-02">
+                    <span class="rectangle-highway-obstacle" data-shape="diamond" style="--obstacle-x: 18%"></span>
+                    <span class="rectangle-highway-obstacle" data-shape="star" style="--obstacle-x: 48%"></span>
+                    <span class="rectangle-highway-obstacle" data-shape="circle" style="--obstacle-x: 78%"></span>
+                </span>
             </div>
         </div>
         <div class="rectangle-speed-control">
@@ -674,7 +683,7 @@
             <div class="rectangle-speed-ticks" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
         </div>
         <button class="rectangle-road-toggle" type="button" aria-label="Stop at this delivery" aria-pressed="false" disabled>Stop</button>
-        <button class="rectangle-boss-jump-button" type="button" aria-label="Jump over the monster spike" hidden>Jump</button>
+        <button class="rectangle-boss-jump-button" type="button" aria-label="Jump over road obstacles">Jump</button>
         <div class="rectangle-boss-warning" role="dialog" aria-modal="true" aria-labelledby="rectangle-boss-warning-title" hidden>
             <div class="rectangle-boss-warning-panel">
                 <span class="rectangle-boss-warning-mark" aria-hidden="true">!</span>
@@ -809,6 +818,7 @@
                 <strong>Bookstore</strong>
             </div>
         </section>
+        <div class="rectangle-delivery-complete-confetti" aria-hidden="true" hidden></div>
         <a class="game-return-btn" href="index.html#shape-area-4" aria-label="Return to Rectangle Village">
             <span>‹</span>
             Back
@@ -1332,7 +1342,7 @@
 
     
 
-    <script src="script.js?v=20260919-402"></script>
+    <script src="script.js?v=20260919-412"></script>
     </div>
 
     <script>

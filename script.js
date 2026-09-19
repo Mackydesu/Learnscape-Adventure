@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260919-402';
+    const appVersion = '20260919-413';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -296,14 +296,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rectangleDeliveryProgressCount = rectangleDeliveryPage?.querySelector('.rectangle-delivery-progress-count span');
     const rectangleGameOverOverlay = rectangleDeliveryPage?.querySelector('.rectangle-game-over-overlay');
     const rectangleGameOverRetry = rectangleDeliveryPage?.querySelector('.rectangle-game-over-retry');
+    const rectangleDeliveryCompleteBg = rectangleDeliveryPage?.querySelector('.rectangle-delivery-complete-bg');
+    const rectangleDeliveryCompleteConfetti = rectangleDeliveryPage?.querySelector('.rectangle-delivery-complete-confetti');
     let rectangleRoadImages = [];
     let rectangleRoadLoopFrame = null;
     let rectangleRoadLoopWidth = 0;
     let rectangleRoadLoopOffset = 0;
     let rectangleHighwayOffset = 0;
     let rectangleHighwayLoopWidth = 0;
+    let rectangleHighwayObstacles = [];
+    const rectangleObstacleContacts = new Set();
+    const rectangleRoadShapeObstacleFrames = new Map();
+    let rectangleRoadShapeObstacleTimer = null;
+    let rectangleRoadHitUntil = 0;
     let rectangleRoadLoopTime = 0;
     let rectangleRoadLoopPaused = false;
+    let rectangleBraking = null;
     let rectangleResumeFromDelivery = false;
     const rectangleRoadBaseSpeed = 0.1;
     const rectangleRoadPostDeliverySpeed = 0.14;
@@ -311,11 +319,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     let rectangleSpeedLevel = 3;
     let rectangleCurrentSpeedMultiplier = rectangleSpeedMultipliers[rectangleSpeedLevel - 1];
     let rectangleDisplayedGasLevel = -1;
+    const rectangleDrivingAudio = window.Audio ? new Audio('assets/Audios/Sound effects/driving.mp3') : null;
+    const rectangleHornAudio = window.Audio ? new Audio('assets/Audios/Sound effects/horn.mp3') : null;
+    const rectangleStopAudio = window.Audio ? new Audio('assets/Audios/Sound effects/stop.mp3') : null;
+    if (rectangleDrivingAudio) rectangleDrivingAudio.loop = true;
+    let rectangleDrivingAudioPlayPending = false;
+    let rectangleDrivingAudioLastAttempt = 0;
+    let rectangleHornReady = true;
     const rectangleGasDrainPerMs = 0.00045;
     let rectangleGasLevel = 100;
     let rectangleGasPenaltyRemaining = 0;
     let rectangleWrongStopTimer = null;
-    let rectangleRoadGasPickupFrame = null;
+    const rectangleRoadGasPickupFrames = new Map();
+    const rectangleGasPickupThresholds = [50, 40, 30, 20, 10, 5];
+    const rectangleTriggeredGasPickupThresholds = new Set();
     let rectangleGasDepleted = false;
     let rectangleGameOverRevealTimer = null;
     let rectangleGameOverLoseAudio = null;
@@ -328,6 +345,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         clearRectangleRoadGasPickup();
         abortRectangleBossEncounter();
         rectangleRoadLoopPaused = true;
+        rectangleBraking = null;
         rectangleDeliveryPage.classList.add('is-road-stopped', 'is-gas-empty');
         rectangleRoadStrip?.classList.add('is-loop-paused');
         if (rectangleWrongStopTimer !== null) {
@@ -340,6 +358,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             rectangleRoadToggle.textContent = 'Empty';
             rectangleRoadToggle.setAttribute('aria-label', 'Out of gas');
         }
+        if (rectangleBossJumpButton) rectangleBossJumpButton.disabled = true;
         if (rectangleDeliveryRevealTimer !== null) {
             window.clearTimeout(rectangleDeliveryRevealTimer);
             rectangleDeliveryRevealTimer = null;
@@ -383,17 +402,88 @@ document.addEventListener('DOMContentLoaded', async () => {
             rectangleGasValueText.textContent = `${roundedLevel}%`;
         }
     };
+    const shouldSpawnRectangleMilestoneGas = () => (
+        rectangleDeliveryPage
+        && !rectangleDeliveryPage.hidden
+        && !rectangleGasDepleted
+        && !rectangleRoadLoopPaused
+        && !rectangleDeliveryPage.classList.contains('is-boss-battle')
+        && !rectangleDeliveryPage.classList.contains('is-final-complete-scene')
+        && rectangleDeliveryJeepSequence?.classList.contains('is-arrived')
+    );
+
     const setRectangleGasLevel = (level) => {
+        const previousGasLevel = rectangleGasLevel;
         rectangleGasLevel = Math.max(0, Math.min(100, level));
         updateRectangleGasMeter();
+        if (rectangleGasLevel > 50) rectangleTriggeredGasPickupThresholds.clear();
+        rectangleGasPickupThresholds.forEach((threshold) => {
+            if (
+                previousGasLevel > threshold
+                && rectangleGasLevel <= threshold
+                && !rectangleTriggeredGasPickupThresholds.has(threshold)
+                && shouldSpawnRectangleMilestoneGas()
+            ) {
+                rectangleTriggeredGasPickupThresholds.add(threshold);
+                spawnRectangleRoadGasPickup({ clearExisting: false, threshold });
+            }
+        });
         if (rectangleGasLevel <= 0) triggerRectangleGameOver();
     };
     updateRectangleGasMeter();
-    function clearRectangleRoadGasPickup() {
-        if (rectangleRoadGasPickupFrame !== null) {
-            window.cancelAnimationFrame(rectangleRoadGasPickupFrame);
-            rectangleRoadGasPickupFrame = null;
+    const syncRectangleDrivingSound = () => {
+        if (!rectangleDrivingAudio) return;
+        const moving = !rectangleDeliveryPage?.hidden && !rectangleGasDepleted && !rectangleRoadLoopPaused;
+        const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+        const brakeFactor = rectangleBraking ? rectangleBraking.speedFactor : 1;
+        rectangleDrivingAudio.volume = moving
+            ? Math.min(1, 0.48 * brakeFactor * soundScale)
+            : 0;
+        rectangleDrivingAudio.playbackRate = Math.max(0.55, Math.min(1.5, rectangleCurrentSpeedMultiplier * brakeFactor));
+        if (!moving || soundScale === 0) {
+            rectangleDrivingAudio.pause();
+            rectangleDrivingAudioPlayPending = false;
+            return;
         }
+
+        const now = performance.now();
+        if (!rectangleDrivingAudio.paused || rectangleDrivingAudioPlayPending || now - rectangleDrivingAudioLastAttempt < 700) return;
+        rectangleDrivingAudioPlayPending = true;
+        rectangleDrivingAudioLastAttempt = now;
+        rectangleDrivingAudio.play()
+            .catch(() => {})
+            .finally(() => {
+                rectangleDrivingAudioPlayPending = false;
+            });
+    };
+    window.addEventListener('learnscape:soundchange', syncRectangleDrivingSound);
+
+    const startRectangleEngineSound = () => {
+        if (!rectangleDrivingAudio) return;
+        syncRectangleDrivingSound();
+    };
+    const stopRectangleEngineSound = () => {
+        rectangleDrivingAudio?.pause();
+        if (rectangleDrivingAudio) rectangleDrivingAudio.currentTime = 0;
+        rectangleStopAudio?.pause();
+    };
+    const updateRectangleEngineSound = syncRectangleDrivingSound;
+
+    const playRectangleHorn = () => {
+        if (!rectangleHornAudio || (window.__learnscapeSoundScale?.() ?? 1) === 0) return;
+        rectangleHornAudio.volume = Math.min(1, 0.7 * (window.__learnscapeSoundScale?.() ?? 1));
+        rectangleHornAudio.currentTime = 0;
+        rectangleHornAudio.play().catch(() => {});
+    };
+    const playRectangleStop = () => {
+        if (!rectangleStopAudio || (window.__learnscapeSoundScale?.() ?? 1) === 0) return;
+        rectangleStopAudio.volume = Math.min(1, 0.7 * (window.__learnscapeSoundScale?.() ?? 1));
+        rectangleStopAudio.currentTime = 0;
+        rectangleStopAudio.play().catch(() => {});
+    };
+    function clearRectangleRoadGasPickup() {
+        rectangleRoadGasPickupFrames.forEach((frame) => window.cancelAnimationFrame(frame));
+        rectangleRoadGasPickupFrames.clear();
         rectangleDeliveryPage?.querySelectorAll('.rectangle-road-gas-pickup')
             .forEach((pickup) => pickup.remove());
     }
@@ -401,9 +491,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     function collectRectangleRoadGasPickup(pickup) {
         if (!pickup?.isConnected) return;
         pickup.remove();
-        if (rectangleRoadGasPickupFrame !== null) {
-            window.cancelAnimationFrame(rectangleRoadGasPickupFrame);
-            rectangleRoadGasPickupFrame = null;
+        const pickupFrame = rectangleRoadGasPickupFrames.get(pickup);
+        if (pickupFrame !== undefined) {
+            window.cancelAnimationFrame(pickupFrame);
+            rectangleRoadGasPickupFrames.delete(pickup);
         }
         setRectangleGasLevel(rectangleGasLevel + 16);
         playUiClickSound('chime');
@@ -415,32 +506,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     function watchRectangleRoadGasPickup(pickup) {
         const checkPickup = () => {
             if (!pickup.isConnected || !rectangleDeliveryJeepSequence || rectangleDeliveryPage?.hidden) {
-                rectangleRoadGasPickupFrame = null;
+                rectangleRoadGasPickupFrames.delete(pickup);
                 return;
             }
             if (rectanglesOverlap(pickup.getBoundingClientRect(), rectangleDeliveryJeepSequence.getBoundingClientRect(), 8)) {
                 collectRectangleRoadGasPickup(pickup);
                 return;
             }
-            rectangleRoadGasPickupFrame = window.requestAnimationFrame(checkPickup);
+            rectangleRoadGasPickupFrames.set(pickup, window.requestAnimationFrame(checkPickup));
         };
-        rectangleRoadGasPickupFrame = window.requestAnimationFrame(checkPickup);
+        rectangleRoadGasPickupFrames.set(pickup, window.requestAnimationFrame(checkPickup));
     }
 
-    function spawnRectangleRoadGasPickup() {
+    function spawnRectangleRoadGasPickup({ clearExisting = true, threshold = null } = {}) {
         if (!rectangleDeliveryPage || rectangleDeliveryPage.hidden || rectangleGasDepleted) return;
-        clearRectangleRoadGasPickup();
+        if (clearExisting) clearRectangleRoadGasPickup();
         const pickup = document.createElement('span');
         pickup.className = 'rectangle-road-gas-pickup';
-        pickup.style.setProperty('--pickup-start-y', `${Math.round((Math.random() * 1.8) - 0.9)}rem`);
+        if (threshold !== null) pickup.dataset.gasThreshold = String(threshold);
+        pickup.style.setProperty('--pickup-start-y', `${((Math.random() * 4.2) - 2.1).toFixed(2)}rem`);
+        pickup.style.setProperty('--pickup-duration', `${(4.1 + Math.random() * 1.35).toFixed(2)}s`);
+        pickup.style.setProperty('--pickup-bottom', `${Math.round(20 + Math.random() * 12)}%`);
         const gasIcon = rectangleGasMeter?.querySelector('.rectangle-gas-icon')?.cloneNode(true);
         if (gasIcon) pickup.append(gasIcon);
         rectangleDeliveryPage.append(pickup);
         pickup.addEventListener('animationend', () => {
             if (pickup.isConnected) pickup.remove();
-            if (rectangleRoadGasPickupFrame !== null) {
-                window.cancelAnimationFrame(rectangleRoadGasPickupFrame);
-                rectangleRoadGasPickupFrame = null;
+            const pickupFrame = rectangleRoadGasPickupFrames.get(pickup);
+            if (pickupFrame !== undefined) {
+                window.cancelAnimationFrame(pickupFrame);
+                rectangleRoadGasPickupFrames.delete(pickup);
             }
         }, { once: true });
         watchRectangleRoadGasPickup(pickup);
@@ -462,6 +557,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         highwaySegments.forEach((segment) => rectangleHighwayTrack.append(segment.cloneNode(true)));
         rectangleHighwayTrack.dataset.loopReady = 'true';
     }
+    rectangleHighwayObstacles = Array.from(rectangleHighwayTrack?.querySelectorAll('.rectangle-highway-obstacle') || []);
+    rectangleHighwayObstacles.forEach((obstacle) => {
+        obstacle.hidden = true;
+    });
     const syncRectangleHighwayPosition = () => {
         if (!rectangleHighwayTrack) return;
         const displayedOffset = rectangleHighwayLoopWidth > 0
@@ -487,8 +586,141 @@ document.addEventListener('DOMContentLoaded', async () => {
             syncRectangleHighwayPosition();
         }
     };
+    const canRunRectangleRoadShapeObstacles = () => (
+        rectangleDeliveredItems.size >= 1
+        && !rectangleDeliveryPage?.hidden
+        && !rectangleDeliveryPage?.classList.contains('is-boss-battle')
+        && !rectangleDeliveryPage?.classList.contains('is-final-complete-scene')
+        && !rectangleRoadLoopPaused
+        && !rectangleGasDepleted
+        && rectangleDeliveryJeepSequence?.classList.contains('is-arrived')
+    );
+
+    const clearRectangleRoadShapeObstacles = () => {
+        if (rectangleRoadShapeObstacleTimer !== null) {
+            window.clearTimeout(rectangleRoadShapeObstacleTimer);
+            rectangleRoadShapeObstacleTimer = null;
+        }
+        rectangleRoadShapeObstacleFrames.forEach((frame) => window.cancelAnimationFrame(frame));
+        rectangleRoadShapeObstacleFrames.clear();
+        rectangleDeliveryPage?.querySelectorAll('.rectangle-road-shape-obstacle')
+            .forEach((obstacle) => obstacle.remove());
+    };
+
+    const hitRectangleRoadShapeObstacle = (obstacle, timestamp) => {
+        if (!obstacle?.isConnected || rectangleObstacleContacts.has(obstacle)) return;
+        rectangleObstacleContacts.add(obstacle);
+        if (timestamp < rectangleRoadHitUntil) return;
+
+        rectangleRoadHitUntil = timestamp + 950;
+        setRectangleGasLevel(rectangleGasLevel - 14);
+        playUiClickSound('thunk');
+        rectangleDeliveryPage.classList.remove('is-road-jeep-hit');
+        rectangleDeliveryPage.getBoundingClientRect();
+        rectangleDeliveryPage.classList.add('is-road-jeep-hit');
+        window.setTimeout(() => rectangleDeliveryPage?.classList.remove('is-road-jeep-hit'), 420);
+    };
+
+    const watchRectangleRoadShapeObstacle = (obstacle) => {
+        const checkObstacle = (timestamp) => {
+            if (!obstacle.isConnected || !rectangleDeliveryJeepSequence || rectangleDeliveryPage?.hidden) {
+                rectangleRoadShapeObstacleFrames.delete(obstacle);
+                rectangleObstacleContacts.delete(obstacle);
+                return;
+            }
+            const obstacleRect = obstacle.getBoundingClientRect();
+            const jeepRect = rectangleDeliveryJeepSequence.getBoundingClientRect();
+            if (obstacleRect.right < jeepRect.left - 80) {
+                rectangleObstacleContacts.delete(obstacle);
+            }
+            if (
+                rectangleDeliveryJeepSequence.classList.contains('is-boss-jumping')
+                && obstacleRect.left < jeepRect.right - 20
+                && obstacleRect.right > jeepRect.left + 20
+            ) {
+                rectangleObstacleContacts.add(obstacle);
+            } else if (rectanglesOverlap(obstacleRect, jeepRect, 12)) {
+                hitRectangleRoadShapeObstacle(obstacle, timestamp);
+            }
+            rectangleRoadShapeObstacleFrames.set(obstacle, window.requestAnimationFrame(checkObstacle));
+        };
+        rectangleRoadShapeObstacleFrames.set(obstacle, window.requestAnimationFrame(checkObstacle));
+    };
+
+    const spawnRectangleRoadShapeObstacle = () => {
+        if (!canRunRectangleRoadShapeObstacles()) return;
+        const shapes = ['circle', 'triangle', 'oval', 'diamond', 'star'];
+        const obstacle = document.createElement('span');
+        obstacle.className = 'rectangle-road-shape-obstacle';
+        obstacle.dataset.shape = shapes[Math.floor(Math.random() * shapes.length)];
+        obstacle.style.setProperty('--obstacle-bottom', `${Math.round(22 + Math.random() * 9)}%`);
+        obstacle.style.setProperty('--obstacle-duration', `${(3.8 + Math.random() * 1.25).toFixed(2)}s`);
+        obstacle.style.setProperty('--obstacle-spin-duration', `${(0.72 + Math.random() * 0.38).toFixed(2)}s`);
+        rectangleDeliveryPage.append(obstacle);
+        obstacle.addEventListener('animationend', () => {
+            const frame = rectangleRoadShapeObstacleFrames.get(obstacle);
+            if (frame !== undefined) window.cancelAnimationFrame(frame);
+            rectangleRoadShapeObstacleFrames.delete(obstacle);
+            rectangleObstacleContacts.delete(obstacle);
+            obstacle.remove();
+        }, { once: true });
+        watchRectangleRoadShapeObstacle(obstacle);
+    };
+
+    const scheduleRectangleRoadShapeObstacle = (delay = 1200 + Math.random() * 900) => {
+        if (rectangleRoadShapeObstacleTimer !== null) window.clearTimeout(rectangleRoadShapeObstacleTimer);
+        if (!canRunRectangleRoadShapeObstacles()) return;
+        rectangleRoadShapeObstacleTimer = window.setTimeout(() => {
+            rectangleRoadShapeObstacleTimer = null;
+            if (!canRunRectangleRoadShapeObstacles()) return;
+            spawnRectangleRoadShapeObstacle();
+            scheduleRectangleRoadShapeObstacle(1700 + Math.random() * 1500);
+        }, delay);
+    };
+
+    const checkRectangleHighwayObstacles = (timestamp) => {
+        if (
+            !rectangleDeliveryJeepSequence?.classList.contains('is-arrived')
+            || rectangleDeliveryPage?.classList.contains('is-boss-battle')
+            || rectangleRoadLoopPaused
+            || rectangleGasDepleted
+        ) return;
+
+        const jeepRect = rectangleDeliveryJeepSequence.getBoundingClientRect();
+        rectangleHighwayObstacles.forEach((obstacle) => {
+            if (obstacle.hidden) {
+                rectangleObstacleContacts.delete(obstacle);
+                return;
+            }
+            const obstacleRect = obstacle.getBoundingClientRect();
+            if (obstacleRect.right < jeepRect.left - 60 || obstacleRect.left > jeepRect.right + 60) {
+                rectangleObstacleContacts.delete(obstacle);
+                return;
+            }
+            if (
+                rectangleDeliveryJeepSequence.classList.contains('is-boss-jumping')
+                && obstacleRect.left < jeepRect.right - 20
+                && obstacleRect.right > jeepRect.left + 20
+            ) {
+                rectangleObstacleContacts.add(obstacle);
+                return;
+            }
+            if (!rectanglesOverlap(obstacleRect, jeepRect, 12) || rectangleObstacleContacts.has(obstacle)) return;
+            rectangleObstacleContacts.add(obstacle);
+            if (timestamp < rectangleRoadHitUntil) return;
+
+            rectangleRoadHitUntil = timestamp + 950;
+            setRectangleGasLevel(rectangleGasLevel - 14);
+            playUiClickSound('thunk');
+            rectangleDeliveryPage.classList.remove('is-road-jeep-hit');
+            rectangleDeliveryPage.getBoundingClientRect();
+            rectangleDeliveryPage.classList.add('is-road-jeep-hit');
+            window.setTimeout(() => rectangleDeliveryPage?.classList.remove('is-road-jeep-hit'), 420);
+        });
+    };
     const tickRectangleRoadLoop = (timestamp) => {
         const elapsedMs = rectangleRoadLoopTime ? Math.min(timestamp - rectangleRoadLoopTime, 34) : 0;
+        if (!rectangleRoadLoopWidth || !rectangleHighwayLoopWidth) updateRectangleRoadLoopWidth();
         if (rectangleRoadLoopTime && !rectangleRoadLoopPaused && rectangleRoadLoopWidth > 0) {
             const roadSpeed = rectangleDeliveredItems.size >= 1
                 ? rectangleRoadPostDeliverySpeed
@@ -496,13 +728,42 @@ document.addEventListener('DOMContentLoaded', async () => {
             const targetSpeedMultiplier = rectangleSpeedMultipliers[rectangleSpeedLevel - 1];
             const speedBlend = Math.min(1, elapsedMs / 140);
             rectangleCurrentSpeedMultiplier += (targetSpeedMultiplier - rectangleCurrentSpeedMultiplier) * speedBlend;
-            const travelDistance = elapsedMs * roadSpeed * rectangleCurrentSpeedMultiplier;
+            if (rectangleBraking) {
+                const progress = Math.min(1, (timestamp - rectangleBraking.startTime) / 850);
+                rectangleBraking.speedFactor = (1 - progress) ** 2;
+            }
+            const travelDistance = elapsedMs * roadSpeed * rectangleCurrentSpeedMultiplier
+                * (rectangleBraking?.speedFactor ?? 1);
             rectangleRoadLoopOffset = (rectangleRoadLoopOffset + travelDistance) % rectangleRoadLoopWidth;
             rectangleHighwayOffset += travelDistance;
             rectangleRoadStrip.style.transform = `translate3d(${-rectangleRoadLoopOffset}px, 0, 0)`;
             syncRectangleHighwayPosition();
+            checkRectangleHighwayObstacles(timestamp);
+            if (canRunRectangleRoadShapeObstacles() && rectangleRoadShapeObstacleTimer === null) {
+                scheduleRectangleRoadShapeObstacle();
+            } else if (!canRunRectangleRoadShapeObstacles() && rectangleRoadShapeObstacleTimer !== null) {
+                window.clearTimeout(rectangleRoadShapeObstacleTimer);
+                rectangleRoadShapeObstacleTimer = null;
+            }
             setRectangleGasLevel(rectangleGasLevel - (elapsedMs * rectangleGasDrainPerMs));
+            const currentJob = rectangleDeliveryJobs[rectangleDeliveryJobIndex];
+            const currentStopDistance = currentJob ? getRectangleDeliveryStopDistance(currentJob) : Number.POSITIVE_INFINITY;
+            if (!rectangleBraking && currentStopDistance < 180 && rectangleHornReady && !rectangleDeliveryPage?.classList.contains('is-boss-battle')) {
+                rectangleHornReady = false;
+                playRectangleHorn();
+            } else if (currentStopDistance > 340) {
+                rectangleHornReady = true;
+            }
+            if (rectangleBraking?.speedFactor === 0) {
+                const onStopped = rectangleBraking.onStopped;
+                rectangleBraking = null;
+                rectangleRoadLoopPaused = true;
+                rectangleDeliveryPage?.classList.add('is-road-stopped');
+                rectangleRoadStrip?.classList.add('is-loop-paused');
+                onStopped();
+            }
         }
+        updateRectangleEngineSound();
         if (elapsedMs && rectangleGasPenaltyRemaining > 0) {
             const penaltyStep = Math.min(rectangleGasPenaltyRemaining, elapsedMs * 0.01);
             rectangleGasPenaltyRemaining -= penaltyStep;
@@ -514,21 +775,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     rectangleSpeedSlider?.addEventListener('input', () => {
         rectangleSpeedLevel = Math.max(1, Math.min(5, Number(rectangleSpeedSlider.value) || 3));
         if (rectangleSpeedValue) rectangleSpeedValue.textContent = String(rectangleSpeedLevel);
+        updateRectangleEngineSound();
     });
     const startRectangleRoadLoop = ({ preservePosition = false } = {}) => {
         updateRectangleRoadLoopWidth();
         if (!preservePosition) {
             rectangleRoadLoopOffset = 0;
             rectangleHighwayOffset = 0;
+            rectangleObstacleContacts.clear();
         }
+        clearRectangleRoadShapeObstacles();
         rectangleRoadLoopTime = 0;
         rectangleRoadLoopPaused = false;
+        rectangleBraking = null;
         rectangleCurrentSpeedMultiplier = rectangleSpeedMultipliers[rectangleSpeedLevel - 1];
         if (rectangleRoadStrip) {
             rectangleRoadStrip.style.transform = `translate3d(${-rectangleRoadLoopOffset}px, 0, 0)`;
         }
         syncRectangleHighwayPosition();
         rectangleRoadStrip?.classList.add('is-auto-looping');
+        startRectangleEngineSound();
+        if (canRunRectangleRoadShapeObstacles()) scheduleRectangleRoadShapeObstacle();
         if (rectangleRoadLoopFrame === null) rectangleRoadLoopFrame = window.requestAnimationFrame(tickRectangleRoadLoop);
     };
     const stopRectangleRoadLoop = ({ preservePosition = false } = {}) => {
@@ -538,8 +805,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!preservePosition) {
             rectangleRoadLoopOffset = 0;
             rectangleHighwayOffset = 0;
+            rectangleObstacleContacts.clear();
+            clearRectangleRoadShapeObstacles();
         }
         rectangleRoadLoopPaused = false;
+        rectangleBraking = null;
         if (rectangleRoadStrip) {
             if (preservePosition) {
                 rectangleRoadStrip.style.transform = `translate3d(${-rectangleRoadLoopOffset}px, 0, 0)`;
@@ -548,6 +818,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
         syncRectangleHighwayPosition();
+        stopRectangleEngineSound();
         rectangleRoadStrip?.classList.remove('is-auto-looping', 'is-loop-paused');
         if (rectangleRoadToggle) {
             rectangleRoadToggle.classList.remove('is-wrong-stop');
@@ -557,51 +828,56 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
     rectangleRoadToggle?.addEventListener('click', () => {
-        if (rectangleRoadToggle.disabled || !rectangleDeliveryJeepSequence?.classList.contains('is-arrived')) return;
+        if (rectangleRoadToggle.disabled || rectangleBraking || !rectangleDeliveryJeepSequence?.classList.contains('is-arrived')) return;
         if (rectangleDeliveryPage?.classList.contains('is-boss-battle')) return;
         const job = rectangleDeliveryJobs[rectangleDeliveryJobIndex];
         if (!job) return;
-        if (!isRectangleDeliveryStopNear(job)) {
-            rectangleRoadLoopPaused = true;
-            rectangleDeliveryPage?.classList.add('is-road-stopped');
-            rectangleRoadStrip?.classList.add('is-loop-paused');
-            rectangleRoadToggle.disabled = true;
-            rectangleRoadToggle.classList.add('is-wrong-stop');
-            rectangleRoadToggle.textContent = 'Wrong Stop';
-            rectangleRoadToggle.setAttribute('aria-label', `Keep moving until the ${job.destination} is beside the jeep`);
-            rectangleGasPenaltyRemaining += 12;
-            rectangleGasMeter?.classList.remove('is-penalized');
-            rectangleGasMeter?.getBoundingClientRect();
-            rectangleGasMeter?.classList.add('is-penalized');
-            if (rectangleWrongStopTimer !== null) window.clearTimeout(rectangleWrongStopTimer);
-            rectangleWrongStopTimer = window.setTimeout(() => {
-                rectangleWrongStopTimer = null;
-                if (rectangleDeliveryPage && !rectangleDeliveryPage.hidden) {
-                    rectangleRoadLoopPaused = false;
-                    rectangleDeliveryPage.classList.remove('is-road-stopped');
-                    rectangleRoadStrip?.classList.remove('is-loop-paused');
-                    rectangleRoadToggle.disabled = false;
-                    rectangleRoadToggle.classList.remove('is-wrong-stop');
-                    rectangleRoadToggle.textContent = 'Stop';
-                    rectangleRoadToggle.setAttribute('aria-label', 'Stop at this delivery');
-                    spawnRectangleRoadGasPickup();
-                }
-            }, 1200);
-            return;
-        }
-        rectangleRoadLoopPaused = true;
-        rectangleDeliveryPage?.classList.add('is-road-stopped');
-        rectangleRoadStrip?.classList.add('is-loop-paused');
+        const isCorrectStop = isRectangleDeliveryStopNear(job);
         rectangleRoadToggle.disabled = true;
         rectangleRoadToggle.classList.remove('is-wrong-stop');
-        rectangleRoadToggle.textContent = 'Going';
-        rectangleRoadToggle.setAttribute('aria-label', `Heading to ${job.destination}`);
-        rectangleRoadToggle.setAttribute('aria-pressed', 'true');
-        rectangleResumeFromDelivery = true;
-        rectangleDeliveryRouteTimer = window.setTimeout(() => {
-            rectangleDeliveryRouteTimer = null;
-            navigateApp(job.route);
-        }, 1200);
+        rectangleRoadToggle.textContent = 'Stopping';
+        rectangleRoadToggle.setAttribute('aria-label', 'Jeep slowing to a stop');
+        playRectangleStop();
+        rectangleBraking = {
+            startTime: rectangleRoadLoopTime || performance.now(),
+            speedFactor: 1,
+            onStopped: () => {
+                if (rectangleGasDepleted || rectangleDeliveryPage?.hidden) return;
+                if (!isCorrectStop) {
+                    rectangleRoadToggle.classList.add('is-wrong-stop');
+                    rectangleRoadToggle.textContent = 'Wrong Stop';
+                    rectangleRoadToggle.setAttribute('aria-label', `Keep moving until the ${job.destination} is beside the jeep`);
+                    rectangleGasPenaltyRemaining += 12;
+                    rectangleGasMeter?.classList.remove('is-penalized');
+                    rectangleGasMeter?.getBoundingClientRect();
+                    rectangleGasMeter?.classList.add('is-penalized');
+                    if (rectangleWrongStopTimer !== null) window.clearTimeout(rectangleWrongStopTimer);
+                    rectangleWrongStopTimer = window.setTimeout(() => {
+                        rectangleWrongStopTimer = null;
+                        if (rectangleDeliveryPage && !rectangleDeliveryPage.hidden) {
+                            rectangleRoadLoopPaused = false;
+                            rectangleDeliveryPage.classList.remove('is-road-stopped');
+                            rectangleRoadStrip?.classList.remove('is-loop-paused');
+                            rectangleRoadToggle.disabled = false;
+                            rectangleRoadToggle.classList.remove('is-wrong-stop');
+                            rectangleRoadToggle.textContent = 'Stop';
+                            rectangleRoadToggle.setAttribute('aria-label', 'Stop at this delivery');
+                            startRectangleEngineSound();
+                            spawnRectangleRoadGasPickup();
+                        }
+                    }, 1200);
+                    return;
+                }
+                rectangleRoadToggle.textContent = 'Going';
+                rectangleRoadToggle.setAttribute('aria-label', `Heading to ${job.destination}`);
+                rectangleRoadToggle.setAttribute('aria-pressed', 'true');
+                rectangleResumeFromDelivery = true;
+                rectangleDeliveryRouteTimer = window.setTimeout(() => {
+                    rectangleDeliveryRouteTimer = null;
+                    navigateApp(job.route);
+                }, 800);
+            },
+        };
     });
     window.addEventListener('resize', () => {
         if (rectangleRoadStrip?.classList.contains('is-auto-looping')) updateRectangleRoadLoopWidth();
@@ -621,6 +897,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         { item: 'toy-box', itemName: 'Toy Box', destination: 'Toy Shop', route: 'rectangleToyShop', wayIndex: 4, center: 0.39 },
     ];
     let rectangleDeliveryJobIndex = 0;
+    const rectangleDeliveredItems = new Set();
     const rectangleDeliveryBackground = rectangleDeliveryPage?.querySelector('.shape-area-bg') || null;
     const rectangleBuildingHotspots = Array.from(rectangleDeliveryPage?.querySelectorAll('[data-rectangle-building]') || []);
     const rectangleDestinationPages = Array.from(document.querySelectorAll('.rectangle-destination-page'));
@@ -628,20 +905,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     let rectangleDeliveryArrivalTimer = null;
     let rectangleDeliveryRevealTimer = null;
     let rectangleDeliveryRouteTimer = null;
-    const isRectangleDeliveryStopNear = (job) => {
+    let rectangleFinalCompletePending = false;
+    let rectangleFinalCelebrationStarted = false;
+    let rectangleFinalCompletedAudio = null;
+    let rectangleFinalCheeringAudio = null;
+    const getRectangleDeliveryStopDistance = (job) => {
         updateRectangleRoadLoopWidth();
         const targetImage = rectangleRoadImages[job.wayIndex];
-        if (!targetImage || !rectangleRoadScroll || !rectangleRoadLoopWidth) return false;
+        if (!targetImage || !rectangleRoadScroll || !rectangleRoadLoopWidth) return Number.POSITIVE_INFINITY;
         const targetWidth = targetImage.getBoundingClientRect().width;
         const targetX = rectangleRoadImages
             .slice(0, job.wayIndex)
             .reduce((x, image) => x + image.getBoundingClientRect().width, 0)
             + (targetWidth * job.center);
         const jeepCenterX = rectangleRoadScroll.clientWidth / 2;
-        const nearestDistance = [-1, 0, 1].reduce((distance, copyIndex) => {
+        return [-1, 0, 1].reduce((distance, copyIndex) => {
             const copyX = targetX + (copyIndex * rectangleRoadLoopWidth) - rectangleRoadLoopOffset;
             return Math.min(distance, Math.abs(copyX - jeepCenterX));
         }, Number.POSITIVE_INFINITY);
+    };
+
+    const isRectangleDeliveryStopNear = (job) => {
+        const targetImage = rectangleRoadImages[job.wayIndex];
+        const targetWidth = targetImage?.getBoundingClientRect().width || 0;
+        const nearestDistance = getRectangleDeliveryStopDistance(job);
         return nearestDistance <= Math.max(70, targetWidth * 0.14);
     };
     let rectangleDeliveryInstructionAudio = null;
@@ -3888,8 +4175,78 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    const resetRectangleDeliveryJeep = ({ preserveRoadPosition = false } = {}) => {
+    const stopRectangleFinalCelebrationAudio = () => {
+        [rectangleFinalCompletedAudio, rectangleFinalCheeringAudio].forEach((audio) => {
+            if (!audio) return;
+            audio.onended = null;
+            audio.pause();
+            audio.currentTime = 0;
+        });
+        rectangleFinalCompletedAudio = null;
+        rectangleFinalCheeringAudio = null;
+    };
+
+    const prepareRectangleFinalConfetti = () => {
+        if (!rectangleDeliveryCompleteConfetti || rectangleDeliveryCompleteConfetti.childElementCount) return;
+        const colors = ['#ff4c6a', '#ffe35d', '#33c76f', '#34a9ff', '#ff9b2f', '#a85dff'];
+        for (let index = 0; index < 38; index += 1) {
+            const piece = document.createElement('span');
+            piece.style.setProperty('--confetti-x', `${3 + Math.random() * 94}%`);
+            piece.style.setProperty('--confetti-color', colors[index % colors.length]);
+            piece.style.setProperty('--confetti-delay', `${(Math.random() * -4).toFixed(2)}s`);
+            piece.style.setProperty('--confetti-duration', `${(3.8 + Math.random() * 2.6).toFixed(2)}s`);
+            piece.style.setProperty('--confetti-drift', `${Math.round((Math.random() * 18) - 9)}vw`);
+            piece.style.setProperty('--confetti-rotate', `${Math.round(Math.random() * 360)}deg`);
+            rectangleDeliveryCompleteConfetti.append(piece);
+        }
+    };
+
+    const startRectangleFinalCelebrationAudio = () => {
+        if (rectangleFinalCelebrationStarted || !rectangleDeliveryPage?.classList.contains('is-final-complete-scene') || !window.Audio) return;
+        rectangleFinalCelebrationStarted = true;
+        stopRectangleFinalCelebrationAudio();
+        const completedAudio = new window.Audio('assets/Audios/Sound effects/completed.mp3');
+        const cheeringAudio = new window.Audio('assets/Audios/Sound effects/kids cheering.mp3');
+        rectangleFinalCompletedAudio = completedAudio;
+        rectangleFinalCheeringAudio = cheeringAudio;
+        completedAudio.preload = 'auto';
+        cheeringAudio.preload = 'auto';
+        completedAudio.playsInline = true;
+        cheeringAudio.playsInline = true;
+        completedAudio.onended = () => {
+            if (rectangleFinalCompletedAudio !== completedAudio || !rectangleDeliveryPage?.classList.contains('is-final-complete-scene')) return;
+            cheeringAudio.currentTime = 0;
+            cheeringAudio.play().catch(() => {});
+        };
+        cheeringAudio.onended = () => {
+            if (rectangleFinalCheeringAudio === cheeringAudio) rectangleFinalCheeringAudio = null;
+        };
+        completedAudio.currentTime = 0;
+        completedAudio.play().catch(() => {
+            if (rectangleFinalCompletedAudio !== completedAudio) return;
+            cheeringAudio.currentTime = 0;
+            cheeringAudio.play().catch(() => {});
+        });
+    };
+
+    const resetRectangleFinalCompleteScene = () => {
+        rectangleFinalCompletePending = false;
+        rectangleFinalCelebrationStarted = false;
+        stopRectangleFinalCelebrationAudio();
+        rectangleDeliveryPage?.classList.remove('is-final-complete-scene');
+        if (rectangleDeliveryCompleteBg) rectangleDeliveryCompleteBg.hidden = true;
+        if (rectangleDeliveryCompleteConfetti) rectangleDeliveryCompleteConfetti.hidden = true;
+    };
+
+    const resetRectangleDeliveryJeep = ({ preserveRoadPosition = false, keepFinalScene = false } = {}) => {
+        if (!keepFinalScene) resetRectangleFinalCompleteScene();
         stopRectangleRoadLoop({ preservePosition: preserveRoadPosition });
+        rectangleDeliveryPage?.classList.remove('is-road-jeep-hit');
+        rectangleDeliveryJeepSequence?.classList.remove('is-boss-jumping');
+        if (rectangleBossJumpButton) {
+            rectangleBossJumpButton.hidden = false;
+            rectangleBossJumpButton.disabled = true;
+        }
         rectangleGasDepleted = false;
         rectangleGasPenaltyRemaining = 0;
         clearRectangleRoadGasPickup();
@@ -4037,12 +4394,60 @@ document.addEventListener('DOMContentLoaded', async () => {
             rectangleRoadToggle.disabled = isComplete;
             if (isComplete) rectangleRoadToggle.textContent = 'Done';
         }
+        if (rectangleBossJumpButton) rectangleBossJumpButton.disabled = isComplete;
         const isBossIntroPending = getRectangleBossMilestone() !== null;
         if (!isComplete && !isBossIntroPending) showRectangleDeliveryInstruction();
     };
 
+    const showRectangleFinalCompleteTask = () => {
+        if (!rectangleDeliveryTaskPanel || !rectangleDeliveryPage || rectangleDeliveryPage.hidden) return;
+        rectangleDeliveryTaskItems.forEach((item) => {
+            item.hidden = true;
+        });
+        if (rectangleDeliveryTaskItemName) rectangleDeliveryTaskItemName.textContent = 'CONGRATULATIONS!';
+        if (rectangleDeliveryTaskDestinationName) rectangleDeliveryTaskDestinationName.textContent = 'ALL ITEMS DELIVERED!';
+        rectangleDeliveryTaskPanel.hidden = false;
+        rectangleDeliveryTaskPanel.getBoundingClientRect();
+        rectangleDeliveryTaskPanel.classList.add('is-visible');
+    };
+
+    const startRectangleFinalCompleteScene = () => {
+        if (!rectangleDeliveryPage || !rectangleDeliveryJeepSequence || rectangleDeliveryPage.hidden) return;
+        resetRectangleDeliveryJeep({ keepFinalScene: true });
+        clearRectangleRoadGasPickup();
+        rectangleDeliveryPage.classList.remove('is-road-entering', 'is-road-visible', 'is-road-stopped', 'is-instruction-active', 'is-boss-battle', 'is-boss-jeep-hit');
+        rectangleDeliveryPage.classList.add('is-final-complete-scene');
+        if (rectangleDeliveryCompleteBg) rectangleDeliveryCompleteBg.hidden = false;
+        if (rectangleDeliveryCompleteConfetti) {
+            prepareRectangleFinalConfetti();
+            rectangleDeliveryCompleteConfetti.hidden = false;
+        }
+        if (rectangleRoadToggle) {
+            rectangleRoadToggle.disabled = true;
+            rectangleRoadToggle.classList.remove('is-wrong-stop', 'is-boss-attack');
+            rectangleRoadToggle.textContent = 'Done';
+            rectangleRoadToggle.setAttribute('aria-label', 'All deliveries completed');
+        }
+        if (rectangleBossJumpButton) rectangleBossJumpButton.disabled = true;
+        if (rectangleDeliveryInstructionPanel) {
+            rectangleDeliveryInstructionPanel.hidden = true;
+            rectangleDeliveryInstructionPanel.classList.remove('is-visible');
+        }
+        if (rectangleDeliveryDrivingJeep) rectangleDeliveryDrivingJeep.hidden = false;
+        if (rectangleDeliveryArrivedJeep) rectangleDeliveryArrivedJeep.hidden = true;
+        rectangleDeliveryJeepSequence.hidden = false;
+        rectangleDeliveryJeepSequence.classList.remove('is-arrived', 'is-boss-jumping');
+        rectangleDeliveryJeepSequence.classList.add('is-driving');
+        showRectangleFinalCompleteTask();
+    };
+
     const startRectangleDeliveryJeep = () => {
         if (!rectangleDeliveryPage || !rectangleDeliveryJeepSequence || rectangleDeliveryPage.hidden) return;
+        if (rectangleFinalCompletePending || rectangleDeliveredItems.size >= rectangleDeliveryJobs.length) {
+            rectangleFinalCompletePending = false;
+            startRectangleFinalCompleteScene();
+            return;
+        }
         const shouldResume = rectangleResumeFromDelivery;
         alignRectangleBuildingHotspots();
         resetRectangleDeliveryJeep({ preserveRoadPosition: shouldResume });
@@ -4103,6 +4508,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (rectangleDeliveryArrivedJeep) rectangleDeliveryArrivedJeep.hidden = false;
         rectangleDeliveryJeepSequence.classList.remove('is-driving');
         rectangleDeliveryJeepSequence.classList.add('is-arrived');
+        if (rectangleDeliveryPage.classList.contains('is-final-complete-scene')) {
+            showRectangleFinalCompleteTask();
+            startRectangleFinalCelebrationAudio();
+            return;
+        }
         if (rectangleRoadToggle) rectangleRoadToggle.disabled = false;
         if (rectangleDeliveryArrivalTimer !== null) {
             window.clearTimeout(rectangleDeliveryArrivalTimer);
@@ -4333,7 +4743,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const rectangleInteriorPages = Array.from(document.querySelectorAll('.rectangle-interior-page'));
-    const rectangleDeliveredItems = new Set();
     const rectangleBossEncounter = rectangleDeliveryPage?.querySelector('.rectangle-boss-encounter');
     const rectangleBossWarning = rectangleDeliveryPage?.querySelector('.rectangle-boss-warning');
     const rectangleBossWarningContinue = rectangleBossWarning?.querySelector('.rectangle-boss-warning-continue');
@@ -4351,7 +4760,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     let rectangleBossWarningAcknowledged = false;
     let rectangleBossAttackTimer = null;
     let rectangleBossGasTimer = null;
-    let rectangleBossObstacleTimer = null;
     let rectangleBossBlinkTimer = null;
     let rectangleBossFlashTimer = null;
     let rectangleBossFinishTimer = null;
@@ -4385,13 +4793,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const canSpawnRectangleBossGas = () => rectangleBossCurrentMilestone !== 2;
 
     const clearRectangleBossTimers = () => {
-        [rectangleBossAttackTimer, rectangleBossGasTimer, rectangleBossObstacleTimer, rectangleBossBlinkTimer, rectangleBossFlashTimer, rectangleBossFinishTimer]
+        [rectangleBossAttackTimer, rectangleBossGasTimer, rectangleBossBlinkTimer, rectangleBossFlashTimer, rectangleBossFinishTimer]
             .forEach((timer) => {
                 if (timer !== null) window.clearTimeout(timer);
             });
         rectangleBossAttackTimer = null;
         rectangleBossGasTimer = null;
-        rectangleBossObstacleTimer = null;
         rectangleBossBlinkTimer = null;
         rectangleBossFlashTimer = null;
         rectangleBossFinishTimer = null;
@@ -4405,8 +4812,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             rectangleRoadToggle.setAttribute('aria-label', 'Stop at this delivery');
         }
         if (rectangleBossJumpButton) {
-            rectangleBossJumpButton.hidden = true;
-            rectangleBossJumpButton.disabled = false;
+            rectangleBossJumpButton.hidden = false;
+            rectangleBossJumpButton.disabled = rectangleGasDepleted || rectangleDeliveredItems.size >= rectangleDeliveryJobs.length;
         }
     };
 
@@ -4429,6 +4836,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const stopRectangleBossEncounter = ({ resetHealth = true } = {}) => {
         rectangleBossActive = false;
+        rectangleRoadHitUntil = performance.now() + 1200;
         clearRectangleBossTimers();
         rectangleBossEffects?.replaceChildren();
         rectangleBossEncounter?.classList.remove('is-active', 'is-mouth-open', 'is-blinking', 'is-monster-hit', 'is-defeated');
@@ -4524,27 +4932,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, delay);
     };
 
-    const spawnRectangleBossRoadObstacle = () => {
-        if (!rectangleBossActive || !rectangleBossEffects) return;
-        const obstacle = document.createElement('span');
-        obstacle.className = 'rectangle-boss-road-obstacle';
-        obstacle.dataset.shape = rectangleBossHazardShapes[Math.floor(Math.random() * rectangleBossHazardShapes.length)];
-        obstacle.style.setProperty('--obstacle-drift-y', `${Math.round((Math.random() * 0.8) - 0.4)}rem`);
-        rectangleBossEffects.append(obstacle);
-        obstacle.addEventListener('animationend', () => obstacle.remove(), { once: true });
-        watchRectangleBossEntityCollision(obstacle, () => damageRectangleBossJeep(obstacle));
-    };
-
-    const scheduleRectangleBossRoadObstacle = (delay = 1600) => {
-        if (rectangleBossObstacleTimer !== null) window.clearTimeout(rectangleBossObstacleTimer);
-        rectangleBossObstacleTimer = window.setTimeout(() => {
-            rectangleBossObstacleTimer = null;
-            if (!rectangleBossActive) return;
-            spawnRectangleBossRoadObstacle();
-            scheduleRectangleBossRoadObstacle(3000 + Math.random() * 1800);
-        }, delay);
-    };
-
     const collectRectangleBossRectangle = (pickup) => {
         if (
             !rectangleBossActive
@@ -4583,11 +4970,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const finishRectangleBossBattle = () => {
         if (!rectangleBossActive) return;
         rectangleBossActive = false;
+        rectangleRoadHitUntil = performance.now() + 1200;
         if (rectangleBossCurrentMilestone !== null) {
             rectangleBossCompletedMilestones.add(rectangleBossCurrentMilestone);
         }
         clearRectangleBossTimers();
-        rectangleBossEffects?.querySelectorAll('.rectangle-boss-spike, .rectangle-boss-road-obstacle, .rectangle-boss-rectangle-pickup')
+        rectangleBossEffects?.querySelectorAll('.rectangle-boss-spike, .rectangle-boss-rectangle-pickup')
             .forEach((entity) => entity.remove());
         rectangleBossEncounter?.classList.remove('is-mouth-open', 'is-blinking');
         rectangleBossEncounter?.classList.add('is-defeated');
@@ -4643,12 +5031,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const jumpRectangleBossJeep = () => {
-        if (!rectangleBossActive || !rectangleDeliveryJeepSequence || rectangleDeliveryJeepSequence.classList.contains('is-boss-jumping')) return;
+        if (
+            !rectangleDeliveryPage || rectangleDeliveryPage.hidden || rectangleGasDepleted || rectangleRoadLoopPaused
+            || !rectangleBossWarning?.hidden
+            || !rectangleDeliveryJeepSequence?.classList.contains('is-arrived')
+            || rectangleDeliveryJeepSequence.classList.contains('is-boss-jumping')
+        ) return;
         rectangleDeliveryJeepSequence.classList.add('is-boss-jumping');
         if (rectangleBossJumpButton) rectangleBossJumpButton.disabled = true;
         window.setTimeout(() => {
             rectangleDeliveryJeepSequence.classList.remove('is-boss-jumping');
-            if (rectangleBossJumpButton) rectangleBossJumpButton.disabled = false;
+            if (rectangleBossJumpButton && !rectangleDeliveryPage.hidden && !rectangleGasDepleted && rectangleBossWarning?.hidden) {
+                rectangleBossJumpButton.disabled = false;
+            }
         }, 780);
     };
 
@@ -4676,6 +5071,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleDeliveryInstructionPanel?.classList.remove('is-visible');
         if (rectangleDeliveryInstructionPanel) rectangleDeliveryInstructionPanel.hidden = true;
         if (rectangleRoadToggle) rectangleRoadToggle.disabled = true;
+        if (rectangleBossJumpButton) rectangleBossJumpButton.disabled = true;
         showRectangleBossGuidePage(0);
         rectangleBossWarning.hidden = false;
         rectangleBossWarning.getBoundingClientRect();
@@ -4690,6 +5086,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             || !milestone
             || !rectangleDeliveryPage
             || rectangleDeliveryPage.hidden
+            || rectangleDeliveryPage.classList.contains('is-final-complete-scene')
+            || rectangleDeliveredItems.size >= rectangleDeliveryJobs.length
             || !rectangleBossEncounter
         ) return;
 
@@ -4699,6 +5097,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         rectangleBossActive = true;
+        rectangleObstacleContacts.clear();
         rectangleBossCurrentMilestone = milestone;
         rectangleBossHealthPoints = 100;
         updateRectangleBossHealth();
@@ -4736,7 +5135,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             rectangleBossJumpButton.disabled = false;
         }
         scheduleRectangleBossSpike();
-        scheduleRectangleBossRoadObstacle();
         if (canSpawnRectangleBossGas()) scheduleRectangleBossGas();
         scheduleRectangleBossBlink();
     };
@@ -4879,7 +5277,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const nextJobIndex = rectangleDeliveryJobs.findIndex((job) => !rectangleDeliveredItems.has(job.item));
         if (nextJobIndex !== -1) rectangleDeliveryJobIndex = nextJobIndex;
 
-        rectangleResumeFromDelivery = true;
+        const isFinalDelivery = rectangleDeliveredItems.size >= rectangleDeliveryJobs.length;
+        rectangleResumeFromDelivery = !isFinalDelivery;
+        rectangleFinalCompletePending = isFinalDelivery;
         if (rectangleInteriorReturnTimer !== null) window.clearTimeout(rectangleInteriorReturnTimer);
         rectangleInteriorReturnTimer = window.setTimeout(() => {
             rectangleInteriorReturnTimer = null;

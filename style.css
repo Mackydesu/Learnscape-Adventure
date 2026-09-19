@@ -4544,8 +4544,27 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 
 .rectangle-delivery-task-panel[hidden],
 .rectangle-delivery-item[hidden],
-.rectangle-delivery-instruction-panel[hidden] {
+.rectangle-delivery-instruction-panel[hidden],
+.rectangle-delivery-complete-bg[hidden],
+.rectangle-delivery-complete-confetti[hidden] {
     display: none !important;
+}
+
+.rectangle-delivery-complete-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0;
+    transition: opacity 520ms ease;
+    pointer-events: none;
+}
+
+.rectangle-delivery-page.is-final-complete-scene .rectangle-delivery-complete-bg {
+    opacity: 1;
 }
 
 .rectangle-delivery-instruction-panel {
@@ -4606,6 +4625,54 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 .rectangle-delivery-task-panel.is-visible {
     opacity: 1;
     transform: translate(-50%, 0) scale(1);
+}
+
+.rectangle-delivery-page.is-final-complete-scene .rectangle-delivery-task-panel {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    top: clamp(1.2rem, 4vh, 2.4rem);
+    width: min(42rem, calc(100% - 4rem));
+    min-height: 8.4rem;
+    padding: 0.95rem 1.8rem 1.15rem;
+    border-color: #9a531f;
+    border-radius: 1.1rem;
+    background: linear-gradient(180deg, #fff9ce 0%, #ffcf52 56%, #ef9a2a 100%);
+    box-shadow: inset 0 0 0 0.14rem rgba(255, 255, 255, 0.85), 0 0.45rem 0 #673414, 0 0 1.25rem rgba(255, 221, 75, 0.78), 0 0.95rem 1.5rem rgba(66, 38, 18, 0.35);
+    color: #6a3515;
+    text-align: center;
+    animation: rectangleDeliveryFinalPanelGlow 1.8s ease-in-out infinite alternate;
+}
+
+.rectangle-delivery-page.is-final-complete-scene .rectangle-delivery-item-stage,
+.rectangle-delivery-page.is-final-complete-scene .rectangle-delivery-task-arrow {
+    display: none;
+}
+
+.rectangle-delivery-page.is-final-complete-scene .rectangle-delivery-task-copy span {
+    display: none;
+}
+
+.rectangle-delivery-page.is-final-complete-scene .rectangle-delivery-task-copy strong {
+    margin: 0;
+    color: #fffdf0;
+    font: 900 clamp(2.25rem, 5.2vw, 4.9rem)/0.94 'Fredoka', 'Nunito', sans-serif;
+    text-shadow: 0 0.12rem 0 #9b4919, 0 0.28rem 0 #603218, 0 0 0.55rem rgba(255, 245, 142, 0.95);
+}
+
+.rectangle-delivery-page.is-final-complete-scene .rectangle-delivery-task-destination span {
+    display: none;
+}
+
+.rectangle-delivery-page.is-final-complete-scene .rectangle-delivery-task-destination strong {
+    margin-top: 0.35rem;
+    color: #14528f;
+    font: 900 clamp(1.85rem, 3.7vw, 3.6rem)/0.95 'Baloo 2', 'Nunito', sans-serif;
+    text-shadow: 0 0.09rem 0 #ffffff, 0 0.2rem 0.25rem rgba(102, 60, 22, 0.22);
+}
+
+@keyframes rectangleDeliveryFinalPanelGlow {
+    from { filter: brightness(1); transform: translate(-50%, 0) scale(1); }
+    to { filter: brightness(1.08); transform: translate(-50%, -0.15rem) scale(1.025); }
 }
 
 .rectangle-delivery-item-stage {
@@ -4713,6 +4780,17 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     cursor: grab;
 }
 
+.rectangle-delivery-page.is-final-complete-scene .rectangle-road-scroll,
+.rectangle-delivery-page.is-final-complete-scene .rectangle-road-toggle,
+.rectangle-delivery-page.is-final-complete-scene .rectangle-boss-jump-button,
+.rectangle-delivery-page.is-final-complete-scene .rectangle-gas-meter,
+.rectangle-delivery-page.is-final-complete-scene .rectangle-delivery-progress,
+.rectangle-delivery-page.is-final-complete-scene .rectangle-delivery-instruction-panel,
+.rectangle-delivery-page.is-final-complete-scene .rectangle-boss-encounter,
+.rectangle-delivery-page.is-final-complete-scene .rectangle-boss-warning {
+    display: none !important;
+}
+
 .rectangle-delivery-page.is-road-entering .rectangle-road-scroll {
     opacity: 0;
     transition: opacity 520ms ease;
@@ -4791,6 +4869,7 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 
 .rectangle-delivery-page.is-boss-battle .rectangle-speed-control,
 .rectangle-delivery-page.is-gas-empty .rectangle-speed-control,
+.rectangle-delivery-page.is-final-complete-scene .rectangle-speed-control,
 .rectangle-delivery-page:has(.rectangle-boss-warning:not([hidden])) .rectangle-speed-control {
     display: none;
 }
@@ -4845,14 +4924,16 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 
 .rectangle-road-gas-pickup {
     --pickup-start-y: 0rem;
+    --pickup-bottom: 23%;
+    --pickup-duration: 4.8s;
     position: absolute;
     left: 92%;
-    bottom: 23%;
+    bottom: var(--pickup-bottom);
     z-index: 17;
     width: clamp(3.4rem, 5vw, 5rem);
     height: clamp(4rem, 5.8vw, 5.9rem);
     pointer-events: none;
-    animation: rectangleRoadGasPickupTravel 4.8s linear forwards;
+    animation: rectangleRoadGasPickupTravel var(--pickup-duration) linear forwards;
     filter: drop-shadow(0 0 0.5rem rgba(255, 239, 90, 0.95)) drop-shadow(0 0.38rem 0.28rem rgba(46, 31, 18, 0.36));
 }
 
@@ -5527,18 +5608,32 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     content: none;
 }
 
-.rectangle-boss-road-obstacle {
-    --obstacle-drift-y: 0rem;
+.rectangle-highway-obstacle,
+.rectangle-road-shape-obstacle {
     position: absolute;
-    left: 92%;
-    bottom: 18%;
     width: clamp(3rem, 4.4vw, 4.4rem);
     height: clamp(3rem, 4.4vw, 4.4rem);
     filter: drop-shadow(0 0.4rem 0.24rem rgba(0, 0, 0, 0.38));
-    animation: rectangleBossRoadObstacleSlide 4.2s linear forwards;
 }
 
-.rectangle-boss-road-obstacle::before {
+.rectangle-highway-obstacle {
+    left: var(--obstacle-x);
+    bottom: 68%;
+}
+
+.rectangle-road-shape-obstacle {
+    --obstacle-bottom: 24%;
+    --obstacle-duration: 4.2s;
+    --obstacle-spin-duration: 0.9s;
+    left: 106%;
+    bottom: var(--obstacle-bottom);
+    z-index: 17;
+    pointer-events: none;
+    animation: rectangleRoadShapeObstacleTravel var(--obstacle-duration) linear forwards;
+}
+
+.rectangle-highway-obstacle::before,
+.rectangle-road-shape-obstacle::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -5547,30 +5642,49 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     background: linear-gradient(145deg, #ffef61, #ff8a32);
 }
 
-.rectangle-boss-road-obstacle[data-shape="circle"]::before {
+.rectangle-road-shape-obstacle::before {
+    animation: rectangleRoadShapeObstacleSpin var(--obstacle-spin-duration) linear infinite;
+}
+
+.rectangle-highway-obstacle[data-shape="circle"]::before,
+.rectangle-road-shape-obstacle[data-shape="circle"]::before {
     border-radius: 50%;
     background: radial-gradient(circle at 32% 28%, #fff6a6 0 15%, #ff4c6a 45%, #c31841 100%);
 }
 
-.rectangle-boss-road-obstacle[data-shape="triangle"]::before {
+.rectangle-highway-obstacle[data-shape="triangle"]::before,
+.rectangle-road-shape-obstacle[data-shape="triangle"]::before {
     clip-path: polygon(50% 4%, 96% 92%, 4% 92%);
     background: linear-gradient(150deg, #ffe66b 0%, #ff9b22 52%, #e85d1d 100%);
 }
 
-.rectangle-boss-road-obstacle[data-shape="oval"]::before {
+.rectangle-highway-obstacle[data-shape="oval"]::before,
+.rectangle-road-shape-obstacle[data-shape="oval"]::before {
     border-radius: 50%;
     transform: scaleX(0.72);
     background: linear-gradient(160deg, #fa9cff 0%, #a140ff 55%, #6620b4 100%);
 }
 
-.rectangle-boss-road-obstacle[data-shape="diamond"]::before {
+.rectangle-highway-obstacle[data-shape="diamond"]::before,
+.rectangle-road-shape-obstacle[data-shape="diamond"]::before {
     transform: rotate(45deg) scale(0.78);
     background: linear-gradient(135deg, #8dfff0 0%, #2ea8ff 50%, #2551d9 100%);
 }
 
-.rectangle-boss-road-obstacle[data-shape="star"]::before {
+.rectangle-highway-obstacle[data-shape="star"]::before,
+.rectangle-road-shape-obstacle[data-shape="star"]::before {
     clip-path: polygon(50% 2%, 61% 35%, 96% 35%, 68% 55%, 80% 91%, 50% 69%, 20% 91%, 32% 55%, 4% 35%, 39% 35%);
     background: linear-gradient(145deg, #fff58a 0%, #ffc321 54%, #f18417 100%);
+}
+
+@keyframes rectangleRoadShapeObstacleTravel {
+    from { transform: translateX(0); opacity: 0; }
+    10%, 88% { opacity: 1; }
+    to { transform: translateX(-116vw); opacity: 0; }
+}
+
+@keyframes rectangleRoadShapeObstacleSpin {
+    to { rotate: 360deg; }
 }
 
 .rectangle-boss-laser {
@@ -5645,7 +5759,7 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     animation: rectangleBossJeepJump 0.76s cubic-bezier(0.22, 0.74, 0.22, 1) both !important;
 }
 
-.rectangle-delivery-page.is-boss-jeep-hit .rectangle-delivery-jeep-sequence {
+.rectangle-delivery-page:is(.is-boss-jeep-hit, .is-road-jeep-hit) .rectangle-delivery-jeep-sequence {
     animation: rectangleBossJeepHit 0.42s ease-in-out both !important;
     filter: saturate(0.45) brightness(1.4);
 }
@@ -5766,8 +5880,34 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     background: linear-gradient(180deg, #ff8c7b 0%, #ef3f3f 55%, #b9192e 100%);
 }
 
+.rectangle-gas-meter.is-danger {
+    border-color: #e22b25;
+    background: linear-gradient(180deg, #ffe4d7 0%, #ff836d 54%, #db342f 100%);
+    box-shadow:
+        inset 0 0 0 0.12rem rgba(255, 255, 255, 0.82),
+        0 0.26rem 0 #7c1616,
+        0 0 0.65rem rgba(255, 46, 38, 0.92),
+        0 0 1.3rem rgba(255, 24, 24, 0.78);
+    color: #ffffff;
+    text-shadow: 0 0.1rem 0 #7d1715;
+    animation: rectangleGasDangerGlow 0.72s ease-in-out infinite alternate;
+}
+
+.rectangle-gas-meter.is-danger .rectangle-gas-track {
+    border-color: #5f1713;
+    background: #2a1411;
+}
+
+.rectangle-gas-meter.is-danger .rectangle-gas-icon {
+    filter: drop-shadow(0 0 0.42rem rgba(255, 255, 255, 0.82)) drop-shadow(0 0 0.85rem rgba(255, 34, 34, 0.9));
+}
+
 .rectangle-gas-meter.is-penalized {
     animation: rectangleGasPenalty 420ms ease-in-out 3;
+}
+
+.rectangle-gas-meter.is-danger.is-penalized {
+    animation: rectangleGasPenalty 420ms ease-in-out 3, rectangleGasDangerGlow 0.72s ease-in-out infinite alternate;
 }
 
 .rectangle-delivery-progress {
@@ -5965,6 +6105,23 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     70% { transform: translateX(calc(-50% + 0.35rem)); filter: brightness(0.92); }
 }
 
+@keyframes rectangleGasDangerGlow {
+    from {
+        box-shadow:
+            inset 0 0 0 0.12rem rgba(255, 255, 255, 0.82),
+            0 0.26rem 0 #7c1616,
+            0 0 0.55rem rgba(255, 46, 38, 0.86),
+            0 0 1.05rem rgba(255, 24, 24, 0.68);
+    }
+    to {
+        box-shadow:
+            inset 0 0 0 0.12rem rgba(255, 255, 255, 0.9),
+            0 0.26rem 0 #7c1616,
+            0 0 0.9rem rgba(255, 246, 158, 0.95),
+            0 0 1.85rem rgba(255, 26, 26, 1);
+    }
+}
+
 @keyframes rectangleRoadGasPickupTravel {
     0% { transform: translateX(0) translateY(var(--pickup-start-y)); opacity: 0; }
     10%, 88% { opacity: 1; }
@@ -6068,6 +6225,7 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 }
 
 .rectangle-highway-segment {
+    position: relative;
     display: block;
     flex: 0 0 calc(30vh * 9.706);
     width: calc(30vh * 9.706);
@@ -6084,6 +6242,10 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 .rectangle-highway-segment.is-highway-02 {
     background-image: url('assets/Backgrounds/highway2.webp');
     transform: scaleX(-1);
+}
+
+.rectangle-delivery-page.is-boss-battle .rectangle-highway-obstacle {
+    display: none;
 }
 
 .rectangle-road-strip > img {
@@ -6257,11 +6419,50 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     .rectangle-delivery-jeep-sequence.is-arrived {
         left: 50%;
     }
+
+    .rectangle-delivery-page.is-final-complete-scene .rectangle-delivery-jeep-sequence {
+        bottom: 15%;
+        z-index: 9;
+        width: clamp(12rem, 18vw, 21rem);
+    }
 }
 
 @keyframes rectangleDeliveryJeepDriveDesktop {
     from { left: -23%; }
     to { left: 50%; }
+}
+
+.rectangle-delivery-complete-confetti {
+    position: absolute;
+    inset: 0;
+    z-index: 18;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.rectangle-delivery-complete-confetti span {
+    position: absolute;
+    top: -12%;
+    left: var(--confetti-x);
+    width: clamp(0.55rem, 1vw, 0.9rem);
+    height: clamp(1rem, 1.8vw, 1.45rem);
+    border-radius: 0.18rem;
+    background: var(--confetti-color);
+    box-shadow: 0 0.16rem 0.18rem rgba(66, 38, 18, 0.18);
+    animation: rectangleDeliveryConfettiFall var(--confetti-duration) linear var(--confetti-delay) infinite;
+    transform: rotate(var(--confetti-rotate));
+}
+
+@keyframes rectangleDeliveryConfettiFall {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, -10vh, 0) rotate(var(--confetti-rotate));
+    }
+    12%, 88% { opacity: 1; }
+    100% {
+        opacity: 0;
+        transform: translate3d(var(--confetti-drift), 112vh, 0) rotate(calc(var(--confetti-rotate) + 580deg));
+    }
 }
 
 .rectangle-jeep-smoke {
