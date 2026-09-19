@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260919-395';
+    const appVersion = '20260919-402';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -287,6 +287,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rectangleRoadStrip = rectangleRoadScroll?.querySelector('.rectangle-road-strip');
     const rectangleHighwayTrack = rectangleRoadScroll?.querySelector('.rectangle-highway-track');
     const rectangleRoadToggle = rectangleDeliveryPage?.querySelector('.rectangle-road-toggle');
+    const rectangleSpeedSlider = rectangleDeliveryPage?.querySelector('#rectangle-speed-slider');
+    const rectangleSpeedValue = rectangleDeliveryPage?.querySelector('.rectangle-speed-value');
     const rectangleBossJumpButton = rectangleDeliveryPage?.querySelector('.rectangle-boss-jump-button');
     const rectangleGasMeter = rectangleDeliveryPage?.querySelector('.rectangle-gas-meter');
     const rectangleGasValueText = rectangleDeliveryPage?.querySelector('.rectangle-gas-value');
@@ -305,10 +307,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     let rectangleResumeFromDelivery = false;
     const rectangleRoadBaseSpeed = 0.1;
     const rectangleRoadPostDeliverySpeed = 0.14;
+    const rectangleSpeedMultipliers = [0.6, 0.8, 1, 1.25, 1.5];
+    let rectangleSpeedLevel = 3;
+    let rectangleCurrentSpeedMultiplier = rectangleSpeedMultipliers[rectangleSpeedLevel - 1];
+    let rectangleDisplayedGasLevel = -1;
     const rectangleGasDrainPerMs = 0.00045;
     let rectangleGasLevel = 100;
     let rectangleGasPenaltyRemaining = 0;
     let rectangleWrongStopTimer = null;
+    let rectangleRoadGasPickupFrame = null;
     let rectangleGasDepleted = false;
     let rectangleGameOverRevealTimer = null;
     let rectangleGameOverLoseAudio = null;
@@ -318,6 +325,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (rectangleGasDepleted || !rectangleDeliveryPage || rectangleDeliveryPage.hidden) return;
         rectangleGasDepleted = true;
         rectangleGasPenaltyRemaining = 0;
+        clearRectangleRoadGasPickup();
         abortRectangleBossEncounter();
         rectangleRoadLoopPaused = true;
         rectangleDeliveryPage.classList.add('is-road-stopped', 'is-gas-empty');
@@ -370,7 +378,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleGasMeter?.setAttribute('aria-valuenow', String(roundedLevel));
         rectangleGasMeter?.classList.toggle('is-low', rectangleGasLevel <= 35);
         rectangleGasMeter?.classList.toggle('is-danger', rectangleGasLevel <= 15);
-        if (rectangleGasValueText) rectangleGasValueText.textContent = `${roundedLevel}%`;
+        if (rectangleGasValueText && roundedLevel !== rectangleDisplayedGasLevel) {
+            rectangleDisplayedGasLevel = roundedLevel;
+            rectangleGasValueText.textContent = `${roundedLevel}%`;
+        }
     };
     const setRectangleGasLevel = (level) => {
         rectangleGasLevel = Math.max(0, Math.min(100, level));
@@ -378,6 +389,62 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (rectangleGasLevel <= 0) triggerRectangleGameOver();
     };
     updateRectangleGasMeter();
+    function clearRectangleRoadGasPickup() {
+        if (rectangleRoadGasPickupFrame !== null) {
+            window.cancelAnimationFrame(rectangleRoadGasPickupFrame);
+            rectangleRoadGasPickupFrame = null;
+        }
+        rectangleDeliveryPage?.querySelectorAll('.rectangle-road-gas-pickup')
+            .forEach((pickup) => pickup.remove());
+    }
+
+    function collectRectangleRoadGasPickup(pickup) {
+        if (!pickup?.isConnected) return;
+        pickup.remove();
+        if (rectangleRoadGasPickupFrame !== null) {
+            window.cancelAnimationFrame(rectangleRoadGasPickupFrame);
+            rectangleRoadGasPickupFrame = null;
+        }
+        setRectangleGasLevel(rectangleGasLevel + 16);
+        playUiClickSound('chime');
+        rectangleGasMeter?.classList.remove('is-penalized');
+        rectangleGasMeter?.getBoundingClientRect();
+        rectangleGasMeter?.classList.add('is-penalized');
+    }
+
+    function watchRectangleRoadGasPickup(pickup) {
+        const checkPickup = () => {
+            if (!pickup.isConnected || !rectangleDeliveryJeepSequence || rectangleDeliveryPage?.hidden) {
+                rectangleRoadGasPickupFrame = null;
+                return;
+            }
+            if (rectanglesOverlap(pickup.getBoundingClientRect(), rectangleDeliveryJeepSequence.getBoundingClientRect(), 8)) {
+                collectRectangleRoadGasPickup(pickup);
+                return;
+            }
+            rectangleRoadGasPickupFrame = window.requestAnimationFrame(checkPickup);
+        };
+        rectangleRoadGasPickupFrame = window.requestAnimationFrame(checkPickup);
+    }
+
+    function spawnRectangleRoadGasPickup() {
+        if (!rectangleDeliveryPage || rectangleDeliveryPage.hidden || rectangleGasDepleted) return;
+        clearRectangleRoadGasPickup();
+        const pickup = document.createElement('span');
+        pickup.className = 'rectangle-road-gas-pickup';
+        pickup.style.setProperty('--pickup-start-y', `${Math.round((Math.random() * 1.8) - 0.9)}rem`);
+        const gasIcon = rectangleGasMeter?.querySelector('.rectangle-gas-icon')?.cloneNode(true);
+        if (gasIcon) pickup.append(gasIcon);
+        rectangleDeliveryPage.append(pickup);
+        pickup.addEventListener('animationend', () => {
+            if (pickup.isConnected) pickup.remove();
+            if (rectangleRoadGasPickupFrame !== null) {
+                window.cancelAnimationFrame(rectangleRoadGasPickupFrame);
+                rectangleRoadGasPickupFrame = null;
+            }
+        }, { once: true });
+        watchRectangleRoadGasPickup(pickup);
+    }
     if (rectangleRoadStrip && !rectangleRoadStrip.dataset.loopReady) {
         const originalRoadImages = Array.from(rectangleRoadStrip.querySelectorAll(':scope > img'));
         originalRoadImages.forEach((image) => {
@@ -421,12 +488,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
     const tickRectangleRoadLoop = (timestamp) => {
-        const elapsedMs = rectangleRoadLoopTime ? Math.min(timestamp - rectangleRoadLoopTime, 100) : 0;
+        const elapsedMs = rectangleRoadLoopTime ? Math.min(timestamp - rectangleRoadLoopTime, 34) : 0;
         if (rectangleRoadLoopTime && !rectangleRoadLoopPaused && rectangleRoadLoopWidth > 0) {
             const roadSpeed = rectangleDeliveredItems.size >= 1
                 ? rectangleRoadPostDeliverySpeed
                 : rectangleRoadBaseSpeed;
-            const travelDistance = elapsedMs * roadSpeed;
+            const targetSpeedMultiplier = rectangleSpeedMultipliers[rectangleSpeedLevel - 1];
+            const speedBlend = Math.min(1, elapsedMs / 140);
+            rectangleCurrentSpeedMultiplier += (targetSpeedMultiplier - rectangleCurrentSpeedMultiplier) * speedBlend;
+            const travelDistance = elapsedMs * roadSpeed * rectangleCurrentSpeedMultiplier;
             rectangleRoadLoopOffset = (rectangleRoadLoopOffset + travelDistance) % rectangleRoadLoopWidth;
             rectangleHighwayOffset += travelDistance;
             rectangleRoadStrip.style.transform = `translate3d(${-rectangleRoadLoopOffset}px, 0, 0)`;
@@ -441,6 +511,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleRoadLoopTime = timestamp;
         rectangleRoadLoopFrame = window.requestAnimationFrame(tickRectangleRoadLoop);
     };
+    rectangleSpeedSlider?.addEventListener('input', () => {
+        rectangleSpeedLevel = Math.max(1, Math.min(5, Number(rectangleSpeedSlider.value) || 3));
+        if (rectangleSpeedValue) rectangleSpeedValue.textContent = String(rectangleSpeedLevel);
+    });
     const startRectangleRoadLoop = ({ preservePosition = false } = {}) => {
         updateRectangleRoadLoopWidth();
         if (!preservePosition) {
@@ -449,6 +523,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         rectangleRoadLoopTime = 0;
         rectangleRoadLoopPaused = false;
+        rectangleCurrentSpeedMultiplier = rectangleSpeedMultipliers[rectangleSpeedLevel - 1];
         if (rectangleRoadStrip) {
             rectangleRoadStrip.style.transform = `translate3d(${-rectangleRoadLoopOffset}px, 0, 0)`;
         }
@@ -509,6 +584,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     rectangleRoadToggle.classList.remove('is-wrong-stop');
                     rectangleRoadToggle.textContent = 'Stop';
                     rectangleRoadToggle.setAttribute('aria-label', 'Stop at this delivery');
+                    spawnRectangleRoadGasPickup();
                 }
             }, 1200);
             return;
@@ -570,6 +646,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     let rectangleDeliveryInstructionAudio = null;
     let rectangleDeliveryInstructionShown = false;
+    let rectangleDeliveryInstructionHideTimer = null;
     let rectangleParkingInstructionAudio = null;
     let rectangleParkingMoveTimer = null;
     let rectangleParkingRouteTimer = null;
@@ -3815,6 +3892,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         stopRectangleRoadLoop({ preservePosition: preserveRoadPosition });
         rectangleGasDepleted = false;
         rectangleGasPenaltyRemaining = 0;
+        clearRectangleRoadGasPickup();
         rectangleGasMeter?.classList.remove('is-penalized');
         rectangleDeliveryPage?.classList.remove('is-gas-empty');
         if (rectangleGameOverRevealTimer !== null) {
@@ -3856,9 +3934,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             rectangleDeliveryInstructionPanel.classList.remove('is-visible');
             rectangleDeliveryInstructionPanel.textContent = rectangleDeliveryInstructionDefaultText;
         }
+        rectangleDeliveryPage?.classList.remove('is-instruction-active');
+        if (rectangleDeliveryInstructionHideTimer !== null) {
+            window.clearTimeout(rectangleDeliveryInstructionHideTimer);
+            rectangleDeliveryInstructionHideTimer = null;
+        }
         if (rectangleDeliveryInstructionAudio) {
             rectangleDeliveryInstructionAudio.pause();
             rectangleDeliveryInstructionAudio.currentTime = 0;
+            rectangleDeliveryInstructionAudio.onended = null;
             rectangleDeliveryInstructionAudio = null;
         }
         rectangleDeliveryInstructionShown = false;
@@ -3897,9 +3981,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     };
 
+    const hideRectangleDeliveryInstruction = () => {
+        rectangleDeliveryInstructionHideTimer = null;
+        rectangleDeliveryPage?.classList.remove('is-instruction-active');
+        if (!rectangleDeliveryInstructionPanel) return;
+        rectangleDeliveryInstructionPanel.classList.remove('is-visible');
+        window.setTimeout(() => {
+            if (rectangleDeliveryInstructionPanel.classList.contains('is-visible')) return;
+            rectangleDeliveryInstructionPanel.hidden = true;
+        }, 340);
+    };
+
+    const scheduleRectangleDeliveryInstructionHide = (delay = 700) => {
+        if (rectangleDeliveryInstructionHideTimer !== null) window.clearTimeout(rectangleDeliveryInstructionHideTimer);
+        rectangleDeliveryInstructionHideTimer = window.setTimeout(hideRectangleDeliveryInstruction, delay);
+    };
+
     const showRectangleDeliveryInstruction = () => {
         if (rectangleDeliveryInstructionShown || !rectangleDeliveryPage || rectangleDeliveryPage.hidden) return;
         rectangleDeliveryInstructionShown = true;
+        if (rectangleDeliveryInstructionHideTimer !== null) {
+            window.clearTimeout(rectangleDeliveryInstructionHideTimer);
+            rectangleDeliveryInstructionHideTimer = null;
+        }
+        rectangleDeliveryPage.classList.add('is-instruction-active');
 
         if (rectangleDeliveryInstructionPanel) {
             rectangleDeliveryInstructionPanel.hidden = false;
@@ -3909,7 +4014,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (window.Audio) {
             rectangleDeliveryInstructionAudio = new window.Audio('assets/Audios/Voice over/ihatid.mp3');
-            rectangleDeliveryInstructionAudio.play().catch(() => {});
+            rectangleDeliveryInstructionAudio.onended = () => scheduleRectangleDeliveryInstructionHide(700);
+            rectangleDeliveryInstructionAudio.play().catch(() => scheduleRectangleDeliveryInstructionHide(1600));
+        } else {
+            scheduleRectangleDeliveryInstructionHide(2300);
         }
     };
 
@@ -3929,7 +4037,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             rectangleRoadToggle.disabled = isComplete;
             if (isComplete) rectangleRoadToggle.textContent = 'Done';
         }
-        if (!isComplete) showRectangleDeliveryInstruction();
+        const isBossIntroPending = getRectangleBossMilestone() !== null;
+        if (!isComplete && !isBossIntroPending) showRectangleDeliveryInstruction();
     };
 
     const startRectangleDeliveryJeep = () => {
@@ -4009,6 +4118,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             resetRectangleDeliveryJeep({ preserveRoadPosition: rectangleResumeFromDelivery });
             if (event.detail?.route === 'shapeArea4') {
                 rectangleResumeFromDelivery = false;
+                rectangleBossCompletedMilestones?.clear();
+                rectangleBossCurrentMilestone = null;
+                rectangleBossWarningMilestone = null;
+                rectangleBossWarningAcknowledged = false;
                 setRectangleGasLevel(100);
             }
         }
@@ -4224,20 +4337,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rectangleBossEncounter = rectangleDeliveryPage?.querySelector('.rectangle-boss-encounter');
     const rectangleBossWarning = rectangleDeliveryPage?.querySelector('.rectangle-boss-warning');
     const rectangleBossWarningContinue = rectangleBossWarning?.querySelector('.rectangle-boss-warning-continue');
+    const rectangleBossWarningNext = rectangleBossWarning?.querySelector('.rectangle-boss-warning-next');
+    const rectangleBossGuidePages = Array.from(rectangleBossWarning?.querySelectorAll('.rectangle-boss-guide-page') || []);
     const rectangleBossHealth = rectangleBossEncounter?.querySelector('.rectangle-boss-health');
     const rectangleBossHealthValue = rectangleBossEncounter?.querySelector('.rectangle-boss-health-value');
     const rectangleBossEffects = rectangleBossEncounter?.querySelector('.rectangle-boss-effects');
+    const rectangleBossDeliveryMilestones = [1, 2];
+    const rectangleBossCompletedMilestones = new Set();
     let rectangleBossHealthPoints = 100;
     let rectangleBossActive = false;
-    let rectangleBossDefeated = false;
+    let rectangleBossCurrentMilestone = null;
+    let rectangleBossWarningMilestone = null;
     let rectangleBossWarningAcknowledged = false;
     let rectangleBossAttackTimer = null;
     let rectangleBossGasTimer = null;
+    let rectangleBossObstacleTimer = null;
     let rectangleBossBlinkTimer = null;
     let rectangleBossFlashTimer = null;
     let rectangleBossFinishTimer = null;
     let rectangleBossLaserReady = true;
     let rectangleBossJeepInvulnerable = false;
+    let rectangleBossGuideIndex = 0;
+    const rectangleBossHazardShapes = ['circle', 'triangle', 'oval', 'diamond', 'star'];
 
     const rectanglesOverlap = (first, second, padding = 0) => (
         first.left + padding < second.right - padding
@@ -4253,13 +4374,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (rectangleBossHealthValue) rectangleBossHealthValue.textContent = `${health} HP`;
     };
 
+    const getRectangleBossMilestone = () => {
+        const deliveredCount = rectangleDeliveredItems.size;
+        return rectangleBossDeliveryMilestones.includes(deliveredCount)
+            && !rectangleBossCompletedMilestones.has(deliveredCount)
+            ? deliveredCount
+            : null;
+    };
+
+    const canSpawnRectangleBossGas = () => rectangleBossCurrentMilestone !== 2;
+
     const clearRectangleBossTimers = () => {
-        [rectangleBossAttackTimer, rectangleBossGasTimer, rectangleBossBlinkTimer, rectangleBossFlashTimer, rectangleBossFinishTimer]
+        [rectangleBossAttackTimer, rectangleBossGasTimer, rectangleBossObstacleTimer, rectangleBossBlinkTimer, rectangleBossFlashTimer, rectangleBossFinishTimer]
             .forEach((timer) => {
                 if (timer !== null) window.clearTimeout(timer);
             });
         rectangleBossAttackTimer = null;
         rectangleBossGasTimer = null;
+        rectangleBossObstacleTimer = null;
         rectangleBossBlinkTimer = null;
         rectangleBossFlashTimer = null;
         rectangleBossFinishTimer = null;
@@ -4278,6 +4410,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    const showRectangleBossGuidePage = (index = 0) => {
+        if (!rectangleBossGuidePages.length) return;
+        const activeGuidePages = rectangleBossGuidePages.filter((page) => (
+            rectangleBossWarningMilestone !== 2 || page.dataset.bossGuidePage !== '1'
+        ));
+        rectangleBossGuideIndex = Math.max(0, Math.min(activeGuidePages.length - 1, index));
+        const activePage = activeGuidePages[rectangleBossGuideIndex];
+        rectangleBossGuidePages.forEach((page, pageIndex) => {
+            const isActive = page === activePage;
+            page.hidden = !isActive;
+            page.classList.toggle('is-active', isActive);
+        });
+        const isLastGuide = rectangleBossGuideIndex >= activeGuidePages.length - 1;
+        if (rectangleBossWarningNext) rectangleBossWarningNext.hidden = isLastGuide;
+        if (rectangleBossWarningContinue) rectangleBossWarningContinue.hidden = !isLastGuide;
+    };
+
     const stopRectangleBossEncounter = ({ resetHealth = true } = {}) => {
         rectangleBossActive = false;
         clearRectangleBossTimers();
@@ -4290,11 +4439,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleDeliveryJeepSequence?.classList.remove('is-boss-jumping');
         rectangleBossJeepInvulnerable = false;
         rectangleBossLaserReady = true;
+        rectangleBossCurrentMilestone = null;
+        rectangleBossWarningMilestone = null;
         restoreRectangleDeliveryControls();
         if (resetHealth) {
             rectangleBossHealthPoints = 100;
             updateRectangleBossHealth();
         }
+        showRectangleBossGuidePage(0);
     };
 
     abortRectangleBossEncounter = () => stopRectangleBossEncounter({ resetHealth: true });
@@ -4305,22 +4457,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             const entityRect = entity.getBoundingClientRect();
             const jeepRect = rectangleDeliveryJeepSequence.getBoundingClientRect();
             if (rectanglesOverlap(entityRect, jeepRect, 8)) {
-                onCollision();
-                return;
+                if (onCollision() !== false) return;
             }
             window.requestAnimationFrame(checkCollision);
         };
         window.requestAnimationFrame(checkCollision);
     };
 
-    const damageRectangleBossJeep = (spike) => {
+    const damageRectangleBossJeep = (hazard) => {
         if (
             !rectangleBossActive
             || rectangleBossJeepInvulnerable
             || rectangleDeliveryJeepSequence?.classList.contains('is-boss-jumping')
         ) return;
         rectangleBossJeepInvulnerable = true;
-        spike.remove();
+        hazard.remove();
         setRectangleGasLevel(rectangleGasLevel - 20);
         playUiClickSound('thunk');
         rectangleDeliveryPage?.classList.remove('is-boss-jeep-hit');
@@ -4332,13 +4483,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 900);
     };
 
-    const spawnRectangleBossSpike = () => {
+    const spawnRectangleBossShapeHazard = () => {
         if (!rectangleBossActive || !rectangleBossEffects) return;
-        const spike = document.createElement('span');
-        spike.className = 'rectangle-boss-spike';
-        rectangleBossEffects.append(spike);
-        spike.addEventListener('animationend', () => spike.remove(), { once: true });
-        watchRectangleBossEntityCollision(spike, () => damageRectangleBossJeep(spike));
+        const hazard = document.createElement('span');
+        hazard.className = 'rectangle-boss-spike';
+        hazard.dataset.shape = rectangleBossHazardShapes[Math.floor(Math.random() * rectangleBossHazardShapes.length)];
+        rectangleBossEffects.append(hazard);
+        hazard.addEventListener('animationend', () => hazard.remove(), { once: true });
+        watchRectangleBossEntityCollision(hazard, () => damageRectangleBossJeep(hazard));
     };
 
     const scheduleRectangleBossBlink = (delay = 1100 + Math.random() * 1300) => {
@@ -4365,57 +4517,84 @@ document.addEventListener('DOMContentLoaded', async () => {
             rectangleBossEncounter?.classList.add('is-mouth-open');
             window.setTimeout(() => {
                 if (!rectangleBossActive) return;
-                spawnRectangleBossSpike();
+                spawnRectangleBossShapeHazard();
             }, 300);
             window.setTimeout(() => rectangleBossEncounter?.classList.remove('is-mouth-open'), 620);
             scheduleRectangleBossSpike(2600 + Math.random() * 1200);
         }, delay);
     };
 
-    const collectRectangleBossGas = (pickup) => {
-        if (!rectangleBossActive || !pickup.isConnected) return;
+    const spawnRectangleBossRoadObstacle = () => {
+        if (!rectangleBossActive || !rectangleBossEffects) return;
+        const obstacle = document.createElement('span');
+        obstacle.className = 'rectangle-boss-road-obstacle';
+        obstacle.dataset.shape = rectangleBossHazardShapes[Math.floor(Math.random() * rectangleBossHazardShapes.length)];
+        obstacle.style.setProperty('--obstacle-drift-y', `${Math.round((Math.random() * 0.8) - 0.4)}rem`);
+        rectangleBossEffects.append(obstacle);
+        obstacle.addEventListener('animationend', () => obstacle.remove(), { once: true });
+        watchRectangleBossEntityCollision(obstacle, () => damageRectangleBossJeep(obstacle));
+    };
+
+    const scheduleRectangleBossRoadObstacle = (delay = 1600) => {
+        if (rectangleBossObstacleTimer !== null) window.clearTimeout(rectangleBossObstacleTimer);
+        rectangleBossObstacleTimer = window.setTimeout(() => {
+            rectangleBossObstacleTimer = null;
+            if (!rectangleBossActive) return;
+            spawnRectangleBossRoadObstacle();
+            scheduleRectangleBossRoadObstacle(3000 + Math.random() * 1800);
+        }, delay);
+    };
+
+    const collectRectangleBossRectangle = (pickup) => {
+        if (
+            !rectangleBossActive
+            || !pickup.isConnected
+            || !rectangleDeliveryJeepSequence?.classList.contains('is-boss-jumping')
+        ) return false;
         pickup.remove();
         setRectangleGasLevel(rectangleGasLevel + 18);
         playUiClickSound('chime');
         rectangleGasMeter?.classList.remove('is-penalized');
         rectangleGasMeter?.getBoundingClientRect();
         rectangleGasMeter?.classList.add('is-penalized');
+        return true;
     };
 
-    const spawnRectangleBossGas = () => {
-        if (!rectangleBossActive || !rectangleBossEffects || !rectangleGasMeter) return;
+    const spawnRectangleBossRectangle = () => {
+        if (!rectangleBossActive || !rectangleBossEffects || !canSpawnRectangleBossGas()) return;
         const pickup = document.createElement('span');
-        pickup.className = 'rectangle-boss-gas-pickup';
-        const gasIcon = rectangleGasMeter.querySelector('.rectangle-gas-icon')?.cloneNode(true);
-        if (gasIcon) pickup.append(gasIcon);
+        pickup.className = 'rectangle-boss-rectangle-pickup';
         rectangleBossEffects.append(pickup);
         pickup.addEventListener('animationend', () => pickup.remove(), { once: true });
-        watchRectangleBossEntityCollision(pickup, () => collectRectangleBossGas(pickup));
+        watchRectangleBossEntityCollision(pickup, () => collectRectangleBossRectangle(pickup));
     };
 
     const scheduleRectangleBossGas = (delay = 2600) => {
+        if (!canSpawnRectangleBossGas()) return;
         if (rectangleBossGasTimer !== null) window.clearTimeout(rectangleBossGasTimer);
         rectangleBossGasTimer = window.setTimeout(() => {
             rectangleBossGasTimer = null;
-            if (!rectangleBossActive) return;
-            spawnRectangleBossGas();
-            scheduleRectangleBossGas(3400 + Math.random() * 2400);
+            if (!rectangleBossActive || !canSpawnRectangleBossGas()) return;
+            spawnRectangleBossRectangle();
+            scheduleRectangleBossGas(3200 + Math.random() * 2600);
         }, delay);
     };
 
     const finishRectangleBossBattle = () => {
         if (!rectangleBossActive) return;
         rectangleBossActive = false;
-        rectangleBossDefeated = true;
+        if (rectangleBossCurrentMilestone !== null) {
+            rectangleBossCompletedMilestones.add(rectangleBossCurrentMilestone);
+        }
         clearRectangleBossTimers();
-        rectangleBossEffects?.querySelectorAll('.rectangle-boss-spike, .rectangle-boss-gas-pickup')
+        rectangleBossEffects?.querySelectorAll('.rectangle-boss-spike, .rectangle-boss-road-obstacle, .rectangle-boss-rectangle-pickup')
             .forEach((entity) => entity.remove());
         rectangleBossEncounter?.classList.remove('is-mouth-open', 'is-blinking');
         rectangleBossEncounter?.classList.add('is-defeated');
         rectangleDeliveryJeepSequence?.classList.remove('is-boss-jumping');
         if (rectangleRoadToggle) rectangleRoadToggle.disabled = true;
         if (rectangleBossJumpButton) rectangleBossJumpButton.disabled = true;
-        if (rectangleDeliveryInstructionPanel) rectangleDeliveryInstructionPanel.textContent = 'Metal Monster defeated!';
+        if (rectangleDeliveryInstructionPanel) rectangleDeliveryInstructionPanel.textContent = 'Shape Monster defeated!';
         playUiClickSound('boardSuccess');
 
         rectangleBossFinishTimer = window.setTimeout(() => {
@@ -4423,6 +4602,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             rectangleBossEncounter?.classList.remove('is-active', 'is-defeated', 'is-monster-hit');
             if (rectangleBossEncounter) rectangleBossEncounter.hidden = true;
             rectangleDeliveryPage?.classList.remove('is-boss-battle', 'is-boss-jeep-hit');
+            rectangleBossCurrentMilestone = null;
+            rectangleBossWarningMilestone = null;
+            rectangleBossWarningAcknowledged = false;
             restoreRectangleDeliveryControls();
             if (rectangleDeliveryInstructionPanel) {
                 rectangleDeliveryInstructionPanel.textContent = rectangleDeliveryInstructionDefaultText;
@@ -4471,7 +4653,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const showRectangleBossWarning = () => {
-        if (!rectangleBossWarning || rectangleBossWarningAcknowledged || rectangleBossDefeated) return;
+        const milestone = getRectangleBossMilestone();
+        if (!rectangleBossWarning || !milestone) return;
+        if (rectangleBossWarningAcknowledged && rectangleBossWarningMilestone === milestone) return;
+        rectangleBossWarningMilestone = milestone;
+        rectangleBossWarningAcknowledged = false;
+        if (rectangleDeliveryInstructionAudio) {
+            rectangleDeliveryInstructionAudio.pause();
+            rectangleDeliveryInstructionAudio.currentTime = 0;
+            rectangleDeliveryInstructionAudio.onended = null;
+            rectangleDeliveryInstructionAudio = null;
+        }
+        if (rectangleDeliveryInstructionHideTimer !== null) {
+            window.clearTimeout(rectangleDeliveryInstructionHideTimer);
+            rectangleDeliveryInstructionHideTimer = null;
+        }
+        rectangleDeliveryPage?.classList.remove('is-instruction-active');
         rectangleRoadLoopPaused = true;
         rectangleRoadStrip?.classList.add('is-loop-paused');
         rectangleDeliveryTaskPanel?.classList.remove('is-visible');
@@ -4479,28 +4676,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleDeliveryInstructionPanel?.classList.remove('is-visible');
         if (rectangleDeliveryInstructionPanel) rectangleDeliveryInstructionPanel.hidden = true;
         if (rectangleRoadToggle) rectangleRoadToggle.disabled = true;
+        showRectangleBossGuidePage(0);
         rectangleBossWarning.hidden = false;
         rectangleBossWarning.getBoundingClientRect();
         rectangleBossWarning.classList.add('is-visible');
-        rectangleBossWarningContinue?.focus({ preventScroll: true });
+        rectangleBossWarningNext?.focus({ preventScroll: true });
     };
 
     const startRectangleBossEncounter = () => {
+        const milestone = getRectangleBossMilestone();
         if (
             rectangleBossActive
-            || rectangleBossDefeated
-            || rectangleDeliveredItems.size !== 1
+            || !milestone
             || !rectangleDeliveryPage
             || rectangleDeliveryPage.hidden
             || !rectangleBossEncounter
         ) return;
 
-        if (!rectangleBossWarningAcknowledged) {
+        if (!rectangleBossWarningAcknowledged || rectangleBossWarningMilestone !== milestone) {
             showRectangleBossWarning();
             return;
         }
 
         rectangleBossActive = true;
+        rectangleBossCurrentMilestone = milestone;
         rectangleBossHealthPoints = 100;
         updateRectangleBossHealth();
         rectangleBossEffects?.replaceChildren();
@@ -4530,18 +4729,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             rectangleRoadToggle.classList.remove('is-wrong-stop');
             rectangleRoadToggle.classList.add('is-boss-attack');
             rectangleRoadToggle.textContent = 'Laser Shot';
-            rectangleRoadToggle.setAttribute('aria-label', 'Fire laser at the metal monster');
+            rectangleRoadToggle.setAttribute('aria-label', 'Fire laser at the shape monster');
         }
         if (rectangleBossJumpButton) {
             rectangleBossJumpButton.hidden = false;
             rectangleBossJumpButton.disabled = false;
         }
         scheduleRectangleBossSpike();
-        scheduleRectangleBossGas();
+        scheduleRectangleBossRoadObstacle();
+        if (canSpawnRectangleBossGas()) scheduleRectangleBossGas();
         scheduleRectangleBossBlink();
     };
 
     resumeRectangleBossEncounter = startRectangleBossEncounter;
+
+    rectangleBossWarningNext?.addEventListener('click', () => {
+        playUiClickSound('chime');
+        showRectangleBossGuidePage(rectangleBossGuideIndex + 1);
+        const activeGuideCount = rectangleBossGuidePages.filter((page) => (
+            rectangleBossWarningMilestone !== 2 || page.dataset.bossGuidePage !== '1'
+        )).length;
+        if (rectangleBossGuideIndex >= activeGuideCount - 1) {
+            rectangleBossWarningContinue?.focus({ preventScroll: true });
+        }
+    });
 
     rectangleBossWarningContinue?.addEventListener('click', () => {
         if (rectangleBossWarningAcknowledged) return;

@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260919-407">
+    <link rel="stylesheet" href="style.css?v=20260919-422">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -668,27 +668,69 @@
                 <span class="rectangle-highway-segment is-highway-02"></span>
             </div>
         </div>
+        <div class="rectangle-speed-control">
+            <label for="rectangle-speed-slider">Speed <strong class="rectangle-speed-value">3</strong></label>
+            <input id="rectangle-speed-slider" type="range" min="1" max="5" step="1" value="3" aria-label="Jeep speed">
+            <div class="rectangle-speed-ticks" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+        </div>
         <button class="rectangle-road-toggle" type="button" aria-label="Stop at this delivery" aria-pressed="false" disabled>Stop</button>
         <button class="rectangle-boss-jump-button" type="button" aria-label="Jump over the monster spike" hidden>Jump</button>
         <div class="rectangle-boss-warning" role="dialog" aria-modal="true" aria-labelledby="rectangle-boss-warning-title" hidden>
             <div class="rectangle-boss-warning-panel">
                 <span class="rectangle-boss-warning-mark" aria-hidden="true">!</span>
-                <p>Monster! Monster!</p>
-                <h2 id="rectangle-boss-warning-title">Defeat the Monster</h2>
+                <div class="rectangle-boss-guide-pages">
+                    <div class="rectangle-boss-guide-page is-active" data-boss-guide-page="0">
+                        <p>Monster! Monster!</p>
+                        <h2 id="rectangle-boss-warning-title">Defeat the Monster</h2>
+                        <div class="rectangle-boss-guide-demo is-monster-demo" aria-hidden="true">
+                            <span class="rectangle-guide-mini-monster"><span></span></span>
+                            <span class="rectangle-guide-alert-shape"></span>
+                        </div>
+                    </div>
+                    <div class="rectangle-boss-guide-page" data-boss-guide-page="1" hidden>
+                        <p>Jump for Gas</p>
+                        <h2>Collect the Rectangle</h2>
+                        <div class="rectangle-boss-guide-demo is-collect-demo" aria-hidden="true">
+                            <span class="rectangle-guide-mini-monster"><span></span></span>
+                            <span class="rectangle-guide-mini-jeep"></span>
+                            <span class="rectangle-guide-gas-rectangle"></span>
+                        </div>
+                    </div>
+                    <div class="rectangle-boss-guide-page" data-boss-guide-page="2" hidden>
+                        <p>Avoid Shapes</p>
+                        <h2>Do not hit the others</h2>
+                        <div class="rectangle-boss-guide-demo is-avoid-demo" aria-hidden="true">
+                            <span class="rectangle-guide-mini-monster"><span></span></span>
+                            <span class="rectangle-guide-mini-jeep"></span>
+                            <span class="rectangle-guide-bad-shape is-circle"></span>
+                            <span class="rectangle-guide-bad-shape is-triangle"></span>
+                        </div>
+                    </div>
+                </div>
+                <button class="rectangle-boss-warning-next" type="button" aria-label="Next guide panel">
+                    <span aria-hidden="true"></span>
+                </button>
                 <button class="rectangle-boss-warning-continue" type="button">Continue</button>
             </div>
         </div>
-        <section class="rectangle-boss-encounter" aria-label="Metal monster battle" hidden>
-            <div class="rectangle-boss-health" role="progressbar" aria-label="Metal monster health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
-                <span class="rectangle-boss-health-title">Metal Monster</span>
+        <section class="rectangle-boss-encounter" aria-label="Shape monster battle" hidden>
+            <div class="rectangle-boss-health" role="progressbar" aria-label="Shape monster health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+                <span class="rectangle-boss-health-title">Shape Monster</span>
                 <span class="rectangle-boss-health-track" aria-hidden="true"><span class="rectangle-boss-health-fill"></span></span>
                 <strong class="rectangle-boss-health-value">100 HP</strong>
             </div>
             <div class="rectangle-boss-monster">
-                <span class="rectangle-boss-mouth-glow" aria-hidden="true"></span>
-                <img class="rectangle-boss-monster-image is-idle" src="assets/Character/metal-monster-boss-idle.png" alt="A huge metal monster">
-                <img class="rectangle-boss-monster-image is-blink" src="assets/Character/metal-monster-boss-blink.png" alt="" aria-hidden="true">
-                <img class="rectangle-boss-monster-image is-attack" src="assets/Character/metal-monster-boss.png" alt="" aria-hidden="true">
+                <span class="rectangle-boss-horn is-left" aria-hidden="true"></span>
+                <span class="rectangle-boss-horn is-right" aria-hidden="true"></span>
+                <span class="rectangle-boss-body" aria-hidden="true"></span>
+                <span class="rectangle-boss-eye is-left" aria-hidden="true"><span></span></span>
+                <span class="rectangle-boss-eye is-right" aria-hidden="true"><span></span></span>
+                <span class="rectangle-boss-mouth" aria-hidden="true">
+                    <span class="rectangle-boss-mouth-hole"></span>
+                    <span class="rectangle-boss-teeth"></span>
+                </span>
+                <span class="rectangle-boss-cheek is-left" aria-hidden="true"></span>
+                <span class="rectangle-boss-cheek is-right" aria-hidden="true"></span>
             </div>
             <div class="rectangle-boss-effects" aria-hidden="true"></div>
         </section>
@@ -1290,7 +1332,7 @@
 
     
 
-    <script src="script.js?v=20260919-395"></script>
+    <script src="script.js?v=20260919-402"></script>
     </div>
 
     <script>

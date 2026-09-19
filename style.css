@@ -4737,9 +4737,69 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 
 .rectangle-road-strip.is-auto-looping {
     will-change: transform;
+    backface-visibility: hidden;
+    transform: translate3d(0, 0, 0);
 }
 
 .rectangle-road-strip.is-loop-paused { animation-play-state: paused; }
+
+.rectangle-speed-control {
+    position: absolute;
+    top: auto;
+    right: calc(50% + clamp(9.8rem, 12vw, 11.6rem));
+    bottom: 1.15rem;
+    left: auto;
+    z-index: 22;
+    width: clamp(10.5rem, 15vw, 14rem);
+    box-sizing: border-box;
+    padding: 0.55rem 0.8rem 0.45rem;
+    border: 0.18rem solid #76502c;
+    border-radius: 0.55rem;
+    background: linear-gradient(180deg, #fff8d4, #ffc65f);
+    box-shadow: inset 0 0 0 0.1rem rgba(255, 255, 255, 0.68), 0 0.25rem 0 #624021, 0 0.4rem 0.8rem rgba(41, 28, 19, 0.3);
+    color: #58341e;
+    font-family: 'Fredoka', 'Nunito', sans-serif;
+    transition: opacity 260ms ease, transform 300ms cubic-bezier(0.2, 0.9, 0.25, 1.18);
+}
+
+.rectangle-speed-control label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.05rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.rectangle-speed-value { color: #17638d; font-size: 1.3rem; }
+
+.rectangle-speed-control input {
+    display: block;
+    width: 100%;
+    height: 1.3rem;
+    margin: 0.2rem 0 0;
+    accent-color: #2082a1;
+    cursor: pointer;
+}
+
+.rectangle-speed-ticks {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
+.rectangle-delivery-page.is-boss-battle .rectangle-speed-control,
+.rectangle-delivery-page.is-gas-empty .rectangle-speed-control,
+.rectangle-delivery-page:has(.rectangle-boss-warning:not([hidden])) .rectangle-speed-control {
+    display: none;
+}
+
+.rectangle-delivery-page.is-instruction-active .rectangle-speed-control {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(0.55rem) scale(0.96);
+}
 
 .rectangle-road-toggle {
     position: absolute;
@@ -4768,12 +4828,38 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 .rectangle-road-toggle.is-wrong-stop { font-size: 2rem; }
 
 .rectangle-road-toggle.is-boss-attack {
+    top: auto;
+    bottom: clamp(1.8rem, 5vh, 3.5rem);
+    transform: none;
     border-color: #235f82;
     background: linear-gradient(180deg, #8ff8ff 0%, #26bde8 48%, #1570ba 100%);
     box-shadow: inset 0 0.18rem 0 #e5ffff, 0 0.32rem 0 #153d72, 0 0 1.2rem rgba(64, 225, 255, 0.8);
     color: #ffffff;
     text-shadow: 0 0.12rem 0 #124c7c;
     font-size: clamp(1.45rem, 2.2vw, 2.25rem);
+}
+
+.rectangle-road-toggle.is-boss-attack:active {
+    transform: translateY(0.14rem);
+}
+
+.rectangle-road-gas-pickup {
+    --pickup-start-y: 0rem;
+    position: absolute;
+    left: 92%;
+    bottom: 23%;
+    z-index: 17;
+    width: clamp(3.4rem, 5vw, 5rem);
+    height: clamp(4rem, 5.8vw, 5.9rem);
+    pointer-events: none;
+    animation: rectangleRoadGasPickupTravel 4.8s linear forwards;
+    filter: drop-shadow(0 0 0.5rem rgba(255, 239, 90, 0.95)) drop-shadow(0 0.38rem 0.28rem rgba(46, 31, 18, 0.36));
+}
+
+.rectangle-road-gas-pickup .rectangle-gas-icon {
+    width: 100%;
+    height: 100%;
+    animation: rectangleRoadGasPickupBounce 0.64s ease-in-out infinite alternate;
 }
 
 .rectangle-boss-warning {
@@ -4793,10 +4879,12 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 .rectangle-boss-warning.is-visible { opacity: 1; }
 
 .rectangle-boss-warning-panel {
+    position: relative;
     display: grid;
     justify-items: center;
-    width: min(34rem, 88vw);
-    padding: clamp(1.4rem, 4vw, 2.4rem);
+    width: min(39rem, 90vw);
+    min-height: clamp(24rem, 64vh, 32rem);
+    padding: clamp(1.25rem, 3vw, 2rem);
     border: 0.3rem solid #6c271b;
     border-radius: 0.7rem;
     background: linear-gradient(180deg, #fff7cd 0%, #ffc84d 100%);
@@ -4831,10 +4919,237 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 }
 
 .rectangle-boss-warning-panel h2 {
-    margin: 0.4rem 0 1.25rem;
-    font: 900 clamp(2rem, 4vw, 3.5rem)/1 'Fredoka', sans-serif;
+    margin: 0.35rem 0 0.8rem;
+    font: 900 clamp(1.85rem, 3.5vw, 3.15rem)/1 'Fredoka', sans-serif;
     letter-spacing: 0;
     text-transform: uppercase;
+}
+
+.rectangle-boss-guide-pages {
+    display: grid;
+    justify-items: center;
+    width: 100%;
+}
+
+.rectangle-boss-guide-page {
+    display: grid;
+    justify-items: center;
+    width: 100%;
+}
+
+.rectangle-boss-guide-page[hidden] { display: none !important; }
+
+.rectangle-boss-guide-demo {
+    position: relative;
+    width: min(28rem, 78vw);
+    height: clamp(8rem, 23vh, 11.5rem);
+    margin: 0.2rem 0 0.95rem;
+    overflow: hidden;
+    border: 0.22rem solid #8d4a22;
+    border-radius: 0.75rem;
+    background:
+        linear-gradient(180deg, rgba(125, 216, 255, 0.62) 0 44%, transparent 45%),
+        linear-gradient(180deg, #7bd55c 0 57%, #3c3f45 58% 100%);
+    box-shadow: inset 0 0 0 0.12rem rgba(255, 255, 255, 0.62), 0 0.25rem 0 rgba(101, 55, 24, 0.72);
+}
+
+.rectangle-boss-guide-demo::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 18%;
+    height: 0.34rem;
+    background: repeating-linear-gradient(90deg, #f8f3df 0 2.4rem, transparent 2.4rem 4.2rem);
+    opacity: 0.9;
+}
+
+.rectangle-guide-mini-monster {
+    position: absolute;
+    right: 13%;
+    bottom: 22%;
+    width: 6.2rem;
+    height: 6rem;
+    border: 0.3rem solid #432116;
+    border-radius: 42% 38% 45% 38%;
+    background: linear-gradient(135deg, #39d5ff 0%, #7e53ff 70%, #da54ef 100%);
+    animation: rectangleGuideMonsterBounce 1.4s ease-in-out infinite;
+}
+
+.is-collect-demo .rectangle-guide-mini-monster,
+.is-avoid-demo .rectangle-guide-mini-monster {
+    right: 7%;
+    bottom: 24%;
+    width: 5.2rem;
+    height: 5.1rem;
+}
+
+.is-collect-demo .rectangle-guide-mini-monster::before,
+.is-collect-demo .rectangle-guide-mini-monster::after,
+.is-avoid-demo .rectangle-guide-mini-monster::before,
+.is-avoid-demo .rectangle-guide-mini-monster::after {
+    width: 0.92rem;
+    height: 0.92rem;
+}
+
+.rectangle-guide-mini-monster::before,
+.rectangle-guide-mini-monster::after {
+    content: '';
+    position: absolute;
+    top: 30%;
+    width: 1.15rem;
+    height: 1.15rem;
+    border: 0.16rem solid #371c13;
+    border-radius: 50%;
+    background: #fffdf0;
+    animation: rectangleGuideBlink 2.4s ease-in-out infinite;
+}
+
+.rectangle-guide-mini-monster::before { left: 25%; }
+.rectangle-guide-mini-monster::after { right: 25%; }
+
+.rectangle-guide-mini-monster span {
+    position: absolute;
+    left: 31%;
+    top: 61%;
+    width: 40%;
+    height: 17%;
+    border: 0.14rem solid #321911;
+    border-radius: 0 0 999px 999px;
+    background: #2a0713;
+    transform-origin: center top;
+    animation: rectangleGuideMonsterMouth 2.05s ease-in-out infinite;
+}
+
+.is-collect-demo .rectangle-guide-mini-monster,
+.is-avoid-demo .rectangle-guide-mini-monster {
+    box-shadow: inset -0.55rem -0.5rem 0 rgba(44, 20, 92, 0.28), inset 0.35rem 0.35rem 0 rgba(255, 255, 255, 0.32);
+}
+
+.is-collect-demo .rectangle-guide-mini-monster::before,
+.is-avoid-demo .rectangle-guide-mini-monster::before {
+    box-shadow: none;
+}
+
+.rectangle-guide-alert-shape {
+    position: absolute;
+    right: 20%;
+    bottom: 30%;
+    width: 2.8rem;
+    height: 2.8rem;
+    background: #ff4f61;
+    border: 0.25rem solid #442014;
+    clip-path: polygon(50% 3%, 96% 92%, 4% 92%);
+    filter: drop-shadow(0 0.35rem 0.18rem rgba(0, 0, 0, 0.28));
+    animation: rectangleGuideShapeDrop 1.85s linear infinite;
+}
+
+.rectangle-guide-mini-jeep {
+    position: absolute;
+    left: 16%;
+    bottom: 22%;
+    width: 6.4rem;
+    height: 3.4rem;
+    border: 0.22rem solid #332017;
+    border-radius: 0.45rem 1.2rem 0.5rem 0.5rem;
+    background: linear-gradient(180deg, #ffe15a 0 34%, #1f9ada 35% 100%);
+    box-shadow: inset 0 0.2rem 0 rgba(255, 255, 255, 0.58);
+}
+
+.rectangle-guide-mini-jeep::before,
+.rectangle-guide-mini-jeep::after {
+    content: '';
+    position: absolute;
+    bottom: -0.78rem;
+    width: 1.4rem;
+    height: 1.4rem;
+    border: 0.2rem solid #f5f5f5;
+    border-radius: 50%;
+    background: #333;
+}
+
+.rectangle-guide-mini-jeep::before { left: 0.7rem; }
+.rectangle-guide-mini-jeep::after { right: 0.7rem; }
+
+.is-collect-demo .rectangle-guide-mini-jeep {
+    animation: rectangleGuideJeepCollectJump 2.2s cubic-bezier(0.24, 0.72, 0.25, 1) infinite;
+}
+
+.rectangle-guide-gas-rectangle {
+    position: absolute;
+    left: auto;
+    right: -6.5rem;
+    top: 22%;
+    width: 6.2rem;
+    height: 3rem;
+    border: 0.24rem solid #332016;
+    border-radius: 0.34rem;
+    background: linear-gradient(180deg, #8dff76 0%, #24bf3e 100%);
+    box-shadow: 0 0 0.8rem rgba(126, 255, 79, 0.9);
+    animation: rectangleGuideRectangleCollect 2.2s linear infinite;
+}
+
+.rectangle-guide-gas-rectangle::before {
+    content: '+GAS';
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font: 900 1rem/1 'Fredoka', sans-serif;
+    text-shadow: 0 0.1rem 0 #126221;
+}
+
+.is-avoid-demo .rectangle-guide-mini-jeep {
+    animation: rectangleGuideJeepCollisionFlash 2.05s ease-in-out infinite;
+}
+
+.rectangle-guide-bad-shape {
+    position: absolute;
+    right: 11%;
+    bottom: 26%;
+    width: 2.8rem;
+    height: 2.8rem;
+    border: 0.24rem solid #3b2015;
+    filter: drop-shadow(0 0.35rem 0.16rem rgba(0, 0, 0, 0.25));
+    animation: rectangleGuideBadShapeRoad 2.05s linear infinite;
+}
+
+.rectangle-guide-bad-shape.is-circle {
+    border-radius: 50%;
+    background: #f84c72;
+}
+
+.rectangle-guide-bad-shape.is-triangle {
+    bottom: 26%;
+    background: #ffb12b;
+    clip-path: polygon(50% 2%, 96% 92%, 4% 92%);
+    animation-delay: 0.7s;
+}
+
+.rectangle-boss-warning-next {
+    display: grid;
+    place-items: center;
+    width: 5.1rem;
+    aspect-ratio: 1;
+    margin-bottom: 0.55rem;
+    border: 0.22rem solid #62301b;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #fff06c 0%, #ffb42a 58%, #e26b18 100%);
+    box-shadow: inset 0 0.18rem 0 rgba(255, 255, 255, 0.72), 0 0.28rem 0 #4a2b18;
+    cursor: pointer;
+}
+
+.rectangle-boss-warning-next[hidden] { display: none !important; }
+
+.rectangle-boss-warning-next span {
+    width: 0;
+    height: 0;
+    margin-left: 0.28rem;
+    border-top: 1.15rem solid transparent;
+    border-bottom: 1.15rem solid transparent;
+    border-left: 1.75rem solid #ffffff;
+    filter: drop-shadow(0 0.14rem 0 #844418);
 }
 
 .rectangle-boss-warning-continue {
@@ -4851,8 +5166,57 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     cursor: pointer;
 }
 
+.rectangle-boss-warning-continue[hidden] { display: none !important; }
 .rectangle-boss-warning-continue:hover { filter: brightness(1.08); }
 .rectangle-boss-warning-continue:active { transform: translateY(0.12rem); }
+
+@keyframes rectangleGuideMonsterBounce {
+    0%, 100% { transform: translateY(0) scaleY(1); }
+    50% { transform: translateY(-0.45rem) scaleY(1.04); }
+}
+
+@keyframes rectangleGuideMonsterMouth {
+    0%, 100% { transform: scaleY(0.45); }
+    18%, 42% { transform: scaleY(1.95); }
+}
+
+@keyframes rectangleGuideBlink {
+    0%, 88%, 100% { transform: scaleY(1); }
+    92% { transform: scaleY(0.08); }
+}
+
+@keyframes rectangleGuideShapeDrop {
+    0% { transform: translateX(0) translateY(-0.6rem) rotate(0deg); opacity: 0; }
+    12% { opacity: 1; }
+    100% { transform: translateX(-24rem) translateY(0.35rem) rotate(-520deg); opacity: 0; }
+}
+
+@keyframes rectangleGuideJeepCollectJump {
+    0%, 39%, 100% { transform: translateX(0) translateY(0) rotate(0); }
+    59%, 68% { transform: translateX(2.1rem) translateY(-4.1rem) rotate(-3deg); }
+    84% { transform: translateX(3.3rem) translateY(0) rotate(0); }
+}
+
+@keyframes rectangleGuideRectangleCollect {
+    0% { opacity: 0; transform: translateX(0) translateY(0) scale(0.92); }
+    10%, 68% { opacity: 1; }
+    56% { transform: translateX(-14.2rem) translateY(0.35rem) scale(1); }
+    64%, 72% { opacity: 0.28; transform: translateX(-16.7rem) translateY(0.15rem) scale(1.18); }
+    100% { opacity: 0; transform: translateX(-28rem) translateY(0.5rem) scale(1); }
+}
+
+@keyframes rectangleGuideJeepCollisionFlash {
+    0%, 39%, 100% { transform: translateX(0) rotate(0); filter: none; }
+    52%, 62% { transform: translateX(-0.35rem) rotate(-2deg); filter: hue-rotate(135deg) saturate(2.8) brightness(1.16); }
+    68% { transform: translateX(0.28rem) rotate(2deg); filter: hue-rotate(135deg) saturate(2.8) brightness(1.16); }
+}
+
+@keyframes rectangleGuideBadShapeRoad {
+    0% { transform: translateX(0) translateY(-0.45rem) rotate(0deg) scale(0.92); opacity: 0; }
+    12% { transform: translateX(-2.5rem) translateY(0) rotate(-70deg) scale(1); opacity: 1; }
+    52% { transform: translateX(-14.7rem) translateY(0.2rem) rotate(-240deg) scale(1); opacity: 1; }
+    100% { transform: translateX(-31rem) translateY(0.2rem) rotate(-520deg) scale(1); opacity: 0; }
+}
 
 .rectangle-boss-jump-button {
     position: absolute;
@@ -4947,62 +5311,149 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 
 .rectangle-boss-monster {
     position: absolute;
-    right: -38%;
-    bottom: 16%;
+    right: -42%;
+    bottom: 15%;
     z-index: 3;
-    width: clamp(25rem, 39vw, 40rem);
-    aspect-ratio: 1;
+    width: clamp(23rem, 36vw, 39rem);
+    aspect-ratio: 1.08;
     transform: translateX(0);
     transition: right 0.9s cubic-bezier(0.2, 0.82, 0.25, 1), filter 160ms ease;
+    filter: drop-shadow(-1rem 1rem 0.85rem rgba(32, 25, 20, 0.48));
 }
 
-.rectangle-boss-encounter.is-active .rectangle-boss-monster { right: -2%; }
+.rectangle-boss-encounter.is-active .rectangle-boss-monster { right: -1%; }
 
-.rectangle-boss-monster-image {
+.rectangle-boss-body {
+    position: absolute;
+    left: 12%;
+    top: 14%;
+    width: 76%;
+    height: 72%;
+    border: 0.55rem solid #422013;
+    border-radius: 42% 36% 45% 38% / 38% 42% 44% 48%;
+    background:
+        radial-gradient(ellipse at 24% 20%, rgba(255, 255, 255, 0.72) 0 7%, transparent 8%),
+        radial-gradient(ellipse at 36% 31%, rgba(188, 246, 255, 0.5) 0 13%, transparent 14%),
+        radial-gradient(circle at 70% 75%, rgba(36, 21, 97, 0.45) 0 17%, transparent 18%),
+        linear-gradient(145deg, #59e5ff 0%, #2386e6 34%, #6852e8 66%, #b33add 100%);
+    box-shadow:
+        inset -1.55rem -1.35rem 0 rgba(39, 15, 84, 0.34),
+        inset 1rem 0.9rem 0 rgba(255, 255, 255, 0.34),
+        inset -0.25rem 0 0.8rem rgba(21, 12, 39, 0.24),
+        0 0.22rem 0 #2f1c14;
+}
+
+.rectangle-boss-horn {
+    position: absolute;
+    top: 4%;
+    width: 24%;
+    height: 25%;
+    z-index: -1;
+    border: 0.42rem solid #4a2515;
+    background:
+        radial-gradient(ellipse at 38% 25%, rgba(255, 255, 255, 0.72) 0 13%, transparent 14%),
+        linear-gradient(160deg, #fff7a2 0%, #ffbd35 62%, #c66a1e 100%);
+    box-shadow: inset -0.45rem -0.25rem 0 rgba(89, 43, 16, 0.22);
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.rectangle-boss-horn.is-left {
+    left: 16%;
+    transform: rotate(-18deg);
+}
+
+.rectangle-boss-horn.is-right {
+    right: 16%;
+    transform: rotate(18deg);
+}
+
+.rectangle-boss-eye {
+    position: absolute;
+    top: 33%;
+    z-index: 2;
+    width: 19%;
+    height: 18%;
+    border: 0.32rem solid #372014;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 25%, #ffffff 0 26%, #fff0cd 57%, #d4c2a5 100%);
+    box-shadow: inset -0.28rem -0.3rem 0 rgba(50, 80, 125, 0.28), 0 0.18rem 0 rgba(43, 19, 12, 0.28);
+    transform-origin: center;
+}
+
+.rectangle-boss-eye.is-left { left: 28%; }
+.rectangle-boss-eye.is-right { right: 28%; }
+
+.rectangle-boss-eye span {
+    position: absolute;
+    left: 44%;
+    top: 42%;
+    width: 36%;
+    height: 42%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 28%, #ffffff 0 12%, transparent 13%), #1c2850;
+    transform: translate(-50%, -50%);
+}
+
+.rectangle-boss-encounter.is-blinking .rectangle-boss-eye {
+    animation: rectangleBossEyeBlink 0.18s ease-in-out;
+}
+
+.rectangle-boss-mouth {
+    position: absolute;
+    left: 29%;
+    top: 54%;
+    z-index: 3;
+    width: 42%;
+    height: 16%;
+    border: 0.34rem solid #3a1e14;
+    border-radius: 0 0 999px 999px;
+    background: radial-gradient(ellipse at 50% 32%, #8a214d 0 24%, #3d1025 55%, #10070e 100%);
+    box-shadow: inset 0 -0.35rem 0 rgba(0, 0, 0, 0.42);
+    overflow: hidden;
+    transform-origin: center top;
+    transition: height 160ms ease, top 160ms ease, border-radius 160ms ease, transform 160ms ease;
+}
+
+.rectangle-boss-mouth-hole {
     position: absolute;
     inset: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    filter: drop-shadow(-0.8rem 0.8rem 0.8rem rgba(24, 20, 18, 0.45));
-    transform-origin: 38% 54%;
-    opacity: 0;
-    transition: opacity 90ms linear;
+    background: radial-gradient(ellipse at 50% 38%, #6d143e 0 28%, #140813 68%);
 }
 
-.rectangle-boss-monster-image.is-idle { opacity: 1; }
-
-.rectangle-boss-encounter.is-blinking .rectangle-boss-monster-image.is-idle,
-.rectangle-boss-encounter.is-mouth-open .rectangle-boss-monster-image.is-idle,
-.rectangle-boss-encounter.is-mouth-open .rectangle-boss-monster-image.is-blink {
-    opacity: 0;
-}
-
-.rectangle-boss-encounter.is-blinking:not(.is-mouth-open) .rectangle-boss-monster-image.is-blink,
-.rectangle-boss-encounter.is-mouth-open .rectangle-boss-monster-image.is-attack {
-    opacity: 1;
-}
-
-.rectangle-boss-mouth-glow {
+.rectangle-boss-teeth {
     position: absolute;
-    z-index: -1;
-    left: 5%;
-    top: 39%;
-    width: 38%;
-    height: 26%;
+    left: 8%;
+    top: 0;
+    width: 84%;
+    height: 38%;
+    background: repeating-linear-gradient(90deg, #ffffff 0 12%, transparent 12% 24%);
+    clip-path: polygon(0 0, 100% 0, 91% 100%, 82% 0, 73% 100%, 64% 0, 55% 100%, 46% 0, 37% 100%, 28% 0, 19% 100%, 10% 0);
+    filter: drop-shadow(0 0.08rem 0 #b8d9e7);
+}
+
+.rectangle-boss-encounter.is-mouth-open .rectangle-boss-mouth {
+    top: 50%;
+    height: 28%;
+    border-radius: 48% 48% 999px 999px / 32% 32% 68% 68%;
+    transform: scaleX(1.08);
+    box-shadow: 0 0 1.4rem rgba(255, 230, 90, 0.72);
+}
+
+.rectangle-boss-cheek {
+    position: absolute;
+    top: 53%;
+    z-index: 2;
+    width: 11%;
+    height: 9%;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 242, 91, 0.95), rgba(255, 77, 24, 0.58) 48%, transparent 72%);
-    opacity: 0;
-    filter: blur(0.35rem);
+    background: rgba(255, 119, 174, 0.68);
 }
 
-.rectangle-boss-encounter.is-mouth-open .rectangle-boss-monster-image.is-attack {
+.rectangle-boss-cheek.is-left { left: 20%; }
+.rectangle-boss-cheek.is-right { right: 20%; }
+
+.rectangle-boss-encounter.is-mouth-open .rectangle-boss-monster {
     animation: rectangleBossMonsterChomp 0.58s ease-in-out;
-}
-
-.rectangle-boss-encounter.is-mouth-open .rectangle-boss-mouth-glow {
-    animation: rectangleBossMouthGlow 0.58s ease-in-out;
 }
 
 .rectangle-boss-encounter.is-monster-hit .rectangle-boss-monster {
@@ -5025,27 +5476,108 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 
 .rectangle-boss-spike {
     position: absolute;
-    left: 76%;
-    bottom: 25%;
-    width: clamp(5.8rem, 8.2vw, 8.2rem);
-    height: clamp(5.8rem, 8.2vw, 8.2rem);
-    background: url('assets/Character/metal-spinner.svg') center / contain no-repeat;
-    filter: drop-shadow(0 0 0.12rem #d9e3e8) drop-shadow(0 0.4rem 0.35rem rgba(0, 0, 0, 0.75));
-    animation: rectangleBossSpikeFly 2.25s linear forwards;
+    left: 78%;
+    bottom: 23%;
+    width: clamp(4.1rem, 6vw, 6rem);
+    height: clamp(4.1rem, 6vw, 6rem);
+    filter: drop-shadow(0 0.45rem 0.3rem rgba(0, 0, 0, 0.42));
+    animation: rectangleBossShapeFly 2.55s linear forwards;
+}
+
+.rectangle-boss-spike::before,
+.rectangle-boss-spike::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
 }
 
 .rectangle-boss-spike::before {
-    content: none;
+    border: 0.28rem solid #3b2317;
+    background: linear-gradient(145deg, #ffef61, #ff8a32);
+}
+
+.rectangle-boss-spike[data-shape="circle"]::before {
+    border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, #fff6a6 0 15%, #ff4c6a 45%, #c31841 100%);
+}
+
+.rectangle-boss-spike[data-shape="triangle"]::before {
+    clip-path: polygon(50% 4%, 96% 92%, 4% 92%);
+    background: linear-gradient(150deg, #ffe66b 0%, #ff9b22 52%, #e85d1d 100%);
+}
+
+.rectangle-boss-spike[data-shape="oval"]::before {
+    border-radius: 50%;
+    transform: scaleX(0.72);
+    background: linear-gradient(160deg, #fa9cff 0%, #a140ff 55%, #6620b4 100%);
+}
+
+.rectangle-boss-spike[data-shape="diamond"]::before {
+    transform: rotate(45deg) scale(0.78);
+    background: linear-gradient(135deg, #8dfff0 0%, #2ea8ff 50%, #2551d9 100%);
+}
+
+.rectangle-boss-spike[data-shape="star"]::before {
+    clip-path: polygon(50% 2%, 61% 35%, 96% 35%, 68% 55%, 80% 91%, 50% 69%, 20% 91%, 32% 55%, 4% 35%, 39% 35%);
+    background: linear-gradient(145deg, #fff58a 0%, #ffc321 54%, #f18417 100%);
 }
 
 .rectangle-boss-spike::after {
     content: none;
 }
 
+.rectangle-boss-road-obstacle {
+    --obstacle-drift-y: 0rem;
+    position: absolute;
+    left: 92%;
+    bottom: 18%;
+    width: clamp(3rem, 4.4vw, 4.4rem);
+    height: clamp(3rem, 4.4vw, 4.4rem);
+    filter: drop-shadow(0 0.4rem 0.24rem rgba(0, 0, 0, 0.38));
+    animation: rectangleBossRoadObstacleSlide 4.2s linear forwards;
+}
+
+.rectangle-boss-road-obstacle::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    border: 0.24rem solid #3b2317;
+    background: linear-gradient(145deg, #ffef61, #ff8a32);
+}
+
+.rectangle-boss-road-obstacle[data-shape="circle"]::before {
+    border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, #fff6a6 0 15%, #ff4c6a 45%, #c31841 100%);
+}
+
+.rectangle-boss-road-obstacle[data-shape="triangle"]::before {
+    clip-path: polygon(50% 4%, 96% 92%, 4% 92%);
+    background: linear-gradient(150deg, #ffe66b 0%, #ff9b22 52%, #e85d1d 100%);
+}
+
+.rectangle-boss-road-obstacle[data-shape="oval"]::before {
+    border-radius: 50%;
+    transform: scaleX(0.72);
+    background: linear-gradient(160deg, #fa9cff 0%, #a140ff 55%, #6620b4 100%);
+}
+
+.rectangle-boss-road-obstacle[data-shape="diamond"]::before {
+    transform: rotate(45deg) scale(0.78);
+    background: linear-gradient(135deg, #8dfff0 0%, #2ea8ff 50%, #2551d9 100%);
+}
+
+.rectangle-boss-road-obstacle[data-shape="star"]::before {
+    clip-path: polygon(50% 2%, 61% 35%, 96% 35%, 68% 55%, 80% 91%, 50% 69%, 20% 91%, 32% 55%, 4% 35%, 39% 35%);
+    background: linear-gradient(145deg, #fff58a 0%, #ffc321 54%, #f18417 100%);
+}
+
 .rectangle-boss-laser {
     position: absolute;
-    left: 25%;
-    bottom: 43%;
+    left: calc(21% + clamp(4.4rem, 7.05vw, 8.35rem));
+    bottom: calc(20% + clamp(4.25rem, 6.85vw, 8.15rem));
+    z-index: 19;
     width: 0;
     height: 0.55rem;
     border-radius: 999px;
@@ -5055,20 +5587,52 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     animation: rectangleBossLaserShot 0.46s ease-out forwards;
 }
 
-.rectangle-boss-gas-pickup {
+.rectangle-boss-laser::before {
+    content: '';
     position: absolute;
-    left: 88%;
-    bottom: 25%;
-    width: clamp(4rem, 6vw, 6rem);
-    height: clamp(4.8rem, 7.2vw, 7rem);
-    animation: rectangleBossGasTravel 5.4s linear forwards;
+    left: -0.55rem;
+    top: 50%;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ffffff 0 22%, #69f6ff 42%, rgba(38, 155, 255, 0.15) 72%);
+    box-shadow: 0 0 0.6rem #ffffff, 0 0 1.25rem #36eaff;
+    transform: translateY(-50%);
 }
 
-.rectangle-boss-gas-pickup .rectangle-gas-icon {
-    width: 100%;
-    height: 100%;
-    animation: rectangleBossGasBounce 0.65s ease-in-out infinite alternate;
-    filter: drop-shadow(0 0 0.55rem #fff16a) drop-shadow(0 0.4rem 0.35rem rgba(54, 32, 16, 0.45));
+.rectangle-boss-rectangle-pickup {
+    position: absolute;
+    left: 86%;
+    bottom: 27%;
+    width: clamp(6.4rem, 9vw, 9.2rem);
+    height: clamp(3.4rem, 4.5vw, 4.5rem);
+    border: 0.32rem solid #3a2215;
+    border-radius: 0.36rem;
+    background:
+        radial-gradient(circle at 18% 26%, rgba(255, 255, 255, 0.72) 0 8%, transparent 9%),
+        linear-gradient(180deg, #7ff572 0%, #2bc443 52%, #168732 100%);
+    box-shadow: inset 0 0.35rem 0 rgba(255, 255, 255, 0.36), 0 0 0.85rem rgba(91, 255, 89, 0.78), 0 0.55rem 0.38rem rgba(0, 0, 0, 0.32);
+    animation: rectangleBossRectangleTravel 4.9s linear forwards;
+}
+
+.rectangle-boss-rectangle-pickup::before {
+    content: '+ GAS';
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: #ffffff;
+    font: 900 clamp(1rem, 1.55vw, 1.45rem)/1 'Fredoka', sans-serif;
+    text-shadow: 0 0.12rem 0 #12541e, 0 0.18rem 0.2rem rgba(0, 0, 0, 0.32);
+}
+
+.rectangle-boss-rectangle-pickup::after {
+    content: '';
+    position: absolute;
+    inset: -0.55rem;
+    border: 0.18rem dashed rgba(231, 255, 143, 0.85);
+    border-radius: 0.65rem;
+    animation: rectangleBossRectanglePulse 0.8s ease-in-out infinite alternate;
 }
 
 .rectangle-delivery-page.is-boss-battle .rectangle-delivery-jeep-sequence.is-arrived {
@@ -5092,14 +5656,15 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     68% { transform: scaleX(0.985) scaleY(0.96); }
 }
 
-@keyframes rectangleBossMouthGlow {
-    0%, 100% { opacity: 0; transform: scale(0.6); }
-    36%, 70% { opacity: 1; transform: scale(1.22); }
+@keyframes rectangleBossEyeBlink {
+    0%, 100% { transform: scaleY(1); }
+    48%, 60% { transform: scaleY(0.08); }
 }
 
-@keyframes rectangleBossSpikeFly {
-    from { transform: translateX(0) rotate(0deg); }
-    to { transform: translateX(-94vw) rotate(-1080deg); }
+@keyframes rectangleBossShapeFly {
+    0% { transform: translateX(0) translateY(0) rotate(0deg); }
+    48% { transform: translateX(-43vw) translateY(0.7rem) rotate(-180deg); }
+    100% { transform: translateX(-94vw) translateY(0.3rem) rotate(-360deg); }
 }
 
 @keyframes rectangleBossLaserShot {
@@ -5109,14 +5674,16 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     100% { width: 57vw; opacity: 0; }
 }
 
-@keyframes rectangleBossGasTravel {
-    from { transform: translateX(0); }
-    to { transform: translateX(-104vw); }
+@keyframes rectangleBossRectangleTravel {
+    0% { transform: translateX(0) translateY(-5.2rem); }
+    32% { transform: translateX(-28vw) translateY(-7rem); }
+    68% { transform: translateX(-62vw) translateY(-6.2rem); }
+    100% { transform: translateX(-104vw) translateY(-5.7rem); }
 }
 
-@keyframes rectangleBossGasBounce {
-    from { transform: translateY(0) rotate(-5deg); }
-    to { transform: translateY(-3.6rem) rotate(5deg); }
+@keyframes rectangleBossRectanglePulse {
+    from { transform: scale(1); opacity: 0.58; }
+    to { transform: scale(1.12); opacity: 1; }
 }
 
 @keyframes rectangleBossJeepJump {
@@ -5398,7 +5965,42 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     70% { transform: translateX(calc(-50% + 0.35rem)); filter: brightness(0.92); }
 }
 
+@keyframes rectangleRoadGasPickupTravel {
+    0% { transform: translateX(0) translateY(var(--pickup-start-y)); opacity: 0; }
+    10%, 88% { opacity: 1; }
+    100% { transform: translateX(-92vw) translateY(calc(var(--pickup-start-y) + 0.4rem)); opacity: 0; }
+}
+
+@keyframes rectangleRoadGasPickupBounce {
+    from { transform: translateY(0) rotate(-4deg); }
+    to { transform: translateY(-1.5rem) rotate(5deg); }
+}
+
 @media (max-width: 900px) {
+    .rectangle-speed-control {
+        right: calc(50% + min(7.9rem, 42vw));
+        bottom: 0.65rem;
+        width: min(8.2rem, calc(50vw - 0.95rem));
+        padding: 0.38rem 0.55rem 0.34rem;
+    }
+
+    .rectangle-speed-control label {
+        font-size: 0.82rem;
+    }
+
+    .rectangle-speed-value {
+        font-size: 1rem;
+    }
+
+    .rectangle-speed-control input {
+        height: 1rem;
+        margin-top: 0.12rem;
+    }
+
+    .rectangle-speed-ticks {
+        font-size: 0.62rem;
+    }
+
     .rectangle-delivery-instruction-panel {
         left: 0.65rem;
         bottom: 4.9rem;
@@ -5461,6 +6063,7 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     display: flex;
     width: max-content;
     will-change: transform;
+    backface-visibility: hidden;
     pointer-events: none;
 }
 
