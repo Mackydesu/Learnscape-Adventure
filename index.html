@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260919-433">
+    <link rel="stylesheet" href="style.css?v=20260919-468">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -790,7 +790,7 @@
         <div class="rectangle-delivery-jeep-sequence" aria-hidden="true" hidden>
             <div class="rectangle-jeep-smoke"><span></span><span></span><span></span></div>
             <img class="rectangle-delivery-jeep-driving" src="assets/Character/jeep.webp" alt="">
-            <img class="rectangle-delivery-jeep-arrived" src="assets/Character/jeep.webp" alt="" hidden>
+            <img class="rectangle-delivery-jeep-arrived" src="assets/Character/jeep1.webp" alt="" hidden>
         </div>
         <div class="rectangle-delivery-instruction-panel" role="status" aria-live="polite" hidden>
             Ihatid ang gamit sa tamang lugar.
@@ -812,6 +812,31 @@
             </div>
         </section>
         <div class="rectangle-delivery-complete-confetti" aria-hidden="true" hidden></div>
+        <section class="circle-lesson-progress rectangle-final-progress" aria-label="Rectangle mission progress" aria-hidden="true">
+            <div class="circle-lesson-progress-board">
+                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/progressboard.webp" alt="">
+                <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Mission Complete!">
+                    <path id="rectangleMissionCompleteTitleCurve" d="M 4 44 Q 100 32 196 44" fill="none"></path>
+                    <text textLength="184" lengthAdjust="spacingAndGlyphs">
+                        <textPath href="#rectangleMissionCompleteTitleCurve" startOffset="50%" text-anchor="middle">Mission Complete!</textPath>
+                    </text>
+                </svg>
+                <div class="circle-lesson-stars" data-earned-stars="2" role="img" aria-label="2 of 3 stars earned">
+                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/1star.webp" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/2star.webp" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/1star.webp" alt=""></span>
+                </div>
+                <p class="circle-lesson-star-message">Well done!</p>
+                <div class="circle-lesson-progress-actions">
+                    <button class="circle-lesson-progress-button" type="button" data-rectangle-final-replay aria-label="Replay rectangle mission">
+                        <img src="assets/Buttons/replay.webp" alt="">
+                    </button>
+                    <button class="circle-lesson-progress-button" type="button" data-rectangle-final-next aria-label="Continue to camera game">
+                        <img src="assets/Buttons/next.webp" alt="">
+                    </button>
+                </div>
+            </div>
+        </section>
         <a class="game-return-btn" href="index.html#shape-area-4" aria-label="Return to Rectangle Village">
             <span>‹</span>
             Back
@@ -913,10 +938,6 @@
         </div>
 
         <section class="rectangle-interior-storage-panel" aria-label="Storage panel below containing rectangle objects">
-            <div class="rectangle-interior-storage-header">
-                <span class="rectangle-interior-storage-title">Storage Panel</span>
-                <span class="rectangle-interior-storage-subtitle">Drag the right rectangle object to the counter</span>
-            </div>
             <div class="rectangle-interior-storage-slots">
                 <div class="rectangle-interior-storage-slot" data-storage-slot="books">
                     <button class="rectangle-interior-object" type="button" data-rectangle-item="books" aria-label="Books">
@@ -965,10 +986,6 @@
         </div>
 
         <section class="rectangle-interior-storage-panel" aria-label="Storage panel below containing rectangle objects">
-            <div class="rectangle-interior-storage-header">
-                <span class="rectangle-interior-storage-title">Storage Panel</span>
-                <span class="rectangle-interior-storage-subtitle">Drag the right rectangle object to the counter</span>
-            </div>
             <div class="rectangle-interior-storage-slots">
                 <div class="rectangle-interior-storage-slot" data-storage-slot="books">
                     <button class="rectangle-interior-object" type="button" data-rectangle-item="books" aria-label="Books">
@@ -1017,10 +1034,6 @@
         </div>
 
         <section class="rectangle-interior-storage-panel" aria-label="Storage panel below containing rectangle objects">
-            <div class="rectangle-interior-storage-header">
-                <span class="rectangle-interior-storage-title">Storage Panel</span>
-                <span class="rectangle-interior-storage-subtitle">Drag the right rectangle object to the counter</span>
-            </div>
             <div class="rectangle-interior-storage-slots">
                 <div class="rectangle-interior-storage-slot" data-storage-slot="books">
                     <button class="rectangle-interior-object" type="button" data-rectangle-item="books" aria-label="Books">
@@ -1049,7 +1062,7 @@
         </a>
     </section>
 
-    <section id="learnscape-shape-area-5-page" class="shape-area-page shape-area-preview-page" data-completed-shape="rectangle" data-area-background="assets/Backgrounds/Area5.webp" data-illustration-background="assets/Backgrounds/oval.webp" data-video-source="assets/Videos/ovalshape.mp4" hidden>
+    <section id="learnscape-shape-area-5-page" class="shape-area-page shape-area-preview-page" data-completed-shape="rectangle" data-area-background="assets/Backgrounds/Area5.webp" data-illustration-background="assets/Backgrounds/oval.webp" data-video-source="assets/Videos/ovalshape.mp4" data-camera-route="ovalBoardGame" hidden>
         <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area5.webp" alt="" aria-hidden="true">
         <div class="shape-area-title shape-area-title-text shape-area-preview-title" aria-label="Area 5">
             <span>Area</span>
@@ -1089,7 +1102,30 @@
         </a>
     </section>
 
-    <section id="learnscape-shape-area-6-page" class="shape-area-page shape-area-preview-page" data-completed-shape="oval" data-area-background="assets/Backgrounds/Area6.webp" data-illustration-background="assets/Backgrounds/heart.webp" data-video-source="assets/Videos/heartshape.mp4" hidden>
+    <section id="learnscape-oval-board-game-page" class="oval-board-game-page" hidden>
+        <img class="game1-bg-image oval-board-bg" src="assets/Backgrounds/oval.webp" alt="" aria-hidden="true">
+        <div class="oval-board-title-panel" aria-label="Oval Match Game">
+            <span>Oval Match Game</span>
+        </div>
+        <div class="oval-board-stage" aria-label="10 oval board pieces">
+            <button class="oval-board-card" type="button" aria-label="Oval board card 1" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 2" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 3" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 4" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 5" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 6" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 7" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 8" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 9" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 10" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
+        </div>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-5" aria-label="Return to Area 5">
+            <span>‹</span>
+            Back
+        </a>
+    </section>
+
+    <section id="learnscape-shape-area-6-page" class="shape-area-page shape-area-preview-page" data-completed-shape="oval" data-area-background="assets/Backgrounds/Area6.webp" data-illustration-background="assets/Backgrounds/heart.webp" data-video-source="assets/Videos/heartshape.mp4" data-camera-route="heartCamera" hidden>
         <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area6.webp" alt="" aria-hidden="true">
         <div class="shape-area-title shape-area-title-text shape-area-preview-title" aria-label="Area 6">
             <span>Area</span>
@@ -1129,7 +1165,7 @@
         </a>
     </section>
 
-    <section id="learnscape-shape-area-7-page" class="shape-area-page shape-area-preview-page" data-completed-shape="heart" data-area-background="assets/Backgrounds/Area7.webp" data-illustration-background="assets/Backgrounds/star.webp" data-video-source="assets/Videos/starshape.mp4" hidden>
+    <section id="learnscape-shape-area-7-page" class="shape-area-page shape-area-preview-page" data-completed-shape="heart" data-area-background="assets/Backgrounds/Area7.webp" data-illustration-background="assets/Backgrounds/star.webp" data-video-source="assets/Videos/starshape.mp4" data-camera-route="starCamera" hidden>
         <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area7.webp" alt="" aria-hidden="true">
         <div class="shape-area-title shape-area-title-text shape-area-preview-title" aria-label="Area 7">
             <span>Area</span>
@@ -1169,7 +1205,7 @@
         </a>
     </section>
 
-    <section id="learnscape-shape-area-8-page" class="shape-area-page shape-area-preview-page" data-completed-shape="star" data-area-background="assets/Backgrounds/Area8.webp" data-illustration-background="assets/Backgrounds/diamond.webp" data-video-source="assets/Videos/diamondshape.mp4" hidden>
+    <section id="learnscape-shape-area-8-page" class="shape-area-page shape-area-preview-page" data-completed-shape="star" data-area-background="assets/Backgrounds/Area8.webp" data-illustration-background="assets/Backgrounds/diamond.webp" data-video-source="assets/Videos/diamondshape.mp4" data-camera-route="diamondCamera" hidden>
         <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area8.webp" alt="" aria-hidden="true">
         <div class="shape-area-title shape-area-title-text shape-area-preview-title" aria-label="Area 8">
             <span>Area</span>
@@ -1327,7 +1363,166 @@
         </a>
     </section>
 
-    
+    <section id="learnscape-circle-camera-page" class="circle-camera-page" hidden>
+        <div class="circle-camera-sky" aria-hidden="true">
+            <span class="circle-camera-cloud circle-camera-cloud-a"></span>
+            <span class="circle-camera-cloud circle-camera-cloud-b"></span>
+        </div>
+        <div class="circle-camera-ground" aria-hidden="true"></div>
+        <div class="circle-camera-flowers" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+        </div>
+
+        <aside class="circle-camera-target-card" aria-label="Target shape">
+            <h2>Target Shape:</h2>
+            <div class="circle-camera-target-shape" aria-hidden="true"></div>
+            <strong>Circle</strong>
+        </aside>
+
+        <main class="circle-camera-scan-board" aria-label="Camera detection game layout">
+            <div class="circle-camera-scan-title">
+                <span class="circle-camera-icon" aria-hidden="true"></span>
+                <strong>Scan an object using the camera!</strong>
+            </div>
+            <div class="circle-camera-viewfinder" aria-label="Camera preview placeholder">
+                <video class="circle-camera-video" autoplay playsinline muted hidden></video>
+                <span class="circle-camera-corner circle-camera-corner-tl"></span>
+                <span class="circle-camera-corner circle-camera-corner-tr"></span>
+                <span class="circle-camera-corner circle-camera-corner-bl"></span>
+                <span class="circle-camera-corner circle-camera-corner-br"></span>
+                <div class="circle-camera-scan-sweep" aria-hidden="true"></div>
+            </div>
+        </main>
+
+        <button class="circle-camera-start-button" type="button">
+            <span class="circle-camera-start-icon" aria-hidden="true"></span>
+            <strong>Start Camera</strong>
+        </button>
+
+        <aside class="circle-camera-unlock-board" aria-label="Circle camera challenge progress">
+            <h2>Find a circle<br>to unlock!</h2>
+            <div class="circle-camera-locked-chest" aria-hidden="true">
+                <span class="circle-camera-chest-lid"></span>
+                <span class="circle-camera-chest-body"></span>
+                <span class="circle-camera-chest-band circle-camera-chest-band-left"></span>
+                <span class="circle-camera-chest-band circle-camera-chest-band-right"></span>
+                <span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span>
+                <span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span>
+                <span class="circle-camera-chest-padlock"></span>
+            </div>
+        </aside>
+
+        <a class="game-return-btn loading-link" href="index.html" data-route="circle-illustration" aria-label="Return to Circle Mission">
+            <span>‹</span>
+            Back
+        </a>
+    </section>
+
+    <section id="learnscape-square-camera-page" class="circle-camera-page shape-camera-page square-camera-page" data-camera-shape="square" hidden>
+        <div class="circle-camera-sky" aria-hidden="true">
+            <span class="circle-camera-cloud circle-camera-cloud-a"></span>
+            <span class="circle-camera-cloud circle-camera-cloud-b"></span>
+        </div>
+        <div class="circle-camera-ground" aria-hidden="true"></div>
+        <div class="circle-camera-flowers" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+        </div>
+        <aside class="circle-camera-target-card" aria-label="Target shape">
+            <h2>Target Shape:</h2>
+            <div class="circle-camera-target-shape square-camera-target-shape" aria-hidden="true"></div>
+            <strong>Square</strong>
+        </aside>
+        <main class="circle-camera-scan-board" aria-label="Camera detection game layout">
+            <div class="circle-camera-scan-title">
+                <span class="circle-camera-icon" aria-hidden="true"></span>
+                <strong>Scan an object using the camera!</strong>
+            </div>
+            <div class="circle-camera-viewfinder" aria-label="Camera preview placeholder">
+                <video class="circle-camera-video" autoplay playsinline muted hidden></video>
+                <span class="circle-camera-corner circle-camera-corner-tl"></span>
+                <span class="circle-camera-corner circle-camera-corner-tr"></span>
+                <span class="circle-camera-corner circle-camera-corner-bl"></span>
+                <span class="circle-camera-corner circle-camera-corner-br"></span>
+                <div class="circle-camera-scan-sweep" aria-hidden="true"></div>
+            </div>
+        </main>
+        <button class="circle-camera-start-button" type="button">
+            <span class="circle-camera-start-icon" aria-hidden="true"></span>
+            <strong>Start Camera</strong>
+        </button>
+        <aside class="circle-camera-unlock-board" aria-label="Square camera challenge progress">
+            <h2>Find a square<br>to unlock!</h2>
+            <div class="circle-camera-locked-chest" aria-hidden="true">
+                <span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span>
+                <span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span>
+                <span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span>
+                <span class="circle-camera-chest-padlock"></span>
+            </div>
+        </aside>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-square" aria-label="Return to Square Mission"><span>‹</span>Back</a>
+    </section>
+
+    <section id="learnscape-triangle-camera-page" class="circle-camera-page shape-camera-page triangle-camera-page" data-camera-shape="triangle" hidden>
+        <div class="circle-camera-sky" aria-hidden="true"><span class="circle-camera-cloud circle-camera-cloud-a"></span><span class="circle-camera-cloud circle-camera-cloud-b"></span></div>
+        <div class="circle-camera-ground" aria-hidden="true"></div>
+        <div class="circle-camera-flowers" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <aside class="circle-camera-target-card" aria-label="Target shape"><h2>Target Shape:</h2><div class="circle-camera-target-shape triangle-camera-target-shape" aria-hidden="true"></div><strong>Triangle</strong></aside>
+        <main class="circle-camera-scan-board" aria-label="Camera detection game layout"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>Scan an object using the camera!</strong></div><div class="circle-camera-viewfinder" aria-label="Camera preview placeholder"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
+        <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Start Camera</strong></button>
+        <aside class="circle-camera-unlock-board" aria-label="Triangle camera challenge progress"><h2>Find a triangle<br>to unlock!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-3" aria-label="Return to Triangle Area"><span>‹</span>Back</a>
+    </section>
+
+    <section id="learnscape-rectangle-camera-page" class="circle-camera-page shape-camera-page rectangle-camera-page" data-camera-shape="rectangle" hidden>
+        <div class="circle-camera-sky" aria-hidden="true"><span class="circle-camera-cloud circle-camera-cloud-a"></span><span class="circle-camera-cloud circle-camera-cloud-b"></span></div>
+        <div class="circle-camera-ground" aria-hidden="true"></div>
+        <div class="circle-camera-flowers" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <aside class="circle-camera-target-card" aria-label="Target shape"><h2>Target Shape:</h2><div class="circle-camera-target-shape rectangle-camera-target-shape" aria-hidden="true"></div><strong>Rectangle</strong></aside>
+        <main class="circle-camera-scan-board" aria-label="Camera detection game layout"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>Scan an object using the camera!</strong></div><div class="circle-camera-viewfinder" aria-label="Camera preview placeholder"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
+        <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Start Camera</strong></button>
+        <aside class="circle-camera-unlock-board" aria-label="Rectangle camera challenge progress"><h2>Find a rectangle<br>to unlock!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-4" aria-label="Return to Rectangle Area"><span>‹</span>Back</a>
+    </section>
+
+    <section id="learnscape-oval-camera-page" class="circle-camera-page shape-camera-page oval-camera-page" data-camera-shape="oval" hidden>
+        <div class="circle-camera-sky" aria-hidden="true"><span class="circle-camera-cloud circle-camera-cloud-a"></span><span class="circle-camera-cloud circle-camera-cloud-b"></span></div><div class="circle-camera-ground" aria-hidden="true"></div><div class="circle-camera-flowers" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <aside class="circle-camera-target-card" aria-label="Target shape"><h2>Target Shape:</h2><div class="circle-camera-target-shape oval-camera-target-shape" aria-hidden="true"></div><strong>Oval</strong></aside>
+        <main class="circle-camera-scan-board" aria-label="Camera detection game layout"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>Scan an object using the camera!</strong></div><div class="circle-camera-viewfinder" aria-label="Camera preview placeholder"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
+        <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Start Camera</strong></button>
+        <aside class="circle-camera-unlock-board" aria-label="Oval camera challenge progress"><h2>Find an oval<br>to unlock!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-5" aria-label="Return to Oval Area"><span>‹</span>Back</a>
+    </section>
+
+    <section id="learnscape-heart-camera-page" class="circle-camera-page shape-camera-page heart-camera-page" data-camera-shape="heart" hidden>
+        <div class="circle-camera-sky" aria-hidden="true"><span class="circle-camera-cloud circle-camera-cloud-a"></span><span class="circle-camera-cloud circle-camera-cloud-b"></span></div><div class="circle-camera-ground" aria-hidden="true"></div><div class="circle-camera-flowers" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <aside class="circle-camera-target-card" aria-label="Target shape"><h2>Target Shape:</h2><div class="circle-camera-target-shape heart-camera-target-shape" aria-hidden="true"></div><strong>Heart</strong></aside>
+        <main class="circle-camera-scan-board" aria-label="Camera detection game layout"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>Scan an object using the camera!</strong></div><div class="circle-camera-viewfinder" aria-label="Camera preview placeholder"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
+        <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Start Camera</strong></button>
+        <aside class="circle-camera-unlock-board" aria-label="Heart camera challenge progress"><h2>Find a heart<br>to unlock!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-6" aria-label="Return to Heart Area"><span>‹</span>Back</a>
+    </section>
+
+    <section id="learnscape-star-camera-page" class="circle-camera-page shape-camera-page star-camera-page" data-camera-shape="star" hidden>
+        <div class="circle-camera-sky" aria-hidden="true"><span class="circle-camera-cloud circle-camera-cloud-a"></span><span class="circle-camera-cloud circle-camera-cloud-b"></span></div><div class="circle-camera-ground" aria-hidden="true"></div><div class="circle-camera-flowers" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <aside class="circle-camera-target-card" aria-label="Target shape"><h2>Target Shape:</h2><div class="circle-camera-target-shape star-camera-target-shape" aria-hidden="true"></div><strong>Star</strong></aside>
+        <main class="circle-camera-scan-board" aria-label="Camera detection game layout"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>Scan an object using the camera!</strong></div><div class="circle-camera-viewfinder" aria-label="Camera preview placeholder"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
+        <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Start Camera</strong></button>
+        <aside class="circle-camera-unlock-board" aria-label="Star camera challenge progress"><h2>Find a star<br>to unlock!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-7" aria-label="Return to Star Area"><span>‹</span>Back</a>
+    </section>
+
+    <section id="learnscape-diamond-camera-page" class="circle-camera-page shape-camera-page diamond-camera-page" data-camera-shape="diamond" hidden>
+        <div class="circle-camera-sky" aria-hidden="true"><span class="circle-camera-cloud circle-camera-cloud-a"></span><span class="circle-camera-cloud circle-camera-cloud-b"></span></div><div class="circle-camera-ground" aria-hidden="true"></div><div class="circle-camera-flowers" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <aside class="circle-camera-target-card" aria-label="Target shape"><h2>Target Shape:</h2><div class="circle-camera-target-shape diamond-camera-target-shape" aria-hidden="true"></div><strong>Diamond</strong></aside>
+        <main class="circle-camera-scan-board" aria-label="Camera detection game layout"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>Scan an object using the camera!</strong></div><div class="circle-camera-viewfinder" aria-label="Camera preview placeholder"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
+        <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Start Camera</strong></button>
+        <aside class="circle-camera-unlock-board" aria-label="Diamond camera challenge progress"><h2>Find a diamond<br>to unlock!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-8" aria-label="Return to Diamond Area"><span>‹</span>Back</a>
+    </section>
 
     
 
@@ -1335,7 +1530,9 @@
 
     
 
-    <script src="script.js?v=20260919-416"></script>
+    
+
+    <script src="script.js?v=20260919-430"></script>
     </div>
 
     <script>
@@ -1431,6 +1628,12 @@
                     pageId: 'learnscape-shape-area-5-page',
                     hash: '#shape-area-5',
                 },
+                ovalBoardGame: {
+                    title: 'Learnscape Adventure - Oval Match Game',
+                    bodyClass: 'gameplay-page',
+                    pageId: 'learnscape-oval-board-game-page',
+                    hash: '#oval-board-game',
+                },
                 shapeArea6: {
                     title: 'Learnscape Adventure - Area 6',
                     bodyClass: 'gameplay-page',
@@ -1455,6 +1658,19 @@
                     pageId: 'learnscape-circle-illustration-page',
                     hash: '#circle-illustration',
                 },
+                circleCamera: {
+                    title: 'Learnscape Adventure - Circle Camera',
+                    bodyClass: 'gameplay-page',
+                    pageId: 'learnscape-circle-camera-page',
+                    hash: '#circle-camera',
+                },
+                squareCamera: { title: 'Learnscape Adventure - Square Camera', bodyClass: 'gameplay-page', pageId: 'learnscape-square-camera-page', hash: '#square-camera' },
+                triangleCamera: { title: 'Learnscape Adventure - Triangle Camera', bodyClass: 'gameplay-page', pageId: 'learnscape-triangle-camera-page', hash: '#triangle-camera' },
+                rectangleCamera: { title: 'Learnscape Adventure - Rectangle Camera', bodyClass: 'gameplay-page', pageId: 'learnscape-rectangle-camera-page', hash: '#rectangle-camera' },
+                ovalCamera: { title: 'Learnscape Adventure - Oval Camera', bodyClass: 'gameplay-page', pageId: 'learnscape-oval-camera-page', hash: '#oval-camera' },
+                heartCamera: { title: 'Learnscape Adventure - Heart Camera', bodyClass: 'gameplay-page', pageId: 'learnscape-heart-camera-page', hash: '#heart-camera' },
+                starCamera: { title: 'Learnscape Adventure - Star Camera', bodyClass: 'gameplay-page', pageId: 'learnscape-star-camera-page', hash: '#star-camera' },
+                diamondCamera: { title: 'Learnscape Adventure - Diamond Camera', bodyClass: 'gameplay-page', pageId: 'learnscape-diamond-camera-page', hash: '#diamond-camera' },
             };
 
             const routeAliases = {
@@ -1490,6 +1706,8 @@
                 'rectangle-toy-shop1': 'rectangleToyShop1',
                 shapeArea5: 'shapeArea5',
                 'shape-area-5': 'shapeArea5',
+                ovalBoardGame: 'ovalBoardGame',
+                'oval-board-game': 'ovalBoardGame',
                 shapeArea6: 'shapeArea6',
                 'shape-area-6': 'shapeArea6',
                 shapeArea7: 'shapeArea7',
@@ -1498,6 +1716,22 @@
                 'shape-area-8': 'shapeArea8',
                 circleIllustration: 'circleIllustration',
                 'circle-illustration': 'circleIllustration',
+                circleCamera: 'circleCamera',
+                'circle-camera': 'circleCamera',
+                squareCamera: 'squareCamera',
+                'square-camera': 'squareCamera',
+                triangleCamera: 'triangleCamera',
+                'triangle-camera': 'triangleCamera',
+                rectangleCamera: 'rectangleCamera',
+                'rectangle-camera': 'rectangleCamera',
+                ovalCamera: 'ovalCamera',
+                'oval-camera': 'ovalCamera',
+                heartCamera: 'heartCamera',
+                'heart-camera': 'heartCamera',
+                starCamera: 'starCamera',
+                'star-camera': 'starCamera',
+                diamondCamera: 'diamondCamera',
+                'diamond-camera': 'diamondCamera',
                 '#home': 'title',
                 '#game-start': 'title',
                 '#game3': 'game3',
@@ -1514,10 +1748,19 @@
                 '#rectangle-bookstore1': 'rectangleBookstore1',
                 '#rectangle-toy-shop1': 'rectangleToyShop1',
                 '#shape-area-5': 'shapeArea5',
+                '#oval-board-game': 'ovalBoardGame',
                 '#shape-area-6': 'shapeArea6',
                 '#shape-area-7': 'shapeArea7',
                 '#shape-area-8': 'shapeArea8',
                 '#circle-illustration': 'circleIllustration',
+                '#circle-camera': 'circleCamera',
+                '#square-camera': 'squareCamera',
+                '#triangle-camera': 'triangleCamera',
+                '#rectangle-camera': 'rectangleCamera',
+                '#oval-camera': 'ovalCamera',
+                '#heart-camera': 'heartCamera',
+                '#star-camera': 'starCamera',
+                '#diamond-camera': 'diamondCamera',
                 'index.html': 'title',
                 'title-screen.html': 'title',
                 'game_start.html': 'start',
@@ -1535,10 +1778,18 @@
                 'rectangle-bookstore1.html': 'rectangleBookstore1',
                 'rectangle-toy-shop1.html': 'rectangleToyShop1',
                 'shape-area-5.html': 'shapeArea5',
+                'oval-board-game.html': 'ovalBoardGame',
                 'shape-area-6.html': 'shapeArea6',
                 'shape-area-7.html': 'shapeArea7',
                 'shape-area-8.html': 'shapeArea8',
                 'circle-illustration.html': 'circleIllustration',
+                'square-camera.html': 'squareCamera',
+                'triangle-camera.html': 'triangleCamera',
+                'rectangle-camera.html': 'rectangleCamera',
+                'oval-camera.html': 'ovalCamera',
+                'heart-camera.html': 'heartCamera',
+                'star-camera.html': 'starCamera',
+                'diamond-camera.html': 'diamondCamera',
             };
 
             const parseTarget = (target) => {
@@ -1577,10 +1828,19 @@
                 rectangleBookstore1: document.getElementById('learnscape-rectangle-bookstore1-page'),
                 rectangleToyShop1: document.getElementById('learnscape-rectangle-toy-shop1-page'),
                 shapeArea5: document.getElementById('learnscape-shape-area-5-page'),
+                ovalBoardGame: document.getElementById('learnscape-oval-board-game-page'),
                 shapeArea6: document.getElementById('learnscape-shape-area-6-page'),
                 shapeArea7: document.getElementById('learnscape-shape-area-7-page'),
                 shapeArea8: document.getElementById('learnscape-shape-area-8-page'),
                 circleIllustration: document.getElementById('learnscape-circle-illustration-page'),
+                circleCamera: document.getElementById('learnscape-circle-camera-page'),
+                squareCamera: document.getElementById('learnscape-square-camera-page'),
+                triangleCamera: document.getElementById('learnscape-triangle-camera-page'),
+                rectangleCamera: document.getElementById('learnscape-rectangle-camera-page'),
+                ovalCamera: document.getElementById('learnscape-oval-camera-page'),
+                heartCamera: document.getElementById('learnscape-heart-camera-page'),
+                starCamera: document.getElementById('learnscape-star-camera-page'),
+                diamondCamera: document.getElementById('learnscape-diamond-camera-page'),
             };
 
             const loadingOverlay = document.querySelector('.page-loading-overlay');

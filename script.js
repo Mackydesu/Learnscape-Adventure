@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260919-416';
+    const appVersion = '20260919-430';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -97,6 +97,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             { frequency: 659.25, type: 'triangle', gain: 0.14, duration: 0.14, delay: 0.04, attack: 0.008 },
             { frequency: 987.77, type: 'sine', gain: 0.09, duration: 0.2, delay: 0.1, attack: 0.01 },
         ],
+        alert: [
+            { frequency: 740, type: 'square', gain: 0.13, duration: 0.13, attack: 0.006 },
+            { frequency: 392, type: 'sawtooth', gain: 0.12, duration: 0.16, delay: 0.13, attack: 0.008 },
+            { frequency: 740, type: 'square', gain: 0.13, duration: 0.13, delay: 0.31, attack: 0.006 },
+            { frequency: 392, type: 'sawtooth', gain: 0.12, duration: 0.2, delay: 0.44, attack: 0.008 },
+        ],
         soft: [
             { frequency: 587.33, type: 'sine', gain: 0.13, duration: 0.08, attack: 0.01 },
         ],
@@ -107,6 +113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     const uiClickSoundGainMultipliers = {
         boardSuccess: 1.75,
+        alert: 1.45,
     };
     const syncUiClickVolume = () => {
         if (!uiClickMasterVolume || !uiClickAudioContext) return;
@@ -280,6 +287,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const game3Hotspots = game3Page?.querySelectorAll('[data-game3-shape]') || [];
     const fullscreenRestoreButton = document.querySelector('.fullscreen-restore-button');
     const shapeCirclePage = document.getElementById('learnscape-shape-circle-page');
+    const circleCameraPage = document.getElementById('learnscape-circle-camera-page');
+    const circleCameraStartButton = circleCameraPage?.querySelector('.circle-camera-start-button') || null;
+    const circleCameraVideo = circleCameraPage?.querySelector('.circle-camera-video') || null;
+    const shapeCameraPages = Array.from(document.querySelectorAll('.shape-camera-page'));
     const shapeSquarePage = document.getElementById('learnscape-shape-square-page');
     const triangleGamePage = document.getElementById('learnscape-triangle-game-page');
     const rectangleDeliveryPage = document.getElementById('learnscape-rectangle-delivery-page');
@@ -298,6 +309,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rectangleGameOverRetry = rectangleDeliveryPage?.querySelector('.rectangle-game-over-retry');
     const rectangleDeliveryCompleteBg = rectangleDeliveryPage?.querySelector('.rectangle-delivery-complete-bg');
     const rectangleDeliveryCompleteConfetti = rectangleDeliveryPage?.querySelector('.rectangle-delivery-complete-confetti');
+    const rectangleFinalProgress = rectangleDeliveryPage?.querySelector('.rectangle-final-progress');
+    const rectangleFinalReplayButton = rectangleFinalProgress?.querySelector('[data-rectangle-final-replay]') || null;
+    const rectangleFinalNextButton = rectangleFinalProgress?.querySelector('[data-rectangle-final-next]') || null;
     let rectangleRoadImages = [];
     let rectangleRoadLoopFrame = null;
     let rectangleRoadLoopWidth = 0;
@@ -315,7 +329,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let rectangleResumeFromDelivery = false;
     const rectangleRoadBaseSpeed = 0.1;
     const rectangleRoadPostDeliverySpeed = 0.14;
-    const rectangleSpeedMultipliers = [0.6, 0.8, 1, 1.25, 1.5];
+    const rectangleSpeedMultipliers = [0.8, 1.15, 1.5, 1.85, 2.25];
     let rectangleSpeedLevel = 3;
     let rectangleCurrentSpeedMultiplier = rectangleSpeedMultipliers[rectangleSpeedLevel - 1];
     let rectangleDisplayedGasLevel = -1;
@@ -343,6 +357,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleGasDepleted = true;
         rectangleGasPenaltyRemaining = 0;
         clearRectangleRoadGasPickup();
+        rectangleBossRetryWarningMilestone = rectangleBossActive && rectangleBossCurrentMilestone !== null
+            ? rectangleBossCurrentMilestone
+            : null;
         abortRectangleBossEncounter();
         rectangleRoadLoopPaused = true;
         rectangleBraking = null;
@@ -433,7 +450,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateRectangleGasMeter();
     const syncRectangleDrivingSound = () => {
         if (!rectangleDrivingAudio) return;
-        const moving = !rectangleDeliveryPage?.hidden && !rectangleGasDepleted && !rectangleRoadLoopPaused;
+        const finalCelebrationDriving = rectangleDeliveryPage?.classList.contains('is-final-complete-scene')
+            && rectangleDeliveryJeepSequence?.classList.contains('is-driving');
+        const moving = !rectangleDeliveryPage?.hidden
+            && !rectangleGasDepleted
+            && (!rectangleRoadLoopPaused || finalCelebrationDriving);
         const soundScale = window.__learnscapeSoundScale?.() ?? 1;
         const brakeFactor = rectangleBraking ? rectangleBraking.speedFactor : 1;
         rectangleDrivingAudio.volume = moving
@@ -653,7 +674,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const obstacle = document.createElement('span');
         obstacle.className = 'rectangle-road-shape-obstacle';
         obstacle.dataset.shape = shapes[Math.floor(Math.random() * shapes.length)];
-        obstacle.style.setProperty('--obstacle-bottom', `${Math.round(22 + Math.random() * 9)}%`);
+        obstacle.style.setProperty('--obstacle-bottom', `${Math.round(14 + Math.random() * 7)}%`);
         obstacle.style.setProperty('--obstacle-duration', `${(3.8 + Math.random() * 1.25).toFixed(2)}s`);
         obstacle.style.setProperty('--obstacle-spin-duration', `${(0.72 + Math.random() * 0.38).toFixed(2)}s`);
         rectangleDeliveryPage.append(obstacle);
@@ -910,6 +931,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let rectangleFinalCelebrationStarted = false;
     let rectangleFinalCompletedAudio = null;
     let rectangleFinalCheeringAudio = null;
+    let rectangleFinalMahusayAudio = null;
     const getRectangleDeliveryStopDistance = (job) => {
         updateRectangleRoadLoopWidth();
         const targetImage = rectangleRoadImages[job.wayIndex];
@@ -4105,6 +4127,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         nextButton?.addEventListener('click', () => {
+            if (page.dataset.cameraRoute) {
+                openShapeCameraLayout(page.dataset.cameraRoute);
+                return;
+            }
+
             const nextBackgroundSource = page.dataset.nextBackground;
             if (!nextBackgroundSource) {
                 window.location.hash = '#game3';
@@ -4177,7 +4204,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const stopRectangleFinalCelebrationAudio = () => {
-        [rectangleFinalCompletedAudio, rectangleFinalCheeringAudio].forEach((audio) => {
+        [rectangleFinalCompletedAudio, rectangleFinalCheeringAudio, rectangleFinalMahusayAudio].forEach((audio) => {
             if (!audio) return;
             audio.onended = null;
             audio.pause();
@@ -4185,6 +4212,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         rectangleFinalCompletedAudio = null;
         rectangleFinalCheeringAudio = null;
+        rectangleFinalMahusayAudio = null;
     };
 
     const prepareRectangleFinalConfetti = () => {
@@ -4202,31 +4230,63 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    const hideRectangleFinalProgress = () => {
+        rectangleDeliveryPage?.classList.remove('is-rectangle-final-progress-visible');
+        rectangleFinalProgress?.setAttribute('aria-hidden', 'true');
+    };
+
+    const showRectangleFinalProgress = () => {
+        if (!rectangleDeliveryPage || rectangleDeliveryPage.hidden || !rectangleDeliveryPage.classList.contains('is-final-complete-scene')) return;
+        rectangleDeliveryPage.classList.add('is-rectangle-final-progress-visible');
+        rectangleFinalProgress?.setAttribute('aria-hidden', 'false');
+        playUiClickSound('boardSuccess');
+        window.setTimeout(() => {
+            if (rectangleDeliveryPage.classList.contains('is-rectangle-final-progress-visible')) {
+                playUiClickSound('starPop');
+            }
+        }, 650);
+    };
+
     const startRectangleFinalCelebrationAudio = () => {
-        if (rectangleFinalCelebrationStarted || !rectangleDeliveryPage?.classList.contains('is-final-complete-scene') || !window.Audio) return;
+        if (rectangleFinalCelebrationStarted || !rectangleDeliveryPage?.classList.contains('is-final-complete-scene')) return;
+        if (!window.Audio) {
+            rectangleFinalCelebrationStarted = true;
+            window.setTimeout(showRectangleFinalProgress, 1600);
+            return;
+        }
         rectangleFinalCelebrationStarted = true;
         stopRectangleFinalCelebrationAudio();
+        const mahusayAudio = new window.Audio('assets/Audios/Voice over/Mahusay.mp3');
         const completedAudio = new window.Audio('assets/Audios/Sound effects/completed.mp3');
         const cheeringAudio = new window.Audio('assets/Audios/Sound effects/kids cheering.mp3');
+        rectangleFinalMahusayAudio = mahusayAudio;
         rectangleFinalCompletedAudio = completedAudio;
         rectangleFinalCheeringAudio = cheeringAudio;
+        mahusayAudio.preload = 'auto';
         completedAudio.preload = 'auto';
         cheeringAudio.preload = 'auto';
+        mahusayAudio.playsInline = true;
         completedAudio.playsInline = true;
         cheeringAudio.playsInline = true;
+        mahusayAudio.onended = () => {
+            if (rectangleFinalMahusayAudio === mahusayAudio) rectangleFinalMahusayAudio = null;
+        };
         completedAudio.onended = () => {
             if (rectangleFinalCompletedAudio !== completedAudio || !rectangleDeliveryPage?.classList.contains('is-final-complete-scene')) return;
             cheeringAudio.currentTime = 0;
-            cheeringAudio.play().catch(() => {});
+            cheeringAudio.play().catch(() => showRectangleFinalProgress());
         };
         cheeringAudio.onended = () => {
             if (rectangleFinalCheeringAudio === cheeringAudio) rectangleFinalCheeringAudio = null;
+            showRectangleFinalProgress();
         };
+        mahusayAudio.currentTime = 0;
+        mahusayAudio.play().catch(() => {});
         completedAudio.currentTime = 0;
         completedAudio.play().catch(() => {
             if (rectangleFinalCompletedAudio !== completedAudio) return;
             cheeringAudio.currentTime = 0;
-            cheeringAudio.play().catch(() => {});
+            cheeringAudio.play().catch(() => showRectangleFinalProgress());
         });
     };
 
@@ -4234,7 +4294,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleFinalCompletePending = false;
         rectangleFinalCelebrationStarted = false;
         stopRectangleFinalCelebrationAudio();
-        rectangleDeliveryPage?.classList.remove('is-final-complete-scene');
+        rectangleDeliveryPage?.classList.remove('is-final-complete-scene', 'is-rectangle-final-progress-visible');
+        rectangleFinalProgress?.setAttribute('aria-hidden', 'true');
         if (rectangleDeliveryCompleteBg) rectangleDeliveryCompleteBg.hidden = true;
         if (rectangleDeliveryCompleteConfetti) rectangleDeliveryCompleteConfetti.hidden = true;
     };
@@ -4439,6 +4500,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleDeliveryJeepSequence.hidden = false;
         rectangleDeliveryJeepSequence.classList.remove('is-arrived', 'is-boss-jumping');
         rectangleDeliveryJeepSequence.classList.add('is-driving');
+        startRectangleEngineSound();
         showRectangleFinalCompleteTask();
     };
 
@@ -4502,6 +4564,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
+    rectangleFinalReplayButton?.addEventListener('click', () => {
+        hideRectangleFinalProgress();
+        navigateApp('shapeArea4');
+    });
+
+    rectangleFinalNextButton?.addEventListener('click', () => {
+        hideRectangleFinalProgress();
+        openShapeCameraLayout('rectangleCamera');
+    });
+
     rectangleDeliveryJeepSequence?.addEventListener('animationend', (event) => {
         if (event.target !== rectangleDeliveryJeepSequence || event.animationName !== 'rectangleDeliveryJeepDriveDesktop') return;
         if (!rectangleDeliveryPage || rectangleDeliveryPage.hidden) return;
@@ -4510,6 +4582,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleDeliveryJeepSequence.classList.remove('is-driving');
         rectangleDeliveryJeepSequence.classList.add('is-arrived');
         if (rectangleDeliveryPage.classList.contains('is-final-complete-scene')) {
+            stopRectangleEngineSound();
+            playRectangleStop();
             showRectangleFinalCompleteTask();
             startRectangleFinalCelebrationAudio();
             return;
@@ -4544,11 +4618,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     rectangleGameOverRetry?.addEventListener('click', () => {
         if (!rectangleGasDepleted) return;
+        const retryWarningMilestone = rectangleBossRetryWarningMilestone;
         rectangleGasDepleted = false;
         rectangleBossWarningAcknowledged = false;
         setRectangleGasLevel(100);
         startRectangleDeliveryJeep();
-        window.setTimeout(resumeRectangleBossEncounter, 80);
+        window.setTimeout(() => {
+            if (retryWarningMilestone === 2) {
+                showRectangleBossWarning({ startGuideIndex: 1 });
+            } else {
+                resumeRectangleBossEncounter();
+            }
+            rectangleBossRetryWarningMilestone = null;
+        }, 80);
     });
 
     const resetRectangleDestinationJeeps = () => {
@@ -4758,6 +4840,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let rectangleBossActive = false;
     let rectangleBossCurrentMilestone = null;
     let rectangleBossWarningMilestone = null;
+    let rectangleBossRetryWarningMilestone = null;
     let rectangleBossWarningAcknowledged = false;
     let rectangleBossAttackTimer = null;
     let rectangleBossGasTimer = null;
@@ -5048,7 +5131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 780);
     };
 
-    const showRectangleBossWarning = () => {
+    const showRectangleBossWarning = ({ startGuideIndex = 0 } = {}) => {
         const milestone = getRectangleBossMilestone();
         if (!rectangleBossWarning || !milestone) return;
         if (rectangleBossWarningAcknowledged && rectangleBossWarningMilestone === milestone) return;
@@ -5065,6 +5148,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             rectangleDeliveryInstructionHideTimer = null;
         }
         rectangleDeliveryPage?.classList.remove('is-instruction-active');
+        if (rectangleDeliveryRevealTimer !== null) {
+            window.clearTimeout(rectangleDeliveryRevealTimer);
+            rectangleDeliveryRevealTimer = null;
+        }
+        if (rectangleDeliveryArrivalTimer !== null) {
+            window.clearTimeout(rectangleDeliveryArrivalTimer);
+            rectangleDeliveryArrivalTimer = null;
+        }
         rectangleRoadLoopPaused = true;
         rectangleRoadStrip?.classList.add('is-loop-paused');
         clearRectangleRoadShapeObstacles();
@@ -5074,10 +5165,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (rectangleDeliveryInstructionPanel) rectangleDeliveryInstructionPanel.hidden = true;
         if (rectangleRoadToggle) rectangleRoadToggle.disabled = true;
         if (rectangleBossJumpButton) rectangleBossJumpButton.disabled = true;
-        showRectangleBossGuidePage(0);
+        showRectangleBossGuidePage(startGuideIndex);
         rectangleBossWarning.hidden = false;
         rectangleBossWarning.getBoundingClientRect();
         rectangleBossWarning.classList.add('is-visible');
+        playUiClickSound('alert');
         rectangleBossWarningNext?.focus({ preventScroll: true });
     };
 
@@ -5802,7 +5894,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     triangleGameCompleteNextButton?.addEventListener('click', () => {
-        window.location.hash = '#game3';
+        openShapeCameraLayout('triangleCamera');
     });
 
     triangleGameTreeSources.forEach((source) => {
@@ -8056,6 +8148,133 @@ document.addEventListener('DOMContentLoaded', async () => {
         circleMissionGuideTimers.push(window.setTimeout(startCircleMissionGuide, 280));
     };
 
+    const openCircleCameraLayout = () => {
+        hideCircleIllustrationProgress();
+        resetCircleHunt();
+        stopCircleHuntCelebration();
+        circleIllustrationVideo?.pause();
+        navigateApp('circleCamera');
+    };
+
+    let circleCameraStream = null;
+
+    const setCircleCameraButtonText = (text) => {
+        const label = circleCameraStartButton?.querySelector('strong');
+        if (label) label.textContent = text;
+    };
+
+    const stopCircleCameraStream = () => {
+        if (circleCameraStream) {
+            circleCameraStream.getTracks().forEach((track) => track.stop());
+            circleCameraStream = null;
+        }
+        if (circleCameraVideo) {
+            circleCameraVideo.pause();
+            circleCameraVideo.srcObject = null;
+            circleCameraVideo.hidden = true;
+        }
+        if (circleCameraStartButton) {
+            circleCameraStartButton.disabled = false;
+            setCircleCameraButtonText('Start Camera');
+        }
+    };
+
+    const startCircleCameraStream = async () => {
+        if (!circleCameraStartButton || !circleCameraVideo) return;
+        if (!navigator.mediaDevices?.getUserMedia) {
+            setCircleCameraButtonText('Camera Unavailable');
+            return;
+        }
+
+        circleCameraStartButton.disabled = true;
+        setCircleCameraButtonText('Opening Camera...');
+
+        try {
+            stopCircleCameraStream();
+            circleCameraStartButton.disabled = true;
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: 'environment',
+                },
+                audio: false,
+            });
+            circleCameraStream = stream;
+            circleCameraVideo.srcObject = stream;
+            circleCameraVideo.hidden = false;
+            await circleCameraVideo.play();
+            setCircleCameraButtonText('Camera Ready');
+        } catch (error) {
+            circleCameraStartButton.disabled = false;
+            setCircleCameraButtonText('Allow Camera');
+        }
+    };
+
+    const shapeCameraStreams = new Map();
+
+    const setShapeCameraButtonText = (page, text) => {
+        const label = page?.querySelector('.circle-camera-start-button strong');
+        if (label) label.textContent = text;
+    };
+
+    const stopShapeCameraStream = (page) => {
+        const stream = shapeCameraStreams.get(page);
+        if (stream) {
+            stream.getTracks().forEach((track) => track.stop());
+            shapeCameraStreams.delete(page);
+        }
+
+        const video = page?.querySelector('.circle-camera-video');
+        const button = page?.querySelector('.circle-camera-start-button');
+        if (video) {
+            video.pause();
+            video.srcObject = null;
+            video.hidden = true;
+        }
+        if (button) {
+            button.disabled = false;
+            setShapeCameraButtonText(page, 'Start Camera');
+        }
+    };
+
+    const stopAllShapeCameraStreams = () => {
+        shapeCameraPages.forEach(stopShapeCameraStream);
+    };
+
+    const startShapeCameraStream = async (page) => {
+        const button = page?.querySelector('.circle-camera-start-button');
+        const video = page?.querySelector('.circle-camera-video');
+        if (!button || !video) return;
+        if (!navigator.mediaDevices?.getUserMedia) {
+            setShapeCameraButtonText(page, 'Camera Unavailable');
+            return;
+        }
+
+        button.disabled = true;
+        setShapeCameraButtonText(page, 'Opening Camera...');
+
+        try {
+            stopShapeCameraStream(page);
+            button.disabled = true;
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment' },
+                audio: false,
+            });
+            shapeCameraStreams.set(page, stream);
+            video.srcObject = stream;
+            video.hidden = false;
+            await video.play();
+            setShapeCameraButtonText(page, 'Camera Ready');
+        } catch (error) {
+            button.disabled = false;
+            setShapeCameraButtonText(page, 'Allow Camera');
+        }
+    };
+
+    const openShapeCameraLayout = (routeName) => {
+        if (!routeName) return;
+        navigateApp(routeName);
+    };
+
     const playCircleIllustrationVideo = async () => {
         if (!circleIllustrationVideo || !isPageVisible(circleIllustrationPage)) return;
 
@@ -8622,7 +8841,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         resetCircleIllustrationVideo();
     });
-    circleIllustrationNextButton?.addEventListener('click', finishCircleIllustrationLesson);
+    circleIllustrationNextButton?.addEventListener('click', () => {
+        if (circleIllustrationProgress?.dataset.progressStage === 'hunt') {
+            openCircleCameraLayout();
+            return;
+        }
+        finishCircleIllustrationLesson();
+    });
+    circleCameraStartButton?.addEventListener('click', startCircleCameraStream);
+    shapeCameraPages.forEach((page) => {
+        page.querySelector('.circle-camera-start-button')?.addEventListener('click', () => {
+            startShapeCameraStream(page);
+        });
+    });
 
     circleIllustrationVideo?.addEventListener('pause', () => {
         if (
@@ -8653,6 +8884,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         setShapeSquarePlayButtonVisible(true);
     });
     shapeSquareNextButton?.addEventListener('click', () => {
+        if (shapeSquareProgress?.dataset.progressStage === 'answer') {
+            openShapeCameraLayout('squareCamera');
+            return;
+        }
         finishShapeSquareLesson();
     });
     shapeSquareMissionStartButton?.addEventListener('click', () => {
@@ -8736,6 +8971,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (event.detail?.route !== 'circleIllustration') {
             resetCircleIllustrationVideo();
         }
+        if (event.detail?.route !== 'circleCamera') {
+            stopCircleCameraStream();
+        }
+        if (!/^(square|triangle|rectangle|oval|heart|star|diamond)Camera$/.test(event.detail?.route || '')) {
+            stopAllShapeCameraStreams();
+        }
         if (event.detail?.route !== 'shapeSquare') {
             resetShapeSquareScene();
         }
@@ -8783,6 +9024,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     resetCircleIllustrationVideo();
 
+    const ovalBoardCards = Array.from(document.querySelectorAll('.oval-board-card'));
+    const ovalHalfPieces = [1, 2, 3, 4, 5].flatMap((ovalNumber) => ([
+        { image: `assets/Shape UI/oval${ovalNumber}.webp`, side: 'left' },
+        { image: `assets/Shape UI/oval${ovalNumber}.webp`, side: 'right' },
+    ]));
+    for (let index = ovalHalfPieces.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [ovalHalfPieces[index], ovalHalfPieces[swapIndex]] = [ovalHalfPieces[swapIndex], ovalHalfPieces[index]];
+    }
+    ovalBoardCards.forEach((card, index) => {
+        const halfPiece = ovalHalfPieces[index];
+        if (halfPiece) {
+            card.style.setProperty('--oval-piece-image', `url("${halfPiece.image}")`);
+            card.style.setProperty('--oval-piece-position', `${halfPiece.side} center`);
+            card.dataset.ovalPiece = `${halfPiece.image}-${halfPiece.side}`;
+        }
+        let flipBackTimer = null;
+        card.addEventListener('click', () => {
+            if (flipBackTimer !== null) {
+                window.clearTimeout(flipBackTimer);
+                flipBackTimer = null;
+            }
+            const isFlipped = card.classList.toggle('is-flipped');
+            card.setAttribute('aria-pressed', String(isFlipped));
+            if (isFlipped) {
+                flipBackTimer = window.setTimeout(() => {
+                    card.classList.remove('is-flipped');
+                    card.setAttribute('aria-pressed', 'false');
+                    flipBackTimer = null;
+                }, 1500);
+            }
+        });
+    });
 
     loadingLinks.forEach((link) => {
         link.addEventListener('click', (event) => {
