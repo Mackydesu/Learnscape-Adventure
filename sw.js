@@ -1,4 +1,4 @@
-const CACHE_NAME = 'learnscape-adventure-v233';
+const CACHE_NAME = 'learnscape-adventure-v301';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -32,7 +32,15 @@ const CORE_ASSETS = [
   './assets/Character/metal-monster-boss.png',
   './assets/Character/metal-monster-boss-idle.png',
   './assets/Character/metal-monster-boss-blink.png',
-  './assets/Character/metal-spinner.svg'
+  './assets/Character/metal-spinner.svg',
+  './assets/Audios/Voice over/oval mission.mp3',
+  './assets/Audios/Voice over/Handa ka na ba.mp3',
+  './assets/Audios/Voice over/Mahusay.mp3',
+  './assets/Audios/Sound effects/completed.mp3',
+  './assets/Audios/Sound effects/kids cheering.mp3',
+  './assets/Audios/Sound effects/clock ticking.mp3',
+  './assets/Audios/Sound effects/times up.mp3',
+  './assets/Audios/Sound effects/lose.mp3'
 ];
 
 self.addEventListener('install', (event) => {

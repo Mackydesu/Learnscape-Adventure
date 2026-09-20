@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260919-468">
+    <link rel="stylesheet" href="style.css?v=20260921-516">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -1107,7 +1107,23 @@
         <div class="oval-board-title-panel" aria-label="Oval Match Game">
             <span>Oval Match Game</span>
         </div>
-        <div class="oval-board-stage" aria-label="10 oval board pieces">
+        <div class="oval-match-progress-panel" aria-live="polite">
+            <span>Matched Pairs</span>
+            <strong class="oval-match-progress-value">0/5</strong>
+        </div>
+        <div class="oval-match-timer-panel" aria-live="polite">
+            <span class="oval-timer-clock-icon" aria-hidden="true"></span>
+            <span>Time</span>
+            <strong class="oval-match-timer-value">45s</strong>
+        </div>
+        <div class="oval-mission-guide" aria-hidden="true" hidden>
+            <img class="oval-mission-character" src="assets/Character/ch6.webp" alt="" aria-hidden="true">
+            <div class="oval-mission-message-panel" role="status" aria-live="polite">
+                <span class="oval-mission-message-text"></span>
+            </div>
+            <button class="circle-mission-start-button oval-mission-start-button" type="button" hidden>Start</button>
+        </div>
+        <div class="oval-board-stage" aria-label="15 oval board pieces">
             <button class="oval-board-card" type="button" aria-label="Oval board card 1" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
             <button class="oval-board-card" type="button" aria-label="Oval board card 2" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
             <button class="oval-board-card" type="button" aria-label="Oval board card 3" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
@@ -1118,6 +1134,59 @@
             <button class="oval-board-card" type="button" aria-label="Oval board card 8" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
             <button class="oval-board-card" type="button" aria-label="Oval board card 9" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
             <button class="oval-board-card" type="button" aria-label="Oval board card 10" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 11" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 12" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 13" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 14" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 15" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
+        </div>
+        <div class="oval-match-reward" aria-live="polite" aria-label="Matched oval object" hidden>
+            <span class="oval-match-burst" aria-hidden="true"></span>
+            <img class="oval-match-object" src="" alt="">
+        </div>
+        <div class="oval-game-celebration" role="status" aria-live="polite" hidden>
+            <div class="oval-celebration-confetti" aria-hidden="true"></div>
+            <div class="oval-celebration-copy">
+                <strong>Congratulations!</strong>
+                <span>You Match Them All</span>
+            </div>
+            <div class="oval-completed-objects" aria-label="Completed oval objects in matching order"></div>
+        </div>
+        <section class="circle-lesson-progress oval-final-progress" aria-label="Oval mission progress" aria-hidden="true">
+            <div class="circle-lesson-progress-board">
+                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/progressboard.webp" alt="">
+                <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Mission Complete!">
+                    <path id="ovalMissionCompleteTitleCurve" d="M 4 44 Q 100 32 196 44" fill="none"></path>
+                    <text textLength="184" lengthAdjust="spacingAndGlyphs">
+                        <textPath href="#ovalMissionCompleteTitleCurve" startOffset="50%" text-anchor="middle">Mission Complete!</textPath>
+                    </text>
+                </svg>
+                <div class="circle-lesson-stars" data-earned-stars="2" role="img" aria-label="2 of 3 stars earned">
+                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/1star.webp" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/2star.webp" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/1star.webp" alt=""></span>
+                </div>
+                <p class="circle-lesson-star-message">Well done!</p>
+                <div class="circle-lesson-progress-actions">
+                    <button class="circle-lesson-progress-button" type="button" data-oval-final-replay aria-label="Replay oval matching mission">
+                        <img src="assets/Buttons/replay.webp" alt="">
+                    </button>
+                    <button class="circle-lesson-progress-button" type="button" data-oval-final-next aria-label="Continue to oval camera game">
+                        <img src="assets/Buttons/next.webp" alt="">
+                    </button>
+                </div>
+            </div>
+        </section>
+        <div class="oval-timeout-flow" role="alert" aria-live="assertive" hidden>
+            <div class="oval-times-up-stage">
+                <span class="oval-times-up-clock" aria-hidden="true"><i></i><b></b></span>
+                <strong>Time's Up!</strong>
+            </div>
+            <div class="oval-game-over-panel" hidden>
+                <strong>Game Over</strong>
+                <span>Time's up!</span>
+                <button class="oval-game-over-retry" type="button">Retry</button>
+            </div>
         </div>
         <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-5" aria-label="Return to Area 5">
             <span>‹</span>
@@ -1125,8 +1194,145 @@
         </a>
     </section>
 
-    <section id="learnscape-shape-area-6-page" class="shape-area-page shape-area-preview-page" data-completed-shape="oval" data-area-background="assets/Backgrounds/Area6.webp" data-illustration-background="assets/Backgrounds/heart.webp" data-video-source="assets/Videos/heartshape.mp4" data-camera-route="heartCamera" hidden>
+    <section id="learnscape-shape-area-6-page" class="shape-area-page shape-area-preview-page" data-completed-shape="oval" data-area-background="assets/Backgrounds/Area6.webp" data-illustration-background="assets/Backgrounds/heart.webp" data-next-background="assets/Backgrounds/heartmission.webp" data-video-source="assets/Videos/heartshape.mp4" hidden>
         <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area6.webp" alt="" aria-hidden="true">
+        <div class="heart-mission-intro" aria-hidden="true" hidden>
+            <div class="heart-mission-character-wrap" aria-hidden="true">
+                <img class="heart-mission-character" src="assets/Character/ch18.webp" alt="">
+            </div>
+            <div class="heart-mission-message" role="status" aria-live="polite">
+                <span class="heart-mission-message-text"></span>
+            </div>
+            <button class="circle-mission-start-button heart-mission-start-button" type="button" hidden>Start</button>
+        </div>
+        <section class="heart-cupid-game" aria-label="Heart balloon bow game" hidden>
+            <div class="heart-game-hud" aria-live="polite">
+                <div class="heart-game-score-panel">
+                    <span class="heart-game-score-label">Score</span>
+                    <strong class="heart-game-score-value">0 / 1000</strong>
+                    <span class="heart-game-score-track" aria-hidden="true"><span class="heart-game-score-fill"></span></span>
+                </div>
+                <div class="heart-game-center-hud">
+                    <div class="heart-game-timer" aria-label="45 seconds remaining">
+                        <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="26" r="17" fill="none" stroke="currentColor" stroke-width="4"></circle><path d="M24 26 V15 M24 26 L33 31 M18 5 H30 M24 5 V9" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"></path></svg>
+                        <strong class="heart-game-timer-value">00:45</strong>
+                    </div>
+                    <div class="heart-freeze-status" hidden>
+                        <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4 V44 M7 14 L41 34 M7 34 L41 14 M18 8 L24 14 L30 8 M18 40 L24 34 L30 40 M9 20 L17 18 L15 10 M39 28 L31 30 L33 38 M9 28 L17 30 L15 38 M39 20 L31 18 L33 10" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        <strong class="heart-freeze-countdown">5.0</strong>
+                    </div>
+                </div>
+                <div class="heart-game-lives" aria-label="5 lives remaining">
+                    <span class="heart-game-lives-label">Lives</span>
+                    <span class="heart-game-life-icons" aria-hidden="true">
+                        <svg class="heart-game-life" viewBox="0 0 40 36"><path d="M20 34 C16 29 3 21 3 11 C3 1 16 -1 20 7 C24 -1 37 1 37 11 C37 21 24 29 20 34 Z"></path></svg>
+                        <svg class="heart-game-life" viewBox="0 0 40 36"><path d="M20 34 C16 29 3 21 3 11 C3 1 16 -1 20 7 C24 -1 37 1 37 11 C37 21 24 29 20 34 Z"></path></svg>
+                        <svg class="heart-game-life" viewBox="0 0 40 36"><path d="M20 34 C16 29 3 21 3 11 C3 1 16 -1 20 7 C24 -1 37 1 37 11 C37 21 24 29 20 34 Z"></path></svg>
+                        <svg class="heart-game-life" viewBox="0 0 40 36"><path d="M20 34 C16 29 3 21 3 11 C3 1 16 -1 20 7 C24 -1 37 1 37 11 C37 21 24 29 20 34 Z"></path></svg>
+                        <svg class="heart-game-life" viewBox="0 0 40 36"><path d="M20 34 C16 29 3 21 3 11 C3 1 16 -1 20 7 C24 -1 37 1 37 11 C37 21 24 29 20 34 Z"></path></svg>
+                    </span>
+                </div>
+            </div>
+            <div class="heart-balloon-field" aria-hidden="true">
+                <svg class="heart-balloon-defs" aria-hidden="true"><defs><symbol id="heartBalloonSymbol" viewBox="0 0 100 150"><path d="M50 84 C43 75 12 58 12 31 C12 10 38 3 50 23 C62 3 88 10 88 31 C88 58 57 75 50 84 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5"></path><ellipse cx="31" cy="28" rx="8" ry="13" fill="rgba(255,255,255,0.62)" transform="rotate(28 31 28)"></ellipse><path d="M50 82 L42 94 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 93 C34 109 66 119 47 148" fill="none" stroke="#8f5b72" stroke-width="2.5" stroke-linecap="round"></path></symbol></defs></svg>
+                <svg class="heart-floating-balloon is-large" data-balloon-kind="heart" data-points="25" viewBox="0 0 100 150" style="--balloon-x:12%;--balloon-duration:21s;--balloon-delay:-7s;--balloon-color:#ff4f91;--balloon-edge:#9d205a;"><use href="#heartBalloonSymbol"></use></svg>
+                <svg class="heart-floating-balloon is-large" data-balloon-kind="heart" data-points="25" viewBox="0 0 100 150" style="--balloon-x:38%;--balloon-duration:23s;--balloon-delay:-15s;--balloon-color:#f35dc4;--balloon-edge:#8d2577;"><use href="#heartBalloonSymbol"></use></svg>
+                <svg class="heart-floating-balloon is-large" data-balloon-kind="heart" data-points="25" viewBox="0 0 100 150" style="--balloon-x:63%;--balloon-duration:20s;--balloon-delay:-11s;--balloon-color:#ff8dba;--balloon-edge:#a82e68;"><use href="#heartBalloonSymbol"></use></svg>
+                <svg class="heart-floating-balloon is-small" data-balloon-kind="heart" data-points="50" viewBox="0 0 100 150" style="--balloon-x:88%;--balloon-duration:9s;--balloon-delay:-2s;--balloon-color:#ff665c;--balloon-edge:#9e2c35;"><use href="#heartBalloonSymbol"></use></svg>
+                <svg class="heart-floating-balloon is-small is-phase-hidden" data-balloon-kind="heart" data-points="50" data-final-heart="true" viewBox="0 0 100 150" style="--balloon-x:27%;--balloon-duration:8.6s;--balloon-delay:-5s;--balloon-color:#ff4f91;--balloon-edge:#9d205a;"><use href="#heartBalloonSymbol"></use></svg>
+                <svg class="heart-floating-balloon is-small is-phase-hidden" data-balloon-kind="heart" data-points="50" data-final-heart="true" viewBox="0 0 100 150" style="--balloon-x:73%;--balloon-duration:8.2s;--balloon-delay:-7s;--balloon-color:#ff72b6;--balloon-edge:#942b68;"><use href="#heartBalloonSymbol"></use></svg>
+                <svg class="shape-floating-balloon is-large" data-balloon-kind="shape" viewBox="0 0 100 150" style="--balloon-x:5%;--balloon-duration:18s;--balloon-delay:-3s;--balloon-color:#4fc5ff;--balloon-edge:#2166a5;"><circle cx="50" cy="42" r="34" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5"></circle><ellipse cx="35" cy="27" rx="8" ry="12" fill="rgba(255,255,255,0.62)" transform="rotate(28 35 27)"></ellipse><path d="M50 75 L42 88 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 87 C34 106 66 119 47 148" fill="none" stroke="#557086" stroke-width="2.5"></path></svg>
+                <svg class="shape-floating-balloon is-large" viewBox="0 0 100 150" style="--balloon-x:18%;--balloon-duration:20s;--balloon-delay:-14s;--balloon-color:#62d26f;--balloon-edge:#24713a;"><rect x="17" y="9" width="66" height="66" rx="8" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5"></rect><path d="M50 74 L42 88 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 87 C34 106 66 119 47 148" fill="none" stroke="#55765b" stroke-width="2.5"></path></svg>
+                <svg class="shape-floating-balloon is-large" viewBox="0 0 100 150" style="--balloon-x:31%;--balloon-duration:16.5s;--balloon-delay:-10s;--balloon-color:#ffd84a;--balloon-edge:#a66a14;"><path d="M50 7 L88 74 H12 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5" stroke-linejoin="round"></path><path d="M50 72 L42 87 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 86 C34 106 66 119 47 148" fill="none" stroke="#856b41" stroke-width="2.5"></path></svg>
+                <svg class="shape-floating-balloon is-large" viewBox="0 0 100 150" style="--balloon-x:44%;--balloon-duration:18.5s;--balloon-delay:-5s;--balloon-color:#a878ff;--balloon-edge:#5d35a2;"><ellipse cx="50" cy="42" rx="30" ry="39" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5"></ellipse><ellipse cx="39" cy="25" rx="6" ry="11" fill="rgba(255,255,255,0.6)" transform="rotate(24 39 25)"></ellipse><path d="M50 79 L42 92 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 91 C34 108 66 120 47 148" fill="none" stroke="#65577b" stroke-width="2.5"></path></svg>
+                <svg class="shape-floating-balloon is-large" viewBox="0 0 100 150" style="--balloon-x:57%;--balloon-duration:19.5s;--balloon-delay:-16s;--balloon-color:#ff9155;--balloon-edge:#a84222;"><rect x="10" y="18" width="80" height="52" rx="7" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5"></rect><path d="M50 69 L42 84 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 83 C34 104 66 119 47 148" fill="none" stroke="#855c48" stroke-width="2.5"></path></svg>
+                <svg class="shape-floating-balloon is-large" viewBox="0 0 100 150" style="--balloon-x:70%;--balloon-duration:17.5s;--balloon-delay:-8s;--balloon-color:#55d9cf;--balloon-edge:#197a79;"><path d="M50 5 L90 42 L50 79 L10 42 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5" stroke-linejoin="round"></path><path d="M50 77 L42 91 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 90 C34 107 66 120 47 148" fill="none" stroke="#497b79" stroke-width="2.5"></path></svg>
+                <svg class="shape-floating-balloon is-large" viewBox="0 0 100 150" style="--balloon-x:83%;--balloon-duration:21s;--balloon-delay:-12s;--balloon-color:#ff78a7;--balloon-edge:#9b315c;"><path d="M50 5 L89 34 L74 79 H26 L11 34 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5" stroke-linejoin="round"></path><path d="M50 77 L42 91 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 90 C34 107 66 120 47 148" fill="none" stroke="#80566a" stroke-width="2.5"></path></svg>
+                <svg class="shape-floating-balloon is-large" viewBox="0 0 100 150" style="--balloon-x:96%;--balloon-duration:18.5s;--balloon-delay:-6s;--balloon-color:#f3a8ff;--balloon-edge:#763789;"><path d="M50 4 L61 28 L88 30 L68 48 L75 76 L50 61 L25 76 L32 48 L12 30 L39 28 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5" stroke-linejoin="round"></path><path d="M50 74 L42 88 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 87 C34 106 66 119 47 148" fill="none" stroke="#74557d" stroke-width="2.5"></path></svg>
+                <svg class="powerup-floating-balloon freeze-balloon is-large" data-balloon-kind="freeze" viewBox="0 0 100 150" style="--balloon-x:24%;--balloon-duration:25s;--balloon-delay:-18s;--balloon-color:#8eeaff;--balloon-edge:#2779ac;">
+                    <circle cx="50" cy="42" r="35" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5"></circle>
+                    <circle cx="50" cy="42" r="27" fill="rgba(255,255,255,0.2)" stroke="#eaffff" stroke-width="2"></circle>
+                    <path d="M50 19 V65 M30 30 L70 54 M30 54 L70 30 M43 22 L50 29 L57 22 M43 62 L50 55 L57 62" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <path d="M50 76 L42 89 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 88 C34 106 66 120 47 148" fill="none" stroke="#477991" stroke-width="2.5"></path>
+                </svg>
+                <svg class="powerup-floating-balloon bomb-balloon is-large" data-balloon-kind="bomb" viewBox="0 0 100 150" style="--balloon-x:77%;--balloon-duration:24s;--balloon-delay:-9s;--balloon-color:#343744;--balloon-edge:#11131a;">
+                    <circle cx="48" cy="47" r="34" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5"></circle>
+                    <ellipse cx="36" cy="34" rx="8" ry="11" fill="rgba(255,255,255,0.28)" transform="rotate(28 36 34)"></ellipse>
+                    <path d="M66 21 Q74 8 83 16" fill="none" stroke="#8a572d" stroke-width="6" stroke-linecap="round"></path><path d="M82 15 L88 8 M82 15 L91 17 M82 15 L79 5" stroke="#ffd34e" stroke-width="4" stroke-linecap="round"></path>
+                    <path d="M48 80 L40 92 H56 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M48 91 C32 108 64 120 45 148" fill="none" stroke="#535764" stroke-width="2.5"></path>
+                </svg>
+                <svg class="powerup-floating-balloon bomb-balloon is-large is-phase-hidden" data-balloon-kind="bomb" data-final-bomb="true" viewBox="0 0 100 150" style="--balloon-x:36%;--balloon-duration:18s;--balloon-delay:-13s;--balloon-color:#343744;--balloon-edge:#11131a;">
+                    <circle cx="48" cy="47" r="34" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5"></circle>
+                    <ellipse cx="36" cy="34" rx="8" ry="11" fill="rgba(255,255,255,0.28)" transform="rotate(28 36 34)"></ellipse>
+                    <path d="M66 21 Q74 8 83 16" fill="none" stroke="#8a572d" stroke-width="6" stroke-linecap="round"></path><path d="M82 15 L88 8 M82 15 L91 17 M82 15 L79 5" stroke="#ffd34e" stroke-width="4" stroke-linecap="round"></path>
+                    <path d="M48 80 L40 92 H56 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M48 91 C32 108 64 120 45 148" fill="none" stroke="#535764" stroke-width="2.5"></path>
+                </svg>
+            </div>
+            <svg class="heart-shot-field" aria-hidden="true" preserveAspectRatio="none">
+                <defs>
+                    <linearGradient id="heartShotTrailGradient" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff4d9d" stop-opacity="0.35"></stop><stop offset="0.5" stop-color="#fff2a3" stop-opacity="0.95"></stop><stop offset="1" stop-color="#ffffff" stop-opacity="0.2"></stop></linearGradient>
+                    <linearGradient id="heartFlyingArrowGradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8f2858"></stop><stop offset="0.55" stop-color="#ffd861"></stop><stop offset="1" stop-color="#fff8d2"></stop></linearGradient>
+                    <filter id="heartShotGlow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="3" result="blur"></feGaussianBlur><feMerge><feMergeNode in="blur"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge></filter>
+                </defs>
+                <path class="heart-aim-trail-glow"></path>
+                <path class="heart-aim-trail"></path>
+                <g class="heart-flying-arrow" hidden>
+                    <path d="M-34 0 H-4" fill="none" stroke="url(#heartFlyingArrowGradient)" stroke-width="7" stroke-linecap="round"></path>
+                    <path d="M-4 0 C-16 12 -10 28 4 25 C18 22 30 0 30 0 C30 0 18 -22 4 -25 C-10 -28 -16 -12 -4 0 Z" fill="#ff6cab" stroke="#8f2858" stroke-width="3"></path>
+                    <path d="M-31 0 L-43 -10 L-39 0 L-43 10 Z" fill="#ff78b5" stroke="#8f2858" stroke-width="3"></path>
+                </g>
+            </svg>
+            <button class="heart-cupid-bow-control" type="button" aria-label="Aim and shoot Cupid bow">
+                <svg class="heart-cupid-bow" viewBox="0 0 320 250" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="heartBowGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1a0"></stop><stop offset="0.45" stop-color="#f5ad2e"></stop><stop offset="1" stop-color="#a85a13"></stop></linearGradient>
+                        <linearGradient id="heartBowGrip" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff82bb"></stop><stop offset="1" stop-color="#a91d64"></stop></linearGradient>
+                    </defs>
+                    <g class="heart-bow-art">
+                        <path class="heart-bow-limb heart-bow-limb-left" d="M160 165 Q112 68 39 171 Q70 136 91 177" fill="none" stroke="url(#heartBowGold)" stroke-width="17" stroke-linecap="round"></path>
+                        <path class="heart-bow-limb heart-bow-limb-right" d="M160 165 Q208 68 281 171 Q250 136 229 177" fill="none" stroke="url(#heartBowGold)" stroke-width="17" stroke-linecap="round"></path>
+                        <path class="heart-bow-detail" d="M45 166 Q108 102 151 166 M275 166 Q212 102 169 166" fill="none" stroke="#fff1a0" stroke-width="4" stroke-linecap="round" opacity="0.8"></path>
+                        <path class="heart-bow-string" d="M39 171 L160 179 L281 171" fill="none" stroke="#fff9db" stroke-width="4" stroke-linecap="round"></path>
+                        <path class="heart-bow-arrow" d="M160 205 V39" fill="none" stroke="#7a3b18" stroke-width="8" stroke-linecap="round"></path>
+                        <path class="heart-bow-arrow-head" d="M160 52 C172 64 188 58 185 44 C182 30 160 18 160 18 C160 18 138 30 135 44 C132 58 148 64 160 52 Z" fill="#ff6cab" stroke="#8f2858" stroke-width="4"></path>
+                        <path class="heart-bow-arrow-feather" d="M160 198 L143 216 L160 210 L177 216 Z" fill="#ff78b5" stroke="#8f2858" stroke-width="4"></path>
+                        <rect x="145" y="151" width="30" height="65" rx="12" fill="url(#heartBowGrip)" stroke="#702044" stroke-width="6"></rect>
+                        <path d="M160 167 C147 148 118 158 123 181 C128 204 160 218 160 218 C160 218 192 204 197 181 C202 158 173 148 160 167 Z" fill="#ff5da8" stroke="#8f2858" stroke-width="5"></path>
+                    </g>
+                </svg>
+            </button>
+            <div class="heart-game-result" role="dialog" aria-modal="true" aria-labelledby="heart-game-result-title" hidden>
+                <div class="heart-game-result-panel">
+                    <strong id="heart-game-result-title" class="heart-game-result-title">Mission Complete!</strong>
+                    <span class="heart-game-result-copy">You reached 1000 points!</span>
+                    <button class="heart-game-retry-button" type="button">Play Again</button>
+                </div>
+            </div>
+        </section>
+        <section class="heart-game-celebration" role="status" aria-live="polite" hidden>
+            <div class="heart-celebration-confetti" aria-hidden="true"></div>
+            <h2 class="heart-celebration-title">Congratulations!</h2>
+            <img class="heart-celebration-character" src="assets/Character/ch18.webp" alt="Heart Mission guide celebrating">
+        </section>
+        <section class="circle-lesson-progress heart-final-progress" aria-label="Heart mission progress" aria-hidden="true">
+            <div class="circle-lesson-progress-board">
+                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/progressboard.webp" alt="">
+                <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Mission Complete!">
+                    <path id="heartMissionCompleteTitleCurve" d="M 4 44 Q 100 32 196 44" fill="none"></path>
+                    <text textLength="184" lengthAdjust="spacingAndGlyphs"><textPath href="#heartMissionCompleteTitleCurve" startOffset="50%" text-anchor="middle">Mission Complete!</textPath></text>
+                </svg>
+                <div class="circle-lesson-stars" data-earned-stars="2" role="img" aria-label="2 of 3 stars earned">
+                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/1star.webp" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/2star.webp" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/1star.webp" alt=""></span>
+                </div>
+                <p class="circle-lesson-star-message">Excellent work!</p>
+                <div class="circle-lesson-progress-actions">
+                    <button class="circle-lesson-progress-button heart-final-replay" type="button" aria-label="Replay Heart Mission"><img src="assets/Buttons/replay.webp" alt=""></button>
+                    <button class="circle-lesson-progress-button heart-final-next" type="button" aria-label="Continue to Shape Island"><img src="assets/Buttons/next.webp" alt=""></button>
+                </div>
+            </div>
+        </section>
         <div class="shape-area-title shape-area-title-text shape-area-preview-title" aria-label="Area 6">
             <span>Area</span>
             <strong>6</strong>
@@ -1532,7 +1738,7 @@
 
     
 
-    <script src="script.js?v=20260919-430"></script>
+    <script src="script.js?v=20260921-492"></script>
     </div>
 
     <script>

@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260919-430';
+    const appVersion = '20260921-492';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -964,6 +964,75 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapePreviewProgressByPage = new Map();
     const shapePreviewIntroStates = new Map();
     const shapePreviewSceneCleanupByPage = new Map();
+    const heartMissionPage = document.getElementById('learnscape-shape-area-6-page');
+    const heartMissionIntro = heartMissionPage?.querySelector('.heart-mission-intro') || null;
+    const heartMissionCharacterWrap = heartMissionIntro?.querySelector('.heart-mission-character-wrap') || null;
+    const heartMissionMessageText = heartMissionIntro?.querySelector('.heart-mission-message-text') || null;
+    const heartMissionStartButton = heartMissionIntro?.querySelector('.heart-mission-start-button') || null;
+    const heartCupidGame = heartMissionPage?.querySelector('.heart-cupid-game') || null;
+    const heartShotField = heartCupidGame?.querySelector('.heart-shot-field') || null;
+    const heartAimTrail = heartShotField?.querySelector('.heart-aim-trail') || null;
+    const heartAimTrailGlow = heartShotField?.querySelector('.heart-aim-trail-glow') || null;
+    const heartFlyingArrow = heartShotField?.querySelector('.heart-flying-arrow') || null;
+    const heartFloatingBalloons = Array.from(heartCupidGame?.querySelectorAll('.heart-floating-balloon, .shape-floating-balloon, .powerup-floating-balloon') || []);
+    const heartPointBalloons = heartFloatingBalloons.filter((balloon) => balloon.dataset.balloonKind === 'heart');
+    const heartShapePenaltyBalloons = heartFloatingBalloons.filter((balloon) => balloon.dataset.balloonKind === 'shape' || balloon.classList.contains('shape-floating-balloon'));
+    const heartFreezeBalloons = heartFloatingBalloons.filter((balloon) => balloon.dataset.balloonKind === 'freeze');
+    const heartBombBalloons = heartFloatingBalloons.filter((balloon) => balloon.dataset.balloonKind === 'bomb');
+    const heartCupidBowControl = heartCupidGame?.querySelector('.heart-cupid-bow-control') || null;
+    const heartBowArt = heartCupidBowControl?.querySelector('.heart-bow-art') || null;
+    const heartBowString = heartCupidBowControl?.querySelector('.heart-bow-string') || null;
+    const heartBowArrowParts = Array.from(heartCupidBowControl?.querySelectorAll('.heart-bow-arrow, .heart-bow-arrow-head, .heart-bow-arrow-feather') || []);
+    const heartGameScoreValue = heartCupidGame?.querySelector('.heart-game-score-value') || null;
+    const heartGameScoreFill = heartCupidGame?.querySelector('.heart-game-score-fill') || null;
+    const heartGameTimer = heartCupidGame?.querySelector('.heart-game-timer') || null;
+    const heartGameTimerValue = heartCupidGame?.querySelector('.heart-game-timer-value') || null;
+    const heartGameLives = heartCupidGame?.querySelector('.heart-game-lives') || null;
+    const heartGameLifeIcons = Array.from(heartCupidGame?.querySelectorAll('.heart-game-life') || []);
+    const heartFreezeStatus = heartCupidGame?.querySelector('.heart-freeze-status') || null;
+    const heartFreezeCountdown = heartCupidGame?.querySelector('.heart-freeze-countdown') || null;
+    const heartGameResult = heartCupidGame?.querySelector('.heart-game-result') || null;
+    const heartGameResultTitle = heartCupidGame?.querySelector('.heart-game-result-title') || null;
+    const heartGameResultCopy = heartCupidGame?.querySelector('.heart-game-result-copy') || null;
+    const heartGameRetryButton = heartCupidGame?.querySelector('.heart-game-retry-button') || null;
+    const heartGameCelebration = heartMissionPage?.querySelector('.heart-game-celebration') || null;
+    const heartCelebrationConfetti = heartGameCelebration?.querySelector('.heart-celebration-confetti') || null;
+    const heartFinalProgress = heartMissionPage?.querySelector('.heart-final-progress') || null;
+    const heartFinalReplayButton = heartFinalProgress?.querySelector('.heart-final-replay') || null;
+    const heartFinalNextButton = heartFinalProgress?.querySelector('.heart-final-next') || null;
+    const HEART_GAME_TARGET_SCORE = 1000;
+    const HEART_GAME_MAX_LIVES = 5;
+    const HEART_GAME_START_TIME_MS = 45000;
+    const HEART_GAME_LARGE_HEART_BONUS_MS = 3000;
+    const HEART_GAME_SMALL_HEART_BONUS_MS = 5000;
+    const HEART_GAME_LIFE_DRAIN_PER_SECOND = 1 / 60;
+    const HEART_CELEBRATION_AUDIO_SOURCES = [
+        'assets/Audios/Voice over/Mahusay.mp3',
+        'assets/Audios/Sound effects/completed.mp3',
+        'assets/Audios/Sound effects/kids cheering.mp3',
+    ];
+    let heartMissionSession = 0;
+    let heartMissionTimers = [];
+    let heartMissionAudio = null;
+    let heartAimPointerId = null;
+    let heartShotAnimationFrame = null;
+    let heartCurrentTrajectory = null;
+    let heartGameScore = 0;
+    let heartGameLivesRemaining = HEART_GAME_MAX_LIVES;
+    let heartGameLifeEnergy = HEART_GAME_MAX_LIVES;
+    let heartGameTimeRemainingMs = HEART_GAME_START_TIME_MS;
+    let heartGameClockFrame = null;
+    let heartGameLastClockTick = null;
+    let heartGameEnded = false;
+    let heartFreezeEndsAt = 0;
+    let heartFreezeTimer = null;
+    let heartFreezeCountdownTimer = null;
+    const heartBalloonRespawnTimers = new Map();
+    let heartGameDifficultyPhase = 0;
+    let heartGameSpeedRate = 0.82;
+    let heartCelebrationSession = 0;
+    let heartCelebrationTimers = [];
+    let heartCelebrationAudio = null;
 
     shapePreviewPages.forEach((page, pageIndex) => {
         const progress = document.createElement('section');
@@ -3301,6 +3370,779 @@ document.addEventListener('DOMContentLoaded', async () => {
         playStage(0);
     };
 
+    const stopHeartMissionSequence = () => {
+        heartMissionSession += 1;
+        heartMissionTimers.forEach((timerId) => window.clearTimeout(timerId));
+        heartMissionTimers = [];
+        if (heartMissionAudio) {
+            heartMissionAudio.onended = null;
+            heartMissionAudio.onerror = null;
+            heartMissionAudio.pause?.();
+            try {
+                heartMissionAudio.currentTime = 0;
+            } catch (error) {
+                // The clip may not have loaded enough to rewind yet.
+            }
+            heartMissionAudio = null;
+        }
+        heartMissionIntro?.classList.remove('is-active', 'is-message-visible', 'is-message-changing', 'is-moving-right');
+        heartMissionIntro?.setAttribute('aria-hidden', 'true');
+        if (heartMissionIntro) heartMissionIntro.hidden = true;
+        if (heartMissionStartButton) {
+            heartMissionStartButton.hidden = true;
+            heartMissionStartButton.classList.remove('is-visible');
+        }
+        heartMissionPage?.classList.remove('is-heart-mission-active');
+    };
+
+    const playHeartMissionAudio = (source, session, fallbackDuration, onComplete) => {
+        if (heartMissionAudio) {
+            heartMissionAudio.onended = null;
+            heartMissionAudio.onerror = null;
+            heartMissionAudio.pause?.();
+        }
+
+        let completed = false;
+        const finish = () => {
+            if (completed || session !== heartMissionSession) return;
+            completed = true;
+            if (heartMissionAudio) {
+                heartMissionAudio.onended = null;
+                heartMissionAudio.onerror = null;
+                heartMissionAudio = null;
+            }
+            onComplete?.();
+        };
+        heartMissionTimers.push(window.setTimeout(finish, fallbackDuration));
+        if (!window.Audio) return;
+
+        const audio = new window.Audio(source);
+        heartMissionAudio = audio;
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+        audio.onended = finish;
+        audio.onerror = finish;
+        audio.load?.();
+        audio.play().catch(() => {});
+    };
+
+    const startHeartMissionSequence = () => {
+        if (!heartMissionPage || heartMissionPage.hidden || !heartMissionIntro || !heartMissionMessageText) return;
+        stopHeartMissionSequence();
+        const session = heartMissionSession;
+        heartMissionPage.classList.add('is-heart-mission-active');
+        heartMissionMessageText.textContent = 'Para sa ating Heart Mission, putukin ang mga lobong hugis puso!';
+        heartMissionIntro.hidden = false;
+        heartMissionIntro.setAttribute('aria-hidden', 'false');
+        heartMissionIntro.getBoundingClientRect();
+        heartMissionTimers.push(window.setTimeout(() => {
+            if (session !== heartMissionSession || heartMissionPage.hidden) return;
+            heartMissionIntro.classList.add('is-active');
+        }, 80));
+
+        heartMissionTimers.push(window.setTimeout(() => {
+            if (session !== heartMissionSession || heartMissionPage.hidden) return;
+            heartMissionIntro.classList.add('is-message-visible');
+            playHeartMissionAudio('assets/Audios/Voice over/heartmission.mp3', session, 8000, () => {
+                if (session !== heartMissionSession || heartMissionPage.hidden) return;
+                heartMissionIntro.classList.add('is-message-changing');
+                heartMissionTimers.push(window.setTimeout(() => {
+                    if (session !== heartMissionSession || heartMissionPage.hidden) return;
+                    heartMissionMessageText.textContent = 'Handa ka na ba?';
+                    heartMissionIntro.classList.remove('is-message-changing');
+                    playHeartMissionAudio('assets/Audios/Voice over/Handa ka na ba.mp3', session, 4000, () => {
+                        if (session !== heartMissionSession || heartMissionPage.hidden) return;
+                        heartMissionIntro.classList.add('is-moving-right');
+                        heartMissionTimers.push(window.setTimeout(() => {
+                            if (session !== heartMissionSession || heartMissionPage.hidden || !heartMissionStartButton) return;
+                            heartMissionStartButton.hidden = false;
+                            heartMissionStartButton.getBoundingClientRect();
+                            heartMissionStartButton.classList.add('is-visible');
+                        }, 1800));
+                    });
+                }, 320));
+            });
+        }, 1950));
+    };
+
+    const sizeHeartShotField = () => {
+        if (!heartShotField || !heartCupidGame) return;
+        const rect = heartCupidGame.getBoundingClientRect();
+        heartShotField.setAttribute('viewBox', `0 0 ${Math.max(1, rect.width)} ${Math.max(1, rect.height)}`);
+    };
+
+    const resetHeartCupidBow = () => {
+        heartCupidGame?.classList.remove('is-aiming', 'is-shooting');
+        heartCupidBowControl?.style.setProperty('--heart-bow-angle', '0deg');
+        heartBowString?.setAttribute('d', 'M39 171 L160 179 L281 171');
+        heartBowArrowParts.forEach((part) => part.removeAttribute('transform'));
+        if (heartBowArt) heartBowArt.style.transform = '';
+        if (heartAimTrail) heartAimTrail.setAttribute('d', '');
+        if (heartAimTrailGlow) heartAimTrailGlow.setAttribute('d', '');
+        if (heartFlyingArrow) {
+            heartFlyingArrow.hidden = true;
+            heartFlyingArrow.removeAttribute('transform');
+        }
+        heartCurrentTrajectory = null;
+    };
+
+    const setHeartBalloonPlaybackRate = (rate) => {
+        heartFloatingBalloons.forEach((balloon) => {
+            balloon.getAnimations().forEach((animation) => {
+                if (animation.animationName === 'heartBalloonRise') animation.playbackRate = rate;
+            });
+        });
+    };
+
+    const getHeartBalloonPlaybackRate = () => (
+        heartGameSpeedRate * (heartFreezeEndsAt > performance.now() ? 0.24 : 1)
+    );
+
+    const formatHeartGameTime = (milliseconds) => {
+        const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    };
+
+    const updateHeartGameHud = () => {
+        if (heartGameScoreValue) heartGameScoreValue.textContent = `${heartGameScore} / ${HEART_GAME_TARGET_SCORE}`;
+        if (heartGameScoreFill) {
+            heartGameScoreFill.style.width = `${Math.min(100, (heartGameScore / HEART_GAME_TARGET_SCORE) * 100)}%`;
+        }
+        if (heartGameTimerValue) heartGameTimerValue.textContent = formatHeartGameTime(heartGameTimeRemainingMs);
+        heartGameTimer?.setAttribute('aria-label', `${Math.max(0, Math.ceil(heartGameTimeRemainingMs / 1000))} seconds remaining`);
+        heartGameTimer?.classList.toggle('is-urgent', heartGameTimeRemainingMs <= 10000);
+        heartGameLivesRemaining = Math.max(0, Math.ceil(heartGameLifeEnergy - 0.0001));
+        heartGameLifeIcons.forEach((icon, index) => {
+            const lifeLevel = Math.max(0, Math.min(1, heartGameLifeEnergy - index));
+            icon.classList.toggle('is-lost', lifeLevel <= 0);
+            icon.classList.toggle('is-draining', lifeLevel > 0 && lifeLevel < 1);
+            icon.style.opacity = `${(0.18 + (lifeLevel * 0.82)).toFixed(3)}`;
+        });
+        heartGameLives?.setAttribute('aria-label', `${heartGameLivesRemaining} ${heartGameLivesRemaining === 1 ? 'life' : 'lives'} remaining`);
+    };
+
+    const stopHeartGameClock = () => {
+        if (heartGameClockFrame !== null) window.cancelAnimationFrame(heartGameClockFrame);
+        heartGameClockFrame = null;
+        heartGameLastClockTick = null;
+    };
+
+    const startHeartGameClock = () => {
+        stopHeartGameClock();
+        const tick = (timestamp) => {
+            if (heartGameEnded) {
+                heartGameClockFrame = null;
+                return;
+            }
+            if (heartGameLastClockTick === null) heartGameLastClockTick = timestamp;
+            const elapsedMs = Math.max(0, timestamp - heartGameLastClockTick);
+            heartGameLastClockTick = timestamp;
+            heartGameTimeRemainingMs = Math.max(0, heartGameTimeRemainingMs - elapsedMs);
+            heartGameLifeEnergy = Math.max(0, heartGameLifeEnergy - ((elapsedMs / 1000) * HEART_GAME_LIFE_DRAIN_PER_SECOND));
+            updateHeartGameHud();
+
+            if (heartGameTimeRemainingMs <= 0) {
+                finishHeartGame(false, 'time');
+                return;
+            }
+            if (heartGameLifeEnergy <= 0) {
+                finishHeartGame(false, 'lives');
+                return;
+            }
+            heartGameClockFrame = window.requestAnimationFrame(tick);
+        };
+        heartGameClockFrame = window.requestAnimationFrame(tick);
+    };
+
+    const clearHeartFreeze = () => {
+        if (heartFreezeTimer !== null) window.clearTimeout(heartFreezeTimer);
+        if (heartFreezeCountdownTimer !== null) window.clearInterval(heartFreezeCountdownTimer);
+        heartFreezeTimer = null;
+        heartFreezeCountdownTimer = null;
+        heartFreezeEndsAt = 0;
+        if (heartFreezeStatus) heartFreezeStatus.hidden = true;
+        heartCupidGame?.classList.remove('is-freeze-active');
+        setHeartBalloonPlaybackRate(heartGameSpeedRate);
+    };
+
+    const activateHeartFreeze = () => {
+        clearHeartFreeze();
+        heartFreezeEndsAt = performance.now() + 5000;
+        heartCupidGame?.classList.add('is-freeze-active');
+        if (heartFreezeStatus) heartFreezeStatus.hidden = false;
+        setHeartBalloonPlaybackRate(heartGameSpeedRate * 0.24);
+
+        const updateCountdown = () => {
+            const remaining = Math.max(0, heartFreezeEndsAt - performance.now());
+            if (heartFreezeCountdown) heartFreezeCountdown.textContent = (remaining / 1000).toFixed(1);
+        };
+        updateCountdown();
+        heartFreezeCountdownTimer = window.setInterval(updateCountdown, 100);
+        heartFreezeTimer = window.setTimeout(clearHeartFreeze, 5000);
+    };
+
+    const showHeartHitFeedback = (text, x, y, tone = 'positive') => {
+        if (!heartCupidGame) return;
+        const feedback = document.createElement('span');
+        feedback.className = `heart-hit-feedback is-${tone}`;
+        feedback.textContent = text;
+        feedback.style.left = `${x}px`;
+        feedback.style.top = `${y}px`;
+        heartCupidGame.appendChild(feedback);
+        window.setTimeout(() => feedback.remove(), 900);
+    };
+
+    const resetHeartFloatingBalloon = (balloon) => {
+        const lifecycle = heartBalloonRespawnTimers.get(balloon);
+        if (lifecycle?.timer !== undefined) window.clearTimeout(lifecycle.timer);
+        lifecycle?.burst?.remove();
+        heartBalloonRespawnTimers.delete(balloon);
+        balloon.classList.remove('is-popping', 'is-respawning');
+        ['left', 'top', 'bottom', 'width', 'height', 'opacity', 'transform'].forEach((property) => {
+            balloon.style.removeProperty(property);
+        });
+        window.requestAnimationFrame(() => {
+            balloon.getAnimations().forEach((animation) => {
+                if (animation.animationName !== 'heartBalloonRise') return;
+                animation.playbackRate = getHeartBalloonPlaybackRate();
+                if (heartGameEnded) animation.pause();
+                else animation.play();
+            });
+        });
+    };
+
+    const respawnHeartFloatingBalloon = (balloon, previousXPercent) => {
+        resetHeartFloatingBalloon(balloon);
+        const nextXPercent = previousXPercent < 50
+            ? 58 + (Math.random() * 36)
+            : 6 + (Math.random() * 36);
+        const respawnDelay = 1300 + (Math.random() * 1200);
+        balloon.style.setProperty('--balloon-x', `${nextXPercent.toFixed(1)}%`);
+        balloon.style.setProperty('--balloon-delay', '0s');
+        balloon.classList.add('is-respawning');
+
+        const respawnTimer = window.setTimeout(() => {
+            heartBalloonRespawnTimers.delete(balloon);
+            if (heartGameEnded) return;
+            balloon.classList.remove('is-respawning');
+            balloon.getBoundingClientRect();
+            window.requestAnimationFrame(() => {
+                balloon.getAnimations().forEach((animation) => {
+                    if (animation.animationName !== 'heartBalloonRise') return;
+                    animation.playbackRate = getHeartBalloonPlaybackRate();
+                    animation.play();
+                });
+            });
+        }, respawnDelay);
+        heartBalloonRespawnTimers.set(balloon, { timer: respawnTimer });
+    };
+
+    const setHeartPhaseBalloonVisible = (balloon, visible) => {
+        const isHidden = balloon.classList.contains('is-phase-hidden');
+        if (visible === !isHidden) return;
+        resetHeartFloatingBalloon(balloon);
+        if (!visible) {
+            balloon.classList.add('is-phase-hidden');
+            return;
+        }
+        balloon.style.setProperty('--balloon-delay', '0s');
+        balloon.style.setProperty('--balloon-x', `${(7 + (Math.random() * 86)).toFixed(1)}%`);
+        balloon.classList.remove('is-phase-hidden');
+    };
+
+    const setHeartPhaseBalloonSize = (balloon, size) => {
+        const isSmall = size === 'small';
+        balloon.classList.toggle('is-small', isSmall);
+        balloon.classList.toggle('is-large', !isSmall);
+        if (balloon.dataset.balloonKind === 'heart') balloon.dataset.points = isSmall ? '50' : '25';
+    };
+
+    const updateHeartGameDifficulty = (force = false) => {
+        const phase = heartGameScore < 300 ? 1 : heartGameScore < 700 ? 2 : 3;
+        const finalSpeedStep = phase === 3 ? Math.min(3, Math.floor((heartGameScore - 700) / 100)) : 0;
+        const difficultyKey = (phase * 10) + finalSpeedStep;
+        if (!force && difficultyKey === heartGameDifficultyPhase) return;
+        heartGameDifficultyPhase = difficultyKey;
+        heartGameSpeedRate = phase === 1
+            ? 0.82
+            : phase === 2
+                ? 1
+                : 1.18 + (finalSpeedStep * 0.26);
+
+        heartPointBalloons.forEach((balloon, index) => {
+            const visible = phase === 1 ? index < 3 : phase === 2 ? index < 4 : true;
+            setHeartPhaseBalloonVisible(balloon, visible);
+            const size = phase === 1
+                ? 'large'
+                : phase === 2
+                    ? (index >= 2 ? 'small' : 'large')
+                    : (index < 2 ? 'large' : 'small');
+            setHeartPhaseBalloonSize(balloon, size);
+            balloon.classList.toggle('is-golden-heart', phase === 1 && index < 2);
+        });
+
+        heartShapePenaltyBalloons.forEach((balloon, index) => {
+            const visible = phase === 1 ? index < 4 : phase === 2 ? index < 6 : true;
+            setHeartPhaseBalloonVisible(balloon, visible);
+            setHeartPhaseBalloonSize(balloon, phase === 2 && index % 2 === 0 ? 'small' : 'large');
+        });
+
+        heartFreezeBalloons.forEach((balloon) => setHeartPhaseBalloonVisible(balloon, phase >= 2));
+        heartBombBalloons.forEach((balloon, index) => {
+            setHeartPhaseBalloonVisible(balloon, phase >= 2 && (phase === 3 || index === 0));
+            setHeartPhaseBalloonSize(balloon, 'large');
+        });
+        setHeartBalloonPlaybackRate(getHeartBalloonPlaybackRate());
+    };
+
+    const popHeartFloatingBalloon = (balloon, balloonRect, gameRect, playSound = true) => {
+        const left = balloonRect.left - gameRect.left;
+        const top = balloonRect.top - gameRect.top;
+        const centerX = left + (balloonRect.width / 2);
+        const centerY = top + (balloonRect.height * 0.3);
+        const previousXPercent = Math.max(0, Math.min(100, (centerX / Math.max(1, gameRect.width)) * 100));
+
+        balloon.style.left = `${left}px`;
+        balloon.style.top = `${top}px`;
+        balloon.style.bottom = 'auto';
+        balloon.style.width = `${balloonRect.width}px`;
+        balloon.style.height = `${balloonRect.height}px`;
+        balloon.style.opacity = '1';
+        balloon.style.transform = 'none';
+        balloon.classList.add('is-popping');
+
+        const burst = document.createElement('span');
+        burst.className = 'heart-balloon-pop-burst';
+        burst.style.left = `${centerX}px`;
+        burst.style.top = `${centerY}px`;
+        heartCupidGame?.appendChild(burst);
+        if (playSound) playUiClickSound('pop');
+
+        const popTimer = window.setTimeout(() => {
+            heartBalloonRespawnTimers.delete(balloon);
+            burst.remove();
+            respawnHeartFloatingBalloon(balloon, previousXPercent);
+        }, 560);
+        heartBalloonRespawnTimers.set(balloon, { timer: popTimer, burst });
+    };
+
+    const findHeartBalloonHit = (fromX, fromY, toX, toY) => {
+        if (!heartCupidGame) return null;
+        const gameRect = heartCupidGame.getBoundingClientRect();
+        const segmentX = toX - fromX;
+        const segmentY = toY - fromY;
+        const segmentLengthSquared = (segmentX * segmentX) + (segmentY * segmentY);
+        let nearestHit = null;
+
+        heartFloatingBalloons.forEach((balloon) => {
+            if (balloon.classList.contains('is-popping')
+                || balloon.classList.contains('is-respawning')
+                || balloon.classList.contains('is-phase-hidden')) return;
+            const balloonRect = balloon.getBoundingClientRect();
+            if (balloonRect.bottom < gameRect.top || balloonRect.top > gameRect.bottom) return;
+            const centerX = balloonRect.left - gameRect.left + (balloonRect.width / 2);
+            const centerY = balloonRect.top - gameRect.top + (balloonRect.height * 0.3);
+            const radius = Math.max(24, Math.min(balloonRect.width, balloonRect.height) * 0.38);
+            const projection = segmentLengthSquared > 0
+                ? Math.max(0, Math.min(1, (((centerX - fromX) * segmentX) + ((centerY - fromY) * segmentY)) / segmentLengthSquared))
+                : 0;
+            const closestX = fromX + (segmentX * projection);
+            const closestY = fromY + (segmentY * projection);
+            const distance = Math.hypot(centerX - closestX, centerY - closestY);
+
+            if (distance <= radius && (!nearestHit || distance < nearestHit.distance)) {
+                nearestHit = { balloon, balloonRect, gameRect, distance };
+            }
+        });
+
+        return nearestHit;
+    };
+
+    const prepareHeartCelebrationConfetti = () => {
+        if (!heartCelebrationConfetti || heartCelebrationConfetti.childElementCount) return;
+        const colors = ['#ff4f91', '#ff79b7', '#ffd84f', '#ff6d68', '#f7a6d2', '#ffffff'];
+        for (let index = 0; index < 42; index += 1) {
+            const heart = document.createElement('span');
+            heart.style.setProperty('--heart-x', `${2 + (Math.random() * 96)}%`);
+            heart.style.setProperty('--heart-size', `${(0.55 + (Math.random() * 1.05)).toFixed(2)}rem`);
+            heart.style.setProperty('--heart-color', colors[index % colors.length]);
+            heart.style.setProperty('--heart-delay', `${(Math.random() * -3.5).toFixed(2)}s`);
+            heart.style.setProperty('--heart-duration', `${(3.2 + (Math.random() * 2.2)).toFixed(2)}s`);
+            heart.style.setProperty('--heart-drift', `${Math.round((Math.random() * 22) - 11)}vw`);
+            heartCelebrationConfetti.appendChild(heart);
+        }
+    };
+
+    const stopHeartVictoryCelebration = () => {
+        heartCelebrationSession += 1;
+        heartCelebrationTimers.forEach((timer) => window.clearTimeout(timer));
+        heartCelebrationTimers = [];
+        if (heartCelebrationAudio) {
+            heartCelebrationAudio.onended = null;
+            heartCelebrationAudio.onerror = null;
+            heartCelebrationAudio.pause();
+            heartCelebrationAudio.currentTime = 0;
+            heartCelebrationAudio = null;
+        }
+        heartGameCelebration?.classList.remove('is-active', 'is-character-exiting', 'is-finishing');
+        if (heartGameCelebration) heartGameCelebration.hidden = true;
+        heartFinalProgress?.setAttribute('aria-hidden', 'true');
+        heartMissionPage?.classList.remove('is-heart-victory-celebration', 'is-heart-final-progress-visible');
+    };
+
+    const showHeartFinalProgress = (session) => {
+        if (session !== heartCelebrationSession || !heartMissionPage || heartMissionPage.hidden) return;
+        heartGameCelebration?.classList.add('is-character-exiting');
+        const exitTimer = window.setTimeout(() => {
+            if (session !== heartCelebrationSession) return;
+            heartGameCelebration?.classList.add('is-finishing');
+            const revealTimer = window.setTimeout(() => {
+                if (session !== heartCelebrationSession) return;
+                if (heartGameCelebration) heartGameCelebration.hidden = true;
+                heartMissionPage.classList.remove('is-heart-victory-celebration');
+                heartMissionPage.classList.add('is-heart-final-progress-visible');
+                heartFinalProgress?.setAttribute('aria-hidden', 'false');
+                playUiClickSound('boardSuccess');
+                heartCelebrationTimers.push(window.setTimeout(() => {
+                    if (session === heartCelebrationSession) playUiClickSound('starPop');
+                }, 650));
+            }, 480);
+            heartCelebrationTimers.push(revealTimer);
+        }, 1550);
+        heartCelebrationTimers.push(exitTimer);
+    };
+
+    const startHeartVictoryCelebration = () => {
+        if (!heartMissionPage || heartMissionPage.hidden) return;
+        stopHeartVictoryCelebration();
+        const session = heartCelebrationSession;
+        prepareHeartCelebrationConfetti();
+        if (heartCupidGame) {
+            heartCupidGame.classList.remove('is-visible');
+            heartCupidGame.hidden = true;
+        }
+        heartMissionPage.classList.remove('is-heart-cupid-game-active');
+        heartMissionPage.classList.add('is-heart-victory-celebration');
+        if (heartGameCelebration) {
+            heartGameCelebration.hidden = false;
+            heartGameCelebration.getBoundingClientRect();
+            heartGameCelebration.classList.add('is-active');
+        }
+
+        const playCelebrationAudio = (index) => {
+            if (session !== heartCelebrationSession) return;
+            if (index >= HEART_CELEBRATION_AUDIO_SOURCES.length) {
+                const finishTimer = window.setTimeout(() => showHeartFinalProgress(session), 450);
+                heartCelebrationTimers.push(finishTimer);
+                return;
+            }
+            if (!window.Audio) {
+                const fallbackTimer = window.setTimeout(() => playCelebrationAudio(index + 1), 1000);
+                heartCelebrationTimers.push(fallbackTimer);
+                return;
+            }
+            const audio = new window.Audio(HEART_CELEBRATION_AUDIO_SOURCES[index]);
+            heartCelebrationAudio = audio;
+            audio.preload = 'auto';
+            audio.playsInline = true;
+            let advanced = false;
+            const advance = () => {
+                if (advanced || session !== heartCelebrationSession) return;
+                advanced = true;
+                if (heartCelebrationAudio === audio) heartCelebrationAudio = null;
+                playCelebrationAudio(index + 1);
+            };
+            audio.onended = advance;
+            audio.onerror = advance;
+            audio.currentTime = 0;
+            audio.play().catch(advance);
+        };
+        playCelebrationAudio(0);
+    };
+
+    const finishHeartGame = (won, reason = 'lives') => {
+        if (heartGameEnded) return;
+        heartGameEnded = true;
+        stopHeartGameClock();
+        clearHeartFreeze();
+        if (heartShotAnimationFrame !== null) {
+            window.cancelAnimationFrame(heartShotAnimationFrame);
+            heartShotAnimationFrame = null;
+        }
+        resetHeartCupidBow();
+        if (heartCupidBowControl) heartCupidBowControl.disabled = true;
+        heartFloatingBalloons.forEach((balloon) => {
+            balloon.getAnimations().forEach((animation) => {
+                if (animation.animationName === 'heartBalloonRise') animation.pause();
+            });
+        });
+        if (won) {
+            playUiClickSound('boardSuccess');
+            startHeartVictoryCelebration();
+            return;
+        }
+        if (heartGameResultTitle) {
+            heartGameResultTitle.textContent = won ? 'Mission Complete!' : reason === 'time' ? "Time's Up!" : 'Out of Lives!';
+        }
+        if (heartGameResultCopy) {
+            heartGameResultCopy.textContent = won ? 'You reached 1000 points!' : `Final score: ${heartGameScore}`;
+        }
+        if (heartGameRetryButton) heartGameRetryButton.textContent = won ? 'Play Again' : 'Retry';
+        if (heartGameResult) {
+            heartGameResult.hidden = false;
+            heartGameResult.getBoundingClientRect();
+            heartGameResult.classList.add('is-visible');
+        }
+        playUiClickSound(won ? 'boardSuccess' : 'alert');
+    };
+
+    const resetHeartGameState = () => {
+        clearHeartFreeze();
+        heartGameScore = 0;
+        heartGameLivesRemaining = HEART_GAME_MAX_LIVES;
+        heartGameLifeEnergy = HEART_GAME_MAX_LIVES;
+        heartGameTimeRemainingMs = HEART_GAME_START_TIME_MS;
+        heartGameEnded = false;
+        heartGameDifficultyPhase = 0;
+        heartGameSpeedRate = 0.82;
+        if (heartCupidBowControl) heartCupidBowControl.disabled = false;
+        heartGameResult?.classList.remove('is-visible');
+        if (heartGameResult) heartGameResult.hidden = true;
+        heartCupidGame?.querySelectorAll('.heart-hit-feedback').forEach((feedback) => feedback.remove());
+        heartFloatingBalloons.forEach(resetHeartFloatingBalloon);
+        updateHeartGameDifficulty(true);
+        updateHeartGameHud();
+        startHeartGameClock();
+    };
+
+    const handleHeartBalloonHit = ({ balloon, balloonRect, gameRect }) => {
+        if (heartGameEnded) return;
+        const kind = balloon.dataset.balloonKind || (balloon.classList.contains('heart-floating-balloon') ? 'heart' : 'shape');
+        const feedbackX = balloonRect.left - gameRect.left + (balloonRect.width / 2);
+        const feedbackY = balloonRect.top - gameRect.top + (balloonRect.height * 0.3);
+        popHeartFloatingBalloon(balloon, balloonRect, gameRect);
+
+        if (kind === 'heart') {
+            const points = Number.parseInt(balloon.dataset.points || '25', 10);
+            heartGameScore = Math.min(HEART_GAME_TARGET_SCORE, heartGameScore + points);
+            const timeBonusMs = points >= 50 ? HEART_GAME_SMALL_HEART_BONUS_MS : HEART_GAME_LARGE_HEART_BONUS_MS;
+            heartGameTimeRemainingMs += timeBonusMs;
+            showHeartHitFeedback(`+${points}  +${timeBonusMs / 1000}s`, feedbackX, feedbackY, points >= 50 ? 'rare' : 'positive');
+            updateHeartGameDifficulty();
+            updateHeartGameHud();
+            if (heartGameScore >= HEART_GAME_TARGET_SCORE) finishHeartGame(true);
+            return;
+        }
+
+        if (kind === 'shape') {
+            heartGameScore = Math.max(0, heartGameScore - 20);
+            showHeartHitFeedback('-20', feedbackX, feedbackY, 'negative');
+            updateHeartGameDifficulty();
+            updateHeartGameHud();
+            return;
+        }
+
+        if (kind === 'freeze') {
+            activateHeartFreeze();
+            showHeartHitFeedback('SLOW 5s', feedbackX, feedbackY, 'freeze');
+            return;
+        }
+
+        if (kind === 'bomb') {
+            heartGameLifeEnergy = Math.max(0, heartGameLifeEnergy - 1);
+            heartGameLivesRemaining = Math.max(0, Math.ceil(heartGameLifeEnergy - 0.0001));
+            showHeartHitFeedback('-1 LIFE', feedbackX, feedbackY, 'negative');
+            heartFloatingBalloons.forEach((candidate) => {
+                if (candidate === balloon || candidate.dataset.balloonKind !== 'heart' || candidate.classList.contains('is-popping')) return;
+                const candidateRect = candidate.getBoundingClientRect();
+                const isVisible = candidateRect.right > gameRect.left
+                    && candidateRect.left < gameRect.right
+                    && candidateRect.bottom > gameRect.top
+                    && candidateRect.top < gameRect.bottom
+                    && Number.parseFloat(window.getComputedStyle(candidate).opacity) > 0.1;
+                if (isVisible) popHeartFloatingBalloon(candidate, candidateRect, gameRect, false);
+            });
+            updateHeartGameHud();
+            if (heartGameLifeEnergy <= 0) finishHeartGame(false, 'lives');
+        }
+    };
+
+    const stopHeartCupidGame = () => {
+        stopHeartVictoryCelebration();
+        stopHeartGameClock();
+        if (heartShotAnimationFrame !== null) {
+            window.cancelAnimationFrame(heartShotAnimationFrame);
+            heartShotAnimationFrame = null;
+        }
+        heartGameEnded = true;
+        clearHeartFreeze();
+        heartFloatingBalloons.forEach(resetHeartFloatingBalloon);
+        heartCupidGame?.querySelectorAll('.heart-balloon-pop-burst').forEach((burst) => burst.remove());
+        heartCupidGame?.querySelectorAll('.heart-hit-feedback').forEach((feedback) => feedback.remove());
+        heartAimPointerId = null;
+        resetHeartCupidBow();
+        if (heartCupidGame) {
+            heartCupidGame.classList.remove('is-visible');
+            heartCupidGame.hidden = true;
+        }
+        heartMissionPage?.classList.remove('is-heart-cupid-game-active');
+    };
+
+    const startHeartCupidGame = () => {
+        if (!heartCupidGame || !heartMissionPage || heartMissionPage.hidden) return;
+        stopHeartCupidGame();
+        heartCupidGame.hidden = false;
+        heartMissionPage.classList.add('is-heart-cupid-game-active');
+        resetHeartGameState();
+        sizeHeartShotField();
+        resetHeartCupidBow();
+        heartCupidGame.getBoundingClientRect();
+        heartCupidGame.classList.add('is-visible');
+    };
+
+    const updateHeartCupidAim = (clientX, clientY) => {
+        if (!heartCupidGame || !heartCupidBowControl || !heartAimTrail || !heartAimTrailGlow) return;
+        const gameRect = heartCupidGame.getBoundingClientRect();
+        const pivot = {
+            x: gameRect.width / 2,
+            y: gameRect.height - Math.max(34, gameRect.height * 0.055),
+        };
+        const target = {
+            x: clientX - gameRect.left,
+            y: Math.min(clientY - gameRect.top, pivot.y - 60),
+        };
+        let dx = target.x - pivot.x;
+        let dy = target.y - pivot.y;
+        const distance = Math.max(1, Math.hypot(dx, dy));
+        dx /= distance;
+        dy /= distance;
+        const rawAngle = (Math.atan2(dy, dx) * 180 / Math.PI) + 90;
+        const angle = Math.max(-72, Math.min(72, rawAngle));
+        const angleRadians = (angle - 90) * Math.PI / 180;
+        const unitX = Math.cos(angleRadians);
+        const unitY = Math.sin(angleRadians);
+        const pull = Math.max(18, Math.min(62, distance * 0.16));
+        const launch = {
+            x: pivot.x + unitX * Math.min(150, gameRect.height * 0.2),
+            y: pivot.y + unitY * Math.min(150, gameRect.height * 0.2),
+        };
+        const flightDistance = Math.max(gameRect.width, gameRect.height) * 1.28;
+        const end = {
+            x: launch.x + unitX * flightDistance,
+            y: launch.y + unitY * flightDistance,
+        };
+        const path = `M ${launch.x.toFixed(1)} ${launch.y.toFixed(1)} L ${end.x.toFixed(1)} ${end.y.toFixed(1)}`;
+
+        heartCupidBowControl.style.setProperty('--heart-bow-angle', `${angle.toFixed(2)}deg`);
+        heartBowString?.setAttribute('d', `M39 171 L160 ${(179 + pull * 0.62).toFixed(1)} L281 171`);
+        heartBowArrowParts.forEach((part) => part.setAttribute('transform', `translate(0 ${(pull * 0.5).toFixed(1)})`));
+        if (heartBowArt) heartBowArt.style.transform = `scaleX(${(1 + pull / 850).toFixed(3)})`;
+        heartAimTrail.setAttribute('d', path);
+        heartAimTrailGlow.setAttribute('d', path);
+        heartCurrentTrajectory = {
+            startX: launch.x,
+            startY: launch.y,
+            endX: end.x,
+            endY: end.y,
+            angle: Math.atan2(end.y - launch.y, end.x - launch.x) * 180 / Math.PI,
+        };
+    };
+
+    const fireHeartCupidArrow = () => {
+        if (!heartCupidGame || !heartFlyingArrow || !heartCurrentTrajectory) {
+            resetHeartCupidBow();
+            return;
+        }
+        const trajectory = { ...heartCurrentTrajectory };
+        heartCupidGame.classList.remove('is-aiming');
+        heartCupidGame.classList.add('is-shooting');
+        heartFlyingArrow.hidden = false;
+        playUiClickSound('spark');
+        const startedAt = performance.now();
+        const duration = 760;
+        let previousX = trajectory.startX;
+        let previousY = trajectory.startY;
+
+        const animateShot = (timestamp) => {
+            const progress = Math.min(1, (timestamp - startedAt) / duration);
+            const eased = 1 - ((1 - progress) ** 2);
+            const x = trajectory.startX + (trajectory.endX - trajectory.startX) * eased;
+            const y = trajectory.startY + (trajectory.endY - trajectory.startY) * eased;
+            heartFlyingArrow.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${trajectory.angle.toFixed(2)})`);
+            const hit = findHeartBalloonHit(previousX, previousY, x, y);
+            if (hit) {
+                heartShotAnimationFrame = null;
+                handleHeartBalloonHit(hit);
+                resetHeartCupidBow();
+                return;
+            }
+            previousX = x;
+            previousY = y;
+            if (progress < 1) {
+                heartShotAnimationFrame = window.requestAnimationFrame(animateShot);
+                return;
+            }
+            heartShotAnimationFrame = null;
+            resetHeartCupidBow();
+        };
+        heartShotAnimationFrame = window.requestAnimationFrame(animateShot);
+    };
+
+    heartCupidBowControl?.addEventListener('pointerdown', (event) => {
+        if (heartAimPointerId !== null || heartCupidGame?.classList.contains('is-shooting')) return;
+        heartAimPointerId = event.pointerId;
+        heartCupidBowControl.setPointerCapture?.(event.pointerId);
+        heartCupidGame?.classList.add('is-aiming');
+        updateHeartCupidAim(event.clientX, event.clientY);
+        event.preventDefault();
+    });
+
+    heartCupidBowControl?.addEventListener('pointermove', (event) => {
+        if (heartAimPointerId !== event.pointerId) return;
+        updateHeartCupidAim(event.clientX, event.clientY);
+        event.preventDefault();
+    });
+
+    const finishHeartCupidAim = (event, cancelled = false) => {
+        if (heartAimPointerId !== event.pointerId) return;
+        heartCupidBowControl?.releasePointerCapture?.(event.pointerId);
+        heartAimPointerId = null;
+        if (cancelled) resetHeartCupidBow();
+        else fireHeartCupidArrow();
+        event.preventDefault();
+    };
+
+    heartCupidBowControl?.addEventListener('pointerup', (event) => finishHeartCupidAim(event));
+    heartCupidBowControl?.addEventListener('pointercancel', (event) => finishHeartCupidAim(event, true));
+    heartCupidBowControl?.addEventListener('dragstart', (event) => event.preventDefault());
+    window.addEventListener('resize', sizeHeartShotField);
+
+    heartMissionStartButton?.addEventListener('click', () => {
+        playUiClickSound('start');
+        stopHeartMissionSequence();
+        startHeartCupidGame();
+    });
+
+    heartGameRetryButton?.addEventListener('click', () => {
+        playUiClickSound('start');
+        resetHeartGameState();
+        resetHeartCupidBow();
+    });
+
+    heartFinalReplayButton?.addEventListener('click', () => {
+        playUiClickSound('start');
+        startHeartCupidGame();
+    });
+
+    heartFinalNextButton?.addEventListener('click', () => {
+        playUiClickSound('chime');
+        stopHeartVictoryCelebration();
+        window.location.hash = '#game3';
+    });
+
     const resetShapePreviewPage = (page) => {
         if (!page) return;
 
@@ -4015,6 +4857,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapePreviewSceneCleanupByPage.set(page, () => {
             stopBridgeDialogue();
             stopRectangleDialogue();
+            if (page === heartMissionPage) {
+                stopHeartMissionSequence();
+                stopHeartCupidGame();
+            }
         });
         rectangleGoButton?.addEventListener('click', () => {
             if (!isPageVisible(page) || rectangleGoButton.hidden || rectangleGoButton.disabled) return;
@@ -4147,6 +4993,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 page.classList.add('is-next-background');
                 progress?.setAttribute('aria-hidden', 'true');
                 videoStage?.setAttribute('aria-hidden', 'true');
+                if (page === heartMissionPage) startHeartMissionSequence();
                 if (areaTitle && page.dataset.nextTitle) {
                     areaTitle.textContent = page.dataset.nextTitle;
                     areaTitle.setAttribute('aria-label', page.dataset.nextTitle);
@@ -9024,39 +9871,861 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     resetCircleIllustrationVideo();
 
+    const ovalBoardStage = document.querySelector('.oval-board-stage');
     const ovalBoardCards = Array.from(document.querySelectorAll('.oval-board-card'));
-    const ovalHalfPieces = [1, 2, 3, 4, 5].flatMap((ovalNumber) => ([
-        { image: `assets/Shape UI/oval${ovalNumber}.webp`, side: 'left' },
-        { image: `assets/Shape UI/oval${ovalNumber}.webp`, side: 'right' },
+    const ovalBoardGamePage = document.getElementById('learnscape-oval-board-game-page');
+    const ovalMissionGuide = ovalBoardGamePage?.querySelector('.oval-mission-guide') || null;
+    const ovalMissionMessagePanel = ovalMissionGuide?.querySelector('.oval-mission-message-panel') || null;
+    const ovalMissionMessageText = ovalMissionGuide?.querySelector('.oval-mission-message-text') || null;
+    const ovalMissionStartButton = ovalMissionGuide?.querySelector('.oval-mission-start-button') || null;
+    const ovalMatchProgressValue = ovalBoardGamePage?.querySelector('.oval-match-progress-value') || null;
+    const ovalMatchTimerPanel = ovalBoardGamePage?.querySelector('.oval-match-timer-panel') || null;
+    const ovalMatchTimerValue = ovalMatchTimerPanel?.querySelector('.oval-match-timer-value') || null;
+    const ovalMatchReward = document.querySelector('.oval-match-reward');
+    const ovalMatchObject = ovalMatchReward?.querySelector('.oval-match-object');
+    const ovalGameCelebration = ovalBoardGamePage?.querySelector('.oval-game-celebration') || null;
+    const ovalCompletedObjects = ovalGameCelebration?.querySelector('.oval-completed-objects') || null;
+    const ovalCelebrationConfetti = ovalGameCelebration?.querySelector('.oval-celebration-confetti') || null;
+    const ovalFinalProgress = ovalBoardGamePage?.querySelector('.oval-final-progress') || null;
+    const ovalFinalReplayButton = ovalFinalProgress?.querySelector('[data-oval-final-replay]') || null;
+    const ovalFinalNextButton = ovalFinalProgress?.querySelector('[data-oval-final-next]') || null;
+    const ovalTimeoutFlow = ovalBoardGamePage?.querySelector('.oval-timeout-flow') || null;
+    const ovalTimesUpStage = ovalTimeoutFlow?.querySelector('.oval-times-up-stage') || null;
+    const ovalGameOverPanel = ovalTimeoutFlow?.querySelector('.oval-game-over-panel') || null;
+    const ovalGameOverRetryButton = ovalTimeoutFlow?.querySelector('.oval-game-over-retry') || null;
+    const ovalPairPieces = [1, 2, 3, 4, 5].flatMap((ovalNumber) => ([
+        {
+            number: ovalNumber,
+            image: `assets/Shape UI/oval${ovalNumber}.webp`,
+            objectImage: `assets/Shape UI/oval${ovalNumber}object.webp`,
+            side: 'left',
+        },
+        {
+            number: ovalNumber,
+            image: `assets/Shape UI/oval${ovalNumber}.webp`,
+            objectImage: `assets/Shape UI/oval${ovalNumber}object.webp`,
+            side: 'right',
+        },
     ]));
+    const ovalChallengePieces = [
+        { number: 'bomb-1', challengeType: 'bomb' },
+        { number: 'bomb-2', challengeType: 'bomb' },
+        { number: 'bomb-3', challengeType: 'bomb' },
+        { number: 'freeze-1', challengeType: 'freeze' },
+        { number: 'freeze-2', challengeType: 'freeze' },
+    ].map((piece) => ({
+        ...piece,
+        image: '',
+        objectImage: '',
+        side: 'center',
+        challenge: true,
+    }));
+    const ovalHalfPieces = [...ovalPairPieces, ...ovalChallengePieces];
     for (let index = ovalHalfPieces.length - 1; index > 0; index -= 1) {
         const swapIndex = Math.floor(Math.random() * (index + 1));
         [ovalHalfPieces[index], ovalHalfPieces[swapIndex]] = [ovalHalfPieces[swapIndex], ovalHalfPieces[index]];
     }
+    let ovalOpenCards = [];
+    let ovalMatchResolving = false;
+    let ovalRewardHideTimer = null;
+    let ovalMissionSession = 0;
+    let ovalMissionTimers = [];
+    let ovalMissionAudio = null;
+    let ovalGameStarted = false;
+    let ovalMatchedObjects = [];
+    let ovalCelebrationCompletedAudio = null;
+    let ovalCelebrationCheeringAudio = null;
+    let ovalCelebrationSoundTimers = [];
+    let ovalGameTimer = null;
+    let ovalTimeRemaining = 45;
+    let ovalTimerPausedForMatch = false;
+    let ovalTrapSession = 0;
+    let ovalTrapTimers = [];
+    let ovalIncorrectMatches = 0;
+    let ovalPairHintTimer = null;
+    let ovalTickingAudio = null;
+    let ovalTimesUpAudio = null;
+    let ovalGameOverLoseAudio = null;
+    let ovalGameOverSession = 0;
+    let ovalGameOverTimers = [];
+    let ovalGameOverActive = false;
+    const ovalMissionAudioSource = 'assets/Audios/Voice over/oval mission.mp3';
+    const ovalReadyAudioSource = 'assets/Audios/Voice over/Handa ka na ba.mp3';
+
+    const clearOvalMissionTimers = () => {
+        ovalMissionTimers.forEach((timerId) => window.clearTimeout(timerId));
+        ovalMissionTimers = [];
+    };
+
+    const updateOvalGameHud = () => {
+        if (ovalMatchProgressValue) ovalMatchProgressValue.textContent = `${ovalMatchedObjects.length}/5`;
+        if (ovalMatchTimerValue) ovalMatchTimerValue.textContent = `${ovalTimeRemaining}s`;
+        ovalMatchTimerPanel?.classList.toggle('is-time-up', ovalTimeRemaining <= 0);
+    };
+
+    const stopOvalGameTimer = () => {
+        if (ovalGameTimer === null) return;
+        window.clearInterval(ovalGameTimer);
+        ovalGameTimer = null;
+    };
+
+    const stopOvalTickingAudio = () => {
+        if (!ovalTickingAudio) return;
+        ovalTickingAudio.pause();
+        ovalTickingAudio.onended = null;
+        ovalTickingAudio = null;
+    };
+
+    const startOvalTickingAudio = () => {
+        if (ovalTickingAudio || !window.Audio || (window.__learnscapeSoundScale?.() ?? 1) <= 0) return;
+        const audio = new window.Audio('assets/Audios/Sound effects/clock ticking.mp3');
+        ovalTickingAudio = audio;
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.loop = true;
+        audio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+        audio.play().catch(() => {
+            if (ovalTickingAudio === audio) ovalTickingAudio = null;
+        });
+    };
+
+    const syncOvalTickingAudio = () => {
+        if (ovalGameStarted && !ovalGameOverActive && ovalTimeRemaining > 0 && ovalTimeRemaining <= 10) {
+            startOvalTickingAudio();
+        } else {
+            stopOvalTickingAudio();
+        }
+    };
+
+    const clearOvalGameOverFlow = () => {
+        ovalGameOverSession += 1;
+        ovalGameOverTimers.forEach((timerId) => window.clearTimeout(timerId));
+        ovalGameOverTimers = [];
+        stopOvalTickingAudio();
+        [ovalTimesUpAudio, ovalGameOverLoseAudio].forEach((audio) => {
+            if (!audio) return;
+            audio.onended = null;
+            audio.pause();
+        });
+        ovalTimesUpAudio = null;
+        ovalGameOverLoseAudio = null;
+        ovalGameOverActive = false;
+        if (ovalTimeoutFlow) ovalTimeoutFlow.hidden = true;
+        if (ovalTimesUpStage) ovalTimesUpStage.hidden = false;
+        if (ovalGameOverPanel) {
+            ovalGameOverPanel.hidden = true;
+            ovalGameOverPanel.classList.remove('is-visible');
+        }
+    };
+
+    const beginOvalGameOverFlow = () => {
+        if (ovalGameOverActive || !ovalTimeoutFlow || !ovalTimesUpStage || !ovalGameOverPanel) return;
+        clearOvalGameOverFlow();
+        ovalGameOverActive = true;
+        const session = ovalGameOverSession;
+        ovalGameStarted = false;
+        stopOvalGameTimer();
+        stopOvalTickingAudio();
+        clearOvalPairHint();
+        clearOvalTrapEffects();
+        ovalOpenCards = [];
+        ovalBoardCards.forEach((card) => { card.disabled = true; });
+        ovalTimeoutFlow.hidden = false;
+        ovalTimesUpStage.hidden = false;
+        ovalGameOverPanel.hidden = true;
+        ovalGameOverPanel.classList.remove('is-visible');
+
+        let panelShown = false;
+        const showGameOverPanel = () => {
+            if (panelShown || session !== ovalGameOverSession || !ovalGameOverActive) return;
+            panelShown = true;
+            ovalTimesUpStage.hidden = true;
+            ovalGameOverPanel.hidden = false;
+            void ovalGameOverPanel.offsetWidth;
+            ovalGameOverPanel.classList.add('is-visible');
+            if (window.Audio) {
+                const loseAudio = new window.Audio('assets/Audios/Sound effects/lose.mp3');
+                ovalGameOverLoseAudio = loseAudio;
+                loseAudio.preload = 'auto';
+                loseAudio.playsInline = true;
+                loseAudio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+                loseAudio.play().catch(() => {});
+            }
+        };
+
+        ovalGameOverTimers.push(window.setTimeout(showGameOverPanel, 2600));
+        if (!window.Audio) return;
+        const timesUpAudio = new window.Audio('assets/Audios/Sound effects/times up.mp3');
+        ovalTimesUpAudio = timesUpAudio;
+        timesUpAudio.preload = 'auto';
+        timesUpAudio.playsInline = true;
+        timesUpAudio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+        timesUpAudio.onended = showGameOverPanel;
+        timesUpAudio.play().catch(() => {});
+    };
+
+    const runOvalGameTimer = () => {
+        if (ovalGameTimer !== null) return;
+        ovalGameTimer = window.setInterval(() => {
+            ovalTimeRemaining = Math.max(0, ovalTimeRemaining - 1);
+            updateOvalGameHud();
+            syncOvalTickingAudio();
+            if (ovalTimeRemaining <= 0) beginOvalGameOverFlow();
+        }, 1000);
+    };
+
+    const startOvalGameTimer = () => {
+        stopOvalGameTimer();
+        ovalTimerPausedForMatch = false;
+        ovalTimeRemaining = 45;
+        updateOvalGameHud();
+        runOvalGameTimer();
+    };
+
+    const addOvalTimeBonus = (seconds) => {
+        ovalTimeRemaining += seconds;
+        updateOvalGameHud();
+        syncOvalTickingAudio();
+        ovalMatchTimerPanel?.classList.remove('is-bonus');
+        void ovalMatchTimerPanel?.offsetWidth;
+        ovalMatchTimerPanel?.classList.add('is-bonus');
+        ovalTrapTimers.push(window.setTimeout(() => ovalMatchTimerPanel?.classList.remove('is-bonus'), 680));
+        if (ovalGameStarted && !ovalTimerPausedForMatch) runOvalGameTimer();
+    };
+
+    const clearOvalPairHint = () => {
+        if (ovalPairHintTimer !== null) {
+            window.clearTimeout(ovalPairHintTimer);
+            ovalPairHintTimer = null;
+        }
+        ovalBoardCards.forEach((card) => card.classList.remove('is-pair-hinting'));
+    };
+
+    const showOvalPairHint = () => {
+        clearOvalPairHint();
+        const availableCards = ovalBoardCards.filter((card) => (
+            card.dataset.ovalChallenge !== 'true'
+            && !card.classList.contains('is-matched')
+            && !card.classList.contains('is-clearing')
+            && !card.classList.contains('is-flipped')
+            && !card.classList.contains('is-frozen')
+        ));
+        const pairs = new Map();
+        availableCards.forEach((card) => {
+            const number = card.dataset.ovalNumber;
+            if (!pairs.has(number)) pairs.set(number, []);
+            pairs.get(number).push(card);
+        });
+        const validPairs = [...pairs.values()].filter((cards) => cards.length >= 2);
+        if (!validPairs.length) return;
+        const hintedPair = validPairs[Math.floor(Math.random() * validPairs.length)].slice(0, 2);
+        hintedPair.forEach((card) => card.classList.add('is-pair-hinting'));
+        ovalPairHintTimer = window.setTimeout(() => {
+            hintedPair.forEach((card) => card.classList.remove('is-pair-hinting'));
+            ovalPairHintTimer = null;
+        }, 2000);
+    };
+
+    const clearOvalTrapEffects = () => {
+        ovalTrapSession += 1;
+        ovalTrapTimers.forEach((timerId) => window.clearTimeout(timerId));
+        ovalTrapTimers = [];
+        ovalBoardCards.forEach((card) => {
+            card.classList.remove('is-bomb-triggered', 'is-frozen');
+        });
+        ovalMatchTimerPanel?.classList.remove('is-bonus');
+    };
+
+    const triggerOvalBomb = (card) => {
+        card.disabled = true;
+        card.classList.add('is-flipped', 'is-bomb-triggered');
+        card.setAttribute('aria-pressed', 'true');
+        ovalTimeRemaining = Math.max(0, ovalTimeRemaining - 5);
+        updateOvalGameHud();
+        syncOvalTickingAudio();
+        if (ovalTimeRemaining <= 0) beginOvalGameOverFlow();
+        playUiClickSound('alert');
+        const session = ovalTrapSession;
+        ovalTrapTimers.push(window.setTimeout(() => {
+            if (session !== ovalTrapSession) return;
+            card.classList.remove('is-flipped', 'is-bomb-triggered');
+            card.setAttribute('aria-pressed', 'false');
+            if (ovalGameStarted && !card.classList.contains('is-matched')) card.disabled = false;
+        }, 950));
+    };
+
+    const triggerOvalFreeze = (card) => {
+        const candidates = ovalBoardCards
+            .filter((candidate) => (
+                candidate !== card
+                && candidate.dataset.ovalChallenge !== 'true'
+                && !candidate.classList.contains('is-matched')
+                && !candidate.classList.contains('is-clearing')
+                && !candidate.classList.contains('is-flipped')
+                && !candidate.classList.contains('is-frozen')
+            ))
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 2);
+        const frozenCards = [card, ...candidates];
+        frozenCards.forEach((frozenCard) => {
+            frozenCard.disabled = true;
+            frozenCard.classList.add('is-frozen');
+        });
+        card.classList.add('is-flipped');
+        card.setAttribute('aria-pressed', 'true');
+        playUiClickSound('spark');
+        const session = ovalTrapSession;
+        ovalTrapTimers.push(window.setTimeout(() => {
+            if (session !== ovalTrapSession) return;
+            frozenCards.forEach((frozenCard) => {
+                frozenCard.classList.remove('is-frozen');
+                if (frozenCard === card) {
+                    frozenCard.classList.remove('is-flipped');
+                    frozenCard.setAttribute('aria-pressed', 'false');
+                }
+                if (ovalGameStarted && !frozenCard.classList.contains('is-matched')) frozenCard.disabled = false;
+            });
+        }, 5000));
+    };
+
+    const hideOvalFinalProgress = () => {
+        ovalBoardGamePage?.classList.remove('is-oval-final-progress-visible');
+        ovalFinalProgress?.setAttribute('aria-hidden', 'true');
+    };
+
+    const showOvalFinalProgress = () => {
+        if (!ovalBoardGamePage || ovalBoardGamePage.hidden || !ovalBoardGamePage.classList.contains('is-celebrating')) return;
+        if (ovalBoardGamePage.classList.contains('is-oval-final-progress-visible')) return;
+        ovalBoardGamePage.classList.add('is-oval-final-progress-visible');
+        ovalFinalProgress?.setAttribute('aria-hidden', 'false');
+        playUiClickSound('boardSuccess');
+        ovalCelebrationSoundTimers.push(window.setTimeout(() => {
+            if (ovalBoardGamePage.classList.contains('is-oval-final-progress-visible')) playUiClickSound('starPop');
+        }, 650));
+    };
+
+    const stopOvalCelebrationSounds = () => {
+        ovalCelebrationSoundTimers.forEach((timerId) => window.clearTimeout(timerId));
+        ovalCelebrationSoundTimers = [];
+        [ovalCelebrationCompletedAudio, ovalCelebrationCheeringAudio].forEach((audio) => {
+            if (!audio) return;
+            audio.onended = null;
+            audio.pause();
+            try {
+                audio.currentTime = 0;
+            } catch (error) {
+                // The clip may not have loaded enough to rewind yet.
+            }
+        });
+        ovalCelebrationCompletedAudio = null;
+        ovalCelebrationCheeringAudio = null;
+    };
+
+    const startOvalCelebrationSounds = () => {
+        stopOvalCelebrationSounds();
+        ovalMatchedObjects.forEach((piece, index) => {
+            ovalCelebrationSoundTimers.push(window.setTimeout(() => {
+                playUiClickSound(index === ovalMatchedObjects.length - 1 ? 'progressCelebration' : 'tap');
+            }, index * 220));
+        });
+
+        ovalCelebrationSoundTimers.push(window.setTimeout(() => {
+            const AudioCtor = window.Audio;
+            if (!AudioCtor) {
+                ovalCelebrationSoundTimers.push(window.setTimeout(showOvalFinalProgress, 4000));
+                return;
+            }
+            const soundScale = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+            const completedAudio = new AudioCtor('assets/Audios/Sound effects/completed.mp3');
+            const cheeringAudio = new AudioCtor('assets/Audios/Sound effects/kids cheering.mp3');
+            ovalCelebrationCompletedAudio = completedAudio;
+            ovalCelebrationCheeringAudio = cheeringAudio;
+            [completedAudio, cheeringAudio].forEach((audio) => {
+                audio.preload = 'auto';
+                audio.playsInline = true;
+                audio.volume = soundScale;
+            });
+            const startCheering = () => {
+                if (ovalCelebrationCheeringAudio !== cheeringAudio) return;
+                cheeringAudio.currentTime = 0;
+                cheeringAudio.play().catch(showOvalFinalProgress);
+            };
+            completedAudio.onended = () => {
+                if (ovalCelebrationCompletedAudio === completedAudio) ovalCelebrationCompletedAudio = null;
+                startCheering();
+            };
+            cheeringAudio.onended = () => {
+                if (ovalCelebrationCheeringAudio === cheeringAudio) ovalCelebrationCheeringAudio = null;
+                showOvalFinalProgress();
+            };
+            completedAudio.currentTime = 0;
+            completedAudio.play().catch(startCheering);
+            ovalCelebrationSoundTimers.push(window.setTimeout(showOvalFinalProgress, 10000));
+        }, 1250));
+    };
+
+    const stopOvalMissionAudio = () => {
+        if (!ovalMissionAudio) return;
+        ovalMissionAudio.pause();
+        try {
+            ovalMissionAudio.currentTime = 0;
+        } catch (error) {
+            // The clip may not have loaded enough to rewind yet.
+        }
+        ovalMissionAudio = null;
+    };
+
+    const playOvalMissionAudio = (source, session, fallbackDuration, onComplete) => {
+        stopOvalMissionAudio();
+        const AudioCtor = window.Audio;
+        let finished = false;
+        let fallbackTimer = null;
+        const finish = () => {
+            if (finished || session !== ovalMissionSession) return;
+            finished = true;
+            if (fallbackTimer !== null) window.clearTimeout(fallbackTimer);
+            if (ovalMissionAudio) {
+                ovalMissionAudio.onended = null;
+                ovalMissionAudio.onerror = null;
+                ovalMissionAudio = null;
+            }
+            onComplete?.();
+        };
+
+        fallbackTimer = window.setTimeout(finish, fallbackDuration);
+        ovalMissionTimers.push(fallbackTimer);
+        if (!AudioCtor) return;
+
+        const audio = new AudioCtor(source);
+        ovalMissionAudio = audio;
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+        audio.onended = finish;
+        audio.onerror = () => {};
+        audio.load?.();
+        audio.play().catch(() => {});
+    };
+
+    const stopOvalMissionIntro = () => {
+        ovalMissionSession += 1;
+        clearOvalMissionTimers();
+        stopOvalMissionAudio();
+        stopOvalCelebrationSounds();
+        stopOvalGameTimer();
+        clearOvalTrapEffects();
+        clearOvalPairHint();
+        clearOvalGameOverFlow();
+        ovalBoardStage?.classList.remove('is-opening-preview');
+        ovalMissionGuide?.classList.remove('is-visible');
+        ovalMissionMessagePanel?.classList.remove('is-cycling');
+        if (ovalMissionGuide) ovalMissionGuide.hidden = true;
+        if (ovalMissionStartButton) {
+            ovalMissionStartButton.hidden = true;
+            ovalMissionStartButton.classList.remove('is-visible');
+        }
+        ovalBoardGamePage?.classList.remove('is-mission-intro');
+    };
+
+    const startOvalMissionIntro = () => {
+        if (!ovalBoardGamePage || ovalBoardGamePage.hidden || !ovalMissionGuide || !ovalMissionMessageText) return;
+        stopOvalMissionIntro();
+        const session = ovalMissionSession;
+        resetOvalBoardGame();
+        ovalGameStarted = false;
+        ovalBoardGamePage.classList.add('is-mission-intro');
+        ovalBoardStage?.setAttribute('aria-hidden', 'true');
+        ovalBoardCards.forEach((card) => {
+            if (!card.classList.contains('is-matched')) card.disabled = true;
+        });
+        ovalMissionMessageText.textContent = 'Para sa ating Oval Mission, hanapin ang magkaparehas na bagay upang mabuo ito.';
+        ovalMissionGuide.hidden = false;
+        ovalMissionGuide.setAttribute('aria-hidden', 'false');
+        ovalMissionGuide.getBoundingClientRect();
+        ovalMissionGuide.classList.add('is-visible');
+
+        const revealStartButton = () => {
+            if (session !== ovalMissionSession || ovalBoardGamePage.hidden) return;
+            ovalMissionGuide.classList.remove('is-visible');
+            ovalMissionTimers.push(window.setTimeout(() => {
+                if (session !== ovalMissionSession || ovalBoardGamePage.hidden || !ovalMissionStartButton) return;
+                ovalMissionStartButton.hidden = false;
+                ovalMissionStartButton.getBoundingClientRect();
+                ovalMissionStartButton.classList.add('is-visible');
+            }, 460));
+        };
+
+        const playReadyMessage = () => {
+            if (session !== ovalMissionSession || ovalBoardGamePage.hidden) return;
+            ovalMissionMessagePanel?.classList.add('is-cycling');
+            ovalMissionTimers.push(window.setTimeout(() => {
+                if (session !== ovalMissionSession || ovalBoardGamePage.hidden) return;
+                ovalMissionMessageText.textContent = 'Handa ka na ba?';
+                ovalMissionMessagePanel?.classList.remove('is-cycling');
+                playOvalMissionAudio(ovalReadyAudioSource, session, 3200, revealStartButton);
+            }, 280));
+        };
+
+        playOvalMissionAudio(ovalMissionAudioSource, session, 7000, playReadyMessage);
+    };
+
+    const applyOvalHalfPiece = (card, halfPiece) => {
+        card.style.setProperty('--oval-piece-image', `url("${halfPiece.image}")`);
+        card.style.setProperty('--oval-piece-position', `${halfPiece.side} center`);
+        card.dataset.ovalPiece = `${halfPiece.image}-${halfPiece.side}`;
+        card.dataset.ovalImage = halfPiece.image;
+        card.dataset.ovalSide = halfPiece.side;
+        card.dataset.ovalNumber = String(halfPiece.number);
+        card.dataset.ovalObjectImage = halfPiece.objectImage;
+        card.dataset.ovalChallenge = halfPiece.challenge ? 'true' : 'false';
+        card.dataset.ovalChallengeType = halfPiece.challengeType || '';
+        card.classList.toggle('is-challenge-card', Boolean(halfPiece.challenge));
+        card.classList.toggle('is-bomb-card', halfPiece.challengeType === 'bomb');
+        card.classList.toggle('is-freeze-card', halfPiece.challengeType === 'freeze');
+    };
+
+    const resetOvalBoardGame = () => {
+        ovalMatchedObjects = [];
+        ovalOpenCards = [];
+        ovalMatchResolving = false;
+        ovalTimerPausedForMatch = false;
+        ovalIncorrectMatches = 0;
+        ovalBoardStage?.classList.remove('is-opening-preview');
+        ovalBoardGamePage?.classList.remove('is-celebrating');
+        hideOvalFinalProgress();
+        stopOvalCelebrationSounds();
+        stopOvalGameTimer();
+        clearOvalTrapEffects();
+        clearOvalGameOverFlow();
+        ovalTimeRemaining = 45;
+        updateOvalGameHud();
+        if (ovalRewardHideTimer !== null) {
+            window.clearTimeout(ovalRewardHideTimer);
+            ovalRewardHideTimer = null;
+        }
+        if (ovalMatchReward) {
+            ovalMatchReward.hidden = true;
+            ovalMatchReward.classList.remove('is-visible');
+        }
+        if (ovalGameCelebration) {
+            ovalGameCelebration.hidden = true;
+            ovalGameCelebration.classList.remove('is-active');
+        }
+
+        const resetPieces = [...ovalHalfPieces];
+        for (let index = resetPieces.length - 1; index > 0; index -= 1) {
+            const swapIndex = Math.floor(Math.random() * (index + 1));
+            [resetPieces[index], resetPieces[swapIndex]] = [resetPieces[swapIndex], resetPieces[index]];
+        }
+        ovalBoardCards.forEach((card, index) => {
+            card.classList.remove('is-flipped', 'is-match-burst', 'is-clearing', 'is-matched', 'is-bomb-triggered', 'is-frozen', 'is-pair-hinting');
+            card.disabled = false;
+            card.setAttribute('aria-pressed', 'false');
+            applyOvalHalfPiece(card, resetPieces[index]);
+        });
+    };
+
+    const randomizeRemainingOvalObjects = () => {
+        const remainingCards = ovalBoardCards.filter((card) => !card.classList.contains('is-matched'));
+        if (remainingCards.length <= 2) return;
+
+        const originalChallengeTypes = remainingCards.map((card) => card.dataset.ovalChallengeType || '');
+        const remainingPieces = remainingCards.map((card) => ({
+            number: card.dataset.ovalNumber,
+            image: card.dataset.ovalImage,
+            objectImage: card.dataset.ovalObjectImage,
+            side: card.dataset.ovalSide,
+            challenge: card.dataset.ovalChallenge === 'true',
+            challengeType: card.dataset.ovalChallengeType,
+        }));
+
+        let shuffledPieces = [...remainingPieces];
+        for (let attempt = 0; attempt < 120; attempt += 1) {
+            shuffledPieces = [...remainingPieces];
+            for (let index = shuffledPieces.length - 1; index > 0; index -= 1) {
+                const swapIndex = Math.floor(Math.random() * (index + 1));
+                [shuffledPieces[index], shuffledPieces[swapIndex]] = [shuffledPieces[swapIndex], shuffledPieces[index]];
+            }
+            const trapsMovedToDifferentSlots = shuffledPieces.every((piece, index) => (
+                !piece.challengeType || piece.challengeType !== originalChallengeTypes[index]
+            ));
+            if (trapsMovedToDifferentSlots) break;
+        }
+
+        remainingCards.forEach((card, index) => applyOvalHalfPiece(card, shuffledPieces[index]));
+        ovalBoardStage?.classList.remove('is-reshuffling');
+        void ovalBoardStage?.offsetWidth;
+        ovalBoardStage?.classList.add('is-reshuffling');
+        window.setTimeout(() => ovalBoardStage?.classList.remove('is-reshuffling'), 520);
+    };
+
+    const previewRemainingOvalCards = (duration, onComplete) => {
+        const previewCards = ovalBoardCards.filter((card) => !card.classList.contains('is-matched'));
+        if (duration <= 0 || previewCards.length === 0) {
+            onComplete?.();
+            return;
+        }
+
+        ovalBoardStage?.classList.add('is-opening-preview');
+        previewCards.forEach((card) => {
+            card.disabled = true;
+            card.classList.add('is-flipped');
+            card.setAttribute('aria-pressed', 'true');
+        });
+        ovalMissionTimers.push(window.setTimeout(() => {
+            ovalBoardStage?.classList.remove('is-opening-preview');
+            void ovalBoardStage?.offsetWidth;
+            previewCards.forEach((card) => {
+                card.classList.remove('is-flipped');
+                card.setAttribute('aria-pressed', 'false');
+            });
+            ovalMissionTimers.push(window.setTimeout(() => onComplete?.(), 520));
+        }, duration));
+    };
+
+    const showOvalGameCelebration = () => {
+        if (!ovalGameCelebration || !ovalCompletedObjects || ovalMatchedObjects.length !== 5) return;
+        ovalGameStarted = false;
+        stopOvalGameTimer();
+        stopOvalTickingAudio();
+        ovalBoardGamePage?.classList.add('is-celebrating');
+        ovalCompletedObjects.replaceChildren();
+        ovalMatchedObjects.forEach((piece, index) => {
+            const object = document.createElement('img');
+            object.className = 'oval-completed-object';
+            object.src = piece.objectImage;
+            object.alt = `Matched object ${index + 1}`;
+            object.style.setProperty('--object-delay', `${index * 0.22}s`);
+            ovalCompletedObjects.appendChild(object);
+        });
+
+        if (ovalCelebrationConfetti && ovalCelebrationConfetti.childElementCount === 0) {
+            const colors = ['#ffd84a', '#ff766b', '#63d6c6', '#65a9ff', '#f58bc0', '#fff4a8'];
+            for (let index = 0; index < 46; index += 1) {
+                const confetti = document.createElement('span');
+                confetti.style.setProperty('--confetti-x', `${2 + Math.random() * 96}%`);
+                confetti.style.setProperty('--confetti-size', `${0.48 + Math.random() * 0.8}rem`);
+                confetti.style.setProperty('--confetti-color', colors[index % colors.length]);
+                confetti.style.setProperty('--confetti-delay', `${1.05 + Math.random() * 1.3}s`);
+                confetti.style.setProperty('--confetti-duration', `${2.8 + Math.random() * 1.8}s`);
+                confetti.style.setProperty('--confetti-drift', `${-8 + Math.random() * 16}vw`);
+                ovalCelebrationConfetti.appendChild(confetti);
+            }
+        }
+
+        ovalGameCelebration.hidden = false;
+        ovalGameCelebration.classList.remove('is-active');
+        void ovalGameCelebration.offsetWidth;
+        ovalGameCelebration.classList.add('is-active');
+        startOvalCelebrationSounds();
+    };
+
+    const showOvalMatchReward = (piece) => {
+        if (!ovalMatchReward || !ovalMatchObject || !piece) return;
+        if (ovalRewardHideTimer !== null) {
+            window.clearTimeout(ovalRewardHideTimer);
+            ovalRewardHideTimer = null;
+        }
+        ovalMatchObject.src = piece.objectImage;
+        ovalMatchObject.alt = `Oval ${piece.number} matched object`;
+        ovalMatchReward.hidden = false;
+        ovalMatchReward.classList.remove('is-visible');
+        void ovalMatchReward.offsetWidth;
+        ovalMatchReward.classList.add('is-visible');
+        ovalRewardHideTimer = window.setTimeout(() => {
+            ovalMatchReward.classList.remove('is-visible');
+            ovalMatchReward.hidden = true;
+            ovalRewardHideTimer = null;
+        }, 4250);
+    };
+
     ovalBoardCards.forEach((card, index) => {
         const halfPiece = ovalHalfPieces[index];
         if (halfPiece) {
-            card.style.setProperty('--oval-piece-image', `url("${halfPiece.image}")`);
-            card.style.setProperty('--oval-piece-position', `${halfPiece.side} center`);
-            card.dataset.ovalPiece = `${halfPiece.image}-${halfPiece.side}`;
+            applyOvalHalfPiece(card, halfPiece);
         }
-        let flipBackTimer = null;
         card.addEventListener('click', () => {
-            if (flipBackTimer !== null) {
-                window.clearTimeout(flipBackTimer);
-                flipBackTimer = null;
+            if (
+                !ovalGameStarted
+                || ovalMatchResolving
+                || card.classList.contains('is-flipped')
+                || card.classList.contains('is-matched')
+                || card.classList.contains('is-clearing')
+                || card.classList.contains('is-frozen')
+            ) return;
+
+            if (card.dataset.ovalChallengeType === 'bomb') {
+                triggerOvalBomb(card);
+                return;
             }
-            const isFlipped = card.classList.toggle('is-flipped');
-            card.setAttribute('aria-pressed', String(isFlipped));
-            if (isFlipped) {
-                flipBackTimer = window.setTimeout(() => {
-                    card.classList.remove('is-flipped');
-                    card.setAttribute('aria-pressed', 'false');
-                    flipBackTimer = null;
-                }, 1500);
+
+            if (card.dataset.ovalChallengeType === 'freeze') {
+                triggerOvalFreeze(card);
+                return;
             }
+
+            if (card.classList.contains('is-pair-hinting')) clearOvalPairHint();
+
+            card.classList.add('is-flipped');
+            card.setAttribute('aria-pressed', 'true');
+            ovalOpenCards.push(card);
+
+            if (ovalOpenCards.length < 2) return;
+
+            const [firstCard, secondCard] = ovalOpenCards;
+            const isMatch = firstCard.dataset.ovalNumber === secondCard.dataset.ovalNumber;
+            ovalOpenCards = [];
+            ovalMatchResolving = true;
+
+            if (isMatch) {
+                const piece = {
+                    number: firstCard.dataset.ovalNumber,
+                    objectImage: firstCard.dataset.ovalObjectImage,
+                };
+                ovalTimerPausedForMatch = true;
+                stopOvalGameTimer();
+                stopOvalTickingAudio();
+                ovalMatchedObjects.push(piece);
+                addOvalTimeBonus(5);
+                updateOvalGameHud();
+                firstCard.classList.add('is-match-burst');
+                secondCard.classList.add('is-match-burst');
+                showOvalMatchReward(piece);
+                playUiClickSound('boardSuccess');
+
+                window.setTimeout(() => {
+                    firstCard.classList.remove('is-match-burst');
+                    secondCard.classList.remove('is-match-burst');
+                }, 680);
+
+                window.setTimeout(() => {
+                    firstCard.classList.add('is-clearing');
+                    secondCard.classList.add('is-clearing');
+                }, 4250);
+
+                window.setTimeout(() => {
+                    [firstCard, secondCard].forEach((matchedCard) => {
+                        matchedCard.classList.remove('is-clearing', 'is-flipped');
+                        matchedCard.classList.add('is-matched');
+                        matchedCard.disabled = true;
+                        matchedCard.setAttribute('aria-pressed', 'true');
+                    });
+                    if (ovalMatchedObjects.length === 5) {
+                        window.setTimeout(showOvalGameCelebration, 260);
+                    } else {
+                        randomizeRemainingOvalObjects();
+                        const previewDuration = {
+                            1: 500,
+                            2: 500,
+                            3: 500,
+                        }[ovalMatchedObjects.length] || 0;
+                        ovalMissionTimers.push(window.setTimeout(() => {
+                            previewRemainingOvalCards(previewDuration, () => {
+                                ovalTimerPausedForMatch = false;
+                                if (ovalGameStarted && !ovalGameOverActive && ovalTimeRemaining > 0) {
+                                    runOvalGameTimer();
+                                    syncOvalTickingAudio();
+                                }
+                                ovalMatchResolving = false;
+                                ovalBoardCards.forEach((card) => {
+                                    if (!card.classList.contains('is-matched')) card.disabled = false;
+                                });
+                            });
+                        }, 520));
+                    }
+                    if (ovalMatchedObjects.length === 5) {
+                        window.setTimeout(() => {
+                            ovalTimerPausedForMatch = false;
+                            ovalMatchResolving = false;
+                        }, 520);
+                    }
+                }, 4850);
+                return;
+            }
+
+            window.setTimeout(() => {
+                [firstCard, secondCard].forEach((openCard) => {
+                    openCard.classList.remove('is-flipped');
+                    openCard.setAttribute('aria-pressed', 'false');
+                });
+                ovalIncorrectMatches += 1;
+                if (ovalIncorrectMatches >= 3) {
+                    ovalIncorrectMatches = 0;
+                    showOvalPairHint();
+                }
+                ovalMatchResolving = false;
+            }, 780);
         });
     });
+
+    ovalMissionStartButton?.addEventListener('click', () => {
+        playUiClickSound('start');
+        clearOvalMissionTimers();
+        stopOvalMissionAudio();
+        ovalGameStarted = false;
+        ovalMatchResolving = true;
+        ovalMissionStartButton.classList.remove('is-visible');
+        ovalMissionStartButton.hidden = true;
+        ovalMissionGuide?.classList.remove('is-visible');
+        ovalMissionGuide?.setAttribute('aria-hidden', 'true');
+        ovalBoardGamePage?.classList.remove('is-mission-intro');
+        ovalBoardStage?.setAttribute('aria-hidden', 'false');
+        ovalMissionTimers.push(window.setTimeout(() => {
+            if (ovalMissionGuide) ovalMissionGuide.hidden = true;
+        }, 520));
+        previewRemainingOvalCards(3000, () => {
+            ovalGameStarted = true;
+            ovalMatchResolving = false;
+            ovalBoardCards.forEach((card) => {
+                if (!card.classList.contains('is-matched')) card.disabled = false;
+            });
+            startOvalGameTimer();
+        });
+    });
+
+    ovalGameOverRetryButton?.addEventListener('click', () => {
+        playUiClickSound('start');
+        clearOvalGameOverFlow();
+        resetOvalBoardGame();
+        ovalGameStarted = false;
+        ovalBoardGamePage?.classList.add('is-mission-intro');
+        ovalBoardStage?.setAttribute('aria-hidden', 'true');
+        ovalBoardCards.forEach((card) => { card.disabled = true; });
+        if (ovalMissionGuide) {
+            ovalMissionGuide.hidden = false;
+            ovalMissionGuide.setAttribute('aria-hidden', 'false');
+            ovalMissionGuide.classList.remove('is-visible');
+        }
+        if (ovalMissionStartButton) {
+            ovalMissionStartButton.hidden = false;
+            ovalMissionStartButton.getBoundingClientRect();
+            ovalMissionStartButton.classList.add('is-visible');
+        }
+    });
+
+    ovalFinalReplayButton?.addEventListener('click', () => {
+        playUiClickSound('start');
+        hideOvalFinalProgress();
+        startOvalMissionIntro();
+    });
+
+    ovalFinalNextButton?.addEventListener('click', () => {
+        playUiClickSound('start');
+        hideOvalFinalProgress();
+        openShapeCameraLayout('ovalCamera');
+    });
+
+    window.addEventListener('learnscape:routechange', (event) => {
+        if (event.detail?.route === 'ovalBoardGame') {
+            startOvalMissionIntro();
+        } else {
+            stopOvalMissionIntro();
+        }
+    });
+
+    if (ovalBoardGamePage && !ovalBoardGamePage.hidden) {
+        startOvalMissionIntro();
+    }
 
     loadingLinks.forEach((link) => {
         link.addEventListener('click', (event) => {
