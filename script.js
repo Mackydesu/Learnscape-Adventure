@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-    const appVersion = '20260921-492';
+const appVersion = '20260921-520';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -1000,6 +1000,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     const heartFinalProgress = heartMissionPage?.querySelector('.heart-final-progress') || null;
     const heartFinalReplayButton = heartFinalProgress?.querySelector('.heart-final-replay') || null;
     const heartFinalNextButton = heartFinalProgress?.querySelector('.heart-final-next') || null;
+    const starMissionPage = document.getElementById('learnscape-shape-area-7-page');
+    const starMissionIntro = starMissionPage?.querySelector('.star-mission-intro') || null;
+    const starMissionMessageText = starMissionIntro?.querySelector('.star-mission-message-text') || null;
+    const starMissionStartButton = starMissionIntro?.querySelector('.star-mission-start-button') || null;
+    const starMissionWalker = starMissionPage?.querySelector('.star-mission-walker') || null;
+    const starMissionWalkerCharacter = starMissionWalker?.querySelector('.star-mission-walker-character') || null;
+    const starMissionFallField = starMissionPage?.querySelector('.star-mission-fall-field') || null;
+    const starMissionSetup = starMissionPage?.querySelector('.star-mission-setup') || null;
+    const starMissionTargetOptions = Array.from(starMissionPage?.querySelectorAll('.star-mission-target-option') || []);
+    const starMissionHud = starMissionPage?.querySelector('.star-mission-hud') || null;
+    const starMissionProgressValue = starMissionPage?.querySelector('.star-mission-progress-value') || null;
+    const starMissionProgressFill = starMissionPage?.querySelector('.star-mission-progress-fill') || null;
+    const starMissionTimerPanel = starMissionPage?.querySelector('.star-mission-timer-panel') || null;
+    const starMissionTimerValue = starMissionPage?.querySelector('.star-mission-timer-value') || null;
+    const starMissionCelebration = starMissionPage?.querySelector('.star-mission-celebration') || null;
+    const starMissionConfetti = starMissionCelebration?.querySelector('.star-mission-confetti') || null;
+    const starMissionTimeout = starMissionPage?.querySelector('.star-mission-timeout') || null;
+    const starMissionRetryButton = starMissionTimeout?.querySelector('.star-mission-retry-button') || null;
     const HEART_GAME_TARGET_SCORE = 1000;
     const HEART_GAME_MAX_LIVES = 5;
     const HEART_GAME_START_TIME_MS = 45000;
@@ -1011,9 +1029,53 @@ document.addEventListener('DOMContentLoaded', async () => {
         'assets/Audios/Sound effects/completed.mp3',
         'assets/Audios/Sound effects/kids cheering.mp3',
     ];
+    const STAR_MISSION_BOING_AUDIO_SOURCE = 'assets/Audios/Sound effects/boing.mp3';
+    const STAR_MISSION_COLLECT_AUDIO_SOURCE = 'assets/Audios/Sound effects/star.mp3';
+    const STAR_MISSION_WALK_AUDIO_SOURCE = 'assets/Audios/Sound effects/walk.mp3';
+    const STAR_MISSION_COMPLETED_AUDIO_SOURCE = 'assets/Audios/Sound effects/completed.mp3';
+    const STAR_MISSION_CELEBRATION_AUDIO_SOURCE = 'assets/Audios/Voice over/Mahusay.mp3';
+    const STAR_MISSION_KIDS_CHEERING_AUDIO_SOURCE = 'assets/Audios/Sound effects/kids cheering.mp3';
+    const STAR_MISSION_CLOCK_TICKING_AUDIO_SOURCE = 'assets/Audios/Sound effects/clock ticking.mp3';
+    const STAR_MISSION_TIMES_UP_AUDIO_SOURCE = 'assets/Audios/Sound effects/times up.mp3';
+    const STAR_MISSION_LOSE_AUDIO_SOURCE = 'assets/Audios/Sound effects/lose.mp3';
+    const STAR_MISSION_PROGRESS_DELAY_MS = 4800;
+    const STAR_MISSION_NON_STAR_PENALTY_MS = 1000;
+    const STAR_MISSION_TIME_BY_TARGET = {
+        5: 20,
+        10: 35,
+        15: 45,
+        20: 60,
+    };
     let heartMissionSession = 0;
     let heartMissionTimers = [];
     let heartMissionAudio = null;
+    let starMissionSession = 0;
+    let starMissionTimers = [];
+    let starMissionAudio = null;
+    let starMissionWalkerActive = false;
+    let starMissionWalkerIdleTimer = null;
+    let starMissionWalkerDirection = 1;
+    let starMissionWalkerX = 0;
+    let starMissionWalkerTargetX = 0;
+    let starMissionWalkAudio = null;
+    let starMissionFallTimer = null;
+    let starMissionCollisionFrame = null;
+    const starMissionFallTimeouts = new Set();
+    const starMissionActiveShapes = new Set();
+    let starMissionSelectedTarget = 5;
+    let starMissionCollectedStars = 0;
+    let starMissionTimeRemainingMs = 20000;
+    let starMissionTimerFrame = null;
+    let starMissionTimerLastTick = null;
+    let starMissionGameActive = false;
+    let starMissionEndSession = 0;
+    let starMissionEndTimers = [];
+    let starMissionCompletedAudio = null;
+    let starMissionCelebrationAudio = null;
+    let starMissionKidsCheeringAudio = null;
+    let starMissionClockTickingAudio = null;
+    let starMissionTimesUpAudio = null;
+    let starMissionLoseAudio = null;
     let heartAimPointerId = null;
     let heartShotAnimationFrame = null;
     let heartCurrentTrajectory = null;
@@ -1162,7 +1224,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeCircleCharacter4 = shapeCirclePage?.querySelector('.shape-area-character-ch4') || null;
     const shapeCircleCharacter5 = shapeCirclePage?.querySelector('.shape-area-character-ch5') || null;
     const shapeCircleSpeakerCharacters = [shapeCircleCharacter3, shapeCircleCharacter4, shapeCircleCharacter5];
-    const shapeCircleLearningGoal = shapeCirclePage?.querySelector('.shape-area-learning-goal') || null;
     const shapeCircleBubbleCh3 = shapeCirclePage?.querySelector('.shape-area-speech-bubble-ch3') || null;
     const shapeCircleBubbleCh3Text = shapeCircleBubbleCh3?.querySelector('.shape-area-speech-bubble-text') || null;
     const shapeCircleBubbleCh3Dots = shapeCircleBubbleCh3 ? document.createElement('span') : null;
@@ -1454,7 +1515,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeCircleBubbleCh3.classList.remove('is-fading');
         shapeCircleBubbleCh3Text.classList.remove('is-fading');
         shapeCircleBubbleCh3Text.textContent = lastMessage;
-        shapeCircleLearningGoal?.classList.add('is-start-ready');
         syncShapeCircleCh3SpeakerCharacters(lastMessageIndex);
 
         if (shapeCircleBubbleCh3SkipButton) {
@@ -1554,10 +1614,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             shapeCircleBubbleCh3SkipButton.onclick = null;
         }
 
-        if (shapeCircleLearningGoal) {
-            shapeCircleLearningGoal.classList.remove('is-start-ready');
-        }
-
         shapeCircleSpeakerCharacters.forEach((character) => {
             if (!character) return;
             character.hidden = true;
@@ -1591,8 +1647,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             shapeCircleBubbleCh3.classList.remove('is-triggering', 'is-message-complete', 'is-final-message');
             shapeCircleBubbleCh3.classList.toggle('is-final-message', stageIndex >= introStages.length - 1);
             syncShapeCircleCh3SpeakerCharacters(stageIndex);
-            shapeCircleLearningGoal?.classList.remove('is-start-ready');
-
             if (shapeCircleBubbleCh3SkipButton) {
                 shapeCircleBubbleCh3SkipButton.onclick = showShapeCircleCh3FinalMessage;
                 shapeCircleBubbleCh3SkipButton.hidden = false;
@@ -1679,7 +1733,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 stageComplete = true;
                 shapeCircleBubbleCh3.classList.add('is-message-complete');
                 if (stageIndex >= introStages.length - 1) {
-                    shapeCircleLearningGoal?.classList.add('is-start-ready');
                     if (shapeCircleBubbleCh3SkipButton) {
                         shapeCircleBubbleCh3SkipButton.hidden = true;
                         shapeCircleBubbleCh3SkipButton.style.display = 'none';
@@ -3466,6 +3519,740 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 1950));
     };
 
+    const stopStarMissionSequence = () => {
+        starMissionSession += 1;
+        starMissionTimers.forEach((timerId) => window.clearTimeout(timerId));
+        starMissionTimers = [];
+        if (starMissionAudio) {
+            starMissionAudio.onended = null;
+            starMissionAudio.onerror = null;
+            starMissionAudio.pause?.();
+            try {
+                starMissionAudio.currentTime = 0;
+            } catch (error) {
+                // Some browsers block resetting before metadata is ready.
+            }
+            starMissionAudio = null;
+        }
+        starMissionIntro?.classList.remove('is-active', 'is-message-visible', 'is-message-changing', 'is-ready-message');
+        starMissionIntro?.setAttribute('aria-hidden', 'true');
+        if (starMissionIntro) starMissionIntro.hidden = true;
+        if (starMissionStartButton) {
+            starMissionStartButton.hidden = true;
+            starMissionStartButton.classList.remove('is-visible');
+        }
+    };
+
+    const playStarMissionAudio = (source, session, fallbackDuration, onComplete) => {
+        if (starMissionAudio) {
+            starMissionAudio.onended = null;
+            starMissionAudio.onerror = null;
+            starMissionAudio.pause?.();
+        }
+
+        let completed = false;
+        const finish = () => {
+            if (completed || session !== starMissionSession) return;
+            completed = true;
+            if (starMissionAudio) {
+                starMissionAudio.onended = null;
+                starMissionAudio.onerror = null;
+                starMissionAudio = null;
+            }
+            onComplete?.();
+        };
+        starMissionTimers.push(window.setTimeout(finish, fallbackDuration));
+        if (!window.Audio) return;
+
+        const audio = new window.Audio(source);
+        starMissionAudio = audio;
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+        audio.onended = finish;
+        audio.onerror = finish;
+        audio.load?.();
+        audio.play().catch(() => {});
+    };
+
+    const startStarMissionSequence = () => {
+        if (!starMissionPage || starMissionPage.hidden || !starMissionIntro || !starMissionMessageText) return;
+        stopStarMissionSequence();
+        const session = starMissionSession;
+        starMissionIntro.classList.remove('is-ready-message');
+        starMissionMessageText.textContent = 'Para sa ating Star Mission, kolektahin ang lahat ng mga bituin na nahuhulog mula sa langit.';
+        starMissionIntro.hidden = false;
+        starMissionIntro.setAttribute('aria-hidden', 'false');
+        starMissionIntro.getBoundingClientRect();
+        starMissionTimers.push(window.setTimeout(() => {
+            if (session !== starMissionSession || starMissionPage.hidden) return;
+            starMissionIntro.classList.add('is-active');
+        }, 80));
+
+        starMissionTimers.push(window.setTimeout(() => {
+            if (session !== starMissionSession || starMissionPage.hidden) return;
+            starMissionIntro.classList.add('is-message-visible');
+            playStarMissionAudio('assets/Audios/Voice over/starmission.mp3', session, 9000, () => {
+                if (session !== starMissionSession || starMissionPage.hidden) return;
+                starMissionIntro.classList.add('is-message-changing');
+                starMissionTimers.push(window.setTimeout(() => {
+                    if (session !== starMissionSession || starMissionPage.hidden) return;
+                    starMissionMessageText.textContent = 'Handa ka na ba?';
+                    starMissionIntro.classList.remove('is-message-changing');
+                    starMissionIntro.classList.add('is-ready-message');
+                    playStarMissionAudio('assets/Audios/Voice over/Handa ka na ba.mp3', session, 4000, () => {
+                        if (session !== starMissionSession || starMissionPage.hidden || !starMissionStartButton) return;
+                        starMissionStartButton.hidden = false;
+                        starMissionStartButton.getBoundingClientRect();
+                        starMissionStartButton.classList.add('is-visible');
+                    });
+                }, 320));
+            });
+        }, 950));
+    };
+
+    const setStarMissionWalkerSprite = (source) => {
+        if (!starMissionWalkerCharacter) return;
+        const currentSource = starMissionWalkerCharacter.getAttribute('src') || '';
+        if (currentSource === source) return;
+        starMissionWalkerCharacter.src = source;
+    };
+
+    const stopStarMissionWalkAudio = () => {
+        if (!starMissionWalkAudio) return;
+        starMissionWalkAudio.pause();
+        try {
+            starMissionWalkAudio.currentTime = 0;
+        } catch (error) {
+            // The clip can be loading when idle begins.
+        }
+        starMissionWalkAudio = null;
+    };
+
+    const playStarMissionWalkAudio = () => {
+        if (!window.Audio || (window.__learnscapeSoundScale?.() ?? 1) === 0) return;
+        if (starMissionWalkAudio) return;
+        starMissionWalkAudio = new window.Audio(STAR_MISSION_WALK_AUDIO_SOURCE);
+        starMissionWalkAudio.loop = true;
+        starMissionWalkAudio.preload = 'auto';
+        starMissionWalkAudio.volume = Math.min(1, 1.45 * (window.__learnscapeSoundScale?.() ?? 1));
+        starMissionWalkAudio.play().catch(() => {
+            starMissionWalkAudio = null;
+        });
+    };
+
+    const setStarMissionWalkerIdle = () => {
+        if (!starMissionWalkerActive || !starMissionWalker) return;
+        setStarMissionWalkerSprite('assets/Character/idle.gif');
+        starMissionWalker.style.setProperty('--star-walker-facing', String(starMissionWalkerDirection));
+        stopStarMissionWalkAudio();
+    };
+
+    const updateStarMissionWalkerPosition = (clientX) => {
+        if (!starMissionWalkerActive || !starMissionWalker || !starMissionPage || starMissionPage.hidden) return;
+        const pageRect = starMissionPage.getBoundingClientRect();
+        const walkerRect = starMissionWalker.getBoundingClientRect();
+        const walkerWidth = walkerRect.width || 160;
+        const nextX = Math.max(0, Math.min(pageRect.width - walkerWidth, clientX - pageRect.left - (walkerWidth / 2)));
+        const delta = nextX - starMissionWalkerX;
+        starMissionWalkerTargetX = nextX;
+        if (Math.abs(delta) > 2) {
+            starMissionWalkerDirection = delta < 0 ? -1 : 1;
+            starMissionWalkerX = nextX;
+            starMissionWalker.style.setProperty('--star-walker-x', `${starMissionWalkerX}px`);
+            starMissionWalker.style.setProperty('--star-walker-facing', String(starMissionWalkerDirection));
+            setStarMissionWalkerSprite('assets/Character/walk.gif');
+            playStarMissionWalkAudio();
+        }
+        if (starMissionWalkerIdleTimer !== null) window.clearTimeout(starMissionWalkerIdleTimer);
+        starMissionWalkerIdleTimer = window.setTimeout(setStarMissionWalkerIdle, 180);
+    };
+
+    const startStarMissionWalker = () => {
+        if (!starMissionPage || !starMissionWalker || !starMissionWalkerCharacter) return;
+        if (starMissionWalkerActive) stopStarMissionWalker();
+        starMissionWalkerActive = true;
+        const pageRect = starMissionPage.getBoundingClientRect();
+        const walkerWidth = Math.max(1, starMissionWalker.getBoundingClientRect().width || 160);
+        starMissionWalkerX = Math.max(0, Math.min(pageRect.width - walkerWidth, pageRect.width * 0.12));
+        starMissionWalkerTargetX = starMissionWalkerX;
+        starMissionWalkerDirection = 1;
+        starMissionWalker.hidden = false;
+        starMissionWalker.style.setProperty('--star-walker-x', `${starMissionWalkerX}px`);
+        starMissionWalker.style.setProperty('--star-walker-facing', '1');
+        setStarMissionWalkerSprite('assets/Character/idle.gif');
+        starMissionWalker.getBoundingClientRect();
+        starMissionWalker.classList.add('is-active');
+        window.addEventListener('mousemove', handleStarMissionWalkerMouseMove);
+    };
+
+    const stopStarMissionWalker = () => {
+        starMissionWalkerActive = false;
+        if (starMissionWalkerIdleTimer !== null) window.clearTimeout(starMissionWalkerIdleTimer);
+        starMissionWalkerIdleTimer = null;
+        window.removeEventListener('mousemove', handleStarMissionWalkerMouseMove);
+        if (starMissionWalker) {
+            starMissionWalker.classList.remove('is-active');
+            starMissionWalker.hidden = true;
+        }
+        setStarMissionWalkerSprite('assets/Character/idle.gif');
+        stopStarMissionWalkAudio();
+        stopStarMissionFallingShapes();
+    };
+
+    function handleStarMissionWalkerMouseMove(event) {
+        updateStarMissionWalkerPosition(event.clientX);
+    }
+
+    const getStarMissionDurationMs = (target = starMissionSelectedTarget) => (
+        (STAR_MISSION_TIME_BY_TARGET[target] || STAR_MISSION_TIME_BY_TARGET[5]) * 1000
+    );
+
+    const formatStarMissionTime = (milliseconds) => String(Math.max(0, Math.ceil(milliseconds / 1000)));
+
+    const updateStarMissionHud = () => {
+        if (starMissionProgressValue) {
+            starMissionProgressValue.textContent = `${starMissionCollectedStars} / ${starMissionSelectedTarget}`;
+        }
+        if (starMissionProgressFill) {
+            starMissionProgressFill.style.width = `${Math.min(100, (starMissionCollectedStars / starMissionSelectedTarget) * 100)}%`;
+        }
+        if (starMissionTimerValue) starMissionTimerValue.textContent = formatStarMissionTime(starMissionTimeRemainingMs);
+        starMissionTimerPanel?.setAttribute('aria-label', `${formatStarMissionTime(starMissionTimeRemainingMs)} seconds remaining`);
+        starMissionTimerPanel?.classList.toggle('is-urgent', starMissionGameActive && starMissionTimeRemainingMs > 0 && starMissionTimeRemainingMs <= 5000);
+    };
+
+    const showStarMissionTimerPenalty = () => {
+        if (!starMissionTimerPanel) return;
+        const penalty = document.createElement('span');
+        penalty.className = 'star-mission-timer-penalty';
+        penalty.textContent = '-1';
+        penalty.setAttribute('aria-hidden', 'true');
+        starMissionTimerPanel.appendChild(penalty);
+        window.setTimeout(() => penalty.remove(), 850);
+    };
+
+    const showStarMissionShapePenalty = (xPixels, yPixels) => {
+        if (!starMissionFallField) return;
+        const penalty = document.createElement('span');
+        penalty.className = 'star-shape-penalty-pop';
+        penalty.textContent = '-1';
+        penalty.setAttribute('aria-hidden', 'true');
+        penalty.style.left = `${xPixels}px`;
+        penalty.style.top = `${yPixels}px`;
+        starMissionFallField.appendChild(penalty);
+        const removeTimer = window.setTimeout(() => {
+            penalty.remove();
+            starMissionFallTimeouts.delete(removeTimer);
+        }, 760);
+        starMissionFallTimeouts.add(removeTimer);
+    };
+
+    const stopStarMissionTimer = () => {
+        if (starMissionTimerFrame !== null) window.cancelAnimationFrame(starMissionTimerFrame);
+        starMissionTimerFrame = null;
+        starMissionTimerLastTick = null;
+    };
+
+    const stopStarMissionAudio = (audio) => {
+        if (!audio) return null;
+        audio.onended = null;
+        audio.onerror = null;
+        audio.pause?.();
+        try {
+            audio.currentTime = 0;
+        } catch (error) {
+            // The clip can be mid-load; pausing still stops the audible part.
+        }
+        return null;
+    };
+
+    const playStarMissionOneShot = (source, onEnded = null) => {
+        if (!window.Audio) {
+            onEnded?.();
+            return null;
+        }
+        const audio = new window.Audio(source);
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+        audio.onended = () => onEnded?.();
+        audio.onerror = () => onEnded?.();
+        audio.play().catch(() => onEnded?.());
+        return audio;
+    };
+
+    const stopStarMissionClockTickingAudio = () => {
+        starMissionClockTickingAudio = stopStarMissionAudio(starMissionClockTickingAudio);
+    };
+
+    const syncStarMissionClockTickingAudio = () => {
+        const shouldTick = starMissionGameActive && starMissionTimeRemainingMs > 0 && starMissionTimeRemainingMs <= 5000;
+        if (!shouldTick) {
+            stopStarMissionClockTickingAudio();
+            return;
+        }
+        if (starMissionClockTickingAudio || !window.Audio) return;
+        starMissionClockTickingAudio = new window.Audio(STAR_MISSION_CLOCK_TICKING_AUDIO_SOURCE);
+        starMissionClockTickingAudio.loop = true;
+        starMissionClockTickingAudio.preload = 'auto';
+        starMissionClockTickingAudio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+        starMissionClockTickingAudio.play().catch(() => {
+            starMissionClockTickingAudio = null;
+        });
+    };
+
+    const prepareStarMissionConfetti = () => {
+        if (!starMissionConfetti || starMissionConfetti.childElementCount) return;
+        const colors = ['#ff4f64', '#ffd83d', '#38c7e8', '#70d34b', '#ff8f32', '#ffffff'];
+        for (let index = 0; index < 130; index += 1) {
+            const piece = document.createElement('span');
+            piece.style.setProperty('--confetti-x', `${(index * 37) % 101}%`);
+            piece.style.setProperty('--confetti-color', colors[index % colors.length]);
+            piece.style.setProperty('--confetti-delay', `${-((index * 0.17) % 3.2)}s`);
+            piece.style.setProperty('--confetti-duration', `${2.5 + ((index * 11) % 13) / 10}s`);
+            piece.style.setProperty('--confetti-drift', `${((index * 29) % 150) - 75}px`);
+            piece.style.setProperty('--confetti-size', `${0.35 + ((index * 5) % 13) / 10}rem`);
+            starMissionConfetti.appendChild(piece);
+        }
+    };
+
+    const stopStarMissionEndFlow = () => {
+        starMissionEndSession += 1;
+        starMissionEndTimers.forEach((timerId) => window.clearTimeout(timerId));
+        starMissionEndTimers = [];
+        starMissionCompletedAudio = stopStarMissionAudio(starMissionCompletedAudio);
+        starMissionCelebrationAudio = stopStarMissionAudio(starMissionCelebrationAudio);
+        starMissionKidsCheeringAudio = stopStarMissionAudio(starMissionKidsCheeringAudio);
+        starMissionClockTickingAudio = stopStarMissionAudio(starMissionClockTickingAudio);
+        starMissionTimesUpAudio = stopStarMissionAudio(starMissionTimesUpAudio);
+        starMissionLoseAudio = stopStarMissionAudio(starMissionLoseAudio);
+        starMissionCelebration?.classList.remove('is-active');
+        starMissionCelebration?.setAttribute('aria-hidden', 'true');
+        if (starMissionTimeout) {
+            starMissionTimeout.hidden = true;
+            starMissionTimeout.classList.remove('is-visible', 'is-intro');
+            starMissionTimeout.setAttribute('aria-hidden', 'true');
+        }
+        starMissionTimerPanel?.classList.remove('is-urgent');
+    };
+
+    const startStarMissionWinFlow = () => {
+        if (!starMissionPage || starMissionPage.hidden) return;
+        stopStarMissionTimer();
+        stopStarMissionClockTickingAudio();
+        stopStarMissionWalker();
+        stopStarMissionFallingShapes();
+        if (starMissionHud) starMissionHud.hidden = true;
+        starMissionGameActive = false;
+        starMissionEndSession += 1;
+        const session = starMissionEndSession;
+        prepareStarMissionConfetti();
+        starMissionCelebration?.setAttribute('aria-hidden', 'false');
+        starMissionCelebration?.classList.add('is-active');
+        starMissionCompletedAudio = playStarMissionOneShot(STAR_MISSION_COMPLETED_AUDIO_SOURCE, () => {
+            if (session !== starMissionEndSession) return;
+            starMissionCompletedAudio = null;
+        });
+        starMissionCelebrationAudio = playStarMissionOneShot(STAR_MISSION_CELEBRATION_AUDIO_SOURCE, () => {
+            if (session !== starMissionEndSession) return;
+            starMissionCelebrationAudio = null;
+        });
+        const cheerTimer = window.setTimeout(() => {
+            if (session !== starMissionEndSession) return;
+            starMissionKidsCheeringAudio = playStarMissionOneShot(STAR_MISSION_KIDS_CHEERING_AUDIO_SOURCE, () => {
+                if (session !== starMissionEndSession) return;
+                starMissionKidsCheeringAudio = null;
+                showStarMissionRewardProgress(session);
+            });
+            starMissionEndTimers = starMissionEndTimers.filter((timerId) => timerId !== cheerTimer);
+        }, 750);
+        starMissionEndTimers.push(cheerTimer);
+        const progressTimer = window.setTimeout(() => {
+            if (session !== starMissionEndSession) return;
+            showStarMissionRewardProgress(session);
+        }, STAR_MISSION_PROGRESS_DELAY_MS);
+        starMissionEndTimers.push(progressTimer);
+    };
+
+    const startStarMissionLoseFlow = () => {
+        if (!starMissionPage || starMissionPage.hidden) return;
+        stopStarMissionTimer();
+        stopStarMissionClockTickingAudio();
+        stopStarMissionWalker();
+        stopStarMissionFallingShapes();
+        if (starMissionHud) starMissionHud.hidden = true;
+        starMissionGameActive = false;
+        starMissionEndSession += 1;
+        const session = starMissionEndSession;
+        if (starMissionTimeout) {
+            starMissionTimeout.hidden = false;
+            starMissionTimeout.setAttribute('aria-hidden', 'false');
+            starMissionTimeout.classList.add('is-intro');
+            starMissionTimeout.getBoundingClientRect();
+            starMissionTimeout.classList.add('is-visible');
+        }
+        starMissionTimesUpAudio = playStarMissionOneShot(STAR_MISSION_TIMES_UP_AUDIO_SOURCE, () => {
+            if (session !== starMissionEndSession) return;
+            starMissionTimesUpAudio = null;
+            starMissionTimeout?.classList.remove('is-intro');
+            starMissionLoseAudio = playStarMissionOneShot(STAR_MISSION_LOSE_AUDIO_SOURCE, () => {
+                if (session !== starMissionEndSession) return;
+                starMissionLoseAudio = null;
+            });
+            starMissionRetryButton?.focus({ preventScroll: true });
+        });
+    };
+
+    const startStarMissionTimer = () => {
+        stopStarMissionTimer();
+        const tick = (timestamp) => {
+            if (!starMissionGameActive) {
+                starMissionTimerFrame = null;
+                return;
+            }
+            if (starMissionTimerLastTick === null) starMissionTimerLastTick = timestamp;
+            const elapsed = Math.max(0, timestamp - starMissionTimerLastTick);
+            starMissionTimerLastTick = timestamp;
+            starMissionTimeRemainingMs = Math.max(0, starMissionTimeRemainingMs - elapsed);
+            updateStarMissionHud();
+            syncStarMissionClockTickingAudio();
+            if (starMissionTimeRemainingMs <= 0) {
+                startStarMissionLoseFlow();
+                return;
+            }
+            starMissionTimerFrame = window.requestAnimationFrame(tick);
+        };
+        starMissionTimerFrame = window.requestAnimationFrame(tick);
+    };
+
+    const setStarMissionTarget = (target) => {
+        starMissionSelectedTarget = Number(target) || 5;
+        starMissionTimeRemainingMs = getStarMissionDurationMs();
+        starMissionTargetOptions.forEach((option) => {
+            const isSelected = Number(option.dataset.starTarget) === starMissionSelectedTarget;
+            option.classList.toggle('is-selected', isSelected);
+            option.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+        });
+        updateStarMissionHud();
+    };
+
+    const showStarMissionSetup = () => {
+        stopStarMissionEndFlow();
+        const progress = shapePreviewProgressByPage.get(starMissionPage);
+        if (progress) {
+            progress.hidden = true;
+            progress.setAttribute('aria-hidden', 'true');
+        }
+        stopStarMissionFallingShapes();
+        stopStarMissionWalker();
+        starMissionGameActive = false;
+        starMissionCollectedStars = 0;
+        starMissionTimeRemainingMs = getStarMissionDurationMs();
+        updateStarMissionHud();
+        if (starMissionHud) starMissionHud.hidden = true;
+        if (starMissionSetup) {
+            starMissionSetup.hidden = false;
+            starMissionSetup.getBoundingClientRect();
+        }
+    };
+
+    const startStarMissionGame = () => {
+        if (!starMissionPage || starMissionPage.hidden) return;
+        stopStarMissionEndFlow();
+        const progress = shapePreviewProgressByPage.get(starMissionPage);
+        if (progress) {
+            progress.hidden = true;
+            progress.setAttribute('aria-hidden', 'true');
+        }
+        starMissionGameActive = true;
+        starMissionCollectedStars = 0;
+        starMissionTimeRemainingMs = getStarMissionDurationMs();
+        if (starMissionSetup) starMissionSetup.hidden = true;
+        if (starMissionHud) starMissionHud.hidden = false;
+        updateStarMissionHud();
+        startStarMissionWalker();
+        startStarMissionFallingShapes();
+        startStarMissionTimer();
+    };
+
+    function stopStarMissionGame({ keepHud = false } = {}) {
+        starMissionGameActive = false;
+        stopStarMissionTimer();
+        stopStarMissionClockTickingAudio();
+        stopStarMissionWalker();
+        stopStarMissionFallingShapes();
+        if (starMissionHud && !keepHud) starMissionHud.hidden = true;
+    }
+
+    const createStarMissionShapeSvg = (kind) => {
+        const shapeColor = {
+            star: '#ffd84a',
+            circle: '#4fc5ff',
+            triangle: '#62d26f',
+            square: '#ff9155',
+            diamond: '#a878ff',
+            oval: '#ff78a7',
+        }[kind] || '#ffffff';
+        const edgeColor = {
+            star: '#a66a14',
+            circle: '#2166a5',
+            triangle: '#24713a',
+            square: '#a84222',
+            diamond: '#5d35a2',
+            oval: '#9b315c',
+        }[kind] || '#555555';
+        const shapeMarkup = {
+            star: '<path d="M50 5 L61 31 L89 33 L68 51 L75 79 L50 64 L25 79 L32 51 L11 33 L39 31 Z"></path>',
+            circle: '<circle cx="50" cy="47" r="34"></circle>',
+            triangle: '<path d="M50 8 L88 80 H12 Z"></path>',
+            square: '<rect x="17" y="14" width="66" height="66" rx="7"></rect>',
+            diamond: '<path d="M50 5 L90 43 L50 82 L10 43 Z"></path>',
+            oval: '<ellipse cx="50" cy="48" rx="31" ry="40"></ellipse>',
+        }[kind];
+        return `
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+                <g fill="${shapeColor}" stroke="${edgeColor}" stroke-width="6" stroke-linejoin="round">
+                    ${shapeMarkup}
+                </g>
+            </svg>
+        `;
+    };
+
+    const createStarMissionBurst = (xPercent, yPixels, color) => {
+        if (!starMissionFallField) return;
+        const burst = document.createElement('span');
+        burst.className = 'star-burst';
+        burst.style.setProperty('--burst-x', `${xPercent}%`);
+        burst.style.setProperty('--burst-y', `${yPixels}px`);
+        const particleCount = 10;
+        for (let index = 0; index < particleCount; index += 1) {
+            const particle = document.createElement('i');
+            const angle = (Math.PI * 2 * index) / particleCount;
+            const distance = 1.8 + Math.random() * 2.2;
+            particle.style.setProperty('--burst-color', color);
+            particle.style.setProperty('--burst-dx', `${Math.cos(angle) * distance}rem`);
+            particle.style.setProperty('--burst-dy', `${Math.sin(angle) * distance - 1.2}rem`);
+            particle.style.setProperty('--burst-size', `${(0.34 + Math.random() * 0.34).toFixed(2)}rem`);
+            burst.appendChild(particle);
+        }
+        starMissionFallField.appendChild(burst);
+        const removeTimer = window.setTimeout(() => {
+            burst.remove();
+            starMissionFallTimeouts.delete(removeTimer);
+        }, 650);
+        starMissionFallTimeouts.add(removeTimer);
+    };
+
+    const playStarMissionBoingSound = () => {
+        if (!window.Audio || (window.__learnscapeSoundScale?.() ?? 1) === 0) return;
+        const audio = new window.Audio(STAR_MISSION_BOING_AUDIO_SOURCE);
+        audio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+        audio.play().catch(() => {});
+    };
+
+    const playStarMissionCollectSound = () => {
+        if (!window.Audio || (window.__learnscapeSoundScale?.() ?? 1) === 0) return;
+        const audio = new window.Audio(STAR_MISSION_COLLECT_AUDIO_SOURCE);
+        audio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+        audio.play().catch(() => {});
+    };
+
+    const getStarMissionBasketRect = () => {
+        if (!starMissionWalker || starMissionWalker.hidden || !starMissionFallField) return null;
+        const walkerRect = starMissionWalker.getBoundingClientRect();
+        const fieldRect = starMissionFallField.getBoundingClientRect();
+        const facingRight = starMissionWalkerDirection >= 0;
+        const left = facingRight
+            ? walkerRect.left + (walkerRect.width * 0.54)
+            : walkerRect.left + (walkerRect.width * 0.05);
+        const right = facingRight
+            ? walkerRect.left + (walkerRect.width * 0.96)
+            : walkerRect.left + (walkerRect.width * 0.47);
+        return {
+            left: left - fieldRect.left,
+            right: right - fieldRect.left,
+            top: walkerRect.top + (walkerRect.height * 0.45) - fieldRect.top,
+            bottom: walkerRect.top + (walkerRect.height * 0.78) - fieldRect.top,
+        };
+    };
+
+    const finishStarMissionShape = (shape, delay = 360) => {
+        const removeTimer = window.setTimeout(() => {
+            shape.remove();
+            starMissionActiveShapes.delete(shape);
+            starMissionFallTimeouts.delete(removeTimer);
+        }, delay);
+        starMissionFallTimeouts.add(removeTimer);
+    };
+
+    const catchStarMissionShape = (shape, shapeRect, basketRect) => {
+        if (!starMissionFallField || !shape.isConnected || shape.classList.contains('is-caught')) return;
+        const fieldRect = starMissionFallField.getBoundingClientRect();
+        const currentCenterX = shapeRect.left - fieldRect.left + (shapeRect.width / 2);
+        const currentCenterY = shapeRect.top - fieldRect.top + (shapeRect.height / 2);
+        const basketCenterX = (basketRect.left + basketRect.right) / 2;
+        const basketCenterY = (basketRect.top + basketRect.bottom) / 2;
+        shape.style.left = `${currentCenterX}px`;
+        shape.style.top = `${currentCenterY}px`;
+        shape.style.setProperty('--catch-dx', `${(basketCenterX - currentCenterX).toFixed(1)}px`);
+        shape.style.setProperty('--catch-dy', `${(basketCenterY - currentCenterY).toFixed(1)}px`);
+        shape.style.removeProperty('--fall-x');
+        shape.classList.add('is-caught');
+        playStarMissionCollectSound();
+        let reachedTarget = false;
+        if (starMissionGameActive) {
+            starMissionCollectedStars = Math.min(starMissionSelectedTarget, starMissionCollectedStars + 1);
+            updateStarMissionHud();
+            reachedTarget = starMissionCollectedStars >= starMissionSelectedTarget;
+        }
+        createStarMissionBurst((basketCenterX / Math.max(1, fieldRect.width)) * 100, basketCenterY, '#ffd84a');
+        finishStarMissionShape(shape, 360);
+        if (reachedTarget) {
+            starMissionGameActive = false;
+            stopStarMissionTimer();
+            stopStarMissionClockTickingAudio();
+            const completeTimer = window.setTimeout(() => {
+                startStarMissionWinFlow();
+                starMissionFallTimeouts.delete(completeTimer);
+            }, 420);
+            starMissionFallTimeouts.add(completeTimer);
+        }
+    };
+
+    const bounceStarMissionShape = (shape, shapeRect, basketRect) => {
+        if (!shape.isConnected || shape.classList.contains('is-bouncing')) return;
+        let penaltyX = null;
+        let penaltyY = null;
+        if (starMissionFallField && shapeRect && basketRect) {
+            const fieldRect = starMissionFallField.getBoundingClientRect();
+            const currentCenterX = shapeRect.left - fieldRect.left + (shapeRect.width / 2);
+            const currentCenterY = shapeRect.top - fieldRect.top + (shapeRect.height / 2);
+            const basketCenterX = (basketRect.left + basketRect.right) / 2;
+            const bounceDx = currentCenterX < basketCenterX ? -4.5 : 4.5;
+            penaltyX = currentCenterX;
+            penaltyY = currentCenterY;
+            shape.style.left = `${currentCenterX}px`;
+            shape.style.top = `${currentCenterY}px`;
+            shape.style.setProperty('--bounce-dx', `${bounceDx}rem`);
+            shape.style.setProperty('--bounce-end-dx', `${bounceDx * 1.55}rem`);
+            shape.style.setProperty('--bounce-dy', '-4.2rem');
+            shape.style.removeProperty('--fall-x');
+        }
+        shape.classList.add('is-bouncing');
+        playStarMissionBoingSound();
+        if (starMissionGameActive) {
+            starMissionTimeRemainingMs = Math.max(0, starMissionTimeRemainingMs - STAR_MISSION_NON_STAR_PENALTY_MS);
+            updateStarMissionHud();
+            showStarMissionTimerPenalty();
+            if (penaltyX !== null && penaltyY !== null) showStarMissionShapePenalty(penaltyX, penaltyY);
+            syncStarMissionClockTickingAudio();
+            if (starMissionTimeRemainingMs <= 0) {
+                startStarMissionLoseFlow();
+                return;
+            }
+        }
+        finishStarMissionShape(shape, 620);
+    };
+
+    const monitorStarMissionFallingShapes = () => {
+        if (!starMissionWalkerActive || !starMissionFallField || starMissionPage?.hidden) {
+            starMissionCollisionFrame = null;
+            return;
+        }
+        const fieldRect = starMissionFallField.getBoundingClientRect();
+        const basketRect = getStarMissionBasketRect();
+        starMissionActiveShapes.forEach((shape) => {
+            if (!shape.isConnected || shape.classList.contains('is-caught') || shape.classList.contains('is-bouncing')) return;
+            const shapeRect = shape.getBoundingClientRect();
+            const shapeCenterX = shapeRect.left - fieldRect.left + (shapeRect.width / 2);
+            const shapeCenterY = shapeRect.top - fieldRect.top + (shapeRect.height / 2);
+            const isStar = shape.dataset.kind === 'star';
+            const isInsideBasket = Boolean(
+                basketRect
+                && shapeCenterX >= basketRect.left
+                && shapeCenterX <= basketRect.right
+                && shapeCenterY >= basketRect.top
+                && shapeCenterY <= basketRect.bottom
+            );
+            if (isInsideBasket && isStar) {
+                catchStarMissionShape(shape, shapeRect, basketRect);
+                return;
+            }
+            if (isInsideBasket && !isStar) {
+                bounceStarMissionShape(shape, shapeRect, basketRect);
+                return;
+            }
+
+            const groundY = Number(shape.dataset.groundY || 0);
+            if (groundY > 0 && shapeRect.bottom - fieldRect.top >= groundY - 2) {
+                shape.classList.add('is-bursting');
+                createStarMissionBurst(
+                    (shapeCenterX / Math.max(1, fieldRect.width)) * 100,
+                    groundY,
+                    shape.dataset.burstColor || (isStar ? '#ffd84a' : '#9be8ff'),
+                );
+                finishStarMissionShape(shape, 240);
+            }
+        });
+        starMissionCollisionFrame = window.requestAnimationFrame(monitorStarMissionFallingShapes);
+    };
+
+    const spawnStarMissionFallingShape = () => {
+        if (!starMissionFallField || !starMissionWalkerActive || starMissionPage?.hidden) return;
+        const kinds = ['star', 'star', 'star', 'circle', 'triangle', 'square', 'diamond', 'oval'];
+        const kind = kinds[Math.floor(Math.random() * kinds.length)];
+        const isStar = kind === 'star';
+        const xPercent = 8 + Math.random() * 84;
+        const duration = isStar ? 4.3 + Math.random() * 1.2 : 3.4 + Math.random() * 1.1;
+        const size = isStar ? 4.4 + Math.random() * 2 : 4 + Math.random() * 1.8;
+        const color = isStar ? '#ffd84a' : '#9be8ff';
+        const fieldRect = starMissionFallField.getBoundingClientRect();
+        const walkerRect = starMissionWalker?.getBoundingClientRect();
+        const groundY = walkerRect
+            ? Math.max(0, Math.min(fieldRect.height, walkerRect.bottom - fieldRect.top))
+            : fieldRect.height * 0.84;
+        const shape = document.createElement('span');
+        shape.className = `star-falling-shape ${isStar ? 'is-star' : 'is-non-star'}`;
+        shape.dataset.kind = kind;
+        shape.style.setProperty('--fall-x', `${xPercent}%`);
+        shape.style.setProperty('--fall-size', `${size.toFixed(2)}rem`);
+        shape.style.setProperty('--fall-duration', `${duration.toFixed(2)}s`);
+        shape.style.setProperty('--fall-ground-y', `${groundY.toFixed(1)}px`);
+        shape.style.setProperty('--fall-rotate', `${Math.round(Math.random() * 80 - 40)}deg`);
+        shape.style.setProperty('--fall-spin', `${Math.round((Math.random() > 0.5 ? 1 : -1) * (120 + Math.random() * 180))}deg`);
+        shape.style.setProperty('--fall-wave', `${(1.4 + Math.random() * 2.2).toFixed(2)}rem`);
+        shape.innerHTML = `<span class="star-falling-shape-art">${createStarMissionShapeSvg(kind)}</span>`;
+        shape.dataset.groundY = groundY.toFixed(1);
+        shape.dataset.burstColor = color;
+        starMissionFallField.appendChild(shape);
+        starMissionActiveShapes.add(shape);
+    };
+
+    const startStarMissionFallingShapes = () => {
+        if (!starMissionFallField) return;
+        starMissionFallField.hidden = false;
+        spawnStarMissionFallingShape();
+        if (starMissionFallTimer !== null) window.clearInterval(starMissionFallTimer);
+        starMissionFallTimer = window.setInterval(spawnStarMissionFallingShape, 720);
+        if (starMissionCollisionFrame !== null) window.cancelAnimationFrame(starMissionCollisionFrame);
+        starMissionCollisionFrame = window.requestAnimationFrame(monitorStarMissionFallingShapes);
+    };
+
+    const stopStarMissionFallingShapes = () => {
+        if (starMissionFallTimer !== null) window.clearInterval(starMissionFallTimer);
+        starMissionFallTimer = null;
+        if (starMissionCollisionFrame !== null) window.cancelAnimationFrame(starMissionCollisionFrame);
+        starMissionCollisionFrame = null;
+        starMissionFallTimeouts.forEach((timerId) => window.clearTimeout(timerId));
+        starMissionFallTimeouts.clear();
+        starMissionActiveShapes.clear();
+        if (starMissionFallField) {
+            starMissionFallField.hidden = true;
+            starMissionFallField.replaceChildren();
+        }
+    };
+
     const sizeHeartShotField = () => {
         if (!heartShotField || !heartCupidGame) return;
         const rect = heartCupidGame.getBoundingClientRect();
@@ -4126,6 +4913,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         startHeartCupidGame();
     });
 
+    starMissionStartButton?.addEventListener('click', () => {
+        playUiClickSound('start');
+        stopStarMissionSequence();
+        showStarMissionSetup();
+    });
+
+    starMissionTargetOptions.forEach((option) => {
+        option.addEventListener('click', () => {
+            playUiClickSound('start');
+            setStarMissionTarget(option.dataset.starTarget);
+            startStarMissionGame();
+        });
+    });
+
+    starMissionRetryButton?.addEventListener('click', () => {
+        playUiClickSound('start');
+        showStarMissionSetup();
+    });
+
     heartGameRetryButton?.addEventListener('click', () => {
         playUiClickSound('start');
         resetHeartGameState();
@@ -4157,7 +4963,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const questionPanel = page.querySelector('.shape-preview-question-panel');
         const playButton = page.querySelector('.shape-preview-play-button');
         const skipButton = page.querySelector('.shape-preview-skip-button');
-        const areaTitle = page.querySelector('.shape-area-preview-title');
+        const progress = shapePreviewProgressByPage.get(page);
+        const replayButton = progress?.querySelector('[data-shape-preview-replay]') || null;
+        const replayImage = replayButton?.querySelector('img') || null;
         const bridgeCharacterSequence = page.querySelector('.triangle-bridge-character-sequence');
         const bridgeWalkingCharacter = page.querySelector('.triangle-bridge-walking-character');
         const bridgeArrivalCharacter = page.querySelector('.triangle-bridge-arrival-character');
@@ -4179,11 +4987,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (questionPanel) questionPanel.hidden = true;
         if (playButton) playButton.hidden = false;
         if (skipButton) skipButton.hidden = true;
-        if (areaTitle?.classList.contains('is-bridge-repair-title')) {
-            areaTitle.innerHTML = '<span>Area</span><strong>3</strong>';
-            areaTitle.setAttribute('aria-label', 'Area 3');
-            areaTitle.classList.remove('is-bridge-repair-title');
-        }
         if (bridgeCharacterSequence) {
             bridgeCharacterSequence.hidden = true;
             bridgeCharacterSequence.classList.remove('is-walking');
@@ -4197,7 +5000,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (drivingJeep) drivingJeep.hidden = false;
         if (arrivedJeep) arrivedJeep.hidden = true;
         videoStage?.setAttribute('aria-hidden', 'true');
-        shapePreviewProgressByPage.get(page)?.setAttribute('aria-hidden', 'true');
+        progress?.setAttribute('aria-hidden', 'true');
+        if (replayImage) replayImage.src = 'assets/Buttons/replay.webp';
+        replayButton?.setAttribute('aria-label', 'Replay shape lesson');
         page.classList.remove('is-transitioning-to-illustration', 'is-illustration-background', 'is-tv-lesson-image-visible', 'is-progress-visible', 'is-next-background', 'is-fading-to-triangle-game', 'is-rectangle-village-departing');
         resetShapeTvChoices(page);
     };
@@ -4219,6 +5024,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 700);
     };
 
+    const showStarMissionRewardProgress = (session) => {
+        if (session !== starMissionEndSession || !isPageVisible(starMissionPage)) return;
+
+        const progress = shapePreviewProgressByPage.get(starMissionPage);
+        if (progress) {
+            progress.dataset.progressStage = 'hunt';
+            const stars = progress.querySelector('.circle-lesson-stars');
+            const message = progress.querySelector('.circle-lesson-star-message');
+            const replayButton = progress.querySelector('[data-shape-preview-replay]');
+            const replayImage = replayButton?.querySelector('img');
+            if (stars) {
+                stars.dataset.earnedStars = '2';
+                stars.setAttribute('aria-label', '2 of 3 stars earned');
+            }
+            if (message) message.textContent = 'Amazing! You collected all stars!';
+            if (replayImage) replayImage.src = 'assets/Buttons/Retry.webp';
+            replayButton?.setAttribute('aria-label', 'Retry Star Mission');
+        }
+
+        stopStarMissionEndFlow();
+        starMissionPage?.classList.add('is-lesson-complete');
+        showShapePreviewProgress(starMissionPage);
+    };
+
     const showShapePreviewIllustration = (page) => {
         if (!page || !isPageVisible(page)) return;
 
@@ -4232,7 +5061,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const skipButton = page.querySelector('.shape-preview-skip-button');
         const illustrationBackgroundSource = page.dataset.illustrationBackground;
         const videoSource = page.dataset.videoSource;
-        if (background && illustrationBackgroundSource && !videoSource && !lessonImage) {
+        if (background && illustrationBackgroundSource) {
             background.src = illustrationBackgroundSource;
         }
         if (video && videoSource) {
@@ -4861,6 +5690,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 stopHeartMissionSequence();
                 stopHeartCupidGame();
             }
+            if (page === starMissionPage) {
+                stopStarMissionSequence();
+                stopStarMissionGame();
+                stopStarMissionEndFlow();
+                if (starMissionSetup) starMissionSetup.hidden = true;
+            }
         });
         rectangleGoButton?.addEventListener('click', () => {
             if (!isPageVisible(page) || rectangleGoButton.hidden || rectangleGoButton.disabled) return;
@@ -4966,6 +5801,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         video?.addEventListener('ended', showLessonBackground);
 
         replayButton?.addEventListener('click', () => {
+            if (page === starMissionPage && progress?.dataset.progressStage === 'hunt') {
+                page.classList.remove('is-progress-visible', 'is-lesson-complete');
+                progress?.setAttribute('aria-hidden', 'true');
+                showStarMissionSetup();
+                return;
+            }
             page.classList.remove('is-progress-visible');
             progress?.setAttribute('aria-hidden', 'true');
             resetShapeTvChoices(page);
@@ -4973,19 +5814,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         nextButton?.addEventListener('click', () => {
-            if (page.dataset.cameraRoute) {
-                openShapeCameraLayout(page.dataset.cameraRoute);
+            if (page === starMissionPage && progress?.dataset.progressStage === 'hunt') {
+                if (page.dataset.cameraRoute) {
+                    openShapeCameraLayout(page.dataset.cameraRoute);
+                    return;
+                }
+                window.location.hash = '#game3';
                 return;
             }
 
             const nextBackgroundSource = page.dataset.nextBackground;
             if (!nextBackgroundSource) {
+                if (page.dataset.cameraRoute) {
+                    openShapeCameraLayout(page.dataset.cameraRoute);
+                    return;
+                }
+
                 window.location.hash = '#game3';
                 return;
             }
 
             const background = page.querySelector('.shape-area-bg');
-            const areaTitle = page.querySelector('.shape-area-preview-title');
             const revealNextBackground = () => {
                 if (!isPageVisible(page)) return;
                 if (background) background.src = nextBackgroundSource;
@@ -4994,11 +5843,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 progress?.setAttribute('aria-hidden', 'true');
                 videoStage?.setAttribute('aria-hidden', 'true');
                 if (page === heartMissionPage) startHeartMissionSequence();
-                if (areaTitle && page.dataset.nextTitle) {
-                    areaTitle.textContent = page.dataset.nextTitle;
-                    areaTitle.setAttribute('aria-label', page.dataset.nextTitle);
-                    areaTitle.classList.add('is-bridge-repair-title');
-                }
+                if (page === starMissionPage) startStarMissionSequence();
                 if (rectangleMissionGuideCharacter || rectangleMissionObjectPanel) {
                     if (jeepSequence) {
                         jeepSequence.hidden = true;

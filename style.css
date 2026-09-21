@@ -2383,63 +2383,11 @@ body.is-windowed-fallback .fullscreen-restore-overlay {
     }
 }
 
-.shape-area-learning-goal {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    z-index: 2;
-    width: max(100vw, calc(100svh * 1.776833));
-    height: max(100svh, calc(100vw / 1.776833));
-    color: #3f210d;
-    font-family: 'Fredoka', sans-serif;
-    text-align: center;
-    transform: translate(-50%, -50%);
-    text-shadow:
-        0 0.08rem 0 #ffe29a,
-        0 0.16rem 0.12rem rgba(90, 45, 12, 0.28);
-    pointer-events: none;
-}
-
-.shape-area-learning-goal > span {
-    position: absolute;
-    left: 50%;
-    display: block;
-    width: 28%;
-    transform: translate(-50%, -50%) rotate(-0.4deg);
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-.shape-area-learning-goal-heading {
-    top: 61.8%;
-    font-size: clamp(1.55rem, 2.75vw, 2.75rem);
-    font-weight: 800;
-    letter-spacing: 0.02em;
-}
-
-.shape-area-learning-goal-line-one,
-.shape-area-learning-goal-line-two {
-    font-size: clamp(1.45rem, 2.45vw, 2.45rem);
-    font-weight: 800;
-    line-height: 1;
-}
-
-.shape-area-learning-goal-line-one {
-    top: 71.5%;
-}
-
-.shape-area-learning-goal-line-two {
-    top: 80.8%;
-}
-
-.shape-area-learning-goal.is-start-ready > span {
-    opacity: 0;
-    visibility: hidden;
-}
-
 .shape-area-start-button {
     position: absolute;
     left: 50%;
     top: 71.5%;
+    z-index: 4;
     min-width: clamp(8rem, 14vw, 14rem);
     padding: clamp(0.65rem, 1.1vw, 1rem) clamp(1.5rem, 3vw, 3rem);
     border: clamp(0.16rem, 0.28vw, 0.28rem) solid #6f3b16;
@@ -2453,11 +2401,12 @@ body.is-windowed-fallback .fullscreen-restore-overlay {
     box-shadow:
         0 0.35rem 0 #9a591f,
         0 0.7rem 1.1rem rgba(70, 35, 8, 0.28);
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
     cursor: pointer;
-    transform: translate(-50%, -50%) scale(0.72);
+    transform: translate(-50%, -50%) scale(1);
+    animation: shapeAreaStartButtonPulse 1.25s ease-in-out infinite;
     transition:
         transform 0.18s ease,
         filter 0.18s ease,
@@ -2465,14 +2414,7 @@ body.is-windowed-fallback .fullscreen-restore-overlay {
         box-shadow 0.18s ease;
 }
 
-.shape-area-learning-goal.is-start-ready .shape-area-start-button {
-    visibility: visible;
-    pointer-events: auto;
-    animation: shapeAreaStartButtonIn 0.55s cubic-bezier(0.2, 1.18, 0.35, 1) forwards,
-        shapeAreaStartButtonPulse 1.25s ease-in-out 0.55s infinite;
-}
-
-.shape-area-learning-goal.is-start-ready .shape-area-start-button:hover {
+.shape-area-start-button:hover {
     animation: none;
     opacity: 1;
     background: linear-gradient(180deg, #fffca0 0%, #ffe35d 52%, #f7ba3d 100%);
@@ -2484,7 +2426,7 @@ body.is-windowed-fallback .fullscreen-restore-overlay {
     transform: translate(-50%, -56%) scale(1.08);
 }
 
-.shape-area-learning-goal.is-start-ready .shape-area-start-button:active {
+.shape-area-start-button:active {
     animation: none;
     opacity: 1;
     filter: brightness(0.98) saturate(1.04);
@@ -2493,18 +2435,6 @@ body.is-windowed-fallback .fullscreen-restore-overlay {
         0 0.35rem 0.65rem rgba(70, 35, 8, 0.24),
         0 0 0 0.18rem rgba(255, 244, 95, 0.22);
     transform: translate(-50%, -47%) scale(0.96);
-}
-
-@keyframes shapeAreaStartButtonIn {
-    from {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.72);
-    }
-
-    to {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
 }
 
 @keyframes shapeAreaStartButtonPulse {
@@ -2810,7 +2740,7 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     border-top: 0.8rem solid #ffe8a5;
 }
 
-.shape-area-title {
+.shape-area-title-text {
     position: absolute;
     left: 50%;
     top: clamp(1rem, 3vh, 2rem);
@@ -3642,6 +3572,11 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     display: none !important;
 }
 
+#learnscape-shape-area-7-page.is-next-background .shape-preview-intro-character,
+#learnscape-shape-area-7-page.is-next-background .shape-preview-intro-bubble {
+    display: none !important;
+}
+
 .heart-mission-intro {
     position: absolute;
     inset: 0;
@@ -3651,6 +3586,18 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 }
 
 .heart-mission-intro[hidden] {
+    display: none;
+}
+
+.star-mission-intro {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.star-mission-intro[hidden] {
     display: none;
 }
 
@@ -3667,8 +3614,26 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     will-change: left, opacity;
 }
 
+.star-mission-character-wrap {
+    position: absolute;
+    left: calc(0% - clamp(9rem, 16vw, 16rem));
+    bottom: clamp(2.5rem, 6vh, 5.2rem);
+    width: clamp(15rem, 26vw, 27rem);
+    opacity: 0;
+    translate: -50% 0;
+    transition:
+        left 1.35s cubic-bezier(0.18, 0.78, 0.22, 1),
+        opacity 0.7s ease;
+    will-change: left, opacity;
+}
+
 .heart-mission-intro.is-active .heart-mission-character-wrap {
     left: 50%;
+    opacity: 1;
+}
+
+.star-mission-intro.is-active .star-mission-character-wrap {
+    left: clamp(7.4rem, 14vw, 15rem);
     opacity: 1;
 }
 
@@ -3684,6 +3649,13 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     height: auto;
     filter: drop-shadow(0 1rem 0.8rem rgba(58, 20, 43, 0.28));
     animation: heartMissionCharacterFloat 2.5s ease-in-out infinite;
+}
+
+.star-mission-character {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 1rem 0.9rem rgba(84, 54, 8, 0.32));
 }
 
 .heart-mission-message {
@@ -3712,15 +3684,55 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     transition: opacity 0.35s ease, transform 0.42s ease;
 }
 
+.star-mission-message {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(1.4rem, 5vh, 4rem);
+    width: min(49rem, calc(100vw - 2rem));
+    box-sizing: border-box;
+    padding: clamp(0.9rem, 1.8vw, 1.35rem) clamp(1.2rem, 2.5vw, 2rem);
+    border: 0.24rem solid #8d5b00;
+    border-radius: 0.5rem;
+    background: linear-gradient(180deg, rgba(255, 253, 218, 0.98), rgba(255, 223, 99, 0.98));
+    box-shadow:
+        inset 0 0.13rem 0 rgba(255, 255, 255, 0.86),
+        0 0.34rem 0 #8d5b00,
+        0 0.75rem 1.2rem rgba(70, 48, 6, 0.3);
+    color: #4a3200;
+    font-family: 'Fredoka', 'Nunito', sans-serif;
+    font-size: clamp(1.45rem, 2.45vw, 2.45rem);
+    font-weight: 800;
+    line-height: 1.25;
+    text-align: center;
+    text-shadow: 0 0.08rem 0 #fffbd0;
+    opacity: 0;
+    transform: translate(-50%, 0.75rem) scale(0.96);
+    transition: opacity 0.35s ease, transform 0.42s ease;
+}
+
 .heart-mission-intro.is-message-visible .heart-mission-message {
     opacity: 1;
     transform: translate(-50%, 0) scale(1);
+}
+
+.star-mission-intro.is-message-visible .star-mission-message {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+}
+
+.star-mission-intro.is-ready-message .star-mission-message {
+    width: min(25rem, calc(100vw - 2rem));
 }
 
 .heart-mission-intro.is-message-changing .heart-mission-message,
 .heart-mission-intro.is-moving-right .heart-mission-message {
     opacity: 0;
     transform: translate(-50%, -0.7rem) scale(0.97);
+}
+
+.star-mission-intro.is-message-changing .star-mission-message {
+    opacity: 0;
+    transform: translate(-50%, 0.7rem) scale(0.97);
 }
 
 .heart-mission-start-button {
@@ -3737,10 +3749,768 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.2, 1.15, 0.35, 1);
 }
 
+.star-mission-start-button {
+    left: 50%;
+    top: 48%;
+    bottom: auto;
+    z-index: 12;
+    min-width: clamp(13rem, 22vw, 20rem);
+    min-height: clamp(4.6rem, 8vw, 6.8rem);
+    font-size: clamp(1.9rem, 3.6vw, 3.5rem);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0.72);
+    transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.2, 1.15, 0.35, 1);
+}
+
 .heart-mission-start-button.is-visible {
     opacity: 1;
     pointer-events: auto;
     transform: translate(-50%, -50%) scale(1);
+}
+
+.star-mission-start-button.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.star-mission-walker {
+    position: absolute;
+    left: 0;
+    bottom: clamp(2.6rem, 6.4vh, 5.2rem);
+    z-index: 8;
+    width: clamp(9rem, 15vw, 16rem);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(var(--star-walker-x, 12vw));
+    transition: opacity 0.25s ease;
+    will-change: transform;
+}
+
+.star-mission-walker.is-active {
+    opacity: 1;
+}
+
+.star-mission-walker[hidden] {
+    display: none;
+}
+
+.star-mission-walker-character {
+    display: block;
+    width: 100%;
+    height: auto;
+    transform: scaleX(var(--star-walker-facing, 1));
+    transform-origin: center bottom;
+    filter: drop-shadow(0 0.75rem 0.65rem rgba(65, 45, 8, 0.28));
+}
+
+.star-mission-fall-field {
+    position: absolute;
+    inset: 0;
+    z-index: 7;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.star-mission-fall-field[hidden] {
+    display: none;
+}
+
+.star-mission-setup {
+    position: absolute;
+    inset: 0;
+    z-index: 11;
+    display: grid;
+    place-items: center;
+    pointer-events: auto;
+}
+
+.star-mission-setup[hidden] {
+    display: none;
+}
+
+.star-mission-setup-panel {
+    width: min(34rem, calc(100vw - 2rem));
+    box-sizing: border-box;
+    padding: clamp(1.1rem, 2.2vw, 1.8rem);
+    border: 0.28rem solid #8d5b00;
+    border-radius: 0.65rem;
+    background: linear-gradient(180deg, rgba(255, 252, 218, 0.98), rgba(255, 219, 82, 0.97));
+    box-shadow:
+        inset 0 0.15rem 0 rgba(255, 255, 255, 0.86),
+        0 0.42rem 0 #8d5b00,
+        0 0.9rem 1.4rem rgba(62, 43, 9, 0.32);
+    font-family: 'Fredoka', 'Nunito', sans-serif;
+    text-align: center;
+    color: #4a3200;
+}
+
+.star-mission-setup-panel h2 {
+    margin: 0 0 0.8rem;
+    font-size: clamp(1.9rem, 3.2vw, 3.1rem);
+    line-height: 1;
+    text-shadow: 0 0.1rem 0 #fffbd0;
+}
+
+.star-mission-target-options {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(0.45rem, 1vw, 0.8rem);
+    margin-bottom: clamp(1rem, 2vw, 1.5rem);
+}
+
+.star-mission-target-option {
+    min-height: clamp(3.2rem, 6vw, 4.7rem);
+    border: 0.2rem solid #8d5b00;
+    border-radius: 0.5rem;
+    background: linear-gradient(180deg, #fff7a5, #ffc93d 56%, #e58d19);
+    box-shadow: 0 0.25rem 0 #8d5b00, inset 0 0.12rem 0 rgba(255, 255, 255, 0.78);
+    color: #4a3200;
+    font: 900 clamp(1.7rem, 3vw, 2.8rem) 'Fredoka', sans-serif;
+    cursor: pointer;
+    transition: transform 0.16s ease, filter 0.16s ease, box-shadow 0.16s ease;
+}
+
+.star-mission-target-option:hover,
+.star-mission-target-option:focus-visible {
+    filter: brightness(1.08) saturate(1.08);
+    box-shadow:
+        0 0.34rem 0 #8d5b00,
+        0 0 0 0.22rem rgba(255, 248, 135, 0.4),
+        inset 0 0.12rem 0 rgba(255, 255, 255, 0.86);
+    transform: translateY(-0.18rem) scale(1.04);
+}
+
+.star-mission-target-option.is-selected {
+    background: linear-gradient(180deg, #fffef0, #ffe95d 56%, #ffb82e);
+    box-shadow:
+        0 0.25rem 0 #8d5b00,
+        0 0 0 0.25rem rgba(255, 248, 135, 0.55),
+        inset 0 0.12rem 0 rgba(255, 255, 255, 0.9);
+    transform: translateY(-0.12rem);
+}
+
+.star-mission-target-option.is-selected:hover,
+.star-mission-target-option.is-selected:focus-visible {
+    filter: brightness(1.1) saturate(1.1);
+    box-shadow:
+        0 0.38rem 0 #8d5b00,
+        0 0 0 0.3rem rgba(255, 248, 135, 0.62),
+        inset 0 0.12rem 0 rgba(255, 255, 255, 0.94);
+    transform: translateY(-0.22rem) scale(1.05);
+}
+
+.star-mission-hud {
+    position: absolute;
+    z-index: 9;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+    font-family: 'Fredoka', 'Nunito', sans-serif;
+}
+
+.star-mission-hud[hidden] {
+    display: none;
+}
+
+.star-mission-progress-panel,
+.star-mission-timer-panel {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    box-sizing: border-box;
+    border: 0.2rem solid rgba(141, 91, 0, 0.8);
+    border-radius: 0.5rem;
+    background: rgba(255, 248, 207, 0.94);
+    box-shadow: 0 0.26rem 0 rgba(141, 91, 0, 0.48), 0 0.55rem 1rem rgba(62, 43, 9, 0.18);
+    color: #4a3200;
+}
+
+.star-mission-progress-panel {
+    position: absolute;
+    left: clamp(0.8rem, 2vw, 1.6rem);
+    bottom: clamp(0.8rem, 2.8vh, 2rem);
+    width: min(20rem, 34vw);
+    padding: 0.5rem 0.7rem;
+}
+
+.star-mission-hud-icon {
+    color: #ffd43d;
+    font-size: clamp(2rem, 3.6vw, 3.1rem);
+    line-height: 1;
+    -webkit-text-stroke: 0.05em #8d5b00;
+    text-shadow: 0 0.12rem 0 #8d5b00;
+}
+
+.star-mission-progress-copy {
+    flex: 1;
+    min-width: 0;
+}
+
+.star-mission-progress-value {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: clamp(1.1rem, 2vw, 1.7rem);
+    line-height: 1;
+}
+
+.star-mission-progress-track {
+    display: block;
+    width: 100%;
+    height: 0.78rem;
+    border-radius: 999px;
+    background: rgba(115, 77, 11, 0.22);
+    overflow: hidden;
+}
+
+.star-mission-progress-fill {
+    display: block;
+    width: 0%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #ffd43d, #fff58b);
+    transition: width 0.28s ease;
+}
+
+.star-mission-timer-panel {
+    position: absolute;
+    right: clamp(0.8rem, 2vw, 1.6rem);
+    bottom: clamp(0.8rem, 2.8vh, 2rem);
+    width: fit-content;
+    padding: 0.5rem 0.9rem;
+}
+
+.star-mission-timer-panel svg {
+    width: clamp(2.2rem, 4vw, 3.4rem);
+    height: clamp(2.2rem, 4vw, 3.4rem);
+    color: #8d5b00;
+}
+
+.star-mission-timer-value {
+    min-width: 3ch;
+    font-size: clamp(2.1rem, 4.2vw, 4rem);
+    line-height: 0.95;
+    text-align: center;
+    color: #4a3200;
+    text-shadow: 0 0.1rem 0 #fffbd0;
+}
+
+.star-mission-timer-panel.is-urgent {
+    animation: starMissionTimerUrgent 0.46s ease-in-out infinite alternate;
+}
+
+.star-mission-timer-penalty {
+    position: absolute;
+    right: 0.35rem;
+    top: -1.45rem;
+    z-index: 2;
+    color: #ff3d35;
+    font: 900 clamp(1.5rem, 3vw, 2.7rem)/1 'Fredoka', 'Nunito', sans-serif;
+    text-shadow:
+        0 0.08rem 0 #ffffff,
+        0 0.16rem 0 #8a1d17,
+        0 0.28rem 0.45rem rgba(90, 27, 14, 0.35);
+    pointer-events: none;
+    animation: starMissionTimerPenaltyPop 0.82s cubic-bezier(0.2, 1.2, 0.35, 1) forwards;
+}
+
+.star-mission-celebration {
+    position: absolute;
+    inset: 0;
+    z-index: 18;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.38s ease;
+}
+
+.star-mission-celebration.is-active {
+    opacity: 1;
+}
+
+.star-mission-celebration h2,
+.star-mission-celebration p {
+    position: absolute;
+    left: 50%;
+    z-index: 3;
+    margin: 0;
+    font-family: 'Fredoka', 'Nunito', sans-serif;
+    text-align: center;
+    transform: translateX(-50%);
+    text-shadow: 0 0.12rem 0 #8d5b00, 0 0.28rem 0.4rem rgba(70, 45, 5, 0.3);
+}
+
+.star-mission-celebration h2 {
+    top: clamp(2rem, 8vh, 5rem);
+    width: min(54rem, calc(100vw - 2rem));
+    color: #fff8d8;
+    font-size: clamp(3rem, 7vw, 7rem);
+    line-height: 0.95;
+}
+
+.star-mission-celebration p {
+    top: clamp(6.2rem, 20vh, 13rem);
+    color: #ffe86e;
+    font-size: clamp(1.8rem, 4vw, 4rem);
+    font-weight: 900;
+}
+
+.star-mission-confetti {
+    position: absolute;
+    inset: -8% 0 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.star-mission-confetti span {
+    position: absolute;
+    left: var(--confetti-x, 50%);
+    top: -1.2rem;
+    width: var(--confetti-size, 0.75rem);
+    height: calc(var(--confetti-size, 0.75rem) * 1.45);
+    border-radius: 0.16rem;
+    background: var(--confetti-color, #ffd84a);
+    opacity: 0.92;
+    animation: circleHuntConfettiFall var(--confetti-duration, 3.2s) linear var(--confetti-delay, 0s) infinite;
+}
+
+.star-mission-celebration-ch7,
+.star-mission-celebration-ch8 {
+    position: absolute;
+    bottom: clamp(2.5rem, 6vh, 5.2rem);
+    z-index: 2;
+    display: block;
+    width: auto;
+    height: clamp(15rem, 28vw, 28rem);
+    filter: drop-shadow(0 1rem 0.85rem rgba(52, 36, 6, 0.28));
+    opacity: 0;
+}
+
+.star-mission-celebration-ch7 {
+    left: calc(50% - clamp(9rem, 24vw, 25rem));
+    transform: translateX(-50%);
+}
+
+.star-mission-celebration-ch8 {
+    left: calc(50% + clamp(9rem, 24vw, 25rem));
+    transform: translateX(-50%);
+}
+
+.star-mission-celebration.is-active .star-mission-celebration-ch7 {
+    animation:
+        starMissionCh7Celebrate 0.75s cubic-bezier(0.16, 0.92, 0.28, 1.18) forwards,
+        starMissionCh7Float 1.05s ease-in-out 0.8s infinite;
+}
+
+.star-mission-celebration.is-active .star-mission-celebration-ch8 {
+    animation:
+        starMissionCh8Pop 0.68s cubic-bezier(0.2, 1.48, 0.35, 1) 0.28s forwards,
+        starMissionCh8Pulse 1.2s ease-in-out 1s infinite;
+}
+
+.star-mission-timeout[hidden] {
+    display: none;
+}
+
+.star-mission-timeout {
+    position: absolute;
+    inset: 0;
+    z-index: 19;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(55, 34, 7, 0.56);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.38s ease;
+}
+
+.star-mission-timeout.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.star-mission-timeout-card {
+    display: grid;
+    justify-items: center;
+    width: min(34rem, calc(100vw - 2rem));
+    box-sizing: border-box;
+    padding: 1.4rem 2rem 1.7rem;
+    border: 0.3rem solid #8d5b00;
+    border-radius: 0.7rem;
+    background: linear-gradient(180deg, #fff8d6 0%, #ffd650 58%, #ee9324 100%);
+    box-shadow: inset 0 0 0 0.14rem rgba(255, 255, 255, 0.76), 0 0.5rem 0 #7a4900, 0 1.1rem 2rem rgba(45, 28, 5, 0.44);
+    color: #553800;
+    font-family: 'Fredoka', 'Nunito', sans-serif;
+    text-align: center;
+    transform: translateY(1.4rem) scale(0.86);
+    transition: transform 0.52s cubic-bezier(0.2, 1.18, 0.35, 1);
+}
+
+.star-mission-timeout.is-visible .star-mission-timeout-card {
+    transform: translateY(0) scale(1);
+}
+
+.star-mission-timeout.is-intro .star-mission-timeout-card {
+    animation: circleHuntTimeoutFall 1.15s cubic-bezier(0.22, 0.76, 0.3, 1) both;
+}
+
+.star-mission-timeout-clock {
+    width: clamp(5rem, 10vw, 7rem);
+    aspect-ratio: 1;
+    margin-top: -3.5rem;
+    filter: drop-shadow(0 0.4rem 0 rgba(141, 91, 0, 0.38));
+    animation: circleHuntClockWiggle 0.5s ease-in-out infinite;
+}
+
+.star-mission-timeout-clock svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.star-mission-timeout-title {
+    margin-top: 0.45rem;
+    color: #fff8d8;
+    font-size: clamp(3.2rem, 7vw, 6rem);
+    line-height: 0.92;
+    text-shadow: 0 0.15rem 0 #8d5b00, 0 0.32rem 0 #5e3500;
+}
+
+.star-mission-timeout-copy {
+    margin: 0.5rem 0 1rem;
+    color: #7a2d15;
+    font-size: clamp(1.5rem, 3vw, 2.4rem);
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.star-mission-timeout.is-intro .star-mission-timeout-copy,
+.star-mission-timeout.is-intro .star-mission-retry-button {
+    visibility: hidden;
+    opacity: 0;
+}
+
+.star-mission-retry-button {
+    min-width: clamp(10rem, 20vw, 15rem);
+    min-height: clamp(3.7rem, 7vw, 5.4rem);
+    border: 0.24rem solid #704000;
+    border-radius: 0.6rem;
+    background: linear-gradient(180deg, #fff7a2 0%, #ffd13f 55%, #ef8d1f 100%);
+    box-shadow: inset 0 0.13rem 0 rgba(255, 255, 255, 0.88), 0 0.34rem 0 #7a4900, 0 0.65rem 1rem rgba(66, 40, 5, 0.3);
+    color: #4d3100;
+    font: 900 clamp(1.7rem, 3.4vw, 3rem)/1 'Fredoka', 'Nunito', sans-serif;
+    cursor: pointer;
+}
+
+.star-mission-retry-button:hover,
+.star-mission-retry-button:focus-visible {
+    filter: brightness(1.08);
+    transform: translateY(-0.12rem);
+    outline: none;
+}
+
+.star-mission-retry-button:active {
+    transform: translateY(0.12rem);
+}
+
+.star-falling-shape {
+    position: absolute;
+    left: var(--fall-x, 50%);
+    top: 0;
+    width: var(--fall-size, 4rem);
+    height: var(--fall-size, 4rem);
+    color: var(--fall-color, #ffd84a);
+    opacity: 0;
+    filter: drop-shadow(0 0.3rem 0.35rem rgba(58, 43, 9, 0.28));
+    transform: translateX(-50%) translateY(calc(-1 * var(--fall-size, 4rem))) rotate(var(--fall-rotate, 0deg));
+    animation: starShapeFall var(--fall-duration, 4.4s) linear forwards;
+}
+
+.star-falling-shape.is-bursting {
+    animation: starShapeImpactFade 0.22s ease-out forwards !important;
+}
+
+.star-falling-shape.is-caught {
+    animation: starShapeCaught 0.34s ease-in forwards !important;
+    transform: translate(-50%, -50%) rotate(var(--fall-rotate, 0deg));
+}
+
+.star-falling-shape.is-bouncing {
+    animation: starShapeBounce 0.6s cubic-bezier(0.2, 0.8, 0.35, 1) forwards !important;
+}
+
+.star-falling-shape.is-star .star-falling-shape-art {
+    animation: starShapeWave 1.15s ease-in-out infinite;
+}
+
+.star-falling-shape.is-caught .star-falling-shape-art,
+.star-falling-shape.is-bouncing .star-falling-shape-art,
+.star-falling-shape.is-bursting .star-falling-shape-art {
+    animation: none;
+}
+
+.star-falling-shape-art,
+.star-falling-shape svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.star-falling-shape svg {
+    overflow: visible;
+}
+
+.star-burst {
+    position: absolute;
+    left: var(--burst-x, 50%);
+    top: var(--burst-y, 80%);
+    z-index: 7;
+    width: 0.65rem;
+    height: 0.65rem;
+    pointer-events: none;
+}
+
+.star-burst i {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--burst-size, 0.55rem);
+    height: var(--burst-size, 0.55rem);
+    border-radius: 999px;
+    background: var(--burst-color, #ffd84a);
+    transform: translate(-50%, -50%);
+    animation: starBurstPop 0.55s ease-out forwards;
+}
+
+.star-shape-penalty-pop {
+    position: absolute;
+    z-index: 9;
+    color: #ff3131;
+    font: 900 clamp(1.6rem, 3.3vw, 3.1rem)/1 'Fredoka', 'Nunito', sans-serif;
+    text-shadow:
+        0 0.08rem 0 #ffffff,
+        0 0.18rem 0 #8a1915,
+        0 0.35rem 0.55rem rgba(69, 25, 8, 0.38);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    animation: starShapePenaltyPop 0.72s cubic-bezier(0.2, 1.25, 0.35, 1) forwards;
+}
+
+@keyframes starShapeFall {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(calc(-1 * var(--fall-size, 4rem))) rotate(var(--fall-rotate, 0deg));
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(calc(var(--fall-ground-y, 82vh) - var(--fall-size, 4rem))) rotate(calc(var(--fall-rotate, 0deg) + var(--fall-spin, 160deg)));
+    }
+}
+
+@keyframes starShapeImpactFade {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(calc(var(--fall-ground-y, 82vh) - var(--fall-size, 4rem))) rotate(calc(var(--fall-rotate, 0deg) + var(--fall-spin, 160deg))) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(calc(var(--fall-ground-y, 82vh) - var(--fall-size, 4rem))) rotate(calc(var(--fall-rotate, 0deg) + var(--fall-spin, 160deg))) scale(0.62);
+    }
+}
+
+@keyframes starShapeCaught {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(var(--fall-rotate, 0deg)) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform:
+            translate(
+                calc(-50% + var(--catch-dx, 0px)),
+                calc(-50% + var(--catch-dy, 0px))
+            )
+            rotate(14deg)
+            scale(0.18);
+    }
+}
+
+@keyframes starShapeBounce {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(var(--fall-rotate, 0deg)) scale(1);
+    }
+
+    42% {
+        opacity: 1;
+        transform:
+            translate(
+                calc(-50% + var(--bounce-dx, 4rem)),
+                calc(-50% + var(--bounce-dy, -4rem))
+            )
+            rotate(calc(var(--fall-rotate, 0deg) + 40deg))
+            scale(0.92);
+    }
+
+    100% {
+        opacity: 0;
+        transform:
+            translate(
+                calc(-50% + var(--bounce-end-dx, 6.8rem)),
+                calc(-50% + 1.8rem)
+            )
+            rotate(calc(var(--fall-rotate, 0deg) + 100deg))
+            scale(0.7);
+    }
+}
+
+@keyframes starShapeWave {
+    0%, 100% {
+        transform: translateX(calc(var(--fall-wave, 2rem) * -0.7)) rotate(-5deg);
+    }
+
+    50% {
+        transform: translateX(var(--fall-wave, 2rem)) rotate(7deg);
+    }
+}
+
+@keyframes starBurstPop {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.7);
+    }
+
+    100% {
+        opacity: 0;
+        transform:
+            translate(
+                calc(-50% + var(--burst-dx, 0rem)),
+                calc(-50% + var(--burst-dy, -2rem))
+            )
+            scale(0.08);
+    }
+}
+
+@keyframes starShapePenaltyPop {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -20%) scale(0.55) rotate(-8deg);
+    }
+
+    22% {
+        opacity: 1;
+        transform: translate(-50%, -58%) scale(1.18) rotate(3deg);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -145%) scale(0.82) rotate(8deg);
+    }
+}
+
+@keyframes starMissionCh7Celebrate {
+    0% {
+        opacity: 0;
+        transform: translateX(-175%) rotate(-6deg);
+    }
+
+    62% {
+        opacity: 1;
+        transform: translateX(-45%) rotate(2deg);
+    }
+
+    82% {
+        transform: translateX(-52%) rotate(-1deg);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) rotate(0);
+    }
+}
+
+@keyframes starMissionCh7Float {
+    0%, 100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) rotate(0deg);
+    }
+
+    42% {
+        transform: translateX(-50%) translateY(-2.2rem) rotate(-2deg);
+    }
+
+    58% {
+        transform: translateX(-50%) translateY(-2.35rem) rotate(2deg);
+    }
+
+    78% {
+        transform: translateX(-50%) translateY(0.18rem) rotate(-1deg);
+    }
+}
+
+@keyframes starMissionCh8Pop {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(30%) scale(0.2) rotate(8deg);
+    }
+
+    62% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-3%) scale(1.1) rotate(-2deg);
+    }
+
+    82% {
+        transform: translateX(-50%) translateY(1%) scale(0.96) rotate(1deg);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1) rotate(0);
+    }
+}
+
+@keyframes starMissionCh8Pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+
+    50% {
+        transform: translateX(-50%) scale(1.055);
+    }
+}
+
+@keyframes starMissionTimerUrgent {
+    from { filter: brightness(1); transform: scale(1); }
+    to { filter: brightness(1.16); transform: scale(1.05); }
+}
+
+@keyframes starMissionTimerPenaltyPop {
+    0% {
+        opacity: 0;
+        transform: translateY(0.55rem) scale(0.65) rotate(-5deg);
+    }
+
+    18% {
+        opacity: 1;
+        transform: translateY(0) scale(1.12) rotate(2deg);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-1.5rem) scale(0.86) rotate(6deg);
+    }
 }
 
 @keyframes heartMissionCharacterFloat {
@@ -10155,7 +10925,7 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .shape-area-title,
+    .shape-area-title-text,
     .shape-area-square-character,
     .shape-area-square-character.is-entering,
     .shape-area-square-character.is-exiting,
