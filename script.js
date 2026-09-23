@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-const appVersion = '20260921-520';
+const appVersion = '20260924-554';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -1018,6 +1018,18 @@ const appVersion = '20260921-520';
     const starMissionConfetti = starMissionCelebration?.querySelector('.star-mission-confetti') || null;
     const starMissionTimeout = starMissionPage?.querySelector('.star-mission-timeout') || null;
     const starMissionRetryButton = starMissionTimeout?.querySelector('.star-mission-retry-button') || null;
+    const diamondMissionPage = document.getElementById('learnscape-shape-area-8-page');
+    const diamondMissionGuide = diamondMissionPage?.querySelector('.diamond-mission-guide') || null;
+    const diamondMissionMessageText = diamondMissionGuide?.querySelector('.diamond-mission-message-text') || null;
+    const diamondMissionStartButton = diamondMissionGuide?.querySelector('.diamond-mission-start-button') || null;
+    const diamondMissionBlackout = diamondMissionPage?.querySelector('.diamond-mission-blackout') || null;
+    const diamondMissionGame = diamondMissionPage?.querySelector('.diamond-mission-game') || null;
+    const diamondMissionBatLayer = diamondMissionGame?.querySelector('.diamond-mission-bats') || null;
+    const diamondMissionStorage = diamondMissionGame?.querySelector('.diamond-mission-storage') || null;
+    const diamondMissionStorageSlots = Array.from(diamondMissionStorage?.querySelectorAll('.diamond-mission-storage-slot') || []);
+    const diamondMissionReveal = diamondMissionGame?.querySelector('.diamond-mission-reveal') || null;
+    const diamondMissionCelebration = diamondMissionPage?.querySelector('.diamond-mission-celebration') || null;
+    const diamondMissionConfetti = diamondMissionCelebration?.querySelector('.diamond-mission-confetti') || null;
     const HEART_GAME_TARGET_SCORE = 1000;
     const HEART_GAME_MAX_LIVES = 5;
     const HEART_GAME_START_TIME_MS = 45000;
@@ -1040,6 +1052,13 @@ const appVersion = '20260921-520';
     const STAR_MISSION_LOSE_AUDIO_SOURCE = 'assets/Audios/Sound effects/lose.mp3';
     const STAR_MISSION_PROGRESS_DELAY_MS = 4800;
     const STAR_MISSION_NON_STAR_PENALTY_MS = 1000;
+    const DIAMOND_MISSION_AUDIO_SOURCE = 'assets/Audios/Voice over/diamondmission.mp3';
+    const DIAMOND_MISSION_READY_AUDIO_SOURCE = 'assets/Audios/Voice over/Handa ka na ba.mp3';
+    const DIAMOND_MISSION_REVEAL_AUDIO_SOURCE = 'assets/Audios/Sound effects/diamond.mp3';
+    const DIAMOND_MISSION_REVEAL_DURATION_MS = 2600;
+    const DIAMOND_MISSION_REVEAL_FADE_MS = 550;
+    const DIAMOND_MISSION_CELEBRATION_DELAY_MS = 2900;
+    const DIAMOND_MISSION_PROGRESS_DELAY_MS = 5200;
     const STAR_MISSION_TIME_BY_TARGET = {
         5: 20,
         10: 35,
@@ -1076,6 +1095,19 @@ const appVersion = '20260921-520';
     let starMissionClockTickingAudio = null;
     let starMissionTimesUpAudio = null;
     let starMissionLoseAudio = null;
+    let diamondMissionSession = 0;
+    let diamondMissionTimers = [];
+    let diamondMissionAudio = null;
+    let diamondMissionRevealAudio = null;
+    let diamondMissionRevealAudioFrame = null;
+    let diamondMissionCompletedAudio = null;
+    let diamondMissionCelebrationAudio = null;
+    let diamondMissionKidsCheeringAudio = null;
+    let diamondMissionBatInterval = null;
+    let diamondMissionBatSequence = 0;
+    let diamondMissionDecoyIndex = 0;
+    let diamondMissionRevealStarted = false;
+    const diamondMissionCollectedPieces = new Set();
     let heartAimPointerId = null;
     let heartShotAnimationFrame = null;
     let heartCurrentTrajectory = null;
@@ -1141,7 +1173,7 @@ const appVersion = '20260921-520';
         stars.setAttribute('role', 'img');
         stars.setAttribute('aria-label', '1 of 3 stars earned');
 
-        ['1star.webp', '2star.webp', '1star.webp'].forEach((source) => {
+        ['lesson-star.svg', 'lesson-star.svg', 'lesson-star.svg'].forEach((source) => {
             const slot = document.createElement('span');
             slot.className = 'circle-lesson-star-slot';
             const star = document.createElement('img');
@@ -1374,11 +1406,13 @@ const appVersion = '20260921-520';
         diamond: { start: 10.9, end: 12.0 },
     };
     let shapeChoiceAudio = null;
+    let shapeWrongAnswerAudio = null;
     let shapeChoiceAudioFrame = null;
     let shapeChoiceAudioSession = 0;
     let shapeQuestionAudio = null;
     let shapeQuestionAudioTimer = null;
-    let pendingShapeChoiceName = null;
+    let pendingShapeChoice = null;
+    let activeShapeChoice = null;
     let shapeMissionCompletionAudio = null;
     let shapeMissionCompletionFrame = null;
     let shapeMissionCompletionSession = 0;
@@ -1387,6 +1421,10 @@ const appVersion = '20260921-520';
         shapeChoiceAudio.preload = 'auto';
         shapeChoiceAudio.playsInline = true;
         shapeChoiceAudio.load();
+        shapeWrongAnswerAudio = new window.Audio('assets/Audios/Sound effects/buzzer.mp3');
+        shapeWrongAnswerAudio.preload = 'auto';
+        shapeWrongAnswerAudio.playsInline = true;
+        shapeWrongAnswerAudio.load();
     }
     const shapeSquareAreaBackgroundSource = 'assets/Backgrounds/Area2.webp';
     const shapeSquareIllustrationBackgroundSource = 'assets/Backgrounds/squaregame.webp';
@@ -2900,10 +2938,29 @@ const appVersion = '20260921-520';
 
     };
 
+    const shapeTvCelebrations = new WeakMap();
+    const stopShapeTvCelebration = (page) => {
+        const celebration = page && shapeTvCelebrations.get(page);
+        if (!celebration) return;
+        celebration.timers.forEach((timerId) => window.clearTimeout(timerId));
+        celebration.audios.forEach((audio) => {
+            audio.pause();
+            audio.onended = null;
+            audio.onerror = null;
+        });
+        celebration.overlay.remove();
+        shapeTvCelebrations.delete(page);
+    };
+
     const resetShapeTvChoices = (page) => {
+        stopShapeTvCelebration(page);
+        stopShapeChoiceAudio();
+        pendingShapeChoice = null;
+        shapeWrongAnswerAudio?.pause();
         page?.querySelectorAll('.shape-tv-choice').forEach((choice) => {
             choice.disabled = false;
-            choice.classList.remove('is-correct', 'is-wrong');
+            choice.classList.remove('is-correct', 'is-wrong', 'is-speaking');
+            delete choice.dataset.nameHeard;
             choice.removeAttribute('aria-pressed');
         });
     };
@@ -3611,6 +3668,457 @@ const appVersion = '20260921-520';
         }, 950));
     };
 
+    const diamondBatDiamondPaths = [
+        'M92 20V80H8Z',
+        'M8 20L92 80H8Z',
+        'M8 20H92V80Z',
+        'M8 20H92L8 80Z',
+    ];
+    const diamondBatFlightSpeeds = [
+        { name: 'slow', duration: 13 },
+        { name: 'normal', duration: 9 },
+        { name: 'fast', duration: 6 },
+    ];
+    const diamondBatDecoys = [
+        { name: 'circle', path: 'M16 84V20A64 64 0 0 1 80 84Z', color: '#f7b4ca' },
+        { name: 'square', path: 'M18 18H82V82H18Z', color: '#f8d677' },
+        { name: 'triangle', path: 'M18 82H82L18 30Z', color: '#a9d894' },
+        { name: 'rectangle', path: 'M14 29H86V71H14Z', color: '#f4b784' },
+        { name: 'oval', path: 'M18 84V31A62 38 0 0 1 82 84Z', color: '#bcb2f5' },
+        { name: 'heart', path: 'M17 82V43C17 15 57 10 73 37C83 53 64 68 50 82Z', color: '#f4a5b8' },
+        { name: 'star', path: 'M15 82L29 47L46 56L57 16L70 51L87 64L61 82Z', color: '#c6dc83' },
+    ];
+
+    const resetDiamondMissionBats = () => {
+        if (diamondMissionRevealAudioFrame !== null) {
+            window.cancelAnimationFrame(diamondMissionRevealAudioFrame);
+            diamondMissionRevealAudioFrame = null;
+        }
+        if (diamondMissionRevealAudio) {
+            diamondMissionRevealAudio.pause();
+            diamondMissionRevealAudio = null;
+        }
+        if (diamondMissionBatInterval !== null) window.clearInterval(diamondMissionBatInterval);
+        diamondMissionBatInterval = null;
+        diamondMissionBatSequence = 0;
+        diamondMissionDecoyIndex = 0;
+        diamondMissionRevealStarted = false;
+        diamondMissionCollectedPieces.clear();
+        diamondMissionBatLayer?.replaceChildren();
+        diamondMissionGame?.querySelectorAll('.diamond-mission-flying-piece').forEach((piece) => {
+            piece.getAnimations().forEach((animation) => animation.cancel());
+            piece.remove();
+        });
+        diamondMissionStorageSlots.forEach((slot) => slot.classList.remove('is-filled'));
+        diamondMissionStorage?.classList.remove('is-complete');
+        diamondMissionStorage?.setAttribute('aria-label', 'Storage board with four empty pieces of a diamond');
+        diamondMissionGame?.classList.remove('is-revealing');
+        if (diamondMissionReveal) {
+            diamondMissionReveal.hidden = true;
+            diamondMissionReveal.classList.remove('is-transforming');
+            diamondMissionReveal.removeAttribute('style');
+        }
+    };
+
+    const startDiamondMissionCelebration = (session) => {
+        if (session !== diamondMissionSession || diamondMissionPage?.hidden) return;
+        if (diamondMissionGame) {
+            diamondMissionGame.hidden = true;
+            diamondMissionGame.classList.remove('is-active');
+        }
+        prepareMissionConfetti(diamondMissionConfetti, ['#8aeaff', '#d8faff', '#ffffff', '#ffe86e', '#9bdbff']);
+        diamondMissionCelebration?.setAttribute('aria-hidden', 'false');
+        diamondMissionCelebration?.classList.add('is-active');
+        diamondMissionCompletedAudio = playStarMissionOneShot(STAR_MISSION_COMPLETED_AUDIO_SOURCE);
+        diamondMissionCelebrationAudio = playStarMissionOneShot(STAR_MISSION_CELEBRATION_AUDIO_SOURCE);
+        diamondMissionTimers.push(window.setTimeout(() => {
+            if (session !== diamondMissionSession || diamondMissionPage?.hidden) return;
+            diamondMissionKidsCheeringAudio = playStarMissionOneShot(STAR_MISSION_KIDS_CHEERING_AUDIO_SOURCE);
+        }, 750));
+        diamondMissionTimers.push(window.setTimeout(() => showDiamondMissionRewardProgress(session), DIAMOND_MISSION_PROGRESS_DELAY_MS));
+    };
+
+    const startDiamondMissionReveal = (session) => {
+        if (!diamondMissionReveal || !diamondMissionGame || diamondMissionRevealStarted) return;
+        diamondMissionRevealStarted = true;
+        diamondMissionTimers.push(window.setTimeout(() => {
+            if (session !== diamondMissionSession || diamondMissionPage?.hidden) return;
+            const gameRect = diamondMissionGame.getBoundingClientRect();
+            const slotRects = diamondMissionStorageSlots.map((slot) => slot.getBoundingClientRect());
+            const left = Math.min(...slotRects.map((rect) => rect.left));
+            const top = Math.min(...slotRects.map((rect) => rect.top));
+            const right = Math.max(...slotRects.map((rect) => rect.right));
+            const bottom = Math.max(...slotRects.map((rect) => rect.bottom));
+            const diamondWidth = right - left;
+            const diamondHeight = bottom - top;
+
+            diamondMissionReveal.style.left = `${left - gameRect.left + diamondWidth / 2}px`;
+            diamondMissionReveal.style.top = `${top - gameRect.top + diamondHeight / 2}px`;
+            diamondMissionReveal.style.width = `${diamondWidth}px`;
+            diamondMissionReveal.style.height = `${diamondHeight}px`;
+            diamondMissionReveal.hidden = false;
+            diamondMissionReveal.getBoundingClientRect();
+            diamondMissionGame.classList.add('is-revealing');
+            diamondMissionReveal.style.left = `${gameRect.width / 2}px`;
+            diamondMissionReveal.style.top = `${gameRect.height / 2}px`;
+
+            diamondMissionTimers.push(window.setTimeout(() => {
+                if (session !== diamondMissionSession || diamondMissionPage?.hidden) return;
+                const crystalWidth = Math.min(260, gameRect.width * 0.3, gameRect.height * 0.45);
+                const crystalHeight = crystalWidth * (610 / 375);
+                diamondMissionReveal.style.width = `${crystalWidth}px`;
+                diamondMissionReveal.style.height = `${crystalHeight}px`;
+                diamondMissionReveal.classList.add('is-transforming');
+                if (window.Audio) {
+                    const audio = new window.Audio(DIAMOND_MISSION_REVEAL_AUDIO_SOURCE);
+                    const startVolume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+                    const revealStartedAt = performance.now();
+                    diamondMissionRevealAudio = audio;
+                    audio.volume = startVolume;
+                    audio.play().catch(() => {});
+                    const updateVolume = (now) => {
+                        if (session !== diamondMissionSession || diamondMissionRevealAudio !== audio) return;
+                        const remaining = DIAMOND_MISSION_REVEAL_DURATION_MS - (now - revealStartedAt);
+                        if (remaining <= 0) {
+                            audio.pause();
+                            diamondMissionRevealAudio = null;
+                            diamondMissionRevealAudioFrame = null;
+                            return;
+                        }
+                        audio.volume = startVolume * Math.min(1, remaining / DIAMOND_MISSION_REVEAL_FADE_MS);
+                        diamondMissionRevealAudioFrame = window.requestAnimationFrame(updateVolume);
+                    };
+                    diamondMissionRevealAudioFrame = window.requestAnimationFrame(updateVolume);
+                    diamondMissionTimers.push(window.setTimeout(() => {
+                        if (diamondMissionRevealAudio !== audio) return;
+                        audio.pause();
+                        diamondMissionRevealAudio = null;
+                        if (diamondMissionRevealAudioFrame !== null) window.cancelAnimationFrame(diamondMissionRevealAudioFrame);
+                        diamondMissionRevealAudioFrame = null;
+                    }, DIAMOND_MISSION_REVEAL_DURATION_MS));
+                }
+                diamondMissionTimers.push(window.setTimeout(() => startDiamondMissionCelebration(session), DIAMOND_MISSION_CELEBRATION_DELAY_MS));
+            }, 2150));
+        }, 550));
+    };
+
+    const releaseDiamondBatPiece = (piece, slotIndex, session) => {
+        if (!diamondMissionGame) return;
+        const gameRect = diamondMissionGame.getBoundingClientRect();
+        const pieceRect = piece.getBoundingClientRect();
+        const flyingPiece = piece.cloneNode(true);
+        flyingPiece.setAttribute('class', 'diamond-mission-flying-piece');
+        flyingPiece.style.left = `${pieceRect.left - gameRect.left}px`;
+        flyingPiece.style.top = `${pieceRect.top - gameRect.top}px`;
+        flyingPiece.style.width = `${pieceRect.width}px`;
+        flyingPiece.style.height = `${pieceRect.height}px`;
+        diamondMissionGame.append(flyingPiece);
+        piece.style.visibility = 'hidden';
+
+        const slotRect = slotIndex >= 0 ? diamondMissionStorageSlots[slotIndex]?.getBoundingClientRect() : null;
+        const endX = slotRect
+            ? slotRect.left + slotRect.width / 2 - pieceRect.left - pieceRect.width / 2
+            : (Math.random() - 0.5) * 90;
+        const endY = slotRect
+            ? slotRect.top + slotRect.height / 2 - pieceRect.top - pieceRect.height / 2
+            : gameRect.bottom - pieceRect.top + pieceRect.height + 20;
+        const slotScale = slotRect
+            ? Math.min(slotRect.width / (pieceRect.width * 0.84), slotRect.height / (pieceRect.height * 0.6))
+            : 1;
+        const frames = slotRect
+            ? [
+                { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                { transform: `translate(${endX}px, ${endY}px) scale(${slotScale})`, opacity: 1, offset: 0.82 },
+                { transform: `translate(${endX}px, ${endY}px) scale(${slotScale})`, opacity: 0 },
+            ]
+            : [
+                { transform: 'translate(0, 0) rotate(0deg)', opacity: 1 },
+                { transform: `translate(${endX}px, ${endY}px) rotate(145deg)`, opacity: 1, offset: 0.75 },
+                { transform: `translate(${endX}px, ${endY}px) rotate(175deg)`, opacity: 0 },
+            ];
+        const flight = flyingPiece.animate(frames, {
+            duration: slotRect ? 650 : 720,
+            easing: slotRect ? 'cubic-bezier(0.22, 0.8, 0.24, 1)' : 'ease-in',
+            fill: 'forwards',
+        });
+        flight.onfinish = () => {
+            flyingPiece.remove();
+            if (!slotRect || session !== diamondMissionSession || diamondMissionPage?.hidden) return;
+            diamondMissionStorageSlots[slotIndex]?.classList.add('is-filled');
+            if (diamondMissionCollectedPieces.size === 4 && diamondMissionStorageSlots.every((slot) => slot.classList.contains('is-filled'))) {
+                diamondMissionStorage?.classList.add('is-complete');
+                if (diamondMissionBatInterval !== null) window.clearInterval(diamondMissionBatInterval);
+                diamondMissionBatInterval = null;
+                diamondMissionBatLayer?.replaceChildren();
+                startDiamondMissionReveal(session);
+            }
+        };
+    };
+
+    const sendDiamondBatAway = (bat) => {
+        if (!diamondMissionGame) return;
+        const gameRect = diamondMissionGame.getBoundingClientRect();
+        const batRect = bat.getBoundingClientRect();
+        const fliesLeft = bat.classList.contains('is-flying-left');
+        bat.style.animation = 'none';
+        bat.style.left = `${batRect.left - gameRect.left}px`;
+        bat.style.top = `${batRect.top - gameRect.top}px`;
+        bat.style.transform = 'none';
+        bat.classList.add('is-exiting');
+        const distance = fliesLeft
+            ? -(batRect.right - gameRect.left + batRect.width)
+            : gameRect.right - batRect.left + batRect.width;
+        const exit = bat.animate([
+            { transform: 'translateX(0)' },
+            { transform: `translateX(${distance}px)` },
+        ], { duration: 480, easing: 'cubic-bezier(0.55, 0, 1, 0.55)', fill: 'forwards' });
+        exit.onfinish = () => bat.remove();
+    };
+
+    const spawnDiamondMissionBat = (guaranteeDiamond = false) => {
+        if (!diamondMissionBatLayer || diamondMissionPage?.hidden || !diamondMissionGame?.classList.contains('is-active') || diamondMissionCollectedPieces.size === 4) return;
+        if (diamondMissionBatLayer.childElementCount >= 5) return;
+
+        const flyingPieces = new Set(Array.from(diamondMissionBatLayer.querySelectorAll('[data-diamond-slot]'), (bat) => Number(bat.dataset.diamondSlot)));
+        const availablePieces = diamondBatDiamondPaths.map((_, index) => index).filter((index) => !diamondMissionCollectedPieces.has(index) && !flyingPieces.has(index));
+        const carryDiamond = availablePieces.length > 0 && (guaranteeDiamond || Math.random() < 0.65);
+        const slotIndex = carryDiamond ? availablePieces[Math.floor(Math.random() * availablePieces.length)] : -1;
+        const decoy = slotIndex < 0 ? diamondBatDecoys[diamondMissionDecoyIndex++ % diamondBatDecoys.length] : null;
+        const bat = document.createElement('button');
+        bat.type = 'button';
+        bat.className = 'diamond-mission-bat';
+        bat.setAttribute('aria-label', slotIndex >= 0 ? 'Catch a diamond piece' : `Bat carrying ${decoy.name === 'oval' ? 'an' : 'a'} ${decoy.name} piece`);
+        bat.style.setProperty('--bat-top', `${[10, 20, 30, 40, 50][diamondMissionBatSequence % 5]}%`);
+        const flightSpeed = diamondBatFlightSpeeds[diamondMissionBatSequence % diamondBatFlightSpeeds.length];
+        bat.dataset.speed = flightSpeed.name;
+        bat.style.setProperty('--bat-duration', `${flightSpeed.duration}s`);
+        if (diamondMissionBatSequence % 2 === 1) bat.classList.add('is-flying-left');
+        diamondMissionBatSequence += 1;
+        if (slotIndex >= 0) bat.dataset.diamondSlot = String(slotIndex);
+
+        const body = document.createElement('span');
+        body.className = 'diamond-mission-bat-body';
+        const image = document.createElement('img');
+        image.className = 'diamond-mission-bat-image';
+        image.src = 'assets/Character/bat.webp';
+        image.alt = '';
+        image.draggable = false;
+        const piece = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        piece.setAttribute('class', 'diamond-mission-bat-piece');
+        piece.setAttribute('viewBox', '0 0 100 100');
+        piece.setAttribute('aria-hidden', 'true');
+        const piecePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        piecePath.setAttribute('d', slotIndex >= 0 ? diamondBatDiamondPaths[slotIndex] : decoy.path);
+        piecePath.setAttribute('fill', slotIndex >= 0 ? '#52cfee' : decoy.color);
+        piecePath.setAttribute('stroke', '#ffffff');
+        piecePath.setAttribute('stroke-width', slotIndex >= 0 ? '4' : '5');
+        if (slotIndex >= 0) piecePath.setAttribute('vector-effect', 'non-scaling-stroke');
+        piecePath.setAttribute('stroke-linejoin', 'round');
+        piece.append(piecePath);
+        body.append(piece, image);
+        bat.append(body);
+
+        bat.addEventListener('click', () => {
+            if (bat.disabled || diamondMissionPage.hidden || diamondMissionCollectedPieces.size === 4) return;
+            bat.disabled = true;
+            const session = diamondMissionSession;
+            releaseDiamondBatPiece(piece, slotIndex, session);
+            sendDiamondBatAway(bat);
+            if (slotIndex >= 0 && !diamondMissionCollectedPieces.has(slotIndex)) {
+                diamondMissionCollectedPieces.add(slotIndex);
+                diamondMissionStorage?.setAttribute('aria-label', `Storage board with ${diamondMissionCollectedPieces.size} of 4 diamond pieces found`);
+                playUiClickSound('chime');
+                if (diamondMissionCollectedPieces.size === 4) {
+                    if (diamondMissionBatInterval !== null) window.clearInterval(diamondMissionBatInterval);
+                    diamondMissionBatInterval = null;
+                    diamondMissionBatLayer.querySelectorAll('.diamond-mission-bat').forEach((flyingBat) => {
+                        if (flyingBat === bat) return;
+                        flyingBat.classList.add('is-caught');
+                        window.setTimeout(() => flyingBat.remove(), 350);
+                    });
+                }
+            }
+        });
+        bat.addEventListener('animationend', (event) => {
+            if (event.target === bat) bat.remove();
+        });
+        diamondMissionBatLayer.append(bat);
+    };
+
+    const startDiamondMissionBats = () => {
+        resetDiamondMissionBats();
+        spawnDiamondMissionBat(true);
+        diamondMissionBatInterval = window.setInterval(spawnDiamondMissionBat, 1450);
+    };
+
+    const stopDiamondMissionSequence = () => {
+        diamondMissionSession += 1;
+        diamondMissionTimers.forEach((timerId) => window.clearTimeout(timerId));
+        diamondMissionTimers = [];
+        resetDiamondMissionBats();
+        diamondMissionCompletedAudio = stopStarMissionAudio(diamondMissionCompletedAudio);
+        diamondMissionCelebrationAudio = stopStarMissionAudio(diamondMissionCelebrationAudio);
+        diamondMissionKidsCheeringAudio = stopStarMissionAudio(diamondMissionKidsCheeringAudio);
+        diamondMissionCelebration?.classList.remove('is-active');
+        diamondMissionCelebration?.setAttribute('aria-hidden', 'true');
+        if (diamondMissionAudio) {
+            diamondMissionAudio.onended = null;
+            diamondMissionAudio.onerror = null;
+            diamondMissionAudio.pause?.();
+            try {
+                diamondMissionAudio.currentTime = 0;
+            } catch (error) {
+                // Audio can still be loading while the route changes.
+            }
+            diamondMissionAudio = null;
+        }
+        diamondMissionGuide?.classList.remove('is-active', 'is-message-visible', 'is-message-changing', 'is-ready-message', 'is-exiting');
+        diamondMissionGuide?.setAttribute('aria-hidden', 'true');
+        if (diamondMissionGuide) diamondMissionGuide.hidden = true;
+        if (diamondMissionMessageText) diamondMissionMessageText.textContent = '';
+        if (diamondMissionStartButton) {
+            diamondMissionStartButton.hidden = true;
+            diamondMissionStartButton.classList.remove('is-visible');
+        }
+        if (diamondMissionBlackout) {
+            diamondMissionBlackout.hidden = true;
+            diamondMissionBlackout.classList.remove('is-visible');
+        }
+        if (diamondMissionGame) {
+            diamondMissionGame.hidden = true;
+            diamondMissionGame.classList.remove('is-active');
+        }
+        diamondMissionPage?.classList.remove('is-diamond-game-active');
+    };
+
+    const playDiamondMissionAudio = (source, session, fallbackDuration, onComplete) => {
+        if (diamondMissionAudio) {
+            diamondMissionAudio.onended = null;
+            diamondMissionAudio.onerror = null;
+            diamondMissionAudio.pause?.();
+        }
+
+        let completed = false;
+        const finish = () => {
+            if (completed || session !== diamondMissionSession) return;
+            completed = true;
+            if (diamondMissionAudio) {
+                diamondMissionAudio.onended = null;
+                diamondMissionAudio.onerror = null;
+                diamondMissionAudio = null;
+            }
+            onComplete?.();
+        };
+        diamondMissionTimers.push(window.setTimeout(finish, fallbackDuration));
+        if (!window.Audio) return;
+
+        const audio = new window.Audio(source);
+        diamondMissionAudio = audio;
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+        audio.onended = finish;
+        audio.onerror = finish;
+        audio.load?.();
+        audio.play().catch(() => {});
+    };
+
+    const startDiamondMissionSequence = () => {
+        if (!diamondMissionPage || diamondMissionPage.hidden || !diamondMissionGuide || !diamondMissionMessageText) return;
+        stopDiamondMissionSequence();
+        const session = diamondMissionSession;
+        diamondMissionMessageText.textContent = 'Para sa ating Diamond Mission, buuin ang hugis na nasa puzzle sa pamamagitan ng paghahanap ng mga parte neto sa kweba.';
+        diamondMissionGuide.hidden = false;
+        diamondMissionGuide.setAttribute('aria-hidden', 'false');
+        diamondMissionGuide.getBoundingClientRect();
+        diamondMissionTimers.push(window.setTimeout(() => {
+            if (session !== diamondMissionSession || diamondMissionPage.hidden) return;
+            diamondMissionGuide.classList.add('is-active');
+        }, 80));
+        diamondMissionTimers.push(window.setTimeout(() => {
+            if (session !== diamondMissionSession || diamondMissionPage.hidden) return;
+            diamondMissionGuide.classList.add('is-message-visible');
+            playDiamondMissionAudio(DIAMOND_MISSION_AUDIO_SOURCE, session, 10500, () => {
+                if (session !== diamondMissionSession || diamondMissionPage.hidden) return;
+                diamondMissionGuide.classList.add('is-message-changing');
+                diamondMissionTimers.push(window.setTimeout(() => {
+                    if (session !== diamondMissionSession || diamondMissionPage.hidden) return;
+                    diamondMissionMessageText.textContent = 'Handa ka na ba?';
+                    diamondMissionGuide.classList.remove('is-message-changing');
+                    diamondMissionGuide.classList.add('is-ready-message');
+                    playDiamondMissionAudio(DIAMOND_MISSION_READY_AUDIO_SOURCE, session, 4000, () => {
+                        if (session !== diamondMissionSession || diamondMissionPage.hidden || !diamondMissionStartButton) return;
+                        diamondMissionStartButton.hidden = false;
+                        diamondMissionStartButton.getBoundingClientRect();
+                        diamondMissionStartButton.classList.add('is-visible');
+                    });
+                }, 320));
+            });
+        }, 2550));
+    };
+
+    const showDiamondMissionRetryStart = () => {
+        if (!diamondMissionPage || diamondMissionPage.hidden || !diamondMissionGuide || !diamondMissionStartButton) return;
+        stopDiamondMissionSequence();
+        diamondMissionGuide.hidden = false;
+        diamondMissionGuide.setAttribute('aria-hidden', 'false');
+        diamondMissionStartButton.hidden = false;
+        diamondMissionStartButton.getBoundingClientRect();
+        diamondMissionStartButton.classList.add('is-visible');
+        diamondMissionStartButton.focus({ preventScroll: true });
+    };
+
+    const startDiamondMissionGame = () => {
+        if (!diamondMissionPage || diamondMissionPage.hidden || !diamondMissionGuide) return;
+        diamondMissionSession += 1;
+        diamondMissionTimers.forEach((timerId) => window.clearTimeout(timerId));
+        diamondMissionTimers = [];
+        resetDiamondMissionBats();
+        if (diamondMissionAudio) {
+            diamondMissionAudio.onended = null;
+            diamondMissionAudio.onerror = null;
+            diamondMissionAudio.pause?.();
+            diamondMissionAudio = null;
+        }
+        diamondMissionGuide.classList.remove('is-message-visible', 'is-message-changing', 'is-ready-message');
+        diamondMissionGuide.classList.add('is-exiting');
+        if (diamondMissionStartButton) {
+            diamondMissionStartButton.classList.remove('is-visible');
+            diamondMissionStartButton.hidden = true;
+        }
+
+        const blackoutTimer = window.setTimeout(() => {
+            if (diamondMissionPage.hidden) return;
+            if (diamondMissionBlackout) {
+                diamondMissionBlackout.hidden = false;
+                diamondMissionBlackout.getBoundingClientRect();
+                diamondMissionBlackout.classList.add('is-visible');
+            }
+        }, 760);
+        const gameTimer = window.setTimeout(() => {
+            if (diamondMissionPage.hidden) return;
+            diamondMissionPage.classList.add('is-diamond-game-active');
+            if (diamondMissionGame) {
+                diamondMissionGame.hidden = false;
+                diamondMissionGame.getBoundingClientRect();
+                diamondMissionGame.classList.add('is-active');
+            }
+            diamondMissionGuide.hidden = true;
+            diamondMissionGuide.setAttribute('aria-hidden', 'true');
+        }, 1700);
+        const revealTimer = window.setTimeout(() => {
+            if (diamondMissionPage.hidden) return;
+            diamondMissionBlackout?.classList.remove('is-visible');
+            startDiamondMissionBats();
+        }, 2300);
+        const cleanupTimer = window.setTimeout(() => {
+            if (diamondMissionBlackout && !diamondMissionBlackout.classList.contains('is-visible')) {
+                diamondMissionBlackout.hidden = true;
+            }
+        }, 3300);
+        diamondMissionTimers.push(blackoutTimer, gameTimer, revealTimer, cleanupTimer);
+    };
+
     const setStarMissionWalkerSprite = (source) => {
         if (!starMissionWalkerCharacter) return;
         const currentSource = starMissionWalkerCharacter.getAttribute('src') || '';
@@ -3802,9 +4310,8 @@ const appVersion = '20260921-520';
         });
     };
 
-    const prepareStarMissionConfetti = () => {
-        if (!starMissionConfetti || starMissionConfetti.childElementCount) return;
-        const colors = ['#ff4f64', '#ffd83d', '#38c7e8', '#70d34b', '#ff8f32', '#ffffff'];
+    const prepareMissionConfetti = (container, colors) => {
+        if (!container || container.childElementCount) return;
         for (let index = 0; index < 130; index += 1) {
             const piece = document.createElement('span');
             piece.style.setProperty('--confetti-x', `${(index * 37) % 101}%`);
@@ -3813,7 +4320,7 @@ const appVersion = '20260921-520';
             piece.style.setProperty('--confetti-duration', `${2.5 + ((index * 11) % 13) / 10}s`);
             piece.style.setProperty('--confetti-drift', `${((index * 29) % 150) - 75}px`);
             piece.style.setProperty('--confetti-size', `${0.35 + ((index * 5) % 13) / 10}rem`);
-            starMissionConfetti.appendChild(piece);
+            container.appendChild(piece);
         }
     };
 
@@ -3847,7 +4354,7 @@ const appVersion = '20260921-520';
         starMissionGameActive = false;
         starMissionEndSession += 1;
         const session = starMissionEndSession;
-        prepareStarMissionConfetti();
+        prepareMissionConfetti(starMissionConfetti, ['#ff4f64', '#ffd83d', '#38c7e8', '#70d34b', '#ff8f32', '#ffffff']);
         starMissionCelebration?.setAttribute('aria-hidden', 'false');
         starMissionCelebration?.classList.add('is-active');
         starMissionCompletedAudio = playStarMissionOneShot(STAR_MISSION_COMPLETED_AUDIO_SOURCE, () => {
@@ -3955,6 +4462,24 @@ const appVersion = '20260921-520';
             starMissionSetup.hidden = false;
             starMissionSetup.getBoundingClientRect();
         }
+    };
+
+    const showStarMissionRetryStart = () => {
+        if (!starMissionPage || starMissionPage.hidden || !starMissionIntro || !starMissionStartButton) return;
+        stopStarMissionEndFlow();
+        stopStarMissionSequence();
+        stopStarMissionFallingShapes();
+        stopStarMissionWalker();
+        starMissionGameActive = false;
+        if (starMissionSetup) starMissionSetup.hidden = true;
+        if (starMissionHud) starMissionHud.hidden = true;
+        starMissionIntro.hidden = false;
+        starMissionIntro.setAttribute('aria-hidden', 'false');
+        starMissionIntro.classList.add('is-active');
+        starMissionStartButton.hidden = false;
+        starMissionStartButton.getBoundingClientRect();
+        starMissionStartButton.classList.add('is-visible');
+        starMissionStartButton.focus({ preventScroll: true });
     };
 
     const startStarMissionGame = () => {
@@ -4932,6 +5457,11 @@ const appVersion = '20260921-520';
         showStarMissionSetup();
     });
 
+    diamondMissionStartButton?.addEventListener('click', () => {
+        playUiClickSound('start');
+        startDiamondMissionGame();
+    });
+
     heartGameRetryButton?.addEventListener('click', () => {
         playUiClickSound('start');
         resetHeartGameState();
@@ -4940,7 +5470,16 @@ const appVersion = '20260921-520';
 
     heartFinalReplayButton?.addEventListener('click', () => {
         playUiClickSound('start');
-        startHeartCupidGame();
+        stopHeartCupidGame();
+        stopHeartMissionSequence();
+        if (!heartMissionIntro || !heartMissionStartButton) return;
+        heartMissionPage?.classList.add('is-heart-mission-active');
+        heartMissionIntro.hidden = false;
+        heartMissionIntro.setAttribute('aria-hidden', 'false');
+        heartMissionStartButton.hidden = false;
+        heartMissionStartButton.getBoundingClientRect();
+        heartMissionStartButton.classList.add('is-visible');
+        heartMissionStartButton.focus({ preventScroll: true });
     });
 
     heartFinalNextButton?.addEventListener('click', () => {
@@ -4954,6 +5493,7 @@ const appVersion = '20260921-520';
 
         shapePreviewSceneCleanupByPage.get(page)?.();
         stopShapePreviewIntro(page);
+        if (page === diamondMissionPage) stopDiamondMissionSequence();
 
         const background = page.querySelector('.shape-area-bg');
         const videoStage = page.querySelector('.shape-preview-video-stage');
@@ -5046,6 +5586,30 @@ const appVersion = '20260921-520';
         stopStarMissionEndFlow();
         starMissionPage?.classList.add('is-lesson-complete');
         showShapePreviewProgress(starMissionPage);
+    };
+
+    const showDiamondMissionRewardProgress = (session) => {
+        if (session !== diamondMissionSession || !isPageVisible(diamondMissionPage)) return;
+
+        const progress = shapePreviewProgressByPage.get(diamondMissionPage);
+        if (progress) {
+            progress.dataset.progressStage = 'hunt';
+            const stars = progress.querySelector('.circle-lesson-stars');
+            const message = progress.querySelector('.circle-lesson-star-message');
+            const replayButton = progress.querySelector('[data-shape-preview-replay]');
+            const replayImage = replayButton?.querySelector('img');
+            if (stars) {
+                stars.dataset.earnedStars = '2';
+                stars.setAttribute('aria-label', '2 of 3 stars earned');
+            }
+            if (message) message.textContent = 'Amazing! You found the crystal!';
+            if (replayImage) replayImage.src = 'assets/Buttons/Retry.webp';
+            replayButton?.setAttribute('aria-label', 'Retry Diamond Mission');
+        }
+
+        stopDiamondMissionSequence();
+        diamondMissionPage.classList.add('is-lesson-complete');
+        showShapePreviewProgress(diamondMissionPage);
     };
 
     const showShapePreviewIllustration = (page) => {
@@ -5696,6 +6260,9 @@ const appVersion = '20260921-520';
                 stopStarMissionEndFlow();
                 if (starMissionSetup) starMissionSetup.hidden = true;
             }
+            if (page === diamondMissionPage) {
+                stopDiamondMissionSequence();
+            }
         });
         rectangleGoButton?.addEventListener('click', () => {
             if (!isPageVisible(page) || rectangleGoButton.hidden || rectangleGoButton.disabled) return;
@@ -5780,7 +6347,7 @@ const appVersion = '20260921-520';
             page.classList.add('is-tv-lesson-image-visible');
         };
 
-        playButton?.addEventListener('click', async () => {
+        const playShapePreviewLessonVideo = async () => {
             if (!video || !isPageVisible(page) || !page.classList.contains('is-illustration-background')) return;
 
             if (playButton) playButton.hidden = true;
@@ -5792,7 +6359,9 @@ const appVersion = '20260921-520';
                 resetVideoControls();
                 console.warn('Shape lesson video could not play.', error);
             }
-        });
+        };
+
+        playButton?.addEventListener('click', playShapePreviewLessonVideo);
 
         skipButton?.addEventListener('click', () => {
             showLessonBackground();
@@ -5804,17 +6373,24 @@ const appVersion = '20260921-520';
             if (page === starMissionPage && progress?.dataset.progressStage === 'hunt') {
                 page.classList.remove('is-progress-visible', 'is-lesson-complete');
                 progress?.setAttribute('aria-hidden', 'true');
-                showStarMissionSetup();
+                showStarMissionRetryStart();
+                return;
+            }
+            if (page === diamondMissionPage && progress?.dataset.progressStage === 'hunt') {
+                page.classList.remove('is-progress-visible', 'is-lesson-complete');
+                progress.setAttribute('aria-hidden', 'true');
+                showDiamondMissionRetryStart();
                 return;
             }
             page.classList.remove('is-progress-visible');
             progress?.setAttribute('aria-hidden', 'true');
             resetShapeTvChoices(page);
             showShapePreviewIllustration(page);
+            playShapePreviewLessonVideo();
         });
 
         nextButton?.addEventListener('click', () => {
-            if (page === starMissionPage && progress?.dataset.progressStage === 'hunt') {
+            if ((page === starMissionPage || page === diamondMissionPage) && progress?.dataset.progressStage === 'hunt') {
                 if (page.dataset.cameraRoute) {
                     openShapeCameraLayout(page.dataset.cameraRoute);
                     return;
@@ -5844,6 +6420,7 @@ const appVersion = '20260921-520';
                 videoStage?.setAttribute('aria-hidden', 'true');
                 if (page === heartMissionPage) startHeartMissionSequence();
                 if (page === starMissionPage) startStarMissionSequence();
+                if (page === diamondMissionPage) startDiamondMissionSequence();
                 if (rectangleMissionGuideCharacter || rectangleMissionObjectPanel) {
                     if (jeepSequence) {
                         jeepSequence.hidden = true;
@@ -7582,7 +8159,12 @@ const appVersion = '20260921-520';
     triangleGameCompleteReplayButton?.addEventListener('click', () => {
         triangleGamePage?.classList.remove('is-game-progress-visible');
         triangleGameCompleteProgress?.setAttribute('aria-hidden', 'true');
-        startTriangleGameDialogue();
+        stopTriangleGameDialogue();
+        if (!triangleGameStartButton) return;
+        triangleGameStartButton.hidden = false;
+        triangleGameStartButton.getBoundingClientRect();
+        triangleGameStartButton.classList.add('is-visible');
+        triangleGameStartButton.focus({ preventScroll: true });
     });
 
     triangleGameCompleteNextButton?.addEventListener('click', () => {
@@ -8338,10 +8920,12 @@ const appVersion = '20260921-520';
             shapeChoiceAudioFrame = null;
         }
         shapeChoiceAudio?.pause?.();
+        activeShapeChoice?.classList.remove('is-speaking');
+        activeShapeChoice = null;
     };
 
     const stopShapeQuestionAudio = () => {
-        pendingShapeChoiceName = null;
+        pendingShapeChoice = null;
         if (shapeQuestionAudioTimer !== null) {
             window.clearTimeout(shapeQuestionAudioTimer);
             shapeQuestionAudioTimer = null;
@@ -8363,53 +8947,133 @@ const appVersion = '20260921-520';
             audio.addEventListener('ended', () => {
                 if (shapeQuestionAudio !== audio) return;
                 shapeQuestionAudio = null;
-                const queuedShapeName = pendingShapeChoiceName;
-                pendingShapeChoiceName = null;
-                if (queuedShapeName) playShapeChoiceAudio(queuedShapeName);
+                const queuedChoice = pendingShapeChoice;
+                pendingShapeChoice = null;
+                if (queuedChoice) playShapeChoiceAudio(queuedChoice);
             }, { once: true });
             audio.play().catch(() => {
                 if (shapeQuestionAudio !== audio) return;
                 shapeQuestionAudio = null;
-                const queuedShapeName = pendingShapeChoiceName;
-                pendingShapeChoiceName = null;
-                if (queuedShapeName) playShapeChoiceAudio(queuedShapeName);
+                const queuedChoice = pendingShapeChoice;
+                pendingShapeChoice = null;
+                if (queuedChoice) playShapeChoiceAudio(queuedChoice);
             });
         }, 400);
     };
 
-    const playShapeChoiceAudio = async (shapeName) => {
-        const normalizedShapeName = String(shapeName || '').trim().toLowerCase();
+    const playShapeChoiceAudio = async (choice) => {
+        if (!choice || choice.disabled || choice.dataset.nameHeard === 'true') return;
+        const normalizedShapeName = choice.textContent.trim().toLowerCase();
         const segment = shapeChoiceAudioSegments[normalizedShapeName];
-        if (!segment || !shapeChoiceAudio) return;
+        if (!segment || !shapeChoiceAudio || (window.__learnscapeSoundScale?.() ?? 1) === 0) {
+            choice.dataset.nameHeard = 'true';
+            return;
+        }
         if (
             shapeQuestionAudioTimer !== null
             || (shapeQuestionAudio && !shapeQuestionAudio.paused && !shapeQuestionAudio.ended)
         ) {
-            pendingShapeChoiceName = normalizedShapeName;
+            pendingShapeChoice = choice;
             return;
         }
 
-        pendingShapeChoiceName = null;
+        pendingShapeChoice = null;
         stopShapeChoiceAudio();
+        activeShapeChoice = choice;
+        choice.classList.add('is-speaking');
         const session = shapeChoiceAudioSession;
 
         try {
             shapeChoiceAudio.currentTime = segment.start;
+            shapeChoiceAudio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
             await shapeChoiceAudio.play();
         } catch (error) {
+            if (session === shapeChoiceAudioSession) {
+                choice.dataset.nameHeard = 'true';
+                stopShapeChoiceAudio();
+            }
             return;
         }
 
         const stopAtSegmentEnd = () => {
             if (session !== shapeChoiceAudioSession) return;
             if (shapeChoiceAudio.currentTime >= segment.end || shapeChoiceAudio.ended) {
-                shapeChoiceAudio.pause();
-                shapeChoiceAudioFrame = null;
+                choice.dataset.nameHeard = 'true';
+                stopShapeChoiceAudio();
                 return;
             }
             shapeChoiceAudioFrame = window.requestAnimationFrame(stopAtSegmentEnd);
         };
         shapeChoiceAudioFrame = window.requestAnimationFrame(stopAtSegmentEnd);
+    };
+
+    const playShapeTvCelebration = (page, choiceGroup) => {
+        const screen = choiceGroup.closest('.circle-illustration-tv-screen');
+        if (!page || !screen) return;
+        stopShapeTvCelebration(page);
+
+        const overlay = document.createElement('div');
+        overlay.className = 'shape-tv-celebration';
+        overlay.setAttribute('role', 'status');
+        overlay.setAttribute('aria-live', 'polite');
+        overlay.innerHTML = '<div class="shape-tv-celebration-confetti" aria-hidden="true"></div><div class="shape-tv-celebration-copy"><strong>CONGRATULATIONS</strong><span>TAMA ANG IYONG SAGOT!</span></div><div class="shape-tv-celebration-character shape-tv-celebration-ch7" aria-hidden="true"><img src="assets/Character/ch7.webp" alt=""></div><div class="shape-tv-celebration-character shape-tv-celebration-ch8" aria-hidden="true"><img src="assets/Character/ch8.webp" alt=""></div>';
+        const confetti = overlay.querySelector('.shape-tv-celebration-confetti');
+        for (let index = 0; index < 96; index += 1) {
+            const piece = document.createElement('i');
+            piece.style.setProperty('--piece-x', `${3 + (index * 37) % 94}%`);
+            piece.style.setProperty('--piece-delay', `${-(index % 16) * 0.24}s`);
+            piece.style.setProperty('--piece-duration', `${2.7 + (index % 5) * 0.3}s`);
+            piece.style.setProperty('--piece-color', ['#ffe56b', '#ff8caa', '#7fe8ff', '#adf081'][index % 4]);
+            confetti.append(piece);
+        }
+        screen.append(overlay);
+
+        const celebration = { overlay, timers: [], audios: [] };
+        shapeTvCelebrations.set(page, celebration);
+        const schedule = (callback, delay) => {
+            const timer = window.setTimeout(callback, delay);
+            celebration.timers.push(timer);
+        };
+        const playSound = (source) => {
+            if (!window.Audio || (window.__learnscapeSoundScale?.() ?? 1) === 0) return null;
+            const audio = new window.Audio(source);
+            audio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+            audio.playsInline = true;
+            celebration.audios.push(audio);
+            audio.play().catch(() => {});
+            return audio;
+        };
+        const finish = () => {
+            if (shapeTvCelebrations.get(page) !== celebration) return;
+            stopShapeTvCelebration(page);
+            if (!isPageVisible(page) || !page.classList.contains('is-tv-lesson-image-visible')) return;
+            if (page === circleIllustrationPage) showCircleIllustrationProgress();
+            else if (page === shapeSquarePage) showShapeSquareProgress();
+            else showShapePreviewProgress(page);
+        };
+        const startCelebration = () => {
+            if (shapeTvCelebrations.get(page) !== celebration || !isPageVisible(page)) return;
+            overlay.classList.add('is-active');
+            playSound('assets/Audios/Voice over/Mahusay.mp3');
+            playSound('assets/Audios/Sound effects/completed.mp3');
+            schedule(() => playSound('assets/Audios/Sound effects/kids cheering.mp3'), 450);
+            schedule(finish, 4800);
+        };
+
+        const correctAudio = playSound('assets/Audios/Sound effects/correct.mp3');
+        if (correctAudio) {
+            let started = false;
+            const startOnce = () => {
+                if (started) return;
+                started = true;
+                startCelebration();
+            };
+            correctAudio.onended = startOnce;
+            correctAudio.onerror = startOnce;
+            schedule(startOnce, 1800);
+        } else {
+            startCelebration();
+        }
     };
 
     document.querySelectorAll('.shape-tv-choices').forEach((choiceGroup) => {
@@ -8418,41 +9082,43 @@ const appVersion = '20260921-520';
 
         choices.forEach((choice) => {
             choice.addEventListener('pointerenter', () => {
-                if (!choice.disabled) playShapeChoiceAudio(choice.textContent);
+                playShapeChoiceAudio(choice);
+            });
+
+            choice.addEventListener('focus', () => {
+                playShapeChoiceAudio(choice);
             });
 
             choice.addEventListener('pointerleave', () => {
-                const shapeName = choice.textContent.trim().toLowerCase();
-                if (pendingShapeChoiceName === shapeName) pendingShapeChoiceName = null;
+                if (pendingShapeChoice === choice) pendingShapeChoice = null;
             });
 
             choice.addEventListener('click', () => {
-                pendingShapeChoiceName = null;
+                if (choice.disabled) return;
+                if (choice.dataset.nameHeard !== 'true') {
+                    if (activeShapeChoice !== choice && pendingShapeChoice !== choice) playShapeChoiceAudio(choice);
+                    if (choice.dataset.nameHeard !== 'true') return;
+                }
+                pendingShapeChoice = null;
                 stopShapeChoiceAudio();
                 if (choice.hasAttribute('data-correct-answer')) {
+                    shapeWrongAnswerAudio?.pause();
                     choices.forEach((item) => {
                         item.disabled = true;
                         item.classList.remove('is-wrong');
                         item.setAttribute('aria-pressed', item === choice ? 'true' : 'false');
                     });
                     choice.classList.add('is-correct');
-                    playUiClickSound('chime');
-                    window.setTimeout(() => {
-                        if (!lessonPage || !isPageVisible(lessonPage)) return;
-                        if (lessonPage === circleIllustrationPage) {
-                            showCircleIllustrationProgress();
-                            return;
-                        }
-                        if (lessonPage === shapeSquarePage) {
-                            showShapeSquareProgress();
-                            return;
-                        }
-                        showShapePreviewProgress(lessonPage);
-                    }, 650);
+                    playShapeTvCelebration(lessonPage, choiceGroup);
                     return;
                 }
 
-                playUiClickSound('tap');
+                if (shapeWrongAnswerAudio) {
+                    shapeWrongAnswerAudio.pause();
+                    shapeWrongAnswerAudio.currentTime = 0;
+                    shapeWrongAnswerAudio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+                    if (shapeWrongAnswerAudio.volume > 0) shapeWrongAnswerAudio.play().catch(() => {});
+                }
                 choice.classList.remove('is-wrong');
                 choice.getBoundingClientRect();
                 choice.classList.add('is-wrong');
@@ -10511,6 +11177,10 @@ const appVersion = '20260921-520';
     });
 
     circleIllustrationPlayButton?.addEventListener('click', () => {
+        if (circleIllustrationVideo?.paused && circleIllustrationVideo.currentTime > 0 && !circleIllustrationVideo.ended && !circleIllustrationVideo.hidden) {
+            circleIllustrationVideo.play().catch(() => {});
+            return;
+        }
         playCircleIllustrationVideo();
     });
 
@@ -10532,6 +11202,7 @@ const appVersion = '20260921-520';
             return;
         }
         resetCircleIllustrationVideo();
+        playCircleIllustrationVideo();
     });
     circleIllustrationNextButton?.addEventListener('click', () => {
         if (circleIllustrationProgress?.dataset.progressStage === 'hunt') {
@@ -10560,7 +11231,78 @@ const appVersion = '20260921-520';
         }
     });
 
-    shapeSquarePlayButton?.addEventListener('click', playShapeSquareLessonVideo);
+    const lessonVideos = Array.from(document.querySelectorAll('.circle-illustration-tv-screen video'));
+    const lessonSeekTargets = new WeakMap();
+    lessonVideos.forEach((video) => {
+        const playButton = video.closest('.circle-illustration-video-stage')?.querySelector('.circle-illustration-play-button');
+        video.addEventListener('pause', () => {
+            const page = video.closest('.circle-illustration-page, .shape-area-page');
+            if (!playButton || !isPageVisible(page) || video.hidden || video.ended || video.currentTime <= 0) return;
+            if (playButton.classList.contains('shape-preview-play-button')) playButton.hidden = false;
+            playButton.classList.remove('is-paused-fading');
+            void playButton.offsetWidth;
+            playButton.classList.add('is-paused-fading');
+        });
+        video.addEventListener('play', () => {
+            playButton?.classList.remove('is-paused-fading');
+            if (playButton?.classList.contains('shape-preview-play-button')) playButton.hidden = true;
+        });
+        video.addEventListener('click', () => {
+            if (video.hidden || video.ended) return;
+            if (video.paused) video.play().catch(() => {});
+            else video.pause();
+        });
+        video.addEventListener('seeked', () => {
+            const target = lessonSeekTargets.get(video);
+            if (target === undefined) return;
+            if (video.hidden || video.ended || Math.abs(video.currentTime - target) < 0.3) {
+                lessonSeekTargets.delete(video);
+                return;
+            }
+            video.currentTime = target;
+        });
+        video.addEventListener('ended', () => lessonSeekTargets.delete(video));
+    });
+    document.addEventListener('keydown', (event) => {
+        if (!['Space', 'ArrowLeft', 'ArrowRight'].includes(event.code) || event.ctrlKey || event.altKey || event.metaKey) return;
+        if (event.target?.closest?.('button, a, input, textarea, select, [contenteditable="true"], [role="dialog"]')) return;
+        if (getComputedStyle(document.querySelector('.fullscreen-restore-overlay')).display !== 'none') return;
+
+        const video = lessonVideos.find((candidate) => {
+            const page = candidate.closest('.circle-illustration-page, .shape-area-page');
+            const stage = candidate.closest('.circle-illustration-video-stage');
+            return isPageVisible(page)
+                && !candidate.hidden
+                && !candidate.ended
+                && candidate.getClientRects().length > 0
+                && stage?.getAttribute('aria-hidden') !== 'true';
+        });
+        if (!video) return;
+
+        if (event.code === 'Space') {
+            if (event.repeat) return;
+            event.preventDefault();
+            if (video.paused) video.play().catch(() => {});
+            else video.pause();
+            return;
+        }
+
+        if (video.readyState === 0) return;
+        event.preventDefault();
+        const offset = event.code === 'ArrowRight' ? 5 : -5;
+        const end = Number.isFinite(video.duration) ? video.duration : Infinity;
+        const target = Math.max(0, Math.min(end, (lessonSeekTargets.get(video) ?? video.currentTime) + offset));
+        lessonSeekTargets.set(video, target);
+        if (!video.seeking) video.currentTime = target;
+    });
+
+    shapeSquarePlayButton?.addEventListener('click', () => {
+        if (shapeSquareVideo?.paused && shapeSquareVideo.currentTime > 0 && !shapeSquareVideo.ended && !shapeSquareVideo.hidden) {
+            shapeSquareVideo.play().catch(() => {});
+            return;
+        }
+        playShapeSquareLessonVideo();
+    });
     shapeSquareSkipButton?.addEventListener('click', () => {
         showShapeSquareTvLessonImage();
         scheduleShapeQuestionAudio();
@@ -10573,7 +11315,7 @@ const appVersion = '20260921-520';
         }
         resetShapeSquareLessonVideo();
         setShapeSquareVideoStageVisible(true);
-        setShapeSquarePlayButtonVisible(true);
+        playShapeSquareLessonVideo();
     });
     shapeSquareNextButton?.addEventListener('click', () => {
         if (shapeSquareProgress?.dataset.progressStage === 'answer') {
@@ -11550,8 +12292,22 @@ const appVersion = '20260921-520';
 
     ovalFinalReplayButton?.addEventListener('click', () => {
         playUiClickSound('start');
-        hideOvalFinalProgress();
-        startOvalMissionIntro();
+        stopOvalMissionIntro();
+        resetOvalBoardGame();
+        ovalGameStarted = false;
+        ovalBoardGamePage?.classList.add('is-mission-intro');
+        ovalBoardStage?.setAttribute('aria-hidden', 'true');
+        ovalBoardCards.forEach((card) => { card.disabled = true; });
+        if (ovalMissionGuide) {
+            ovalMissionGuide.hidden = false;
+            ovalMissionGuide.setAttribute('aria-hidden', 'false');
+        }
+        if (ovalMissionStartButton) {
+            ovalMissionStartButton.hidden = false;
+            ovalMissionStartButton.getBoundingClientRect();
+            ovalMissionStartButton.classList.add('is-visible');
+            ovalMissionStartButton.focus({ preventScroll: true });
+        }
     });
 
     ovalFinalNextButton?.addEventListener('click', () => {

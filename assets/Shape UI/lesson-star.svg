@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" aria-hidden="true">
+  <defs>
+    <linearGradient id="starGold" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#fffda5"/>
+      <stop offset="0.3" stop-color="#ffe928"/>
+      <stop offset="0.65" stop-color="#ffcb16"/>
+      <stop offset="1" stop-color="#f9940b"/>
+    </linearGradient>
+    <linearGradient id="starInner" x1="0" y1="0" x2="0.75" y2="1">
+      <stop offset="0" stop-color="#fffed9" stop-opacity="0.95"/>
+      <stop offset="0.5" stop-color="#fff36e" stop-opacity="0.72"/>
+      <stop offset="1" stop-color="#ffba24" stop-opacity="0.28"/>
+    </linearGradient>
+    <filter id="starShadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="5" stdDeviation="3" flood-color="#77320e" flood-opacity="0.48"/>
+    </filter>
+  </defs>
+  <path d="M100 9 C106 9 110 15 113 23 L129 64 L176 67 C190 68 195 78 184 88 L143 119 L157 166 C162 183 152 190 138 181 L100 156 L62 181 C48 190 38 183 43 166 L57 119 L16 88 C5 78 10 68 24 67 L71 64 L87 23 C90 15 94 9 100 9 Z" fill="url(#starGold)" stroke="#71300e" stroke-width="7" stroke-linejoin="round" filter="url(#starShadow)"/>
+  <path d="M100 19 C106 19 109 28 112 35 L126 72 L169 76 C177 77 180 80 173 86 L133 116 L147 163 C149 171 145 174 138 170 L100 145 L62 170 C55 174 51 171 53 163 L67 116 L27 86 C20 80 23 77 31 76 L74 72 L88 35 C91 28 94 19 100 19 Z" fill="url(#starInner)" stroke="#fff6a2" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M96 27 C88 37 85 52 81 68 C70 76 52 76 38 78" fill="none" stroke="#fffef0" stroke-width="7" stroke-linecap="round" opacity="0.85"/>
+  <ellipse cx="66" cy="86" rx="13" ry="5" transform="rotate(-19 66 86)" fill="#fffef1" opacity="0.85"/>
+  <circle cx="85" cy="77" r="3.5" fill="#ffffff" opacity="0.9"/>
+</svg>

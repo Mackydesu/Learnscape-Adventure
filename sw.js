@@ -1,4 +1,4 @@
-const CACHE_NAME = 'learnscape-adventure-v337';
+const CACHE_NAME = 'learnscape-adventure-v379';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -29,6 +29,11 @@ const CORE_ASSETS = [
   './assets/Backgrounds/shape.png',
   './assets/Backgrounds/loadingscreen.png',
   './assets/Character/ch1.png',
+  './assets/Character/bat.webp',
+  './assets/Character/cave.webp',
+  './assets/Character/cave1.webp',
+  './assets/Shape UI/crystal.webp',
+  './assets/Audios/Sound effects/diamond.mp3',
   './assets/Character/metal-monster-boss.png',
   './assets/Character/metal-monster-boss-idle.png',
   './assets/Character/metal-monster-boss-blink.png',
