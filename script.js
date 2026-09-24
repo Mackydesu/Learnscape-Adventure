@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-const appVersion = '20260924-554';
+const appVersion = '20260924-557';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -1412,6 +1412,7 @@ const appVersion = '20260924-554';
     let shapeQuestionAudio = null;
     let shapeQuestionAudioTimer = null;
     let pendingShapeChoice = null;
+    let pendingShapeChoiceAction = null;
     let activeShapeChoice = null;
     let shapeMissionCompletionAudio = null;
     let shapeMissionCompletionFrame = null;
@@ -1485,6 +1486,7 @@ const appVersion = '20260924-554';
     const circleHuntKidsCheeringAudioSource = 'assets/Audios/Sound effects/kids cheering.mp3';
     const circleHuntClockTickingAudioSource = 'assets/Audios/Sound effects/clock ticking.mp3';
     const circleHuntSecondAudioSource = 'assets/Audios/Sound effects/sec.mp3';
+    const circleHuntCountdownAudioSource = 'assets/Audios/Sound effects/3-2-1-countdown.mp3';
     const circleHuntTimesUpAudioSource = 'assets/Audios/Sound effects/times up.mp3';
     const circleHuntLoseAudioSource = 'assets/Audios/Sound effects/lose.mp3';
     let circleMissionGuideTimers = [];
@@ -1505,6 +1507,7 @@ const appVersion = '20260924-554';
     let circleHuntKidsCheeringAudio = null;
     let circleHuntClockTickingAudio = null;
     let circleHuntSecondAudio = null;
+    let circleHuntCountdownAudio = null;
     let circleHuntTimesUpAudio = null;
     let circleHuntLoseAudio = null;
     let circleSortCollectedCount = 0;
@@ -2956,11 +2959,13 @@ const appVersion = '20260924-554';
         stopShapeTvCelebration(page);
         stopShapeChoiceAudio();
         pendingShapeChoice = null;
+        pendingShapeChoiceAction = null;
         shapeWrongAnswerAudio?.pause();
         page?.querySelectorAll('.shape-tv-choice').forEach((choice) => {
             choice.disabled = false;
             choice.classList.remove('is-correct', 'is-wrong', 'is-speaking');
             delete choice.dataset.nameHeard;
+            delete choice.dataset.answerPending;
             choice.removeAttribute('aria-pressed');
         });
     };
@@ -8926,6 +8931,7 @@ const appVersion = '20260924-554';
 
     const stopShapeQuestionAudio = () => {
         pendingShapeChoice = null;
+        pendingShapeChoiceAction = null;
         if (shapeQuestionAudioTimer !== null) {
             window.clearTimeout(shapeQuestionAudioTimer);
             shapeQuestionAudioTimer = null;
@@ -8948,25 +8954,30 @@ const appVersion = '20260924-554';
                 if (shapeQuestionAudio !== audio) return;
                 shapeQuestionAudio = null;
                 const queuedChoice = pendingShapeChoice;
+                const queuedAction = pendingShapeChoiceAction;
                 pendingShapeChoice = null;
-                if (queuedChoice) playShapeChoiceAudio(queuedChoice);
+                pendingShapeChoiceAction = null;
+                if (queuedChoice) playShapeChoiceAudio(queuedChoice, true, queuedAction);
             }, { once: true });
             audio.play().catch(() => {
                 if (shapeQuestionAudio !== audio) return;
                 shapeQuestionAudio = null;
                 const queuedChoice = pendingShapeChoice;
+                const queuedAction = pendingShapeChoiceAction;
                 pendingShapeChoice = null;
-                if (queuedChoice) playShapeChoiceAudio(queuedChoice);
+                pendingShapeChoiceAction = null;
+                if (queuedChoice) playShapeChoiceAudio(queuedChoice, true, queuedAction);
             });
         }, 400);
     };
 
-    const playShapeChoiceAudio = async (choice) => {
-        if (!choice || choice.disabled || choice.dataset.nameHeard === 'true') return;
+    const playShapeChoiceAudio = async (choice, forceReplay = false, onFinished = null) => {
+        if (!choice || choice.disabled || (!forceReplay && choice.dataset.nameHeard === 'true')) return;
         const normalizedShapeName = choice.textContent.trim().toLowerCase();
         const segment = shapeChoiceAudioSegments[normalizedShapeName];
         if (!segment || !shapeChoiceAudio || (window.__learnscapeSoundScale?.() ?? 1) === 0) {
             choice.dataset.nameHeard = 'true';
+            onFinished?.();
             return;
         }
         if (
@@ -8974,10 +8985,12 @@ const appVersion = '20260924-554';
             || (shapeQuestionAudio && !shapeQuestionAudio.paused && !shapeQuestionAudio.ended)
         ) {
             pendingShapeChoice = choice;
+            pendingShapeChoiceAction = onFinished;
             return;
         }
 
         pendingShapeChoice = null;
+        pendingShapeChoiceAction = null;
         stopShapeChoiceAudio();
         activeShapeChoice = choice;
         choice.classList.add('is-speaking');
@@ -8991,6 +9004,7 @@ const appVersion = '20260924-554';
             if (session === shapeChoiceAudioSession) {
                 choice.dataset.nameHeard = 'true';
                 stopShapeChoiceAudio();
+                onFinished?.();
             }
             return;
         }
@@ -9000,6 +9014,7 @@ const appVersion = '20260924-554';
             if (shapeChoiceAudio.currentTime >= segment.end || shapeChoiceAudio.ended) {
                 choice.dataset.nameHeard = 'true';
                 stopShapeChoiceAudio();
+                onFinished?.();
                 return;
             }
             shapeChoiceAudioFrame = window.requestAnimationFrame(stopAtSegmentEnd);
@@ -9082,47 +9097,51 @@ const appVersion = '20260924-554';
 
         choices.forEach((choice) => {
             choice.addEventListener('pointerenter', () => {
-                playShapeChoiceAudio(choice);
+                if (choiceGroup.querySelector('[data-answer-pending="true"]')) return;
+                playShapeChoiceAudio(choice, true);
             });
 
             choice.addEventListener('focus', () => {
-                playShapeChoiceAudio(choice);
+                if (choiceGroup.querySelector('[data-answer-pending="true"]')) return;
+                playShapeChoiceAudio(choice, true);
             });
 
             choice.addEventListener('pointerleave', () => {
-                if (pendingShapeChoice === choice) pendingShapeChoice = null;
+                if (pendingShapeChoice === choice && !pendingShapeChoiceAction) pendingShapeChoice = null;
             });
 
             choice.addEventListener('click', () => {
-                if (choice.disabled) return;
-                if (choice.dataset.nameHeard !== 'true') {
-                    if (activeShapeChoice !== choice && pendingShapeChoice !== choice) playShapeChoiceAudio(choice);
-                    if (choice.dataset.nameHeard !== 'true') return;
-                }
-                pendingShapeChoice = null;
-                stopShapeChoiceAudio();
-                if (choice.hasAttribute('data-correct-answer')) {
-                    shapeWrongAnswerAudio?.pause();
-                    choices.forEach((item) => {
-                        item.disabled = true;
-                        item.classList.remove('is-wrong');
-                        item.setAttribute('aria-pressed', item === choice ? 'true' : 'false');
-                    });
-                    choice.classList.add('is-correct');
-                    playShapeTvCelebration(lessonPage, choiceGroup);
-                    return;
-                }
+                if (choice.disabled || choice.dataset.answerPending === 'true') return;
+                choice.dataset.answerPending = 'true';
+                playShapeChoiceAudio(choice, true, () => {
+                    delete choice.dataset.answerPending;
+                    if (choice.disabled) return;
+                    pendingShapeChoice = null;
+                    pendingShapeChoiceAction = null;
+                    stopShapeChoiceAudio();
+                    if (choice.hasAttribute('data-correct-answer')) {
+                        shapeWrongAnswerAudio?.pause();
+                        choices.forEach((item) => {
+                            item.disabled = true;
+                            item.classList.remove('is-wrong');
+                            item.setAttribute('aria-pressed', item === choice ? 'true' : 'false');
+                        });
+                        choice.classList.add('is-correct');
+                        playShapeTvCelebration(lessonPage, choiceGroup);
+                        return;
+                    }
 
-                if (shapeWrongAnswerAudio) {
-                    shapeWrongAnswerAudio.pause();
-                    shapeWrongAnswerAudio.currentTime = 0;
-                    shapeWrongAnswerAudio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
-                    if (shapeWrongAnswerAudio.volume > 0) shapeWrongAnswerAudio.play().catch(() => {});
-                }
-                choice.classList.remove('is-wrong');
-                choice.getBoundingClientRect();
-                choice.classList.add('is-wrong');
-                window.setTimeout(() => choice.classList.remove('is-wrong'), 500);
+                    if (shapeWrongAnswerAudio) {
+                        shapeWrongAnswerAudio.pause();
+                        shapeWrongAnswerAudio.currentTime = 0;
+                        shapeWrongAnswerAudio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+                        if (shapeWrongAnswerAudio.volume > 0) shapeWrongAnswerAudio.play().catch(() => {});
+                    }
+                    choice.classList.remove('is-wrong');
+                    choice.getBoundingClientRect();
+                    choice.classList.add('is-wrong');
+                    window.setTimeout(() => choice.classList.remove('is-wrong'), 500);
+                });
             });
         });
     });
@@ -9736,6 +9755,37 @@ const appVersion = '20260924-554';
         }
         stopCircleHuntClockTickingAudio();
         stopCircleHuntSecondAudio();
+        stopCircleHuntCountdownAudio();
+    };
+
+    const stopCircleHuntCountdownAudio = () => {
+        if (!circleHuntCountdownAudio) return;
+
+        circleHuntCountdownAudio.onended = null;
+        circleHuntCountdownAudio.pause();
+        try {
+            circleHuntCountdownAudio.currentTime = 0;
+        } catch (error) {
+            // The clip may still be loading, so pausing is enough.
+        }
+        circleHuntCountdownAudio = null;
+    };
+
+    const playCircleHuntCountdownAudio = () => {
+        stopCircleHuntCountdownAudio();
+        if (!window.Audio || (window.__learnscapeSoundScale?.() ?? 1) === 0) return;
+
+        const audio = new Audio(circleHuntCountdownAudioSource);
+        circleHuntCountdownAudio = audio;
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+        audio.onended = () => {
+            if (circleHuntCountdownAudio === audio) circleHuntCountdownAudio = null;
+        };
+        audio.play().catch(() => {
+            if (circleHuntCountdownAudio === audio) circleHuntCountdownAudio = null;
+        });
     };
 
     const stopCircleHuntClockTickingAudio = () => {
@@ -10187,6 +10237,7 @@ const appVersion = '20260924-554';
         }
 
         circleHuntCountdown.hidden = false;
+        playCircleHuntCountdownAudio();
         ['3', '2', '1', 'GO!'].forEach((label, index) => {
             const timerId = window.setTimeout(() => {
                 if (circleHuntState !== 'countdown') return;

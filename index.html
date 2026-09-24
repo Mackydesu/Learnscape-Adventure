@@ -1810,7 +1810,7 @@
 
     
 
-    <script src="script.js?v=20260924-554"></script>
+    <script src="script.js?v=20260924-557"></script>
     </div>
 
     <script>
@@ -2477,6 +2477,7 @@
                 const route = routes[routeName] || routes.title;
                 currentRoute = routeName in routes ? routeName : 'title';
                 currentRouteKey = getRouteKey(currentRoute, params);
+                syncIntroBgmForRoute(currentRoute);
 
                 const isIntro = currentRoute === 'title';
                 if (fullscreenRestoreKicker) fullscreenRestoreKicker.textContent = isIntro ? 'Welcome, Adventurer' : 'Game Paused';
@@ -2692,6 +2693,36 @@
             const registeredMedia = new WeakSet();
             const soundScale = () => isSoundMuted ? 0 : masterSoundVolume;
             window.__learnscapeSoundScale = soundScale;
+            const introBgmRoutes = new Set(['title', 'game3']);
+            const introBgm = new Audio('assets/Audios/Bgm/intro.mp3');
+            introBgm.loop = true;
+            introBgm.preload = 'auto';
+            introBgm.playsInline = true;
+            introBgm.volume = 0.5;
+
+            function syncIntroBgmForRoute(routeName) {
+                if (!introBgmRoutes.has(routeName)) {
+                    introBgm.pause();
+                    try {
+                        introBgm.currentTime = 0;
+                    } catch (error) {
+                        // Pausing is enough while the track is still loading.
+                    }
+                    return;
+                }
+
+                if (!introBgm.paused) return;
+                introBgm.play().catch(() => {
+                    // The first pointer or keyboard interaction retries autoplay.
+                });
+            }
+
+            const unlockIntroBgm = () => {
+                if (!introBgmRoutes.has(currentRoute) || !introBgm.paused) return;
+                introBgm.play().catch(() => {});
+            };
+            document.addEventListener('pointerdown', unlockIntroBgm, { passive: true });
+            document.addEventListener('keydown', unlockIntroBgm);
             const applyMasterSoundVolume = () => {
                 window.dispatchEvent(new Event('learnscape:soundchange'));
                 if (!mediaVolumeDescriptor?.set) return;
