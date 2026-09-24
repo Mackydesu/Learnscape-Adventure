@@ -60,6 +60,16 @@
     </div>
 
     <div class="intro-settings">
+        <div class="intro-home-resources" aria-label="Adventure progress">
+            <div class="intro-resource-pill intro-resource-pill-star" data-resource="stars" aria-label="0 stars">
+                <svg viewBox="0 0 32 32" aria-hidden="true"><path d="m16 2.5 4.1 8.3 9.2 1.3-6.7 6.5 1.6 9.2-8.2-4.3-8.2 4.3 1.6-9.2-6.7-6.5 9.2-1.3Z"/></svg>
+                <output id="intro-star-count">0</output>
+            </div>
+            <div class="intro-resource-pill intro-resource-pill-carrot" data-resource="carrots" aria-label="0 carrots">
+                <svg viewBox="0 0 32 32" aria-hidden="true"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg>
+                <output id="intro-carrot-count">0</output>
+            </div>
+        </div>
         <button class="intro-settings-button" type="button" aria-label="Settings" aria-expanded="false" aria-controls="intro-settings-panel">
             <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M20.2 3.5h7.6l1.1 5.1a16 16 0 0 1 3.2 1.3l4.5-2.5 5.4 5.4-2.5 4.5a16 16 0 0 1 1.3 3.2l5.1 1.1v7.6l-5.1 1.1a16 16 0 0 1-1.3 3.2l2.5 4.5-5.4 5.4-4.5-2.5a16 16 0 0 1-3.2 1.3l-1.1 5.1h-7.6l-1.1-5.1a16 16 0 0 1-3.2-1.3l-4.5 2.5L6 38.1l2.5-4.5a16 16 0 0 1-1.3-3.2l-5.1-1.1v-7.6l5.1-1.1a16 16 0 0 1 1.3-3.2L6 12.9l5.4-5.4 4.5 2.5a16 16 0 0 1 3.2-1.3l1.1-5.2Z"/><circle cx="24" cy="24" r="7"/></svg>
         </button>
@@ -1104,23 +1114,24 @@
             <button class="circle-mission-start-button oval-mission-start-button" type="button" hidden>Start</button>
         </div>
         <div class="oval-board-stage" aria-label="15 oval board pieces">
-            <button class="oval-board-card" type="button" aria-label="Oval board card 1" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
-            <button class="oval-board-card" type="button" aria-label="Oval board card 2" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
-            <button class="oval-board-card" type="button" aria-label="Oval board card 3" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
-            <button class="oval-board-card" type="button" aria-label="Oval board card 4" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
-            <button class="oval-board-card" type="button" aria-label="Oval board card 5" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
-            <button class="oval-board-card" type="button" aria-label="Oval board card 6" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
-            <button class="oval-board-card" type="button" aria-label="Oval board card 7" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
-            <button class="oval-board-card" type="button" aria-label="Oval board card 8" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
-            <button class="oval-board-card" type="button" aria-label="Oval board card 9" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
-            <button class="oval-board-card" type="button" aria-label="Oval board card 10" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
-            <button class="oval-board-card" type="button" aria-label="Oval board card 11" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
-            <button class="oval-board-card" type="button" aria-label="Oval board card 12" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
-            <button class="oval-board-card" type="button" aria-label="Oval board card 13" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
-            <button class="oval-board-card" type="button" aria-label="Oval board card 14" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
-            <button class="oval-board-card" type="button" aria-label="Oval board card 15" aria-pressed="false"><span class="oval-card-face oval-card-back"></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 1" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">1</span></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 2" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">2</span></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 3" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">3</span></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 4" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">4</span></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 5" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">5</span></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 6" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">6</span></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 7" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">7</span></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 8" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">8</span></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 9" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">9</span></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 10" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">10</span></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 11" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">11</span></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 12" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">12</span></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 13" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">13</span></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 14" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">14</span></span><span class="oval-card-face oval-card-front"></span></button>
+            <button class="oval-board-card" type="button" aria-label="Oval board card 15" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">15</span></span><span class="oval-card-face oval-card-front"></span></button>
         </div>
         <div class="oval-match-reward" aria-live="polite" aria-label="Matched oval object" hidden>
+            <div class="oval-match-confetti" aria-hidden="true"></div>
             <span class="oval-match-burst" aria-hidden="true"></span>
             <img class="oval-match-object" src="" alt="">
         </div>
@@ -1190,7 +1201,10 @@
                 <div class="heart-game-score-panel">
                     <span class="heart-game-score-label">Score</span>
                     <strong class="heart-game-score-value">0 / 1000</strong>
-                    <span class="heart-game-score-track" aria-hidden="true"><span class="heart-game-score-fill"></span></span>
+                    <span class="heart-game-score-track" aria-hidden="true">
+                        <span class="heart-game-score-fill"></span>
+                        <span class="heart-game-high-score-marker"></span>
+                    </span>
                 </div>
                 <div class="heart-game-center-hud">
                     <div class="heart-game-timer" aria-label="45 seconds remaining">
@@ -1262,7 +1276,7 @@
                     <path d="M-31 0 L-43 -10 L-39 0 L-43 10 Z" fill="#ff78b5" stroke="#8f2858" stroke-width="3"></path>
                 </g>
             </svg>
-            <button class="heart-cupid-bow-control" type="button" aria-label="Aim and shoot Cupid bow">
+            <button class="heart-cupid-bow-control" type="button" aria-label="Aim Cupid bow; press Space to shoot">
                 <svg class="heart-cupid-bow" viewBox="0 0 320 250" aria-hidden="true">
                     <defs>
                         <linearGradient id="heartBowGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1a0"></stop><stop offset="0.45" stop-color="#f5ad2e"></stop><stop offset="1" stop-color="#a85a13"></stop></linearGradient>
@@ -1292,7 +1306,9 @@
         <section class="heart-game-celebration" role="status" aria-live="polite" hidden>
             <div class="heart-celebration-confetti" aria-hidden="true"></div>
             <h2 class="heart-celebration-title">Congratulations!</h2>
-            <img class="heart-celebration-character" src="assets/Character/ch18.webp" alt="Heart Mission guide celebrating">
+            <div class="heart-celebration-character-wrap" aria-hidden="true">
+                <img class="heart-mission-character" src="assets/Character/ch18.webp" alt="">
+            </div>
         </section>
         <section class="circle-lesson-progress heart-final-progress" aria-label="Heart mission progress" aria-hidden="true">
             <div class="circle-lesson-progress-board">
@@ -1309,7 +1325,7 @@
                 <p class="circle-lesson-star-message">Excellent work!</p>
                 <div class="circle-lesson-progress-actions">
                     <button class="circle-lesson-progress-button heart-final-replay" type="button" aria-label="Retry Heart Mission"><img src="assets/Buttons/Retry.webp" alt=""></button>
-                    <button class="circle-lesson-progress-button heart-final-next" type="button" aria-label="Continue to Shape Island"><img src="assets/Buttons/next.webp" alt=""></button>
+                    <button class="circle-lesson-progress-button heart-final-next" type="button" aria-label="Continue to heart camera game"><img src="assets/Buttons/next.webp" alt=""></button>
                 </div>
             </div>
         </section>
@@ -1320,7 +1336,7 @@
                     <video class="circle-illustration-video shape-preview-video" playsinline preload="auto" aria-label="Heart lesson video"></video>
                     <img class="circle-illustration-video shape-preview-lesson-image" src="assets/Backgrounds/heart.webp" alt="Heart lesson scene" hidden>
                     <img class="shape-tv-mascot shape-preview-mascot" src="assets/Shape UI/heart.webp" alt="Heart character" hidden>
-                    <div class="shape-tv-question-panel shape-preview-question-panel" hidden>Anong hugis ito/</div>
+                    <div class="shape-tv-question-panel shape-preview-question-panel" hidden>Anong hugis ito?</div>
                     <div class="shape-tv-choices" aria-label="Choose the shape name">
                         <div class="shape-tv-choice-column">
                             <button class="shape-tv-choice" type="button">Star</button>
@@ -2622,9 +2638,23 @@
             let introMenuTrigger = null;
             const introMenuContent = {
                 shop: {
-                    kicker: 'Village Shop',
-                    title: 'Adventure Shop',
-                    copy: 'The village shop is getting ready for your next adventure.',
+                    kicker: '',
+                    title: 'SHOP',
+                    copy: `
+                        <div class="intro-shop-board" aria-label="Shape key shop items">
+                            <img class="intro-shop-board-art" src="assets/Shape UI/shop-board.svg" alt="">
+                            <div class="intro-shop-list">
+                                <button class="intro-shop-item" type="button" data-shop-item="circle" aria-pressed="false" aria-label="Circle key, costs 10 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/circlekey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="square" aria-pressed="false" aria-label="Square key, costs 10 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/squarekey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="triangle" aria-pressed="false" aria-label="Triangle key, costs 10 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/trianglekey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="rectangle" aria-pressed="false" aria-label="Rectangle key, costs 10 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/rectanglekey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="oval" aria-pressed="false" aria-label="Oval key, costs 10 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/ovalkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="heart" aria-pressed="false" aria-label="Heart key, costs 10 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/heartkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="star" aria-pressed="false" aria-label="Star key, costs 10 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/starkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="diamond" aria-pressed="false" aria-label="Diamond key, costs 10 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/diamondkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></button>
+                            </div>
+                        </div>
+                    `,
                 },
                 character: {
                     kicker: 'Your Guide',
@@ -2646,15 +2676,27 @@
                     if (!content || !introMenuPanel) return;
                     introMenuTrigger = button;
                     introMenuKicker.textContent = content.kicker;
+                    introMenuKicker.hidden = !content.kicker;
                     introMenuTitle.textContent = content.title;
                     introMenuCopy.hidden = false;
                     introMenuCopy.innerHTML = content.copy || '';
+                    introMenuPanel.dataset.panel = button.dataset.introPanel;
                     introMenuPanel.hidden = false;
                     introMenuClose.focus({ preventScroll: true });
                 });
             });
 
             introMenuClose?.addEventListener('click', closeIntroMenu);
+            introMenuCopy?.addEventListener('click', (event) => {
+                const item = event.target.closest('.intro-shop-item');
+                if (!item || !introMenuCopy.contains(item)) return;
+                introMenuCopy.querySelectorAll('.intro-shop-item').forEach((shopItem) => {
+                    const isSelected = shopItem === item;
+                    shopItem.classList.toggle('is-selected', isSelected);
+                    shopItem.setAttribute('aria-pressed', String(isSelected));
+                });
+                window.playUiClickSound?.('chime');
+            });
             introMenuPanel?.addEventListener('click', (event) => {
                 if (event.target === introMenuPanel) closeIntroMenu();
             });
@@ -2669,6 +2711,10 @@
             const soundMutedToggle = document.getElementById('intro-sound-muted');
             const soundVolumeSlider = document.getElementById('intro-volume-slider');
             const soundVolumeValue = document.getElementById('intro-volume-value');
+            const resourceCountElements = {
+                stars: document.getElementById('intro-star-count'),
+                carrots: document.getElementById('intro-carrot-count'),
+            };
             const readSoundSetting = (key, fallback) => {
                 try {
                     const stored = window.localStorage.getItem(key);
@@ -2684,6 +2730,130 @@
                     // Sound settings still apply for this session if storage is unavailable.
                 }
             };
+            const resourceStorageKeys = {
+                stars: 'learnscape-star-count',
+                carrots: 'learnscape-carrot-count',
+            };
+            const resourceCounts = { stars: 0, carrots: 0 };
+            const normalizeResourceCount = (value) => Math.max(0, Math.floor(Number(value) || 0));
+            const setLearnscapeResourceCount = (resource, value, persist = true) => {
+                if (!(resource in resourceCounts)) return 0;
+                const nextValue = normalizeResourceCount(value);
+                resourceCounts[resource] = nextValue;
+                const output = resourceCountElements[resource];
+                if (output) {
+                    output.value = String(nextValue);
+                    output.textContent = String(nextValue);
+                    output.closest('.intro-resource-pill')?.setAttribute('aria-label', `${nextValue} ${resource}`);
+                }
+                if (persist) writeSoundSetting(resourceStorageKeys[resource], String(nextValue));
+                window.dispatchEvent(new CustomEvent('learnscape:resourcechange', {
+                    detail: { resource, value: nextValue },
+                }));
+                return nextValue;
+            };
+            Object.keys(resourceCounts).forEach((resource) => {
+                setLearnscapeResourceCount(resource, readSoundSetting(resourceStorageKeys[resource], '0'), false);
+            });
+            window.getLearnscapeResourceCount = (resource) => resourceCounts[resource] ?? 0;
+            window.setLearnscapeResourceCount = setLearnscapeResourceCount;
+            window.addLearnscapeResource = (resource, amount = 1) => (
+                setLearnscapeResourceCount(resource, (resourceCounts[resource] ?? 0) + Number(amount || 0))
+            );
+            const progressRewardByStarStage = { 1: 2, 2: 3, 3: 5 };
+            const getProgressRewardIdentity = (progress, starStage) => {
+                const page = progress.closest('section[id]');
+                const stage = progress.dataset.progressStage || `star-${starStage}`;
+                return `${page?.id || 'unknown'}:${stage}:${starStage}`;
+            };
+            const createProgressRewardBadge = (actions) => {
+                const badge = document.createElement('span');
+                badge.className = 'circle-lesson-progress-reward';
+                badge.setAttribute('role', 'status');
+                badge.innerHTML = `
+                    <svg viewBox="0 0 32 32" aria-hidden="true">
+                        <path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/>
+                        <path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/>
+                        <path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/>
+                    </svg>
+                    <strong></strong>
+                `;
+                const buttons = actions.querySelectorAll('.circle-lesson-progress-button');
+                if (buttons.length > 1) {
+                    actions.insertBefore(badge, buttons[1]);
+                } else {
+                    actions.appendChild(badge);
+                }
+                actions.classList.add('has-progress-reward');
+                return badge;
+            };
+            const syncLearnscapeProgressReward = (progress) => {
+                if (!progress) return;
+                const actions = progress.querySelector('.circle-lesson-progress-actions');
+                const stars = progress.querySelector('.circle-lesson-stars');
+                if (!actions || !stars) return;
+
+                const starStage = Math.max(0, Math.min(3, Number(stars.dataset.earnedStars) || 0));
+                const reward = progressRewardByStarStage[starStage] || 0;
+                let badge = actions.querySelector('.circle-lesson-progress-reward');
+                if (!reward) {
+                    badge?.remove();
+                    actions.classList.remove('has-progress-reward');
+                    return;
+                }
+
+                badge ||= createProgressRewardBadge(actions);
+                const rewardText = `+${reward}`;
+                const rewardValue = badge.querySelector('strong');
+                if (rewardValue.textContent !== rewardText) rewardValue.textContent = rewardText;
+                badge.setAttribute('aria-label', `Reward: ${reward} carrots`);
+                badge.dataset.reward = String(reward);
+                badge.dataset.starStage = String(starStage);
+
+                const page = progress.closest('section[id]');
+                const isVisible = progress.getAttribute('aria-hidden') === 'false'
+                    && !progress.hidden
+                    && !page?.hidden;
+                if (!isVisible) return;
+
+                const rewardIdentity = getProgressRewardIdentity(progress, starStage);
+                const rewardStorageKey = `learnscape-progress-reward:${rewardIdentity}`;
+                const wasAwarded = readSoundSetting(rewardStorageKey, 'false') === 'true';
+                badge.classList.toggle('is-awarded', wasAwarded);
+                if (wasAwarded) return;
+
+                writeSoundSetting(rewardStorageKey, 'true');
+                window.addLearnscapeResource('stars', 1);
+                window.addLearnscapeResource('carrots', reward);
+                badge.classList.add('is-awarded', 'is-new-reward');
+                window.setTimeout(() => badge.classList.remove('is-new-reward'), 900);
+            };
+            const syncAllLearnscapeProgressRewards = () => {
+                document.querySelectorAll('.circle-lesson-progress').forEach(syncLearnscapeProgressReward);
+            };
+            const progressRewardObserver = new MutationObserver((mutations) => {
+                const affectedProgress = new Set();
+                mutations.forEach((mutation) => {
+                    const progress = mutation.target.closest?.('.circle-lesson-progress');
+                    if (progress) affectedProgress.add(progress);
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach((node) => {
+                            if (!(node instanceof Element)) return;
+                            if (node.matches('.circle-lesson-progress')) affectedProgress.add(node);
+                            node.querySelectorAll?.('.circle-lesson-progress').forEach((item) => affectedProgress.add(item));
+                        });
+                    }
+                });
+                affectedProgress.forEach(syncLearnscapeProgressReward);
+            });
+            progressRewardObserver.observe(document.body, {
+                subtree: true,
+                childList: true,
+                attributes: true,
+                attributeFilter: ['aria-hidden', 'data-earned-stars', 'data-progress-stage', 'hidden'],
+            });
+            syncAllLearnscapeProgressRewards();
+            window.syncLearnscapeProgressReward = syncLearnscapeProgressReward;
             let masterSoundVolume = Math.min(1, Math.max(0, Number(readSoundSetting('learnscape-sound-volume', '1')) || 0));
             let isSoundMuted = readSoundSetting('learnscape-sound-muted', 'false') === 'true';
             const mediaVolumeDescriptor = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'volume');
