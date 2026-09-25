@@ -6436,7 +6436,7 @@ body *::after {
         background: linear-gradient(180deg, #fffdf0, #ffe7a4);
         box-shadow: inset 0 0 0 0.08rem #ffffff, 0 0.2rem 0 #7a3f20;
         cursor: pointer;
-        touch-action: none;
+        touch-action: manipulation;
         user-select: none;
         --drag-x: 0px;
         --drag-y: 0px;
@@ -6506,6 +6506,13 @@ body *::after {
         transition: transform 330ms cubic-bezier(0.2, 0.9, 0.25, 1.12), opacity 180ms ease;
     }
 
+    .rectangle-mission-object.is-wrong:not(:disabled) {
+        border-color: #e82f36;
+        background: linear-gradient(180deg, #fff3e8, #ffb4a6);
+        box-shadow: inset 0 0 0 0.08rem #ffffff, 0 0.2rem 0 #8d1e21, 0 0 0.85rem rgba(238, 43, 52, 0.9);
+        animation: rectangleMissionWrongTap 400ms ease-in-out;
+    }
+
     .rectangle-mission-guide-character {
         position: absolute;
         left: 41.5%;
@@ -6525,6 +6532,13 @@ body *::after {
 @keyframes rectangleMissionGuideEnter {
     from { opacity: 0; transform: translateX(calc(-50% + 2.5rem)) scale(0.92); }
     to { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+
+@keyframes rectangleMissionWrongTap {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-0.45rem) rotate(-2deg); }
+    55% { transform: translateX(0.45rem) rotate(2deg); }
+    78% { transform: translateX(-0.2rem); }
 }
 
 .rectangle-village-go-button[hidden] {
@@ -7571,19 +7585,7 @@ body *::after {
 .rectangle-road-toggle.is-wrong-stop { font-size: 2rem; }
 
 .rectangle-road-toggle.is-boss-attack {
-    top: auto;
-    bottom: clamp(1.8rem, 5vh, 3.5rem);
-    transform: none;
-    border-color: #235f82;
-    background: linear-gradient(180deg, #8ff8ff 0%, #26bde8 48%, #1570ba 100%);
-    box-shadow: inset 0 0.18rem 0 #e5ffff, 0 0.32rem 0 #153d72, 0 0 1.2rem rgba(64, 225, 255, 0.8);
-    color: #ffffff;
-    text-shadow: 0 0.12rem 0 #124c7c;
-    font-size: clamp(1.45rem, 2.2vw, 2.25rem);
-}
-
-.rectangle-road-toggle.is-boss-attack:active {
-    transform: translateY(0.14rem);
+    display: none;
 }
 
 .rectangle-road-gas-pickup {
@@ -7990,26 +7992,53 @@ body *::after {
     100% { transform: translateX(-31rem) translateY(0.2rem) rotate(-520deg) scale(1); opacity: 0; }
 }
 
-.rectangle-boss-jump-button {
+.rectangle-jump-guide {
     position: absolute;
-    right: clamp(15rem, 21vw, 20rem);
-    bottom: clamp(1.8rem, 5vh, 3.5rem);
+    left: 50%;
+    bottom: clamp(2rem, 6vh, 4.5rem);
     z-index: 28;
-    width: clamp(9rem, 12vw, 12rem);
-    height: clamp(4.6rem, 8vh, 6rem);
-    border: 0.28rem solid #84410f;
-    border-radius: 1.4rem;
-    background: linear-gradient(180deg, #fff17b 0%, #ffb72d 48%, #e36d17 100%);
-    box-shadow: inset 0 0.18rem 0 #fffbd0, 0 0.32rem 0 #7a3814, 0 0 1rem rgba(255, 194, 44, 0.7);
-    color: #57300d;
-    font: 900 clamp(1.65rem, 2.5vw, 2.5rem)/1 'Fredoka', 'Nunito', sans-serif;
+    display: grid;
+    gap: 0.2rem;
+    min-width: clamp(14rem, 23vw, 21rem);
+    padding: 0.8rem 1.25rem 0.95rem;
+    border: 0.22rem solid #6b350f;
+    border-radius: 0.75rem;
+    background: rgba(255, 240, 148, 0.96);
+    box-shadow: inset 0 0.15rem 0 #fffde1, 0 0.35rem 0 #7a3814, 0 0 1.2rem rgba(255, 197, 47, 0.82);
+    color: #542b0b;
+    text-align: center;
     text-transform: uppercase;
-    cursor: pointer;
+    transform: translate(-50%, 1rem) scale(0.92);
+    opacity: 0;
+    transition: opacity 150ms ease, transform 150ms ease;
+    pointer-events: none;
 }
 
-.rectangle-boss-jump-button:hover:not(:disabled) { filter: brightness(1.08); }
-.rectangle-boss-jump-button:active:not(:disabled) { transform: translateY(0.14rem); }
-.rectangle-boss-jump-button:disabled { filter: grayscale(0.35); opacity: 0.72; cursor: default; }
+.rectangle-jump-guide[hidden] { display: none !important; }
+
+.rectangle-jump-guide.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+}
+
+.rectangle-jump-guide span {
+    font: 800 clamp(1rem, 1.5vw, 1.3rem)/1 'Baloo 2', 'Nunito', sans-serif;
+}
+
+.rectangle-jump-guide strong {
+    font: 900 clamp(1.35rem, 2.25vw, 2rem)/1.1 'Fredoka', 'Nunito', sans-serif;
+}
+
+.rectangle-jump-guide kbd {
+    display: inline-block;
+    padding: 0.28rem 0.7rem;
+    border: 0.16rem solid #60300d;
+    border-radius: 0.38rem;
+    background: #ffffff;
+    box-shadow: 0 0.2rem 0 #a15a1c;
+    color: #3f220c;
+    font: inherit;
+}
 
 .rectangle-boss-encounter {
     --boss-health: 100%;
@@ -8421,14 +8450,7 @@ body *::after {
 }
 
 .rectangle-boss-rectangle-pickup::before {
-    content: '+ GAS';
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    color: #ffffff;
-    font: 900 clamp(1rem, 1.55vw, 1.45rem)/1 'Fredoka', sans-serif;
-    text-shadow: 0 0.12rem 0 #12541e, 0 0.18rem 0.2rem rgba(0, 0, 0, 0.32);
+    content: none;
 }
 
 .rectangle-boss-rectangle-pickup::after {
@@ -14089,8 +14111,8 @@ body *::after {
 .oval-match-object {
     position: relative;
     z-index: 4;
-    width: clamp(14rem, 25vw, 25rem);
-    height: clamp(14rem, 25vw, 25rem);
+    width: clamp(19rem, 34vw, 34rem);
+    height: clamp(19rem, 34vw, 34rem);
     object-fit: contain;
     filter:
         drop-shadow(0 0.55rem 0.45rem rgba(64, 29, 8, 0.34))
@@ -14122,7 +14144,7 @@ body *::after {
     clip-path: polygon(50% 0, 100% 100%, 0 100%);
 }
 
-.oval-match-reward.is-visible .oval-match-confetti span {
+.oval-match-reward:not([hidden]) .oval-match-confetti span {
     animation: ovalMatchConfettiFall var(--match-confetti-duration) ease-in var(--match-confetti-delay) both;
 }
 

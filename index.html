@@ -670,7 +670,10 @@
             <div class="rectangle-speed-ticks" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
         </div>
         <button class="rectangle-road-toggle" type="button" aria-label="Stop at this delivery" aria-pressed="false" disabled>Stop</button>
-        <button class="rectangle-boss-jump-button" type="button" aria-label="Jump over road obstacles">Jump</button>
+        <div class="rectangle-jump-guide" role="status" aria-live="polite" hidden>
+            <span>Obstacle ahead</span>
+            <strong><kbd>SPACE</kbd> Jump</strong>
+        </div>
         <div class="rectangle-boss-warning" role="dialog" aria-modal="true" aria-labelledby="rectangle-boss-warning-title" hidden>
             <div class="rectangle-boss-warning-panel">
                 <span class="rectangle-boss-warning-mark" aria-hidden="true">!</span>

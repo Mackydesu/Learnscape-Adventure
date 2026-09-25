@@ -183,6 +183,7 @@ const appVersion = '20260924-557';
         if (control.classList.contains('circle-sort-object')) return null;
         if (control.classList.contains('square-answer-tile')) return null;
         if (control.classList.contains('shape-tv-choice')) return null;
+        if (control.classList.contains('rectangle-mission-object')) return null;
 
         if (control.classList.contains('game-return-btn')) return 'backChime';
         if (control.classList.contains('shape-collection-chest')) return 'chestChime';
@@ -301,6 +302,7 @@ const appVersion = '20260924-557';
     const rectangleSpeedSlider = rectangleDeliveryPage?.querySelector('#rectangle-speed-slider');
     const rectangleSpeedValue = rectangleDeliveryPage?.querySelector('.rectangle-speed-value');
     const rectangleBossJumpButton = rectangleDeliveryPage?.querySelector('.rectangle-boss-jump-button');
+    const rectangleJumpGuide = rectangleDeliveryPage?.querySelector('.rectangle-jump-guide');
     const rectangleGasMeter = rectangleDeliveryPage?.querySelector('.rectangle-gas-meter');
     const rectangleGasValueText = rectangleDeliveryPage?.querySelector('.rectangle-gas-value');
     const rectangleDeliveryProgress = rectangleDeliveryPage?.querySelector('.rectangle-delivery-progress');
@@ -5776,7 +5778,6 @@ const appVersion = '20260924-557';
         const rectangleMissionObjects = Array.from(page.querySelectorAll('.rectangle-mission-object'));
         const rectangleMissionStorage = page.querySelector('.rectangle-mission-storage-slots');
         const rectangleMissionStorageSlots = Array.from(page.querySelectorAll('.rectangle-mission-storage-slot'));
-        let rectangleMissionActiveDrag = null;
         const bridgeWalkingCharacterSource = bridgeWalkingCharacter?.getAttribute('src') || '';
         const bridgeMessagePanel = page.querySelector('.triangle-bridge-message-panel');
         const bridgeMessageText = page.querySelector('.triangle-bridge-message-text');
@@ -5919,7 +5920,7 @@ const appVersion = '20260924-557';
         const rectangleDialogueMessages = [
             'Hello explorer!',
             'Para sa ating Rectangle Mission, tulungan mo akong ihatid ang mga gamit sa Rectangle Village.',
-            'Piliin ang tatlong bagay na hugis rectangle at ilagay ito sa jeep.',
+            'I-tap ang tatlong bagay na hugis rectangle para ilagay ito sa jeep.',
         ];
         const rectangleDialogueSegments = [
             { start: 0, end: 1.4 },
@@ -5965,7 +5966,6 @@ const appVersion = '20260924-557';
             if (rectangleMissionGuideCharacterCh5) rectangleMissionGuideCharacterCh5.hidden = true;
             if (rectangleMissionObjectPanel) rectangleMissionObjectPanel.hidden = true;
             if (rectangleMissionStorage) rectangleMissionStorage.hidden = true;
-            rectangleMissionActiveDrag = null;
             rectangleMissionStorageSlots.forEach((slot) => {
                 slot.classList.remove('is-over', 'is-filled');
             });
@@ -6191,50 +6191,12 @@ const appVersion = '20260924-557';
             });
         };
 
-        const getNearbyRectangleStorageSlot = (clientX, clientY) => {
-            let nearestSlot = null;
-            let nearestDistance = Number.POSITIVE_INFINITY;
-
-            rectangleMissionStorageSlots.forEach((slot) => {
-                if (slot.classList.contains('is-filled')) return;
-                const rect = slot.getBoundingClientRect();
-                const distance = Math.hypot(
-                    clientX - (rect.left + (rect.width / 2)),
-                    clientY - (rect.top + (rect.height / 2)),
-                );
-                const snapDistance = Math.max(rect.width, rect.height) * 1.2;
-                if (distance <= snapDistance && distance < nearestDistance) {
-                    nearestSlot = slot;
-                    nearestDistance = distance;
-                }
-            });
-
-            return nearestSlot;
-        };
-
-        const clearRectangleStorageHover = () => {
-            rectangleMissionStorageSlots.forEach((slot) => slot.classList.remove('is-over'));
-        };
-
-        const returnRectangleMissionObject = (object) => {
-            if (!object) return;
-            object.classList.remove('is-dragging');
-            object.classList.add('is-returning');
-            object.style.setProperty('--drag-x', '0px');
-            object.style.setProperty('--drag-y', '0px');
-            const timerId = window.setTimeout(() => {
-                object.classList.remove('is-returning');
-                rectangleDialogueTimers = rectangleDialogueTimers.filter((id) => id !== timerId);
-            }, 420);
-            rectangleDialogueTimers.push(timerId);
-        };
-
-        const snapRectangleMissionObject = (object, slot, dragX, dragY) => {
+        const snapRectangleMissionObject = (object, slot) => {
             if (!object || !slot) return;
             const objectRect = object.getBoundingClientRect();
             const slotRect = slot.getBoundingClientRect();
-            const targetX = dragX + (slotRect.left + (slotRect.width / 2)) - (objectRect.left + (objectRect.width / 2));
-            const targetY = dragY + (slotRect.top + (slotRect.height / 2)) - (objectRect.top + (objectRect.height / 2));
+            const targetX = (slotRect.left + (slotRect.width / 2)) - (objectRect.left + (objectRect.width / 2));
+            const targetY = (slotRect.top + (slotRect.height / 2)) - (objectRect.top + (objectRect.height / 2));
             const snapScale = Math.min(
                 (slotRect.width * 0.92) / objectRect.width,
                 (slotRect.height * 0.92) / objectRect.height,
@@ -6244,81 +6206,39 @@ const appVersion = '20260924-557';
             object.classList.remove('is-dragging');
             object.classList.add('is-stored');
             object.disabled = true;
+            object.setAttribute('aria-pressed', 'true');
             object.style.setProperty('--drag-x', `${targetX}px`);
             object.style.setProperty('--drag-y', `${targetY}px`);
             object.style.setProperty('--snap-scale', String(snapScale));
             slot.classList.remove('is-over');
             slot.classList.add('is-filled');
+            playUiClickSound('woodStore');
             if (rectangleMissionStorageSlots.every((storageSlot) => storageSlot.classList.contains('is-filled'))) {
                 startRectangleCompletionDialogue();
             }
         };
 
-        const beginRectangleMissionObjectDrag = (event) => {
-            const object = event.currentTarget;
-            if (
-                !object
-                || object.disabled
-                || object.classList.contains('is-stored')
-                || rectangleMissionActiveDrag
-                || (event.pointerType === 'mouse' && event.button !== 0)
-            ) return;
-
-            rectangleMissionActiveDrag = {
-                object,
-                pointerId: event.pointerId,
-                startX: event.clientX,
-                startY: event.clientY,
-                dragX: 0,
-                dragY: 0,
-            };
-            object.classList.remove('is-returning');
-            object.classList.add('is-dragging');
-            object.setPointerCapture?.(event.pointerId);
-            event.preventDefault();
-        };
-
-        const moveRectangleMissionObjectDrag = (event) => {
-            const drag = rectangleMissionActiveDrag;
-            if (!drag || drag.pointerId !== event.pointerId || drag.object !== event.currentTarget) return;
-
-            drag.dragX = event.clientX - drag.startX;
-            drag.dragY = event.clientY - drag.startY;
-            drag.object.style.setProperty('--drag-x', `${drag.dragX}px`);
-            drag.object.style.setProperty('--drag-y', `${drag.dragY}px`);
-            clearRectangleStorageHover();
-            if (drag.object.hasAttribute('data-rectangle-correct')) {
-                getNearbyRectangleStorageSlot(event.clientX, event.clientY)?.classList.add('is-over');
-            }
-            event.preventDefault();
-        };
-
-        const endRectangleMissionObjectDrag = (event, wasCancelled = false) => {
-            const drag = rectangleMissionActiveDrag;
-            if (!drag || drag.pointerId !== event.pointerId) return;
-
-            const object = drag.object;
-            const slot = !wasCancelled && object.hasAttribute('data-rectangle-correct')
-                ? getNearbyRectangleStorageSlot(event.clientX, event.clientY)
-                : null;
-            object.releasePointerCapture?.(event.pointerId);
-            clearRectangleStorageHover();
-            rectangleMissionActiveDrag = null;
-
-            if (slot) {
-                snapRectangleMissionObject(object, slot, drag.dragX, drag.dragY);
-            } else {
-                returnRectangleMissionObject(object);
-            }
-            event.preventDefault();
-        };
-
         rectangleMissionObjects.forEach((object) => {
             object.setAttribute('aria-pressed', 'false');
-            object.addEventListener('pointerdown', beginRectangleMissionObjectDrag);
-            object.addEventListener('pointermove', moveRectangleMissionObjectDrag);
-            object.addEventListener('pointerup', (event) => endRectangleMissionObjectDrag(event));
-            object.addEventListener('pointercancel', (event) => endRectangleMissionObjectDrag(event, true));
+            object.addEventListener('click', () => {
+                if (object.disabled || object.classList.contains('is-stored')) return;
+
+                if (object.hasAttribute('data-rectangle-correct')) {
+                    const availableSlot = rectangleMissionStorageSlots.find((slot) => !slot.classList.contains('is-filled'));
+                    if (availableSlot) snapRectangleMissionObject(object, availableSlot);
+                    return;
+                }
+
+                playUiClickSound('thunk');
+                object.classList.remove('is-wrong');
+                object.getBoundingClientRect();
+                object.classList.add('is-wrong');
+                const timerId = window.setTimeout(() => {
+                    object.classList.remove('is-wrong');
+                    rectangleDialogueTimers = rectangleDialogueTimers.filter((id) => id !== timerId);
+                }, 420);
+                rectangleDialogueTimers.push(timerId);
+            });
             object.addEventListener('dragstart', (event) => event.preventDefault());
         });
         page.querySelector('.shape-area-bg')?.addEventListener('load', alignRectangleMissionStorageSlots);
@@ -7193,9 +7113,11 @@ const appVersion = '20260924-557';
     let rectangleBossBlinkTimer = null;
     let rectangleBossFlashTimer = null;
     let rectangleBossFinishTimer = null;
+    let rectangleBossAutoLaserTimer = null;
     let rectangleBossLaserReady = true;
     let rectangleBossJeepInvulnerable = false;
     let rectangleBossGuideIndex = 0;
+    let rectangleJumpGuideObstacle = null;
     const rectangleBossHazardShapes = ['circle', 'triangle', 'oval', 'diamond', 'star'];
 
     const rectanglesOverlap = (first, second, padding = 0) => (
@@ -7223,7 +7145,7 @@ const appVersion = '20260924-557';
     const canSpawnRectangleBossGas = () => rectangleBossCurrentMilestone !== 2;
 
     const clearRectangleBossTimers = () => {
-        [rectangleBossAttackTimer, rectangleBossGasTimer, rectangleBossBlinkTimer, rectangleBossFlashTimer, rectangleBossFinishTimer]
+        [rectangleBossAttackTimer, rectangleBossGasTimer, rectangleBossBlinkTimer, rectangleBossFlashTimer, rectangleBossFinishTimer, rectangleBossAutoLaserTimer]
             .forEach((timer) => {
                 if (timer !== null) window.clearTimeout(timer);
             });
@@ -7232,6 +7154,23 @@ const appVersion = '20260924-557';
         rectangleBossBlinkTimer = null;
         rectangleBossFlashTimer = null;
         rectangleBossFinishTimer = null;
+        rectangleBossAutoLaserTimer = null;
+    };
+
+    const hideRectangleJumpGuide = (obstacle = null) => {
+        if (!rectangleJumpGuide || (obstacle && rectangleJumpGuideObstacle !== obstacle)) return;
+        rectangleJumpGuide.classList.remove('is-visible');
+        rectangleJumpGuide.hidden = true;
+        rectangleJumpGuideObstacle = null;
+    };
+
+    const showRectangleJumpGuide = (obstacle) => {
+        if (!rectangleJumpGuide || !obstacle) return;
+        if (rectangleJumpGuideObstacle === obstacle && !rectangleJumpGuide.hidden) return;
+        rectangleJumpGuideObstacle = obstacle;
+        rectangleJumpGuide.hidden = false;
+        rectangleJumpGuide.getBoundingClientRect();
+        rectangleJumpGuide.classList.add('is-visible');
     };
 
     const restoreRectangleDeliveryControls = () => {
@@ -7275,6 +7214,7 @@ const appVersion = '20260924-557';
         if (rectangleBossWarning) rectangleBossWarning.hidden = true;
         rectangleDeliveryPage?.classList.remove('is-boss-battle', 'is-boss-jeep-hit');
         rectangleDeliveryJeepSequence?.classList.remove('is-boss-jumping');
+        hideRectangleJumpGuide();
         rectangleBossJeepInvulnerable = false;
         rectangleBossLaserReady = true;
         rectangleBossCurrentMilestone = null;
@@ -7289,13 +7229,29 @@ const appVersion = '20260924-557';
 
     abortRectangleBossEncounter = () => stopRectangleBossEncounter({ resetHealth: true });
 
-    const watchRectangleBossEntityCollision = (entity, onCollision) => {
+    const watchRectangleBossEntityCollision = (entity, onCollision, { promptJump = false } = {}) => {
         const checkCollision = () => {
-            if (!rectangleBossActive || !entity.isConnected || !rectangleDeliveryJeepSequence) return;
+            if (!rectangleBossActive || !entity.isConnected || !rectangleDeliveryJeepSequence) {
+                if (promptJump) hideRectangleJumpGuide(entity);
+                return;
+            }
             const entityRect = entity.getBoundingClientRect();
             const jeepRect = rectangleDeliveryJeepSequence.getBoundingClientRect();
+            if (promptJump) {
+                const approachDistance = entityRect.left - jeepRect.right;
+                const guideDistance = Math.min(360, window.innerWidth * 0.28);
+                const isJumping = rectangleDeliveryJeepSequence.classList.contains('is-boss-jumping');
+                if (!isJumping && approachDistance > 0 && approachDistance <= guideDistance) {
+                    showRectangleJumpGuide(entity);
+                } else if (isJumping || entityRect.right < jeepRect.left) {
+                    hideRectangleJumpGuide(entity);
+                }
+            }
             if (rectanglesOverlap(entityRect, jeepRect, 8)) {
-                if (onCollision() !== false) return;
+                if (onCollision() !== false) {
+                    if (promptJump) hideRectangleJumpGuide(entity);
+                    return;
+                }
             }
             window.requestAnimationFrame(checkCollision);
         };
@@ -7327,8 +7283,11 @@ const appVersion = '20260924-557';
         hazard.className = 'rectangle-boss-spike';
         hazard.dataset.shape = rectangleBossHazardShapes[Math.floor(Math.random() * rectangleBossHazardShapes.length)];
         rectangleBossEffects.append(hazard);
-        hazard.addEventListener('animationend', () => hazard.remove(), { once: true });
-        watchRectangleBossEntityCollision(hazard, () => damageRectangleBossJeep(hazard));
+        hazard.addEventListener('animationend', () => {
+            hideRectangleJumpGuide(hazard);
+            hazard.remove();
+        }, { once: true });
+        watchRectangleBossEntityCollision(hazard, () => damageRectangleBossJeep(hazard), { promptJump: true });
     };
 
     const scheduleRectangleBossBlink = (delay = 1100 + Math.random() * 1300) => {
@@ -7447,7 +7406,12 @@ const appVersion = '20260924-557';
     };
 
     const fireRectangleBossLaser = () => {
-        if (!rectangleBossActive || !rectangleBossLaserReady || !rectangleBossEffects) return;
+        if (
+            !rectangleBossActive
+            || !rectangleBossLaserReady
+            || !rectangleBossEffects
+            || rectangleDeliveryJeepSequence?.classList.contains('is-boss-jumping')
+        ) return;
         rectangleBossLaserReady = false;
         const laser = document.createElement('span');
         laser.className = 'rectangle-boss-laser';
@@ -7460,6 +7424,16 @@ const appVersion = '20260924-557';
         }, 420);
     };
 
+    const scheduleRectangleBossAutoLaser = (delay = 320) => {
+        if (rectangleBossAutoLaserTimer !== null) window.clearTimeout(rectangleBossAutoLaserTimer);
+        rectangleBossAutoLaserTimer = window.setTimeout(() => {
+            rectangleBossAutoLaserTimer = null;
+            if (!rectangleBossActive) return;
+            fireRectangleBossLaser();
+            scheduleRectangleBossAutoLaser(600);
+        }, delay);
+    };
+
     const jumpRectangleBossJeep = () => {
         if (
             !rectangleDeliveryPage || rectangleDeliveryPage.hidden || rectangleGasDepleted || rectangleRoadLoopPaused
@@ -7467,6 +7441,7 @@ const appVersion = '20260924-557';
             || !rectangleDeliveryJeepSequence?.classList.contains('is-arrived')
             || rectangleDeliveryJeepSequence.classList.contains('is-boss-jumping')
         ) return;
+        hideRectangleJumpGuide();
         rectangleDeliveryJeepSequence.classList.add('is-boss-jumping');
         if (rectangleBossJumpButton) rectangleBossJumpButton.disabled = true;
         window.setTimeout(() => {
@@ -7564,11 +7539,11 @@ const appVersion = '20260924-557';
             rectangleDeliveryInstructionPanel.classList.remove('is-visible');
         }
         if (rectangleRoadToggle) {
-            rectangleRoadToggle.disabled = false;
+            rectangleRoadToggle.disabled = true;
             rectangleRoadToggle.classList.remove('is-wrong-stop');
             rectangleRoadToggle.classList.add('is-boss-attack');
-            rectangleRoadToggle.textContent = 'Laser Shot';
-            rectangleRoadToggle.setAttribute('aria-label', 'Fire laser at the shape monster');
+            rectangleRoadToggle.textContent = '';
+            rectangleRoadToggle.setAttribute('aria-label', 'Laser fires automatically');
         }
         if (rectangleBossJumpButton) {
             rectangleBossJumpButton.hidden = false;
@@ -7577,6 +7552,7 @@ const appVersion = '20260924-557';
         scheduleRectangleBossSpike();
         if (canSpawnRectangleBossGas()) scheduleRectangleBossGas();
         scheduleRectangleBossBlink();
+        scheduleRectangleBossAutoLaser();
     };
 
     resumeRectangleBossEncounter = startRectangleBossEncounter;
@@ -7605,10 +7581,22 @@ const appVersion = '20260924-557';
         }, 240);
     });
 
-    rectangleRoadToggle?.addEventListener('click', () => {
-        if (rectangleBossActive) fireRectangleBossLaser();
+    window.addEventListener('keydown', (event) => {
+        if (
+            event.code !== 'Space'
+            || event.repeat
+            || event.ctrlKey
+            || event.altKey
+            || event.metaKey
+            || !rectangleBossActive
+            || !rectangleDeliveryPage
+            || rectangleDeliveryPage.hidden
+        ) return;
+        const target = event.target;
+        if (target instanceof HTMLElement && target.matches('input, textarea, select, button, [contenteditable="true"]')) return;
+        event.preventDefault();
+        jumpRectangleBossJeep();
     });
-    rectangleBossJumpButton?.addEventListener('click', jumpRectangleBossJeep);
     window.addEventListener('learnscape:routechange', (event) => {
         if (event.detail?.route === 'rectangleDelivery') {
             window.setTimeout(startRectangleBossEncounter, 140);
@@ -11607,6 +11595,9 @@ const appVersion = '20260924-557';
             side: 'right',
         },
     ]));
+    const ovalObjectImageByNumber = new Map(
+        ovalPairPieces.map((piece) => [String(piece.number), piece.objectImage]),
+    );
     const ovalChallengePieces = [
         { number: 'bomb-1', challengeType: 'bomb' },
         { number: 'bomb-2', challengeType: 'bomb' },
@@ -11629,6 +11620,7 @@ const appVersion = '20260924-557';
     let ovalMatchResolving = false;
     let ovalRewardHideTimer = null;
     let ovalMatchCheeringAudio = null;
+    let ovalWrongPairAudio = null;
     let ovalMissionSession = 0;
     let ovalMissionTimers = [];
     let ovalMissionAudio = null;
@@ -11831,6 +11823,38 @@ const appVersion = '20260924-557';
         };
         audio.play().catch(() => {
             if (ovalMatchCheeringAudio === audio) ovalMatchCheeringAudio = null;
+        });
+    };
+
+    const stopOvalWrongPairAudio = () => {
+        if (!ovalWrongPairAudio) return;
+        ovalWrongPairAudio.onended = null;
+        ovalWrongPairAudio.onerror = null;
+        ovalWrongPairAudio.pause();
+        try {
+            ovalWrongPairAudio.currentTime = 0;
+        } catch (error) {
+            // Pausing is enough if the clip has not loaded yet.
+        }
+        ovalWrongPairAudio = null;
+    };
+
+    const playOvalWrongPairBuzzer = () => {
+        stopOvalWrongPairAudio();
+        if (!window.Audio || (window.__learnscapeSoundScale?.() ?? 1) <= 0) return;
+        const audio = new window.Audio('assets/Audios/Sound effects/buzzer.mp3');
+        ovalWrongPairAudio = audio;
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+        audio.onended = () => {
+            if (ovalWrongPairAudio === audio) ovalWrongPairAudio = null;
+        };
+        audio.onerror = () => {
+            if (ovalWrongPairAudio === audio) ovalWrongPairAudio = null;
+        };
+        audio.play().catch(() => {
+            if (ovalWrongPairAudio === audio) ovalWrongPairAudio = null;
         });
     };
 
@@ -12046,6 +12070,7 @@ const appVersion = '20260924-557';
         stopOvalMissionAudio();
         stopOvalCelebrationSounds();
         stopOvalMatchCheering();
+        stopOvalWrongPairAudio();
         stopOvalGameTimer();
         clearOvalTrapEffects();
         clearOvalPairHint();
@@ -12327,10 +12352,15 @@ const appVersion = '20260924-557';
             ovalMatchResolving = true;
 
             if (isMatch) {
+                const matchedNumber = firstCard.dataset.ovalNumber;
                 const piece = {
-                    number: firstCard.dataset.ovalNumber,
-                    objectImage: firstCard.dataset.ovalObjectImage,
+                    number: matchedNumber,
+                    objectImage: ovalObjectImageByNumber.get(matchedNumber),
                 };
+                if (!piece.objectImage) {
+                    ovalMatchResolving = false;
+                    return;
+                }
                 ovalTimerPausedForMatch = true;
                 stopOvalGameTimer();
                 stopOvalTickingAudio();
@@ -12394,6 +12424,7 @@ const appVersion = '20260924-557';
 
             firstCard.classList.add('is-pair-incorrect');
             secondCard.classList.add('is-pair-incorrect');
+            playOvalWrongPairBuzzer();
             window.setTimeout(() => {
                 [firstCard, secondCard].forEach((openCard) => {
                     openCard.classList.remove('is-flipped', 'is-pair-incorrect');
