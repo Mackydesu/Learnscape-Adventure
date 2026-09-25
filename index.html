@@ -479,10 +479,8 @@
         </div>
         <div class="triangle-wood-storage" role="status" aria-live="polite" aria-label="Collected wood blocks" hidden>
             <img class="triangle-wood-storage-image" src="assets/Shape UI/wood-block-stylized.webp" alt="">
+            <img class="triangle-wood-click-guide" src="assets/Shape UI/drag-guide-hand.png" alt="" aria-hidden="true" hidden>
             <strong class="triangle-wood-storage-count"><span data-triangle-wood-count>0</span>/9</strong>
-        </div>
-        <div class="triangle-wood-drag-guide" aria-hidden="true" hidden>
-            <img class="triangle-wood-guide-hand" src="assets/Shape UI/drag-guide-hand.png?v=20260913-287" alt="">
         </div>
         <section class="triangle-crafting-panel" aria-label="Bridge crafting" hidden>
             <h2>Bridge Crafting</h2>
@@ -533,6 +531,15 @@
                     <img src="assets/Shape UI/clouds.webp" alt="">
                     <img src="assets/Shape UI/clouds.webp" alt="">
                     <img src="assets/Shape UI/clouds.webp" alt="">
+                </div>
+            </div>
+            <div class="triangle-bridge-question" role="group" aria-labelledby="triangle-bridge-question-text" hidden>
+                <p id="triangle-bridge-question-text">Ilang hugis tatsulok mayroon ito?</p>
+                <div class="triangle-bridge-question-choices">
+                    <button type="button" data-triangle-count-answer="3">3</button>
+                    <button type="button" data-triangle-count-answer="4">4</button>
+                    <button type="button" data-triangle-count-answer="5" data-correct-answer>5</button>
+                    <button type="button" data-triangle-count-answer="6">6</button>
                 </div>
             </div>
         </section>
@@ -670,25 +677,40 @@
             <div class="rectangle-speed-ticks" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
         </div>
         <button class="rectangle-road-toggle" type="button" aria-label="Stop at this delivery" aria-pressed="false" disabled>Stop</button>
+        <button class="rectangle-pause-button" type="button" aria-label="Pause rectangle game" aria-pressed="false">
+            <span aria-hidden="true"></span>
+        </button>
+        <div class="rectangle-pause-overlay" role="status" aria-live="polite" hidden>
+            <div class="rectangle-pause-sign" aria-hidden="true"><span></span><span></span></div>
+            <strong>Paused</strong>
+        </div>
         <div class="rectangle-jump-guide" role="status" aria-live="polite" hidden>
-            <span>Obstacle ahead</span>
-            <strong><kbd>SPACE</kbd> Jump</strong>
+            <strong>JUMP</strong>
         </div>
         <div class="rectangle-boss-warning" role="dialog" aria-modal="true" aria-labelledby="rectangle-boss-warning-title" hidden>
             <div class="rectangle-boss-warning-panel">
                 <span class="rectangle-boss-warning-mark" aria-hidden="true">!</span>
                 <div class="rectangle-boss-guide-pages">
                     <div class="rectangle-boss-guide-page is-active" data-boss-guide-page="0">
-                        <p>Monster! Monster!</p>
-                        <h2 id="rectangle-boss-warning-title">Defeat the Monster</h2>
+                        <p>May halimaw!</p>
+                        <h2 id="rectangle-boss-warning-title">Talunin ang Halimaw</h2>
                         <div class="rectangle-boss-guide-demo is-monster-demo" aria-hidden="true">
                             <span class="rectangle-guide-mini-monster"><span></span></span>
                             <span class="rectangle-guide-alert-shape"></span>
                         </div>
                     </div>
+                    <div class="rectangle-boss-guide-page" data-boss-guide-page="jump" hidden>
+                        <p>Gamitin ang Spacebar</p>
+                        <h2>Upang tumalon</h2>
+                        <div class="rectangle-boss-guide-demo is-jump-demo" aria-hidden="true">
+                            <span class="rectangle-guide-mini-jeep"></span>
+                            <span class="rectangle-guide-jump-arrow">&uarr;</span>
+                            <span class="rectangle-guide-space-key">SPACE</span>
+                        </div>
+                    </div>
                     <div class="rectangle-boss-guide-page" data-boss-guide-page="1" hidden>
-                        <p>Jump for Gas</p>
-                        <h2>Collect the Rectangle</h2>
+                        <p>Tumalon para kunin</p>
+                        <h2>Kunin ang Rectangle</h2>
                         <div class="rectangle-boss-guide-demo is-collect-demo" aria-hidden="true">
                             <span class="rectangle-guide-mini-monster"><span></span></span>
                             <span class="rectangle-guide-mini-jeep"></span>
@@ -696,8 +718,8 @@
                         </div>
                     </div>
                     <div class="rectangle-boss-guide-page" data-boss-guide-page="2" hidden>
-                        <p>Avoid Shapes</p>
-                        <h2>Do not hit the others</h2>
+                        <p>Iwasan ang ibang hugis</p>
+                        <h2>Huwag bumangga</h2>
                         <div class="rectangle-boss-guide-demo is-avoid-demo" aria-hidden="true">
                             <span class="rectangle-guide-mini-monster"><span></span></span>
                             <span class="rectangle-guide-mini-jeep"></span>
@@ -706,10 +728,10 @@
                         </div>
                     </div>
                 </div>
-                <button class="rectangle-boss-warning-next" type="button" aria-label="Next guide panel">
+                <button class="rectangle-boss-warning-next" type="button" aria-label="Susunod na gabay">
                     <span aria-hidden="true"></span>
                 </button>
-                <button class="rectangle-boss-warning-continue" type="button">Continue</button>
+                <button class="rectangle-boss-warning-continue" type="button">Magpatuloy</button>
             </div>
         </div>
         <section class="rectangle-boss-encounter" aria-label="Shape monster battle" hidden>
@@ -787,7 +809,7 @@
         <div class="rectangle-delivery-jeep-sequence" aria-hidden="true" hidden>
             <div class="rectangle-jeep-smoke"><span></span><span></span><span></span></div>
             <img class="rectangle-delivery-jeep-driving" src="assets/Character/jeep.webp" alt="">
-            <img class="rectangle-delivery-jeep-arrived" src="assets/Character/jeep1.webp" alt="" hidden>
+            <img class="rectangle-delivery-jeep-arrived" src="assets/Character/jeep.webp" alt="" hidden>
         </div>
         <div class="rectangle-delivery-instruction-panel" role="status" aria-live="polite" hidden>
             Ihatid ang gamit sa tamang lugar.
@@ -929,7 +951,7 @@
 
         <div class="rectangle-staff-bubble" data-source-x="686" data-source-y="180" data-source-width="300" data-source-height="95" role="status" aria-live="polite" hidden>
             <div class="rectangle-staff-bubble-content">
-                <span class="rectangle-staff-bubble-text">Thank you for your service!</span>
+                <span class="rectangle-staff-bubble-text">Maraming salamat!</span>
             </div>
             <div class="rectangle-staff-bubble-tail" aria-hidden="true"></div>
         </div>
@@ -977,7 +999,7 @@
 
         <div class="rectangle-staff-bubble" data-source-x="686" data-source-y="180" data-source-width="300" data-source-height="95" role="status" aria-live="polite" hidden>
             <div class="rectangle-staff-bubble-content">
-                <span class="rectangle-staff-bubble-text">Thank you for your service!</span>
+                <span class="rectangle-staff-bubble-text">Maraming salamat!</span>
             </div>
             <div class="rectangle-staff-bubble-tail" aria-hidden="true"></div>
         </div>
@@ -1025,7 +1047,7 @@
 
         <div class="rectangle-staff-bubble" data-source-x="686" data-source-y="180" data-source-width="300" data-source-height="95" role="status" aria-live="polite" hidden>
             <div class="rectangle-staff-bubble-content">
-                <span class="rectangle-staff-bubble-text">Thank you for your service!</span>
+                <span class="rectangle-staff-bubble-text">Maraming salamat!</span>
             </div>
             <div class="rectangle-staff-bubble-tail" aria-hidden="true"></div>
         </div>
@@ -1188,7 +1210,7 @@
         </a>
     </section>
 
-    <section id="learnscape-shape-area-6-page" class="shape-area-page shape-area-preview-page" data-completed-shape="oval" data-area-background="assets/Backgrounds/Area6.webp" data-illustration-background="assets/Backgrounds/heart.webp" data-next-background="assets/Backgrounds/heartmission.webp" data-video-source="assets/Videos/heartshape.mp4" hidden>
+    <section id="learnscape-shape-area-6-page" class="shape-area-page shape-area-preview-page" data-completed-shape="oval" data-area-background="assets/Backgrounds/Area6.webp" data-illustration-background="assets/Backgrounds/heartmission.webp" data-next-background="assets/Backgrounds/heartmission.webp" data-video-source="assets/Videos/heartshape.mp4" hidden>
         <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area6.webp" alt="" aria-hidden="true">
         <div class="heart-mission-intro" aria-hidden="true" hidden>
             <div class="heart-mission-character-wrap" aria-hidden="true">
@@ -1229,6 +1251,13 @@
                         <svg class="heart-game-life" viewBox="0 0 40 36"><path d="M20 34 C16 29 3 21 3 11 C3 1 16 -1 20 7 C24 -1 37 1 37 11 C37 21 24 29 20 34 Z"></path></svg>
                     </span>
                 </div>
+            </div>
+            <button class="heart-game-pause-button" type="button" aria-label="Pause heart game" aria-pressed="false">
+                <span aria-hidden="true"></span>
+            </button>
+            <div class="heart-game-pause-overlay" role="status" aria-live="polite" hidden>
+                <div class="heart-game-pause-sign" aria-hidden="true"><span></span><span></span></div>
+                <strong>Paused</strong>
             </div>
             <div class="heart-balloon-field" aria-hidden="true">
                 <svg class="heart-balloon-defs" aria-hidden="true"><defs><symbol id="heartBalloonSymbol" viewBox="0 0 100 150"><path d="M50 84 C43 75 12 58 12 31 C12 10 38 3 50 23 C62 3 88 10 88 31 C88 58 57 75 50 84 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5"></path><ellipse cx="31" cy="28" rx="8" ry="13" fill="rgba(255,255,255,0.62)" transform="rotate(28 31 28)"></ellipse><path d="M50 82 L42 94 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 93 C34 109 66 119 47 148" fill="none" stroke="#8f5b72" stroke-width="2.5" stroke-linecap="round"></path></symbol></defs></svg>

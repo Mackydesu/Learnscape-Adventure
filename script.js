@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-const appVersion = '20260924-557';
+const appVersion = '20260926-583';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -311,6 +311,8 @@ const appVersion = '20260924-557';
     const rectangleGameOverRetry = rectangleDeliveryPage?.querySelector('.rectangle-game-over-retry');
     const rectangleDeliveryCompleteBg = rectangleDeliveryPage?.querySelector('.rectangle-delivery-complete-bg');
     const rectangleDeliveryCompleteConfetti = rectangleDeliveryPage?.querySelector('.rectangle-delivery-complete-confetti');
+    const rectanglePauseButton = rectangleDeliveryPage?.querySelector('.rectangle-pause-button');
+    const rectanglePauseOverlay = rectangleDeliveryPage?.querySelector('.rectangle-pause-overlay');
     const rectangleFinalProgress = rectangleDeliveryPage?.querySelector('.rectangle-final-progress');
     const rectangleFinalReplayButton = rectangleFinalProgress?.querySelector('[data-rectangle-final-replay]') || null;
     const rectangleFinalNextButton = rectangleFinalProgress?.querySelector('[data-rectangle-final-next]') || null;
@@ -327,11 +329,14 @@ const appVersion = '20260924-557';
     let rectangleRoadHitUntil = 0;
     let rectangleRoadLoopTime = 0;
     let rectangleRoadLoopPaused = false;
+    let rectangleGamePaused = false;
     let rectangleBraking = null;
     let rectangleResumeFromDelivery = false;
     const rectangleRoadBaseSpeed = 0.1;
     const rectangleRoadPostDeliverySpeed = 0.14;
     const rectangleSpeedMultipliers = [0.8, 1.15, 1.5, 1.85, 2.25];
+    const rectangleHornCueDistance = 220;
+    const rectangleHornResetDistance = 380;
     let rectangleSpeedLevel = 3;
     let rectangleCurrentSpeedMultiplier = rectangleSpeedMultipliers[rectangleSpeedLevel - 1];
     let rectangleDisplayedGasLevel = -1;
@@ -425,6 +430,7 @@ const appVersion = '20260924-557';
         rectangleDeliveryPage
         && !rectangleDeliveryPage.hidden
         && !rectangleGasDepleted
+        && !rectangleGamePaused
         && !rectangleRoadLoopPaused
         && !rectangleDeliveryPage.classList.contains('is-boss-battle')
         && !rectangleDeliveryPage.classList.contains('is-final-complete-scene')
@@ -456,6 +462,7 @@ const appVersion = '20260924-557';
             && rectangleDeliveryJeepSequence?.classList.contains('is-driving');
         const moving = !rectangleDeliveryPage?.hidden
             && !rectangleGasDepleted
+            && !rectangleGamePaused
             && (!rectangleRoadLoopPaused || finalCelebrationDriving);
         const soundScale = window.__learnscapeSoundScale?.() ?? 1;
         const brakeFactor = rectangleBraking ? rectangleBraking.speedFactor : 1;
@@ -491,6 +498,49 @@ const appVersion = '20260924-557';
         rectangleStopAudio?.pause();
     };
     const updateRectangleEngineSound = syncRectangleDrivingSound;
+
+    const setRectangleGamePaused = (paused) => {
+        if (!rectangleDeliveryPage || rectangleDeliveryPage.hidden || rectangleDeliveryPage.classList.contains('is-final-complete-scene')) {
+            paused = false;
+        }
+        if (rectangleGamePaused === paused) return;
+        rectangleGamePaused = paused;
+        rectangleDeliveryPage?.classList.toggle('is-paused', paused);
+        if (rectanglePauseOverlay) rectanglePauseOverlay.hidden = !paused;
+        if (rectanglePauseButton) {
+            rectanglePauseButton.setAttribute('aria-pressed', paused ? 'true' : 'false');
+            rectanglePauseButton.setAttribute('aria-label', paused ? 'Resume rectangle game' : 'Pause rectangle game');
+        }
+
+        if (paused) {
+            if (rectangleRoadShapeObstacleTimer !== null) {
+                window.clearTimeout(rectangleRoadShapeObstacleTimer);
+                rectangleRoadShapeObstacleTimer = null;
+            }
+            stopRectangleEngineSound();
+            if (rectangleBossActive) clearRectangleBossTimers();
+            return;
+        }
+
+        rectangleRoadLoopTime = performance.now();
+        if (canRunRectangleRoadShapeObstacles()) scheduleRectangleRoadShapeObstacle();
+        if (rectangleBossActive) {
+            scheduleRectangleBossSpike(700);
+            if (canSpawnRectangleBossGas()) scheduleRectangleBossGas(900);
+            scheduleRectangleBossBlink(900);
+            scheduleRectangleBossAutoLaser(700);
+        }
+        updateRectangleEngineSound();
+    };
+
+    const clearRectangleGamePause = () => setRectangleGamePaused(false);
+
+    rectanglePauseButton?.addEventListener('click', () => {
+        setRectangleGamePaused(!rectangleGamePaused);
+    });
+    rectanglePauseButton?.addEventListener('keydown', (event) => {
+        if (event.code === 'Space') event.preventDefault();
+    });
 
     const playRectangleHorn = () => {
         if (!rectangleHornAudio || (window.__learnscapeSoundScale?.() ?? 1) === 0) return;
@@ -532,6 +582,10 @@ const appVersion = '20260924-557';
                 rectangleRoadGasPickupFrames.delete(pickup);
                 return;
             }
+            if (rectangleGamePaused) {
+                rectangleRoadGasPickupFrames.set(pickup, window.requestAnimationFrame(checkPickup));
+                return;
+            }
             if (rectanglesOverlap(pickup.getBoundingClientRect(), rectangleDeliveryJeepSequence.getBoundingClientRect(), 8)) {
                 collectRectangleRoadGasPickup(pickup);
                 return;
@@ -542,7 +596,7 @@ const appVersion = '20260924-557';
     }
 
     function spawnRectangleRoadGasPickup({ clearExisting = true, threshold = null } = {}) {
-        if (!rectangleDeliveryPage || rectangleDeliveryPage.hidden || rectangleGasDepleted) return;
+        if (!rectangleDeliveryPage || rectangleDeliveryPage.hidden || rectangleGasDepleted || rectangleGamePaused) return;
         if (clearExisting) clearRectangleRoadGasPickup();
         const pickup = document.createElement('span');
         pickup.className = 'rectangle-road-gas-pickup';
@@ -614,6 +668,7 @@ const appVersion = '20260924-557';
         && !rectangleDeliveryPage?.hidden
         && !rectangleDeliveryPage?.classList.contains('is-boss-battle')
         && !rectangleDeliveryPage?.classList.contains('is-final-complete-scene')
+        && !rectangleGamePaused
         && !rectangleRoadLoopPaused
         && !rectangleGasDepleted
         && rectangleDeliveryJeepSequence?.classList.contains('is-arrived')
@@ -649,6 +704,10 @@ const appVersion = '20260924-557';
             if (!obstacle.isConnected || !rectangleDeliveryJeepSequence || rectangleDeliveryPage?.hidden) {
                 rectangleRoadShapeObstacleFrames.delete(obstacle);
                 rectangleObstacleContacts.delete(obstacle);
+                return;
+            }
+            if (rectangleGamePaused) {
+                rectangleRoadShapeObstacleFrames.set(obstacle, window.requestAnimationFrame(checkObstacle));
                 return;
             }
             const obstacleRect = obstacle.getBoundingClientRect();
@@ -706,6 +765,7 @@ const appVersion = '20260924-557';
             !rectangleDeliveryJeepSequence?.classList.contains('is-arrived')
             || rectangleDeliveryPage?.classList.contains('is-boss-battle')
             || rectangleRoadLoopPaused
+            || rectangleGamePaused
             || rectangleGasDepleted
         ) return;
 
@@ -743,6 +803,12 @@ const appVersion = '20260924-557';
     };
     const tickRectangleRoadLoop = (timestamp) => {
         const elapsedMs = rectangleRoadLoopTime ? Math.min(timestamp - rectangleRoadLoopTime, 34) : 0;
+        if (rectangleGamePaused) {
+            rectangleRoadLoopTime = timestamp;
+            updateRectangleEngineSound();
+            rectangleRoadLoopFrame = window.requestAnimationFrame(tickRectangleRoadLoop);
+            return;
+        }
         if (!rectangleRoadLoopWidth || !rectangleHighwayLoopWidth) updateRectangleRoadLoopWidth();
         if (rectangleRoadLoopTime && !rectangleRoadLoopPaused && rectangleRoadLoopWidth > 0) {
             const roadSpeed = rectangleDeliveredItems.size >= 1
@@ -771,10 +837,10 @@ const appVersion = '20260924-557';
             setRectangleGasLevel(rectangleGasLevel - (elapsedMs * rectangleGasDrainPerMs));
             const currentJob = rectangleDeliveryJobs[rectangleDeliveryJobIndex];
             const currentStopDistance = currentJob ? getRectangleDeliveryStopDistance(currentJob) : Number.POSITIVE_INFINITY;
-            if (!rectangleBraking && currentStopDistance < 180 && rectangleHornReady && !rectangleDeliveryPage?.classList.contains('is-boss-battle')) {
+            if (!rectangleBraking && currentStopDistance < rectangleHornCueDistance && rectangleHornReady && !rectangleDeliveryPage?.classList.contains('is-boss-battle')) {
                 rectangleHornReady = false;
                 playRectangleHorn();
-            } else if (currentStopDistance > 340) {
+            } else if (currentStopDistance > rectangleHornResetDistance) {
                 rectangleHornReady = true;
             }
             if (rectangleBraking?.speedFactor === 0) {
@@ -852,6 +918,7 @@ const appVersion = '20260924-557';
         }
     };
     rectangleRoadToggle?.addEventListener('click', () => {
+        if (rectangleGamePaused) return;
         if (rectangleRoadToggle.disabled || rectangleBraking || !rectangleDeliveryJeepSequence?.classList.contains('is-arrived')) return;
         if (rectangleDeliveryPage?.classList.contains('is-boss-battle')) return;
         const job = rectangleDeliveryJobs[rectangleDeliveryJobIndex];
@@ -926,6 +993,7 @@ const appVersion = '20260924-557';
     const rectangleBuildingHotspots = Array.from(rectangleDeliveryPage?.querySelectorAll('[data-rectangle-building]') || []);
     const rectangleDestinationPages = Array.from(document.querySelectorAll('.rectangle-destination-page'));
     const rectangleParkingShapes = Array.from(document.querySelectorAll('.rectangle-parking-shape'));
+    const rectangleParkingWrongTimers = new WeakMap();
     let rectangleDeliveryArrivalTimer = null;
     let rectangleDeliveryRevealTimer = null;
     let rectangleDeliveryRouteTimer = null;
@@ -960,6 +1028,7 @@ const appVersion = '20260924-557';
     let rectangleDeliveryInstructionShown = false;
     let rectangleDeliveryInstructionHideTimer = null;
     let rectangleParkingInstructionAudio = null;
+    let rectangleParkingFeedbackAudio = null;
     let rectangleParkingMoveTimer = null;
     let rectangleParkingRouteTimer = null;
     const shapePreviewPages = Array.from(document.querySelectorAll('.shape-area-preview-page'));
@@ -992,6 +1061,8 @@ const appVersion = '20260924-557';
     const heartGameTimerValue = heartCupidGame?.querySelector('.heart-game-timer-value') || null;
     const heartGameLives = heartCupidGame?.querySelector('.heart-game-lives') || null;
     const heartGameLifeIcons = Array.from(heartCupidGame?.querySelectorAll('.heart-game-life') || []);
+    const heartGamePauseButton = heartCupidGame?.querySelector('.heart-game-pause-button') || null;
+    const heartGamePauseOverlay = heartCupidGame?.querySelector('.heart-game-pause-overlay') || null;
     const heartFreezeStatus = heartCupidGame?.querySelector('.heart-freeze-status') || null;
     const heartFreezeCountdown = heartCupidGame?.querySelector('.heart-freeze-countdown') || null;
     const heartGameResult = heartCupidGame?.querySelector('.heart-game-result') || null;
@@ -1124,7 +1195,9 @@ const appVersion = '20260924-557';
     let heartGameClockFrame = null;
     let heartGameLastClockTick = null;
     let heartGameEnded = false;
+    let heartGamePaused = false;
     let heartFreezeEndsAt = 0;
+    let heartFreezePausedRemainingMs = 0;
     let heartFreezeTimer = null;
     let heartFreezeCountdownTimer = null;
     const heartBalloonRespawnTimers = new Map();
@@ -4911,14 +4984,14 @@ const appVersion = '20260924-557';
         heartFreezeTimer = null;
         heartFreezeCountdownTimer = null;
         heartFreezeEndsAt = 0;
+        heartFreezePausedRemainingMs = 0;
         if (heartFreezeStatus) heartFreezeStatus.hidden = true;
         heartCupidGame?.classList.remove('is-freeze-active');
         setHeartBalloonPlaybackRate(heartGameSpeedRate);
     };
 
-    const activateHeartFreeze = () => {
-        clearHeartFreeze();
-        heartFreezeEndsAt = performance.now() + 5000;
+    const runHeartFreezeCountdown = (durationMs) => {
+        heartFreezeEndsAt = performance.now() + durationMs;
         heartCupidGame?.classList.add('is-freeze-active');
         if (heartFreezeStatus) heartFreezeStatus.hidden = false;
         setHeartBalloonPlaybackRate(heartGameSpeedRate * 0.24);
@@ -4929,8 +5002,76 @@ const appVersion = '20260924-557';
         };
         updateCountdown();
         heartFreezeCountdownTimer = window.setInterval(updateCountdown, 100);
-        heartFreezeTimer = window.setTimeout(clearHeartFreeze, 5000);
+        heartFreezeTimer = window.setTimeout(clearHeartFreeze, durationMs);
     };
+
+    const activateHeartFreeze = () => {
+        clearHeartFreeze();
+        runHeartFreezeCountdown(5000);
+    };
+
+    const resetHeartGamePauseUi = () => {
+        heartGamePaused = false;
+        heartFreezePausedRemainingMs = 0;
+        heartCupidGame?.classList.remove('is-paused');
+        if (heartGamePauseOverlay) heartGamePauseOverlay.hidden = true;
+        if (heartGamePauseButton) {
+            heartGamePauseButton.setAttribute('aria-pressed', 'false');
+            heartGamePauseButton.setAttribute('aria-label', 'Pause heart game');
+        }
+    };
+
+    const setHeartGamePaused = (paused) => {
+        if (!heartCupidGame || heartCupidGame.hidden || heartGameEnded) paused = false;
+        if (heartGamePaused === paused) return;
+        heartGamePaused = paused;
+        heartCupidGame.classList.toggle('is-paused', paused);
+        if (heartGamePauseOverlay) heartGamePauseOverlay.hidden = !paused;
+        if (heartGamePauseButton) {
+            heartGamePauseButton.setAttribute('aria-pressed', paused ? 'true' : 'false');
+            heartGamePauseButton.setAttribute('aria-label', paused ? 'Resume heart game' : 'Pause heart game');
+        }
+
+        if (paused) {
+            stopHeartGameClock();
+            if (heartShotAnimationFrame !== null) {
+                window.cancelAnimationFrame(heartShotAnimationFrame);
+                heartShotAnimationFrame = null;
+            }
+            resetHeartCupidBow();
+            heartFreezePausedRemainingMs = Math.max(0, heartFreezeEndsAt - performance.now());
+            if (heartFreezeTimer !== null) window.clearTimeout(heartFreezeTimer);
+            if (heartFreezeCountdownTimer !== null) window.clearInterval(heartFreezeCountdownTimer);
+            heartFreezeTimer = null;
+            heartFreezeCountdownTimer = null;
+            heartFreezeEndsAt = 0;
+            heartFloatingBalloons.forEach((balloon) => {
+                balloon.getAnimations().forEach((animation) => animation.pause());
+            });
+            if (heartCupidBowControl) heartCupidBowControl.disabled = true;
+            return;
+        }
+
+        if (heartCupidBowControl) heartCupidBowControl.disabled = false;
+        if (heartFreezePausedRemainingMs > 0) {
+            const remainingMs = heartFreezePausedRemainingMs;
+            heartFreezePausedRemainingMs = 0;
+            runHeartFreezeCountdown(remainingMs);
+        } else {
+            setHeartBalloonPlaybackRate(heartGameSpeedRate);
+        }
+        heartFloatingBalloons.forEach((balloon) => {
+            if (balloon.classList.contains('is-popping') || balloon.classList.contains('is-phase-hidden')) return;
+            balloon.getAnimations().forEach((animation) => animation.play());
+        });
+        startHeartGameClock();
+        restoreHeartCupidCursorAim();
+    };
+
+    heartGamePauseButton?.addEventListener('click', () => setHeartGamePaused(!heartGamePaused));
+    heartGamePauseButton?.addEventListener('keydown', (event) => {
+        if (event.code === 'Space') event.preventDefault();
+    });
 
     const showHeartHitFeedback = (text, x, y, tone = 'positive') => {
         if (!heartCupidGame) return;
@@ -4956,7 +5097,7 @@ const appVersion = '20260924-557';
             balloon.getAnimations().forEach((animation) => {
                 if (animation.animationName !== 'heartBalloonRise') return;
                 animation.playbackRate = getHeartBalloonPlaybackRate();
-                if (heartGameEnded) animation.pause();
+                if (heartGameEnded || heartGamePaused) animation.pause();
                 else animation.play();
             });
         });
@@ -4981,7 +5122,8 @@ const appVersion = '20260924-557';
                 balloon.getAnimations().forEach((animation) => {
                     if (animation.animationName !== 'heartBalloonRise') return;
                     animation.playbackRate = getHeartBalloonPlaybackRate();
-                    animation.play();
+                    if (heartGamePaused) animation.pause();
+                    else animation.play();
                 });
             });
         }, respawnDelay);
@@ -5234,6 +5376,7 @@ const appVersion = '20260924-557';
     const finishHeartGame = (won, reason = 'lives') => {
         if (heartGameEnded) return;
         heartGameEnded = true;
+        resetHeartGamePauseUi();
         stopHeartGameClock();
         clearHeartFreeze();
         if (heartShotAnimationFrame !== null) {
@@ -5271,6 +5414,7 @@ const appVersion = '20260924-557';
     };
 
     const resetHeartGameState = () => {
+        resetHeartGamePauseUi();
         clearHeartFreeze();
         heartGameHighScore = loadHeartGameHighScore();
         heartGameScore = 0;
@@ -5344,6 +5488,7 @@ const appVersion = '20260924-557';
 
     const stopHeartCupidGame = () => {
         stopHeartVictoryCelebration();
+        resetHeartGamePauseUi();
         stopHeartGameClock();
         if (heartShotAnimationFrame !== null) {
             window.cancelAnimationFrame(heartShotAnimationFrame);
@@ -5432,6 +5577,7 @@ const appVersion = '20260924-557';
 
     const restoreHeartCupidCursorAim = () => {
         if (heartGameEnded
+            || heartGamePaused
             || !heartCupidGame
             || heartCupidGame.hidden
             || heartCupidGame.classList.contains('is-shooting')
@@ -5441,7 +5587,7 @@ const appVersion = '20260924-557';
     };
 
     const fireHeartCupidArrow = () => {
-        if (heartGameEnded || heartCupidGame?.classList.contains('is-shooting')) return;
+        if (heartGameEnded || heartGamePaused || heartCupidGame?.classList.contains('is-shooting')) return;
         restoreHeartCupidCursorAim();
         if (!heartCupidGame || !heartFlyingArrow || !heartCurrentTrajectory) {
             resetHeartCupidBow();
@@ -5487,6 +5633,7 @@ const appVersion = '20260924-557';
     window.addEventListener('pointermove', (event) => {
         if (!heartCupidGame
             || heartGameEnded
+            || heartGamePaused
             || heartCupidGame.hidden
             || heartCupidGame.classList.contains('is-shooting')) return;
         heartLastAimClientX = event.clientX;
@@ -5500,6 +5647,7 @@ const appVersion = '20260924-557';
             || !heartCupidGame
             || heartCupidGame.hidden
             || heartGameEnded
+            || heartGamePaused
             || heartCupidGame.classList.contains('is-shooting')) return;
         event.preventDefault();
         fireHeartCupidArrow();
@@ -5570,6 +5718,7 @@ const appVersion = '20260924-557';
     const resetShapePreviewPage = (page) => {
         if (!page) return;
 
+        delete page.dataset.lessonReplay;
         shapePreviewSceneCleanupByPage.get(page)?.();
         stopShapePreviewIntro(page);
         if (page === diamondMissionPage) stopDiamondMissionSequence();
@@ -5605,7 +5754,7 @@ const appVersion = '20260924-557';
         if (mascot) mascot.hidden = true;
         if (questionPanel) questionPanel.hidden = true;
         if (playButton) playButton.hidden = false;
-        if (skipButton) skipButton.hidden = true;
+        if (skipButton) skipButton.hidden = page.dataset.lessonReplay !== 'true';
         if (bridgeCharacterSequence) {
             bridgeCharacterSequence.hidden = true;
             bridgeCharacterSequence.classList.remove('is-walking');
@@ -5716,7 +5865,7 @@ const appVersion = '20260924-557';
         if (mascot) mascot.hidden = Boolean(videoSource);
         if (questionPanel) questionPanel.hidden = Boolean(videoSource);
         if (playButton) playButton.hidden = false;
-        if (skipButton) skipButton.hidden = true;
+        if (skipButton) skipButton.hidden = page.dataset.lessonReplay !== 'true';
         videoStage?.setAttribute('aria-hidden', videoSource || lessonImage ? 'false' : 'true');
         page.classList.remove('is-transitioning-to-illustration');
         page.classList.add('is-illustration-background');
@@ -5851,8 +6000,14 @@ const appVersion = '20260924-557';
                 const unlockStage = () => {
                     if (!textFinished || !audioFinished || session !== bridgeDialogueSession) return;
                     if (stageIndex < bridgeDialogueMessages.length - 1) {
-                        bridgeDialogueAdvance = () => playStage(stageIndex + 1);
+                        const advanceStage = () => {
+                            if (session !== bridgeDialogueSession || bridgeDialogueAdvance !== advanceStage) return;
+                            bridgeDialogueAdvance = null;
+                            playStage(stageIndex + 1);
+                        };
+                        bridgeDialogueAdvance = advanceStage;
                         page.classList.add('is-bridge-dialog-ready');
+                        bridgeDialogueTimers.push(window.setTimeout(advanceStage, 700));
                     } else if (bridgeYesButton) {
                         bridgeYesButton.hidden = false;
                         bridgeYesButton.getBoundingClientRect();
@@ -5920,7 +6075,7 @@ const appVersion = '20260924-557';
         const rectangleDialogueMessages = [
             'Hello explorer!',
             'Para sa ating Rectangle Mission, tulungan mo akong ihatid ang mga gamit sa Rectangle Village.',
-            'I-tap ang tatlong bagay na hugis rectangle para ilagay ito sa jeep.',
+            'Piliin ang tatlong bagay na hugis rectangle at ilagay ito sa jeep.',
         ];
         const rectangleDialogueSegments = [
             { start: 0, end: 1.4 },
@@ -6281,7 +6436,6 @@ const appVersion = '20260924-557';
         page.addEventListener('click', (event) => {
             if (event.target.closest('a, button') || typeof bridgeDialogueAdvance !== 'function') return;
             const advance = bridgeDialogueAdvance;
-            bridgeDialogueAdvance = null;
             advance();
         });
 
@@ -6315,6 +6469,7 @@ const appVersion = '20260924-557';
         });
 
         startButton?.addEventListener('click', () => {
+            delete page.dataset.lessonReplay;
             stopShapePreviewIntro(page);
             transitionToShapePreviewIllustration(page);
         });
@@ -6329,10 +6484,11 @@ const appVersion = '20260924-557';
                 }
             }
             if (playButton) playButton.hidden = false;
-            if (skipButton) skipButton.hidden = true;
+            if (skipButton) skipButton.hidden = page.dataset.lessonReplay !== 'true';
         };
 
         const showLessonBackground = () => {
+            delete page.dataset.lessonReplay;
             video?.pause?.();
             if (video) video.hidden = true;
             if (lessonImage) lessonImage.hidden = false;
@@ -6382,6 +6538,7 @@ const appVersion = '20260924-557';
             page.classList.remove('is-progress-visible');
             progress?.setAttribute('aria-hidden', 'true');
             resetShapeTvChoices(page);
+            page.dataset.lessonReplay = 'true';
             showShapePreviewIllustration(page);
             playButton?.focus({ preventScroll: true });
         });
@@ -6567,6 +6724,7 @@ const appVersion = '20260924-557';
     };
 
     const resetRectangleDeliveryJeep = ({ preserveRoadPosition = false, keepFinalScene = false } = {}) => {
+        clearRectangleGamePause();
         if (!keepFinalScene) resetRectangleFinalCompleteScene();
         stopRectangleRoadLoop({ preservePosition: preserveRoadPosition });
         rectangleDeliveryPage?.classList.remove('is-road-jeep-hit');
@@ -6636,7 +6794,10 @@ const appVersion = '20260924-557';
         rectangleDeliveryJeepSequence.hidden = true;
         rectangleDeliveryJeepSequence.classList.remove('is-driving', 'is-arrived');
         if (rectangleDeliveryDrivingJeep) rectangleDeliveryDrivingJeep.hidden = false;
-        if (rectangleDeliveryArrivedJeep) rectangleDeliveryArrivedJeep.hidden = true;
+        if (rectangleDeliveryArrivedJeep) {
+            rectangleDeliveryArrivedJeep.src = 'assets/Character/jeep.webp';
+            rectangleDeliveryArrivedJeep.hidden = true;
+        }
     };
 
     const rectangleBuildingSourceBounds = {
@@ -6762,7 +6923,10 @@ const appVersion = '20260924-557';
             rectangleDeliveryInstructionPanel.classList.remove('is-visible');
         }
         if (rectangleDeliveryDrivingJeep) rectangleDeliveryDrivingJeep.hidden = false;
-        if (rectangleDeliveryArrivedJeep) rectangleDeliveryArrivedJeep.hidden = true;
+        if (rectangleDeliveryArrivedJeep) {
+            rectangleDeliveryArrivedJeep.src = 'assets/Character/jeep1.webp';
+            rectangleDeliveryArrivedJeep.hidden = true;
+        }
         rectangleDeliveryJeepSequence.hidden = false;
         rectangleDeliveryJeepSequence.classList.remove('is-arrived', 'is-boss-jumping');
         rectangleDeliveryJeepSequence.classList.add('is-driving');
@@ -6796,14 +6960,28 @@ const appVersion = '20260924-557';
             showRectangleDeliveryTask();
             return;
         }
-        rectangleDeliveryRevealTimer = window.setTimeout(() => {
+        const revealRectangleDeliveryJeep = () => {
             rectangleDeliveryRevealTimer = null;
             if (rectangleDeliveryPage.hidden) return;
+            if (rectangleGamePaused) {
+                rectangleDeliveryRevealTimer = window.setTimeout(revealRectangleDeliveryJeep, 220);
+                return;
+            }
             rectangleDeliveryJeepSequence.getBoundingClientRect();
             rectangleDeliveryJeepSequence.hidden = false;
             rectangleDeliveryJeepSequence.classList.add('is-driving');
-            rectangleDeliveryArrivalTimer = window.setTimeout(showRectangleDeliveryTask, 3600);
-        }, 560);
+            const revealDeliveryTask = () => {
+                if (rectangleDeliveryPage.hidden) return;
+                if (rectangleGamePaused) {
+                    rectangleDeliveryArrivalTimer = window.setTimeout(revealDeliveryTask, 220);
+                    return;
+                }
+                rectangleDeliveryArrivalTimer = null;
+                showRectangleDeliveryTask();
+            };
+            rectangleDeliveryArrivalTimer = window.setTimeout(revealDeliveryTask, 3600);
+        };
+        rectangleDeliveryRevealTimer = window.setTimeout(revealRectangleDeliveryJeep, 560);
     };
 
     rectangleDeliveryBackground?.addEventListener('load', alignRectangleBuildingHotspots);
@@ -6913,6 +7091,11 @@ const appVersion = '20260924-557';
             rectangleParkingInstructionAudio.currentTime = 0;
             rectangleParkingInstructionAudio = null;
         }
+        if (rectangleParkingFeedbackAudio) {
+            rectangleParkingFeedbackAudio.pause();
+            rectangleParkingFeedbackAudio.currentTime = 0;
+            rectangleParkingFeedbackAudio = null;
+        }
 
         rectangleDestinationPages.forEach((page) => {
             const jeep = page.querySelector('.rectangle-destination-jeep');
@@ -6922,7 +7105,7 @@ const appVersion = '20260924-557';
             if (parkingShapes) parkingShapes.hidden = true;
             page.querySelectorAll('.rectangle-parking-shape').forEach((shape) => {
                 shape.disabled = false;
-                shape.classList.remove('is-selected');
+                shape.classList.remove('is-selected', 'is-wrong');
                 shape.setAttribute('aria-pressed', 'false');
             });
             if (instructionPanel) {
@@ -7014,16 +7197,53 @@ const appVersion = '20260924-557';
         rectangleDestinationPages.forEach(alignRectangleParkingShapes);
     });
 
+    const playRectangleParkingFeedback = (source) => {
+        if (rectangleParkingFeedbackAudio) {
+            rectangleParkingFeedbackAudio.pause();
+            rectangleParkingFeedbackAudio.currentTime = 0;
+            rectangleParkingFeedbackAudio = null;
+        }
+        const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+        if (!window.Audio || soundScale <= 0) return;
+        const audio = new window.Audio(source);
+        rectangleParkingFeedbackAudio = audio;
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = Math.min(1, soundScale);
+        const releaseAudio = () => {
+            if (rectangleParkingFeedbackAudio === audio) rectangleParkingFeedbackAudio = null;
+        };
+        audio.onended = releaseAudio;
+        audio.onerror = releaseAudio;
+        audio.play().catch(releaseAudio);
+    };
+
     rectangleParkingShapes.forEach((shape) => {
         shape.addEventListener('click', () => {
             const page = shape.closest('.rectangle-destination-page');
             if (!page || page.classList.contains('is-parking-transition')) return;
+            const isCorrectParking = shape.hasAttribute('data-correct-parking');
             page?.querySelectorAll('.rectangle-parking-shape').forEach((candidate) => {
                 const isSelected = candidate === shape;
-                candidate.classList.toggle('is-selected', isSelected);
-                candidate.setAttribute('aria-pressed', String(isSelected));
+                candidate.classList.toggle('is-selected', isSelected && isCorrectParking);
+                candidate.classList.remove('is-wrong');
+                candidate.setAttribute('aria-pressed', String(isSelected && isCorrectParking));
             });
-            if (!shape.hasAttribute('data-correct-parking')) return;
+            if (!isCorrectParking) {
+                const previousWrongTimer = rectangleParkingWrongTimers.get(shape);
+                if (previousWrongTimer) window.clearTimeout(previousWrongTimer);
+                shape.getBoundingClientRect();
+                shape.classList.add('is-wrong');
+                playRectangleParkingFeedback('assets/Audios/Sound effects/buzzer.mp3');
+                const wrongTimer = window.setTimeout(() => {
+                    shape.classList.remove('is-wrong');
+                    rectangleParkingWrongTimers.delete(shape);
+                }, 900);
+                rectangleParkingWrongTimers.set(shape, wrongTimer);
+                return;
+            }
+
+            playRectangleParkingFeedback('assets/Audios/Sound effects/correct.mp3');
 
             const jeep = page.querySelector('.rectangle-destination-jeep');
             const targetRoute = shape.dataset.parkingRoute;
@@ -7118,6 +7338,7 @@ const appVersion = '20260924-557';
     let rectangleBossJeepInvulnerable = false;
     let rectangleBossGuideIndex = 0;
     let rectangleJumpGuideObstacle = null;
+    let rectangleJumpGuideTimer = null;
     const rectangleBossHazardShapes = ['circle', 'triangle', 'oval', 'diamond', 'star'];
 
     const rectanglesOverlap = (first, second, padding = 0) => (
@@ -7159,6 +7380,10 @@ const appVersion = '20260924-557';
 
     const hideRectangleJumpGuide = (obstacle = null) => {
         if (!rectangleJumpGuide || (obstacle && rectangleJumpGuideObstacle !== obstacle)) return;
+        if (rectangleJumpGuideTimer !== null) {
+            window.clearTimeout(rectangleJumpGuideTimer);
+            rectangleJumpGuideTimer = null;
+        }
         rectangleJumpGuide.classList.remove('is-visible');
         rectangleJumpGuide.hidden = true;
         rectangleJumpGuideObstacle = null;
@@ -7167,10 +7392,16 @@ const appVersion = '20260924-557';
     const showRectangleJumpGuide = (obstacle) => {
         if (!rectangleJumpGuide || !obstacle) return;
         if (rectangleJumpGuideObstacle === obstacle && !rectangleJumpGuide.hidden) return;
+        if (rectangleJumpGuideTimer !== null) window.clearTimeout(rectangleJumpGuideTimer);
         rectangleJumpGuideObstacle = obstacle;
+        rectangleJumpGuide.classList.remove('is-visible');
         rectangleJumpGuide.hidden = false;
         rectangleJumpGuide.getBoundingClientRect();
         rectangleJumpGuide.classList.add('is-visible');
+        rectangleJumpGuideTimer = window.setTimeout(() => {
+            rectangleJumpGuideTimer = null;
+            hideRectangleJumpGuide(obstacle);
+        }, 1100);
     };
 
     const restoreRectangleDeliveryControls = () => {
@@ -7235,6 +7466,10 @@ const appVersion = '20260924-557';
                 if (promptJump) hideRectangleJumpGuide(entity);
                 return;
             }
+            if (rectangleGamePaused) {
+                window.requestAnimationFrame(checkCollision);
+                return;
+            }
             const entityRect = entity.getBoundingClientRect();
             const jeepRect = rectangleDeliveryJeepSequence.getBoundingClientRect();
             if (promptJump) {
@@ -7261,6 +7496,7 @@ const appVersion = '20260924-557';
     const damageRectangleBossJeep = (hazard) => {
         if (
             !rectangleBossActive
+            || rectangleGamePaused
             || rectangleBossJeepInvulnerable
             || rectangleDeliveryJeepSequence?.classList.contains('is-boss-jumping')
         ) return;
@@ -7278,7 +7514,7 @@ const appVersion = '20260924-557';
     };
 
     const spawnRectangleBossShapeHazard = () => {
-        if (!rectangleBossActive || !rectangleBossEffects) return;
+        if (!rectangleBossActive || rectangleGamePaused || !rectangleBossEffects) return;
         const hazard = document.createElement('span');
         hazard.className = 'rectangle-boss-spike';
         hazard.dataset.shape = rectangleBossHazardShapes[Math.floor(Math.random() * rectangleBossHazardShapes.length)];
@@ -7294,7 +7530,7 @@ const appVersion = '20260924-557';
         if (rectangleBossBlinkTimer !== null) window.clearTimeout(rectangleBossBlinkTimer);
         rectangleBossBlinkTimer = window.setTimeout(() => {
             rectangleBossBlinkTimer = null;
-            if (!rectangleBossActive) return;
+            if (!rectangleBossActive || rectangleGamePaused) return;
             if (!rectangleBossEncounter?.classList.contains('is-mouth-open')) {
                 rectangleBossEncounter?.classList.add('is-blinking');
                 window.setTimeout(() => rectangleBossEncounter?.classList.remove('is-blinking'), 170);
@@ -7307,7 +7543,7 @@ const appVersion = '20260924-557';
         if (rectangleBossAttackTimer !== null) window.clearTimeout(rectangleBossAttackTimer);
         rectangleBossAttackTimer = window.setTimeout(() => {
             rectangleBossAttackTimer = null;
-            if (!rectangleBossActive) return;
+            if (!rectangleBossActive || rectangleGamePaused) return;
             rectangleBossEncounter?.classList.remove('is-blinking');
             rectangleBossEncounter?.classList.remove('is-mouth-open');
             rectangleBossEncounter?.getBoundingClientRect();
@@ -7324,6 +7560,7 @@ const appVersion = '20260924-557';
     const collectRectangleBossRectangle = (pickup) => {
         if (
             !rectangleBossActive
+            || rectangleGamePaused
             || !pickup.isConnected
             || !rectangleDeliveryJeepSequence?.classList.contains('is-boss-jumping')
         ) return false;
@@ -7337,7 +7574,7 @@ const appVersion = '20260924-557';
     };
 
     const spawnRectangleBossRectangle = () => {
-        if (!rectangleBossActive || !rectangleBossEffects || !canSpawnRectangleBossGas()) return;
+        if (!rectangleBossActive || rectangleGamePaused || !rectangleBossEffects || !canSpawnRectangleBossGas()) return;
         const pickup = document.createElement('span');
         pickup.className = 'rectangle-boss-rectangle-pickup';
         rectangleBossEffects.append(pickup);
@@ -7350,14 +7587,14 @@ const appVersion = '20260924-557';
         if (rectangleBossGasTimer !== null) window.clearTimeout(rectangleBossGasTimer);
         rectangleBossGasTimer = window.setTimeout(() => {
             rectangleBossGasTimer = null;
-            if (!rectangleBossActive || !canSpawnRectangleBossGas()) return;
+            if (!rectangleBossActive || rectangleGamePaused || !canSpawnRectangleBossGas()) return;
             spawnRectangleBossRectangle();
             scheduleRectangleBossGas(3200 + Math.random() * 2600);
         }, delay);
     };
 
     const finishRectangleBossBattle = () => {
-        if (!rectangleBossActive) return;
+        if (!rectangleBossActive || rectangleGamePaused) return;
         rectangleBossActive = false;
         rectangleRoadHitUntil = performance.now() + 1200;
         if (rectangleBossCurrentMilestone !== null) {
@@ -7408,6 +7645,7 @@ const appVersion = '20260924-557';
     const fireRectangleBossLaser = () => {
         if (
             !rectangleBossActive
+            || rectangleGamePaused
             || !rectangleBossLaserReady
             || !rectangleBossEffects
             || rectangleDeliveryJeepSequence?.classList.contains('is-boss-jumping')
@@ -7421,22 +7659,22 @@ const appVersion = '20260924-557';
         laser.addEventListener('animationend', () => laser.remove(), { once: true });
         window.setTimeout(() => {
             rectangleBossLaserReady = true;
-        }, 420);
+        }, 700);
     };
 
-    const scheduleRectangleBossAutoLaser = (delay = 320) => {
+    const scheduleRectangleBossAutoLaser = (delay = 650) => {
         if (rectangleBossAutoLaserTimer !== null) window.clearTimeout(rectangleBossAutoLaserTimer);
         rectangleBossAutoLaserTimer = window.setTimeout(() => {
             rectangleBossAutoLaserTimer = null;
-            if (!rectangleBossActive) return;
+            if (!rectangleBossActive || rectangleGamePaused) return;
             fireRectangleBossLaser();
-            scheduleRectangleBossAutoLaser(600);
+            scheduleRectangleBossAutoLaser(1100);
         }, delay);
     };
 
     const jumpRectangleBossJeep = () => {
         if (
-            !rectangleDeliveryPage || rectangleDeliveryPage.hidden || rectangleGasDepleted || rectangleRoadLoopPaused
+            !rectangleDeliveryPage || rectangleDeliveryPage.hidden || rectangleGasDepleted || rectangleRoadLoopPaused || rectangleGamePaused
             || !rectangleBossWarning?.hidden
             || !rectangleDeliveryJeepSequence?.classList.contains('is-arrived')
             || rectangleDeliveryJeepSequence.classList.contains('is-boss-jumping')
@@ -7588,12 +7826,17 @@ const appVersion = '20260924-557';
             || event.ctrlKey
             || event.altKey
             || event.metaKey
-            || !rectangleBossActive
             || !rectangleDeliveryPage
             || rectangleDeliveryPage.hidden
         ) return;
         const target = event.target;
-        if (target instanceof HTMLElement && target.matches('input, textarea, select, button, [contenteditable="true"]')) return;
+        if (
+            target instanceof HTMLElement
+            && target.matches('input, textarea, select, button, [contenteditable="true"]')
+            && target !== rectanglePauseButton
+            && target !== rectangleSpeedSlider
+            && target !== rectangleRoadToggle
+        ) return;
         event.preventDefault();
         jumpRectangleBossJeep();
     });
@@ -7963,11 +8206,13 @@ const appVersion = '20260924-557';
     const triangleGameTrees = Array.from(triangleGamePage?.querySelectorAll('[data-triangle-game-tree]') || []);
     const triangleWoodStorage = triangleGamePage?.querySelector('.triangle-wood-storage') || null;
     const triangleWoodStorageImage = triangleWoodStorage?.querySelector('.triangle-wood-storage-image') || null;
+    const triangleWoodClickGuide = triangleWoodStorage?.querySelector('.triangle-wood-click-guide') || null;
     const triangleWoodStorageCount = triangleWoodStorage?.querySelector('[data-triangle-wood-count]') || null;
-    const triangleWoodDragGuide = triangleGamePage?.querySelector('.triangle-wood-drag-guide') || null;
     const triangleCraftingPanel = triangleGamePage?.querySelector('.triangle-crafting-panel') || null;
     const triangleCraftingShapes = triangleCraftingPanel?.querySelector('.triangle-crafting-shapes') || null;
     const triangleCraftingSlots = Array.from(triangleCraftingPanel?.querySelectorAll('[data-triangle-craft-slot]') || []);
+    const triangleBridgeQuestion = triangleCraftingPanel?.querySelector('.triangle-bridge-question') || null;
+    const triangleBridgeQuestionChoices = Array.from(triangleBridgeQuestion?.querySelectorAll('[data-triangle-count-answer]') || []);
     const triangleBridgeBuildOverlay = triangleCraftingPanel?.querySelector('.triangle-bridge-build-overlay') || null;
     const triangleCraftedBridge = triangleCraftingPanel?.querySelector('.triangle-crafted-bridge') || null;
     const triangleGameCompleteTitle = triangleGamePage?.querySelector('.triangle-game-complete-title') || null;
@@ -8011,11 +8256,11 @@ const appVersion = '20260924-557';
     const triangleGameTreePixelData = new Map();
     let triangleWoodCollected = 0;
     let triangleWoodCollectionSession = 0;
-    let triangleWoodDrag = null;
     let triangleWoodSnapInProgress = false;
     let triangleBridgeBuildSession = 0;
     let triangleBridgeBuildTimers = [];
-    let triangleWoodGuideIdleTimer = null;
+    let triangleBridgeQuestionAnswered = false;
+    let triangleBridgeQuestionAudio = null;
     let triangleGameCompleteVoiceAudio = null;
     let triangleGameCompleteCheeringAudio = null;
     let triangleGameCompleteWalkLoopTimer = null;
@@ -8247,14 +8492,15 @@ const appVersion = '20260924-557';
         triangleBridgeBuildTimers.forEach((timerId) => window.clearTimeout(timerId));
         triangleBridgeBuildTimers = [];
         triangleWoodCollected = 0;
-        hideTriangleWoodDragGuide();
+        triangleBridgeQuestionAnswered = false;
+        triangleBridgeQuestionAudio?.pause?.();
+        triangleBridgeQuestionAudio = null;
         triangleGamePage?.classList.remove('is-switching-completed-background', 'is-bridge-complete-scene', 'is-game-progress-visible');
         stopTriangleGameCompletionSequence();
         if (triangleGameBackground) triangleGameBackground.src = triangleGameBackgroundSource;
         triangleGameTreeGroup?.classList.remove('is-active', 'is-over-tree', 'is-exiting');
         triangleGamePage?.querySelectorAll('.triangle-wood-collectible').forEach((collectible) => collectible.remove());
-        triangleWoodDrag?.ghost?.remove();
-        triangleWoodDrag = null;
+        triangleGamePage?.querySelectorAll('.triangle-wood-drag-ghost').forEach((ghost) => ghost.remove());
         triangleWoodSnapInProgress = false;
         if (triangleWoodStorageCount) triangleWoodStorageCount.textContent = '0';
         if (triangleWoodStorage) {
@@ -8262,15 +8508,24 @@ const appVersion = '20260924-557';
             triangleWoodStorage.classList.remove('is-visible', 'is-storing', 'is-crafting', 'is-exiting');
         }
         if (triangleWoodStorageImage) {
-            triangleWoodStorageImage.classList.remove('is-drag-source');
             triangleWoodStorageImage.removeAttribute('role');
             triangleWoodStorageImage.removeAttribute('tabindex');
             triangleWoodStorageImage.removeAttribute('aria-label');
         }
+        if (triangleWoodClickGuide) triangleWoodClickGuide.hidden = true;
         if (triangleCraftingPanel) {
             triangleCraftingPanel.hidden = true;
             triangleCraftingPanel.classList.remove('is-visible', 'is-complete', 'is-building', 'is-bridge-revealed', 'is-exiting');
         }
+        if (triangleBridgeQuestion) {
+            triangleBridgeQuestion.hidden = true;
+            triangleBridgeQuestion.classList.remove('is-visible');
+        }
+        triangleBridgeQuestionChoices.forEach((choice) => {
+            choice.disabled = false;
+            choice.classList.remove('is-correct', 'is-wrong');
+            choice.setAttribute('aria-pressed', 'false');
+        });
         triangleCraftingShapes?.classList.remove('is-built-away');
         if (triangleBridgeBuildOverlay) {
             triangleBridgeBuildOverlay.hidden = true;
@@ -8360,8 +8615,14 @@ const appVersion = '20260924-557';
             const unlockStage = () => {
                 if (!textFinished || !audioFinished || session !== triangleGameDialogueSession) return;
                 if (stageIndex < triangleGameMessages.length - 1) {
-                    triangleGameDialogueAdvance = () => playStage(stageIndex + 1);
+                    const advanceStage = () => {
+                        if (session !== triangleGameDialogueSession || triangleGameDialogueAdvance !== advanceStage) return;
+                        triangleGameDialogueAdvance = null;
+                        playStage(stageIndex + 1);
+                    };
+                    triangleGameDialogueAdvance = advanceStage;
                     triangleGamePage.classList.add('is-dialog-ready');
+                    triangleGameDialogueTimers.push(window.setTimeout(advanceStage, 700));
                     return;
                 }
 
@@ -8446,56 +8707,10 @@ const appVersion = '20260924-557';
     triangleGamePage?.addEventListener('click', (event) => {
         if (event.target.closest('a, button') || typeof triangleGameDialogueAdvance !== 'function') return;
         const advance = triangleGameDialogueAdvance;
-        triangleGameDialogueAdvance = null;
         advance();
     });
 
     const getNextTriangleCraftingSlot = () => triangleCraftingSlots.find((slot) => !slot.classList.contains('is-filled')) || null;
-
-    const hideTriangleWoodDragGuide = () => {
-        if (triangleWoodGuideIdleTimer !== null) {
-            window.clearTimeout(triangleWoodGuideIdleTimer);
-            triangleWoodGuideIdleTimer = null;
-        }
-        if (!triangleWoodDragGuide) return;
-        triangleWoodDragGuide.hidden = true;
-        triangleWoodDragGuide.classList.remove('is-active');
-    };
-
-    const showTriangleWoodDragGuide = () => {
-        const nextSlot = getNextTriangleCraftingSlot();
-        if (
-            !triangleGamePage
-            || !triangleWoodDragGuide
-            || !triangleWoodStorageImage
-            || !nextSlot
-            || !triangleWoodStorage?.classList.contains('is-crafting')
-            || triangleWoodCollected <= 0
-            || triangleWoodDrag
-            || triangleWoodSnapInProgress
-        ) return;
-
-        const pageRect = triangleGamePage.getBoundingClientRect();
-        const storageRect = triangleWoodStorageImage.getBoundingClientRect();
-        const slotRect = nextSlot.getBoundingClientRect();
-        triangleWoodDragGuide.style.setProperty('--guide-start-x', `${storageRect.left - pageRect.left + (storageRect.width / 2)}px`);
-        triangleWoodDragGuide.style.setProperty('--guide-start-y', `${storageRect.top - pageRect.top + (storageRect.height / 2)}px`);
-        triangleWoodDragGuide.style.setProperty('--guide-target-x', `${slotRect.left - pageRect.left + (slotRect.width / 2)}px`);
-        triangleWoodDragGuide.style.setProperty('--guide-target-y', `${slotRect.top - pageRect.top + (slotRect.height / 2)}px`);
-        triangleWoodDragGuide.hidden = false;
-        triangleWoodDragGuide.classList.remove('is-active');
-        triangleWoodDragGuide.getBoundingClientRect();
-        triangleWoodDragGuide.classList.add('is-active');
-    };
-
-    const scheduleTriangleWoodDragGuide = (delay = 5600) => {
-        hideTriangleWoodDragGuide();
-        const session = triangleWoodCollectionSession;
-        triangleWoodGuideIdleTimer = window.setTimeout(() => {
-            triangleWoodGuideIdleTimer = null;
-            if (session === triangleWoodCollectionSession) showTriangleWoodDragGuide();
-        }, delay);
-    };
 
     const showTriangleCraftingPanel = (session) => {
         if (session !== triangleWoodCollectionSession || !triangleCraftingPanel || !triangleWoodStorage) return;
@@ -8505,9 +8720,9 @@ const appVersion = '20260924-557';
         triangleWoodStorage.classList.add('is-crafting');
         triangleWoodStorageImage?.setAttribute('role', 'button');
         triangleWoodStorageImage?.setAttribute('tabindex', '0');
-        triangleWoodStorageImage?.setAttribute('aria-label', 'Drag a wood block to the triangle crafting panel');
+        triangleWoodStorageImage?.setAttribute('aria-label', 'Tap to place a wood block in the bridge frame');
+        if (triangleWoodClickGuide) triangleWoodClickGuide.hidden = false;
         playUiClickSound('chime');
-        scheduleTriangleWoodDragGuide(700);
     };
 
     const storeTriangleWoodBlock = (session) => {
@@ -8549,7 +8764,7 @@ const appVersion = '20260924-557';
                     if (session !== triangleWoodCollectionSession || triangleGamePage.hidden) return;
                     const collectible = document.createElement('img');
                     collectible.className = 'triangle-wood-collectible';
-                    collectible.src = 'assets/Shape UI/wood-block-stylized.png';
+                    collectible.src = 'assets/Shape UI/wood-block-stylized.webp';
                     collectible.alt = '';
                     collectible.setAttribute('aria-hidden', 'true');
                     collectible.style.left = `${startX}px`;
@@ -8597,7 +8812,7 @@ const appVersion = '20260924-557';
         const pageRect = triangleGamePage.getBoundingClientRect();
         const ghost = document.createElement('img');
         ghost.className = 'triangle-wood-drag-ghost';
-        ghost.src = 'assets/Shape UI/wood-block-stylized.png';
+        ghost.src = 'assets/Shape UI/wood-block-stylized.webp';
         ghost.alt = '';
         ghost.setAttribute('aria-hidden', 'true');
         ghost.style.left = `${clientX - pageRect.left}px`;
@@ -8616,6 +8831,40 @@ const appVersion = '20260924-557';
         }, 380));
     };
 
+    const playTriangleBridgeQuestionAudio = (source) => {
+        triangleBridgeQuestionAudio?.pause?.();
+        triangleBridgeQuestionAudio = null;
+        const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+        if (!window.Audio || soundScale <= 0) return;
+        const audio = new window.Audio(source);
+        triangleBridgeQuestionAudio = audio;
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = Math.min(1, soundScale);
+        const releaseAudio = () => {
+            if (triangleBridgeQuestionAudio === audio) triangleBridgeQuestionAudio = null;
+        };
+        audio.onended = releaseAudio;
+        audio.onerror = releaseAudio;
+        audio.play().catch(releaseAudio);
+    };
+
+    const showTriangleBridgeQuestion = (session) => {
+        if (!triangleBridgeQuestion || session !== triangleWoodCollectionSession) return;
+        triangleBridgeQuestionAnswered = false;
+        triangleBridgeQuestionChoices.forEach((choice) => {
+            choice.disabled = false;
+            choice.classList.remove('is-correct', 'is-wrong');
+            choice.setAttribute('aria-pressed', 'false');
+        });
+        triangleBridgeQuestion.hidden = false;
+        triangleBridgeQuestion.getBoundingClientRect();
+        triangleBridgeQuestion.classList.add('is-visible');
+        triangleBridgeQuestionChoices[0]?.focus({ preventScroll: true });
+        playUiClickSound('chime');
+        playTriangleBridgeQuestionAudio('assets/Audios/Voice over/ilang hugis.mp3');
+    };
+
     const startTriangleBridgeBuildSequence = (collectionSession) => {
         if (
             !triangleCraftingPanel
@@ -8628,6 +8877,8 @@ const appVersion = '20260924-557';
         const buildSession = triangleBridgeBuildSession;
         triangleBridgeBuildTimers.forEach((timerId) => window.clearTimeout(timerId));
         triangleBridgeBuildTimers = [];
+        triangleBridgeQuestion?.classList.remove('is-visible');
+        if (triangleBridgeQuestion) triangleBridgeQuestion.hidden = true;
         const scheduleBuildStep = (callback, delay) => {
             const timerId = window.setTimeout(() => {
                 triangleBridgeBuildTimers = triangleBridgeBuildTimers.filter((currentId) => currentId !== timerId);
@@ -8744,11 +8995,11 @@ const appVersion = '20260924-557';
             triangleGameDialogueTimers.push(window.setTimeout(() => slot.classList.remove('is-snapping'), 420));
 
             if (triangleCraftingSlots.every((craftingSlot) => craftingSlot.classList.contains('is-filled'))) {
-                hideTriangleWoodDragGuide();
                 triangleWoodStorage?.classList.remove('is-crafting');
+                triangleWoodStorage?.classList.add('is-exiting');
                 triangleWoodStorageImage?.setAttribute('tabindex', '-1');
                 triangleWoodStorageImage?.setAttribute('aria-label', 'All wood blocks have been placed');
-                startTriangleBridgeBuildSequence(session);
+                showTriangleBridgeQuestion(session);
             }
         }).catch(() => {
             triangleWoodSnapInProgress = false;
@@ -8756,104 +9007,63 @@ const appVersion = '20260924-557';
         });
     };
 
-    const returnTriangleWoodToStorage = (ghost) => {
-        if (!ghost || !triangleGamePage || !triangleWoodStorageImage) return;
-        const pageRect = triangleGamePage.getBoundingClientRect();
-        const storageRect = triangleWoodStorageImage.getBoundingClientRect();
-        const targetX = storageRect.left - pageRect.left + (storageRect.width / 2);
-        const targetY = storageRect.top - pageRect.top + (storageRect.height / 2);
-        const animation = ghost.animate([
-            { left: ghost.style.left, top: ghost.style.top, opacity: 1, transform: 'translate(-50%, -50%) scale(1)' },
-            { left: `${targetX}px`, top: `${targetY}px`, opacity: 0, transform: 'translate(-50%, -50%) scale(0.32)' },
-        ], {
-            duration: 280,
-            easing: 'ease-in',
-            fill: 'forwards',
-        });
-        animation.finished.then(() => ghost.remove()).catch(() => ghost.remove());
-    };
-
-    const beginTriangleWoodDrag = (event) => {
+    const placeNextTriangleWood = () => {
         if (
             !triangleWoodStorage?.classList.contains('is-crafting') ||
             triangleWoodCollected <= 0 ||
-            triangleWoodDrag ||
-            triangleWoodSnapInProgress ||
-            (event.pointerType === 'mouse' && event.button !== 0)
+            triangleWoodSnapInProgress
         ) return;
-        const ghost = createTriangleWoodDragGhost(event.clientX, event.clientY);
-        if (!ghost) return;
-        hideTriangleWoodDragGuide();
-        triangleWoodDrag = {
-            ghost,
-            pointerId: event.pointerId,
-            session: triangleWoodCollectionSession,
-        };
-        triangleWoodStorageImage?.classList.add('is-drag-source');
-        triangleWoodStorageImage?.setPointerCapture?.(event.pointerId);
-        playUiClickSound('wood');
-        event.preventDefault();
-    };
-
-    const moveTriangleWoodDrag = (event) => {
-        if (!triangleWoodDrag || event.pointerId !== triangleWoodDrag.pointerId || !triangleGamePage) return;
-        const pageRect = triangleGamePage.getBoundingClientRect();
-        triangleWoodDrag.ghost.style.left = `${event.clientX - pageRect.left}px`;
-        triangleWoodDrag.ghost.style.top = `${event.clientY - pageRect.top}px`;
-        event.preventDefault();
-    };
-
-    const endTriangleWoodDrag = (event, cancelled = false) => {
-        if (!triangleWoodDrag || event.pointerId !== triangleWoodDrag.pointerId) return;
-        const drag = triangleWoodDrag;
-        triangleWoodDrag = null;
-        triangleWoodStorageImage?.classList.remove('is-drag-source');
-        try {
-            triangleWoodStorageImage?.releasePointerCapture?.(event.pointerId);
-        } catch (error) {
-            // Pointer capture may already be released by the browser.
-        }
-
-        const panelRect = triangleCraftingPanel?.getBoundingClientRect();
-        const droppedOnPanel = !cancelled && panelRect &&
-            event.clientX >= panelRect.left && event.clientX <= panelRect.right &&
-            event.clientY >= panelRect.top && event.clientY <= panelRect.bottom;
-        const nextSlot = droppedOnPanel ? getNextTriangleCraftingSlot() : null;
-        if (nextSlot) {
-            snapTriangleWoodIntoSlot(drag.ghost, nextSlot, drag.session);
-        } else {
-            returnTriangleWoodToStorage(drag.ghost);
-        }
-        scheduleTriangleWoodDragGuide();
-    };
-
-    triangleWoodStorageImage?.addEventListener('pointerdown', beginTriangleWoodDrag);
-    triangleWoodStorageImage?.addEventListener('pointermove', moveTriangleWoodDrag);
-    triangleWoodStorageImage?.addEventListener('pointerup', (event) => endTriangleWoodDrag(event));
-    triangleWoodStorageImage?.addEventListener('pointercancel', (event) => endTriangleWoodDrag(event, true));
-    triangleWoodStorageImage?.addEventListener('dragstart', (event) => event.preventDefault());
-    triangleWoodStorageImage?.addEventListener('keydown', (event) => {
-        if ((event.key !== 'Enter' && event.key !== ' ') || triangleWoodCollected <= 0 || triangleWoodSnapInProgress) return;
         const nextSlot = getNextTriangleCraftingSlot();
-        if (!nextSlot) return;
-        hideTriangleWoodDragGuide();
+        if (!nextSlot || !triangleWoodStorageImage) return;
+        if (triangleWoodClickGuide) triangleWoodClickGuide.hidden = true;
         const storageRect = triangleWoodStorageImage.getBoundingClientRect();
         const ghost = createTriangleWoodDragGhost(
             storageRect.left + (storageRect.width / 2),
             storageRect.top + (storageRect.height / 2),
         );
+        if (!ghost) return;
+        playUiClickSound('wood');
         snapTriangleWoodIntoSlot(ghost, nextSlot, triangleWoodCollectionSession);
-        scheduleTriangleWoodDragGuide();
+    };
+
+    triangleWoodStorageImage?.addEventListener('click', placeNextTriangleWood);
+    triangleWoodStorageImage?.addEventListener('dragstart', (event) => event.preventDefault());
+    triangleWoodStorageImage?.addEventListener('keydown', (event) => {
+        if ((event.key !== 'Enter' && event.key !== ' ') || triangleWoodCollected <= 0 || triangleWoodSnapInProgress) return;
         event.preventDefault();
+        placeNextTriangleWood();
     });
 
-    triangleGamePage?.addEventListener('pointermove', () => {
-        if (
-            triangleWoodDragGuide?.hidden
-            && triangleWoodStorage?.classList.contains('is-crafting')
-            && !triangleWoodDrag
-            && !triangleWoodSnapInProgress
-        ) scheduleTriangleWoodDragGuide();
+    triangleBridgeQuestionChoices.forEach((choice) => {
+        choice.addEventListener('click', () => {
+            if (triangleBridgeQuestionAnswered || triangleBridgeQuestion?.hidden) return;
+            const isCorrect = choice.hasAttribute('data-correct-answer');
+            triangleBridgeQuestionChoices.forEach((candidate) => {
+                candidate.classList.remove('is-correct', 'is-wrong');
+                candidate.setAttribute('aria-pressed', 'false');
+            });
+            choice.classList.add(isCorrect ? 'is-correct' : 'is-wrong');
+            choice.setAttribute('aria-pressed', 'true');
+
+            if (!isCorrect) {
+                playTriangleBridgeQuestionAudio('assets/Audios/Sound effects/buzzer.mp3');
+                triangleGameDialogueTimers.push(window.setTimeout(() => {
+                    choice.classList.remove('is-wrong');
+                    choice.setAttribute('aria-pressed', 'false');
+                }, 650));
+                return;
+            }
+
+            triangleBridgeQuestionAnswered = true;
+            triangleBridgeQuestionChoices.forEach((candidate) => {
+                candidate.disabled = true;
+            });
+            playTriangleBridgeQuestionAudio('assets/Audios/Sound effects/correct.mp3');
+            const session = triangleWoodCollectionSession;
+            triangleGameDialogueTimers.push(window.setTimeout(() => {
+                if (session === triangleWoodCollectionSession) startTriangleBridgeBuildSequence(session);
+            }, 650));
+        });
     });
 
     const advanceTriangleGameTree = (tree) => {
