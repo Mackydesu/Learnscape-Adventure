@@ -2703,9 +2703,55 @@
                                 <button class="intro-shop-item" type="button" data-shop-item="star" aria-pressed="false" aria-label="Star key, costs 10 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/starkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></button>
                                 <button class="intro-shop-item" type="button" data-shop-item="diamond" aria-pressed="false" aria-label="Diamond key, costs 10 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/diamondkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></button>
                             </div>
+                            <p class="intro-shop-status" role="status" aria-live="polite"></p>
                         </div>
                     `,
                 },
+            };
+
+            const introShopCost = 10;
+            const introShopPurchaseKey = (shape) => `learnscape-shop-purchased:${shape}`;
+            const syncIntroShopItems = () => {
+                const selectedShape = readSoundSetting('learnscape-shop-selected', '');
+                introMenuCopy?.querySelectorAll('.intro-shop-item').forEach((item) => {
+                    const shape = item.dataset.shopItem || '';
+                    const isPurchased = readSoundSetting(introShopPurchaseKey(shape), 'false') === 'true';
+                    const isSelected = isPurchased && shape === selectedShape;
+                    const key = item.querySelector('.intro-shop-key');
+                    if (key && !key.querySelector('.intro-shop-padlock')) {
+                        const lock = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                        lock.classList.add('intro-shop-padlock');
+                        lock.setAttribute('viewBox', '0 0 80 96');
+                        lock.setAttribute('aria-hidden', 'true');
+                        lock.innerHTML = `
+                            <path d="M22 42V29C22 17 29 9 40 9s18 8 18 20v13" fill="none" stroke="#684418" stroke-width="13" stroke-linecap="round"/>
+                            <path d="M22 42V29C22 17 29 9 40 9s18 8 18 20v13" fill="none" stroke="#f4c54c" stroke-width="7" stroke-linecap="round"/>
+                            <rect x="10" y="38" width="60" height="49" rx="10" fill="#8d5611"/>
+                            <rect x="14" y="40" width="52" height="42" rx="7" fill="#ffc83d" stroke="#ffe889" stroke-width="3"/>
+                            <path d="M19 47h42" fill="none" stroke="#fff4ad" stroke-width="4" stroke-linecap="round" opacity=".85"/>
+                            <circle cx="40" cy="60" r="6" fill="#5a3615"/>
+                            <path d="M37 64h6l2 11H35z" fill="#5a3615"/>
+                        `;
+                        key.appendChild(lock);
+                    }
+                    const cost = item.querySelector('.intro-shop-cost');
+                    const costValue = cost?.lastElementChild;
+                    item.classList.toggle('is-purchased', isPurchased);
+                    item.classList.toggle('is-selected', isSelected);
+                    item.setAttribute('aria-pressed', String(isSelected));
+                    item.setAttribute('aria-label', isPurchased
+                        ? `${shape} key, unlocked`
+                        : `${shape} key, locked, costs ${introShopCost} carrots`);
+                    if (cost) cost.classList.toggle('is-owned', isPurchased);
+                    if (costValue) costValue.textContent = isPurchased ? '\u2713' : String(introShopCost);
+                });
+            };
+
+            const setIntroShopStatus = (message, state = '') => {
+                const status = introMenuCopy?.querySelector('.intro-shop-status');
+                if (!status) return;
+                status.textContent = message;
+                status.dataset.state = state;
             };
 
             const closeIntroMenu = () => {
@@ -2726,6 +2772,7 @@
                     introMenuCopy.hidden = false;
                     introMenuCopy.innerHTML = content.copy || '';
                     introMenuPanel.dataset.panel = button.dataset.introPanel;
+                    if (button.dataset.introPanel === 'shop') syncIntroShopItems();
                     introMenuPanel.hidden = false;
                     introMenuClose.focus({ preventScroll: true });
                 });
@@ -2735,11 +2782,28 @@
             introMenuCopy?.addEventListener('click', (event) => {
                 const item = event.target.closest('.intro-shop-item');
                 if (!item || !introMenuCopy.contains(item)) return;
+                const shape = item.dataset.shopItem || '';
+                if (!item.classList.contains('is-purchased')) {
+                    const carrots = window.getLearnscapeResourceCount?.('carrots') ?? resourceCounts.carrots;
+                    if (carrots < introShopCost) {
+                        item.classList.remove('is-insufficient');
+                        void item.offsetWidth;
+                        item.classList.add('is-insufficient');
+                        setIntroShopStatus('');
+                        window.playUiClickSound?.('thunk');
+                        return;
+                    }
+                    setLearnscapeResourceCount('carrots', carrots - introShopCost);
+                    writeSoundSetting(introShopPurchaseKey(shape), 'true');
+                    setIntroShopStatus('Nabuksan na ang susi!', 'success');
+                }
+                writeSoundSetting('learnscape-shop-selected', shape);
                 introMenuCopy.querySelectorAll('.intro-shop-item').forEach((shopItem) => {
                     const isSelected = shopItem === item;
                     shopItem.classList.toggle('is-selected', isSelected);
                     shopItem.setAttribute('aria-pressed', String(isSelected));
                 });
+                syncIntroShopItems();
                 window.playUiClickSound?.('chime');
             });
             introMenuPanel?.addEventListener('click', (event) => {
@@ -2775,6 +2839,14 @@
                     // Sound settings still apply for this session if storage is unavailable.
                 }
             };
+            const introShopResetVersion = '2026-09-26-1';
+            if (readSoundSetting('learnscape-shop-reset-version', '') !== introShopResetVersion) {
+                ['circle', 'square', 'triangle', 'rectangle', 'oval', 'heart', 'star', 'diamond'].forEach((shape) => {
+                    writeSoundSetting(introShopPurchaseKey(shape), 'false');
+                });
+                writeSoundSetting('learnscape-shop-selected', '');
+                writeSoundSetting('learnscape-shop-reset-version', introShopResetVersion);
+            }
             const resourceStorageKeys = {
                 stars: 'learnscape-star-count',
                 carrots: 'learnscape-carrot-count',
@@ -2806,10 +2878,11 @@
                 setLearnscapeResourceCount(resource, (resourceCounts[resource] ?? 0) + Number(amount || 0))
             );
             const progressRewardByStarStage = { 1: 2, 2: 3, 3: 5 };
-            const getProgressRewardIdentity = (progress, starStage) => {
+            const claimedProgressRewards = new Set();
+            const getProgressRewardIdentity = (progress) => {
                 const page = progress.closest('section[id]');
-                const stage = progress.dataset.progressStage || `star-${starStage}`;
-                return `${page?.id || 'unknown'}:${stage}:${starStage}`;
+                const stage = progress.dataset.progressStage || 'complete';
+                return `${page?.id || 'unknown'}:${stage}`;
             };
             const createProgressRewardBadge = (actions) => {
                 const badge = document.createElement('span');
@@ -2861,12 +2934,26 @@
                     && !page?.hidden;
                 if (!isVisible) return;
 
-                const rewardIdentity = getProgressRewardIdentity(progress, starStage);
+                const rewardIdentity = getProgressRewardIdentity(progress);
                 const rewardStorageKey = `learnscape-progress-reward:${rewardIdentity}`;
-                const wasAwarded = readSoundSetting(rewardStorageKey, 'false') === 'true';
+                const rewardPageId = progress.closest('section[id]')?.id || 'unknown';
+                const legacyRewardWasAwarded = Object.keys(progressRewardByStarStage).some((legacyStarStage) => (
+                    readSoundSetting(
+                        `learnscape-progress-reward:${rewardPageId}:${progress.dataset.progressStage || `star-${legacyStarStage}`}:${legacyStarStage}`,
+                        'false',
+                    ) === 'true'
+                ));
+                const wasAwarded = claimedProgressRewards.has(rewardIdentity)
+                    || readSoundSetting(rewardStorageKey, 'false') === 'true'
+                    || legacyRewardWasAwarded;
                 badge.classList.toggle('is-awarded', wasAwarded);
-                if (wasAwarded) return;
+                if (wasAwarded) {
+                    claimedProgressRewards.add(rewardIdentity);
+                    if (legacyRewardWasAwarded) writeSoundSetting(rewardStorageKey, 'true');
+                    return;
+                }
 
+                claimedProgressRewards.add(rewardIdentity);
                 writeSoundSetting(rewardStorageKey, 'true');
                 window.addLearnscapeResource('stars', 1);
                 window.addLearnscapeResource('carrots', reward);

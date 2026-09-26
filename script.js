@@ -4351,7 +4351,7 @@ const appVersion = '20260926-583';
             }
             diamondMissionAudio = null;
         }
-        diamondMissionGuide?.classList.remove('is-active', 'is-message-visible', 'is-message-changing', 'is-ready-message', 'is-exiting');
+        diamondMissionGuide?.classList.remove('is-active', 'is-message-visible', 'is-message-changing', 'is-ready-message', 'is-exiting', 'is-retry');
         diamondMissionGuide?.setAttribute('aria-hidden', 'true');
         if (diamondMissionGuide) diamondMissionGuide.hidden = true;
         if (diamondMissionMessageText) diamondMissionMessageText.textContent = '';
@@ -4441,6 +4441,7 @@ const appVersion = '20260926-583';
         stopDiamondMissionSequence();
         diamondMissionGuide.hidden = false;
         diamondMissionGuide.setAttribute('aria-hidden', 'false');
+        diamondMissionGuide.classList.add('is-retry');
         diamondMissionStartButton.hidden = false;
         diamondMissionStartButton.getBoundingClientRect();
         diamondMissionStartButton.classList.add('is-visible');

@@ -4029,6 +4029,11 @@ body *::after {
     animation: diamondMissionCaveDig 2.35s cubic-bezier(0.18, 0.78, 0.22, 1) forwards;
 }
 
+.diamond-mission-guide.is-retry .diamond-mission-cave,
+.diamond-mission-guide.is-retry .diamond-mission-dig-particles {
+    display: none;
+}
+
 .diamond-mission-dig-particles {
     position: absolute;
     left: 50%;
@@ -16964,10 +16969,28 @@ h3 {
     height: 100%;
     padding: 0.15rem 0.25rem 0.3rem;
     overflow-y: auto;
+    overflow-x: hidden;
     overscroll-behavior: contain;
     scrollbar-color: #a64d18 #f3d58f;
     scrollbar-width: thin;
 }
+
+.intro-shop-status {
+    position: absolute;
+    left: 50%;
+    bottom: 6.4%;
+    z-index: 3;
+    width: 70%;
+    min-height: 1.2rem;
+    margin: 0;
+    transform: translateX(-50%);
+    color: #215c2b;
+    font-size: clamp(0.76rem, 2.2vw, 1rem);
+    font-weight: 900;
+    text-align: center;
+}
+
+.intro-shop-status[data-state="error"] { color: #9c271b; }
 
 .intro-shop-list::-webkit-scrollbar { width: 0.55rem; }
 .intro-shop-list::-webkit-scrollbar-track { border-radius: 999px; background: #f3d58f; }
@@ -17003,6 +17026,16 @@ h3 {
     box-shadow: inset 0 0 0 0.12rem #8be064, inset 0 0.13rem 0 rgba(255, 255, 255, 0.9), 0 0.2rem 0 #17662b, 0 0 0 0.16rem rgba(255, 246, 164, 0.9);
 }
 
+.intro-shop-item.is-insufficient {
+    animation: intro-shop-denied 360ms ease;
+}
+
+@keyframes intro-shop-denied {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-0.35rem); }
+    75% { transform: translateX(0.35rem); }
+}
+
 .intro-shop-item.is-selected::after {
     content: '\2713';
     position: absolute;
@@ -17024,11 +17057,32 @@ h3 {
 }
 
 .intro-shop-key {
+    position: relative;
     display: grid;
     place-items: center;
     width: 100%;
     min-width: 0;
 }
+
+.intro-shop-item:not(.is-purchased) .intro-shop-key img {
+    opacity: 0.22;
+    filter: grayscale(0.75) brightness(0.65);
+}
+
+.intro-shop-padlock {
+    position: absolute;
+    z-index: 2;
+    top: 48%;
+    left: 50%;
+    width: clamp(3.65rem, 11vw, 4.8rem);
+    height: auto;
+    overflow: visible;
+    filter: drop-shadow(0 0.24rem 0.12rem rgba(50, 28, 11, 0.62));
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.intro-shop-item.is-purchased .intro-shop-padlock { display: none; }
 
 .intro-shop-key img {
     display: block;
@@ -17040,6 +17094,8 @@ h3 {
 }
 
 .intro-shop-cost {
+    position: relative;
+    z-index: 4;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -17058,6 +17114,15 @@ h3 {
     box-shadow: inset 0 0.1rem 0 rgba(255, 219, 139, 0.4);
     box-sizing: border-box;
 }
+
+.intro-shop-cost.is-owned {
+    border-color: #17662b;
+    background: linear-gradient(180deg, #8be064, #31a950);
+    color: #fff;
+    text-shadow: 0 0.1rem 0 #145f28;
+}
+
+.intro-shop-cost.is-owned .intro-shop-carrot { display: none; }
 
 .intro-shop-carrot {
     display: block;
