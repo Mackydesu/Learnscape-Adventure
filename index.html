@@ -98,10 +98,13 @@
             <nav class="intro-signpost" aria-label="Adventure menu">
                 <img class="intro-signpost-art" src="assets/Shape UI/post.webp" alt="">
                 <button class="intro-sign-button intro-sign-button-shop" type="button" data-intro-panel="shop" aria-label="Shop">
-                    <img src="assets/Shape UI/Shop.webp" alt="Shop">
+                    <img src="assets/Buttons/Shop.webp" alt="Shop">
                 </button>
-                <button class="intro-sign-button intro-sign-button-character" type="button" data-intro-panel="character" aria-label="Character">
-                    <img src="assets/Shape UI/character.webp" alt="Character">
+                <button class="intro-sign-button intro-sign-button-profile" type="button" aria-label="Profile">
+                    <img src="assets/Buttons/profile.webp" alt="Profile">
+                </button>
+                <button class="intro-sign-button intro-sign-button-notif" type="button" aria-label="Notifications">
+                    <img src="assets/Buttons/notif.webp" alt="Notifications">
                 </button>
             </nav>
 
@@ -365,6 +368,7 @@
             </div>
             <button class="square-mission-start-button" type="button" hidden>Start</button>
         </div>
+        <h2 class="square-placement-title" hidden>Ibalik ang mga bagay na nawawala</h2>
         <div class="square-object-targets" aria-hidden="true">
             <span class="square-object-target" data-square-target="1"></span>
             <span class="square-object-target" data-square-target="2"></span>
@@ -380,13 +384,17 @@
             <button class="square-answer-tile" type="button"></button>
         </div>
         <div class="square-object-panel" aria-label="Square storage">
-            <span class="square-object-slot" data-square-slot="1"><button class="square-object-piece" type="button" data-square-piece="1" aria-label="Place the square clock"><img src="assets/Shape UI/square1.webp" alt=""></button></span>
-            <span class="square-object-slot" data-square-slot="2"><button class="square-object-piece" type="button" data-square-piece="2" aria-label="Place the square window"><img src="assets/Shape UI/square2.webp" alt=""></button></span>
-            <span class="square-object-slot" data-square-slot="3"><button class="square-object-piece" type="button" data-square-piece="3" aria-label="Place the square wall panel"><img src="assets/Shape UI/square3.webp" alt=""></button></span>
-            <span class="square-object-slot" data-square-slot="4"><button class="square-object-piece" type="button" data-square-piece="4" aria-label="Place the square double doors"><img src="assets/Shape UI/square4.webp" alt=""></button></span>
-            <span class="square-object-slot" data-square-slot="5"><button class="square-object-piece" type="button" data-square-piece="5" aria-label="Place the square fountain"><img src="assets/Shape UI/square5.webp" alt=""></button></span>
+            <span class="square-object-slot" data-square-slot="1"><button class="square-object-piece" type="button" data-square-piece="1" data-square-hint="parisukat na orasan" aria-label="Place the square clock"><img src="assets/Shape UI/square1.webp" alt=""></button></span>
+            <span class="square-object-slot" data-square-slot="2"><button class="square-object-piece" type="button" data-square-piece="2" data-square-hint="parisukat na bintana" aria-label="Place the square window"><img src="assets/Shape UI/square2.webp" alt=""></button></span>
+            <span class="square-object-slot" data-square-slot="3"><button class="square-object-piece" type="button" data-square-piece="3" data-square-hint="parisukat na palamuti sa dingding" aria-label="Place the square wall panel"><img src="assets/Shape UI/square3.webp" alt=""></button></span>
+            <span class="square-object-slot" data-square-slot="4"><button class="square-object-piece" type="button" data-square-piece="4" data-square-hint="parisukat na dobleng pinto" aria-label="Place the square double doors"><img src="assets/Shape UI/square4.webp" alt=""></button></span>
+            <span class="square-object-slot" data-square-slot="5"><button class="square-object-piece" type="button" data-square-piece="5" data-square-hint="parisukat na may larawan ng fountain" aria-label="Place the square fountain"><img src="assets/Shape UI/square5.webp" alt=""></button></span>
         </div>
-        <div class="square-puzzle-celebration-text" aria-live="polite" hidden>You fix them all!</div>
+        <div class="square-placement-hint" role="status" aria-live="polite" hidden>
+            <span>Pindutin ang</span>
+            <strong class="square-placement-hint-object"></strong>
+        </div>
+        <div class="square-puzzle-celebration-text" aria-live="polite" hidden>Napakahusay!</div>
         <div class="square-puzzle-confetti" aria-hidden="true" hidden>
             <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
             <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
@@ -709,8 +717,8 @@
                         </div>
                     </div>
                     <div class="rectangle-boss-guide-page" data-boss-guide-page="1" hidden>
-                        <p>Tumalon para kunin</p>
-                        <h2>Kunin ang Rectangle</h2>
+                        <p>Tumalon</p>
+                        <h2>Kunin ang rectangle at iwasan ang ibang hugis</h2>
                         <div class="rectangle-boss-guide-demo is-collect-demo" aria-hidden="true">
                             <span class="rectangle-guide-mini-monster"><span></span></span>
                             <span class="rectangle-guide-mini-jeep"></span>
@@ -1223,13 +1231,19 @@
         </div>
         <section class="heart-cupid-game" aria-label="Heart balloon bow game" hidden>
             <div class="heart-game-hud" aria-live="polite">
-                <div class="heart-game-score-panel">
-                    <span class="heart-game-score-label">Score</span>
-                    <strong class="heart-game-score-value">0 / 1000</strong>
-                    <span class="heart-game-score-track" aria-hidden="true">
-                        <span class="heart-game-score-fill"></span>
-                        <span class="heart-game-high-score-marker"></span>
-                    </span>
+                <div class="heart-color-gauge" role="status" aria-label="Target RED: 0 of 3 hearts">
+                    <svg class="heart-color-target-icon" viewBox="0 0 100 90" aria-hidden="true">
+                        <path d="M50 84 C43 75 12 58 12 31 C12 10 38 3 50 23 C62 3 88 10 88 31 C88 58 57 75 50 84 Z"></path>
+                        <ellipse cx="31" cy="28" rx="8" ry="13" transform="rotate(28 31 28)"></ellipse>
+                    </svg>
+                    <div class="heart-color-gauge-body">
+                        <div class="heart-color-gauge-track" aria-hidden="true">
+                            <span class="heart-color-gauge-fill"></span>
+                            <span class="heart-color-milestones">
+                                <i data-heart-color-stage="0"></i><i data-heart-color-stage="1"></i><i data-heart-color-stage="2"></i><i data-heart-color-stage="3"></i><i data-heart-color-stage="4"></i><i data-heart-color-stage="5"></i><i data-heart-color-stage="6"></i>
+                            </span>
+                        </div>
+                    </div>
                 </div>
                 <div class="heart-game-center-hud">
                     <div class="heart-game-timer" aria-label="45 seconds remaining">
@@ -1241,16 +1255,6 @@
                         <strong class="heart-freeze-countdown">5.0</strong>
                     </div>
                 </div>
-                <div class="heart-game-lives" aria-label="5 lives remaining">
-                    <span class="heart-game-lives-label">Lives</span>
-                    <span class="heart-game-life-icons" aria-hidden="true">
-                        <svg class="heart-game-life" viewBox="0 0 40 36"><path d="M20 34 C16 29 3 21 3 11 C3 1 16 -1 20 7 C24 -1 37 1 37 11 C37 21 24 29 20 34 Z"></path></svg>
-                        <svg class="heart-game-life" viewBox="0 0 40 36"><path d="M20 34 C16 29 3 21 3 11 C3 1 16 -1 20 7 C24 -1 37 1 37 11 C37 21 24 29 20 34 Z"></path></svg>
-                        <svg class="heart-game-life" viewBox="0 0 40 36"><path d="M20 34 C16 29 3 21 3 11 C3 1 16 -1 20 7 C24 -1 37 1 37 11 C37 21 24 29 20 34 Z"></path></svg>
-                        <svg class="heart-game-life" viewBox="0 0 40 36"><path d="M20 34 C16 29 3 21 3 11 C3 1 16 -1 20 7 C24 -1 37 1 37 11 C37 21 24 29 20 34 Z"></path></svg>
-                        <svg class="heart-game-life" viewBox="0 0 40 36"><path d="M20 34 C16 29 3 21 3 11 C3 1 16 -1 20 7 C24 -1 37 1 37 11 C37 21 24 29 20 34 Z"></path></svg>
-                    </span>
-                </div>
             </div>
             <button class="heart-game-pause-button" type="button" aria-label="Pause heart game" aria-pressed="false">
                 <span aria-hidden="true"></span>
@@ -1261,12 +1265,12 @@
             </div>
             <div class="heart-balloon-field" aria-hidden="true">
                 <svg class="heart-balloon-defs" aria-hidden="true"><defs><symbol id="heartBalloonSymbol" viewBox="0 0 100 150"><path d="M50 84 C43 75 12 58 12 31 C12 10 38 3 50 23 C62 3 88 10 88 31 C88 58 57 75 50 84 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5"></path><ellipse cx="31" cy="28" rx="8" ry="13" fill="rgba(255,255,255,0.62)" transform="rotate(28 31 28)"></ellipse><path d="M50 82 L42 94 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 93 C34 109 66 119 47 148" fill="none" stroke="#8f5b72" stroke-width="2.5" stroke-linecap="round"></path></symbol></defs></svg>
-                <svg class="heart-floating-balloon is-large" data-balloon-kind="heart" data-points="25" viewBox="0 0 100 150" style="--balloon-x:12%;--balloon-duration:21s;--balloon-delay:-7s;--balloon-color:#ff4f91;--balloon-edge:#9d205a;"><use href="#heartBalloonSymbol"></use></svg>
-                <svg class="heart-floating-balloon is-large" data-balloon-kind="heart" data-points="25" viewBox="0 0 100 150" style="--balloon-x:38%;--balloon-duration:23s;--balloon-delay:-15s;--balloon-color:#f35dc4;--balloon-edge:#8d2577;"><use href="#heartBalloonSymbol"></use></svg>
-                <svg class="heart-floating-balloon is-large" data-balloon-kind="heart" data-points="25" viewBox="0 0 100 150" style="--balloon-x:63%;--balloon-duration:20s;--balloon-delay:-11s;--balloon-color:#ff8dba;--balloon-edge:#a82e68;"><use href="#heartBalloonSymbol"></use></svg>
-                <svg class="heart-floating-balloon is-small" data-balloon-kind="heart" data-points="50" viewBox="0 0 100 150" style="--balloon-x:88%;--balloon-duration:9s;--balloon-delay:-2s;--balloon-color:#ff665c;--balloon-edge:#9e2c35;"><use href="#heartBalloonSymbol"></use></svg>
-                <svg class="heart-floating-balloon is-small is-phase-hidden" data-balloon-kind="heart" data-points="50" data-final-heart="true" viewBox="0 0 100 150" style="--balloon-x:27%;--balloon-duration:8.6s;--balloon-delay:-5s;--balloon-color:#ff4f91;--balloon-edge:#9d205a;"><use href="#heartBalloonSymbol"></use></svg>
-                <svg class="heart-floating-balloon is-small is-phase-hidden" data-balloon-kind="heart" data-points="50" data-final-heart="true" viewBox="0 0 100 150" style="--balloon-x:73%;--balloon-duration:8.2s;--balloon-delay:-7s;--balloon-color:#ff72b6;--balloon-edge:#942b68;"><use href="#heartBalloonSymbol"></use></svg>
+                <svg class="heart-floating-balloon is-large" data-balloon-kind="heart" viewBox="0 0 100 150" style="--balloon-x:12%;--balloon-duration:21s;--balloon-delay:-7s;--balloon-color:#ff4f91;--balloon-edge:#9d205a;"><use href="#heartBalloonSymbol"></use></svg>
+                <svg class="heart-floating-balloon is-large" data-balloon-kind="heart" viewBox="0 0 100 150" style="--balloon-x:38%;--balloon-duration:23s;--balloon-delay:-15s;--balloon-color:#f35dc4;--balloon-edge:#8d2577;"><use href="#heartBalloonSymbol"></use></svg>
+                <svg class="heart-floating-balloon is-large" data-balloon-kind="heart" viewBox="0 0 100 150" style="--balloon-x:63%;--balloon-duration:20s;--balloon-delay:-11s;--balloon-color:#ff8dba;--balloon-edge:#a82e68;"><use href="#heartBalloonSymbol"></use></svg>
+                <svg class="heart-floating-balloon is-small" data-balloon-kind="heart" viewBox="0 0 100 150" style="--balloon-x:88%;--balloon-duration:9s;--balloon-delay:-2s;--balloon-color:#ff665c;--balloon-edge:#9e2c35;"><use href="#heartBalloonSymbol"></use></svg>
+                <svg class="heart-floating-balloon is-small is-phase-hidden" data-balloon-kind="heart" data-final-heart="true" viewBox="0 0 100 150" style="--balloon-x:27%;--balloon-duration:8.6s;--balloon-delay:-5s;--balloon-color:#ff4f91;--balloon-edge:#9d205a;"><use href="#heartBalloonSymbol"></use></svg>
+                <svg class="heart-floating-balloon is-small is-phase-hidden" data-balloon-kind="heart" data-final-heart="true" viewBox="0 0 100 150" style="--balloon-x:73%;--balloon-duration:8.2s;--balloon-delay:-7s;--balloon-color:#ff72b6;--balloon-edge:#942b68;"><use href="#heartBalloonSymbol"></use></svg>
                 <svg class="shape-floating-balloon is-large" data-balloon-kind="shape" viewBox="0 0 100 150" style="--balloon-x:5%;--balloon-duration:18s;--balloon-delay:-3s;--balloon-color:#4fc5ff;--balloon-edge:#2166a5;"><circle cx="50" cy="42" r="34" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5"></circle><ellipse cx="35" cy="27" rx="8" ry="12" fill="rgba(255,255,255,0.62)" transform="rotate(28 35 27)"></ellipse><path d="M50 75 L42 88 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 87 C34 106 66 119 47 148" fill="none" stroke="#557086" stroke-width="2.5"></path></svg>
                 <svg class="shape-floating-balloon is-large" viewBox="0 0 100 150" style="--balloon-x:18%;--balloon-duration:20s;--balloon-delay:-14s;--balloon-color:#62d26f;--balloon-edge:#24713a;"><rect x="17" y="9" width="66" height="66" rx="8" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5"></rect><path d="M50 74 L42 88 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 87 C34 106 66 119 47 148" fill="none" stroke="#55765b" stroke-width="2.5"></path></svg>
                 <svg class="shape-floating-balloon is-large" viewBox="0 0 100 150" style="--balloon-x:31%;--balloon-duration:16.5s;--balloon-delay:-10s;--balloon-color:#ffd84a;--balloon-edge:#a66a14;"><path d="M50 7 L88 74 H12 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5" stroke-linejoin="round"></path><path d="M50 72 L42 87 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 86 C34 106 66 119 47 148" fill="none" stroke="#856b41" stroke-width="2.5"></path></svg>
@@ -1330,7 +1334,7 @@
             <div class="heart-game-result" role="dialog" aria-modal="true" aria-labelledby="heart-game-result-title" hidden>
                 <div class="heart-game-result-panel">
                     <strong id="heart-game-result-title" class="heart-game-result-title">Mission Complete!</strong>
-                    <span class="heart-game-result-copy">You reached 1000 points!</span>
+                    <span class="heart-game-result-copy">You completed the rainbow!</span>
                     <button class="heart-game-retry-button" type="button">Play Again</button>
                 </div>
             </div>
@@ -1437,7 +1441,7 @@
         <section class="star-mission-celebration" aria-hidden="true">
             <div class="star-mission-confetti" aria-hidden="true"></div>
             <h2>Congratulations!</h2>
-            <p>You collected all stars!</p>
+            <p>NAKOLEKTA MO LAHAT!</p>
             <img class="star-mission-celebration-ch7" src="assets/Character/ch7.webp" alt="">
             <img class="star-mission-celebration-ch8" src="assets/Character/ch8.webp" alt="">
         </section>
@@ -1505,6 +1509,13 @@
         <div class="diamond-mission-blackout" aria-hidden="true" hidden></div>
         <section class="diamond-mission-game" aria-label="Diamond Mission game" hidden>
             <div class="diamond-mission-bats" aria-label="Flying bats carrying shape pieces"></div>
+            <button class="diamond-mission-pause-button" type="button" aria-label="Pause diamond game" aria-pressed="false" hidden>
+                <span aria-hidden="true"></span>
+            </button>
+            <div class="diamond-mission-pause-overlay" role="status" aria-live="polite" hidden>
+                <div class="diamond-mission-pause-sign" aria-hidden="true"><span></span><span></span></div>
+                <strong>Paused</strong>
+            </div>
             <svg class="diamond-mission-storage" viewBox="3 3 354 274" role="img" aria-label="Storage board with four empty pieces of a diamond" xmlns="http://www.w3.org/2000/svg">
                 <rect x="7" y="7" width="346" height="266" rx="8" fill="#635f9d" stroke="#bbecff" stroke-width="8"/>
                 <rect x="23" y="23" width="314" height="234" rx="4" fill="#a9d7e8"/>
@@ -1728,7 +1739,7 @@
         </button>
 
         <aside class="circle-camera-unlock-board" aria-label="Circle camera challenge progress">
-            <h2>Find a circle<br>to unlock!</h2>
+            <h2>Maghanap ng hugis bilog<br>upang mabuksan ito!</h2>
             <div class="circle-camera-locked-chest" aria-hidden="true">
                 <span class="circle-camera-chest-lid"></span>
                 <span class="circle-camera-chest-body"></span>
@@ -1740,7 +1751,7 @@
             </div>
         </aside>
 
-        <a class="game-return-btn loading-link" href="index.html" data-route="circle-illustration" aria-label="Return to Circle Mission">
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-circle" aria-label="Return to Circle Island intro">
             <span>‹</span>
             Back
         </a>
@@ -1781,7 +1792,7 @@
             <strong>Start Camera</strong>
         </button>
         <aside class="circle-camera-unlock-board" aria-label="Square camera challenge progress">
-            <h2>Find a square<br>to unlock!</h2>
+            <h2>Maghanap ng hugis parisukat<br>upang mabuksan ito!</h2>
             <div class="circle-camera-locked-chest" aria-hidden="true">
                 <span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span>
                 <span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span>
@@ -1789,7 +1800,7 @@
                 <span class="circle-camera-chest-padlock"></span>
             </div>
         </aside>
-        <a class="game-return-btn loading-link" href="index.html" data-route="shape-square" aria-label="Return to Square Mission"><span>‹</span>Back</a>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-square" aria-label="Return to Square Island intro"><span>‹</span>Back</a>
     </section>
 
     <section id="learnscape-triangle-camera-page" class="circle-camera-page shape-camera-page triangle-camera-page" data-camera-shape="triangle" hidden>
@@ -1799,8 +1810,8 @@
         <aside class="circle-camera-target-card" aria-label="Target shape"><h2>Target Shape:</h2><div class="circle-camera-target-shape triangle-camera-target-shape" aria-hidden="true"></div><strong>Triangle</strong></aside>
         <main class="circle-camera-scan-board" aria-label="Camera detection game layout"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>Scan an object using the camera!</strong></div><div class="circle-camera-viewfinder" aria-label="Camera preview placeholder"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
         <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Start Camera</strong></button>
-        <aside class="circle-camera-unlock-board" aria-label="Triangle camera challenge progress"><h2>Find a triangle<br>to unlock!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
-        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-3" aria-label="Return to Triangle Area"><span>‹</span>Back</a>
+        <aside class="circle-camera-unlock-board" aria-label="Triangle camera challenge progress"><h2>Maghanap ng hugis tatsulok<br>upang mabuksan ito!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-3" aria-label="Return to Triangle Island intro"><span>‹</span>Back</a>
     </section>
 
     <section id="learnscape-rectangle-camera-page" class="circle-camera-page shape-camera-page rectangle-camera-page" data-camera-shape="rectangle" hidden>
@@ -1810,8 +1821,8 @@
         <aside class="circle-camera-target-card" aria-label="Target shape"><h2>Target Shape:</h2><div class="circle-camera-target-shape rectangle-camera-target-shape" aria-hidden="true"></div><strong>Rectangle</strong></aside>
         <main class="circle-camera-scan-board" aria-label="Camera detection game layout"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>Scan an object using the camera!</strong></div><div class="circle-camera-viewfinder" aria-label="Camera preview placeholder"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
         <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Start Camera</strong></button>
-        <aside class="circle-camera-unlock-board" aria-label="Rectangle camera challenge progress"><h2>Find a rectangle<br>to unlock!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
-        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-4" aria-label="Return to Rectangle Area"><span>‹</span>Back</a>
+        <aside class="circle-camera-unlock-board" aria-label="Rectangle camera challenge progress"><h2>Maghanap ng hugis parihaba<br>upang mabuksan ito!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-4" aria-label="Return to Rectangle Island intro"><span>‹</span>Back</a>
     </section>
 
     <section id="learnscape-oval-camera-page" class="circle-camera-page shape-camera-page oval-camera-page" data-camera-shape="oval" hidden>
@@ -1819,8 +1830,8 @@
         <aside class="circle-camera-target-card" aria-label="Target shape"><h2>Target Shape:</h2><div class="circle-camera-target-shape oval-camera-target-shape" aria-hidden="true"></div><strong>Oval</strong></aside>
         <main class="circle-camera-scan-board" aria-label="Camera detection game layout"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>Scan an object using the camera!</strong></div><div class="circle-camera-viewfinder" aria-label="Camera preview placeholder"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
         <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Start Camera</strong></button>
-        <aside class="circle-camera-unlock-board" aria-label="Oval camera challenge progress"><h2>Find an oval<br>to unlock!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
-        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-5" aria-label="Return to Oval Area"><span>‹</span>Back</a>
+        <aside class="circle-camera-unlock-board" aria-label="Oval camera challenge progress"><h2>Maghanap ng hugis bilohaba<br>upang mabuksan ito!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-5" aria-label="Return to Oval Island intro"><span>‹</span>Back</a>
     </section>
 
     <section id="learnscape-heart-camera-page" class="circle-camera-page shape-camera-page heart-camera-page" data-camera-shape="heart" hidden>
@@ -1828,8 +1839,8 @@
         <aside class="circle-camera-target-card" aria-label="Target shape"><h2>Target Shape:</h2><div class="circle-camera-target-shape heart-camera-target-shape" aria-hidden="true"></div><strong>Heart</strong></aside>
         <main class="circle-camera-scan-board" aria-label="Camera detection game layout"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>Scan an object using the camera!</strong></div><div class="circle-camera-viewfinder" aria-label="Camera preview placeholder"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
         <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Start Camera</strong></button>
-        <aside class="circle-camera-unlock-board" aria-label="Heart camera challenge progress"><h2>Find a heart<br>to unlock!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
-        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-6" aria-label="Return to Heart Area"><span>‹</span>Back</a>
+        <aside class="circle-camera-unlock-board" aria-label="Heart camera challenge progress"><h2>Maghanap ng hugis puso<br>upang mabuksan ito!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-6" aria-label="Return to Heart Island intro"><span>‹</span>Back</a>
     </section>
 
     <section id="learnscape-star-camera-page" class="circle-camera-page shape-camera-page star-camera-page" data-camera-shape="star" hidden>
@@ -1837,8 +1848,8 @@
         <aside class="circle-camera-target-card" aria-label="Target shape"><h2>Target Shape:</h2><div class="circle-camera-target-shape star-camera-target-shape" aria-hidden="true"></div><strong>Star</strong></aside>
         <main class="circle-camera-scan-board" aria-label="Camera detection game layout"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>Scan an object using the camera!</strong></div><div class="circle-camera-viewfinder" aria-label="Camera preview placeholder"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
         <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Start Camera</strong></button>
-        <aside class="circle-camera-unlock-board" aria-label="Star camera challenge progress"><h2>Find a star<br>to unlock!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
-        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-7" aria-label="Return to Star Area"><span>‹</span>Back</a>
+        <aside class="circle-camera-unlock-board" aria-label="Star camera challenge progress"><h2>Maghanap ng hugis bituin<br>upang mabuksan ito!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-7" aria-label="Return to Star Island intro"><span>‹</span>Back</a>
     </section>
 
     <section id="learnscape-diamond-camera-page" class="circle-camera-page shape-camera-page diamond-camera-page" data-camera-shape="diamond" hidden>
@@ -1846,8 +1857,8 @@
         <aside class="circle-camera-target-card" aria-label="Target shape"><h2>Target Shape:</h2><div class="circle-camera-target-shape diamond-camera-target-shape" aria-hidden="true"></div><strong>Diamond</strong></aside>
         <main class="circle-camera-scan-board" aria-label="Camera detection game layout"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>Scan an object using the camera!</strong></div><div class="circle-camera-viewfinder" aria-label="Camera preview placeholder"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
         <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Start Camera</strong></button>
-        <aside class="circle-camera-unlock-board" aria-label="Diamond camera challenge progress"><h2>Find a diamond<br>to unlock!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
-        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-8" aria-label="Return to Diamond Area"><span>‹</span>Back</a>
+        <aside class="circle-camera-unlock-board" aria-label="Diamond camera challenge progress"><h2>Maghanap ng hugis dyamante<br>upang mabuksan ito!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-8" aria-label="Return to Diamond Island intro"><span>‹</span>Back</a>
     </section>
 
     
@@ -2687,11 +2698,6 @@
                             </div>
                         </div>
                     `,
-                },
-                character: {
-                    kicker: 'Your Guide',
-                    title: 'Meet Bibi',
-                    copy: '<img class="intro-guide-portrait" src="assets/Character/ch3.webp" alt="Bibi"> <span>Bibi is ready to explore Shape Island with you.</span>',
                 },
             };
 
