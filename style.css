@@ -4304,6 +4304,127 @@ body *::after {
     pointer-events: none;
 }
 
+.diamond-mission-lives {
+    position: absolute;
+    top: clamp(1rem, 2.5vw, 1.8rem);
+    left: 50%;
+    z-index: 11;
+    display: flex;
+    gap: clamp(0.55rem, 1.2vw, 0.9rem);
+    align-items: center;
+    justify-content: center;
+    min-width: clamp(10rem, 20vw, 14rem);
+    padding: clamp(0.65rem, 1.2vw, 0.9rem) clamp(1.1rem, 2vw, 1.6rem);
+    border: 0.22rem solid #4b2b83;
+    border-radius: 0.5rem;
+    background: rgba(244, 235, 255, 0.94);
+    box-shadow: inset 0 0.12rem 0 rgba(255, 255, 255, 0.9), 0 0.35rem 0 #291654, 0 0.65rem 1rem rgba(18, 9, 49, 0.32);
+    transform: translateX(-50%);
+}
+
+.diamond-mission-life {
+    position: relative;
+    display: block;
+    width: clamp(1.65rem, 3.2vw, 2.4rem);
+    aspect-ratio: 1;
+    background: #ff4f82;
+    filter: drop-shadow(0 0.16rem 0 #8f1f52);
+    transform: rotate(45deg) scale(0.72);
+    transition: opacity 0.28s ease, filter 0.28s ease, transform 0.28s ease;
+}
+
+.diamond-mission-life::before,
+.diamond-mission-life::after {
+    position: absolute;
+    content: '';
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: inherit;
+}
+
+.diamond-mission-life::before { left: -50%; }
+.diamond-mission-life::after { top: -50%; }
+
+.diamond-mission-life.is-lost {
+    opacity: 0.2;
+    filter: grayscale(1);
+    transform: rotate(45deg) scale(0.58);
+}
+
+.diamond-mission-game-over[hidden] { display: none; }
+
+.diamond-mission-game-over {
+    position: absolute;
+    inset: 0;
+    z-index: 18;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(18, 10, 48, 0.65);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.diamond-mission-game-over.is-visible { opacity: 1; }
+
+.diamond-mission-game.is-game-over .diamond-mission-lives,
+.diamond-mission-game.is-game-over .diamond-mission-storage,
+.diamond-mission-game.is-game-over .diamond-mission-reveal {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.learnscape-shape-area-8-page.is-diamond-game-over .game-return-btn {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.diamond-mission-game-over-panel {
+    display: grid;
+    justify-items: center;
+    width: min(30rem, calc(100vw - 2rem));
+    padding: 1.5rem 2rem 1.8rem;
+    border: 0.28rem solid #4b2b83;
+    border-radius: 0.5rem;
+    background: #f7efff;
+    box-shadow: inset 0 0.15rem rgba(255, 255, 255, 0.9), 0 0.45rem 0 #291654;
+    color: #351665;
+    font-family: 'Fredoka', 'Nunito', sans-serif;
+    text-align: center;
+}
+
+.diamond-mission-game-over-panel strong {
+    font-size: clamp(2.6rem, 6vw, 4.5rem);
+    line-height: 1;
+}
+
+.diamond-mission-game-over-panel span {
+    margin: 0.55rem 0 1.1rem;
+    font-size: clamp(1.25rem, 2.6vw, 1.8rem);
+    font-weight: 800;
+}
+
+.diamond-mission-retry-button {
+    min-width: 10rem;
+    min-height: 3.5rem;
+    border: 0.22rem solid #2d1761;
+    border-radius: 0.45rem;
+    background: linear-gradient(180deg, #83e9ff, #45b6e8);
+    box-shadow: inset 0 0.12rem rgba(255, 255, 255, 0.85), 0 0.28rem 0 #24518a;
+    color: #172d61;
+    font: 900 clamp(1.35rem, 2.8vw, 2rem)/1 'Fredoka', 'Nunito', sans-serif;
+    cursor: pointer;
+}
+
+.diamond-mission-retry-button:hover,
+.diamond-mission-retry-button:focus-visible {
+    filter: brightness(1.08);
+    outline: none;
+    transform: translateY(-0.1rem);
+}
+
 .diamond-mission-storage {
     position: absolute;
     right: 0;
@@ -4480,7 +4601,7 @@ body *::after {
     display: block;
     width: 100%;
     height: 100%;
-    animation: diamondBatFloat 1.15s ease-in-out infinite alternate;
+    animation: diamondBatFloat var(--bat-wave-duration, 1.65s) ease-in-out infinite;
 }
 
 .diamond-mission-bat-image {
@@ -4511,7 +4632,7 @@ body *::after {
 .diamond-mission-bat-piece.is-upper-left,
 .diamond-mission-bat-piece.is-upper-right {
     top: 38%;
-    z-index: 1;
+    z-index: 3;
     transform: none;
 }
 
@@ -4519,8 +4640,40 @@ body *::after {
     left: -12%;
 }
 
+.diamond-mission-bat.is-flying-left .diamond-mission-bat-piece.is-upper-left {
+    left: 9%;
+}
+
 .diamond-mission-bat-piece.is-upper-right {
     left: 32%;
+}
+
+.diamond-mission-bat-piece.is-decoy {
+    z-index: 3;
+}
+
+.diamond-mission-bat-piece.is-circle,
+.diamond-mission-bat-piece.is-triangle,
+.diamond-mission-bat-piece.is-oval {
+    left: 33%;
+    transform: none;
+}
+
+.diamond-mission-bat-piece.is-circle {
+    top: 34%;
+}
+
+.diamond-mission-bat-piece.is-triangle,
+.diamond-mission-bat-piece.is-oval {
+    top: 30%;
+}
+
+.diamond-mission-bat-piece.is-rectangle {
+    top: 30%;
+}
+
+.diamond-mission-bat-piece.is-heart {
+    top: 36%;
 }
 
 .diamond-mission-bat:hover .diamond-mission-bat-piece,
@@ -4544,8 +4697,10 @@ body *::after {
 }
 
 @keyframes diamondBatFloat {
-    from { transform: translateY(-0.45rem) rotate(-2deg); }
-    to { transform: translateY(0.45rem) rotate(2deg); }
+    0%, 100% { transform: translateY(var(--bat-wave-up, -0.9rem)) rotate(-3deg); }
+    25% { transform: translateY(var(--bat-wave-down, 1.05rem)) rotate(2.5deg); }
+    50% { transform: translateY(var(--bat-wave-up, -0.9rem)) rotate(-2.5deg); }
+    75% { transform: translateY(var(--bat-wave-down, 1.05rem)) rotate(3deg); }
 }
 
 .heart-mission-intro {
@@ -15478,6 +15633,13 @@ body *::after {
 
 .game3-island-prev:disabled {
     display: none;
+}
+
+#learnscape-game3-page[data-game3-island="1"] .game3-island-prev,
+#learnscape-game3-page[data-game3-island="8"] .game3-island-next {
+    display: none;
+    visibility: hidden;
+    pointer-events: none;
 }
 
 @media (max-width: 700px) {

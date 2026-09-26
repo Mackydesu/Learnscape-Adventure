@@ -1098,8 +1098,12 @@ const appVersion = '20260926-583';
     const diamondMissionBlackout = diamondMissionPage?.querySelector('.diamond-mission-blackout') || null;
     const diamondMissionGame = diamondMissionPage?.querySelector('.diamond-mission-game') || null;
     const diamondMissionBatLayer = diamondMissionGame?.querySelector('.diamond-mission-bats') || null;
+    const diamondMissionLivesPanel = diamondMissionGame?.querySelector('.diamond-mission-lives') || null;
+    const diamondMissionLifeIcons = Array.from(diamondMissionLivesPanel?.querySelectorAll('.diamond-mission-life') || []);
     const diamondMissionPauseButton = diamondMissionGame?.querySelector('.diamond-mission-pause-button') || null;
     const diamondMissionPauseOverlay = diamondMissionGame?.querySelector('.diamond-mission-pause-overlay') || null;
+    const diamondMissionGameOver = diamondMissionGame?.querySelector('.diamond-mission-game-over') || null;
+    const diamondMissionRetryButton = diamondMissionGameOver?.querySelector('.diamond-mission-retry-button') || null;
     const diamondMissionStorage = diamondMissionGame?.querySelector('.diamond-mission-storage') || null;
     const diamondMissionStorageSlots = Array.from(diamondMissionStorage?.querySelectorAll('.diamond-mission-storage-slot') || []);
     const diamondMissionReveal = diamondMissionGame?.querySelector('.diamond-mission-reveal') || null;
@@ -1140,6 +1144,11 @@ const appVersion = '20260926-583';
     const STAR_MISSION_NON_STAR_PENALTY_MS = 1000;
     const DIAMOND_MISSION_AUDIO_SOURCE = 'assets/Audios/Voice over/diamondmission.mp3';
     const DIAMOND_MISSION_READY_AUDIO_SOURCE = 'assets/Audios/Voice over/Handa ka na ba.mp3';
+    const DIAMOND_MISSION_BATS_AUDIO_SOURCE = 'assets/Audios/Sound effects/bats.mp3';
+    const DIAMOND_MISSION_BAT_FLY_AUDIO_SOURCE = 'assets/Audios/Sound effects/bats fly.mp3';
+    const DIAMOND_MISSION_CORRECT_AUDIO_SOURCE = 'assets/Audios/Sound effects/correct.mp3';
+    const DIAMOND_MISSION_SUCCESS_AUDIO_SOURCE = 'assets/Audios/Sound effects/success.mp3';
+    const DIAMOND_MISSION_LOSE_AUDIO_SOURCE = 'assets/Audios/Sound effects/lose.mp3';
     const DIAMOND_MISSION_REVEAL_AUDIO_SOURCE = 'assets/Audios/Sound effects/diamond.mp3';
     const DIAMOND_MISSION_REVEAL_DURATION_MS = 2600;
     const DIAMOND_MISSION_REVEAL_FADE_MS = 550;
@@ -1184,6 +1193,9 @@ const appVersion = '20260926-583';
     let diamondMissionSession = 0;
     let diamondMissionTimers = [];
     let diamondMissionAudio = null;
+    let diamondMissionBatsAudio = null;
+    const diamondMissionBatFlyAudios = new Set();
+    let diamondMissionLoseAudio = null;
     let diamondMissionRevealAudio = null;
     let diamondMissionRevealAudioFrame = null;
     let diamondMissionCompletedAudio = null;
@@ -1194,6 +1206,8 @@ const appVersion = '20260926-583';
     let diamondMissionDecoyIndex = 0;
     let diamondMissionRevealStarted = false;
     let diamondMissionPaused = false;
+    let diamondMissionLives = 3;
+    let diamondMissionGameOverStarted = false;
     const diamondMissionCollectedPieces = new Set();
     let heartShotAnimationFrame = null;
     let heartCurrentTrajectory = null;
@@ -3848,6 +3862,12 @@ const appVersion = '20260926-583';
         { name: 'normal', duration: 9 },
         { name: 'fast', duration: 6 },
     ];
+    const diamondBatWaveProfiles = [
+        { name: 'gentle', up: '-0.8rem', down: '0.9rem', duration: '1.8s' },
+        { name: 'strong', up: '-2rem', down: '2.15rem', duration: '1.45s' },
+        { name: 'medium', up: '-1.35rem', down: '1.5rem', duration: '1.7s' },
+        { name: 'extra-strong', up: '-2.75rem', down: '2.9rem', duration: '1.3s' },
+    ];
     const diamondBatDecoys = [
         { name: 'circle', path: 'M16 84V20A64 64 0 0 1 80 84Z', color: '#f7b4ca' },
         { name: 'square', path: 'M18 18H82V82H18Z', color: '#f8d677' },
@@ -3858,9 +3878,125 @@ const appVersion = '20260926-583';
         { name: 'star', path: 'M15 82L29 47L46 56L57 16L70 51L87 64L61 82Z', color: '#c6dc83' },
     ];
 
+    const syncDiamondMissionBatsVolume = () => {
+        const volume = Math.min(1, 0.3 * (window.__learnscapeSoundScale?.() ?? 1));
+        if (diamondMissionBatsAudio) diamondMissionBatsAudio.volume = volume;
+        diamondMissionBatFlyAudios.forEach((audio) => {
+            const volumeScale = Number(audio.dataset.diamondVolumeScale || 0.5);
+            audio.volume = Math.min(1, volumeScale * (window.__learnscapeSoundScale?.() ?? 1));
+        });
+    };
+
+    const stopDiamondMissionBatsAudio = () => {
+        if (!diamondMissionBatsAudio) return;
+        diamondMissionBatsAudio.pause();
+        diamondMissionBatsAudio.currentTime = 0;
+        diamondMissionBatsAudio = null;
+    };
+
+    const startDiamondMissionBatsAudio = () => {
+        stopDiamondMissionBatsAudio();
+        if (!window.Audio || (window.__learnscapeSoundScale?.() ?? 1) <= 0) return;
+        const audio = new window.Audio(DIAMOND_MISSION_BATS_AUDIO_SOURCE);
+        diamondMissionBatsAudio = audio;
+        audio.loop = true;
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        syncDiamondMissionBatsVolume();
+        audio.play().catch(() => {
+            if (diamondMissionBatsAudio === audio) diamondMissionBatsAudio = null;
+        });
+    };
+
+    const playDiamondMissionBatEffectAudio = (source, volumeScale = 0.5) => {
+        if (!window.Audio || (window.__learnscapeSoundScale?.() ?? 1) <= 0) return;
+        const audio = new window.Audio(source);
+        diamondMissionBatFlyAudios.add(audio);
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.dataset.diamondVolumeScale = String(volumeScale);
+        audio.volume = Math.min(1, volumeScale * (window.__learnscapeSoundScale?.() ?? 1));
+        const release = () => diamondMissionBatFlyAudios.delete(audio);
+        audio.onended = release;
+        audio.onerror = release;
+        audio.play().catch(release);
+    };
+
+    const playDiamondMissionBatFlyAudio = () => {
+        playDiamondMissionBatEffectAudio(DIAMOND_MISSION_BAT_FLY_AUDIO_SOURCE, 0.9);
+    };
+
+    const playDiamondMissionWrongShapeAudio = () => {
+        playDiamondMissionBatEffectAudio(STAR_MISSION_BOING_AUDIO_SOURCE);
+    };
+
+    const playDiamondMissionCorrectShapeAudio = () => {
+        playDiamondMissionBatEffectAudio(DIAMOND_MISSION_CORRECT_AUDIO_SOURCE);
+    };
+
+    const playDiamondMissionSuccessAudio = () => {
+        playDiamondMissionBatEffectAudio(DIAMOND_MISSION_SUCCESS_AUDIO_SOURCE, 1);
+    };
+
+    window.addEventListener('learnscape:soundchange', syncDiamondMissionBatsVolume);
+
+    const updateDiamondMissionLives = () => {
+        diamondMissionLifeIcons.forEach((life, index) => {
+            life.classList.toggle('is-lost', index >= diamondMissionLives);
+        });
+        diamondMissionLivesPanel?.setAttribute(
+            'aria-label',
+            `${diamondMissionLives} ${diamondMissionLives === 1 ? 'life' : 'lives'} remaining`,
+        );
+    };
+
+    const showDiamondMissionGameOver = () => {
+        if (diamondMissionGameOverStarted) return;
+        diamondMissionGameOverStarted = true;
+        stopDiamondMissionBatsAudio();
+        diamondMissionLoseAudio = stopStarMissionAudio(diamondMissionLoseAudio);
+        diamondMissionLoseAudio = playStarMissionOneShot(DIAMOND_MISSION_LOSE_AUDIO_SOURCE, () => {
+            diamondMissionLoseAudio = null;
+        });
+        if (diamondMissionBatInterval !== null) window.clearInterval(diamondMissionBatInterval);
+        diamondMissionBatInterval = null;
+        diamondMissionGame?.classList.add('is-game-over');
+        diamondMissionPage?.classList.add('is-diamond-game-over');
+        diamondMissionBatLayer?.replaceChildren();
+        diamondMissionGame?.querySelectorAll('.diamond-mission-flying-piece').forEach((piece) => piece.remove());
+        if (diamondMissionPauseButton) diamondMissionPauseButton.hidden = true;
+        if (diamondMissionGameOver) {
+            diamondMissionGameOver.hidden = false;
+            diamondMissionGameOver.getBoundingClientRect();
+            diamondMissionGameOver.classList.add('is-visible');
+        }
+    };
+
+    const loseDiamondMissionLife = () => {
+        if (diamondMissionGameOverStarted || diamondMissionLives <= 0) return;
+        diamondMissionLives = Math.max(0, diamondMissionLives - 1);
+        updateDiamondMissionLives();
+        if (diamondMissionLives === 0) showDiamondMissionGameOver();
+    };
+
     const resetDiamondMissionBats = () => {
+        stopDiamondMissionBatsAudio();
+        diamondMissionLoseAudio = stopStarMissionAudio(diamondMissionLoseAudio);
+        diamondMissionBatFlyAudios.forEach((audio) => {
+            audio.pause();
+            audio.currentTime = 0;
+        });
+        diamondMissionBatFlyAudios.clear();
         diamondMissionPaused = false;
-        diamondMissionGame?.classList.remove('is-paused');
+        diamondMissionLives = 3;
+        diamondMissionGameOverStarted = false;
+        updateDiamondMissionLives();
+        diamondMissionGame?.classList.remove('is-paused', 'is-game-over');
+        diamondMissionPage?.classList.remove('is-diamond-game-over');
+        if (diamondMissionGameOver) {
+            diamondMissionGameOver.hidden = true;
+            diamondMissionGameOver.classList.remove('is-visible');
+        }
         if (diamondMissionPauseOverlay) diamondMissionPauseOverlay.hidden = true;
         if (diamondMissionPauseButton) {
             diamondMissionPauseButton.hidden = true;
@@ -4042,6 +4178,7 @@ const appVersion = '20260926-583';
         bat.style.top = `${batRect.top - gameRect.top}px`;
         bat.style.transform = 'none';
         bat.classList.add('is-exiting');
+        playDiamondMissionBatFlyAudio();
         const distance = fliesLeft
             ? -(batRect.right - gameRect.left + batRect.width)
             : gameRect.right - batRect.left + batRect.width;
@@ -4052,13 +4189,13 @@ const appVersion = '20260926-583';
         exit.onfinish = () => bat.remove();
     };
 
-    const spawnDiamondMissionBat = (guaranteeDiamond = false) => {
+    const spawnDiamondMissionBat = (guaranteeDiamond = false, forceDecoy = false) => {
         if (!diamondMissionBatLayer || diamondMissionPage?.hidden || !diamondMissionGame?.classList.contains('is-active') || diamondMissionCollectedPieces.size === 4) return;
         if (diamondMissionBatLayer.childElementCount >= 5) return;
 
         const flyingPieces = new Set(Array.from(diamondMissionBatLayer.querySelectorAll('[data-diamond-slot]'), (bat) => Number(bat.dataset.diamondSlot)));
         const availablePieces = diamondBatDiamondPaths.map((_, index) => index).filter((index) => !diamondMissionCollectedPieces.has(index) && !flyingPieces.has(index));
-        const carryDiamond = availablePieces.length > 0 && (guaranteeDiamond || Math.random() < 0.65);
+        const carryDiamond = !forceDecoy && availablePieces.length > 0 && (guaranteeDiamond || Math.random() < 0.65);
         const slotIndex = carryDiamond ? availablePieces[Math.floor(Math.random() * availablePieces.length)] : -1;
         const decoy = slotIndex < 0 ? diamondBatDecoys[diamondMissionDecoyIndex++ % diamondBatDecoys.length] : null;
         const bat = document.createElement('button');
@@ -4066,9 +4203,19 @@ const appVersion = '20260926-583';
         bat.className = 'diamond-mission-bat';
         bat.setAttribute('aria-label', slotIndex >= 0 ? 'Catch a diamond piece' : `Bat carrying ${decoy.name === 'oval' ? 'an' : 'a'} ${decoy.name} piece`);
         bat.style.setProperty('--bat-top', `${[10, 20, 30, 40, 50][diamondMissionBatSequence % 5]}%`);
-        const flightSpeed = diamondBatFlightSpeeds[diamondMissionBatSequence % diamondBatFlightSpeeds.length];
+        const baseFlightSpeed = diamondBatFlightSpeeds[diamondMissionBatSequence % diamondBatFlightSpeeds.length];
+        const flightSpeed = slotIndex >= 0
+            ? { name: `${baseFlightSpeed.name}-diamond`, duration: baseFlightSpeed.duration * 0.7 }
+            : baseFlightSpeed;
+        const waveProfile = slotIndex >= 0
+            ? diamondBatWaveProfiles[1 + (slotIndex % (diamondBatWaveProfiles.length - 1))]
+            : diamondBatWaveProfiles[diamondMissionBatSequence % diamondBatWaveProfiles.length];
         bat.dataset.speed = flightSpeed.name;
+        bat.dataset.wave = waveProfile.name;
         bat.style.setProperty('--bat-duration', `${flightSpeed.duration}s`);
+        bat.style.setProperty('--bat-wave-up', waveProfile.up);
+        bat.style.setProperty('--bat-wave-down', waveProfile.down);
+        bat.style.setProperty('--bat-wave-duration', waveProfile.duration);
         if (diamondMissionBatSequence % 2 === 1) bat.classList.add('is-flying-left');
         diamondMissionBatSequence += 1;
         if (slotIndex >= 0) bat.dataset.diamondSlot = String(slotIndex);
@@ -4084,6 +4231,7 @@ const appVersion = '20260926-583';
         piece.setAttribute('class', 'diamond-mission-bat-piece');
         if (slotIndex === 0) piece.classList.add('is-upper-left');
         if (slotIndex === 1) piece.classList.add('is-upper-right');
+        if (decoy) piece.classList.add('is-decoy', `is-${decoy.name}`);
         piece.setAttribute('viewBox', '0 0 100 100');
         piece.setAttribute('aria-hidden', 'true');
         const piecePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -4098,16 +4246,26 @@ const appVersion = '20260926-583';
         bat.append(body);
 
         bat.addEventListener('click', () => {
-            if (bat.disabled || diamondMissionPage.hidden || diamondMissionCollectedPieces.size === 4) return;
+            if (bat.disabled || diamondMissionPage.hidden || diamondMissionGameOverStarted || diamondMissionCollectedPieces.size === 4) return;
             bat.disabled = true;
+            const completesDiamond = slotIndex >= 0
+                && !diamondMissionCollectedPieces.has(slotIndex)
+                && diamondMissionCollectedPieces.size === 3;
+            if (completesDiamond) playDiamondMissionSuccessAudio();
+            else if (slotIndex >= 0) playDiamondMissionCorrectShapeAudio();
+            else {
+                playDiamondMissionWrongShapeAudio();
+                loseDiamondMissionLife();
+            }
             const session = diamondMissionSession;
             releaseDiamondBatPiece(piece, slotIndex, session);
             sendDiamondBatAway(bat);
             if (slotIndex >= 0 && !diamondMissionCollectedPieces.has(slotIndex)) {
                 diamondMissionCollectedPieces.add(slotIndex);
                 diamondMissionStorage?.setAttribute('aria-label', `Storage board with ${diamondMissionCollectedPieces.size} of 4 diamond pieces found`);
-                playUiClickSound('chime');
+                if (diamondMissionCollectedPieces.size < 4) playUiClickSound('chime');
                 if (diamondMissionCollectedPieces.size === 4) {
+                    stopDiamondMissionBatsAudio();
                     if (diamondMissionPauseButton) diamondMissionPauseButton.hidden = true;
                     if (diamondMissionBatInterval !== null) window.clearInterval(diamondMissionBatInterval);
                     diamondMissionBatInterval = null;
@@ -4128,7 +4286,8 @@ const appVersion = '20260926-583';
     const startDiamondMissionBats = () => {
         resetDiamondMissionBats();
         if (diamondMissionPauseButton) diamondMissionPauseButton.hidden = false;
-        spawnDiamondMissionBat(true);
+        startDiamondMissionBatsAudio();
+        spawnDiamondMissionBat(false, true);
         diamondMissionBatInterval = window.setInterval(spawnDiamondMissionBat, 1450);
     };
 
@@ -4152,9 +4311,16 @@ const appVersion = '20260926-583';
             diamondMissionBatLayer?.querySelectorAll('.diamond-mission-bat').forEach((bat) => {
                 bat.disabled = true;
             });
+            diamondMissionBatsAudio?.pause();
+            diamondMissionBatFlyAudios.forEach((audio) => audio.pause());
             return;
         }
 
+        syncDiamondMissionBatsVolume();
+        diamondMissionBatsAudio?.play().catch(() => {});
+        diamondMissionBatFlyAudios.forEach((audio) => {
+            audio.play().catch(() => diamondMissionBatFlyAudios.delete(audio));
+        });
         diamondMissionGame.getAnimations({ subtree: true }).forEach((animation) => animation.play());
         diamondMissionBatLayer?.querySelectorAll('.diamond-mission-bat').forEach((bat) => {
             if (!bat.classList.contains('is-caught') && !bat.classList.contains('is-exiting')) bat.disabled = false;
@@ -5935,6 +6101,11 @@ const appVersion = '20260926-583';
     diamondMissionPauseButton?.addEventListener('click', () => {
         playUiClickSound('start');
         setDiamondMissionPaused(!diamondMissionPaused);
+    });
+
+    diamondMissionRetryButton?.addEventListener('click', () => {
+        playUiClickSound('start');
+        startDiamondMissionBats();
     });
 
     heartGameRetryButton?.addEventListener('click', () => {
@@ -12936,15 +13107,26 @@ const appVersion = '20260926-583';
     if (game3IslandCarousel && game3IslandPrevButton && game3IslandNextButton) {
         const game3IslandCards = game3IslandCarousel.querySelectorAll('.game3-island-card');
 
+        const getCurrentGame3Island = () => {
+            if (game3IslandCarousel.clientWidth > 0) {
+                return Math.max(0, Math.min(
+                    game3IslandCards.length - 1,
+                    Math.round(game3IslandCarousel.scrollLeft / game3IslandCarousel.clientWidth),
+                ));
+            }
+            const storedIsland = Number(game3Page.dataset.game3Island || 1) - 1;
+            return Number.isFinite(storedIsland) ? Math.max(0, Math.min(game3IslandCards.length - 1, storedIsland)) : 0;
+        };
+
         const updateGame3IslandButtons = () => {
-            const currentIsland = Math.round(game3IslandCarousel.scrollLeft / game3IslandCarousel.clientWidth);
+            const currentIsland = getCurrentGame3Island();
             game3IslandPrevButton.disabled = currentIsland <= 0;
             game3IslandNextButton.disabled = currentIsland >= game3IslandCards.length - 1;
             game3Page.dataset.game3Island = String(currentIsland + 1);
         };
 
         game3IslandPrevButton.addEventListener('click', () => {
-            const currentIsland = Math.round(game3IslandCarousel.scrollLeft / game3IslandCarousel.clientWidth);
+            const currentIsland = getCurrentGame3Island();
             const previousIsland = Math.max(currentIsland - 1, 0);
 
             game3IslandCarousel.scrollTo({
@@ -12954,7 +13136,7 @@ const appVersion = '20260926-583';
         });
 
         game3IslandNextButton.addEventListener('click', () => {
-            const currentIsland = Math.round(game3IslandCarousel.scrollLeft / game3IslandCarousel.clientWidth);
+            const currentIsland = getCurrentGame3Island();
             const nextIsland = Math.min(currentIsland + 1, game3IslandCards.length - 1);
 
             game3IslandCarousel.scrollTo({
@@ -12965,6 +13147,10 @@ const appVersion = '20260926-583';
 
         game3IslandCarousel.addEventListener('scroll', updateGame3IslandButtons, { passive: true });
         window.addEventListener('resize', updateGame3IslandButtons);
+        window.addEventListener('learnscape:routechange', (event) => {
+            if (event.detail?.route !== 'game3') return;
+            window.requestAnimationFrame(() => window.requestAnimationFrame(updateGame3IslandButtons));
+        });
         updateGame3IslandButtons();
     }
 

@@ -133,7 +133,7 @@
 
     </main>
 
-    <section id="learnscape-game3-page" class="game3-page" hidden>
+    <section id="learnscape-game3-page" class="game3-page" data-game3-island="1" hidden>
         <img class="game1-bg-image" src="assets/Backgrounds/skybg.webp" alt="" aria-hidden="true">
         <div class="game1-overlay" aria-hidden="true"></div>
         <div class="game3-clouds" aria-hidden="true"></div>
@@ -235,11 +235,6 @@
                 <h2 class="game1-intro-title">Shape Island</h2>
             </div>
         </div>
-
-        <a class="game-return-btn loading-link" href="index.html" data-route="title" aria-label="Return to intro page">
-            <span>‹</span>
-            Back
-        </a>
 
         <div class="shape-collection-widget" aria-label="Shape collection">
             <button class="shape-collection-chest" type="button" aria-expanded="false" aria-controls="shape-collection-dashboard">
@@ -1509,12 +1504,24 @@
         <div class="diamond-mission-blackout" aria-hidden="true" hidden></div>
         <section class="diamond-mission-game" aria-label="Diamond Mission game" hidden>
             <div class="diamond-mission-bats" aria-label="Flying bats carrying shape pieces"></div>
+            <div class="diamond-mission-lives" role="status" aria-live="polite" aria-label="3 lives remaining">
+                <span class="diamond-mission-life" aria-hidden="true"></span>
+                <span class="diamond-mission-life" aria-hidden="true"></span>
+                <span class="diamond-mission-life" aria-hidden="true"></span>
+            </div>
             <button class="diamond-mission-pause-button" type="button" aria-label="Pause diamond game" aria-pressed="false" hidden>
                 <span aria-hidden="true"></span>
             </button>
             <div class="diamond-mission-pause-overlay" role="status" aria-live="polite" hidden>
                 <div class="diamond-mission-pause-sign" aria-hidden="true"><span></span><span></span></div>
                 <strong>Paused</strong>
+            </div>
+            <div class="diamond-mission-game-over" role="dialog" aria-modal="true" aria-labelledby="diamond-mission-game-over-title" hidden>
+                <div class="diamond-mission-game-over-panel">
+                    <strong id="diamond-mission-game-over-title">Game Over</strong>
+                    <span>Try again!</span>
+                    <button class="diamond-mission-retry-button" type="button">Retry</button>
+                </div>
             </div>
             <svg class="diamond-mission-storage" viewBox="3 3 354 274" role="img" aria-label="Storage board with four empty pieces of a diamond" xmlns="http://www.w3.org/2000/svg">
                 <rect x="7" y="7" width="346" height="266" rx="8" fill="#635f9d" stroke="#bbecff" stroke-width="8"/>
@@ -1544,7 +1551,7 @@
         <section class="star-mission-celebration diamond-mission-celebration" aria-hidden="true">
             <div class="star-mission-confetti diamond-mission-confetti" aria-hidden="true"></div>
             <h2>Congratulations!</h2>
-            <p>You found the crystal!</p>
+            <p>NABUO MO ANG DYAMANTE!</p>
             <img class="diamond-mission-celebration-cave" src="assets/Character/cave.webp" alt="">
             <img class="diamond-mission-celebration-cave1" src="assets/Character/cave1.webp" alt="">
         </section>
