@@ -1,4 +1,4 @@
-const CACHE_NAME = 'learnscape-adventure-v379';
+const CACHE_NAME = 'learnscape-adventure-v381';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -45,7 +45,9 @@ const CORE_ASSETS = [
   './assets/Audios/Sound effects/kids cheering.mp3',
   './assets/Audios/Sound effects/clock ticking.mp3',
   './assets/Audios/Sound effects/times up.mp3',
-  './assets/Audios/Sound effects/lose.mp3'
+  './assets/Audios/Sound effects/lose.mp3',
+  './assets/Audios/Sound effects/nope.mp3',
+  './assets/Audios/Sound effects/buy.mp3'
 ];
 
 self.addEventListener('install', (event) => {

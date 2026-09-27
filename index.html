@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260924-582">
+    <link rel="stylesheet" href="style.css?v=20260928-583">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -62,7 +62,7 @@
     <div class="intro-settings">
         <div class="intro-home-resources" aria-label="Adventure progress">
             <div class="intro-resource-pill intro-resource-pill-star" data-resource="stars" aria-label="0 stars">
-                <svg viewBox="0 0 32 32" aria-hidden="true"><path d="m16 2.5 4.1 8.3 9.2 1.3-6.7 6.5 1.6 9.2-8.2-4.3-8.2 4.3 1.6-9.2-6.7-6.5 9.2-1.3Z"/></svg>
+                <img src="assets/Shape UI/lesson-star.svg" alt="" aria-hidden="true">
                 <output id="intro-star-count">0</output>
             </div>
             <div class="intro-resource-pill intro-resource-pill-carrot" data-resource="carrots" aria-label="0 carrots">
@@ -100,7 +100,7 @@
                 <button class="intro-sign-button intro-sign-button-shop" type="button" data-intro-panel="shop" aria-label="Shop">
                     <img src="assets/Buttons/Shop.webp" alt="Shop">
                 </button>
-                <button class="intro-sign-button intro-sign-button-profile" type="button" aria-label="Profile">
+                <button class="intro-sign-button intro-sign-button-profile" type="button" data-intro-panel="profile" aria-label="Profile">
                     <img src="assets/Buttons/profile.webp" alt="Profile">
                 </button>
                 <button class="intro-sign-button intro-sign-button-notif" type="button" aria-label="Notifications">
@@ -2695,26 +2695,181 @@
                             <img class="intro-shop-board-art" src="assets/Shape UI/shop-board.svg" alt="">
                             <div class="intro-shop-list">
                                 <button class="intro-shop-item" type="button" data-shop-item="circle" aria-pressed="false" aria-label="Circle key, costs 10 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/circlekey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></button>
-                                <button class="intro-shop-item" type="button" data-shop-item="square" aria-pressed="false" aria-label="Square key, costs 10 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/squarekey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></button>
-                                <button class="intro-shop-item" type="button" data-shop-item="triangle" aria-pressed="false" aria-label="Triangle key, costs 10 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/trianglekey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></button>
-                                <button class="intro-shop-item" type="button" data-shop-item="rectangle" aria-pressed="false" aria-label="Rectangle key, costs 10 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/rectanglekey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></button>
-                                <button class="intro-shop-item" type="button" data-shop-item="oval" aria-pressed="false" aria-label="Oval key, costs 10 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/ovalkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></button>
-                                <button class="intro-shop-item" type="button" data-shop-item="heart" aria-pressed="false" aria-label="Heart key, costs 10 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/heartkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></button>
-                                <button class="intro-shop-item" type="button" data-shop-item="star" aria-pressed="false" aria-label="Star key, costs 10 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/starkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></button>
-                                <button class="intro-shop-item" type="button" data-shop-item="diamond" aria-pressed="false" aria-label="Diamond key, costs 10 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/diamondkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="square" aria-pressed="false" aria-label="Square key, costs 15 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/squarekey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>15</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="triangle" aria-pressed="false" aria-label="Triangle key, costs 20 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/trianglekey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>20</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="rectangle" aria-pressed="false" aria-label="Rectangle key, costs 30 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/rectanglekey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>30</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="oval" aria-pressed="false" aria-label="Oval key, costs 40 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/ovalkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>40</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="heart" aria-pressed="false" aria-label="Heart key, costs 60 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/heartkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>60</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="star" aria-pressed="false" aria-label="Star key, costs 80 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/starkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>80</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="diamond" aria-pressed="false" aria-label="Diamond key, costs 100 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/diamondkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>100</span></span></button>
                             </div>
                             <p class="intro-shop-status" role="status" aria-live="polite"></p>
                         </div>
                     `,
                 },
+                profile: {
+                    kicker: '',
+                    title: 'PROFILE',
+                    copy: `
+                        <div class="intro-profile-board" aria-label="Player profile">
+                            <svg class="intro-profile-board-art" viewBox="0 0 960 620" preserveAspectRatio="none" aria-hidden="true">
+                                <defs>
+                                    <linearGradient id="profileWood" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#d8842d"/><stop offset=".5" stop-color="#a84d16"/><stop offset="1" stop-color="#6f2a0a"/></linearGradient>
+                                    <linearGradient id="profilePaper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff8d9"/><stop offset=".55" stop-color="#ffe7aa"/><stop offset="1" stop-color="#f6c86e"/></linearGradient>
+                                    <filter id="profileShadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="9" stdDeviation="8" flood-color="#3b1708" flood-opacity=".38"/></filter>
+                                </defs>
+                                <rect x="18" y="34" width="924" height="566" rx="34" fill="url(#profileWood)" stroke="#4d1d08" stroke-width="12" filter="url(#profileShadow)"/>
+                                <path d="M39 70H921M39 542H921" stroke="#f0a54d" stroke-width="5" opacity=".62"/>
+                                <rect x="48" y="79" width="864" height="450" rx="24" fill="url(#profilePaper)" stroke="#78330e" stroke-width="8"/>
+                                <path d="M70 103c132 14 245-13 368 0s257-12 451 4M72 507c168-13 302 12 470-2s242 11 348-2" fill="none" stroke="#d49a55" stroke-width="3" opacity=".5"/>
+                                <g fill="#ffd66a" stroke="#4e210d" stroke-width="5"><circle cx="39" cy="55" r="11"/><circle cx="921" cy="55" r="11"/><circle cx="39" cy="578" r="11"/><circle cx="921" cy="578" r="11"/></g>
+                            </svg>
+                            <div class="intro-profile-layout">
+                                <section class="intro-profile-avatar-column" aria-label="Avatar settings">
+                                    <div class="intro-profile-avatar-frame">
+                                        <div class="intro-profile-avatar-mat">
+                                            <img class="intro-profile-avatar" src="assets/Character/ch6.webp" alt="Player avatar">
+                                        </div>
+                                    </div>
+                                    <button class="intro-profile-action intro-profile-action-avatar" type="button" data-profile-action="avatar-prompt">
+                                        <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="10" r="6"/><path d="M5 28c1-8 5-11 11-11s10 3 11 11Z"/></svg>
+                                        <span>Edit Avatar</span>
+                                    </button>
+                                    <button class="intro-profile-action intro-profile-action-name" type="button" data-profile-action="edit-name">
+                                        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="m7 22-1 5 5-1L25 12l-4-4L7 22Z"/><path d="m19 10 4 4"/></svg>
+                                        <span>Edit Name</span>
+                                    </button>
+                                    <button class="intro-profile-action intro-profile-action-frame" type="button" data-profile-action="change-frame">
+                                        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4C9 4 4 9 4 15c0 7 6 13 13 13 2 0 3-1 3-3 0-1-1-2 0-3s2-1 3 0c2 1 5-2 5-7C28 9 23 4 16 4Z"/><circle cx="10" cy="13" r="2"/><circle cx="15" cy="9" r="2"/><circle cx="21" cy="11" r="2"/></svg>
+                                        <span>Change Frame</span>
+                                    </button>
+                                </section>
+                                <section class="intro-profile-details">
+                                    <label class="intro-profile-name-label" for="intro-profile-name">Player Name</label>
+                                    <div class="intro-profile-name-row">
+                                        <input id="intro-profile-name" class="intro-profile-name" type="text" maxlength="24" value="Adventurer" readonly>
+                                    </div>
+                                    <section class="intro-profile-collection" aria-labelledby="intro-profile-collection-title">
+                                        <h3 id="intro-profile-collection-title">BADGE COLLECTIONS</h3>
+                                        <div class="intro-profile-badges" aria-label="Shape badges">
+                                            <div class="intro-profile-badge" data-profile-badge="circle" style="--badge-color:#1887ff;--badge-dark:#0d54b6" role="img" aria-label="Circle badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><circle class="badge-shape-shadow" cx="40" cy="43" r="18"/><circle class="badge-shape-face" cx="40" cy="39" r="18"/><path class="badge-shape-glint" d="M28 34c3-7 9-11 16-11"/></svg><span class="intro-profile-lock"></span></span><strong>Circle</strong></div>
+                                            <div class="intro-profile-badge" data-profile-badge="square" style="--badge-color:#8b2cf5;--badge-dark:#4c1197" role="img" aria-label="Square badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><rect class="badge-shape-shadow" x="22" y="25" width="36" height="36" rx="6"/><rect class="badge-shape-face" x="22" y="21" width="36" height="36" rx="6"/><path class="badge-shape-glint" d="M28 31v-4h17"/></svg><span class="intro-profile-lock"></span></span><strong>Square</strong></div>
+                                            <div class="intro-profile-badge" data-profile-badge="triangle" style="--badge-color:#31c91d;--badge-dark:#14770c" role="img" aria-label="Triangle badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><path class="badge-shape-shadow" d="M40 20 62 61H18Z"/><path class="badge-shape-face" d="M40 16 62 57H18Z"/><path class="badge-shape-glint" d="m39 25-11 21"/></svg><span class="intro-profile-lock"></span></span><strong>Triangle</strong></div>
+                                            <div class="intro-profile-badge" data-profile-badge="rectangle" style="--badge-color:#ff8a17;--badge-dark:#a74408" role="img" aria-label="Rectangle badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><rect class="badge-shape-shadow" x="14" y="29" width="52" height="28" rx="5"/><rect class="badge-shape-face" x="14" y="25" width="52" height="28" rx="5"/><path class="badge-shape-glint" d="M21 34v-3h23"/></svg><span class="intro-profile-lock"></span></span><strong>Rectangle</strong></div>
+                                            <div class="intro-profile-badge" data-profile-badge="oval" style="--badge-color:#f33ca4;--badge-dark:#a31363" role="img" aria-label="Oval badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><ellipse class="badge-shape-shadow" cx="40" cy="43" rx="24" ry="17"/><ellipse class="badge-shape-face" cx="40" cy="39" rx="24" ry="17"/><path class="badge-shape-glint" d="M24 37c4-7 11-10 19-10"/></svg><span class="intro-profile-lock"></span></span><strong>Oval</strong></div>
+                                            <div class="intro-profile-badge" data-profile-badge="heart" style="--badge-color:#f02d25;--badge-dark:#9d1712" role="img" aria-label="Heart badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><path class="badge-shape-shadow" transform="translate(0 4)" d="M40 61 19 42C9 31 16 18 28 20c6 1 10 6 12 11 3-5 7-10 13-11 12-2 19 11 9 22Z"/><path class="badge-shape-face" d="M40 61 19 42C9 31 16 18 28 20c6 1 10 6 12 11 3-5 7-10 13-11 12-2 19 11 9 22Z"/><path class="badge-shape-glint" d="M24 31c3-5 8-6 12-2"/></svg><span class="intro-profile-lock"></span></span><strong>Heart</strong></div>
+                                            <div class="intro-profile-badge" data-profile-badge="star" style="--badge-color:#ffc51c;--badge-dark:#b06a06" role="img" aria-label="Star badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><path class="badge-shape-shadow" transform="translate(0 4)" d="m40 14 7 17 19 2-15 12 5 19-16-10-16 10 5-19-15-12 19-2Z"/><path class="badge-shape-face" d="m40 14 7 17 19 2-15 12 5 19-16-10-16 10 5-19-15-12 19-2Z"/><path class="badge-shape-glint" d="m34 28 5-7 3 8"/></svg><span class="intro-profile-lock"></span></span><strong>Star</strong></div>
+                                            <div class="intro-profile-badge" data-profile-badge="diamond" style="--badge-color:#167af5;--badge-dark:#074ba5" role="img" aria-label="Diamond badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><path class="badge-shape-shadow" transform="translate(0 4)" d="M40 12 66 40 40 68 14 40Z"/><path class="badge-shape-face" d="M40 12 66 40 40 68 14 40Z"/><path class="badge-shape-glint" d="m39 20-15 20 12-5"/></svg><span class="intro-profile-lock"></span></span><strong>Diamond</strong></div>
+                                        </div>
+                                    </section>
+                                </section>
+                                <footer class="intro-profile-stats" aria-label="Player progress totals">
+                                    <div class="intro-profile-stat-grid">
+                                        <div class="intro-profile-stat"><img src="assets/Shape UI/lesson-star.svg" alt="" aria-hidden="true"><span><small>Stars Earned</small><strong data-profile-stat="stars">0 / 24</strong></span></div>
+                                        <div class="intro-profile-stat"><svg class="intro-profile-carrot-icon" viewBox="0 0 32 32" aria-hidden="true"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg><span><small>Carrots Collected</small><strong data-profile-stat="carrots">0</strong></span></div>
+                                        <div class="intro-profile-stat"><svg viewBox="0 0 48 48" aria-hidden="true"><path class="profile-stat-cup" d="M13 7h22v12c0 9-5 15-11 15s-11-6-11-15Z"/><path d="M13 11H6v5c0 7-4 11-10 11M35 11h7v5c0 7-4 11-10 11M24 34v7M15 44h18"/></svg><span><small>Areas Unlocked</small><strong data-profile-stat="areas">1 / 8</strong></span></div>
+                                    </div>
+                                </footer>
+                            </div>
+                            <input class="intro-profile-avatar-input" type="file" accept="image/*" hidden>
+                            <div class="intro-profile-message" data-profile-dialog="avatar" role="dialog" aria-modal="true" aria-labelledby="intro-profile-avatar-title" hidden>
+                                <div class="intro-profile-message-card">
+                                    <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M9 13h14l5-6h14l5 6h8c4 0 7 3 7 7v30c0 4-3 7-7 7H9c-4 0-7-3-7-7V20c0-4 3-7 7-7Z"/><circle cx="32" cy="34" r="13"/></svg>
+                                    <h3 id="intro-profile-avatar-title">Choose Your Avatar</h3>
+                                    <p>Open your gallery and choose a photo.</p>
+                                    <div><button type="button" data-profile-action="cancel-avatar">Not Now</button><button type="button" data-profile-action="open-gallery">Open Gallery</button></div>
+                                </div>
+                            </div>
+                            <div class="intro-profile-frame-picker" data-profile-dialog="frame" role="dialog" aria-modal="true" aria-labelledby="intro-profile-frame-title" hidden>
+                                <div class="intro-profile-frame-card">
+                                    <h3 id="intro-profile-frame-title">Choose a Frame Color</h3>
+                                    <p>Suggested Colors</p>
+                                    <div class="intro-profile-random-colors" aria-label="Suggested frame colors"></div>
+                                    <label class="intro-profile-color-matrix"><span>Color Matrix</span><input type="color" value="#ffb52e" aria-label="Custom frame color"></label>
+                                    <button class="intro-profile-frame-ok" type="button" data-profile-action="save-frame">OK</button>
+                                </div>
+                            </div>
+                            <p class="intro-profile-status" role="status" aria-live="polite"></p>
+                        </div>
+                    `,
+                },
             };
 
-            const introShopCost = 10;
+            const introShopCosts = Object.freeze({
+                circle: 10,
+                square: 15,
+                triangle: 20,
+                rectangle: 30,
+                oval: 40,
+                heart: 60,
+                star: 80,
+                diamond: 100,
+            });
+            const getIntroShopCost = (shape) => introShopCosts[shape] ?? introShopCosts.circle;
+            const introShopNopeAudioSource = 'assets/Audios/Sound effects/nope.mp3';
+            const introShopBuyAudioSource = 'assets/Audios/Sound effects/buy.mp3';
+            let introShopNopeAudio = null;
+            let introShopBuyAudio = null;
             const introShopPurchaseKey = (shape) => `learnscape-shop-purchased:${shape}`;
+            const playIntroShopFeedbackSound = (source, fallbackKind) => {
+                if (!window.Audio) {
+                    window.playUiClickSound?.(fallbackKind);
+                    return null;
+                }
+                try {
+                    const audio = new window.Audio(source);
+                    audio.preload = 'auto';
+                    audio.playsInline = true;
+                    audio.volume = 0.95;
+                    audio.onerror = () => window.playUiClickSound?.(fallbackKind);
+                    audio.play().catch(() => window.playUiClickSound?.(fallbackKind));
+                    return audio;
+                } catch (error) {
+                    window.playUiClickSound?.(fallbackKind);
+                    return null;
+                }
+            };
+            const playIntroShopNopeSound = () => {
+                introShopNopeAudio?.pause?.();
+                introShopNopeAudio = playIntroShopFeedbackSound(introShopNopeAudioSource, 'thunk');
+                if (introShopNopeAudio) {
+                    introShopNopeAudio.onended = () => {
+                        if (introShopNopeAudio?.ended) introShopNopeAudio = null;
+                    };
+                }
+            };
+            const playIntroShopBuySound = () => {
+                introShopBuyAudio?.pause?.();
+                introShopBuyAudio = playIntroShopFeedbackSound(introShopBuyAudioSource, 'chime');
+                if (introShopBuyAudio) {
+                    introShopBuyAudio.onended = () => {
+                        if (introShopBuyAudio?.ended) introShopBuyAudio = null;
+                    };
+                }
+            };
+            const pulseIntroCarrotCount = () => {
+                const carrotPill = resourceCountElements.carrots?.closest('.intro-resource-pill');
+                if (!carrotPill) return;
+                carrotPill.classList.remove('is-insufficient');
+                void carrotPill.offsetWidth;
+                carrotPill.classList.add('is-insufficient');
+                window.setTimeout(() => carrotPill.classList.remove('is-insufficient'), 820);
+            };
+            const showIntroCarrotSpendPopout = (amount) => {
+                const carrotPill = resourceCountElements.carrots?.closest('.intro-resource-pill');
+                if (!carrotPill) return;
+                const popout = document.createElement('span');
+                popout.className = 'intro-carrot-spend-popout';
+                popout.textContent = `-${amount}`;
+                carrotPill.querySelectorAll('.intro-carrot-spend-popout').forEach((node) => node.remove());
+                carrotPill.appendChild(popout);
+                window.setTimeout(() => popout.remove(), 950);
+            };
             const syncIntroShopItems = () => {
                 const selectedShape = readSoundSetting('learnscape-shop-selected', '');
                 introMenuCopy?.querySelectorAll('.intro-shop-item').forEach((item) => {
                     const shape = item.dataset.shopItem || '';
+                    const itemCost = getIntroShopCost(shape);
                     const isPurchased = readSoundSetting(introShopPurchaseKey(shape), 'false') === 'true';
                     const isSelected = isPurchased && shape === selectedShape;
                     const key = item.querySelector('.intro-shop-key');
@@ -2741,9 +2896,9 @@
                     item.setAttribute('aria-pressed', String(isSelected));
                     item.setAttribute('aria-label', isPurchased
                         ? `${shape} key, unlocked`
-                        : `${shape} key, locked, costs ${introShopCost} carrots`);
+                        : `${shape} key, locked, costs ${itemCost} carrots`);
                     if (cost) cost.classList.toggle('is-owned', isPurchased);
-                    if (costValue) costValue.textContent = isPurchased ? '\u2713' : String(introShopCost);
+                    if (costValue) costValue.textContent = isPurchased ? '\u2713' : String(itemCost);
                 });
             };
 
@@ -2752,6 +2907,150 @@
                 if (!status) return;
                 status.textContent = message;
                 status.dataset.state = state;
+            };
+
+            const introProfileShapes = ['circle', 'square', 'triangle', 'rectangle', 'oval', 'heart', 'star', 'diamond'];
+            const introProfileFrameColors = [
+                '#ffb52e', '#ef4444', '#f97316', '#facc15', '#22c55e', '#14b8a6',
+                '#0ea5e9', '#2563eb', '#7c3aed', '#d946ef', '#ec4899', '#8b5e3c',
+            ];
+            const introProfileNameKey = 'learnscape-profile-name';
+            const introProfileAvatarKey = 'learnscape-profile-avatar';
+            const introProfileFrameKey = 'learnscape-profile-frame';
+            const introProfileBadgeUnlockKey = (shape) => `learnscape-profile-badge-unlocked:${shape}`;
+            const introProfileDefaultFrame = '#ffb52e';
+            let introProfilePendingFrame = introProfileDefaultFrame;
+
+            const isIntroProfileColor = (value) => /^#[0-9a-f]{6}$/i.test(value || '');
+            const setIntroProfileStatus = (message, state = '') => {
+                const status = introMenuCopy?.querySelector('.intro-profile-status');
+                if (!status) return;
+                status.textContent = message;
+                status.dataset.state = state;
+                if (message) window.setTimeout(() => {
+                    if (status.textContent === message) status.textContent = '';
+                }, 2400);
+            };
+            const applyIntroProfileFramePreview = (color) => {
+                if (!isIntroProfileColor(color)) return;
+                introProfilePendingFrame = color;
+                const board = introMenuCopy?.querySelector('.intro-profile-board');
+                const colorInput = introMenuCopy?.querySelector('.intro-profile-color-matrix input');
+                board?.style.setProperty('--profile-frame-color', color);
+                if (colorInput && colorInput.value.toLowerCase() !== color.toLowerCase()) colorInput.value = color;
+                introMenuCopy?.querySelectorAll('[data-frame-color]').forEach((swatch) => {
+                    const isSelected = swatch.dataset.frameColor.toLowerCase() === color.toLowerCase();
+                    swatch.classList.toggle('is-selected', isSelected);
+                    swatch.setAttribute('aria-pressed', String(isSelected));
+                });
+            };
+            const renderIntroProfileFrameColors = () => {
+                const palette = introMenuCopy?.querySelector('.intro-profile-random-colors');
+                if (!palette) return;
+                const colors = [...introProfileFrameColors];
+                for (let index = colors.length - 1; index > 0; index -= 1) {
+                    const swapIndex = Math.floor(Math.random() * (index + 1));
+                    [colors[index], colors[swapIndex]] = [colors[swapIndex], colors[index]];
+                }
+                palette.innerHTML = colors.slice(0, 7).map((color) => (
+                    `<button type="button" data-frame-color="${color}" style="--swatch:${color}" aria-label="Use ${color} frame" aria-pressed="false"></button>`
+                )).join('');
+            };
+            const syncIntroProfile = () => {
+                const board = introMenuCopy?.querySelector('.intro-profile-board');
+                if (!board) return;
+                const savedName = readSoundSetting(introProfileNameKey, 'Adventurer').trim().slice(0, 24) || 'Adventurer';
+                const savedAvatar = readSoundSetting(introProfileAvatarKey, '');
+                const storedFrame = readSoundSetting(introProfileFrameKey, introProfileDefaultFrame);
+                const savedFrame = isIntroProfileColor(storedFrame) ? storedFrame : introProfileDefaultFrame;
+                const nameInput = board.querySelector('.intro-profile-name');
+                const avatar = board.querySelector('.intro-profile-avatar');
+                if (nameInput) nameInput.value = savedName;
+                if (avatar) avatar.src = savedAvatar || 'assets/Character/ch6.webp';
+                board.classList.toggle('has-custom-avatar', Boolean(savedAvatar));
+                introProfilePendingFrame = savedFrame;
+                board.style.setProperty('--profile-frame-color', savedFrame);
+
+                const stars = window.getLearnscapeResourceCount?.('stars') ?? resourceCounts.stars;
+                const carrots = window.getLearnscapeResourceCount?.('carrots') ?? resourceCounts.carrots;
+                const unlockedAreas = Math.max(1, Math.min(8, Math.floor(stars / 3)));
+                const starStat = board.querySelector('[data-profile-stat="stars"]');
+                const carrotStat = board.querySelector('[data-profile-stat="carrots"]');
+                const areaStat = board.querySelector('[data-profile-stat="areas"]');
+                if (starStat) starStat.textContent = `${Math.min(24, stars)} / 24`;
+                if (carrotStat) carrotStat.textContent = String(carrots);
+                if (areaStat) areaStat.textContent = `${unlockedAreas} / 8`;
+                introProfileShapes.forEach((shape) => {
+                    const badge = board.querySelector(`[data-profile-badge="${shape}"]`);
+                    const isUnlocked = readSoundSetting(introProfileBadgeUnlockKey(shape), 'false') === 'true';
+                    badge?.classList.toggle('is-unlocked', isUnlocked);
+                    badge?.setAttribute('aria-label', `${shape} badge ${isUnlocked ? 'unlocked' : 'locked'}`);
+                });
+            };
+            const saveIntroProfileName = () => {
+                const board = introMenuCopy?.querySelector('.intro-profile-board');
+                const input = board?.querySelector('.intro-profile-name');
+                if (!input) return;
+                const name = input.value.trim().replace(/\s+/g, ' ').slice(0, 24) || 'Adventurer';
+                input.value = name;
+                input.readOnly = true;
+                board.classList.remove('is-name-editing');
+                writeSoundSetting(introProfileNameKey, name);
+                board.querySelectorAll('[data-profile-action="edit-name"] span').forEach((label) => {
+                    label.textContent = 'Edit Name';
+                });
+                setIntroProfileStatus('Name saved!', 'success');
+            };
+            const toggleIntroProfileNameEditing = () => {
+                const board = introMenuCopy?.querySelector('.intro-profile-board');
+                const input = board?.querySelector('.intro-profile-name');
+                if (!input) return;
+                if (!input.readOnly) {
+                    saveIntroProfileName();
+                    return;
+                }
+                input.readOnly = false;
+                board.classList.add('is-name-editing');
+                board.querySelectorAll('[data-profile-action="edit-name"] span').forEach((label) => {
+                    label.textContent = 'Save Name';
+                });
+                input.focus({ preventScroll: true });
+                input.select();
+            };
+            const saveIntroProfileAvatar = (file) => {
+                if (!file?.type?.startsWith('image/')) {
+                    setIntroProfileStatus('Please choose an image file.', 'error');
+                    return;
+                }
+                const objectUrl = URL.createObjectURL(file);
+                const image = new Image();
+                image.onload = () => {
+                    const size = 512;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = size;
+                    canvas.height = size;
+                    const context = canvas.getContext('2d');
+                    const cropSize = Math.min(image.naturalWidth, image.naturalHeight);
+                    const sourceX = (image.naturalWidth - cropSize) / 2;
+                    const sourceY = (image.naturalHeight - cropSize) / 2;
+                    context.drawImage(image, sourceX, sourceY, cropSize, cropSize, 0, 0, size, size);
+                    const avatarData = canvas.toDataURL('image/jpeg', 0.84);
+                    URL.revokeObjectURL(objectUrl);
+                    try {
+                        window.localStorage.setItem(introProfileAvatarKey, avatarData);
+                        const avatar = introMenuCopy?.querySelector('.intro-profile-avatar');
+                        if (avatar) avatar.src = avatarData;
+                        introMenuCopy?.querySelector('.intro-profile-board')?.classList.add('has-custom-avatar');
+                        setIntroProfileStatus('Avatar updated!', 'success');
+                    } catch (error) {
+                        setIntroProfileStatus('That photo is too large to save.', 'error');
+                    }
+                };
+                image.onerror = () => {
+                    URL.revokeObjectURL(objectUrl);
+                    setIntroProfileStatus('This photo could not be opened.', 'error');
+                };
+                image.src = objectUrl;
             };
 
             const closeIntroMenu = () => {
@@ -2773,6 +3072,7 @@
                     introMenuCopy.innerHTML = content.copy || '';
                     introMenuPanel.dataset.panel = button.dataset.introPanel;
                     if (button.dataset.introPanel === 'shop') syncIntroShopItems();
+                    if (button.dataset.introPanel === 'profile') syncIntroProfile();
                     introMenuPanel.hidden = false;
                     introMenuClose.focus({ preventScroll: true });
                 });
@@ -2780,21 +3080,86 @@
 
             introMenuClose?.addEventListener('click', closeIntroMenu);
             introMenuCopy?.addEventListener('click', (event) => {
+                if (introMenuPanel?.dataset.panel !== 'profile') return;
+                const frameSwatch = event.target.closest('[data-frame-color]');
+                if (frameSwatch && introMenuCopy.contains(frameSwatch)) {
+                    applyIntroProfileFramePreview(frameSwatch.dataset.frameColor);
+                    return;
+                }
+                const action = event.target.closest('[data-profile-action]')?.dataset.profileAction;
+                if (!action) return;
+                const board = introMenuCopy.querySelector('.intro-profile-board');
+                const avatarDialog = board?.querySelector('[data-profile-dialog="avatar"]');
+                const frameDialog = board?.querySelector('[data-profile-dialog="frame"]');
+                if (action === 'avatar-prompt') {
+                    avatarDialog.hidden = false;
+                    avatarDialog.querySelector('[data-profile-action="open-gallery"]')?.focus({ preventScroll: true });
+                } else if (action === 'cancel-avatar') {
+                    avatarDialog.hidden = true;
+                } else if (action === 'open-gallery') {
+                    avatarDialog.hidden = true;
+                    board.querySelector('.intro-profile-avatar-input')?.click();
+                } else if (action === 'edit-name') {
+                    toggleIntroProfileNameEditing();
+                } else if (action === 'change-frame') {
+                    const storedFrame = readSoundSetting(introProfileFrameKey, introProfileDefaultFrame);
+                    introProfilePendingFrame = isIntroProfileColor(storedFrame) ? storedFrame : introProfileDefaultFrame;
+                    renderIntroProfileFrameColors();
+                    frameDialog.hidden = false;
+                    applyIntroProfileFramePreview(introProfilePendingFrame);
+                    frameDialog.querySelector('.intro-profile-color-matrix input')?.focus({ preventScroll: true });
+                } else if (action === 'save-frame') {
+                    writeSoundSetting(introProfileFrameKey, introProfilePendingFrame);
+                    frameDialog.hidden = true;
+                    setIntroProfileStatus('Frame color saved!', 'success');
+                }
+            });
+            introMenuCopy?.addEventListener('input', (event) => {
+                if (introMenuPanel?.dataset.panel !== 'profile') return;
+                if (event.target.matches('.intro-profile-color-matrix input')) {
+                    applyIntroProfileFramePreview(event.target.value);
+                }
+            });
+            introMenuCopy?.addEventListener('change', (event) => {
+                if (introMenuPanel?.dataset.panel !== 'profile') return;
+                if (event.target.matches('.intro-profile-avatar-input')) {
+                    saveIntroProfileAvatar(event.target.files?.[0]);
+                    event.target.value = '';
+                }
+            });
+            introMenuCopy?.addEventListener('keydown', (event) => {
+                if (introMenuPanel?.dataset.panel !== 'profile' || !event.target.matches('.intro-profile-name')) return;
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    saveIntroProfileName();
+                } else if (event.key === 'Escape') {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.target.value = readSoundSetting(introProfileNameKey, 'Adventurer');
+                    saveIntroProfileName();
+                }
+            });
+            introMenuCopy?.addEventListener('click', (event) => {
                 const item = event.target.closest('.intro-shop-item');
                 if (!item || !introMenuCopy.contains(item)) return;
                 const shape = item.dataset.shopItem || '';
+                const itemCost = getIntroShopCost(shape);
+                let didPurchase = false;
                 if (!item.classList.contains('is-purchased')) {
                     const carrots = window.getLearnscapeResourceCount?.('carrots') ?? resourceCounts.carrots;
-                    if (carrots < introShopCost) {
+                    if (carrots < itemCost) {
                         item.classList.remove('is-insufficient');
                         void item.offsetWidth;
                         item.classList.add('is-insufficient');
+                        pulseIntroCarrotCount();
                         setIntroShopStatus('');
-                        window.playUiClickSound?.('thunk');
+                        playIntroShopNopeSound();
                         return;
                     }
-                    setLearnscapeResourceCount('carrots', carrots - introShopCost);
+                    setLearnscapeResourceCount('carrots', carrots - itemCost);
+                    showIntroCarrotSpendPopout(itemCost);
                     writeSoundSetting(introShopPurchaseKey(shape), 'true');
+                    didPurchase = true;
                     setIntroShopStatus('Nabuksan na ang susi!', 'success');
                 }
                 writeSoundSetting('learnscape-shop-selected', shape);
@@ -2804,7 +3169,15 @@
                     shopItem.setAttribute('aria-pressed', String(isSelected));
                 });
                 syncIntroShopItems();
-                window.playUiClickSound?.('chime');
+                if (didPurchase) {
+                    item.classList.remove('is-purchase-success');
+                    void item.offsetWidth;
+                    item.classList.add('is-purchase-success');
+                    window.setTimeout(() => item.classList.remove('is-purchase-success'), 900);
+                    playIntroShopBuySound();
+                } else {
+                    window.playUiClickSound?.('chime');
+                }
             });
             introMenuPanel?.addEventListener('click', (event) => {
                 if (event.target === introMenuPanel) closeIntroMenu();
@@ -2872,13 +3245,60 @@
             Object.keys(resourceCounts).forEach((resource) => {
                 setLearnscapeResourceCount(resource, readSoundSetting(resourceStorageKeys[resource], '0'), false);
             });
+            const retiredTemporaryCarrotGrantKey = 'learnscape-temp-carrot-grant:2026-09-27-1';
+            if (readSoundSetting(retiredTemporaryCarrotGrantKey, 'false') === 'true') {
+                setLearnscapeResourceCount('carrots', resourceCounts.carrots - 1);
+                try {
+                    window.localStorage.removeItem(retiredTemporaryCarrotGrantKey);
+                } catch (error) {
+                    // The in-session balance is still corrected when storage is unavailable.
+                }
+            }
             window.getLearnscapeResourceCount = (resource) => resourceCounts[resource] ?? 0;
             window.setLearnscapeResourceCount = setLearnscapeResourceCount;
             window.addLearnscapeResource = (resource, amount = 1) => (
                 setLearnscapeResourceCount(resource, (resourceCounts[resource] ?? 0) + Number(amount || 0))
             );
-            const progressRewardByStarStage = { 1: 2, 2: 3, 3: 5 };
+            window.addEventListener('learnscape:resourcechange', () => {
+                if (introMenuPanel?.dataset.panel === 'profile' && !introMenuPanel.hidden) syncIntroProfile();
+            });
+            const progressRewardsByShape = Object.freeze({
+                circle: [0, 3, 5, 7],
+                square: [0, 4, 6, 10],
+                triangle: [0, 6, 9, 15],
+                rectangle: [0, 8, 12, 20],
+                oval: [0, 10, 20, 30],
+                heart: [0, 15, 25, 40],
+                star: [0, 20, 30, 50],
+                diamond: [0, 50, 50, 50],
+            });
+            const progressRewardShapeByPageId = Object.freeze({
+                'learnscape-circle-illustration-page': 'circle',
+                'learnscape-circle-camera-page': 'circle',
+                'learnscape-shape-square-page': 'square',
+                'learnscape-square-camera-page': 'square',
+                'learnscape-shape-area-3-page': 'triangle',
+                'learnscape-triangle-game-page': 'triangle',
+                'learnscape-triangle-camera-page': 'triangle',
+                'learnscape-shape-area-4-page': 'rectangle',
+                'learnscape-rectangle-delivery-page': 'rectangle',
+                'learnscape-rectangle-camera-page': 'rectangle',
+                'learnscape-shape-area-5-page': 'oval',
+                'learnscape-oval-board-game-page': 'oval',
+                'learnscape-oval-camera-page': 'oval',
+                'learnscape-shape-area-6-page': 'heart',
+                'learnscape-heart-camera-page': 'heart',
+                'learnscape-shape-area-7-page': 'star',
+                'learnscape-star-camera-page': 'star',
+                'learnscape-shape-area-8-page': 'diamond',
+                'learnscape-diamond-camera-page': 'diamond',
+            });
+            const progressRewardStages = [1, 2, 3];
             const claimedProgressRewards = new Set();
+            const getProgressRewardShape = (progress) => {
+                const page = progress.closest('section[id]');
+                return page?.dataset.cameraShape || progressRewardShapeByPageId[page?.id] || '';
+            };
             const getProgressRewardIdentity = (progress) => {
                 const page = progress.closest('section[id]');
                 const stage = progress.dataset.progressStage || 'complete';
@@ -2912,7 +3332,8 @@
                 if (!actions || !stars) return;
 
                 const starStage = Math.max(0, Math.min(3, Number(stars.dataset.earnedStars) || 0));
-                const reward = progressRewardByStarStage[starStage] || 0;
+                const rewardShape = getProgressRewardShape(progress);
+                const reward = progressRewardsByShape[rewardShape]?.[starStage] || 0;
                 let badge = actions.querySelector('.circle-lesson-progress-reward');
                 if (!reward) {
                     badge?.remove();
@@ -2934,10 +3355,14 @@
                     && !page?.hidden;
                 if (!isVisible) return;
 
+                if (starStage === 3 && rewardShape) {
+                    writeSoundSetting(introProfileBadgeUnlockKey(rewardShape), 'true');
+                }
+
                 const rewardIdentity = getProgressRewardIdentity(progress);
                 const rewardStorageKey = `learnscape-progress-reward:${rewardIdentity}`;
                 const rewardPageId = progress.closest('section[id]')?.id || 'unknown';
-                const legacyRewardWasAwarded = Object.keys(progressRewardByStarStage).some((legacyStarStage) => (
+                const legacyRewardWasAwarded = progressRewardStages.some((legacyStarStage) => (
                     readSoundSetting(
                         `learnscape-progress-reward:${rewardPageId}:${progress.dataset.progressStage || `star-${legacyStarStage}`}:${legacyStarStage}`,
                         'false',
