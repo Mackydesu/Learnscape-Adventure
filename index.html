@@ -103,8 +103,9 @@
                 <button class="intro-sign-button intro-sign-button-profile" type="button" data-intro-panel="profile" aria-label="Profile">
                     <img src="assets/Buttons/profile.webp" alt="Profile">
                 </button>
-                <button class="intro-sign-button intro-sign-button-notif" type="button" aria-label="Notifications">
+                <button class="intro-sign-button intro-sign-button-notif" type="button" data-intro-panel="notifications" aria-label="Notifications">
                     <img src="assets/Buttons/notif.webp" alt="Notifications">
+                    <span class="intro-notification-unread-indicator" aria-hidden="true" hidden></span>
                 </button>
             </nav>
 
@@ -624,7 +625,7 @@
         <div class="rectangle-village-message-panel" role="status" aria-live="polite" hidden>
             <span class="rectangle-village-message-text"></span>
         </div>
-        <button class="rectangle-village-go-button" type="button" hidden>Go &gt;</button>
+        <button class="rectangle-village-go-button" type="button" hidden>Tara &gt;</button>
         <button class="shape-area-preview-start-button" type="button" hidden>Start</button>
         <div class="circle-illustration-video-stage shape-preview-video-stage" aria-hidden="true">
             <div class="circle-illustration-tv-frame">
@@ -1167,7 +1168,7 @@
             <div class="oval-celebration-confetti" aria-hidden="true"></div>
             <div class="oval-celebration-copy">
                 <strong>Congratulations!</strong>
-                <span>You Match Them All</span>
+                <span>NAHANAP MO ANG MAGKAKAPARES</span>
             </div>
             <div class="oval-completed-objects" aria-label="Completed oval objects in matching order"></div>
         </div>
@@ -2793,6 +2794,103 @@
                         </div>
                     `,
                 },
+                notifications: {
+                    kicker: '',
+                    title: 'NOTIFICATIONS',
+                    copy: `
+                        <section class="intro-notification-board" aria-label="Notifications panel">
+                            <svg class="intro-notification-frame-art" viewBox="0 0 960 620" preserveAspectRatio="none" aria-hidden="true">
+                                <defs>
+                                    <linearGradient id="notifWoodTop" x1="0" y1="0" x2="0" y2="1">
+                                        <stop stop-color="#f19b3d"/>
+                                        <stop offset=".5" stop-color="#b85b18"/>
+                                        <stop offset="1" stop-color="#7c340e"/>
+                                    </linearGradient>
+                                    <linearGradient id="notifPaper" x1="0" y1="0" x2="0" y2="1">
+                                        <stop stop-color="#fff9e9"/>
+                                        <stop offset=".62" stop-color="#ffe9b7"/>
+                                        <stop offset="1" stop-color="#f8cb79"/>
+                                    </linearGradient>
+                                    <linearGradient id="notifLeaf" x1="0" y1="0" x2="1" y2="1">
+                                        <stop stop-color="#91f039"/>
+                                        <stop offset=".55" stop-color="#2faa25"/>
+                                        <stop offset="1" stop-color="#116e23"/>
+                                    </linearGradient>
+                                    <linearGradient id="notifBellGold" x1="0" y1="0" x2="0" y2="1">
+                                        <stop stop-color="#fff96a"/>
+                                        <stop offset=".46" stop-color="#ffd21f"/>
+                                        <stop offset="1" stop-color="#f18b06"/>
+                                    </linearGradient>
+                                    <linearGradient id="notifBellGlow" x1="0" y1="0" x2="1" y2="1">
+                                        <stop stop-color="#ffffff"/>
+                                        <stop offset=".55" stop-color="#fff9b5"/>
+                                        <stop offset="1" stop-color="#ffe151"/>
+                                    </linearGradient>
+                                    <filter id="notifPanelShadow" x="-10%" y="-18%" width="120%" height="140%">
+                                        <feDropShadow dx="0" dy="11" stdDeviation="8" flood-color="#3f1b08" flood-opacity=".35"/>
+                                    </filter>
+                                </defs>
+                                <g filter="url(#notifPanelShadow)">
+                                    <path d="M74 98H886c32 0 58 26 58 58v366c0 32-26 58-58 58H74c-32 0-58-26-58-58V156c0-32 26-58 58-58Z" fill="url(#notifWoodTop)" stroke="#53210a" stroke-width="14"/>
+                                    <path d="M92 121H868c28 0 50 22 50 50v329c0 28-22 50-50 50H92c-28 0-50-22-50-50V171c0-28 22-50 50-50Z" fill="url(#notifPaper)" stroke="#a45519" stroke-width="9"/>
+                                    <path d="M76 141h808" stroke="#fff1ba" stroke-width="7" stroke-linecap="round" opacity=".62"/>
+                                    <path d="M173 28h614c20 0 36 16 36 36v42c0 20-16 36-36 36H173c-20 0-36-16-36-36V64c0-20 16-36 36-36Z" fill="url(#notifWoodTop)" stroke="#4f1d08" stroke-width="12"/>
+                                    <path d="M188 45c158 18 276-16 420 0 86 9 139-5 196 10" fill="none" stroke="#ffc06a" stroke-width="8" stroke-linecap="round" opacity=".36"/>
+                                    <g fill="url(#notifLeaf)" stroke="#0f5e1e" stroke-width="7">
+                                        <path d="M146 90C95 49 63 52 35 92c43 18 76 17 111-2Z"/>
+                                        <path d="M123 142C78 136 47 152 34 199c48 3 76-15 89-57Z"/>
+                                        <path d="M820 89c51-41 83-38 111 2-43 18-76 17-111-2Z"/>
+                                        <path d="M843 142c45-6 76 10 89 57-48 3-76-15-89-57Z"/>
+                                    </g>
+                                    <g transform="translate(178 36) scale(0.58) rotate(-2 100 76)">
+                                        <g stroke="#571b08" stroke-width="8" stroke-linejoin="round">
+                                            <path d="M37 1c-7 2-10 9-6 16l18 28c4 7 13 8 19 3 6-5 6-13 1-19L49 5c-3-4-7-5-12-4Z" fill="#ffdf1f"/>
+                                            <path d="M17 32c-7-1-13 4-14 11-1 6 2 11 8 14l29 14c7 3 14 0 17-7 3-6 0-13-6-17L24 34c-2-1-5-2-7-2Z" fill="#ffdb1d"/>
+                                            <path d="M7 77c-7 1-11 7-10 14 1 7 7 11 14 10l31-6c7-1 11-8 9-15-2-7-8-10-15-9Z" fill="#ffd51a"/>
+                                        </g>
+                                        <path d="M40 8c-2 3-1 6 2 10l17 22M11 42c0 3 2 5 6 7l27 13M7 86l31-6" fill="none" stroke="#fff994" stroke-width="5" stroke-linecap="round" opacity=".9"/>
+                                        <path d="M95 28c0-17 10-26 25-26s25 9 25 26v13H95Z" fill="#5a1b07"/>
+                                        <path d="M104 28c0-10 6-17 16-17s16 7 16 17v11h-32Z" fill="url(#notifBellGold)"/>
+                                        <path d="M57 116c15-16 17-35 19-58 3-27 20-42 44-42 25 0 42 17 44 46 2 25 7 42 22 55 11 10 5 27-10 29L65 146c-17 0-22-19-8-30Z" fill="#5a1b07"/>
+                                        <path d="M67 111c12-14 14-30 17-52 3-22 16-34 36-34 21 0 34 14 36 38 2 24 7 39 20 50 5 5 2 13-6 14L73 128c-10 0-14-10-6-17Z" fill="url(#notifBellGold)"/>
+                                        <path d="M63 115c29-20 88-22 118 0 9 7 6 20-4 25-33 16-83 18-116 2-12-6-9-19 2-27Z" fill="#5a1b07"/>
+                                        <path d="M70 116c27-14 76-16 103 0 6 4 4 12-3 16-30 13-72 14-101 1-8-4-7-13 1-17Z" fill="#ffa70e"/>
+                                        <path d="M81 113c24-9 57-10 80-1" fill="none" stroke="#fff26a" stroke-width="7" stroke-linecap="round" opacity=".9"/>
+                                        <path d="M99 138c1 20 10 30 23 30 14 0 23-11 23-31" fill="#5a1b07"/>
+                                        <circle cx="122" cy="145" r="17" fill="url(#notifBellGold)" stroke="#5a1b07" stroke-width="8"/>
+                                        <path d="M97 36c-10 8-15 22-16 39M111 31c-8 7-11 16-12 27" fill="none" stroke="url(#notifBellGlow)" stroke-width="9" stroke-linecap="round" opacity=".9"/>
+                                        <path d="M73 121c9-5 18-8 27-10" fill="none" stroke="#fffbd1" stroke-width="8" stroke-linecap="round" opacity=".9"/>
+                                    </g>
+                                </g>
+                            </svg>
+                            <div class="intro-notification-layout">
+                                <div class="intro-notification-title-row" aria-hidden="true">
+                                    <span class="intro-notification-title">NOTIFICATION</span>
+                                </div>
+                                <div class="intro-notification-tabs" role="tablist" aria-label="Notification categories">
+                                    <button class="intro-notification-tab is-active" id="intro-notification-game-tab" type="button" role="tab" aria-selected="true" aria-controls="intro-notification-content" data-notification-tab="game" tabindex="0">
+                                        <svg class="intro-notification-speaker-icon" viewBox="0 0 96 96" aria-hidden="true"><path class="speaker-body" d="M35 34 70 18v60L35 62Z"/><path class="speaker-back" d="M18 36h18v28H18c-6 0-10-6-10-14s4-14 10-14Z"/><path class="speaker-handle" d="M32 61h15l9 25H40Z"/><path class="speaker-gloss" d="M43 37 62 28"/></svg>
+                                        <span>Game Notifications</span>
+                                        <span class="intro-notification-tab-unread-indicator" data-notification-tab-indicator aria-hidden="true" hidden></span>
+                                    </button>
+                                    <button class="intro-notification-tab" id="intro-notification-system-tab" type="button" role="tab" aria-selected="false" aria-controls="intro-notification-content" data-notification-tab="system" tabindex="-1">
+                                        <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M20 5h8l2 6a15 15 0 0 1 4 2l6-3 4 7-5 4v6l5 4-4 7-6-3a15 15 0 0 1-4 2l-2 6h-8l-2-6a15 15 0 0 1-4-2l-6 3-4-7 5-4v-6l-5-4 4-7 6 3a15 15 0 0 1 4-2Z"/><circle cx="24" cy="24" r="7"/></svg>
+                                        <span>System Updates</span>
+                                        <span class="intro-notification-tab-unread-indicator" data-notification-tab-indicator aria-hidden="true" hidden></span>
+                                    </button>
+                                </div>
+                                <div class="intro-notification-empty" id="intro-notification-content" role="tabpanel" aria-live="polite" aria-labelledby="intro-notification-game-tab" data-notification-category="game">
+                                    <div class="intro-notification-list" role="list" data-notification-list hidden></div>
+                                    <div class="intro-notification-empty-bell" aria-hidden="true">
+                                        <svg viewBox="0 0 96 96"><path class="empty-bell-shadow" d="M22 66c8-9 8-18 10-32 2-15 14-24 29-21 13 3 21 14 21 30 0 13 5 20 12 27 5 5 2 13-5 14l-57 5c-10 1-17-14-10-23Z"/><path class="empty-bell-body" d="M22 63c8-8 8-17 10-30 2-13 12-21 26-19 13 2 21 12 21 27 0 13 5 21 12 27 3 3 1 8-4 9l-59 5c-6 1-10-14-6-19Z"/><path class="empty-bell-rim" d="M23 66c15-11 53-14 68 1 3 3 1 8-4 10-19 8-47 10-64 0-5-3-4-8 0-11Z"/><circle class="empty-bell-clapper" cx="57" cy="79" r="10"/><path class="empty-bell-gloss" d="M43 23c-6 6-9 14-9 24M51 20c-5 4-7 11-7 18"/><path class="empty-bell-rays" d="M16 26 5 15M13 52H2M83 23 94 12"/></svg>
+                                    </div>
+                                    <strong data-notification-empty-message>Game notifications will appear here.</strong>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </section>
+                    `,
+                },
             };
 
             const introShopCosts = Object.freeze({
@@ -3073,12 +3171,67 @@
                     introMenuPanel.dataset.panel = button.dataset.introPanel;
                     if (button.dataset.introPanel === 'shop') syncIntroShopItems();
                     if (button.dataset.introPanel === 'profile') syncIntroProfile();
+                    if (button.dataset.introPanel === 'notifications') renderIntroNotifications('game');
                     introMenuPanel.hidden = false;
                     introMenuClose.focus({ preventScroll: true });
                 });
             });
 
             introMenuClose?.addEventListener('click', closeIntroMenu);
+            const selectIntroNotificationTab = (tab, shouldFocus = false) => {
+                if (!tab || !introMenuCopy?.contains(tab)) return;
+                const category = tab.dataset.notificationTab;
+                const tabs = [...introMenuCopy.querySelectorAll('[data-notification-tab]')];
+                const contentPanel = introMenuCopy.querySelector('#intro-notification-content');
+                const message = contentPanel?.querySelector('[data-notification-empty-message]');
+                tabs.forEach((item) => {
+                    const isSelected = item === tab;
+                    item.classList.toggle('is-active', isSelected);
+                    item.setAttribute('aria-selected', String(isSelected));
+                    item.tabIndex = isSelected ? 0 : -1;
+                });
+                if (contentPanel) {
+                    contentPanel.dataset.notificationCategory = category;
+                    contentPanel.setAttribute('aria-labelledby', tab.id);
+                }
+                if (message) message.textContent = category === 'system'
+                    ? 'System updates will appear here.'
+                    : 'Game notifications will appear here.';
+                renderIntroNotifications(category);
+                if (shouldFocus) tab.focus({ preventScroll: true });
+                window.playUiClickSound?.('soft');
+            };
+            introMenuCopy?.addEventListener('click', (event) => {
+                if (introMenuPanel?.dataset.panel !== 'notifications') return;
+                const notificationItem = event.target.closest('[data-notification-id]');
+                if (notificationItem) {
+                    markLearnscapeNotificationRead(notificationItem.dataset.notificationId);
+                    return;
+                }
+                const tab = event.target.closest('[data-notification-tab]');
+                if (tab) selectIntroNotificationTab(tab);
+            });
+            introMenuCopy?.addEventListener('keydown', (event) => {
+                if (introMenuPanel?.dataset.panel !== 'notifications') return;
+                const notificationItem = event.target.closest('[data-notification-id]');
+                if (notificationItem && (event.key === 'Enter' || event.key === ' ')) {
+                    event.preventDefault();
+                    markLearnscapeNotificationRead(notificationItem.dataset.notificationId);
+                    return;
+                }
+                const currentTab = event.target.closest('[data-notification-tab]');
+                if (!currentTab) return;
+                const tabs = [...introMenuCopy.querySelectorAll('[data-notification-tab]')];
+                const currentIndex = tabs.indexOf(currentTab);
+                let nextIndex = currentIndex;
+                if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length;
+                else if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+                else if (event.key === 'Home') nextIndex = 0;
+                else if (event.key === 'End') nextIndex = tabs.length - 1;
+                else return;
+                event.preventDefault();
+                selectIntroNotificationTab(tabs[nextIndex], true);
+            });
             introMenuCopy?.addEventListener('click', (event) => {
                 if (introMenuPanel?.dataset.panel !== 'profile') return;
                 const frameSwatch = event.target.closest('[data-frame-color]');
@@ -3170,6 +3323,13 @@
                 });
                 syncIntroShopItems();
                 if (didPurchase) {
+                    addLearnscapeNotification({
+                        id: `shop:${shape}`,
+                        type: 'shop',
+                        shape,
+                        title: `${shape.charAt(0).toUpperCase() + shape.slice(1)} key purchased`,
+                        detail: 'Your new island key is ready to use.',
+                    });
                     item.classList.remove('is-purchase-success');
                     void item.offsetWidth;
                     item.classList.add('is-purchase-success');
@@ -3212,6 +3372,358 @@
                     // Sound settings still apply for this session if storage is unavailable.
                 }
             };
+            const learnscapeNotificationStorageKey = 'learnscape-game-notifications:v1';
+            const learnscapeNotificationLimit = 120;
+            const learnscapeShapeLabels = Object.freeze({
+                circle: 'Circle',
+                square: 'Square',
+                triangle: 'Triangle',
+                rectangle: 'Rectangle',
+                oval: 'Oval',
+                heart: 'Heart',
+                star: 'Star',
+                diamond: 'Diamond',
+            });
+            const learnscapeAreaByRoute = Object.freeze({
+                shapeCircle: { shape: 'circle', name: 'Circle Meadow' },
+                shapeSquare: { shape: 'square', name: 'Square Town' },
+                shapeArea3: { shape: 'triangle', name: 'Triangle Mountains' },
+                shapeArea4: { shape: 'rectangle', name: 'Rectangle Village' },
+                shapeArea5: { shape: 'oval', name: 'Oval Garden' },
+                shapeArea6: { shape: 'heart', name: 'Heart City' },
+                shapeArea7: { shape: 'star', name: 'Star Forest' },
+                shapeArea8: { shape: 'diamond', name: 'Diamond Cave' },
+            });
+            const notificationShapeColors = Object.freeze({
+                circle: '#1887ff',
+                square: '#9b55ed',
+                triangle: '#35bd35',
+                rectangle: '#ff7914',
+                oval: '#f55cad',
+                heart: '#f02d25',
+                star: '#ffc719',
+                diamond: '#65d5ff',
+            });
+            const getNotificationShape = (notification) => {
+                if (learnscapeShapeLabels[notification.shape]) return notification.shape;
+                const searchable = `${notification.id} ${notification.title} ${notification.detail}`.toLowerCase();
+                return Object.keys(learnscapeShapeLabels).find((shape) => searchable.includes(shape)) || 'circle';
+            };
+            const getNotificationShapeSvg = (shape, color) => {
+                const common = `fill="${color}" stroke="#fff9df" stroke-width="3.2" stroke-linejoin="round"`;
+                const shapes = {
+                    circle: `<circle cx="32" cy="32" r="13" ${common}/>` ,
+                    square: `<rect x="20" y="20" width="24" height="24" rx="2" ${common}/>` ,
+                    triangle: `<path d="M32 17 47 44H17Z" ${common}/>` ,
+                    rectangle: `<rect x="16" y="23" width="32" height="18" rx="2" ${common}/>` ,
+                    oval: `<ellipse cx="32" cy="32" rx="11" ry="17" ${common}/>` ,
+                    heart: `<path d="M32 47C20 39 14 33 16 24c2-8 12-10 16-3 4-7 14-5 16 3 2 9-4 15-16 23Z" ${common}/>` ,
+                    star: `<path d="m32 15 5 11 12 1-9 8 3 12-11-6-11 6 3-12-9-8 12-1Z" ${common}/>` ,
+                    diamond: `<path d="M32 15 48 32 32 49 16 32Z" ${common}/>` ,
+                };
+                return shapes[shape] || shapes.circle;
+            };
+            const createNotificationIconSvg = (notification) => {
+                const shape = getNotificationShape(notification);
+                const color = notificationShapeColors[shape] || notificationShapeColors.circle;
+                const motif = getNotificationShapeSvg(shape, color);
+                const outline = '#572007';
+                const shine = '<path d="M18 15c5-5 12-7 18-7" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".72"/>';
+                const icons = {
+                    progress: `<path d="M8 43 18 25l15-8 17 11 7 15-8 11H16Z" fill="#6dcc32" stroke="${outline}" stroke-width="3"/><path d="m16 45 8 14 8-8 8 7 10-13Z" fill="#a95a28" stroke="${outline}" stroke-width="3"/><path d="M16 10v28" stroke="${outline}" stroke-width="4" stroke-linecap="round"/><path d="M18 12h31l-5 10 5 10H18Z" fill="${color}" stroke="${outline}" stroke-width="3"/><g transform="translate(33.5 22) scale(.48) translate(-32 -32)">${motif}</g>`,
+                    lesson: `<path d="M7 20c9-5 18-3 25 3 7-6 16-8 25-3v31c-9-4-18-2-25 4-7-6-16-8-25-4Z" fill="#fff2c5" stroke="${outline}" stroke-width="3"/><path d="M32 23v32" stroke="#d88b2a" stroke-width="2.5"/><path d="m19 11 13-6 13 6-13 6Z" fill="#263b68" stroke="${outline}" stroke-width="3"/><g transform="translate(32 35) scale(.82) translate(-32 -32)">${motif}</g>`,
+                    mission: `<path d="M8 14 21 9l11 5 11-5 13 5-3 39-11 4-11-5-11 5-12-5Z" fill="#fff0bd" stroke="${outline}" stroke-width="3"/><path d="M21 9v48M32 14v38M43 9v48" fill="none" stroke="#d98a2a" stroke-width="2" stroke-dasharray="3 3"/><g transform="translate(32 34) scale(.92) translate(-32 -32)">${motif}</g><circle cx="51" cy="50" r="10" fill="#20bd3e" stroke="${outline}" stroke-width="3"/><path d="m46 50 4 4 7-9" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`,
+                    camera: `<path d="M9 22h12l4-7h17l4 7h9a5 5 0 0 1 5 5v25a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V27a5 5 0 0 1 5-5Z" fill="#263b68" stroke="${outline}" stroke-width="3"/><circle cx="32" cy="39" r="16" fill="#fff2c5" stroke="#111b36" stroke-width="3"/><g transform="translate(6 13) scale(.82)">${motif}</g><circle cx="54" cy="19" r="3" fill="#ffd224"/>`,
+                    badge: `<circle cx="32" cy="27" r="22" fill="#ffdd31" stroke="${outline}" stroke-width="3"/><circle cx="32" cy="27" r="17" fill="#fff3a0" stroke="#ee8a16" stroke-width="2.5"/><path d="m18 44 3 16 11-8 11 8 3-16" fill="#ef3150" stroke="${outline}" stroke-width="3"/><g transform="translate(6 1) scale(.82)">${motif}</g>`,
+                    shop: `<path d="M23 18a14 14 0 1 0 8 25l7 7h7v7h8v-8l-15-15a14 14 0 0 0-15-16Z" fill="#ffd127" stroke="${outline}" stroke-width="3.5"/><circle cx="23" cy="32" r="7" fill="#fff1a4" stroke="#e67d0a" stroke-width="3"/><g transform="translate(3 12) scale(.62)">${motif}</g>`,
+                    system: `<path d="m32 8 6 3 7-2 4 6 7 2v7l5 5-3 7 3 7-5 5v7l-7 2-4 6-7-2-6 3-6-3-7 2-4-6-7-2v-7l-5-5 3-7-3-7 5-5v-7l7-2 4-6 7 2Z" fill="#e7e7e7" stroke="${outline}" stroke-width="3"/><circle cx="32" cy="36" r="11" fill="#fff" stroke="#66515b" stroke-width="3"/>`,
+                };
+                let artwork = icons[notification.type] || icons.system;
+                if (notification.type === 'reward') {
+                    const titleStarCount = Number(String(notification.title).match(/earned\s+([123])\s+stars?/i)?.[1]);
+                    const rewardStage = Math.max(1, Math.min(3, Number(notification.stage) || titleStarCount || 1));
+                    if (String(notification.id).startsWith('carrots:')) {
+                        const carrot = `<path d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z" fill="#58c83e" stroke="#185f2b" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z" fill="#ff8b24" stroke="#8a2e08" stroke-width="1.8" stroke-linejoin="round"/><path d="m9 17 5 1m-5 5 4 1m2-10 4 1" fill="none" stroke="#c44a0b" stroke-width="1.5" stroke-linecap="round"/><path d="M10 13c3-2 6-2 8-1" fill="none" stroke="#ffd27a" stroke-width="1.5" stroke-linecap="round" opacity=".8"/>`;
+                        if (rewardStage === 1) artwork = `<g transform="translate(6 3) scale(1.7)">${carrot}</g>`;
+                        if (rewardStage === 2) artwork = `<g transform="translate(-2 7) scale(1.08) rotate(-18 16 16)">${carrot}</g><g transform="translate(14 0) scale(1.15) rotate(-5 16 16)">${carrot}</g><g transform="translate(32 7) scale(1.08) rotate(18 16 16)">${carrot}</g><g transform="translate(14 23) scale(1.02) rotate(2 16 16)">${carrot}</g>`;
+                        if (rewardStage === 3) artwork = `<ellipse cx="32" cy="23" rx="18" ry="7" fill="#704016" stroke="${outline}" stroke-width="3"/><g transform="translate(7 2) scale(.82) rotate(-12 16 16)">${carrot}</g><g transform="translate(23 0) scale(.86)">${carrot}</g><g transform="translate(39 2) scale(.82) rotate(12 16 16)">${carrot}</g><path d="M14 24c-4 9-5 22-2 31 3 7 12 8 20 8s17-1 20-8c3-9 2-22-2-31-11 5-25 5-36 0Z" fill="#f2c46f" stroke="${outline}" stroke-width="3"/><path d="M14 23c10 5 26 5 36 0l-2 9c-10 4-22 4-32 0Z" fill="#d99a45" stroke="${outline}" stroke-width="3"/><path d="M17 27c9 3 21 3 30 0" fill="none" stroke="#fff0b2" stroke-width="2.2" stroke-linecap="round"/><path d="M29 40c3-2 7-2 10 0 2 3 0 8-5 14-1 2-3 2-4 0-5-7-5-11-1-14Z" fill="#ff8b24" stroke="#8a2e08" stroke-width="2"/><path d="M31 40c-2-4 0-7 4-8 1 3 0 6-3 8m3 0c2-3 5-3 7-1-2 2-4 3-7 1Z" fill="#58c83e" stroke="#185f2b" stroke-width="1.7" stroke-linejoin="round"/>`;
+                    } else {
+                        const rewardStar = `<path d="m32 5 8 18 20 2-15 13 5 20-18-10-18 10 5-20L4 25l20-2Z" fill="#ffd21d" stroke="${outline}" stroke-width="3.2"/>`;
+                        const rewardMotif = (x, y, scale) => shape === 'star'
+                            ? ''
+                            : `<g transform="translate(${x} ${y}) scale(${scale}) translate(-32 -32)">${motif}</g>`;
+                        if (rewardStage === 1) artwork = `${rewardStar}${rewardMotif(32, 32, .78)}`;
+                        if (rewardStage === 2) artwork = `<g transform="translate(18 32) scale(.72) translate(-32 -32)">${rewardStar}</g><g transform="translate(46 32) scale(.72) translate(-32 -32)">${rewardStar}</g>${rewardMotif(32, 32, .72)}`;
+                        if (rewardStage === 3) artwork = `<g transform="translate(32 17) scale(.62) translate(-32 -32)">${rewardStar}</g><g transform="translate(18 43) scale(.62) translate(-32 -32)">${rewardStar}</g><g transform="translate(46 43) scale(.62) translate(-32 -32)">${rewardStar}</g>${rewardMotif(32, 35, .68)}`;
+                    }
+                }
+                const shouldShowShine = ['badge', 'lesson'].includes(notification.type);
+                return `<svg viewBox="0 0 64 64" aria-hidden="true">${artwork}${shouldShowShine ? shine : ''}</svg>`;
+            };
+            const readLearnscapeNotifications = () => {
+                try {
+                    const stored = JSON.parse(window.localStorage.getItem(learnscapeNotificationStorageKey) || '[]');
+                    return Array.isArray(stored)
+                        ? stored.filter((item) => item && item.id && item.title && item.type !== 'collection')
+                        : [];
+                } catch (error) {
+                    return [];
+                }
+            };
+            const createNotificationPreviewItems = () => {
+                const shapeOrder = Object.keys(learnscapeShapeLabels);
+                const carrotRewards = Object.freeze({
+                    circle: [3, 5, 7],
+                    square: [4, 6, 10],
+                    triangle: [6, 9, 15],
+                    rectangle: [8, 12, 20],
+                    oval: [10, 20, 30],
+                    heart: [15, 25, 40],
+                    star: [20, 30, 50],
+                    diamond: [50, 50, 50],
+                });
+                const areaNames = Object.fromEntries(
+                    Object.values(learnscapeAreaByRoute).map((area) => [area.shape, area.name]),
+                );
+                const previewItems = [];
+                let previewIndex = 0;
+                const addPreview = (notification) => {
+                    previewItems.push({
+                        category: 'game',
+                        read: false,
+                        createdAt: Date.now() - previewIndex * 60000,
+                        detail: '',
+                        ...notification,
+                    });
+                    previewIndex += 1;
+                };
+                shapeOrder.forEach((shape) => addPreview({
+                    id: `preview:area:${shape}`,
+                    type: 'progress',
+                    shape,
+                    title: `New area unlocked: ${areaNames[shape]}`,
+                    detail: `${learnscapeShapeLabels[shape]} adventures are now available.`,
+                }));
+                shapeOrder.forEach((shape) => addPreview({
+                    id: `preview:lesson:${shape}`,
+                    type: 'lesson',
+                    shape,
+                    title: `${learnscapeShapeLabels[shape]} Lesson Complete`,
+                    detail: `${learnscapeShapeLabels[shape]} lesson progress completed.`,
+                }));
+                shapeOrder.forEach((shape) => addPreview({
+                    id: `preview:mission:${shape}`,
+                    type: 'mission',
+                    shape,
+                    title: `${learnscapeShapeLabels[shape]} Mission Complete`,
+                    detail: `${learnscapeShapeLabels[shape]} mission progress completed.`,
+                }));
+                shapeOrder.forEach((shape) => addPreview({
+                    id: `preview:camera:${shape}`,
+                    type: 'camera',
+                    shape,
+                    title: `${learnscapeShapeLabels[shape]} Object Detection Complete`,
+                    detail: 'Shape recognition completed.',
+                }));
+                shapeOrder.forEach((shape) => [1, 2, 3].forEach((stars) => addPreview({
+                    id: `preview:stars:${shape}:${stars}`,
+                    type: 'reward',
+                    shape,
+                    stage: stars,
+                    title: `You earned ${stars} ${stars === 1 ? 'star' : 'stars'} in ${learnscapeShapeLabels[shape]}`,
+                    detail: 'Your star total has been updated.',
+                })));
+                shapeOrder.forEach((shape) => carrotRewards[shape].forEach((carrots, rewardIndex) => addPreview({
+                    id: `carrots:preview:${shape}:${rewardIndex + 1}`,
+                    type: 'reward',
+                    shape,
+                    stage: rewardIndex + 1,
+                    title: `${learnscapeShapeLabels[shape]} reward: +${carrots} carrots`,
+                    detail: 'Carrots were added to your balance.',
+                })));
+                shapeOrder.forEach((shape) => addPreview({
+                    id: `preview:shop:${shape}`,
+                    type: 'shop',
+                    shape,
+                    title: `${learnscapeShapeLabels[shape]} key purchased`,
+                    detail: 'Your new island key is ready to use.',
+                }));
+                shapeOrder.forEach((shape) => addPreview({
+                    id: `preview:badge:${shape}`,
+                    type: 'badge',
+                    shape,
+                    title: 'Profile badge unlocked',
+                    detail: `${learnscapeShapeLabels[shape]} badge is now available.`,
+                }));
+                return previewItems;
+            };
+            const isNotificationPreviewMode = true;
+            let learnscapeNotifications = isNotificationPreviewMode
+                ? createNotificationPreviewItems()
+                : readLearnscapeNotifications();
+            const persistLearnscapeNotifications = () => {
+                if (isNotificationPreviewMode) return;
+                try {
+                    window.localStorage.setItem(
+                        learnscapeNotificationStorageKey,
+                        JSON.stringify(learnscapeNotifications.slice(0, learnscapeNotificationLimit)),
+                    );
+                } catch (error) {
+                    // Notifications remain available for this session when storage is unavailable.
+                }
+            };
+            const formatLearnscapeNotificationTime = (timestamp) => {
+                const date = new Date(Number(timestamp) || Date.now());
+                return new Intl.DateTimeFormat(undefined, {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                }).format(date);
+            };
+            const syncIntroNotificationUnreadIndicator = () => {
+                const button = document.querySelector('.intro-sign-button-notif');
+                const indicator = button?.querySelector('.intro-notification-unread-indicator');
+                const unreadCount = learnscapeNotifications.filter((item) => item.read !== true).length;
+                if (button && indicator) {
+                    indicator.hidden = unreadCount === 0;
+                    button.dataset.unreadCount = String(unreadCount);
+                    button.setAttribute('aria-label', unreadCount
+                        ? `Notifications, ${unreadCount} unread`
+                        : 'Notifications');
+                }
+                introMenuCopy?.querySelectorAll('[data-notification-tab]').forEach((tab) => {
+                    const category = tab.dataset.notificationTab;
+                    const categoryUnreadCount = learnscapeNotifications.filter((item) => (
+                        (category === 'system' ? item.category === 'system' : item.category !== 'system')
+                        && item.read !== true
+                    )).length;
+                    const tabIndicator = tab.querySelector('[data-notification-tab-indicator]');
+                    if (tabIndicator) tabIndicator.hidden = categoryUnreadCount === 0;
+                    tab.dataset.unreadCount = String(categoryUnreadCount);
+                });
+            };
+            const markLearnscapeNotificationRead = (notificationId) => {
+                const notification = learnscapeNotifications.find((item) => item.id === notificationId);
+                if (!notification || notification.read === true) return false;
+                notification.read = true;
+                persistLearnscapeNotifications();
+                syncIntroNotificationUnreadIndicator();
+                const selectedCategory = introMenuCopy?.querySelector('[data-notification-tab][aria-selected="true"]')?.dataset.notificationTab || 'game';
+                renderIntroNotifications(selectedCategory);
+                window.playUiClickSound?.('soft');
+                return true;
+            };
+            const renderIntroNotifications = (category = 'game') => {
+                const panel = introMenuCopy?.querySelector('#intro-notification-content');
+                const list = panel?.querySelector('[data-notification-list]');
+                const message = panel?.querySelector('[data-notification-empty-message]');
+                if (!panel || !list) return;
+                const items = category === 'system'
+                    ? learnscapeNotifications.filter((item) => item.category === 'system')
+                    : learnscapeNotifications.filter((item) => item.category !== 'system');
+                panel.dataset.notificationCategory = category;
+                syncIntroNotificationUnreadIndicator();
+                panel.classList.toggle('has-notifications', items.length > 0);
+                list.hidden = items.length === 0;
+                list.replaceChildren();
+                if (!items.length) {
+                    if (message) message.textContent = category === 'system'
+                        ? 'System updates will appear here.'
+                        : 'Game notifications will appear here.';
+                    return;
+                }
+                items.forEach((notification) => {
+                    const item = document.createElement('article');
+                    item.className = 'intro-notification-item';
+                    item.dataset.notificationType = notification.type || 'progress';
+                    item.dataset.notificationId = notification.id;
+                    item.setAttribute('role', 'listitem');
+                    item.tabIndex = 0;
+                    const isUnread = notification.read !== true;
+                    item.classList.toggle('is-unread', isUnread);
+                    item.setAttribute('aria-label', `${notification.title}${isUnread ? ', unread' : ', read'}`);
+                    const readStatus = document.createElement('span');
+                    readStatus.className = `intro-notification-item-read-status ${isUnread ? 'is-unread' : 'is-read'}`;
+                    readStatus.setAttribute('aria-hidden', 'true');
+                    readStatus.textContent = isUnread ? '' : '\u2713';
+                    const icon = document.createElement('span');
+                    icon.className = 'intro-notification-item-icon';
+                    icon.setAttribute('aria-hidden', 'true');
+                    icon.innerHTML = createNotificationIconSvg(notification);
+                    const copy = document.createElement('span');
+                    copy.className = 'intro-notification-item-copy';
+                    const title = document.createElement('strong');
+                    title.textContent = notification.title;
+                    copy.appendChild(title);
+                    if (notification.detail) {
+                        const detail = document.createElement('span');
+                        detail.textContent = notification.detail;
+                        copy.appendChild(detail);
+                    }
+                    const time = document.createElement('time');
+                    time.dateTime = new Date(Number(notification.createdAt) || Date.now()).toISOString();
+                    time.textContent = formatLearnscapeNotificationTime(notification.createdAt);
+                    item.append(readStatus, icon, copy, time);
+                    list.appendChild(item);
+                });
+            };
+            const addLearnscapeNotification = (notification) => {
+                if (!notification?.id || !notification?.title) return false;
+                if (notification.type === 'collection') return false;
+                if (learnscapeNotifications.some((item) => item.id === notification.id)) return false;
+                learnscapeNotifications.unshift({
+                    category: 'game',
+                    type: 'progress',
+                    detail: '',
+                    createdAt: Date.now(),
+                    read: false,
+                    ...notification,
+                });
+                learnscapeNotifications = learnscapeNotifications.slice(0, learnscapeNotificationLimit);
+                persistLearnscapeNotifications();
+                syncIntroNotificationUnreadIndicator();
+                if (introMenuPanel?.dataset.panel === 'notifications' && !introMenuPanel.hidden) {
+                    const selectedCategory = introMenuCopy?.querySelector('[data-notification-tab][aria-selected="true"]')?.dataset.notificationTab || 'game';
+                    renderIntroNotifications(selectedCategory);
+                }
+                window.dispatchEvent(new CustomEvent('learnscape:notificationadded', { detail: notification }));
+                return true;
+            };
+            window.addLearnscapeNotification = addLearnscapeNotification;
+            window.getLearnscapeNotifications = () => [...learnscapeNotifications];
+            syncIntroNotificationUnreadIndicator();
+            window.completeLearnscapeCameraChallenge = (shape) => {
+                const normalizedShape = String(shape || '').trim().toLowerCase();
+                if (!learnscapeShapeLabels[normalizedShape]) return false;
+                window.dispatchEvent(new CustomEvent('learnscape:camera-complete', {
+                    detail: { shape: normalizedShape },
+                }));
+                return true;
+            };
+            window.addEventListener('learnscape:camera-complete', (event) => {
+                const shape = String(event.detail?.shape || '').trim().toLowerCase();
+                const shapeLabel = learnscapeShapeLabels[shape];
+                if (!shapeLabel) return;
+                addLearnscapeNotification({
+                    id: `camera:${shape}`,
+                    type: 'camera',
+                    shape,
+                    title: `${shapeLabel} Object Detection Complete`,
+                    detail: 'Shape recognition completed.',
+                });
+            });
+            window.addEventListener('learnscape:routechange', (event) => {
+                const area = learnscapeAreaByRoute[event.detail?.route];
+                if (!area) return;
+                addLearnscapeNotification({
+                    id: `area:${area.shape}`,
+                    type: 'progress',
+                    shape: area.shape,
+                    title: `New area unlocked: ${area.name}`,
+                    detail: `${learnscapeShapeLabels[area.shape]} adventures are now available.`,
+                });
+            });
             const introShopResetVersion = '2026-09-26-1';
             if (readSoundSetting('learnscape-shop-reset-version', '') !== introShopResetVersion) {
                 ['circle', 'square', 'triangle', 'rectangle', 'oval', 'heart', 'star', 'diamond'].forEach((shape) => {
@@ -3304,6 +3816,49 @@
                 const stage = progress.dataset.progressStage || 'complete';
                 return `${page?.id || 'unknown'}:${stage}`;
             };
+            const getProgressNotificationType = (progress) => {
+                const page = progress.closest('section[id]');
+                const stage = String(progress.dataset.progressStage || '').toLowerCase();
+                const title = String(
+                    progress.querySelector('.circle-lesson-progress-title')?.getAttribute('aria-label')
+                    || progress.querySelector('.circle-lesson-progress-title')?.textContent
+                    || '',
+                ).toLowerCase();
+                if (page?.matches('.shape-camera-page') || stage === 'camera') return 'camera';
+                if (stage === 'hunt' || stage === 'answer' || title.includes('mission')) return 'mission';
+                return 'lesson';
+            };
+            const addProgressNotifications = (progress, shape, starStage, reward, rewardIdentity) => {
+                const shapeLabel = learnscapeShapeLabels[shape];
+                if (!shapeLabel) return;
+                const completionType = getProgressNotificationType(progress);
+                const completionTitle = completionType === 'camera'
+                    ? `${shapeLabel} Object Detection Complete`
+                    : `${shapeLabel} ${completionType === 'mission' ? 'Mission' : 'Lesson'} Complete`;
+                addLearnscapeNotification({
+                    id: `completion:${rewardIdentity}`,
+                    type: completionType,
+                    shape,
+                    title: completionTitle,
+                    detail: `${shapeLabel} progress completed.`,
+                });
+                addLearnscapeNotification({
+                    id: `stars:${rewardIdentity}`,
+                    type: 'reward',
+                    shape,
+                    stage: starStage,
+                    title: `You earned ${starStage} ${starStage === 1 ? 'star' : 'stars'} in ${shapeLabel}`,
+                    detail: 'Your star total has been updated.',
+                });
+                addLearnscapeNotification({
+                    id: `carrots:${rewardIdentity}`,
+                    type: 'reward',
+                    shape,
+                    stage: starStage,
+                    title: `${shapeLabel} reward: +${reward} carrots`,
+                    detail: 'Carrots were added to your balance.',
+                });
+            };
             const createProgressRewardBadge = (actions) => {
                 const badge = document.createElement('span');
                 badge.className = 'circle-lesson-progress-reward';
@@ -3356,7 +3911,17 @@
                 if (!isVisible) return;
 
                 if (starStage === 3 && rewardShape) {
+                    const badgeWasUnlocked = readSoundSetting(introProfileBadgeUnlockKey(rewardShape), 'false') === 'true';
                     writeSoundSetting(introProfileBadgeUnlockKey(rewardShape), 'true');
+                    if (!badgeWasUnlocked) {
+                        addLearnscapeNotification({
+                            id: `badge:${rewardShape}`,
+                            type: 'badge',
+                            shape: rewardShape,
+                            title: 'Profile badge unlocked',
+                            detail: `${learnscapeShapeLabels[rewardShape]} badge is now available.`,
+                        });
+                    }
                 }
 
                 const rewardIdentity = getProgressRewardIdentity(progress);
@@ -3380,6 +3945,7 @@
 
                 claimedProgressRewards.add(rewardIdentity);
                 writeSoundSetting(rewardStorageKey, 'true');
+                addProgressNotifications(progress, rewardShape, starStage, reward, rewardIdentity);
                 window.addLearnscapeResource('stars', 1);
                 window.addLearnscapeResource('carrots', reward);
                 badge.classList.add('is-awarded', 'is-new-reward');
