@@ -177,6 +177,124 @@ const appVersion = '20260926-583';
         );
     };
 
+    const numberChoiceAudioSegments = Object.freeze([
+        [0.0, 0.6],
+        [0.7, 1.5],
+        [1.6, 2.3],
+        [2.6, 3.1],
+        [3.2, 3.9],
+        [4.0, 4.6],
+        [4.8, 5.4],
+        [5.5, 6.2],
+        [6.2, 6.8],
+        [6.9, 7.7],
+        [7.8, 8.8],
+        [8.8, 10.0],
+        [10.1, 11.2],
+        [11.2, 12.3],
+        [12.4, 13.4],
+        [13.5, 14.6],
+        [14.6, 15.7],
+        [15.7, 16.8],
+        [16.8, 18.0],
+        [18.1, 19.1],
+    ]);
+    const numberChoiceAudioSource = 'assets/Audios/Sound effects/counting.mp3';
+    let numberChoiceAudio = null;
+    let numberChoiceAudioFrame = null;
+    let numberChoiceAudioTimer = null;
+
+    const stopNumberChoiceAudio = () => {
+        if (numberChoiceAudioFrame !== null) {
+            window.cancelAnimationFrame(numberChoiceAudioFrame);
+            numberChoiceAudioFrame = null;
+        }
+        if (numberChoiceAudioTimer !== null) {
+            window.clearTimeout(numberChoiceAudioTimer);
+            numberChoiceAudioTimer = null;
+        }
+        if (numberChoiceAudio) {
+            numberChoiceAudio.onended = null;
+            numberChoiceAudio.onerror = null;
+            numberChoiceAudio.pause();
+            numberChoiceAudio = null;
+        }
+    };
+
+    const playNumberChoiceAudio = (number) => {
+        const value = Math.floor(Number(number));
+        const segment = numberChoiceAudioSegments[value - 1];
+        if (!segment || !window.Audio || (window.__learnscapeSoundScale?.() ?? 1) <= 0) return false;
+        stopNumberChoiceAudio();
+        const [start, end] = segment;
+        const audio = new window.Audio(numberChoiceAudioSource);
+        numberChoiceAudio = audio;
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+        const releaseAudio = () => {
+            if (numberChoiceAudio !== audio) return;
+            stopNumberChoiceAudio();
+        };
+        const monitorSegment = () => {
+            if (numberChoiceAudio !== audio) return;
+            if (audio.currentTime >= end || audio.ended) {
+                releaseAudio();
+                return;
+            }
+            numberChoiceAudioFrame = window.requestAnimationFrame(monitorSegment);
+        };
+        const startPlayback = () => {
+            if (numberChoiceAudio !== audio) return;
+            try {
+                audio.currentTime = start;
+            } catch (error) {
+                // Metadata loading will retry the seek before playback.
+            }
+            audio.play().then(() => {
+                if (numberChoiceAudio !== audio) return;
+                monitorSegment();
+                numberChoiceAudioTimer = window.setTimeout(releaseAudio, ((end - start) * 1000) + 120);
+            }).catch(releaseAudio);
+        };
+        audio.onended = releaseAudio;
+        audio.onerror = releaseAudio;
+        if (audio.readyState >= 1) {
+            startPlayback();
+        } else {
+            audio.addEventListener('loadedmetadata', startPlayback, { once: true });
+            audio.load?.();
+        }
+        return true;
+    };
+    window.playLearnscapeCountingNumber = playNumberChoiceAudio;
+
+    const numberChoiceSelector = '[data-triangle-count-answer], .star-mission-target-option, .oval-board-card';
+    const getNumberChoiceValue = (control) => {
+        if (!control?.matches?.(numberChoiceSelector)) return null;
+        if (control.disabled || control.getAttribute('aria-disabled') === 'true') return null;
+        if (control.dataset.triangleCountAnswer) return control.dataset.triangleCountAnswer;
+        if (control.dataset.starTarget) return control.dataset.starTarget;
+        return control.querySelector('.oval-card-number')?.textContent?.trim() || null;
+    };
+    const playNumberChoiceActivationFallback = (control) => {
+        const hasMouseHover = window.matchMedia?.('(hover: hover) and (pointer: fine)').matches;
+        if (!hasMouseHover) playNumberChoiceAudio(getNumberChoiceValue(control));
+    };
+
+    document.addEventListener('pointerover', (event) => {
+        const control = event.target.closest?.(numberChoiceSelector);
+        if (!control || control.contains(event.relatedTarget)) return;
+        if (event.pointerType && event.pointerType !== 'mouse') return;
+        playNumberChoiceAudio(getNumberChoiceValue(control));
+    });
+
+    document.addEventListener('focusin', (event) => {
+        const control = event.target.closest?.(numberChoiceSelector);
+        if (!control || control.matches(':hover')) return;
+        playNumberChoiceAudio(getNumberChoiceValue(control));
+    });
+
     const getButtonClickSoundKind = (control) => {
         if (!control) return null;
         if (control.matches('button[disabled], [aria-disabled="true"]')) return null;
@@ -184,6 +302,7 @@ const appVersion = '20260926-583';
         if (control.classList.contains('square-answer-tile')) return null;
         if (control.classList.contains('shape-tv-choice')) return null;
         if (control.classList.contains('rectangle-mission-object')) return null;
+        if (control.matches('[data-triangle-count-answer], .star-mission-target-option, .oval-board-card')) return null;
 
         if (control.classList.contains('game-return-btn')) return 'backChime';
         if (control.classList.contains('shape-collection-chest')) return 'chestChime';
@@ -6092,7 +6211,7 @@ const appVersion = '20260926-583';
 
     starMissionTargetOptions.forEach((option) => {
         option.addEventListener('click', () => {
-            playUiClickSound('start');
+            playNumberChoiceActivationFallback(option);
             setStarMissionTarget(option.dataset.starTarget);
             startStarMissionGame();
         });
@@ -8532,6 +8651,7 @@ const appVersion = '20260926-583';
     const triangleGameBackground = triangleGamePage?.querySelector('.shape-area-bg') || null;
     const triangleGameTreeGroup = triangleGamePage?.querySelector('.triangle-game-tree-group') || null;
     const triangleGameTrees = Array.from(triangleGamePage?.querySelectorAll('[data-triangle-game-tree]') || []);
+    const triangleTreeCutGuide = triangleGameTreeGroup?.querySelector('.triangle-tree-cut-guide') || null;
     const triangleWoodStorage = triangleGamePage?.querySelector('.triangle-wood-storage') || null;
     const triangleWoodStorageImage = triangleWoodStorage?.querySelector('.triangle-wood-storage-image') || null;
     const triangleWoodClickGuide = triangleWoodStorage?.querySelector('.triangle-wood-click-guide') || null;
@@ -8592,6 +8712,50 @@ const appVersion = '20260926-583';
     let triangleGameCompleteVoiceAudio = null;
     let triangleGameCompleteCheeringAudio = null;
     let triangleGameCompleteWalkLoopTimer = null;
+    let triangleTreeCutGuideTimer = null;
+    const TRIANGLE_TREE_CUT_GUIDE_IDLE_MS = 5000;
+
+    const hideTriangleTreeCutGuide = () => {
+        if (triangleTreeCutGuideTimer !== null) {
+            window.clearTimeout(triangleTreeCutGuideTimer);
+            triangleTreeCutGuideTimer = null;
+        }
+        if (triangleTreeCutGuide) triangleTreeCutGuide.hidden = true;
+    };
+
+    const positionTriangleTreeCutGuide = () => {
+        if (!triangleTreeCutGuide || !triangleGameTreeGroup) return false;
+        const targetTree = triangleGameTrees.find((tree) => tree.classList.contains('is-clickable'));
+        if (!targetTree) {
+            triangleTreeCutGuide.hidden = true;
+            return false;
+        }
+        const groupRect = triangleGameTreeGroup.getBoundingClientRect();
+        const treeRect = targetTree.getBoundingClientRect();
+        triangleTreeCutGuide.style.left = `${treeRect.left - groupRect.left + (treeRect.width * 0.5)}px`;
+        triangleTreeCutGuide.style.top = `${treeRect.top - groupRect.top + (treeRect.height * 0.58)}px`;
+        triangleTreeCutGuide.hidden = false;
+        return true;
+    };
+
+    const scheduleTriangleTreeCutGuide = () => {
+        hideTriangleTreeCutGuide();
+        if (
+            triangleGamePage?.hidden
+            || !triangleGameTreeGroup?.classList.contains('is-active')
+            || !triangleGameTrees.some((tree) => tree.classList.contains('is-clickable'))
+        ) return;
+        const session = triangleWoodCollectionSession;
+        triangleTreeCutGuideTimer = window.setTimeout(() => {
+            triangleTreeCutGuideTimer = null;
+            if (
+                session !== triangleWoodCollectionSession
+                || triangleGamePage?.hidden
+                || !triangleGameTreeGroup?.classList.contains('is-active')
+            ) return;
+            positionTriangleTreeCutGuide();
+        }, TRIANGLE_TREE_CUT_GUIDE_IDLE_MS);
+    };
 
     const prepareTriangleGameCompleteConfetti = () => {
         if (!triangleGameCompleteConfetti || triangleGameCompleteConfetti.childElementCount) return;
@@ -8815,6 +8979,7 @@ const appVersion = '20260926-583';
     });
 
     const resetTriangleGameTrees = () => {
+        hideTriangleTreeCutGuide();
         triangleWoodCollectionSession += 1;
         triangleBridgeBuildSession += 1;
         triangleBridgeBuildTimers.forEach((timerId) => window.clearTimeout(timerId));
@@ -9159,18 +9324,25 @@ const appVersion = '20260926-583';
         }, 380));
     };
 
-    const playTriangleBridgeQuestionAudio = (source) => {
+    const playTriangleBridgeQuestionAudio = (source, onComplete) => {
         triangleBridgeQuestionAudio?.pause?.();
         triangleBridgeQuestionAudio = null;
         const soundScale = window.__learnscapeSoundScale?.() ?? 1;
-        if (!window.Audio || soundScale <= 0) return;
+        if (!window.Audio || soundScale <= 0) {
+            onComplete?.();
+            return;
+        }
         const audio = new window.Audio(source);
         triangleBridgeQuestionAudio = audio;
         audio.preload = 'auto';
         audio.playsInline = true;
         audio.volume = Math.min(1, soundScale);
+        let completed = false;
         const releaseAudio = () => {
+            if (completed) return;
+            completed = true;
             if (triangleBridgeQuestionAudio === audio) triangleBridgeQuestionAudio = null;
+            onComplete?.();
         };
         audio.onended = releaseAudio;
         audio.onerror = releaseAudio;
@@ -9181,16 +9353,21 @@ const appVersion = '20260926-583';
         if (!triangleBridgeQuestion || session !== triangleWoodCollectionSession) return;
         triangleBridgeQuestionAnswered = false;
         triangleBridgeQuestionChoices.forEach((choice) => {
-            choice.disabled = false;
+            choice.disabled = true;
             choice.classList.remove('is-correct', 'is-wrong');
             choice.setAttribute('aria-pressed', 'false');
         });
         triangleBridgeQuestion.hidden = false;
         triangleBridgeQuestion.getBoundingClientRect();
         triangleBridgeQuestion.classList.add('is-visible');
-        triangleBridgeQuestionChoices[0]?.focus({ preventScroll: true });
         playUiClickSound('chime');
-        playTriangleBridgeQuestionAudio('assets/Audios/Voice over/ilang hugis.mp3');
+        playTriangleBridgeQuestionAudio('assets/Audios/Voice over/ilang hugis.mp3', () => {
+            if (session !== triangleWoodCollectionSession || triangleBridgeQuestion.hidden) return;
+            triangleBridgeQuestionChoices.forEach((choice) => {
+                choice.disabled = false;
+            });
+            triangleBridgeQuestionChoices[0]?.focus({ preventScroll: true });
+        });
     };
 
     const startTriangleBridgeBuildSequence = (collectionSession) => {
@@ -9365,6 +9542,7 @@ const appVersion = '20260926-583';
     triangleBridgeQuestionChoices.forEach((choice) => {
         choice.addEventListener('click', () => {
             if (triangleBridgeQuestionAnswered || triangleBridgeQuestion?.hidden) return;
+            playNumberChoiceActivationFallback(choice);
             const isCorrect = choice.hasAttribute('data-correct-answer');
             triangleBridgeQuestionChoices.forEach((candidate) => {
                 candidate.classList.remove('is-correct', 'is-wrong');
@@ -9396,6 +9574,7 @@ const appVersion = '20260926-583';
 
     const advanceTriangleGameTree = (tree) => {
         if (!triangleGameTreeGroup?.classList.contains('is-active') || !tree.classList.contains('is-clickable')) return;
+        scheduleTriangleTreeCutGuide();
         const currentStage = Number.parseInt(tree.dataset.treeStage || '0', 10);
         const nextStage = Math.min(currentStage + 1, 3);
         tree.dataset.treeStage = String(nextStage);
@@ -9480,6 +9659,7 @@ const appVersion = '20260926-583';
             tree.classList.remove('is-hit', 'is-fallen');
             tree.setAttribute('aria-label', `Tree ${treeIndex + 1}, 3 taps remaining`);
         });
+        scheduleTriangleTreeCutGuide();
     });
 
     triangleGameTreeGroup?.addEventListener('click', (event) => {
@@ -9493,6 +9673,10 @@ const appVersion = '20260926-583';
 
     triangleGameTreeGroup?.addEventListener('pointerleave', () => {
         triangleGameTreeGroup.classList.remove('is-over-tree');
+    });
+
+    window.addEventListener('resize', () => {
+        if (triangleTreeCutGuide && !triangleTreeCutGuide.hidden) positionTriangleTreeCutGuide();
     });
 
     triangleGameTrees.forEach((tree) => {
@@ -12918,6 +13102,8 @@ const appVersion = '20260926-583';
                 || card.classList.contains('is-clearing')
                 || card.classList.contains('is-frozen')
             ) return;
+
+            playNumberChoiceActivationFallback(card);
 
             if (card.dataset.ovalChallengeType === 'bomb') {
                 triggerOvalBomb(card);
