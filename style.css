@@ -2291,6 +2291,140 @@ body.is-windowed-fallback .fullscreen-restore-overlay {
     .circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='2']) .circle-lesson-progress-button:last-child { width: clamp(6.5rem, 27vw, 9rem); }
 }
 
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) {
+    padding: 0;
+    background: rgba(255, 232, 117, 0.08);
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+}
+
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-board {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: auto;
+}
+
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-board-image,
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-board::before,
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-board::after,
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-star-slot::before,
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-star-message {
+    display: none;
+}
+
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-title {
+    z-index: 8;
+    top: 1.5%;
+    width: min(91vw, 1160px);
+    height: 23%;
+    transform: translateX(-50%) scale(1.08, 1.06);
+    filter:
+        drop-shadow(0 0 1px #4fc5ff)
+        drop-shadow(0 0 3px #159eea)
+        drop-shadow(0 5px 0 #064b91)
+        drop-shadow(0 9px 5px rgba(0, 38, 91, 0.58));
+}
+
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-title text {
+    fill: #ffe95a;
+    stroke: #07529f;
+    stroke-width: 4.2px;
+    stroke-linejoin: round;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 46px;
+    font-weight: 900;
+    paint-order: stroke fill;
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: scaleX(1.34);
+}
+
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-stars {
+    top: 23%;
+    width: min(78vw, 920px);
+    height: min(43svh, 390px);
+    isolation: isolate;
+    filter: drop-shadow(0 0 22px rgba(255, 229, 52, 0.95));
+}
+
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-stars::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: -12%;
+    top: 50%;
+    width: 124%;
+    aspect-ratio: 1;
+    translate: 0 -50%;
+    border-radius: 50%;
+    background: repeating-conic-gradient(from 8deg, transparent 0deg 8deg, rgba(255, 251, 176, 0.86) 14deg, rgba(255, 205, 29, 0.52) 19deg, transparent 26deg 42deg);
+    -webkit-mask-image: radial-gradient(circle, transparent 0 14%, #000 29% 80%, transparent 96%);
+    mask-image: radial-gradient(circle, transparent 0 14%, #000 29% 80%, transparent 96%);
+    filter: saturate(1.15) drop-shadow(0 0 24px rgba(255, 221, 38, 0.82));
+    animation: circleLessonGoldenRaysSpin 18s linear infinite;
+}
+
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-star-slot {
+    top: 0;
+    bottom: auto;
+    width: 32%;
+}
+
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-star-slot:nth-child(1) {
+    left: 0;
+    transform: rotate(-7deg);
+}
+
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-star-slot:nth-child(2) {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-star-slot:nth-child(3) {
+    right: 0;
+    transform: rotate(7deg);
+}
+
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-star-real {
+    opacity: 1;
+    transform: scale(1);
+    animation:
+        circleLessonTwoStarPop 0.78s 0.42s cubic-bezier(0.2, 1.4, 0.35, 1) both,
+        circleLessonStarShine 1.15s 0.7s ease-out both;
+}
+
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-star-slot::after {
+    animation: circleLessonStarGlitter 1.25s 0.62s ease-out both;
+}
+
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-actions {
+    bottom: 4%;
+    width: min(39vw, 510px);
+    gap: clamp(1rem, 4vw, 4rem);
+}
+
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-button {
+    flex: 0 0 auto;
+    width: clamp(5.5rem, 13vw, 9rem);
+    height: clamp(5.5rem, 19svh, 9rem);
+    aspect-ratio: 1;
+}
+
+.circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-button:last-child {
+    width: clamp(7rem, 15vw, 10.5rem);
+}
+
+@media (max-width: 700px) {
+    .circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-title { top: 7%; width: 96vw; height: 21%; transform: translateX(-50%) scale(1, 1.04); }
+    .circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-title text { font-size: 45px; stroke-width: 3.6px; transform: scaleX(1.18); }
+    .circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-stars { top: 34%; width: 94vw; height: 30svh; }
+    .circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-actions { bottom: 8%; width: 88vw; gap: 1rem; }
+    .circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-button { width: clamp(5.5rem, 22vw, 7.5rem); height: clamp(5.5rem, 22vw, 7.5rem); }
+    .circle-lesson-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-button:last-child { width: clamp(6.5rem, 27vw, 9rem); }
+}
+
 @keyframes circleLessonTwoStarPop {
     0% {
         opacity: 0;
@@ -13556,6 +13690,269 @@ body *::after {
         0 0 0.75rem rgba(83, 255, 135, 0.48);
 }
 
+.camera-temporary-okay-button {
+    position: absolute;
+    z-index: 7;
+    top: 1rem;
+    right: 1rem;
+    min-width: 7rem;
+    padding: 0.7rem 1.35rem;
+    border: 0.18rem solid #ffffff;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #fff58a, #ffb51c);
+    box-shadow: inset 0 0.12rem 0 rgba(255, 255, 255, 0.7), 0 0.28rem 0 #9b5a00;
+    color: #5b3100;
+    font: 900 1.25rem/1 'Fredoka', 'Nunito', sans-serif;
+    cursor: pointer;
+}
+
+.camera-temporary-okay-button:hover {
+    filter: brightness(1.08);
+}
+
+.camera-temporary-okay-button:active {
+    transform: translateY(0.15rem);
+    box-shadow: inset 0 0.12rem 0 rgba(255, 255, 255, 0.55), 0 0.12rem 0 #9b5a00;
+}
+
+.camera-temporary-okay-button:disabled {
+    opacity: 0.48;
+    pointer-events: none;
+}
+
+.circle-camera-page.is-camera-chest-ready .camera-temporary-okay-button,
+.circle-camera-page.is-camera-completing .camera-temporary-okay-button {
+    opacity: 0;
+}
+
+.camera-detection-check {
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    display: grid;
+    place-items: center;
+    background: rgba(4, 28, 18, 0.22);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 180ms ease;
+}
+
+.camera-detection-check span {
+    position: relative;
+    display: block;
+    width: clamp(7rem, 14vw, 11rem);
+    aspect-ratio: 1;
+    border: 0.5rem solid #ffffff;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #7eff91, #12b642);
+    box-shadow: 0 0 0 0.45rem rgba(26, 221, 83, 0.45), 0 0 2.4rem rgba(62, 255, 116, 0.92);
+    transform: scale(0.25) rotate(-12deg);
+}
+
+.camera-detection-check span::after {
+    content: '';
+    position: absolute;
+    width: 44%;
+    height: 23%;
+    margin: 30% 0 0 25%;
+    border-left: 0.72rem solid #ffffff;
+    border-bottom: 0.72rem solid #ffffff;
+    transform: rotate(-45deg);
+    filter: drop-shadow(0 0.16rem 0 rgba(0, 94, 32, 0.32));
+}
+
+.circle-camera-page.is-camera-detection-success .camera-detection-check {
+    opacity: 1;
+    visibility: visible;
+}
+
+.circle-camera-page.is-camera-detection-success .camera-detection-check span {
+    animation: cameraDetectionCheckPop 0.62s cubic-bezier(0.2, 1.45, 0.35, 1) both;
+}
+
+.camera-completion-celebration {
+    z-index: 24;
+    background: radial-gradient(circle at 50% 44%, rgba(255, 250, 174, 0.5), rgba(26, 118, 205, 0.3) 46%, rgba(8, 30, 68, 0.56));
+    -webkit-backdrop-filter: blur(5px) saturate(1.08);
+    backdrop-filter: blur(5px) saturate(1.08);
+}
+
+.camera-completion-celebration-copy {
+    position: absolute;
+    z-index: 5;
+    top: clamp(1.5rem, 6vh, 4rem);
+    left: 50%;
+    display: grid;
+    gap: 0.65rem;
+    width: min(92vw, 78rem);
+    color: #ffffff;
+    text-align: center;
+    opacity: 0;
+    transform: translate(-50%, -1.5rem) scale(0.82);
+    filter: drop-shadow(0 0.35rem 0.18rem rgba(20, 42, 91, 0.45));
+}
+
+.camera-completion-celebration-copy strong {
+    color: #ffe852;
+    font: 900 clamp(3.5rem, 8.5vw, 8rem)/0.9 'Fredoka', 'Quicksand', sans-serif;
+    letter-spacing: 0.02em;
+    -webkit-text-stroke: 0.1em #07529f;
+    paint-order: stroke fill;
+    text-shadow: 0 0.08em 0 #043b79, 0 0.16em 0.12em rgba(4, 46, 99, 0.48);
+}
+
+.camera-completion-celebration-copy span {
+    font: 900 clamp(1.7rem, 4vw, 3.4rem)/1.05 'Fredoka', 'Quicksand', sans-serif;
+    letter-spacing: 0.015em;
+    -webkit-text-stroke: 0.055em #07529f;
+    paint-order: stroke fill;
+    text-shadow: 0 0.12em 0 #043b79, 0 0 0.42em rgba(7, 82, 159, 0.95);
+}
+
+.camera-completion-celebration.is-active .camera-completion-celebration-copy {
+    animation: cameraCelebrationCopyPop 0.72s 0.18s cubic-bezier(0.2, 1.38, 0.35, 1) both;
+}
+
+.camera-celebration-badge {
+    --camera-badge-size: min(42vw, 46vh, 25rem);
+    position: absolute;
+    z-index: 4;
+    left: 50%;
+    top: 61%;
+    width: var(--camera-badge-size);
+    aspect-ratio: 1;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.18) rotate(-14deg);
+    filter: drop-shadow(0 1rem 0.75rem rgba(14, 42, 86, 0.42));
+}
+
+.camera-completion-celebration.is-active .camera-celebration-badge {
+    animation: cameraCelebrationBadgeReveal 1.05s 0.58s cubic-bezier(0.16, 1.38, 0.3, 1) both;
+}
+
+.camera-celebration-badge .camera-celebration-profile-badge {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    filter: none;
+    opacity: 1;
+}
+
+.camera-celebration-profile-badge .intro-profile-medal {
+    position: absolute;
+    top: 0;
+    left: 10%;
+    width: 80%;
+    max-width: none;
+    transform: none;
+    box-shadow:
+        inset 0 -0.32rem 0 rgba(213, 126, 0, 0.25),
+        0 0.34rem 0 #c77a00,
+        0 0 1.8rem 0.5rem rgba(255, 226, 62, 0.72);
+}
+
+.camera-celebration-badge .camera-celebration-profile-badge strong {
+    box-sizing: border-box;
+    position: absolute;
+    top: 78%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: 100%;
+    min-height: 0;
+    margin: 0;
+    padding: 0.24em 0.45em 0.3em;
+    display: grid;
+    place-items: center;
+    font: 900 calc(var(--camera-badge-size) * 0.115)/1.1 'Fredoka', 'Quicksand', sans-serif;
+    color: #542900;
+    text-align: center;
+    letter-spacing: 0.015em;
+    -webkit-text-stroke: 0.015em currentColor;
+    paint-order: stroke fill;
+    border-width: 0.07em;
+    border-radius: 0.24em;
+    text-shadow: 0 0.045em 0 #fff6bb;
+    box-shadow:
+        inset 0 0.16rem 0 rgba(255, 255, 255, 0.7),
+        inset 0 -0.28rem 0 rgba(186, 99, 0, 0.4),
+        0 0.4rem 0 #9a5000,
+        0 0.64rem 0.55rem rgba(92, 43, 0, 0.38);
+}
+
+@media (max-height: 500px) {
+    .camera-completion-celebration-copy { top: 4vh; gap: 2vh; }
+    .camera-completion-celebration-copy strong { font-size: min(8vw, 12vh); }
+    .camera-completion-celebration-copy span { font-size: min(3.5vw, 6vh); }
+}
+
+.circle-camera-page.is-camera-progress-visible .camera-completion-progress {
+    z-index: 30;
+    display: grid;
+    background: rgba(27, 16, 8, 0.34);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+}
+
+.camera-completion-next {
+    aspect-ratio: 308 / 250;
+}
+
+.circle-lesson-progress-button:has(.progress-button-svg) {
+    width: clamp(12rem, 24vw, 18rem) !important;
+    height: clamp(6.5rem, 12vw, 9.5rem) !important;
+    aspect-ratio: auto !important;
+}
+
+.circle-lesson-progress-button[data-progress-control='next']:has(.progress-button-svg) {
+    width: clamp(12rem, 24vw, 18rem) !important;
+}
+
+.circle-lesson-progress-actions:has(.progress-button-svg) {
+    width: min(66vw, 780px) !important;
+    gap: clamp(1.25rem, 4vw, 4.5rem) !important;
+}
+
+.progress-button-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.circle-lesson-progress-button .progress-control-source {
+    display: none !important;
+}
+
+@media (max-width: 700px) {
+    .circle-lesson-progress-button:has(.progress-button-svg) {
+        width: clamp(9rem, 42vw, 12rem) !important;
+        height: clamp(5rem, 20vw, 6.8rem) !important;
+    }
+
+    .circle-lesson-progress-button[data-progress-control='next']:has(.progress-button-svg) {
+        width: clamp(9rem, 42vw, 12rem) !important;
+    }
+
+    .circle-lesson-progress-actions:has(.progress-button-svg) {
+        width: 96vw !important;
+        gap: clamp(0.5rem, 2vw, 1rem) !important;
+    }
+}
+
+@keyframes cameraDetectionCheckPop {
+    0% { transform: scale(0.25) rotate(-12deg); opacity: 0; }
+    68% { transform: scale(1.13) rotate(4deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+@keyframes cameraCelebrationCopyPop {
+    0% { opacity: 0; transform: translate(-50%, -1.5rem) scale(0.82); }
+    70% { opacity: 1; transform: translate(-50%, 0) scale(1.06); }
+    100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
 .circle-camera-start-icon {
     position: relative;
     width: 2.5rem;
@@ -13617,14 +14014,143 @@ body *::after {
     color: #4b210f;
 }
 
+.camera-empty-stars {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.3rem, 0.8vw, 0.7rem);
+    flex: 0 0 auto;
+    min-height: 5.2rem;
+    margin-bottom: 0.65rem;
+}
+
+.camera-empty-stars .circle-lesson-star-slot {
+    position: relative;
+    inset: auto;
+    width: clamp(3.6rem, 5.5vw, 5rem);
+    transform: none;
+}
+
+.camera-empty-stars .circle-lesson-star-slot::before {
+    background: rgba(255, 247, 182, 0.84);
+    filter: drop-shadow(0 0.22rem 0.15rem rgba(73, 42, 8, 0.48));
+    transition: opacity 180ms ease;
+}
+
+.camera-progress-star {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    transform: scale(0.28);
+}
+
+.camera-empty-stars .circle-lesson-star-slot.is-earned::before {
+    opacity: 0.18;
+}
+
+.camera-empty-stars .circle-lesson-star-slot.is-earned .camera-progress-star {
+    animation:
+        circleLessonEarnedStarPop 0.68s cubic-bezier(0.2, 1.4, 0.35, 1) both,
+        circleLessonStarShine 1.05s 0.18s ease-out both;
+}
+
+.camera-empty-stars .circle-lesson-star-slot.is-earned::after {
+    animation: circleLessonStarGlitter 1.15s 0.12s ease-out both;
+}
+
 .circle-camera-locked-chest {
     position: relative;
+    isolation: isolate;
     flex: 0 1 auto;
     width: min(15rem, 90%);
-    max-height: calc(100% - 6.5rem);
+    max-height: calc(100% - 10.5rem);
     aspect-ratio: 1.35;
     margin: clamp(0.35rem, 1.2vh, 0.8rem) auto 0;
     filter: drop-shadow(0 0.65rem 0.45rem rgba(52, 25, 10, 0.38));
+    perspective: 32rem;
+    transform-style: preserve-3d;
+}
+
+.circle-camera-locked-chest::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 185%;
+    aspect-ratio: 1;
+    translate: -50% -50%;
+    z-index: 0;
+    border-radius: 50%;
+    background: repeating-conic-gradient(from 5deg, transparent 0 9deg, rgba(255, 250, 167, 0.92) 13deg, rgba(255, 199, 27, 0.54) 19deg, transparent 25deg 39deg);
+    -webkit-mask-image: radial-gradient(circle, transparent 0 21%, #000 35% 76%, transparent 96%);
+    mask-image: radial-gradient(circle, transparent 0 21%, #000 35% 76%, transparent 96%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.circle-camera-page.is-camera-chest-ready .circle-camera-locked-chest::before {
+    opacity: 1;
+    animation:
+        circleLessonGoldenRaysSpin 10s linear infinite,
+        circleLessonGoldenRaysPulse 1.55s ease-in-out infinite;
+}
+
+.circle-camera-page.is-camera-chest-ready .circle-camera-locked-chest {
+    animation: cameraChestReadyGlow 1.25s ease-in-out infinite alternate;
+}
+
+.camera-open-chest-button {
+    position: relative;
+    z-index: 3;
+    display: none;
+    flex: 0 0 auto;
+    min-width: 11rem;
+    min-height: 3.5rem;
+    margin: 0.55rem auto 0;
+    padding: 0.65rem 1.25rem;
+    border: 0.2rem solid #fffbd1;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #ffe96a, #ffad18 60%, #d56b05);
+    box-shadow: inset 0 0.13rem 0 rgba(255, 255, 255, 0.72), 0 0.28rem 0 #8d3c03, 0 0 1.1rem rgba(255, 226, 65, 0.76);
+    color: #5d2903;
+    font: 900 clamp(1.1rem, 1.6vw, 1.45rem)/1 'Fredoka', 'Quicksand', sans-serif;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+    text-shadow: 0 0.08rem 0 #fff4a8;
+    cursor: pointer;
+}
+
+.circle-camera-page.is-camera-chest-ready .camera-open-chest-button {
+    display: block;
+    animation: cameraOpenChestButtonPulse 0.95s ease-in-out infinite alternate;
+}
+
+.circle-camera-page.is-camera-chest-unlocking .camera-open-chest-button {
+    opacity: 0;
+    pointer-events: none;
+    animation: none;
+    transform: scale(0.88);
+    transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.camera-open-chest-button:hover,
+.camera-open-chest-button:focus-visible {
+    filter: brightness(1.08);
+}
+
+@keyframes cameraChestReadyGlow {
+    from { filter: drop-shadow(0 0.65rem 0.45rem rgba(52, 25, 10, 0.38)) drop-shadow(0 0 0.3rem rgba(255, 220, 58, 0.62)); }
+    to { filter: drop-shadow(0 0.65rem 0.45rem rgba(52, 25, 10, 0.38)) drop-shadow(0 0 1.25rem rgba(255, 243, 126, 1)); }
+}
+
+@keyframes cameraOpenChestButtonPulse {
+    from { transform: scale(0.96); box-shadow: inset 0 0.13rem 0 rgba(255, 255, 255, 0.72), 0 0.28rem 0 #8d3c03, 0 0 0.7rem rgba(255, 226, 65, 0.64); }
+    to { transform: scale(1.07); box-shadow: inset 0 0.13rem 0 rgba(255, 255, 255, 0.82), 0 0.28rem 0 #8d3c03, 0 0 1.65rem rgba(255, 243, 126, 1); }
 }
 
 .circle-camera-chest-lid,
@@ -13634,9 +14160,11 @@ body *::after {
     right: 5%;
     border: 0.22rem solid var(--camera-chest-border);
     overflow: hidden;
+    transform-style: preserve-3d;
 }
 
 .circle-camera-chest-lid {
+    z-index: 3;
     top: 8%;
     height: 40%;
     border-radius: 1.35rem 1.35rem 0.3rem 0.3rem;
@@ -13646,10 +14174,40 @@ body *::after {
         var(--camera-chest-lid);
     box-shadow:
         inset 0 0.34rem 0 rgba(255, 222, 127, 0.64),
-        inset 0 -0.35rem 0 rgba(82, 34, 12, 0.36);
+        inset 0 -0.52rem 0 rgba(82, 34, 12, 0.48),
+        inset 0 -0.76rem 0 rgba(255, 177, 57, 0.18),
+        0 0.26rem 0.22rem rgba(61, 25, 7, 0.3);
+    transform-origin: 50% 100%;
+    backface-visibility: visible;
+}
+
+.circle-camera-chest-lid::before {
+    content: '';
+    position: absolute;
+    inset: 13% 8% 17%;
+    border: 0.2rem solid rgba(80, 35, 9, 0.74);
+    border-radius: 1rem 1rem 0.22rem 0.22rem;
+    background:
+        radial-gradient(ellipse at 50% 78%, rgba(255, 191, 45, 0.38), transparent 56%),
+        linear-gradient(180deg, #542005, #210b02 86%);
+    box-shadow: inset 0 0.28rem 0.45rem rgba(0, 0, 0, 0.55), 0 0.12rem 0 rgba(255, 209, 94, 0.32);
+    opacity: 0;
+}
+
+.circle-camera-chest-lid::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 16%;
+    background: linear-gradient(180deg, #9a4a10, #542307 72%, #2d1002);
+    border-top: 0.15rem solid rgba(255, 191, 73, 0.5);
+    box-shadow: inset 0 -0.14rem 0 rgba(0, 0, 0, 0.42);
 }
 
 .circle-camera-chest-body {
+    z-index: 2;
     bottom: 8%;
     height: 48%;
     border-radius: 0.3rem 0.3rem 0.8rem 0.8rem;
@@ -13660,7 +14218,12 @@ body *::after {
         var(--camera-chest-body);
     box-shadow:
         inset 0 0.26rem 0 rgba(255, 196, 93, 0.35),
-        inset 0 -0.45rem 0 rgba(66, 25, 9, 0.36);
+        inset 0 -0.62rem 0 rgba(66, 25, 9, 0.52),
+        inset 0.38rem 0 0 rgba(255, 185, 71, 0.12),
+        inset -0.48rem 0 0 rgba(54, 18, 5, 0.28),
+        0 0.42rem 0 #552006,
+        0 0.64rem 0.4rem rgba(42, 16, 4, 0.34);
+    transform: translateZ(0.4rem);
 }
 
 .circle-camera-chest-band {
@@ -13672,6 +14235,7 @@ body *::after {
     border-radius: 0.42rem;
     background: linear-gradient(90deg, #ffd976 0%, #a97325 48%, #5f3b13 100%);
     box-shadow: inset 0.18rem 0 0 rgba(255, 245, 178, 0.42), 0 0.08rem 0.22rem rgba(42, 20, 7, 0.35);
+    z-index: 4;
 }
 
 .circle-camera-chest-band-left { left: 22%; }
@@ -13690,6 +14254,7 @@ body *::after {
         0 0.12rem 0 #29313a,
         inset 0 0.16rem 0 rgba(255, 255, 255, 0.45);
     transform-origin: center;
+    z-index: 5;
 }
 
 .circle-camera-chest-chain-a { transform: rotate(13deg); }
@@ -13711,6 +14276,7 @@ body *::after {
         inset 0 0.2rem 0 rgba(255, 255, 210, 0.58),
         inset 0 -0.28rem 0 rgba(92, 54, 13, 0.32),
         0 0.25rem 0.25rem rgba(42, 20, 7, 0.35);
+    z-index: 6;
 }
 
 .circle-camera-chest-padlock::before {
@@ -13737,6 +14303,121 @@ body *::after {
     transform: translateX(-50%);
     border-radius: 999px;
     background: #5a3411;
+}
+
+.circle-camera-locked-chest::after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    left: 13%;
+    right: 13%;
+    top: 38%;
+    height: 48%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(255, 255, 211, 0.98) 0 10%, rgba(255, 221, 62, 0.88) 25%, rgba(255, 158, 11, 0.34) 52%, transparent 76%);
+    opacity: 0;
+    transform: scale(0.35) translateY(18%);
+    pointer-events: none;
+}
+
+.circle-camera-page.is-camera-chest-unlocking .circle-camera-locked-chest {
+    animation: cameraChestUnlockLift 3.45s cubic-bezier(0.2, 0.72, 0.24, 1) both;
+}
+
+.circle-camera-page.is-camera-chest-unlocking .circle-camera-chest-padlock {
+    animation: cameraPadlockBreak 1.05s cubic-bezier(0.32, 0.02, 0.5, 1) 0.08s both;
+}
+
+.circle-camera-page.is-camera-chest-unlocking .circle-camera-chest-padlock::before {
+    animation: cameraPadlockShackleBreak 0.58s cubic-bezier(0.3, 0.05, 0.65, 1.4) 0.18s both;
+}
+
+.circle-camera-page.is-camera-chest-unlocking .circle-camera-chest-chain-a {
+    animation: cameraChainReleaseLeft 0.92s cubic-bezier(0.22, 0.78, 0.28, 1) 0.72s both;
+}
+
+.circle-camera-page.is-camera-chest-unlocking .circle-camera-chest-chain-b {
+    animation: cameraChainReleaseRight 0.92s cubic-bezier(0.22, 0.78, 0.28, 1) 0.78s both;
+}
+
+.circle-camera-page.is-camera-chest-unlocking .circle-camera-chest-band {
+    animation: cameraChestBandClear 0.46s ease 1.2s both;
+}
+
+.circle-camera-page.is-camera-chest-unlocking .circle-camera-chest-lid {
+    animation: cameraChestLidOpen 1.6s cubic-bezier(0.2, 0.74, 0.24, 1) 1.42s both;
+}
+
+.circle-camera-page.is-camera-chest-unlocking .circle-camera-chest-lid::before {
+    animation: cameraChestLidInterior 1.25s ease 1.62s both;
+}
+
+.circle-camera-page.is-camera-chest-unlocking .circle-camera-locked-chest::after {
+    animation: cameraChestInnerGlow 1.7s ease-out 1.5s both;
+}
+
+@keyframes cameraPadlockShackleBreak {
+    0%, 42% { transform: translateX(-50%) rotate(0); transform-origin: 82% 100%; }
+    58% { transform: translateX(-50%) rotate(8deg); transform-origin: 82% 100%; }
+    100% { transform: translate(-34%, -0.45rem) rotate(34deg); transform-origin: 82% 100%; }
+}
+
+@keyframes cameraPadlockBreak {
+    0% { transform: translate(-50%, -10%) rotate(0); }
+    18% { transform: translate(-53%, -13%) rotate(-7deg); }
+    34% { transform: translate(-47%, -12%) rotate(8deg); }
+    50% { transform: translate(-52%, -10%) rotate(-5deg) scale(1.08); }
+    62% { transform: translate(-50%, -5%) rotate(4deg) scale(1.03); opacity: 1; }
+    100% { transform: translate(-22%, 145%) rotate(29deg) scale(0.76); opacity: 0; }
+}
+
+@keyframes cameraChainReleaseLeft {
+    0% { transform: rotate(13deg); opacity: 1; }
+    24% { transform: rotate(9deg) scaleX(1.04); }
+    100% { transform: translate(-92%, 165%) rotate(-42deg) scaleX(0.82); opacity: 0; }
+}
+
+@keyframes cameraChainReleaseRight {
+    0% { transform: rotate(-13deg); opacity: 1; }
+    24% { transform: rotate(-9deg) scaleX(1.04); }
+    100% { transform: translate(92%, 165%) rotate(42deg) scaleX(0.82); opacity: 0; }
+}
+
+@keyframes cameraChestBandClear {
+    from { opacity: 1; }
+    to { opacity: 0; transform: translateY(16%) scaleY(0.72); }
+}
+
+@keyframes cameraChestLidOpen {
+    0% { transform: translate3d(0, 0, 0) rotateX(0deg); }
+    18% { transform: translate3d(0, -8%, 0.35rem) rotateX(8deg); }
+    68% { transform: translate3d(0, -42%, 2rem) rotateX(56deg); }
+    100% { transform: translate3d(0, -54%, 2.8rem) rotateX(72deg); }
+}
+
+@keyframes cameraChestLidInterior {
+    0%, 18% { opacity: 0; }
+    58% { opacity: 0.72; }
+    100% { opacity: 1; }
+}
+
+@keyframes cameraChestInnerGlow {
+    0% { opacity: 0; transform: scale(0.35) translateY(18%); }
+    42% { opacity: 0.92; transform: scale(1.02) translateY(-4%); }
+    100% { opacity: 0.78; transform: scale(1.25) translateY(-12%); }
+}
+
+@keyframes cameraChestUnlockLift {
+    0%, 38% { transform: translateY(0) scale(1); }
+    54% { transform: translateY(-0.25rem) scale(1.025); }
+    100% { transform: translateY(-0.65rem) scale(1.05); }
+}
+
+@keyframes cameraCelebrationBadgeReveal {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.18) rotate(-14deg); }
+    68% { opacity: 1; transform: translate(-50%, -50%) scale(1.1) rotate(3deg); }
+    84% { transform: translate(-50%, -50%) scale(0.95) rotate(-1deg); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0); }
 }
 
 .square-camera-page {
@@ -18501,6 +19182,68 @@ body:has(.intro-menu-panel[data-panel="notifications"]:not([hidden])) .intro-res
 }
 
 .intro-profile-badge.is-unlocked .intro-profile-lock { display: none; }
+
+.intro-profile-board .intro-profile-badge.is-revealing {
+    animation: profileBadgeRestore 1.7s var(--badge-reveal-delay, 0ms) ease both;
+}
+
+.intro-profile-board .intro-profile-badge.is-revealing .intro-profile-lock {
+    display: block;
+    animation: profileBadgeLockRelease 1.7s var(--badge-reveal-delay, 0ms) ease both;
+}
+
+.intro-profile-board .intro-profile-badge.is-revealing .intro-profile-lock::before {
+    transform-origin: 80% 100%;
+    animation: profileBadgeShackleOpen 1.7s var(--badge-reveal-delay, 0ms) ease both;
+}
+
+@keyframes profileBadgeRestore {
+    0%, 30% {
+        filter: grayscale(1) brightness(1) drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent);
+        opacity: 0.74;
+        transform: scale(1);
+    }
+    58% {
+        filter: grayscale(0.25) brightness(1.12) drop-shadow(0 0 0.4rem #fff6ba) drop-shadow(0 0 0.85rem #ffcc32);
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    72% {
+        filter: grayscale(0) brightness(1.2) drop-shadow(0 0 0.65rem #fffbd4) drop-shadow(0 0 1.35rem #ffbf19);
+        transform: scale(1.06);
+    }
+    84% {
+        filter: grayscale(0) brightness(1.1) drop-shadow(0 0 0.45rem #fff3a0) drop-shadow(0 0 0.9rem rgba(255, 191, 25, 0.7));
+        transform: scale(1.02);
+    }
+    100% {
+        filter: grayscale(0) brightness(1) drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent);
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes profileBadgeLockRelease {
+    0%, 14% { opacity: 1; transform: translate(-50%, -50%) rotate(0); }
+    20% { transform: translate(-50%, -50%) rotate(-12deg); }
+    26% { transform: translate(-50%, -50%) rotate(10deg); }
+    34% { opacity: 1; transform: translate(-50%, -50%) rotate(0); }
+    64%, 100% { opacity: 0; transform: translate(-50%, 100%) rotate(22deg) scale(0.65); }
+}
+
+@keyframes profileBadgeShackleOpen {
+    0%, 26% { transform: translateX(-50%) rotate(0); }
+    42%, 100% { transform: translate(-40%, -20%) rotate(30deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .intro-profile-board .intro-profile-badge.is-revealing,
+    .intro-profile-board .intro-profile-badge.is-revealing .intro-profile-lock,
+    .intro-profile-board .intro-profile-badge.is-revealing .intro-profile-lock::before {
+        animation-duration: 1ms;
+        animation-delay: 0ms;
+    }
+}
 
 .intro-profile-lock::before {
     content: '';

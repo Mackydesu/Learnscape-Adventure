@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-const appVersion = '20260926-583';
+const appVersion = '20260930-625';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -411,6 +411,77 @@ const appVersion = '20260926-583';
     const circleCameraStartButton = circleCameraPage?.querySelector('.circle-camera-start-button') || null;
     const circleCameraVideo = circleCameraPage?.querySelector('.circle-camera-video') || null;
     const shapeCameraPages = Array.from(document.querySelectorAll('.shape-camera-page'));
+    const cameraPages = Array.from(document.querySelectorAll('.circle-camera-page'));
+    // The Okay button temporarily enters the same success flow that shape detection will call later.
+    cameraPages.forEach((page) => {
+        const shape = page.dataset.cameraShape || '';
+        const shapeLabel = shape ? `${shape[0].toUpperCase()}${shape.slice(1)}` : 'Shape';
+        const titleCurveId = `cameraCompleteTitleCurve-${shape || 'shape'}`;
+        page.dataset.cameraDetectionCount = '0';
+
+        const unlockHeading = page.querySelector('.circle-camera-unlock-board h2');
+        if (unlockHeading) {
+            const emptyStars = document.createElement('div');
+            emptyStars.className = 'camera-empty-stars';
+            emptyStars.setAttribute('role', 'img');
+            emptyStars.setAttribute('aria-label', '0 of 3 stars earned');
+            emptyStars.innerHTML = '<span class="circle-lesson-star-slot"><img class="camera-progress-star" src="assets/Shape UI/lesson-star.svg" alt=""></span><span class="circle-lesson-star-slot"><img class="camera-progress-star" src="assets/Shape UI/lesson-star.svg" alt=""></span><span class="circle-lesson-star-slot"><img class="camera-progress-star" src="assets/Shape UI/lesson-star.svg" alt=""></span>';
+            unlockHeading.replaceWith(emptyStars);
+        }
+
+        const unlockBoard = page.querySelector('.circle-camera-unlock-board');
+        if (unlockBoard && !unlockBoard.querySelector('.camera-open-chest-button')) {
+            unlockBoard.insertAdjacentHTML('beforeend', '<button class="camera-open-chest-button" type="button" disabled>Open Chest</button>');
+        }
+
+        const viewfinder = page.querySelector('.circle-camera-viewfinder');
+        if (viewfinder && !viewfinder.querySelector('.camera-detection-check')) {
+            viewfinder.insertAdjacentHTML('beforeend', '<div class="camera-detection-check" role="status" aria-label="Correct shape detected" aria-hidden="true"><span aria-hidden="true"></span></div>');
+        }
+
+        if (!page.querySelector('.camera-completion-celebration')) {
+            page.insertAdjacentHTML('beforeend', `
+                <section class="circle-hunt-celebration camera-completion-celebration" aria-label="Camera challenge celebration" aria-hidden="true">
+                    <div class="circle-hunt-confetti camera-completion-confetti" aria-hidden="true"></div>
+                    <div class="camera-completion-celebration-copy" role="status">
+                        <strong>Congratulations!</strong>
+                        <span>Tama ang hugis na iyong nahanap</span>
+                    </div>
+                    <div class="camera-celebration-badge" aria-label="${shapeLabel} badge unlocked"></div>
+                    <img class="circle-hunt-character circle-hunt-character-ch7" src="assets/Character/ch7.webp" alt="Bibi celebrating">
+                    <div class="circle-hunt-ch8-pop"><img class="circle-hunt-character-ch8" src="assets/Character/ch8.webp" alt="Bibi giving a thumbs up"></div>
+                </section>
+                <section class="circle-lesson-progress camera-completion-progress" aria-label="Camera challenge progress" aria-hidden="true">
+                    <div class="circle-lesson-progress-board">
+                        <img class="circle-lesson-progress-board-image" src="assets/Shape UI/progressboard.webp" alt="">
+                        <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Game Complete!">
+                            <path id="${titleCurveId}" d="M 4 44 Q 100 32 196 44" fill="none"></path>
+                            <text textLength="184" lengthAdjust="spacingAndGlyphs"><textPath href="#${titleCurveId}" startOffset="50%" text-anchor="middle">Game Complete!</textPath></text>
+                        </svg>
+                        <div class="circle-lesson-stars" data-earned-stars="3" role="img" aria-label="3 of 3 stars earned">
+                            <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
+                            <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
+                            <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
+                        </div>
+                        <p class="circle-lesson-star-message" aria-live="polite">Wow! You found a ${shapeLabel.toLowerCase()} object!</p>
+                        <div class="circle-lesson-progress-actions">
+                            <button class="circle-lesson-progress-button camera-completion-replay" type="button" aria-label="Try the ${shapeLabel} camera challenge again"><img src="assets/Buttons/Retry.webp" alt=""></button>
+                            <button class="circle-lesson-progress-button camera-completion-next" type="button" aria-label="Finish the ${shapeLabel} camera challenge"><img src="assets/Buttons/next.webp" alt=""></button>
+                        </div>
+                    </div>
+                </section>
+            `);
+
+        }
+
+        if (page.querySelector('.camera-temporary-okay-button')) return;
+        const button = document.createElement('button');
+        button.className = 'camera-temporary-okay-button';
+        button.type = 'button';
+        button.textContent = 'Okay';
+        button.setAttribute('aria-label', `Simulate a correct ${page.dataset.cameraShape || 'camera'} detection`);
+        page.append(button);
+    });
     const shapeSquarePage = document.getElementById('learnscape-shape-square-page');
     const triangleGamePage = document.getElementById('learnscape-triangle-game-page');
     const rectangleDeliveryPage = document.getElementById('learnscape-rectangle-delivery-page');
@@ -1443,6 +1514,74 @@ const appVersion = '20260926-583';
         progress.appendChild(board);
         page.insertBefore(progress, page.querySelector('.game-return-btn'));
         shapePreviewProgressByPage.set(page, progress);
+    });
+
+    const createProgressControlSvg = (kind, idSuffix) => {
+        const isReplayControl = kind === 'replay' || kind === 'retry';
+        if (isReplayControl) {
+            const label = kind === 'retry' ? 'RETRY' : 'REPLAY';
+            return `
+                <svg class="progress-button-svg progress-button-svg-${kind}" viewBox="0 0 330 170" aria-hidden="true" focusable="false">
+                    <defs>
+                        <linearGradient id="progressOrange-${idSuffix}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc21c"/><stop offset="0.48" stop-color="#ff9412"/><stop offset="1" stop-color="#ef5a05"/></linearGradient>
+                        <linearGradient id="progressOrangeIcon-${idSuffix}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffef5"/><stop offset="1" stop-color="#ffe8bd"/></linearGradient>
+                        <filter id="progressShadow-${idSuffix}" x="-20%" y="-25%" width="140%" height="165%"><feDropShadow dx="0" dy="8" stdDeviation="5" flood-color="#7c2b00" flood-opacity=".55"/></filter>
+                    </defs>
+                    <g filter="url(#progressShadow-${idSuffix})">
+                        <rect x="10" y="8" width="310" height="146" rx="55" fill="url(#progressOrange-${idSuffix})" stroke="#ad3c04" stroke-width="8"/>
+                        <path d="M24 66C27 35 50 19 88 18h166" fill="none" stroke="#ffe765" stroke-width="6.5" stroke-linecap="round" opacity=".84"/>
+                        <circle cx="83" cy="82" r="46" fill="#e66b08" stroke="#bd4704" stroke-width="5" opacity=".72"/>
+                        <path d="M111 67A33 33 0 1 0 111 99" fill="none" stroke="#9f3300" stroke-width="16" stroke-linecap="round" opacity=".36" transform="translate(0 3)"/>
+                        <path d="M111 64A33 33 0 1 0 111 96" fill="none" stroke="url(#progressOrangeIcon-${idSuffix})" stroke-width="14" stroke-linecap="round"/>
+                        <path d="M115 42v29H86Z" fill="url(#progressOrangeIcon-${idSuffix})" stroke="#d05705" stroke-width="3" stroke-linejoin="round"/>
+                        <text x="210" y="99" text-anchor="middle" fill="#fffdf4" stroke="#9d3100" stroke-width="8" paint-order="stroke fill" font-family="Fredoka, Quicksand, sans-serif" font-size="47" font-weight="900" letter-spacing="1">${label}</text>
+                    </g>
+                </svg>`;
+        }
+
+        return `
+            <svg class="progress-button-svg progress-button-svg-next" viewBox="0 0 330 170" aria-hidden="true" focusable="false">
+                <defs>
+                    <linearGradient id="progressGreen-${idSuffix}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#87e82c"/><stop offset=".54" stop-color="#35b914"/><stop offset="1" stop-color="#148304"/></linearGradient>
+                    <linearGradient id="progressGreenIcon-${idSuffix}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e8ffd9"/></linearGradient>
+                    <filter id="progressNextShadow-${idSuffix}" x="-20%" y="-25%" width="140%" height="165%"><feDropShadow dx="0" dy="8" stdDeviation="5" flood-color="#075000" flood-opacity=".55"/></filter>
+                </defs>
+                <g filter="url(#progressNextShadow-${idSuffix})">
+                    <rect x="10" y="8" width="310" height="146" rx="55" fill="url(#progressGreen-${idSuffix})" stroke="#0d6503" stroke-width="8"/>
+                    <path d="M24 66C27 35 50 19 88 18h166" fill="none" stroke="#c9f982" stroke-width="6.5" stroke-linecap="round" opacity=".84"/>
+                    <circle cx="83" cy="82" r="51" fill="#159407" stroke="#0b6d02" stroke-width="5" opacity=".76"/>
+                    <path d="M65 49 112 82 65 115Z" fill="#0a6101" opacity=".38" transform="translate(0 4)"/>
+                    <path d="M65 45 112 82 65 119Z" fill="url(#progressGreenIcon-${idSuffix})" stroke="#0e7203" stroke-width="4" stroke-linejoin="round"/>
+                    <path d="M73 57 98 77" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity=".88"/>
+                    <text x="210" y="99" text-anchor="middle" fill="#fffdf4" stroke="#0b6202" stroke-width="8" paint-order="stroke fill" font-family="Fredoka, Quicksand, sans-serif" font-size="50" font-weight="900" letter-spacing="1">NEXT</text>
+                </g>
+            </svg>`;
+    };
+
+    let progressSvgRenderVersion = 0;
+    document.querySelectorAll('.circle-lesson-progress-button').forEach((button, index) => {
+        const image = button.querySelector('img');
+        const renderSvgControl = () => {
+            const source = image?.getAttribute('src') || '';
+            const fileName = source.split('/').pop()?.toLowerCase() || '';
+            const ariaLabel = (button.getAttribute('aria-label') || '').toLowerCase();
+            const kind = fileName === 'retry.webp' || ariaLabel.includes('retry') || ariaLabel.includes('try the')
+                ? 'retry'
+                : fileName === 'replay.webp' || ariaLabel.includes('replay')
+                    ? 'replay'
+                    : 'next';
+            button.dataset.progressControl = kind;
+            button.querySelector('.progress-button-svg')?.remove();
+            progressSvgRenderVersion += 1;
+            button.insertAdjacentHTML('beforeend', createProgressControlSvg(kind, `${index + 1}-${progressSvgRenderVersion}`));
+        };
+
+        if (image) {
+            image.classList.add('progress-control-source');
+            image.hidden = true;
+            new MutationObserver(renderSvgControl).observe(image, { attributes: true, attributeFilter: ['src'] });
+        }
+        renderSvgControl();
     });
     const circleIllustrationPage = document.getElementById('learnscape-circle-illustration-page');
     const circleIllustrationVideo = circleIllustrationPage?.querySelector('.circle-illustration-video') || null;
@@ -11448,6 +11587,8 @@ const appVersion = '20260926-583';
     };
 
     const shapeCameraStreams = new Map();
+    const cameraCompletionTimers = new Map();
+    const cameraCompletionAudio = new Map();
 
     const setShapeCameraButtonText = (page, text) => {
         const label = page?.querySelector('.circle-camera-start-button strong');
@@ -11511,6 +11652,229 @@ const appVersion = '20260926-583';
     const openShapeCameraLayout = (routeName) => {
         if (!routeName) return;
         navigateApp(routeName);
+    };
+
+    const clearCameraCompletionTimers = (page) => {
+        (cameraCompletionTimers.get(page) || []).forEach((timerId) => window.clearTimeout(timerId));
+        cameraCompletionTimers.delete(page);
+        const audio = cameraCompletionAudio.get(page);
+        if (audio) {
+            audio.onended = null;
+            audio.onerror = null;
+            audio.pause();
+            cameraCompletionAudio.delete(page);
+        }
+    };
+
+    const prepareCameraCompletionConfetti = (page) => {
+        const confetti = page?.querySelector('.camera-completion-confetti');
+        if (!confetti || confetti.childElementCount) return;
+        const colors = ['#ff4f64', '#ffd83d', '#38c7e8', '#70d34b', '#ff8f32', '#ffffff'];
+        for (let index = 0; index < 120; index += 1) {
+            const piece = document.createElement('span');
+            piece.style.setProperty('--confetti-x', `${(index * 37) % 101}%`);
+            piece.style.setProperty('--confetti-color', colors[index % colors.length]);
+            piece.style.setProperty('--confetti-delay', `${-((index * 0.17) % 3.2)}s`);
+            piece.style.setProperty('--confetti-duration', `${2.5 + ((index * 11) % 13) / 10}s`);
+            piece.style.setProperty('--confetti-drift', `${((index * 29) % 150) - 75}px`);
+            piece.style.setProperty('--confetti-size', `${0.35 + ((index * 5) % 13) / 10}rem`);
+            confetti.appendChild(piece);
+        }
+    };
+
+    const cameraBadgeArtwork = {
+        circle: { color: '#1887ff', dark: '#0d54b6', shape: '<circle class="badge-shape-shadow" cx="40" cy="43" r="18"/><circle class="badge-shape-face" cx="40" cy="39" r="18"/><path class="badge-shape-glint" d="M28 34c3-7 9-11 16-11"/>' },
+        square: { color: '#8b2cf5', dark: '#4c1197', shape: '<rect class="badge-shape-shadow" x="22" y="25" width="36" height="36" rx="6"/><rect class="badge-shape-face" x="22" y="21" width="36" height="36" rx="6"/><path class="badge-shape-glint" d="M28 31v-4h17"/>' },
+        triangle: { color: '#31c91d', dark: '#14770c', shape: '<path class="badge-shape-shadow" d="M40 20 62 61H18Z"/><path class="badge-shape-face" d="M40 16 62 57H18Z"/><path class="badge-shape-glint" d="m39 25-11 21"/>' },
+        rectangle: { color: '#ff8a17', dark: '#a74408', shape: '<rect class="badge-shape-shadow" x="14" y="29" width="52" height="28" rx="5"/><rect class="badge-shape-face" x="14" y="25" width="52" height="28" rx="5"/><path class="badge-shape-glint" d="M21 34v-3h23"/>' },
+        oval: { color: '#f33ca4', dark: '#a31363', shape: '<ellipse class="badge-shape-shadow" cx="40" cy="43" rx="24" ry="17"/><ellipse class="badge-shape-face" cx="40" cy="39" rx="24" ry="17"/><path class="badge-shape-glint" d="M24 37c4-7 11-10 19-10"/>' },
+        heart: { color: '#f02d25', dark: '#9d1712', shape: '<path class="badge-shape-shadow" transform="translate(0 4)" d="M40 61 19 42C9 31 16 18 28 20c6 1 10 6 12 11 3-5 7-10 13-11 12-2 19 11 9 22Z"/><path class="badge-shape-face" d="M40 61 19 42C9 31 16 18 28 20c6 1 10 6 12 11 3-5 7-10 13-11 12-2 19 11 9 22Z"/><path class="badge-shape-glint" d="M24 31c3-5 8-6 12-2"/>' },
+        star: { color: '#ffc51c', dark: '#b06a06', shape: '<path class="badge-shape-shadow" transform="translate(0 4)" d="m40 14 7 17 19 2-15 12 5 19-16-10-16 10 5-19-15-12 19-2Z"/><path class="badge-shape-face" d="m40 14 7 17 19 2-15 12 5 19-16-10-16 10 5-19-15-12 19-2Z"/><path class="badge-shape-glint" d="m34 28 5-7 3 8"/>' },
+        diamond: { color: '#167af5', dark: '#074ba5', shape: '<path class="badge-shape-shadow" transform="translate(0 4)" d="M40 12 66 40 40 68 14 40Z"/><path class="badge-shape-face" d="M40 12 66 40 40 68 14 40Z"/><path class="badge-shape-glint" d="m39 20-15 20 12-5"/>' },
+    };
+
+    const prepareCameraCelebrationBadge = (page, shape) => {
+        const celebrationBadge = page?.querySelector('.camera-celebration-badge');
+        if (!celebrationBadge || celebrationBadge.childElementCount) return;
+        const profileBadge = document.querySelector(`[data-profile-badge="${shape}"]`);
+        const artwork = cameraBadgeArtwork[shape];
+        if (!profileBadge && !artwork) return;
+        const badgeClone = profileBadge?.cloneNode(true) || document.createElement('div');
+        if (!profileBadge) {
+            badgeClone.className = 'intro-profile-badge';
+            badgeClone.style.setProperty('--badge-color', artwork.color);
+            badgeClone.style.setProperty('--badge-dark', artwork.dark);
+            badgeClone.innerHTML = `<span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/>${artwork.shape}</svg></span><strong>${shape[0].toUpperCase()}${shape.slice(1)}</strong>`;
+        }
+        badgeClone.removeAttribute('data-profile-badge');
+        badgeClone.removeAttribute('role');
+        badgeClone.removeAttribute('aria-label');
+        badgeClone.classList.add('is-unlocked', 'camera-celebration-profile-badge');
+        badgeClone.querySelector('.intro-profile-lock')?.remove();
+        celebrationBadge.appendChild(badgeClone);
+    };
+
+    window.setTimeout(() => {
+        cameraPages.forEach((page) => prepareCameraCelebrationBadge(page, page.dataset.cameraShape || ''));
+    }, 0);
+
+    const resetCameraCompletionFlow = (page) => {
+        if (!page) return;
+        clearCameraCompletionTimers(page);
+        page.dataset.cameraDetectionCount = '0';
+        page.classList.remove('is-camera-completing', 'is-camera-detection-success', 'is-camera-chest-ready', 'is-camera-chest-unlocking', 'is-camera-celebrating', 'is-camera-progress-visible');
+        page.querySelector('.camera-detection-check')?.setAttribute('aria-hidden', 'true');
+        const detectionStars = Array.from(page.querySelectorAll('.camera-empty-stars .circle-lesson-star-slot'));
+        detectionStars.forEach((star) => star.classList.remove('is-earned'));
+        const emptyStars = page.querySelector('.camera-empty-stars');
+        emptyStars?.setAttribute('aria-label', '0 of 3 stars earned');
+        const celebration = page.querySelector('.camera-completion-celebration');
+        celebration?.classList.remove('is-active', 'is-ch8-visible');
+        celebration?.setAttribute('aria-hidden', 'true');
+        page.querySelector('.camera-completion-progress')?.setAttribute('aria-hidden', 'true');
+        const openChestButton = page.querySelector('.camera-open-chest-button');
+        if (openChestButton) openChestButton.disabled = true;
+        const okayButton = page.querySelector('.camera-temporary-okay-button');
+        if (okayButton) okayButton.disabled = false;
+    };
+
+    const registerCameraDetection = (page) => {
+        if (
+            !page
+            || !isPageVisible(page)
+            || page.classList.contains('is-camera-completing')
+            || page.classList.contains('is-camera-chest-ready')
+            || page.classList.contains('is-camera-detection-success')
+        ) return false;
+
+        const currentCount = Math.max(0, Math.min(3, Number(page.dataset.cameraDetectionCount) || 0));
+        if (currentCount >= 3) return false;
+        const nextCount = currentCount + 1;
+        page.dataset.cameraDetectionCount = String(nextCount);
+
+        const stars = Array.from(page.querySelectorAll('.camera-empty-stars .circle-lesson-star-slot'));
+        stars.slice(0, nextCount).forEach((star) => star.classList.add('is-earned'));
+        page.querySelector('.camera-empty-stars')?.setAttribute('aria-label', `${nextCount} of 3 stars earned`);
+        page.classList.add('is-camera-detection-success');
+        page.querySelector('.camera-detection-check')?.setAttribute('aria-hidden', 'false');
+        const okayButton = page.querySelector('.camera-temporary-okay-button');
+        if (okayButton) okayButton.disabled = true;
+        playUiClickSound('starPop');
+
+        const detectionTimer = window.setTimeout(() => {
+            if (!isPageVisible(page)) return;
+            page.classList.remove('is-camera-detection-success');
+            page.querySelector('.camera-detection-check')?.setAttribute('aria-hidden', 'true');
+            if (nextCount >= 3) {
+                page.classList.add('is-camera-chest-ready');
+                const openChestButton = page.querySelector('.camera-open-chest-button');
+                if (openChestButton) {
+                    openChestButton.disabled = false;
+                    openChestButton.focus({ preventScroll: true });
+                }
+                playUiClickSound('boardSuccess');
+            } else if (okayButton) {
+                okayButton.disabled = false;
+            }
+        }, 850);
+        const timers = cameraCompletionTimers.get(page) || [];
+        timers.push(detectionTimer);
+        cameraCompletionTimers.set(page, timers);
+        return true;
+    };
+
+    const showCameraCompletionProgress = (page) => {
+        if (!isPageVisible(page) || !page.classList.contains('is-camera-celebrating')) return;
+        page.classList.remove('is-camera-celebrating');
+        page.classList.add('is-camera-progress-visible');
+        const celebration = page.querySelector('.camera-completion-celebration');
+        celebration?.classList.remove('is-active', 'is-ch8-visible');
+        celebration?.setAttribute('aria-hidden', 'true');
+        page.querySelector('.camera-completion-progress')?.setAttribute('aria-hidden', 'false');
+        playUiClickSound('boardSuccess');
+        page.querySelector('.camera-completion-next')?.focus({ preventScroll: true });
+        const starTimer = window.setTimeout(() => {
+            if (page.classList.contains('is-camera-progress-visible')) playUiClickSound('starPop');
+        }, 700);
+        const timers = cameraCompletionTimers.get(page) || [];
+        timers.push(starTimer);
+        cameraCompletionTimers.set(page, timers);
+    };
+
+    const completeCameraGame = (page) => {
+        const shape = page?.dataset.cameraShape;
+        if (
+            !shape
+            || !isPageVisible(page)
+            || page.classList.contains('is-camera-completing')
+            || Number(page.dataset.cameraDetectionCount) < 3
+        ) return false;
+        if (!window.completeLearnscapeCameraChallenge?.(shape)) return false;
+
+        clearCameraCompletionTimers(page);
+        prepareCameraCelebrationBadge(page, shape);
+        page.classList.add('is-camera-completing', 'is-camera-chest-unlocking');
+        const okayButton = page.querySelector('.camera-temporary-okay-button');
+        if (okayButton) okayButton.disabled = true;
+        const openChestButton = page.querySelector('.camera-open-chest-button');
+        if (openChestButton) openChestButton.disabled = true;
+        const padlockSound = new Audio('assets/Audios/Sound effects/padlock.mp3');
+        padlockSound.volume = 0.9;
+        padlockSound.play().catch(() => playUiClickSound('chime'));
+
+        const timers = [];
+        timers.push(window.setTimeout(() => {
+            if (isPageVisible(page)) playUiClickSound('thunk');
+        }, 920));
+        timers.push(window.setTimeout(() => {
+            if (isPageVisible(page)) playUiClickSound('chime');
+        }, 2100));
+        timers.push(window.setTimeout(() => {
+            if (!isPageVisible(page)) return;
+            if (page === circleCameraPage) stopCircleCameraStream();
+            else stopShapeCameraStream(page);
+            page.classList.remove('is-camera-chest-ready', 'is-camera-chest-unlocking');
+            page.classList.add('is-camera-celebrating');
+            const celebration = page.querySelector('.camera-completion-celebration');
+            prepareCameraCompletionConfetti(page);
+            celebration?.setAttribute('aria-hidden', 'false');
+            celebration?.classList.add('is-active', 'is-ch8-visible');
+            playUiClickSound('boardSuccess');
+
+            let celebrationAnimationFinished = false;
+            let celebrationSoundFinished = false;
+            let progressShown = false;
+            const finishCelebrationWhenReady = () => {
+                if (progressShown || !celebrationAnimationFinished || !celebrationSoundFinished) return;
+                progressShown = true;
+                showCameraCompletionProgress(page);
+            };
+            const cheering = new Audio('assets/Audios/Sound effects/kids cheering.mp3');
+            cameraCompletionAudio.set(page, cheering);
+            const finishCelebrationSound = () => {
+                if (cameraCompletionAudio.get(page) === cheering) cameraCompletionAudio.delete(page);
+                celebrationSoundFinished = true;
+                finishCelebrationWhenReady();
+            };
+            cheering.onended = finishCelebrationSound;
+            cheering.onerror = finishCelebrationSound;
+            cheering.play().catch(finishCelebrationSound);
+
+            const celebrationAnimationTimer = window.setTimeout(() => {
+                celebrationAnimationFinished = true;
+                finishCelebrationWhenReady();
+            }, 3000);
+            timers.push(celebrationAnimationTimer);
+        }, 3600));
+        cameraCompletionTimers.set(page, timers);
+        return true;
+    };
+
+    // Future shape recognition should call this once for every correct detection.
+    window.completeLearnscapeCameraGame = (shape) => {
+        const normalizedShape = String(shape || '').trim().toLowerCase();
+        const page = cameraPages.find((cameraPage) => cameraPage.dataset.cameraShape === normalizedShape);
+        return page ? registerCameraDetection(page) : false;
     };
 
     const playCircleIllustrationVideo = async () => {
@@ -12100,6 +12464,21 @@ const appVersion = '20260926-583';
             startShapeCameraStream(page);
         });
     });
+    cameraPages.forEach((page) => {
+        page.querySelector('.camera-temporary-okay-button')?.addEventListener('click', () => {
+            registerCameraDetection(page);
+        });
+        page.querySelector('.camera-open-chest-button')?.addEventListener('click', () => {
+            completeCameraGame(page);
+        });
+        page.querySelector('.camera-completion-replay')?.addEventListener('click', () => {
+            resetCameraCompletionFlow(page);
+        });
+        page.querySelector('.camera-completion-next')?.addEventListener('click', () => {
+            resetCameraCompletionFlow(page);
+            navigateApp('game3');
+        });
+    });
 
     circleIllustrationVideo?.addEventListener('pause', () => {
         if (
@@ -12283,6 +12662,9 @@ const appVersion = '20260926-583';
         if (!/^(square|triangle|rectangle|oval|heart|star|diamond)Camera$/.test(event.detail?.route || '')) {
             stopAllShapeCameraStreams();
         }
+        cameraPages.forEach((page) => {
+            if (!isPageVisible(page)) resetCameraCompletionFlow(page);
+        });
         if (event.detail?.route !== 'shapeSquare') {
             resetShapeSquareScene();
         }

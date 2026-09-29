@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260929-594">
+    <link rel="stylesheet" href="style.css?v=20260930-625">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -1713,7 +1713,7 @@
         </a>
     </section>
 
-    <section id="learnscape-circle-camera-page" class="circle-camera-page" hidden>
+    <section id="learnscape-circle-camera-page" class="circle-camera-page" data-camera-shape="circle" hidden>
         <div class="circle-camera-sky" aria-hidden="true">
             <span class="circle-camera-cloud circle-camera-cloud-a"></span>
             <span class="circle-camera-cloud circle-camera-cloud-b"></span>
@@ -1882,7 +1882,7 @@
 
     
 
-    <script src="script.js?v=20260929-560"></script>
+    <script src="script.js?v=20260930-625"></script>
     </div>
 
     <script>
@@ -3094,6 +3094,74 @@
             const introProfileAvatarKey = 'learnscape-profile-avatar';
             const introProfileFrameKey = 'learnscape-profile-frame';
             const introProfileBadgeUnlockKey = (shape) => `learnscape-profile-badge-unlocked:${shape}`;
+            const introProfileBadgeViewedKey = (shape) => `learnscape-profile-badge-viewed:${shape}`;
+            const viewedProfileBadges = new Set();
+            const profileBadgeRevealTimers = new Map();
+            const isProfileBadgeViewed = (shape) => viewedProfileBadges.has(shape)
+                || readSoundSetting(introProfileBadgeViewedKey(shape), 'false') === 'true';
+            const cancelProfileBadgeReveals = () => {
+                profileBadgeRevealTimers.forEach((timer, badge) => {
+                    window.clearTimeout(timer);
+                    badge.classList.remove('is-revealing');
+                });
+                profileBadgeRevealTimers.clear();
+            };
+            const revealProfileBadge = (badge, shape, delay) => {
+                if (profileBadgeRevealTimers.has(badge)) return;
+                badge.classList.remove('is-unlocked');
+                badge.setAttribute('aria-label', `${shape} badge ready to reveal`);
+                const isProfileVisible = () => {
+                    if (document.hidden || !badge.getClientRects().length
+                        || document.body.classList.contains('is-page-loading')) return false;
+                    const rect = badge.getBoundingClientRect();
+                    const visibleElement = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+                    if (!visibleElement || !badge.contains(visibleElement)) return false;
+                    for (let parent = badge.parentElement; parent; parent = parent.parentElement) {
+                        const style = getComputedStyle(parent);
+                        if (style.visibility !== 'visible' || Number(style.opacity) < 0.99) return false;
+                        if (parent.getAnimations().some((animation) => animation.playState === 'running'
+                            && animation.effect?.getComputedTiming().iterations !== Infinity)) return false;
+                    }
+                    return true;
+                };
+                let visibleSince = null;
+                let revealStarted = null;
+                const checkProfile = () => {
+                    if (!badge.isConnected || introMenuPanel.hidden || introMenuPanel.dataset.panel !== 'profile') {
+                        badge.classList.remove('is-revealing');
+                        profileBadgeRevealTimers.delete(badge);
+                        return;
+                    }
+                    const now = performance.now();
+                    if (!isProfileVisible()) {
+                        visibleSince = null;
+                        revealStarted = null;
+                        badge.classList.remove('is-revealing');
+                        badge.setAttribute('aria-label', `${shape} badge ready to reveal`);
+                    } else {
+                        visibleSince ??= now;
+                        if (revealStarted === null && now - visibleSince >= delay) {
+                            badge.style.setProperty('--badge-reveal-delay', '0ms');
+                            badge.classList.add('is-revealing');
+                            badge.setAttribute('aria-label', `${shape} badge unlocking`);
+                            revealStarted = now;
+                        }
+                        if (revealStarted !== null && now - revealStarted >= 1700) {
+                            profileBadgeRevealTimers.delete(badge);
+                            badge.classList.remove('is-revealing');
+                            badge.classList.add('is-unlocked');
+                            badge.setAttribute('aria-label', `${shape} badge unlocked`);
+                            viewedProfileBadges.add(shape);
+                            writeSoundSetting(introProfileBadgeViewedKey(shape), 'true');
+                            markLearnscapeNotificationRead(`badge:${shape}`);
+                            window.playUiClickSound?.('spark');
+                            return;
+                        }
+                    }
+                    profileBadgeRevealTimers.set(badge, window.setTimeout(checkProfile, 100));
+                };
+                profileBadgeRevealTimers.set(badge, window.setTimeout(checkProfile, 0));
+            };
             const introProfileDefaultFrame = '#ffb52e';
             let introProfilePendingFrame = introProfileDefaultFrame;
 
@@ -3156,9 +3224,16 @@
                 if (starStat) starStat.textContent = `${Math.min(24, stars)} / 24`;
                 if (carrotStat) carrotStat.textContent = String(carrots);
                 if (areaStat) areaStat.textContent = `${unlockedAreas} / 8`;
+                let revealIndex = 0;
                 introProfileShapes.forEach((shape) => {
                     const badge = board.querySelector(`[data-profile-badge="${shape}"]`);
                     const isUnlocked = readSoundSetting(introProfileBadgeUnlockKey(shape), 'false') === 'true';
+                    if (badge && isUnlocked && !isProfileBadgeViewed(shape)) {
+                        if (!introMenuPanel.hidden && introMenuPanel.dataset.panel === 'profile') {
+                            revealProfileBadge(badge, shape, 650 + revealIndex++ * 220);
+                        }
+                        return;
+                    }
                     badge?.classList.toggle('is-unlocked', isUnlocked);
                     badge?.setAttribute('aria-label', `${shape} badge ${isUnlocked ? 'unlocked' : 'locked'}`);
                 });
@@ -3231,28 +3306,31 @@
 
             const closeIntroMenu = () => {
                 if (!introMenuPanel) return;
+                cancelProfileBadgeReveals();
                 introMenuPanel.hidden = true;
                 introMenuTrigger?.focus({ preventScroll: true });
                 introMenuTrigger = null;
             };
 
-            document.querySelectorAll('[data-intro-panel]').forEach((button) => {
-                button.addEventListener('click', () => {
-                    const content = introMenuContent[button.dataset.introPanel];
+            const openIntroMenu = (panelName, trigger) => {
+                    const content = introMenuContent[panelName];
                     if (!content || !introMenuPanel) return;
-                    introMenuTrigger = button;
+                    cancelProfileBadgeReveals();
+                    introMenuTrigger = trigger || introMenuTrigger;
                     introMenuKicker.textContent = content.kicker;
                     introMenuKicker.hidden = !content.kicker;
                     introMenuTitle.textContent = content.title;
                     introMenuCopy.hidden = false;
                     introMenuCopy.innerHTML = content.copy || '';
-                    introMenuPanel.dataset.panel = button.dataset.introPanel;
-                    if (button.dataset.introPanel === 'shop') syncIntroShopItems();
-                    if (button.dataset.introPanel === 'profile') syncIntroProfile();
-                    if (button.dataset.introPanel === 'notifications') renderIntroNotifications('game');
+                    introMenuPanel.dataset.panel = panelName;
                     introMenuPanel.hidden = false;
+                    if (panelName === 'shop') syncIntroShopItems();
+                    if (panelName === 'profile') syncIntroProfile();
+                    if (panelName === 'notifications') renderIntroNotifications('game');
                     introMenuClose.focus({ preventScroll: true });
-                });
+            };
+            document.querySelectorAll('[data-intro-panel]').forEach((button) => {
+                button.addEventListener('click', () => openIntroMenu(button.dataset.introPanel, button));
             });
 
             introMenuClose?.addEventListener('click', closeIntroMenu);
@@ -3291,6 +3369,14 @@
                             notificationAction.dataset.notificationShape,
                             notificationItem?.dataset.notificationId,
                         );
+                    } else if (notificationAction.dataset.notificationAction === 'view-badge') {
+                        const shape = notificationAction.dataset.notificationShape;
+                        if (introProfileShapes.includes(shape)
+                            && readSoundSetting(introProfileBadgeUnlockKey(shape), 'false') === 'true') {
+                            openIntroMenu('profile');
+                            const badge = introMenuCopy.querySelector(`[data-profile-badge="${shape}"]`);
+                            badge?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+                        }
                     } else if (notificationAction.dataset.notificationAction === 'claim-carrots') {
                         window.claimLearnscapeCarrotReward?.(
                             notificationItem?.dataset.notificationId,
@@ -3580,7 +3666,9 @@
                 try {
                     const stored = JSON.parse(window.localStorage.getItem(learnscapeNotificationStorageKey) || '[]');
                     return Array.isArray(stored)
-                        ? stored.filter((item) => item && item.id && item.title && item.type !== 'collection')
+                        ? stored.filter((item) => item && item.id && item.title && item.type !== 'collection'
+                            && !(String(item.id).startsWith('completion:')
+                                && (item.type === 'camera' || String(item.id).includes('-camera-page:'))))
                         : [];
                 } catch (error) {
                     return [];
@@ -3672,7 +3760,7 @@
                     id: `preview:badge:${shape}`,
                     type: 'badge',
                     shape,
-                    title: 'Profile badge unlocked',
+                    title: 'BADGE UNLOCKED',
                     detail: `${learnscapeShapeLabels[shape]} badge is now available.`,
                 }));
                 return previewItems;
@@ -3834,6 +3922,19 @@
                     const meta = document.createElement('span');
                     meta.className = 'intro-notification-item-meta';
                     meta.appendChild(time);
+                    if (notification.type === 'badge'
+                        && notification.id === `badge:${notification.shape}`
+                        && readSoundSetting(introProfileBadgeUnlockKey(notification.shape), 'false') === 'true'
+                        && !isProfileBadgeViewed(notification.shape)) {
+                        const action = document.createElement('button');
+                        action.className = 'intro-notification-use-key intro-notification-view-badge';
+                        action.type = 'button';
+                        action.dataset.notificationAction = 'view-badge';
+                        action.dataset.notificationShape = notification.shape;
+                        action.setAttribute('aria-label', `View ${learnscapeShapeLabels[notification.shape]} badge in Profile`);
+                        action.textContent = 'View';
+                        meta.appendChild(action);
+                    }
                     if (shouldShowUseKeyAction(notification)) {
                         const action = document.createElement('button');
                         action.className = 'intro-notification-use-key';
@@ -3866,6 +3967,11 @@
                 if (!notification?.id || !notification?.title) return false;
                 if (notification.type === 'collection') return false;
                 if (learnscapeNotifications.some((item) => item.id === notification.id)) return false;
+                if (notification.type === 'camera' && notification.id === `camera:${notification.shape}`) {
+                    learnscapeNotifications = learnscapeNotifications.filter((item) => (
+                        item.id !== `preview:camera:${notification.shape}`
+                    ));
+                }
                 const notificationRecord = {
                     category: 'game',
                     type: 'progress',
@@ -3888,6 +3994,21 @@
             };
             window.addLearnscapeNotification = addLearnscapeNotification;
             window.getLearnscapeNotifications = () => [...learnscapeNotifications];
+            const awardLearnscapeProfileBadge = (shape) => {
+                if (!learnscapeShapeLabels[shape]) return;
+                const alreadyEarned = readSoundSetting(introProfileBadgeUnlockKey(shape), 'false') === 'true';
+                writeSoundSetting(introProfileBadgeUnlockKey(shape), 'true');
+                if (!alreadyEarned || !isProfileBadgeViewed(shape)) {
+                    addLearnscapeNotification({
+                        id: `badge:${shape}`,
+                        type: 'badge',
+                        shape,
+                        title: `${learnscapeShapeLabels[shape]} Badge Earned!`,
+                        detail: 'Open your Profile to reveal your new badge.',
+                    });
+                }
+                if (!introMenuPanel.hidden && introMenuPanel.dataset.panel === 'profile') syncIntroProfile();
+            };
             let isCarrotClaimAnimationActive = false;
             const claimLearnscapeCarrotReward = (notificationId, claimButton) => {
                 if (isCarrotClaimAnimationActive) return false;
@@ -4143,6 +4264,7 @@
                 const shape = String(event.detail?.shape || '').trim().toLowerCase();
                 const shapeLabel = learnscapeShapeLabels[shape];
                 if (!shapeLabel) return;
+                awardLearnscapeProfileBadge(shape);
                 addLearnscapeNotification({
                     id: `camera:${shape}`,
                     type: 'camera',
@@ -4262,7 +4384,7 @@
                     || progress.querySelector('.circle-lesson-progress-title')?.textContent
                     || '',
                 ).toLowerCase();
-                if (page?.matches('.shape-camera-page') || stage === 'camera') return 'camera';
+                if (page?.matches('.circle-camera-page') || stage === 'camera') return 'camera';
                 if (stage === 'hunt' || stage === 'answer' || title.includes('mission')) return 'mission';
                 return 'lesson';
             };
@@ -4270,16 +4392,16 @@
                 const shapeLabel = learnscapeShapeLabels[shape];
                 if (!shapeLabel) return;
                 const completionType = getProgressNotificationType(progress);
-                const completionTitle = completionType === 'camera'
-                    ? `${shapeLabel} Object Detection Complete`
-                    : `${shapeLabel} ${completionType === 'mission' ? 'Mission' : 'Lesson'} Complete`;
-                addLearnscapeNotification({
-                    id: `completion:${rewardIdentity}`,
-                    type: completionType,
-                    shape,
-                    title: completionTitle,
-                    detail: `${shapeLabel} progress completed.`,
-                });
+                // The camera-complete event already posts the detection notification.
+                if (completionType !== 'camera') {
+                    addLearnscapeNotification({
+                        id: `completion:${rewardIdentity}`,
+                        type: completionType,
+                        shape,
+                        title: `${shapeLabel} ${completionType === 'mission' ? 'Mission' : 'Lesson'} Complete`,
+                        detail: `${shapeLabel} progress completed.`,
+                    });
+                }
                 addLearnscapeNotification({
                     id: `stars:${rewardIdentity}`,
                     type: 'reward',
@@ -4352,17 +4474,7 @@
                 if (!isVisible) return;
 
                 if (starStage === 3 && rewardShape) {
-                    const badgeWasUnlocked = readSoundSetting(introProfileBadgeUnlockKey(rewardShape), 'false') === 'true';
-                    writeSoundSetting(introProfileBadgeUnlockKey(rewardShape), 'true');
-                    if (!badgeWasUnlocked) {
-                        addLearnscapeNotification({
-                            id: `badge:${rewardShape}`,
-                            type: 'badge',
-                            shape: rewardShape,
-                            title: 'Profile badge unlocked',
-                            detail: `${learnscapeShapeLabels[rewardShape]} badge is now available.`,
-                        });
-                    }
+                    awardLearnscapeProfileBadge(rewardShape);
                 }
 
                 const rewardIdentity = getProgressRewardIdentity(progress);
