@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-const appVersion = '20260930-647';
+const appVersion = '20261001-671';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -453,6 +453,41 @@ const appVersion = '20260930-647';
             unlockBoard.insertAdjacentHTML('beforeend', '<button class="camera-open-chest-button" type="button" disabled>Open Chest</button>');
         }
 
+        const chest = unlockBoard?.querySelector('.circle-camera-locked-chest');
+        if (chest && !chest.querySelector('.camera-chest-3d-stage')) {
+            const chainLinks = '<i class="camera-chest-chain-link"></i>'.repeat(10);
+            chest.innerHTML = `
+                <span class="circle-camera-chest-ground-shadow"></span>
+                <span class="camera-chest-3d-stage">
+                    <span class="circle-camera-chest-body camera-chest-solid">
+                        <span class="camera-chest-face camera-chest-f-back"></span>
+                        <span class="camera-chest-face camera-chest-f-left"></span>
+                        <span class="camera-chest-face camera-chest-f-right"></span>
+                        <span class="camera-chest-face camera-chest-f-bottom"></span>
+                        <span class="camera-chest-face camera-chest-f-top"></span>
+                        <span class="camera-chest-inner-glow"></span>
+                        <span class="camera-chest-face camera-chest-f-front"></span>
+                    </span>
+                    <span class="circle-camera-chest-lid camera-chest-solid">
+                        <span class="camera-chest-face camera-chest-f-back"></span>
+                        <span class="camera-chest-face camera-chest-f-left"></span>
+                        <span class="camera-chest-face camera-chest-f-right"></span>
+                        <span class="camera-chest-face camera-chest-f-top"></span>
+                        <span class="camera-chest-face camera-chest-f-bottom"></span>
+                        <span class="camera-chest-face camera-chest-f-front"></span>
+                    </span>
+                    <span class="circle-camera-chest-band circle-camera-chest-band-left"></span>
+                    <span class="circle-camera-chest-band circle-camera-chest-band-right"></span>
+                    <span class="circle-camera-chest-chain circle-camera-chest-chain-a">${chainLinks}</span>
+                    <span class="circle-camera-chest-chain circle-camera-chest-chain-b">${chainLinks}</span>
+                    <span class="circle-camera-chest-padlock">
+                        <span class="camera-chest-padlock-shackle"></span>
+                        <span class="camera-chest-padlock-body"></span>
+                    </span>
+                </span>
+            `;
+        }
+
         const viewfinder = page.querySelector('.circle-camera-viewfinder');
         if (viewfinder && !viewfinder.querySelector('.camera-detection-check')) {
             viewfinder.insertAdjacentHTML('beforeend', '<div class="camera-detection-check" role="status" aria-label="Correct shape detected" aria-hidden="true"><span aria-hidden="true"></span></div>');
@@ -485,7 +520,7 @@ const appVersion = '20260930-647';
                         <p class="circle-lesson-star-message" aria-live="polite">Wow! You found a ${shapeLabel.toLowerCase()} object!</p>
                         <div class="circle-lesson-progress-actions">
                             <button class="circle-lesson-progress-button camera-completion-replay" type="button" aria-label="Try the ${shapeLabel} camera challenge again"><img src="assets/Buttons/Retry.webp" alt=""></button>
-                            <button class="circle-lesson-progress-button camera-completion-next" type="button" aria-label="Finish the ${shapeLabel} camera challenge"><img src="assets/Buttons/next.webp" alt=""></button>
+                            <button class="circle-lesson-progress-button camera-completion-home" type="button" aria-label="Return to the intro page"><img src="assets/Buttons/next.webp" alt=""></button>
                         </div>
                     </div>
                 </section>
@@ -508,8 +543,6 @@ const appVersion = '20260930-647';
     const rectangleRoadStrip = rectangleRoadScroll?.querySelector('.rectangle-road-strip');
     const rectangleHighwayTrack = rectangleRoadScroll?.querySelector('.rectangle-highway-track');
     const rectangleRoadToggle = rectangleDeliveryPage?.querySelector('.rectangle-road-toggle');
-    const rectangleSpeedSlider = rectangleDeliveryPage?.querySelector('#rectangle-speed-slider');
-    const rectangleSpeedValue = rectangleDeliveryPage?.querySelector('.rectangle-speed-value');
     const rectangleBossJumpButton = rectangleDeliveryPage?.querySelector('.rectangle-boss-jump-button');
     const rectangleJumpGuide = rectangleDeliveryPage?.querySelector('.rectangle-jump-guide');
     const rectangleGasMeter = rectangleDeliveryPage?.querySelector('.rectangle-gas-meter');
@@ -544,8 +577,8 @@ const appVersion = '20260930-647';
     const rectangleRoadBaseSpeed = 0.1;
     const rectangleRoadPostDeliverySpeed = 0.14;
     const rectangleSpeedMultipliers = [0.8, 1.15, 1.5, 1.85, 2.25];
-    const rectangleHornCueDistance = 220;
-    const rectangleHornResetDistance = 380;
+    const rectangleHornMinimumCueDistance = 220;
+    const rectangleHornResetMargin = 180;
     let rectangleSpeedLevel = 3;
     let rectangleCurrentSpeedMultiplier = rectangleSpeedMultipliers[rectangleSpeedLevel - 1];
     let rectangleDisplayedGasLevel = -1;
@@ -556,6 +589,9 @@ const appVersion = '20260930-647';
     let rectangleDrivingAudioPlayPending = false;
     let rectangleDrivingAudioLastAttempt = 0;
     let rectangleHornReady = true;
+    let rectangleAutoStopPending = false;
+    let rectangleHornFallbackTimer = null;
+    let requestRectangleAutomaticStop = () => {};
     const rectangleGasDrainPerMs = 0.00045;
     let rectangleGasLevel = 100;
     let rectangleGasPenaltyRemaining = 0;
@@ -568,6 +604,22 @@ const appVersion = '20260930-647';
     let rectangleGameOverLoseAudio = null;
     let abortRectangleBossEncounter = () => {};
     let resumeRectangleBossEncounter = () => {};
+    const getRectangleHornDurationSeconds = () => (
+        Number.isFinite(rectangleHornAudio?.duration) && rectangleHornAudio.duration > 0
+            ? rectangleHornAudio.duration
+            : 2.1
+    );
+    const getRectangleHornCueDistance = () => {
+        const roadSpeed = rectangleDeliveredItems.size >= 1
+            ? rectangleRoadPostDeliverySpeed
+            : rectangleRoadBaseSpeed;
+        const brakingTravelSeconds = 0.85 / 3;
+        return Math.max(
+            rectangleHornMinimumCueDistance,
+            roadSpeed * rectangleCurrentSpeedMultiplier * 1000
+                * (getRectangleHornDurationSeconds() + brakingTravelSeconds),
+        );
+    };
     const triggerRectangleGameOver = () => {
         if (rectangleGasDepleted || !rectangleDeliveryPage || rectangleDeliveryPage.hidden) return;
         rectangleGasDepleted = true;
@@ -635,16 +687,8 @@ const appVersion = '20260930-647';
             rectangleGasValueText.textContent = `${roundedLevel}%`;
         }
     };
-    const shouldSpawnRectangleMilestoneGas = () => (
-        rectangleDeliveryPage
-        && !rectangleDeliveryPage.hidden
-        && !rectangleGasDepleted
-        && !rectangleGamePaused
-        && !rectangleRoadLoopPaused
-        && !rectangleDeliveryPage.classList.contains('is-boss-battle')
-        && !rectangleDeliveryPage.classList.contains('is-final-complete-scene')
-        && rectangleDeliveryJeepSequence?.classList.contains('is-arrived')
-    );
+    // Keep normal delivery rides clear; gas pickups are reserved for boss encounters.
+    const shouldSpawnRectangleMilestoneGas = () => false;
 
     const setRectangleGasLevel = (level) => {
         const previousGasLevel = rectangleGasLevel;
@@ -740,6 +784,10 @@ const appVersion = '20260930-647';
             scheduleRectangleBossAutoLaser(700);
         }
         updateRectangleEngineSound();
+        if (rectangleAutoStopPending) {
+            rectangleAutoStopPending = false;
+            window.requestAnimationFrame(() => requestRectangleAutomaticStop());
+        }
     };
 
     const clearRectangleGamePause = () => setRectangleGamePaused(false);
@@ -752,10 +800,29 @@ const appVersion = '20260930-647';
     });
 
     const playRectangleHorn = () => {
-        if (!rectangleHornAudio || (window.__learnscapeSoundScale?.() ?? 1) === 0) return;
-        rectangleHornAudio.volume = Math.min(1, 0.7 * (window.__learnscapeSoundScale?.() ?? 1));
+        const finishHornCue = () => {
+            if (rectangleHornFallbackTimer !== null) {
+                window.clearTimeout(rectangleHornFallbackTimer);
+                rectangleHornFallbackTimer = null;
+            }
+            if (rectangleHornAudio) {
+                rectangleHornAudio.onended = null;
+                rectangleHornAudio.onerror = null;
+            }
+            requestRectangleAutomaticStop();
+        };
+        const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+        if (!rectangleHornAudio || soundScale === 0) {
+            rectangleHornFallbackTimer = window.setTimeout(finishHornCue, getRectangleHornDurationSeconds() * 1000);
+            return;
+        }
+        rectangleHornAudio.volume = Math.min(1, 0.7 * soundScale);
         rectangleHornAudio.currentTime = 0;
-        rectangleHornAudio.play().catch(() => {});
+        rectangleHornAudio.onended = finishHornCue;
+        rectangleHornAudio.onerror = finishHornCue;
+        rectangleHornAudio.play().catch(() => {
+            rectangleHornFallbackTimer = window.setTimeout(finishHornCue, getRectangleHornDurationSeconds() * 1000);
+        });
     };
     const playRectangleStop = () => {
         if (!rectangleStopAudio || (window.__learnscapeSoundScale?.() ?? 1) === 0) return;
@@ -872,16 +939,8 @@ const appVersion = '20260930-647';
             syncRectangleHighwayPosition();
         }
     };
-    const canRunRectangleRoadShapeObstacles = () => (
-        rectangleDeliveredItems.size >= 1
-        && !rectangleDeliveryPage?.hidden
-        && !rectangleDeliveryPage?.classList.contains('is-boss-battle')
-        && !rectangleDeliveryPage?.classList.contains('is-final-complete-scene')
-        && !rectangleGamePaused
-        && !rectangleRoadLoopPaused
-        && !rectangleGasDepleted
-        && rectangleDeliveryJeepSequence?.classList.contains('is-arrived')
-    );
+    // Regular delivery roads stay obstacle-free; hazards belong to boss encounters only.
+    const canRunRectangleRoadShapeObstacles = () => false;
 
     const clearRectangleRoadShapeObstacles = () => {
         if (rectangleRoadShapeObstacleTimer !== null) {
@@ -1046,10 +1105,17 @@ const appVersion = '20260930-647';
             setRectangleGasLevel(rectangleGasLevel - (elapsedMs * rectangleGasDrainPerMs));
             const currentJob = rectangleDeliveryJobs[rectangleDeliveryJobIndex];
             const currentStopDistance = currentJob ? getRectangleDeliveryStopDistance(currentJob) : Number.POSITIVE_INFINITY;
-            if (!rectangleBraking && currentStopDistance < rectangleHornCueDistance && rectangleHornReady && !rectangleDeliveryPage?.classList.contains('is-boss-battle')) {
+            const hornCueDistance = getRectangleHornCueDistance();
+            if (
+                !rectangleBraking
+                && rectangleDeliveryJeepSequence?.classList.contains('is-arrived')
+                && currentStopDistance < hornCueDistance
+                && rectangleHornReady
+                && !rectangleDeliveryPage?.classList.contains('is-boss-battle')
+            ) {
                 rectangleHornReady = false;
                 playRectangleHorn();
-            } else if (currentStopDistance > rectangleHornResetDistance) {
+            } else if (currentStopDistance > hornCueDistance + rectangleHornResetMargin) {
                 rectangleHornReady = true;
             }
             if (rectangleBraking?.speedFactor === 0) {
@@ -1071,12 +1137,8 @@ const appVersion = '20260930-647';
         rectangleRoadLoopTime = timestamp;
         rectangleRoadLoopFrame = window.requestAnimationFrame(tickRectangleRoadLoop);
     };
-    rectangleSpeedSlider?.addEventListener('input', () => {
-        rectangleSpeedLevel = Math.max(1, Math.min(5, Number(rectangleSpeedSlider.value) || 3));
-        if (rectangleSpeedValue) rectangleSpeedValue.textContent = String(rectangleSpeedLevel);
-        updateRectangleEngineSound();
-    });
     const startRectangleRoadLoop = ({ preservePosition = false } = {}) => {
+        rectangleSpeedLevel = Math.min(5, 3 + rectangleDeliveredItems.size);
         updateRectangleRoadLoopWidth();
         if (!preservePosition) {
             rectangleRoadLoopOffset = 0;
@@ -1109,6 +1171,17 @@ const appVersion = '20260930-647';
         }
         rectangleRoadLoopPaused = false;
         rectangleBraking = null;
+        rectangleAutoStopPending = false;
+        if (rectangleHornFallbackTimer !== null) {
+            window.clearTimeout(rectangleHornFallbackTimer);
+            rectangleHornFallbackTimer = null;
+        }
+        if (rectangleHornAudio) {
+            rectangleHornAudio.onended = null;
+            rectangleHornAudio.onerror = null;
+            rectangleHornAudio.pause();
+            rectangleHornAudio.currentTime = 0;
+        }
         if (rectangleRoadStrip) {
             if (preservePosition) {
                 rectangleRoadStrip.style.transform = `translate3d(${-rectangleRoadLoopOffset}px, 0, 0)`;
@@ -1126,51 +1199,28 @@ const appVersion = '20260930-647';
             rectangleRoadToggle.setAttribute('aria-pressed', 'false');
         }
     };
-    rectangleRoadToggle?.addEventListener('click', () => {
-        if (rectangleGamePaused) return;
-        if (rectangleRoadToggle.disabled || rectangleBraking || !rectangleDeliveryJeepSequence?.classList.contains('is-arrived')) return;
-        if (rectangleDeliveryPage?.classList.contains('is-boss-battle')) return;
+    requestRectangleAutomaticStop = () => {
+        if (rectangleGamePaused) {
+            rectangleAutoStopPending = true;
+            return;
+        }
+        if (
+            rectangleBraking
+            || rectangleRoadLoopPaused
+            || rectangleGasDepleted
+            || rectangleDeliveryPage?.hidden
+            || rectangleDeliveryPage?.classList.contains('is-boss-battle')
+            || rectangleDeliveryPage?.classList.contains('is-final-complete-scene')
+            || !rectangleDeliveryJeepSequence?.classList.contains('is-arrived')
+        ) return;
         const job = rectangleDeliveryJobs[rectangleDeliveryJobIndex];
         if (!job) return;
-        const isCorrectStop = isRectangleDeliveryStopNear(job);
-        rectangleRoadToggle.disabled = true;
-        rectangleRoadToggle.classList.remove('is-wrong-stop');
-        rectangleRoadToggle.textContent = 'Stopping';
-        rectangleRoadToggle.setAttribute('aria-label', 'Jeep slowing to a stop');
         playRectangleStop();
         rectangleBraking = {
             startTime: rectangleRoadLoopTime || performance.now(),
             speedFactor: 1,
             onStopped: () => {
                 if (rectangleGasDepleted || rectangleDeliveryPage?.hidden) return;
-                if (!isCorrectStop) {
-                    rectangleRoadToggle.classList.add('is-wrong-stop');
-                    rectangleRoadToggle.textContent = 'Wrong Stop';
-                    rectangleRoadToggle.setAttribute('aria-label', `Keep moving until the ${job.destination} is beside the jeep`);
-                    rectangleGasPenaltyRemaining += 12;
-                    rectangleGasMeter?.classList.remove('is-penalized');
-                    rectangleGasMeter?.getBoundingClientRect();
-                    rectangleGasMeter?.classList.add('is-penalized');
-                    if (rectangleWrongStopTimer !== null) window.clearTimeout(rectangleWrongStopTimer);
-                    rectangleWrongStopTimer = window.setTimeout(() => {
-                        rectangleWrongStopTimer = null;
-                        if (rectangleDeliveryPage && !rectangleDeliveryPage.hidden) {
-                            rectangleRoadLoopPaused = false;
-                            rectangleDeliveryPage.classList.remove('is-road-stopped');
-                            rectangleRoadStrip?.classList.remove('is-loop-paused');
-                            rectangleRoadToggle.disabled = false;
-                            rectangleRoadToggle.classList.remove('is-wrong-stop');
-                            rectangleRoadToggle.textContent = 'Stop';
-                            rectangleRoadToggle.setAttribute('aria-label', 'Stop at this delivery');
-                            startRectangleEngineSound();
-                            spawnRectangleRoadGasPickup();
-                        }
-                    }, 1200);
-                    return;
-                }
-                rectangleRoadToggle.textContent = 'Going';
-                rectangleRoadToggle.setAttribute('aria-label', `Heading to ${job.destination}`);
-                rectangleRoadToggle.setAttribute('aria-pressed', 'true');
                 rectangleResumeFromDelivery = true;
                 rectangleDeliveryRouteTimer = window.setTimeout(() => {
                     rectangleDeliveryRouteTimer = null;
@@ -1178,7 +1228,7 @@ const appVersion = '20260930-647';
                 }, 800);
             },
         };
-    });
+    };
     window.addEventListener('resize', () => {
         if (rectangleRoadStrip?.classList.contains('is-auto-looping')) updateRectangleRoadLoopWidth();
     });
@@ -1192,9 +1242,9 @@ const appVersion = '20260930-647';
     const rectangleDeliveryTaskItemName = rectangleDeliveryPage?.querySelector('.rectangle-delivery-task-copy strong') || null;
     const rectangleDeliveryTaskDestinationName = rectangleDeliveryPage?.querySelector('.rectangle-delivery-task-destination strong') || null;
     const rectangleDeliveryJobs = [
-        { item: 'books', itemName: 'Books', destination: 'Bookstore', route: 'rectangleBookstore', wayIndex: 1, center: 0.36 },
-        { item: 'bread-tray', itemName: 'Bread Tray', destination: 'Bakery', route: 'rectangleBakery', wayIndex: 2, center: 0.82 },
-        { item: 'toy-box', itemName: 'Toy Box', destination: 'Toy Shop', route: 'rectangleToyShop', wayIndex: 4, center: 0.39 },
+        { item: 'books', itemName: 'Libro', destination: 'Bookstore', route: 'rectangleBookstore', wayIndex: 1, center: 0.36 },
+        { item: 'bread-tray', itemName: 'Tinapay', destination: 'Bakery', route: 'rectangleBakery', wayIndex: 2, center: 0.82 },
+        { item: 'toy-box', itemName: 'Laruan', destination: 'Toy Shop', route: 'rectangleToyShop', wayIndex: 4, center: 0.39 },
     ];
     let rectangleDeliveryJobIndex = 0;
     const rectangleDeliveredItems = new Set();
@@ -1227,17 +1277,13 @@ const appVersion = '20260930-647';
         }, Number.POSITIVE_INFINITY);
     };
 
-    const isRectangleDeliveryStopNear = (job) => {
-        const targetImage = rectangleRoadImages[job.wayIndex];
-        const targetWidth = targetImage?.getBoundingClientRect().width || 0;
-        const nearestDistance = getRectangleDeliveryStopDistance(job);
-        return nearestDistance <= Math.max(70, targetWidth * 0.14);
-    };
     let rectangleDeliveryInstructionAudio = null;
     let rectangleDeliveryInstructionShown = false;
     let rectangleDeliveryInstructionHideTimer = null;
     let rectangleParkingInstructionAudio = null;
     let rectangleParkingFeedbackAudio = null;
+    let rectangleInteriorGreetingAudio = null;
+    let rectangleInteriorGreetingPage = null;
     let rectangleParkingMoveTimer = null;
     let rectangleParkingRouteTimer = null;
     const shapePreviewPages = Array.from(document.querySelectorAll('.shape-area-preview-page'));
@@ -1567,8 +1613,19 @@ const appVersion = '20260930-647';
                 </svg>`;
         }
 
+        const isHomeControl = kind === 'home';
+        const actionLabel = isHomeControl ? 'HOME' : 'NEXT';
+        const actionIcon = isHomeControl
+            ? `<path d="M48 83 83 49l35 34v39H94V96H72v26H48Z" fill="#0a6101" opacity=".38" transform="translate(0 4)"/>
+                        <path d="M48 79 83 45l35 34v39H94V92H72v26H48Z" fill="url(#progressGreenIcon-${idSuffix})" stroke="#0e7203" stroke-width="4" stroke-linejoin="round"/>
+                        <path d="M42 81 83 41l41 40" fill="none" stroke="url(#progressGreenIcon-${idSuffix})" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M58 75 82 52" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity=".88"/>`
+            : `<path d="M65 49 112 82 65 115Z" fill="#0a6101" opacity=".38" transform="translate(0 4)"/>
+                        <path d="M65 45 112 82 65 119Z" fill="url(#progressGreenIcon-${idSuffix})" stroke="#0e7203" stroke-width="4" stroke-linejoin="round"/>
+                        <path d="M73 57 98 77" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity=".88"/>`;
+
         return `
-            <svg class="progress-button-svg progress-button-svg-next" viewBox="0 0 330 170" aria-hidden="true" focusable="false">
+            <svg class="progress-button-svg progress-button-svg-${kind}" viewBox="0 0 330 170" aria-hidden="true" focusable="false">
                 <defs>
                     <linearGradient id="progressGreen-${idSuffix}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#87e82c"/><stop offset=".54" stop-color="#35b914"/><stop offset="1" stop-color="#148304"/></linearGradient>
                     <linearGradient id="progressGreenIcon-${idSuffix}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e8ffd9"/></linearGradient>
@@ -1578,10 +1635,8 @@ const appVersion = '20260930-647';
                     <rect x="10" y="8" width="310" height="146" rx="55" fill="url(#progressGreen-${idSuffix})" stroke="#0d6503" stroke-width="8"/>
                     <path d="M24 66C27 35 50 19 88 18h166" fill="none" stroke="#c9f982" stroke-width="6.5" stroke-linecap="round" opacity=".84"/>
                     <circle cx="83" cy="82" r="51" fill="#159407" stroke="#0b6d02" stroke-width="5" opacity=".76"/>
-                    <path d="M65 49 112 82 65 115Z" fill="#0a6101" opacity=".38" transform="translate(0 4)"/>
-                    <path d="M65 45 112 82 65 119Z" fill="url(#progressGreenIcon-${idSuffix})" stroke="#0e7203" stroke-width="4" stroke-linejoin="round"/>
-                    <path d="M73 57 98 77" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity=".88"/>
-                    <text x="210" y="99" text-anchor="middle" fill="#fffdf4" stroke="#0b6202" stroke-width="8" paint-order="stroke fill" font-family="Fredoka, Quicksand, sans-serif" font-size="50" font-weight="900" letter-spacing="1">NEXT</text>
+                    ${actionIcon}
+                    <text x="210" y="99" text-anchor="middle" fill="#fffdf4" stroke="#0b6202" stroke-width="8" paint-order="stroke fill" font-family="Fredoka, Quicksand, sans-serif" font-size="50" font-weight="900" letter-spacing="1">${actionLabel}</text>
                 </g>
             </svg>`;
     };
@@ -1593,11 +1648,13 @@ const appVersion = '20260930-647';
             const source = image?.getAttribute('src') || '';
             const fileName = source.split('/').pop()?.toLowerCase() || '';
             const ariaLabel = (button.getAttribute('aria-label') || '').toLowerCase();
-            const kind = fileName === 'retry.webp' || ariaLabel.includes('retry') || ariaLabel.includes('try the')
-                ? 'retry'
-                : fileName === 'replay.webp' || ariaLabel.includes('replay')
-                    ? 'replay'
-                    : 'next';
+            const kind = button.classList.contains('camera-completion-home') || ariaLabel.includes('intro page')
+                ? 'home'
+                : fileName === 'retry.webp' || ariaLabel.includes('retry') || ariaLabel.includes('try the')
+                    ? 'retry'
+                    : fileName === 'replay.webp' || ariaLabel.includes('replay')
+                        ? 'replay'
+                        : 'next';
             button.dataset.progressControl = kind;
             button.querySelector('.progress-button-svg')?.remove();
             progressSvgRenderVersion += 1;
@@ -7819,7 +7876,7 @@ const appVersion = '20260930-647';
             item.hidden = true;
         });
         if (rectangleDeliveryTaskItemName) rectangleDeliveryTaskItemName.textContent = 'CONGRATULATIONS!';
-        if (rectangleDeliveryTaskDestinationName) rectangleDeliveryTaskDestinationName.textContent = 'ALL ITEMS DELIVERED!';
+        if (rectangleDeliveryTaskDestinationName) rectangleDeliveryTaskDestinationName.textContent = 'Naihatid mo lahat ng gamit';
         rectangleDeliveryTaskPanel.hidden = false;
         rectangleDeliveryTaskPanel.getBoundingClientRect();
         rectangleDeliveryTaskPanel.classList.add('is-visible');
@@ -8143,6 +8200,36 @@ const appVersion = '20260930-647';
         audio.play().catch(releaseAudio);
     };
 
+    const stopRectangleInteriorGreeting = ({ resetPage = true } = {}) => {
+        if (rectangleInteriorGreetingAudio) {
+            rectangleInteriorGreetingAudio.onended = null;
+            rectangleInteriorGreetingAudio.onerror = null;
+            rectangleInteriorGreetingAudio.pause();
+            rectangleInteriorGreetingAudio.currentTime = 0;
+            rectangleInteriorGreetingAudio = null;
+        }
+        if (resetPage) rectangleInteriorGreetingPage = null;
+    };
+
+    const playRectangleInteriorGreeting = (page) => {
+        if (!page || rectangleInteriorGreetingPage === page) return;
+        stopRectangleInteriorGreeting();
+        rectangleInteriorGreetingPage = page;
+        const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+        if (!window.Audio || soundScale <= 0) return;
+        const audio = new window.Audio('assets/Audios/Voice over/magandand araw.mp3');
+        rectangleInteriorGreetingAudio = audio;
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = Math.min(1, soundScale);
+        const releaseAudio = () => {
+            if (rectangleInteriorGreetingAudio === audio) rectangleInteriorGreetingAudio = null;
+        };
+        audio.onended = releaseAudio;
+        audio.onerror = releaseAudio;
+        audio.play().catch(releaseAudio);
+    };
+
     rectangleParkingShapes.forEach((shape) => {
         shape.addEventListener('click', () => {
             const page = shape.closest('.rectangle-destination-page');
@@ -8215,7 +8302,9 @@ const appVersion = '20260930-647';
         } else {
             resetRectangleDestinationJeeps();
         }
-        if (['rectangleBakery1', 'rectangleBookstore1', 'rectangleToyShop1'].includes(routeName)) {
+        const isRectangleInteriorRoute = ['rectangleBakery1', 'rectangleBookstore1', 'rectangleToyShop1'].includes(routeName);
+        if (isRectangleInteriorRoute) {
+            stopRectangleInteriorGreeting();
             const interiorPageId = {
                 rectangleBakery1: 'learnscape-rectangle-bakery1-page',
                 rectangleBookstore1: 'learnscape-rectangle-bookstore1-page',
@@ -8223,6 +8312,8 @@ const appVersion = '20260930-647';
             }[routeName];
             const interiorPage = document.getElementById(interiorPageId);
             if (interiorPage) setupRectangleInteriorPage(interiorPage);
+        } else {
+            stopRectangleInteriorGreeting();
         }
     });
 
@@ -8759,7 +8850,6 @@ const appVersion = '20260930-647';
             target instanceof HTMLElement
             && target.matches('input, textarea, select, button, [contenteditable="true"]')
             && target !== rectanglePauseButton
-            && target !== rectangleSpeedSlider
             && target !== rectangleRoadToggle
         ) return;
         event.preventDefault();
@@ -8838,6 +8928,7 @@ const appVersion = '20260930-647';
         const itemType = object.dataset.rectangleItem;
         if (!itemType || rectangleDeliveredItems.has(itemType)) return;
 
+        stopRectangleInteriorGreeting({ resetPage: false });
         rectangleDeliveredItems.add(itemType);
         updateRectangleDeliveryProgress();
 
@@ -8863,6 +8954,8 @@ const appVersion = '20260930-647';
 
         const bubble = page.querySelector('.rectangle-staff-bubble');
         if (bubble) {
+            const bubbleText = bubble.querySelector('.rectangle-staff-bubble-text');
+            if (bubbleText) bubbleText.textContent = 'Maraming salamat!';
             bubble.hidden = false;
             bubble.classList.remove('is-visible');
             void bubble.offsetWidth;
@@ -8960,12 +9053,18 @@ const appVersion = '20260930-647';
         }
 
         if (bubble) {
+            const bubbleText = bubble.querySelector('.rectangle-staff-bubble-text');
             if (isDelivered) {
+                if (bubbleText) bubbleText.textContent = 'Maraming salamat!';
                 bubble.hidden = false;
                 bubble.classList.add('is-visible');
             } else {
-                bubble.hidden = true;
+                if (bubbleText) bubbleText.textContent = 'Magandang araw explorer!';
+                bubble.hidden = false;
                 bubble.classList.remove('is-visible');
+                void bubble.offsetWidth;
+                bubble.classList.add('is-visible');
+                playRectangleInteriorGreeting(page);
             }
         }
 
@@ -11780,9 +11879,6 @@ const appVersion = '20260930-647';
     };
 
     const openCircleCameraLayout = () => {
-        hideCircleIllustrationProgress();
-        resetCircleHunt();
-        stopCircleHuntCelebration();
         circleIllustrationVideo?.pause();
         navigateApp('circleCamera');
     };
@@ -11976,7 +12072,7 @@ const appVersion = '20260930-647';
         if (!page) return;
         clearCameraCompletionTimers(page);
         page.dataset.cameraDetectionCount = '0';
-        page.classList.remove('is-camera-completing', 'is-camera-detection-success', 'is-camera-chest-ready', 'is-camera-chest-unlocking', 'is-camera-celebrating', 'is-camera-progress-visible');
+        page.classList.remove('is-camera-completing', 'is-camera-detection-success', 'is-camera-chest-ready', 'is-camera-chest-unlocking', 'is-camera-chest-open', 'is-camera-celebrating', 'is-camera-progress-visible');
         page.querySelector('.camera-detection-check')?.setAttribute('aria-hidden', 'true');
         const detectionStars = Array.from(page.querySelectorAll('.camera-empty-stars .circle-lesson-star-slot'));
         detectionStars.forEach((star) => star.classList.remove('is-earned'));
@@ -12046,7 +12142,7 @@ const appVersion = '20260930-647';
         celebration?.setAttribute('aria-hidden', 'true');
         page.querySelector('.camera-completion-progress')?.setAttribute('aria-hidden', 'false');
         playUiClickSound('boardSuccess');
-        page.querySelector('.camera-completion-next')?.focus({ preventScroll: true });
+        page.querySelector('.camera-completion-home')?.focus({ preventScroll: true });
         const starTimer = window.setTimeout(() => {
             if (page.classList.contains('is-camera-progress-visible')) playUiClickSound('starPop');
         }, 700);
@@ -12083,6 +12179,9 @@ const appVersion = '20260930-647';
         timers.push(window.setTimeout(() => {
             if (isPageVisible(page)) playUiClickSound('chime');
         }, 2100));
+        timers.push(window.setTimeout(() => {
+            if (isPageVisible(page)) page.classList.add('is-camera-chest-open');
+        }, 3450));
         timers.push(window.setTimeout(() => {
             if (!isPageVisible(page)) return;
             if (page === circleCameraPage) stopCircleCameraStream();
@@ -12728,9 +12827,9 @@ const appVersion = '20260930-647';
         page.querySelector('.camera-completion-replay')?.addEventListener('click', () => {
             resetCameraCompletionFlow(page);
         });
-        page.querySelector('.camera-completion-next')?.addEventListener('click', () => {
+        page.querySelector('.camera-completion-home')?.addEventListener('click', () => {
             resetCameraCompletionFlow(page);
-            navigateApp('game3');
+            navigateApp('title');
         });
     });
 
