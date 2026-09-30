@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260930-625">
+    <link rel="stylesheet" href="style.css?v=20260930-647">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -368,6 +368,7 @@
             </div>
             <button class="square-mission-start-button" type="button" hidden>Start</button>
         </div>
+        <h2 class="square-game-title" hidden>Hanapin ang mga nawawalang bagay sa Square Town</h2>
         <h2 class="square-placement-title" hidden>Ibalik ang mga bagay na nawawala</h2>
         <div class="square-object-targets" aria-hidden="true">
             <span class="square-object-target" data-square-target="1"></span>
@@ -376,7 +377,17 @@
             <span class="square-object-target" data-square-target="4"></span>
             <span class="square-object-target" data-square-target="5"></span>
         </div>
-        <img class="square-cookie-square" src="assets/Shape UI/chocolate.webp" alt="Square chocolate" hidden>
+        <section class="square-count-range-picker" aria-labelledby="squareCountRangeTitle" hidden>
+            <h2 id="squareCountRangeTitle">Pumili ng bilang ng tsokolate</h2>
+            <p>Ilang tsokolate ang gusto mong bilangin?</p>
+            <div class="square-count-range-options">
+                <button type="button" data-square-count-min="1" data-square-count-max="5">1–5</button>
+                <button type="button" data-square-count-min="6" data-square-count-max="10">6–10</button>
+                <button type="button" data-square-count-min="11" data-square-count-max="15">11–15</button>
+                <button type="button" data-square-count-min="16" data-square-count-max="20">16–20</button>
+            </div>
+        </section>
+        <div class="square-cookie-square" role="group" aria-label="Square chocolates to count" hidden></div>
         <div class="square-answer-tiles" aria-label="Choose the correct answer" hidden>
             <button class="square-answer-tile" type="button"></button>
             <button class="square-answer-tile" type="button"></button>
@@ -384,11 +395,11 @@
             <button class="square-answer-tile" type="button"></button>
         </div>
         <div class="square-object-panel" aria-label="Square storage">
-            <span class="square-object-slot" data-square-slot="1"><button class="square-object-piece" type="button" data-square-piece="1" data-square-hint="parisukat na orasan" aria-label="Place the square clock"><img src="assets/Shape UI/square1.webp" alt=""></button></span>
-            <span class="square-object-slot" data-square-slot="2"><button class="square-object-piece" type="button" data-square-piece="2" data-square-hint="parisukat na bintana" aria-label="Place the square window"><img src="assets/Shape UI/square2.webp" alt=""></button></span>
-            <span class="square-object-slot" data-square-slot="3"><button class="square-object-piece" type="button" data-square-piece="3" data-square-hint="parisukat na palamuti sa dingding" aria-label="Place the square wall panel"><img src="assets/Shape UI/square3.webp" alt=""></button></span>
-            <span class="square-object-slot" data-square-slot="4"><button class="square-object-piece" type="button" data-square-piece="4" data-square-hint="parisukat na dobleng pinto" aria-label="Place the square double doors"><img src="assets/Shape UI/square4.webp" alt=""></button></span>
-            <span class="square-object-slot" data-square-slot="5"><button class="square-object-piece" type="button" data-square-piece="5" data-square-hint="parisukat na may larawan ng fountain" aria-label="Place the square fountain"><img src="assets/Shape UI/square5.webp" alt=""></button></span>
+            <span class="square-object-slot" data-square-slot="1"><button class="square-object-piece" type="button" data-square-piece="1" data-square-hint="orasan" aria-label="Place the square clock"><img src="assets/Shape UI/square1.webp" alt=""></button></span>
+            <span class="square-object-slot" data-square-slot="2"><button class="square-object-piece" type="button" data-square-piece="2" data-square-hint="bintana" aria-label="Place the square window"><img src="assets/Shape UI/square2.webp" alt=""></button></span>
+            <span class="square-object-slot" data-square-slot="3"><button class="square-object-piece" type="button" data-square-piece="3" data-square-hint="palamuti sa dingding" aria-label="Place the square wall panel"><img src="assets/Shape UI/square3.webp" alt=""></button></span>
+            <span class="square-object-slot" data-square-slot="4"><button class="square-object-piece" type="button" data-square-piece="4" data-square-hint="pintuan" aria-label="Place the square double doors"><img src="assets/Shape UI/square4.webp" alt=""></button></span>
+            <span class="square-object-slot" data-square-slot="5"><button class="square-object-piece" type="button" data-square-piece="5" data-square-hint="may larawan ng fountain" aria-label="Place the square fountain"><img src="assets/Shape UI/square5.webp" alt=""></button></span>
         </div>
         <div class="square-placement-hint" role="status" aria-live="polite" hidden>
             <span>Pindutin ang</span>
@@ -1417,15 +1428,26 @@
         <div class="star-mission-fall-field" aria-hidden="true" hidden></div>
         <section class="star-mission-setup" aria-labelledby="starMissionSetupTitle" hidden>
             <div class="star-mission-setup-panel">
-                <h2 id="starMissionSetupTitle">Target Stars</h2>
-                <div class="star-mission-target-options" role="group" aria-label="Choose target stars">
-                    <button class="star-mission-target-option is-selected" type="button" data-star-target="5" aria-pressed="true">5</button>
-                    <button class="star-mission-target-option" type="button" data-star-target="10" aria-pressed="false">10</button>
-                    <button class="star-mission-target-option" type="button" data-star-target="15" aria-pressed="false">15</button>
-                    <button class="star-mission-target-option" type="button" data-star-target="20" aria-pressed="false">20</button>
+                <h2 id="starMissionSetupTitle">Pumili kung gaano kadaming bituin ang kokolektahin</h2>
+                <div class="star-mission-target-options" role="group" aria-label="Choose a target star range">
+                    <button class="star-mission-range-option" type="button" data-star-range-min="1" data-star-range-max="5" aria-pressed="false">1–5</button>
+                    <button class="star-mission-range-option" type="button" data-star-range-min="6" data-star-range-max="10" aria-pressed="false">6–10</button>
+                    <button class="star-mission-range-option" type="button" data-star-range-min="11" data-star-range-max="15" aria-pressed="false">11–15</button>
+                    <button class="star-mission-range-option" type="button" data-star-range-min="16" data-star-range-max="20" aria-pressed="false">16–20</button>
                 </div>
             </div>
         </section>
+        <div class="star-mission-target-reveal" role="status" aria-live="assertive" aria-hidden="true" hidden>
+            <span class="star-mission-target-reveal-label">Target Stars</span>
+            <span class="star-mission-target-reveal-badge" aria-hidden="true">
+                <span class="star-mission-target-reveal-star">
+                    <svg viewBox="0 0 100 100" focusable="false" aria-hidden="true">
+                        <path d="M50 4 L61.8 34.1 L94 35.9 L69.1 56.4 L77.3 88 L50 70.6 L22.7 88 L30.9 56.4 L6 35.9 L38.2 34.1 Z"></path>
+                    </svg>
+                </span>
+                <strong class="star-mission-target-reveal-value">5</strong>
+            </span>
+        </div>
         <section class="star-mission-hud" aria-live="polite" hidden>
             <div class="star-mission-progress-panel">
                 <span class="star-mission-hud-icon" aria-hidden="true">★</span>
@@ -1439,6 +1461,13 @@
                 <strong class="star-mission-timer-value">20</strong>
             </div>
         </section>
+        <button class="star-mission-pause-button" type="button" aria-label="Pause star game" aria-pressed="false" hidden>
+            <span aria-hidden="true"></span>
+        </button>
+        <div class="star-mission-pause-overlay" role="status" aria-live="polite" hidden>
+            <div class="star-mission-pause-sign" aria-hidden="true"><span></span><span></span></div>
+            <strong>Paused</strong>
+        </div>
         <section class="star-mission-celebration" aria-hidden="true">
             <div class="star-mission-confetti" aria-hidden="true"></div>
             <h2>Congratulations!</h2>
@@ -1882,7 +1911,7 @@
 
     
 
-    <script src="script.js?v=20260930-625"></script>
+    <script src="script.js?v=20260930-647"></script>
     </div>
 
     <script>

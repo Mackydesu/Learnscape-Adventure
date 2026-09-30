@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-const appVersion = '20260930-625';
+const appVersion = '20260930-647';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -200,6 +200,7 @@ const appVersion = '20260930-625';
         [18.1, 19.1],
     ]);
     const numberChoiceAudioSource = 'assets/Audios/Sound effects/counting.mp3';
+    const zeroChoiceAudioSource = 'assets/Audios/Sound effects/zero.mp3';
     let numberChoiceAudio = null;
     let numberChoiceAudioFrame = null;
     let numberChoiceAudioTimer = null;
@@ -223,6 +224,22 @@ const appVersion = '20260930-625';
 
     const playNumberChoiceAudio = (number) => {
         const value = Math.floor(Number(number));
+        if (value === 0 && window.Audio && (window.__learnscapeSoundScale?.() ?? 1) > 0) {
+            stopNumberChoiceAudio();
+            const zeroAudio = new window.Audio(zeroChoiceAudioSource);
+            numberChoiceAudio = zeroAudio;
+            zeroAudio.preload = 'auto';
+            zeroAudio.playsInline = true;
+            zeroAudio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+            const releaseZeroAudio = () => {
+                if (numberChoiceAudio !== zeroAudio) return;
+                stopNumberChoiceAudio();
+            };
+            zeroAudio.onended = releaseZeroAudio;
+            zeroAudio.onerror = releaseZeroAudio;
+            zeroAudio.play().catch(releaseZeroAudio);
+            return true;
+        }
         const segment = numberChoiceAudioSegments[value - 1];
         if (!segment || !window.Audio || (window.__learnscapeSoundScale?.() ?? 1) <= 0) return false;
         stopNumberChoiceAudio();
@@ -269,12 +286,12 @@ const appVersion = '20260930-625';
     };
     window.playLearnscapeCountingNumber = playNumberChoiceAudio;
 
-    const numberChoiceSelector = '[data-triangle-count-answer], .star-mission-target-option, .oval-board-card';
+    const numberChoiceSelector = '[data-triangle-count-answer], .oval-board-card, .square-answer-tile';
     const getNumberChoiceValue = (control) => {
         if (!control?.matches?.(numberChoiceSelector)) return null;
         if (control.disabled || control.getAttribute('aria-disabled') === 'true') return null;
         if (control.dataset.triangleCountAnswer) return control.dataset.triangleCountAnswer;
-        if (control.dataset.starTarget) return control.dataset.starTarget;
+        if (control.classList.contains('square-answer-tile')) return control.dataset.answer;
         return control.querySelector('.oval-card-number')?.textContent?.trim() || null;
     };
     const playNumberChoiceActivationFallback = (control) => {
@@ -300,9 +317,11 @@ const appVersion = '20260930-625';
         if (control.matches('button[disabled], [aria-disabled="true"]')) return null;
         if (control.classList.contains('circle-sort-object')) return null;
         if (control.classList.contains('square-answer-tile')) return null;
+        if (control.matches('[data-square-count-min]')) return null;
+        if (control.classList.contains('star-mission-range-option')) return null;
         if (control.classList.contains('shape-tv-choice')) return null;
         if (control.classList.contains('rectangle-mission-object')) return null;
-        if (control.matches('[data-triangle-count-answer], .star-mission-target-option, .oval-board-card')) return null;
+        if (control.matches('[data-triangle-count-answer], .oval-board-card')) return null;
 
         if (control.classList.contains('game-return-btn')) return 'backChime';
         if (control.classList.contains('shape-collection-chest')) return 'chestChime';
@@ -1271,12 +1290,17 @@ const appVersion = '20260930-625';
     const starMissionWalkerCharacter = starMissionWalker?.querySelector('.star-mission-walker-character') || null;
     const starMissionFallField = starMissionPage?.querySelector('.star-mission-fall-field') || null;
     const starMissionSetup = starMissionPage?.querySelector('.star-mission-setup') || null;
-    const starMissionTargetOptions = Array.from(starMissionPage?.querySelectorAll('.star-mission-target-option') || []);
+    const starMissionRangeOptions = Array.from(starMissionPage?.querySelectorAll('.star-mission-range-option') || []);
+    const starMissionTargetReveal = starMissionPage?.querySelector('.star-mission-target-reveal') || null;
+    const starMissionTargetRevealValue = starMissionTargetReveal?.querySelector('.star-mission-target-reveal-value') || null;
     const starMissionHud = starMissionPage?.querySelector('.star-mission-hud') || null;
+    const starMissionProgressPanel = starMissionPage?.querySelector('.star-mission-progress-panel') || null;
     const starMissionProgressValue = starMissionPage?.querySelector('.star-mission-progress-value') || null;
     const starMissionProgressFill = starMissionPage?.querySelector('.star-mission-progress-fill') || null;
     const starMissionTimerPanel = starMissionPage?.querySelector('.star-mission-timer-panel') || null;
     const starMissionTimerValue = starMissionPage?.querySelector('.star-mission-timer-value') || null;
+    const starMissionPauseButton = starMissionPage?.querySelector('.star-mission-pause-button') || null;
+    const starMissionPauseOverlay = starMissionPage?.querySelector('.star-mission-pause-overlay') || null;
     const starMissionCelebration = starMissionPage?.querySelector('.star-mission-celebration') || null;
     const starMissionConfetti = starMissionCelebration?.querySelector('.star-mission-confetti') || null;
     const starMissionTimeout = starMissionPage?.querySelector('.star-mission-timeout') || null;
@@ -1367,11 +1391,15 @@ const appVersion = '20260930-625';
     const starMissionFallTimeouts = new Set();
     const starMissionActiveShapes = new Set();
     let starMissionSelectedTarget = 5;
+    let starMissionLastRandomTarget = null;
+    let starMissionTargetRevealSession = 0;
+    let starMissionTargetRevealTimers = [];
     let starMissionCollectedStars = 0;
     let starMissionTimeRemainingMs = 20000;
     let starMissionTimerFrame = null;
     let starMissionTimerLastTick = null;
     let starMissionGameActive = false;
+    let starMissionPaused = false;
     let starMissionEndSession = 0;
     let starMissionEndTimers = [];
     let starMissionCompletedAudio = null;
@@ -1679,9 +1707,12 @@ const appVersion = '20260930-625';
     const shapeSquareMissionBubbleText = shapeSquarePage?.querySelector('.square-mission-bubble-text') || null;
     const shapeSquareMissionStartButton = shapeSquarePage?.querySelector('.square-mission-start-button') || null;
     const squareObjectPanel = shapeSquarePage?.querySelector('.square-object-panel') || null;
+    const squareGameTitle = shapeSquarePage?.querySelector('.square-game-title') || null;
     const squarePlacementTitle = shapeSquarePage?.querySelector('.square-placement-title') || null;
     const squarePlacementHint = shapeSquarePage?.querySelector('.square-placement-hint') || null;
     const squarePlacementHintObject = shapeSquarePage?.querySelector('.square-placement-hint-object') || null;
+    const shapeSquareCountRangePicker = shapeSquarePage?.querySelector('.square-count-range-picker') || null;
+    const shapeSquareCountRangeButtons = Array.from(shapeSquarePage?.querySelectorAll('[data-square-count-min]') || []);
     const shapeSquareCookieSquare = shapeSquarePage?.querySelector('.square-cookie-square') || null;
     const shapeSquareAnswerTiles = shapeSquarePage?.querySelector('.square-answer-tiles') || null;
     const shapeSquareAnswerTileButtons = Array.from(shapeSquarePage?.querySelectorAll('.square-answer-tile') || []);
@@ -2519,7 +2550,7 @@ const appVersion = '20260930-625';
         return shuffled;
     };
 
-    const setShapeSquareAnswerTiles = () => {
+    const setShapeSquareAnswerTiles = (rangeMin, rangeMax) => {
         if (!shapeSquareAnswerTileButtons.length) return;
 
         if (shapeSquareCookieSquare) {
@@ -2535,18 +2566,40 @@ const appVersion = '20260930-625';
             );
         }
 
-        const values = [10];
-        while (values.length < shapeSquareAnswerTileButtons.length) {
-            const candidate = Math.floor(Math.random() * 20) + 1;
-            if (!values.includes(candidate)) values.push(candidate);
+        const minimum = Math.max(1, Math.min(20, Math.floor(Number(rangeMin)) || 1));
+        const maximum = Math.max(minimum, Math.min(20, Math.floor(Number(rangeMax)) || minimum));
+        const rangeValues = Array.from({ length: maximum - minimum + 1 }, (_, index) => minimum + index);
+        const previousCount = Number(shapeSquareCookieSquare?.dataset.chocolateCount) || 0;
+        const availableCounts = rangeValues.filter((count) => count !== previousCount);
+        const chocolateCount = availableCounts[Math.floor(Math.random() * availableCounts.length)];
+        if (shapeSquareCookieSquare) {
+            shapeSquareCookieSquare.dataset.rangeMin = String(minimum);
+            shapeSquareCookieSquare.dataset.rangeMax = String(maximum);
+            shapeSquareCookieSquare.dataset.chocolateCount = String(chocolateCount);
+            const chocolateColumns = maximum <= 5
+                ? Math.min(3, chocolateCount)
+                : Math.min(5, chocolateCount);
+            shapeSquareCookieSquare.style.setProperty('--chocolate-columns', String(chocolateColumns));
+            shapeSquareCookieSquare.replaceChildren();
+            for (let index = 0; index < chocolateCount; index += 1) {
+                const chocolate = document.createElement('img');
+                chocolate.className = 'square-chocolate-piece';
+                chocolate.src = 'assets/Shape UI/chocolate.webp';
+                chocolate.alt = 'Square chocolate';
+                chocolate.draggable = false;
+                shapeSquareCookieSquare.appendChild(chocolate);
+            }
         }
+
+        const distractors = shuffleValues(rangeValues.filter((value) => value !== chocolateCount));
+        const values = [chocolateCount, ...distractors.slice(0, shapeSquareAnswerTileButtons.length - 1)];
 
         shuffleValues(values).forEach((value, index) => {
             const tile = shapeSquareAnswerTileButtons[index];
             if (!tile) return;
             tile.textContent = String(value);
             tile.dataset.answer = String(value);
-            tile.dataset.correct = String(value === 10);
+            tile.dataset.correct = String(value === chocolateCount);
             tile.classList.remove('is-correct', 'is-wrong');
             tile.disabled = false;
             tile.setAttribute('aria-label', `Answer ${value}`);
@@ -2717,6 +2770,7 @@ const appVersion = '20260930-625';
     const handleShapeSquareAnswerTileClick = (event) => {
         const tile = event.currentTarget;
         if (!tile || tile.disabled) return;
+        playNumberChoiceActivationFallback(tile);
 
         if (tile.dataset.correct === 'true') {
             shapeSquareAnswerTileButtons.forEach((button) => {
@@ -2755,6 +2809,8 @@ const appVersion = '20260930-625';
 
     const resetSquareObjectPuzzle = () => {
         squareObjectGuidedTargetNumber = null;
+        if (shapeSquareCountRangePicker) shapeSquareCountRangePicker.hidden = true;
+        if (squareGameTitle) squareGameTitle.hidden = true;
         if (squarePlacementTitle) squarePlacementTitle.hidden = true;
         if (squarePlacementHint) squarePlacementHint.hidden = true;
         if (squarePlacementHintObject) squarePlacementHintObject.textContent = '';
@@ -2838,17 +2894,30 @@ const appVersion = '20260930-625';
             shapeSquarePuzzleNextButton.hidden = true;
             shapeSquarePuzzleNextButton.classList.remove('is-visible');
         }
+        hideShapeSquareAnswerChoices();
+        if (shapeSquarePuzzleRetryButton) {
+            shapeSquarePuzzleRetryButton.hidden = true;
+            shapeSquarePuzzleRetryButton.classList.remove('is-visible');
+        }
+        if (shapeSquarePuzzleRetryButton) {
+            shapeSquarePuzzleRetryButton.hidden = true;
+            shapeSquarePuzzleRetryButton.classList.remove('is-visible');
+        }
+        if (shapeSquareCharacter13) shapeSquareCharacter13.hidden = true;
+        if (shapeSquareChocolateQuestionBubble) shapeSquareChocolateQuestionBubble.hidden = true;
+        if (shapeSquareCountRangePicker) {
+            shapeSquareCountRangePicker.hidden = false;
+            shapeSquareCountRangeButtons[0]?.focus({ preventScroll: true });
+        }
+        shapeSquareCharacter12?.classList.remove('is-entering');
+    };
+
+    const startShapeSquareChocolateRound = (rangeMin, rangeMax) => {
+        if (!shapeSquarePage?.classList.contains('is-square-puzzle-followup')) return;
+        if (shapeSquareCountRangePicker) shapeSquareCountRangePicker.hidden = true;
         if (shapeSquareCookieSquare) shapeSquareCookieSquare.hidden = false;
-        setShapeSquareAnswerTiles();
+        setShapeSquareAnswerTiles(rangeMin, rangeMax);
         if (shapeSquareAnswerTiles) shapeSquareAnswerTiles.hidden = false;
-        if (shapeSquarePuzzleRetryButton) {
-            shapeSquarePuzzleRetryButton.hidden = true;
-            shapeSquarePuzzleRetryButton.classList.remove('is-visible');
-        }
-        if (shapeSquarePuzzleRetryButton) {
-            shapeSquarePuzzleRetryButton.hidden = true;
-            shapeSquarePuzzleRetryButton.classList.remove('is-visible');
-        }
         if (shapeSquareCharacter13) {
             shapeSquareCharacter13.hidden = false;
             shapeSquareCharacter13.getBoundingClientRect();
@@ -2860,7 +2929,6 @@ const appVersion = '20260930-625';
             shapeSquareChocolateQuestionBubble.classList.add('is-visible');
         }
         playShapeSquareChocolateQuestionAudio();
-        shapeSquareCharacter12?.classList.remove('is-entering');
     };
 
     const returnToShapeSquareMissionStart = () => {
@@ -3025,6 +3093,7 @@ const appVersion = '20260930-625';
         ] || null;
         squareObjectGuidedTargetNumber = nextPiece?.dataset.squarePiece || null;
 
+        if (squareGameTitle) squareGameTitle.hidden = allCollected;
         if (squarePlacementTitle) squarePlacementTitle.hidden = !squareObjectGuidedTargetNumber;
         if (squarePlacementHint) squarePlacementHint.hidden = !squareObjectGuidedTargetNumber;
         if (squarePlacementHintObject) {
@@ -3194,6 +3263,7 @@ const appVersion = '20260930-625';
             squareObjectPanel.classList.remove('is-complete');
         }
         shapeSquarePage?.classList.add('is-lesson-complete');
+        if (squareGameTitle) squareGameTitle.hidden = false;
         updateSquareObjectTargets();
         setShapeSquareVideoStageVisible(false);
         setShapeSquarePlayButtonVisible(false);
@@ -3402,6 +3472,7 @@ const appVersion = '20260930-625';
         page?.querySelectorAll('.shape-tv-choice').forEach((choice) => {
             choice.disabled = false;
             choice.classList.remove('is-correct', 'is-wrong', 'is-speaking');
+            choice.closest('.shape-tv-choice-item')?.classList.remove('is-correct', 'is-wrong');
             delete choice.dataset.nameHeard;
             delete choice.dataset.answerPending;
             choice.removeAttribute('aria-pressed');
@@ -4856,12 +4927,14 @@ const appVersion = '20260930-625';
     };
 
     function handleStarMissionWalkerMouseMove(event) {
+        if (starMissionPaused) return;
         updateStarMissionWalkerPosition(event.clientX);
     }
 
-    const getStarMissionDurationMs = (target = starMissionSelectedTarget) => (
-        (STAR_MISSION_TIME_BY_TARGET[target] || STAR_MISSION_TIME_BY_TARGET[5]) * 1000
-    );
+    const getStarMissionDurationMs = (target = starMissionSelectedTarget) => {
+        const targetBucket = target <= 5 ? 5 : target <= 10 ? 10 : target <= 15 ? 15 : 20;
+        return (STAR_MISSION_TIME_BY_TARGET[targetBucket] || STAR_MISSION_TIME_BY_TARGET[5]) * 1000;
+    };
 
     const formatStarMissionTime = (milliseconds) => String(Math.max(0, Math.ceil(milliseconds / 1000)));
 
@@ -4942,7 +5015,7 @@ const appVersion = '20260930-625';
     };
 
     const syncStarMissionClockTickingAudio = () => {
-        const shouldTick = starMissionGameActive && starMissionTimeRemainingMs > 0 && starMissionTimeRemainingMs <= 5000;
+        const shouldTick = starMissionGameActive && !starMissionPaused && starMissionTimeRemainingMs > 0 && starMissionTimeRemainingMs <= 5000;
         if (!shouldTick) {
             stopStarMissionClockTickingAudio();
             return;
@@ -4955,6 +5028,53 @@ const appVersion = '20260930-625';
         starMissionClockTickingAudio.play().catch(() => {
             starMissionClockTickingAudio = null;
         });
+    };
+
+    const resetStarMissionPauseUi = (hideButton = true) => {
+        starMissionPaused = false;
+        starMissionPage?.classList.remove('is-star-paused');
+        if (starMissionPauseOverlay) starMissionPauseOverlay.hidden = true;
+        if (starMissionPauseButton) {
+            starMissionPauseButton.hidden = hideButton;
+            starMissionPauseButton.setAttribute('aria-pressed', 'false');
+            starMissionPauseButton.setAttribute('aria-label', 'Pause star game');
+        }
+    };
+
+    const setStarMissionPaused = (paused) => {
+        if (!starMissionGameActive || !starMissionPage || starMissionPage.hidden) paused = false;
+        if (starMissionPaused === paused) return;
+        starMissionPaused = paused;
+        starMissionPage.classList.toggle('is-star-paused', paused);
+        if (starMissionPauseOverlay) starMissionPauseOverlay.hidden = !paused;
+        if (starMissionPauseButton) {
+            starMissionPauseButton.setAttribute('aria-pressed', paused ? 'true' : 'false');
+            starMissionPauseButton.setAttribute('aria-label', paused ? 'Resume star game' : 'Pause star game');
+        }
+
+        if (paused) {
+            stopStarMissionTimer();
+            stopStarMissionClockTickingAudio();
+            if (starMissionFallTimer !== null) window.clearInterval(starMissionFallTimer);
+            starMissionFallTimer = null;
+            if (starMissionCollisionFrame !== null) window.cancelAnimationFrame(starMissionCollisionFrame);
+            starMissionCollisionFrame = null;
+            starMissionFallField?.getAnimations({ subtree: true }).forEach((animation) => animation.pause());
+            window.removeEventListener('mousemove', handleStarMissionWalkerMouseMove);
+            setStarMissionWalkerSprite('assets/Character/idle.gif');
+            stopStarMissionWalkAudio();
+            return;
+        }
+
+        starMissionFallField?.getAnimations({ subtree: true }).forEach((animation) => animation.play());
+        window.removeEventListener('mousemove', handleStarMissionWalkerMouseMove);
+        window.addEventListener('mousemove', handleStarMissionWalkerMouseMove);
+        if (starMissionFallTimer === null) starMissionFallTimer = window.setInterval(spawnStarMissionFallingShape, 720);
+        if (starMissionCollisionFrame === null) {
+            starMissionCollisionFrame = window.requestAnimationFrame(monitorStarMissionFallingShapes);
+        }
+        startStarMissionTimer();
+        syncStarMissionClockTickingAudio();
     };
 
     const prepareMissionConfetti = (container, colors) => {
@@ -4998,6 +5118,7 @@ const appVersion = '20260930-625';
         stopStarMissionClockTickingAudio();
         stopStarMissionWalker();
         stopStarMissionFallingShapes();
+        resetStarMissionPauseUi(true);
         if (starMissionHud) starMissionHud.hidden = true;
         starMissionGameActive = false;
         starMissionEndSession += 1;
@@ -5036,6 +5157,7 @@ const appVersion = '20260930-625';
         stopStarMissionClockTickingAudio();
         stopStarMissionWalker();
         stopStarMissionFallingShapes();
+        resetStarMissionPauseUi(true);
         if (starMissionHud) starMissionHud.hidden = true;
         starMissionGameActive = false;
         starMissionEndSession += 1;
@@ -5062,7 +5184,7 @@ const appVersion = '20260930-625';
     const startStarMissionTimer = () => {
         stopStarMissionTimer();
         const tick = (timestamp) => {
-            if (!starMissionGameActive) {
+            if (!starMissionGameActive || starMissionPaused) {
                 starMissionTimerFrame = null;
                 return;
             }
@@ -5082,17 +5204,100 @@ const appVersion = '20260930-625';
     };
 
     const setStarMissionTarget = (target) => {
-        starMissionSelectedTarget = Number(target) || 5;
+        starMissionSelectedTarget = Math.max(1, Math.min(20, Math.floor(Number(target)) || 5));
         starMissionTimeRemainingMs = getStarMissionDurationMs();
-        starMissionTargetOptions.forEach((option) => {
-            const isSelected = Number(option.dataset.starTarget) === starMissionSelectedTarget;
+        starMissionRangeOptions.forEach((option) => {
+            const rangeMin = Number(option.dataset.starRangeMin);
+            const rangeMax = Number(option.dataset.starRangeMax);
+            const isSelected = starMissionSelectedTarget >= rangeMin && starMissionSelectedTarget <= rangeMax;
             option.classList.toggle('is-selected', isSelected);
             option.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
         });
         updateStarMissionHud();
     };
 
+    const stopStarMissionTargetReveal = () => {
+        starMissionTargetRevealSession += 1;
+        starMissionTargetRevealTimers.forEach((timerId) => window.clearTimeout(timerId));
+        starMissionTargetRevealTimers = [];
+        if (starMissionTargetReveal) {
+            starMissionTargetReveal.hidden = true;
+            starMissionTargetReveal.setAttribute('aria-hidden', 'true');
+            starMissionTargetReveal.classList.remove('is-active', 'is-snapping');
+            starMissionTargetReveal.style.removeProperty('--star-target-snap-x');
+            starMissionTargetReveal.style.removeProperty('--star-target-snap-y');
+        }
+        starMissionHud?.classList.remove('is-target-preview');
+        starMissionProgressPanel?.classList.remove('is-target-received');
+    };
+
+    const chooseRandomStarMissionTarget = (rangeMin, rangeMax) => {
+        const minimum = Math.max(1, Math.min(20, Math.floor(Number(rangeMin)) || 1));
+        const maximum = Math.max(minimum, Math.min(20, Math.floor(Number(rangeMax)) || minimum));
+        const targets = Array.from({ length: maximum - minimum + 1 }, (_, index) => minimum + index);
+        const candidates = targets.filter((target) => target !== starMissionLastRandomTarget);
+        const pool = candidates.length ? candidates : targets;
+        const target = pool[Math.floor(Math.random() * pool.length)];
+        starMissionLastRandomTarget = target;
+        return target;
+    };
+
+    const revealStarMissionTarget = (rangeMin, rangeMax) => {
+        if (!starMissionPage || starMissionPage.hidden || !starMissionTargetReveal) return;
+        stopStarMissionTargetReveal();
+        const session = starMissionTargetRevealSession;
+        const target = chooseRandomStarMissionTarget(rangeMin, rangeMax);
+        setStarMissionTarget(target);
+        starMissionCollectedStars = 0;
+        updateStarMissionHud();
+        if (starMissionSetup) starMissionSetup.hidden = true;
+        if (starMissionHud) {
+            starMissionHud.hidden = false;
+            starMissionHud.classList.add('is-target-preview');
+        }
+        if (starMissionTargetRevealValue) starMissionTargetRevealValue.textContent = String(target);
+        starMissionTargetReveal.hidden = false;
+        starMissionTargetReveal.setAttribute('aria-hidden', 'false');
+        starMissionTargetReveal.setAttribute('aria-label', `Target Stars: ${target}`);
+        starMissionTargetReveal.getBoundingClientRect();
+        starMissionTargetReveal.classList.add('is-active');
+        playNumberChoiceAudio(target);
+
+        const snapTimer = window.setTimeout(() => {
+            if (session !== starMissionTargetRevealSession || starMissionPage.hidden) return;
+            const pageRect = starMissionPage.getBoundingClientRect();
+            const progressRect = starMissionProgressValue?.getBoundingClientRect();
+            if (progressRect) {
+                const revealCenterX = pageRect.left + (pageRect.width / 2);
+                const revealCenterY = pageRect.top + (pageRect.height * 0.48);
+                const progressCenterX = progressRect.left + (progressRect.width / 2);
+                const progressCenterY = progressRect.top + (progressRect.height / 2);
+                starMissionTargetReveal.style.setProperty('--star-target-snap-x', `${progressCenterX - revealCenterX}px`);
+                starMissionTargetReveal.style.setProperty('--star-target-snap-y', `${progressCenterY - revealCenterY}px`);
+            }
+            starMissionTargetReveal.classList.add('is-snapping');
+            starMissionProgressPanel?.classList.remove('is-target-received');
+            starMissionProgressPanel?.getBoundingClientRect();
+            starMissionProgressPanel?.classList.add('is-target-received');
+            playUiClickSound('starPop');
+        }, 1200);
+
+        const startTimer = window.setTimeout(() => {
+            if (session !== starMissionTargetRevealSession || starMissionPage.hidden) return;
+            starMissionTargetReveal.hidden = true;
+            starMissionTargetReveal.setAttribute('aria-hidden', 'true');
+            starMissionTargetReveal.classList.remove('is-active', 'is-snapping');
+            starMissionHud?.classList.remove('is-target-preview');
+            starMissionProgressPanel?.classList.remove('is-target-received');
+            starMissionTargetRevealTimers = [];
+            startStarMissionGame();
+        }, 1900);
+        starMissionTargetRevealTimers.push(snapTimer, startTimer);
+    };
+
     const showStarMissionSetup = () => {
+        stopStarMissionTargetReveal();
+        resetStarMissionPauseUi(true);
         stopStarMissionEndFlow();
         const progress = shapePreviewProgressByPage.get(starMissionPage);
         if (progress) {
@@ -5106,9 +5311,14 @@ const appVersion = '20260930-625';
         starMissionTimeRemainingMs = getStarMissionDurationMs();
         updateStarMissionHud();
         if (starMissionHud) starMissionHud.hidden = true;
+        starMissionRangeOptions.forEach((option) => {
+            option.classList.remove('is-selected');
+            option.setAttribute('aria-pressed', 'false');
+        });
         if (starMissionSetup) {
             starMissionSetup.hidden = false;
             starMissionSetup.getBoundingClientRect();
+            starMissionRangeOptions[0]?.focus({ preventScroll: true });
         }
     };
 
@@ -5118,6 +5328,8 @@ const appVersion = '20260930-625';
         stopStarMissionSequence();
         stopStarMissionFallingShapes();
         stopStarMissionWalker();
+        stopStarMissionTargetReveal();
+        resetStarMissionPauseUi(true);
         starMissionGameActive = false;
         if (starMissionSetup) starMissionSetup.hidden = true;
         if (starMissionHud) starMissionHud.hidden = true;
@@ -5139,10 +5351,14 @@ const appVersion = '20260930-625';
             progress.setAttribute('aria-hidden', 'true');
         }
         starMissionGameActive = true;
+        resetStarMissionPauseUi(false);
         starMissionCollectedStars = 0;
         starMissionTimeRemainingMs = getStarMissionDurationMs();
         if (starMissionSetup) starMissionSetup.hidden = true;
-        if (starMissionHud) starMissionHud.hidden = false;
+        if (starMissionHud) {
+            starMissionHud.hidden = false;
+            starMissionHud.classList.remove('is-target-preview');
+        }
         updateStarMissionHud();
         startStarMissionWalker();
         startStarMissionFallingShapes();
@@ -5151,6 +5367,8 @@ const appVersion = '20260930-625';
 
     function stopStarMissionGame({ keepHud = false } = {}) {
         starMissionGameActive = false;
+        resetStarMissionPauseUi(true);
+        stopStarMissionTargetReveal();
         stopStarMissionTimer();
         stopStarMissionClockTickingAudio();
         stopStarMissionWalker();
@@ -5329,7 +5547,7 @@ const appVersion = '20260930-625';
     };
 
     const monitorStarMissionFallingShapes = () => {
-        if (!starMissionWalkerActive || !starMissionFallField || starMissionPage?.hidden) {
+        if (starMissionPaused || !starMissionWalkerActive || !starMissionFallField || starMissionPage?.hidden) {
             starMissionCollisionFrame = null;
             return;
         }
@@ -5372,7 +5590,7 @@ const appVersion = '20260930-625';
     };
 
     const spawnStarMissionFallingShape = () => {
-        if (!starMissionFallField || !starMissionWalkerActive || starMissionPage?.hidden) return;
+        if (starMissionPaused || !starMissionFallField || !starMissionWalkerActive || starMissionPage?.hidden) return;
         const kinds = ['star', 'star', 'star', 'circle', 'triangle', 'square', 'diamond', 'oval'];
         const kind = kinds[Math.floor(Math.random() * kinds.length)];
         const isStar = kind === 'star';
@@ -6348,17 +6566,26 @@ const appVersion = '20260930-625';
         showStarMissionSetup();
     });
 
-    starMissionTargetOptions.forEach((option) => {
+    starMissionRangeOptions.forEach((option) => {
         option.addEventListener('click', () => {
-            playNumberChoiceActivationFallback(option);
-            setStarMissionTarget(option.dataset.starTarget);
-            startStarMissionGame();
+            const rangeMin = Number(option.dataset.starRangeMin);
+            const rangeMax = Number(option.dataset.starRangeMax);
+            if (!Number.isFinite(rangeMin) || !Number.isFinite(rangeMax)) return;
+            playUiClickSound('chime');
+            revealStarMissionTarget(rangeMin, rangeMax);
         });
     });
 
     starMissionRetryButton?.addEventListener('click', () => {
         playUiClickSound('start');
         showStarMissionSetup();
+    });
+
+    starMissionPauseButton?.addEventListener('click', () => {
+        setStarMissionPaused(!starMissionPaused);
+    });
+    starMissionPauseButton?.addEventListener('keydown', (event) => {
+        if (event.code === 'Space') event.preventDefault();
     });
 
     diamondMissionStartButton?.addEventListener('click', () => {
@@ -10011,6 +10238,24 @@ const appVersion = '20260930-625';
 
     document.querySelectorAll('.shape-tv-choices').forEach((choiceGroup) => {
         const choices = Array.from(choiceGroup.querySelectorAll('.shape-tv-choice'));
+        const choiceAssetNames = {
+            circle: 'circle', square: 'square', triangle: 'triangle', rectangle: 'rectangle',
+            oval: 'oval', heart: 'heart', star: 'star', diamond: 'diamond',
+        };
+        choices.forEach((choice) => {
+            const shapeName = choice.textContent.trim().toLowerCase();
+            const assetName = choiceAssetNames[shapeName];
+            if (!assetName || choice.parentElement.classList.contains('shape-tv-choice-item')) return;
+            const item = document.createElement('div');
+            item.className = 'shape-tv-choice-item';
+            const picture = document.createElement('img');
+            picture.className = 'shape-tv-choice-picture';
+            picture.src = `assets/Shape UI/${assetName} choice.webp`;
+            picture.alt = '';
+            picture.draggable = false;
+            choice.before(item);
+            item.append(picture, choice);
+        });
         const lessonPage = choiceGroup.closest('.circle-illustration-page, .shape-area-page');
         const handleShapeTvChoiceAnswer = (choice) => {
             delete choice.dataset.answerPending;
@@ -10023,9 +10268,11 @@ const appVersion = '20260930-625';
                 choices.forEach((item) => {
                     item.disabled = true;
                     item.classList.remove('is-wrong');
+                    item.closest('.shape-tv-choice-item')?.classList.remove('is-correct', 'is-wrong');
                     item.setAttribute('aria-pressed', item === choice ? 'true' : 'false');
                 });
                 choice.classList.add('is-correct');
+                choice.closest('.shape-tv-choice-item')?.classList.add('is-correct');
                 playShapeTvCelebration(lessonPage, choiceGroup);
                 return;
             }
@@ -10037,9 +10284,16 @@ const appVersion = '20260930-625';
                 if (shapeWrongAnswerAudio.volume > 0) shapeWrongAnswerAudio.play().catch(() => {});
             }
             choice.classList.remove('is-wrong');
+            const choiceItem = choice.closest('.shape-tv-choice-item');
+            choiceItem?.classList.remove('is-wrong');
             choice.getBoundingClientRect();
             choice.classList.add('is-wrong');
-            window.setTimeout(() => choice.classList.remove('is-wrong'), 500);
+            choiceItem?.getBoundingClientRect();
+            choiceItem?.classList.add('is-wrong');
+            window.setTimeout(() => {
+                choice.classList.remove('is-wrong');
+                choiceItem?.classList.remove('is-wrong');
+            }, 500);
         };
 
         choices.forEach((choice) => {
@@ -12603,6 +12857,15 @@ const appVersion = '20260930-625';
     });
     shapeSquareAnswerTileButtons.forEach((tile) => {
         tile.addEventListener('click', handleShapeSquareAnswerTileClick);
+    });
+    shapeSquareCountRangeButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const rangeMin = Number(button.dataset.squareCountMin);
+            const rangeMax = Number(button.dataset.squareCountMax);
+            if (!Number.isFinite(rangeMin) || !Number.isFinite(rangeMax)) return;
+            playUiClickSound('chime');
+            startShapeSquareChocolateRound(rangeMin, rangeMax);
+        });
     });
     shapeSquareBgImage?.addEventListener('load', updateSquareObjectTargets);
 
