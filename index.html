@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20261002-762">
+    <link rel="stylesheet" href="style.css?v=20261002-765">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -130,7 +130,7 @@
                     <h4>Information stored on your device</h4>
                     <p>Learnscape stores game information in your browser on the device you use. This may include your chosen player’s name, optional avatar image, frame color, sound settings, game progress, badges, stars, carrots, and game notifications.</p>
                     <p>This information helps the game remember your progress. It is not sent to our server by the current version of Learnscape.</p>
-                    <p>You can remove this information by using the game’s <strong>Clear My Data</strong> control, when available, or by clearing Learnscape website data in your browser settings.</p>
+                    <p>You can remove this information by clearing Learnscape website data in your browser settings.</p>
 
                     <h4>Camera Challenge and object detection</h4>
                     <p>Learnscape asks for camera access only after you choose <strong>Start Camera</strong>.</p>
@@ -164,6 +164,37 @@
                 </label>
             </div>
         </section>
+    </div>
+
+    <div class="onboarding-dialog-overlay" hidden>
+        <section class="onboarding-dialog" role="dialog" aria-modal="true" aria-labelledby="onboarding-dialog-title">
+            <h2 id="onboarding-dialog-title">Maligayang pagdating!</h2>
+            <div class="onboarding-step" data-onboarding-step="name">
+                <p>Ilagay ang pangalan ng manlalaro. Makikita ito mamaya sa iyong Profile.</p>
+                <label for="onboarding-player-name">Pangalan ng manlalaro</label>
+                <input id="onboarding-player-name" type="text" maxlength="24" autocomplete="nickname" placeholder="Halimbawa: Adventurer">
+                <p class="onboarding-error" role="alert" hidden>Pakiusap, maglagay ng pangalan.</p>
+                <button class="onboarding-next" type="button">Magpatuloy</button>
+            </div>
+            <div class="onboarding-step" data-onboarding-step="avatar" hidden>
+                <p>Pumili ng larawan para sa iyong Profile. Maaari mo rin itong baguhin mamaya.</p>
+                <input class="onboarding-avatar-input" type="file" accept="image/*" hidden>
+                <button class="onboarding-avatar-pick" type="button">Pumili ng Avatar</button>
+                <p class="onboarding-avatar-status" role="status"></p>
+                <div class="onboarding-avatar-actions">
+                    <button class="onboarding-avatar-continue" type="button" hidden>Magpatuloy</button>
+                    <button class="onboarding-avatar-skip" type="button">Skip for now</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="onboarding-coach" aria-live="polite" hidden>
+        <div class="onboarding-hand" aria-hidden="true">👆</div>
+        <div class="onboarding-coach-card">
+            <p class="onboarding-coach-copy"></p>
+            <button class="onboarding-coach-next" type="button" hidden>Susunod</button>
+        </div>
     </div>
 
     <main id="learnscape-title-page">
@@ -1993,7 +2024,7 @@
 
     
 
-    <script src="script.js?v=20261002-762"></script>
+    <script src="script.js?v=20261002-765"></script>
     </div>
 
     <script>
@@ -4150,6 +4181,7 @@
                         detail: `${learnscapeShapeLabels[shape]} adventures are now available.`,
                     });
                 }
+                window.dispatchEvent(new CustomEvent('learnscape:islandunlocked', { detail: { shape } }));
                 window.playUiClickSound?.('chime');
             };
             const animateLearnscapeIslandUnlock = (shape, unlockAfterArrival = true) => {
@@ -4780,6 +4812,20 @@
                 termsPrivacyClose.hidden = !termsPrivacyCheckbox.checked;
             };
 
+            const requestTermsPrivacyFullscreen = () => {
+                if (isFullscreenActive()) return;
+                const root = document.documentElement;
+                const request = root.requestFullscreen
+                    || root.webkitRequestFullscreen
+                    || root.msRequestFullscreen;
+                if (!request) return;
+                Promise.resolve(request.call(root))
+                    .then(syncFullscreenClass)
+                    .catch(() => {
+                        // Some browsers only allow fullscreen from an explicit button press.
+                    });
+            };
+
             const openTermsPrivacy = (trigger = null) => {
                 if (!termsPrivacyOverlay) return;
                 termsPrivacyTrigger = trigger;
@@ -4798,6 +4844,7 @@
                 }
                 termsPrivacyTrigger?.focus({ preventScroll: true });
                 termsPrivacyTrigger = null;
+                window.dispatchEvent(new CustomEvent('learnscape:termsaccepted'));
             };
 
             termsPrivacyLink?.addEventListener('click', (event) => {
@@ -4812,6 +4859,7 @@
                 if (event.key === 'Escape') closeTermsPrivacy();
             });
             termsPrivacyCheckbox?.addEventListener('change', () => {
+                if (termsPrivacyCheckbox.checked) requestTermsPrivacyFullscreen();
                 try {
                     window.localStorage.setItem(termsPrivacyAgreementKey, String(termsPrivacyCheckbox.checked));
                 } catch (error) {
@@ -4823,6 +4871,199 @@
             if (location.hash === '#terms-of-use-privacy' || !hasAcceptedTermsPrivacy()) {
                 openTermsPrivacy(location.hash === '#terms-of-use-privacy' ? termsPrivacyLink : null);
             }
+
+            const onboardingDoneKey = 'learnscape-onboarding-complete:20261002';
+            const onboardingDialog = document.querySelector('.onboarding-dialog-overlay');
+            const onboardingCoach = document.querySelector('.onboarding-coach');
+            const onboardingCopy = onboardingCoach?.querySelector('.onboarding-coach-copy');
+            const onboardingHand = onboardingCoach?.querySelector('.onboarding-hand');
+            const onboardingCoachNext = onboardingCoach?.querySelector('.onboarding-coach-next');
+            const onboardingNameInput = document.getElementById('onboarding-player-name');
+            const onboardingNameError = onboardingDialog?.querySelector('.onboarding-error');
+            const onboardingAvatarInput = onboardingDialog?.querySelector('.onboarding-avatar-input');
+            const onboardingAvatarStatus = onboardingDialog?.querySelector('.onboarding-avatar-status');
+            const onboardingAvatarContinue = onboardingDialog?.querySelector('.onboarding-avatar-continue');
+            let onboardingStage = '';
+            let onboardingTarget = null;
+            let onboardingElevationRoot = null;
+
+            const isOnboardingComplete = () => readSoundSetting(onboardingDoneKey, 'false') === 'true';
+            const setOnboardingStage = (stage) => { onboardingStage = stage; };
+            const clearOnboardingTarget = () => {
+                onboardingTarget?.classList.remove('onboarding-highlight');
+                onboardingTarget = null;
+                onboardingElevationRoot?.classList.remove('onboarding-elevated');
+                onboardingElevationRoot = null;
+                introMenuPanel?.classList.remove('is-onboarding-active');
+            };
+            const hideOnboardingCoach = () => {
+                clearOnboardingTarget();
+                if (onboardingCoach) onboardingCoach.hidden = true;
+                if (onboardingCoachNext) {
+                    onboardingCoachNext.hidden = true;
+                    onboardingCoachNext.onclick = null;
+                }
+            };
+            const showOnboardingCoach = (target, message, nextAction = null) => {
+                if (!onboardingCoach || !target) return;
+                clearOnboardingTarget();
+                onboardingTarget = target;
+                target.classList.add('onboarding-highlight');
+                if (introMenuPanel?.contains(target)) introMenuPanel.classList.add('is-onboarding-active');
+                onboardingElevationRoot = target.closest('.intro-signpost, .intro-home-resources, .game3-island-carousel');
+                onboardingElevationRoot?.classList.add('onboarding-elevated');
+                onboardingCopy.textContent = message;
+                onboardingCoach.hidden = false;
+                if (onboardingCoachNext) {
+                    onboardingCoachNext.hidden = typeof nextAction !== 'function';
+                    onboardingCoachNext.onclick = nextAction || null;
+                }
+                const rect = target.getBoundingClientRect();
+                if (onboardingHand) {
+                    onboardingHand.style.left = `${Math.max(8, Math.min(window.innerWidth - 50, rect.left + rect.width * 0.5 - 16))}px`;
+                    onboardingHand.style.top = `${Math.max(8, rect.top - 48)}px`;
+                }
+            };
+            const showOnboardingDialog = (step) => {
+                if (!onboardingDialog) return;
+                onboardingDialog.hidden = false;
+                onboardingDialog.querySelectorAll('.onboarding-step').forEach((panel) => {
+                    panel.hidden = panel.dataset.onboardingStep !== step;
+                });
+                if (step === 'name') {
+                    onboardingNameInput.value = readSoundSetting(introProfileNameKey, '') === 'Adventurer' ? '' : readSoundSetting(introProfileNameKey, '');
+                    onboardingNameError.hidden = true;
+                    onboardingNameInput.focus({ preventScroll: true });
+                }
+            };
+            const beginShopTutorial = () => {
+                if (onboardingDialog) onboardingDialog.hidden = true;
+                setLearnscapeResourceCount('carrots', 10);
+                setOnboardingStage('carrots');
+                const carrotPill = resourceCountElements.carrots?.closest('.intro-resource-pill-carrot');
+                showOnboardingCoach(carrotPill, 'Gamitin upang makabili ng gamit sa Shop.', () => {
+                    setOnboardingStage('open-shop');
+                    showOnboardingCoach(document.querySelector('[data-intro-panel="shop"]'), 'Pindutin ang Shop para makabili ng unang susi.');
+                });
+            };
+            const showUseKeyGuide = () => {
+                const useKeyButton = introMenuCopy?.querySelector('[data-notification-action="use-key"][data-notification-shape="circle"]');
+                if (!useKeyButton) {
+                    window.setTimeout(showUseKeyGuide, 80);
+                    return;
+                }
+                setOnboardingStage('use-key');
+                showOnboardingCoach(useKeyButton, 'Pindutin ang Use Key upang mabuksan ang unang isla.');
+            };
+            const showProfileGuide = () => {
+                setOnboardingStage('open-profile');
+                showOnboardingCoach(document.querySelector('[data-intro-panel="profile"]'), 'Bumalik tayo sa Home. Pindutin ang Profile para makita ang iyong impormasyon.');
+            };
+            const showProfileAvatarGuide = () => {
+                const target = introMenuCopy?.querySelector('.intro-profile-avatar-column');
+                setOnboardingStage('profile-avatar');
+                showOnboardingCoach(target, 'Dito makikita at mababago ang iyong avatar.', showProfileNameGuide);
+            };
+            const showProfileNameGuide = () => {
+                const target = introMenuCopy?.querySelector('.intro-profile-name-row');
+                setOnboardingStage('profile-name');
+                showOnboardingCoach(target, 'Dito makikita at mae-edit ang pangalan ng manlalaro.', showProfileBadgeGuide);
+            };
+            const showProfileBadgeGuide = () => {
+                const target = introMenuCopy?.querySelector('.intro-profile-collection');
+                setOnboardingStage('profile-badges');
+                showOnboardingCoach(target, 'Dito makikita ang mga badge na makukuha sa bawat Shape Island.', showProfileStatsGuide);
+            };
+            const showProfileStatsGuide = () => {
+                const target = introMenuCopy?.querySelector('.intro-profile-stats');
+                setOnboardingStage('profile-stats');
+                showOnboardingCoach(target, 'Dito makikita ang iyong mga bituin, carrots, at mga lugar na nabuksan.', () => {
+                    setOnboardingStage('close-profile');
+                    showOnboardingCoach(introMenuClose, 'Pindutin ang × upang isara ang Profile.');
+                });
+            };
+            const startOnboarding = () => {
+                if (isOnboardingComplete() || !hasAcceptedTermsPrivacy() || onboardingStage) return;
+                hideOnboardingCoach();
+                setOnboardingStage('name');
+                showOnboardingDialog('name');
+            };
+            const finishOnboarding = () => {
+                hideOnboardingCoach();
+                writeSoundSetting(onboardingDoneKey, 'true');
+                setOnboardingStage('complete');
+            };
+
+            onboardingDialog?.querySelector('.onboarding-next')?.addEventListener('click', () => {
+                const name = onboardingNameInput.value.trim().replace(/\s+/g, ' ').slice(0, 24);
+                if (!name) {
+                    onboardingNameError.hidden = false;
+                    onboardingNameInput.focus({ preventScroll: true });
+                    return;
+                }
+                writeSoundSetting(introProfileNameKey, name);
+                setOnboardingStage('avatar');
+                showOnboardingDialog('avatar');
+            });
+            onboardingNameInput?.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') onboardingDialog?.querySelector('.onboarding-next')?.click();
+            });
+            onboardingDialog?.querySelector('.onboarding-avatar-pick')?.addEventListener('click', () => onboardingAvatarInput?.click());
+            onboardingAvatarInput?.addEventListener('change', () => {
+                const file = onboardingAvatarInput.files?.[0];
+                if (!file) return;
+                saveIntroProfileAvatar(file);
+                onboardingAvatarStatus.textContent = 'Napili na ang avatar mo.';
+                onboardingAvatarContinue.hidden = false;
+                onboardingAvatarInput.value = '';
+            });
+            onboardingAvatarContinue?.addEventListener('click', beginShopTutorial);
+            onboardingDialog?.querySelector('.onboarding-avatar-skip')?.addEventListener('click', beginShopTutorial);
+
+            document.addEventListener('click', (event) => {
+                if (isOnboardingComplete()) return;
+                const target = event.target.closest?.('button, a');
+                if (!target) return;
+                if (onboardingStage === 'open-shop' && target.matches('[data-intro-panel="shop"]')) {
+                    window.setTimeout(() => {
+                        setOnboardingStage('buy-circle');
+                        showOnboardingCoach(introMenuCopy?.querySelector('[data-shop-item="circle"]'), 'Pindutin ang Circle Key upang bilhin ito gamit ang carrots.');
+                    }, 0);
+                } else if (onboardingStage === 'buy-circle' && target.matches('[data-shop-item="circle"]')) {
+                    window.setTimeout(() => {
+                        closeIntroMenu();
+                        setOnboardingStage('open-notifications');
+                        showOnboardingCoach(document.querySelector('[data-intro-panel="notifications"]'), 'Pindutin ang Notifications para gamitin ang iyong bagong susi.');
+                    }, 120);
+                } else if (onboardingStage === 'open-notifications' && target.matches('[data-intro-panel="notifications"]')) {
+                    window.setTimeout(showUseKeyGuide, 0);
+                } else if (onboardingStage === 'use-key' && target.matches('[data-notification-action="use-key"][data-notification-shape="circle"]')) {
+                    hideOnboardingCoach();
+                    setOnboardingStage('unlocking');
+                } else if (onboardingStage === 'open-profile' && target.matches('[data-intro-panel="profile"]')) {
+                    window.setTimeout(showProfileAvatarGuide, 0);
+                } else if (onboardingStage === 'close-profile' && target === introMenuClose) {
+                    window.setTimeout(() => {
+                        setOnboardingStage('enter-world');
+                        showOnboardingCoach(document.querySelector('.btn-enter'), 'Pindutin ang ENTER upang pumunta sa Shape Island.');
+                    }, 0);
+                } else if (onboardingStage === 'enter-world' && target.matches('.btn-enter')) {
+                    hideOnboardingCoach();
+                    setOnboardingStage('enter-circle');
+                } else if (onboardingStage === 'enter-circle' && target.matches('.game3-island-card[data-island-shape="circle"] .game3-island-enter')) {
+                    finishOnboarding();
+                }
+            });
+            window.addEventListener('learnscape:routechange', (event) => {
+                if (onboardingStage === 'enter-circle' && event.detail?.route === 'shapeCircle') finishOnboarding();
+            });
+            window.addEventListener('learnscape:islandunlocked', (event) => {
+                if (onboardingStage !== 'unlocking' || event.detail?.shape !== 'circle') return;
+                navigateWithLoading('title');
+                window.setTimeout(showProfileGuide, 1100);
+            });
+            window.addEventListener('learnscape:termsaccepted', () => window.setTimeout(startOnboarding, 0));
+            if (hasAcceptedTermsPrivacy() && !isOnboardingComplete()) window.setTimeout(startOnboarding, 0);
 
             syncFullscreenClass();
             setRoute(parseTarget(location.hash || 'title'), true);
