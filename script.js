@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-const appVersion = '20261003-797';
+const appVersion = '20261003-802';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;

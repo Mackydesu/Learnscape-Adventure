@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20261003-797">
+    <link rel="stylesheet" href="style.css?v=20261003-802">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -2025,7 +2025,7 @@
 
     
 
-    <script src="script.js?v=20261003-797"></script>
+    <script src="script.js?v=20261003-802"></script>
     </div>
 
     <script>
@@ -3612,7 +3612,7 @@
                     // Sound settings still apply for this session if storage is unavailable.
                 }
             };
-            const freshStartResetVersion = '2026-10-02-1';
+            const freshStartResetVersion = '2026-10-03-3';
             if (readSoundSetting('learnscape-fresh-start-reset-version', '') !== freshStartResetVersion) {
                 try {
                     Object.keys(window.localStorage)
@@ -3936,14 +3936,31 @@
                 && notification.claimed !== true
                 && getNotificationCarrotAmount(notification) > 0
             );
+            const getLearnscapeNotificationDisplayPriority = (notification) => {
+                const hasClaimableAction = isClaimableCarrotNotification(notification)
+                    || shouldShowUseKeyAction(notification);
+                if (hasClaimableAction) return 0;
+                if (notification.read === true || notification.claimed === true) return 3;
+                if (notification.type === 'badge') return 1;
+                return 2;
+            };
+            const sortLearnscapeNotificationsForDisplay = (notifications) => (
+                [...notifications].sort((first, second) => {
+                    const priorityDifference = getLearnscapeNotificationDisplayPriority(first)
+                        - getLearnscapeNotificationDisplayPriority(second);
+                    if (priorityDifference !== 0) return priorityDifference;
+                    return (Number(second.createdAt) || 0) - (Number(first.createdAt) || 0);
+                })
+            );
             const renderIntroNotifications = (category = 'game') => {
                 const panel = introMenuCopy?.querySelector('#intro-notification-content');
                 const list = panel?.querySelector('[data-notification-list]');
                 const message = panel?.querySelector('[data-notification-empty-message]');
                 if (!panel || !list) return;
-                const items = category === 'system'
+                const filteredItems = category === 'system'
                     ? learnscapeNotifications.filter((item) => item.category === 'system')
                     : learnscapeNotifications.filter((item) => item.category !== 'system');
+                const items = sortLearnscapeNotificationsForDisplay(filteredItems);
                 panel.dataset.notificationCategory = category;
                 syncIntroNotificationUnreadIndicator();
                 panel.classList.toggle('has-notifications', items.length > 0);
@@ -4143,6 +4160,7 @@
                             persistLearnscapeNotifications();
                             persistPendingCarrotClaims();
                             window.addLearnscapeResource('carrots', amount);
+                            reconcileLearnscapeCarrotBalance();
                             showIntroCarrotGainPopout(amount);
                             carrotPill.classList.remove('is-claim-impact');
                             void carrotPill.offsetWidth;
@@ -4399,6 +4417,33 @@
             window.addLearnscapeResource = (resource, amount = 1) => (
                 setLearnscapeResourceCount(resource, (resourceCounts[resource] ?? 0) + Number(amount || 0))
             );
+            const reconcileLearnscapeCarrotBalance = () => {
+                const hasTutorialCircleKey = isLearnscapeKeyPurchased('circle');
+                if (!hasTutorialCircleKey) return resourceCounts.carrots;
+                const claimedRewardTotal = learnscapeNotifications.reduce((total, notification) => (
+                    notification.claimRequired === true && notification.claimed === true
+                        ? total + getNotificationCarrotAmount(notification)
+                        : total
+                ), 0);
+                if (claimedRewardTotal <= 0) return resourceCounts.carrots;
+                const purchasedKeyTotal = Object.keys(introShopCosts).reduce((total, shape) => (
+                    isLearnscapeKeyPurchased(shape) ? total + getIntroShopCost(shape) : total
+                ), 0);
+                const expectedMinimumBalance = Math.max(
+                    0,
+                    claimedRewardTotal + getIntroShopCost('circle') - purchasedKeyTotal,
+                );
+                if (resourceCounts.carrots < expectedMinimumBalance) {
+                    return setLearnscapeResourceCount('carrots', expectedMinimumBalance);
+                }
+                return resourceCounts.carrots;
+            };
+            const carrotBalanceRepairVersion = '2026-10-03-1';
+            const carrotBalanceRepairKey = 'learnscape-carrot-balance-repair-version';
+            if (readSoundSetting(carrotBalanceRepairKey, '') !== carrotBalanceRepairVersion) {
+                reconcileLearnscapeCarrotBalance();
+                writeSoundSetting(carrotBalanceRepairKey, carrotBalanceRepairVersion);
+            }
             window.addEventListener('learnscape:resourcechange', () => {
                 if (introMenuPanel?.dataset.panel === 'profile' && !introMenuPanel.hidden) syncIntroProfile();
             });
@@ -4979,6 +5024,9 @@
                 clearOnboardingTarget();
                 onboardingTarget = target;
                 target.classList.add('onboarding-target-glow');
+                const isProfileEditTarget = target.matches(
+                    '[data-profile-action="avatar-prompt"], [data-profile-action="edit-name"], [data-profile-action="change-frame"]',
+                );
                 if (introMenuPanel?.contains(target)) introMenuPanel.classList.add('is-onboarding-active');
                 onboardingCopy.textContent = message;
                 if (onboardingDim) onboardingDim.hidden = false;
@@ -5003,16 +5051,21 @@
                 }
                 if (onboardingCoachCard) {
                     const gap = 20;
+                    onboardingCoachCard.classList.toggle('is-profile-action-message', isProfileEditTarget);
                     const cardWidth = onboardingCoachCard.offsetWidth;
                     const cardHeight = onboardingCoachCard.offsetHeight;
-                    const preferredTop = rect.bottom + gap;
-                    const top = preferredTop + cardHeight <= window.innerHeight - 8
-                        ? preferredTop
-                        : Math.max(8, rect.top - cardHeight - gap);
-                    const left = Math.max(
-                        8,
-                        Math.min(window.innerWidth - cardWidth - 8, rect.left + (rect.width / 2) - (cardWidth / 2)),
-                    );
+                    const preferredTop = isProfileEditTarget
+                        ? rect.top + (rect.height / 2) - (cardHeight / 2)
+                        : rect.bottom + gap;
+                    const top = isProfileEditTarget
+                        ? Math.max(8, Math.min(window.innerHeight - cardHeight - 8, preferredTop))
+                        : (preferredTop + cardHeight <= window.innerHeight - 8
+                            ? preferredTop
+                            : Math.max(8, rect.top - cardHeight - gap));
+                    const preferredLeft = isProfileEditTarget
+                        ? rect.right + gap
+                        : rect.left + (rect.width / 2) - (cardWidth / 2);
+                    const left = Math.max(8, Math.min(window.innerWidth - cardWidth - 8, preferredLeft));
                     onboardingCoachCard.style.left = `${left}px`;
                     onboardingCoachCard.style.top = `${top}px`;
                     onboardingCoachCard.style.right = 'auto';
@@ -5020,7 +5073,7 @@
                 }
                 if (onboardingHand) {
                     const handWidth = onboardingHand.offsetWidth || 76;
-                    const sideGap = 18;
+                    const sideGap = isProfileEditTarget ? 10 : 18;
                     const oppositeStages = ['open-shop', 'buy-circle', 'open-notifications', 'use-key'];
                     const preferRightSide = oppositeStages.includes(onboardingStage);
                     const rightSideLeft = rect.right + sideGap;
@@ -5058,7 +5111,8 @@
             };
             const beginShopTutorial = () => {
                 if (onboardingDialog) onboardingDialog.hidden = true;
-                setLearnscapeResourceCount('carrots', 10);
+                const currentCarrots = window.getLearnscapeResourceCount?.('carrots') ?? resourceCounts.carrots;
+                setLearnscapeResourceCount('carrots', Math.max(currentCarrots, getIntroShopCost('circle')));
                 setOnboardingStage('stars');
                 const starPill = resourceCountElements.stars?.closest('.intro-resource-pill-star');
                 showOnboardingCoach(starPill, 'Bilang ng mga star na nakolekta sa laro.', showCarrotGuide);
@@ -5083,17 +5137,22 @@
             };
             const showProfileGuide = () => {
                 setOnboardingStage('open-profile');
-                showOnboardingCoach(document.querySelector('[data-intro-panel="profile"]'), 'Bumalik tayo sa Home. Pindutin ang Profile para makita ang iyong impormasyon.');
+                showOnboardingCoach(document.querySelector('[data-intro-panel="profile"]'), 'Pindutin ang Profile para makita ang iyong impormasyon.');
             };
             const showProfileAvatarGuide = () => {
-                const target = introMenuCopy?.querySelector('.intro-profile-avatar-column');
+                const target = introMenuCopy?.querySelector('[data-profile-action="avatar-prompt"]');
                 setOnboardingStage('profile-avatar');
-                showOnboardingCoach(target, 'Dito makikita at mababago ang iyong avatar.', showProfileNameGuide);
+                showOnboardingCoach(target, 'Pindutin ang Edit Avatar para baguhin ang avatar.', showProfileNameGuide);
             };
             const showProfileNameGuide = () => {
-                const target = introMenuCopy?.querySelector('.intro-profile-name-row');
+                const target = introMenuCopy?.querySelector('[data-profile-action="edit-name"]');
                 setOnboardingStage('profile-name');
-                showOnboardingCoach(target, 'Dito makikita at mae-edit ang pangalan ng manlalaro.', showProfileBadgeGuide);
+                showOnboardingCoach(target, 'Pindutin ang Edit Name para baguhin ang pangalan ng manlalaro.', showProfileFrameGuide);
+            };
+            const showProfileFrameGuide = () => {
+                const target = introMenuCopy?.querySelector('[data-profile-action="change-frame"]');
+                setOnboardingStage('profile-frame');
+                showOnboardingCoach(target, 'Pindutin ang Change Frame para baguhin ang kulay ng avatar frame.', showProfileBadgeGuide);
             };
             const showProfileBadgeGuide = () => {
                 const target = introMenuCopy?.querySelector('.intro-profile-collection');

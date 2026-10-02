@@ -253,6 +253,9 @@ body.game3-page {
     line-height: 1.48;
     pointer-events: auto;
 }
+.onboarding-coach-card.is-profile-action-message {
+    width: min(22rem, 42vw);
+}
 
 .onboarding-coach-next { min-height: 3rem; margin-top: 0.9rem; padding-inline: 1.2rem; font-size: 1.08em; float: right; }
 .onboarding-hand { position: fixed; z-index: 2; display: block; width: clamp(3.8rem, 7vw, 5.4rem); height: auto; pointer-events: none; user-select: none; filter: drop-shadow(0 0.25rem 0.18rem rgba(0, 0, 0, 0.38)); animation: onboardingHandDrag 0.9s ease-in-out infinite alternate; }
@@ -260,6 +263,7 @@ body.game3-page {
 .onboarding-target-glow {
     filter: brightness(1.16) drop-shadow(0 0 0.45rem #ffd83d) drop-shadow(0 0 0.9rem rgba(255, 244, 163, 0.95)) !important;
 }
+.intro-profile-action.onboarding-target-glow:active { transform: none; }
 .intro-resource-pill-carrot.onboarding-carrot-highlight {
     border-color: #fff4a3 !important;
     outline: 0.24rem solid #ffd83d;
