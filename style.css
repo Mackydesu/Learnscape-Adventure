@@ -171,6 +171,7 @@ body.game3-page {
 }
 
 .onboarding-dialog-overlay[hidden],
+.onboarding-dim[hidden],
 .onboarding-coach[hidden] { display: none; }
 
 .onboarding-dialog {
@@ -208,7 +209,7 @@ body.game3-page {
 .onboarding-avatar-skip { color: #1e6573; background: #e4f2f3; }
 .onboarding-avatar-status { min-height: 1.35rem; margin-top: 0.65rem; color: #245866; font-weight: 700; }
 
-.onboarding-coach {
+.onboarding-dim {
     position: fixed;
     inset: 0;
     width: 100vw;
@@ -217,32 +218,116 @@ body.game3-page {
     height: 100dvh;
     z-index: 1100;
     pointer-events: none;
-    background: rgba(3, 15, 24, 0.7);
+    background: radial-gradient(
+        ellipse var(--onboarding-spotlight-width, 0px) var(--onboarding-spotlight-height, 0px)
+        at var(--onboarding-spotlight-x, -100px) var(--onboarding-spotlight-y, -100px),
+        transparent 0 92%,
+        rgba(3, 15, 24, 0.7) 100%
+    );
+}
+
+.onboarding-coach {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    width: 100dvw;
+    height: 100vh;
+    height: 100dvh;
+    z-index: 1130;
+    pointer-events: none;
 }
 
 .onboarding-coach-card {
     position: fixed;
     right: clamp(0.8rem, 4vw, 2rem);
     bottom: clamp(0.8rem, 4vw, 2rem);
-    width: min(22rem, calc(100vw - 1.6rem));
-    padding: 0.9rem 1rem;
+    width: min(29rem, calc(100vw - 1.6rem));
+    padding: 1.15rem 1.25rem;
     border: 2px solid #f9d65a;
     border-radius: 0.8rem;
     color: #173a42;
     background: #fffdf5;
     box-shadow: 0 0.7rem 1.8rem rgba(0, 0, 0, 0.35);
-    font-weight: 700;
-    line-height: 1.42;
+    font-size: clamp(1.12rem, 2.3vw, 1.45rem);
+    font-weight: 800;
+    line-height: 1.48;
     pointer-events: auto;
 }
 
-.onboarding-coach-next { margin-top: 0.75rem; float: right; }
-.onboarding-hand { position: fixed; z-index: 1; font-size: clamp(2rem, 5vw, 3rem); filter: drop-shadow(0 0.2rem 0.15rem rgba(0, 0, 0, 0.35)); animation: onboardingHandPoint 0.85s ease-in-out infinite alternate; }
-.onboarding-highlight { position: relative !important; z-index: 1120 !important; border-radius: 0.5rem; box-shadow: 0 0 0 0.3rem #f9d65a, 0 0 0 0.55rem rgba(255, 255, 255, 0.8), 0 0 1.2rem 0.45rem rgba(249, 214, 90, 0.94) !important; }
+.onboarding-coach-next { min-height: 3rem; margin-top: 0.9rem; padding-inline: 1.2rem; font-size: 1.08em; float: right; }
+.onboarding-hand { position: fixed; z-index: 2; display: block; width: clamp(3.8rem, 7vw, 5.4rem); height: auto; pointer-events: none; user-select: none; filter: drop-shadow(0 0.25rem 0.18rem rgba(0, 0, 0, 0.38)); animation: onboardingHandDrag 0.9s ease-in-out infinite alternate; }
+.onboarding-hand.is-pointing-from-right { animation-name: onboardingHandDragFromRight; }
+.onboarding-target-glow {
+    filter: brightness(1.16) drop-shadow(0 0 0.45rem #ffd83d) drop-shadow(0 0 0.9rem rgba(255, 244, 163, 0.95)) !important;
+}
+.intro-resource-pill-carrot.onboarding-carrot-highlight {
+    border-color: #fff4a3 !important;
+    outline: 0.24rem solid #ffd83d;
+    outline-offset: 0.22rem;
+    animation: onboardingCarrotCounterGlow 0.85s ease-in-out infinite alternate;
+}
+.intro-resource-pill-carrot.onboarding-carrot-highlight output {
+    color: #fffdf0;
+    text-shadow: 0 0.1rem 0 #7e3b0a, 0 0 0.7rem #ffd83d;
+}
 .intro-menu-panel.is-onboarding-active { z-index: 1110; }
-.onboarding-elevated { position: relative !important; z-index: 1110 !important; }
 
-@keyframes onboardingHandPoint { to { transform: translateY(0.45rem) scale(1.08); } }
+.intro-shop-item.onboarding-circle-key-glow {
+    animation: onboardingCircleKeyPanelGlow 0.85s ease-in-out infinite alternate;
+}
+.intro-shop-item.onboarding-circle-key-glow:hover,
+.intro-shop-item.onboarding-circle-key-glow:active {
+    transform: none;
+}
+.onboarding-use-key-glow {
+    animation: onboardingUseKeyGlow 0.85s ease-in-out infinite alternate !important;
+}
+.onboarding-use-key-glow:hover,
+.onboarding-use-key-glow:active {
+    transform: none !important;
+}
+.intro-shop-item.onboarding-circle-key-glow .intro-shop-key img,
+.intro-shop-item:not(.is-purchased).onboarding-circle-key-glow .intro-shop-key img {
+    opacity: 1;
+    animation: onboardingCircleKeyGlow 0.85s ease-in-out infinite alternate;
+}
+
+@keyframes onboardingHandDrag {
+    from { transform: translate(-0.35rem, -0.12rem) rotate(-95deg) scale(0.96); }
+    to { transform: translate(0.45rem, 0.32rem) rotate(-86deg) scale(1.04); }
+}
+@keyframes onboardingHandDragFromRight {
+    from { transform: translate(0.35rem, -0.12rem) rotate(85deg) scale(0.96) scaleX(-1); }
+    to { transform: translate(-0.45rem, 0.32rem) rotate(94deg) scale(1.04) scaleX(-1); }
+}
+@keyframes onboardingCircleKeyGlow {
+    from { filter: brightness(1.08) drop-shadow(0 0 0.35rem rgba(255, 224, 74, 0.9)); }
+    to { filter: brightness(1.35) saturate(1.2) drop-shadow(0 0 0.85rem #ffdf32) drop-shadow(0 0 1.25rem rgba(255, 255, 255, 0.9)); }
+}
+@keyframes onboardingCircleKeyPanelGlow {
+    from {
+        border-color: #ffd83d;
+        box-shadow: 0 0 0.35rem rgba(255, 216, 61, 0.95), 0 0 0.7rem rgba(255, 244, 163, 0.72);
+    }
+    to {
+        border-color: #fff4a3;
+        box-shadow: 0 0 0.7rem #ffd83d, 0 0 1.35rem rgba(255, 244, 163, 0.98), inset 0 0 0.55rem rgba(255, 240, 113, 0.45);
+    }
+}
+@keyframes onboardingUseKeyGlow {
+    from {
+        filter: brightness(1.06);
+        box-shadow: 0 0 0.35rem rgba(255, 216, 61, 0.95), 0 0 0.7rem rgba(255, 244, 163, 0.72);
+    }
+    to {
+        filter: brightness(1.25) saturate(1.15);
+        box-shadow: 0 0 0.75rem #ffd83d, 0 0 1.4rem rgba(255, 244, 163, 0.98), inset 0 0 0.45rem rgba(255, 255, 255, 0.42);
+    }
+}
+@keyframes onboardingCarrotCounterGlow {
+    from { filter: brightness(1.08) drop-shadow(0 0 0.35rem #ffd83d); }
+    to { filter: brightness(1.24) drop-shadow(0 0 0.85rem #ffd83d) drop-shadow(0 0 1.2rem rgba(255, 244, 163, 0.92)); }
+}
 
 @media (max-width: 540px) {
     .terms-privacy-overlay { padding: 0.7rem; }
