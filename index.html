@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20261002-709">
+    <link rel="stylesheet" href="style.css?v=20261002-751">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -188,6 +188,13 @@
                 <svg class="game3-island-lock" viewBox="0 0 120 145" role="img" aria-label="Locked" hidden><use class="game3-island-lock-shackle" href="#game3-padlock-shackle"></use><use class="game3-island-lock-body" href="#game3-padlock-body"></use></svg>
                 <a class="game3-island-enter loading-link" href="index.html" data-route="shape-area-8">Enter</a>
             </div>
+            <div class="game3-island-card game3-coming-soon-card" aria-label="Coming soon island. Look for later updates.">
+                <img src="assets/Shape UI/coming soon.webp" alt="Coming soon castle island">
+                <div class="game3-coming-soon-message" role="status">
+                    <strong>COMING SOON</strong>
+                    <span>Look for later updates</span>
+                </div>
+            </div>
         </nav>
         <svg class="game3-padlock-defs" aria-hidden="true" focusable="false">
             <defs>
@@ -241,32 +248,6 @@
             </div>
         </div>
 
-        <div class="shape-collection-widget" aria-label="Shape collection">
-            <button class="shape-collection-chest" type="button" aria-expanded="false" aria-controls="shape-collection-dashboard">
-                <span class="shape-collection-chest-glow" aria-hidden="true"></span>
-                <img class="shape-collection-chest-base" src="assets/Buttons/chest.webp" alt="Shape Collection treasure chest">
-                <video class="shape-collection-chest-video shape-collection-chest-open-video" src="assets/Buttons/chestopen.webm" muted playsinline preload="auto" aria-hidden="true"></video>
-                <video class="shape-collection-chest-video shape-collection-chest-steady-video" src="assets/Buttons/chesteady.webm" muted playsinline loop preload="auto" aria-hidden="true"></video>
-            </button>
-        </div>
-
-        <div id="shape-collection-dashboard" class="shape-collection-dashboard" role="dialog" aria-modal="true" aria-labelledby="shape-collection-dashboard-title" hidden>
-            <div class="shape-collection-dashboard-card">
-                <button class="shape-collection-close" type="button" aria-label="Close Shape Collection">&times;</button>
-                <p class="shape-collection-kicker">Treasure Chest</p>
-                <h2 id="shape-collection-dashboard-title">Shape Collection</h2>
-                <div class="shape-collection-grid" aria-label="Collected shapes">
-                    <span class="shape-collection-item shape-collection-item-circle"><span class="shape-collection-icon" aria-hidden="true"></span><span class="shape-collection-label">Circle</span></span>
-                    <span class="shape-collection-item shape-collection-item-square"><span class="shape-collection-icon" aria-hidden="true"></span><span class="shape-collection-label">Square</span></span>
-                    <span class="shape-collection-item shape-collection-item-triangle"><span class="shape-collection-icon" aria-hidden="true"></span><span class="shape-collection-label">Triangle</span></span>
-                    <span class="shape-collection-item shape-collection-item-rectangle"><span class="shape-collection-icon" aria-hidden="true"></span><span class="shape-collection-label">Rectangle</span></span>
-                    <span class="shape-collection-item shape-collection-item-oval"><span class="shape-collection-icon" aria-hidden="true"></span><span class="shape-collection-label">Oval</span></span>
-                    <span class="shape-collection-item shape-collection-item-heart"><span class="shape-collection-icon" aria-hidden="true"></span><span class="shape-collection-label">Heart</span></span>
-                    <span class="shape-collection-item shape-collection-item-star"><span class="shape-collection-icon" aria-hidden="true"></span><span class="shape-collection-label">Star</span></span>
-                    <span class="shape-collection-item shape-collection-item-diamond"><span class="shape-collection-icon" aria-hidden="true"></span><span class="shape-collection-label">Diamond</span></span>
-                </div>
-            </div>
-        </div>
     </section>
 
     <section id="learnscape-shape-circle-page" class="shape-area-page" hidden>
@@ -1151,6 +1132,17 @@
             </div>
             <button class="circle-mission-start-button oval-mission-start-button" type="button" hidden>Start</button>
         </div>
+        <div class="oval-target-picker" role="dialog" aria-modal="true" aria-labelledby="oval-target-picker-title" hidden>
+            <div class="oval-target-picker-panel">
+                <strong id="oval-target-picker-title">Pumili ng target cards</strong>
+                <span>Ilang cards ang gusto mong laruin?</span>
+                <div class="oval-target-picker-choices">
+                    <button type="button" data-oval-target="5"><b>5</b><small>2 pairs + bomb</small></button>
+                    <button type="button" data-oval-target="10"><b>10</b><small>4 pairs + traps</small></button>
+                    <button type="button" data-oval-target="15"><b>15</b><small>5 pairs + traps</small></button>
+                </div>
+            </div>
+        </div>
         <div class="oval-board-stage" aria-label="15 oval board pieces">
             <button class="oval-board-card" type="button" aria-label="Oval board card 1" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">1</span></span><span class="oval-card-face oval-card-front"></span></button>
             <button class="oval-board-card" type="button" aria-label="Oval board card 2" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">2</span></span><span class="oval-card-face oval-card-front"></span></button>
@@ -1538,6 +1530,10 @@
                 <span></span><span></span><span></span><span></span><span></span><span></span>
                 <span></span><span></span><span></span><span></span>
             </div>
+            <span class="diamond-mission-cave-baseline" aria-hidden="true">
+                <i></i><i></i><i></i><i></i><i></i><i></i>
+                <i></i><i></i><i></i><i></i><i></i><i></i>
+            </span>
             <img class="diamond-mission-cave" src="assets/Character/cave2.webp" alt="">
             <div class="diamond-mission-message" role="status" aria-live="polite">
                 <span class="diamond-mission-message-text"></span>
@@ -1560,13 +1556,28 @@
                 <strong>Paused</strong>
             </div>
             <div class="diamond-mission-game-over" role="dialog" aria-modal="true" aria-labelledby="diamond-mission-game-over-title" hidden>
+                <img class="diamond-mission-game-over-cave3 is-left" src="assets/Character/cave3.webp" alt="" aria-hidden="true">
+                <img class="diamond-mission-game-over-cave3 is-right" src="assets/Character/cave3.webp" alt="" aria-hidden="true">
                 <div class="diamond-mission-game-over-panel">
                     <strong id="diamond-mission-game-over-title">Game Over</strong>
                     <span>Try again!</span>
                     <button class="diamond-mission-retry-button" type="button">Retry</button>
                 </div>
             </div>
-            <svg class="diamond-mission-storage" viewBox="3 3 354 274" role="img" aria-label="Storage board with four empty pieces of a diamond" xmlns="http://www.w3.org/2000/svg">
+            <div class="diamond-mission-cart" role="status" aria-live="polite" aria-label="Collection cart: 0 of 4 diamond pieces">
+                <img src="assets/Shape UI/cart.webp" alt="" aria-hidden="true">
+                <strong class="diamond-mission-cart-progress">0/4</strong>
+            </div>
+            <div class="diamond-mission-collection-panel" role="status" aria-live="polite" aria-label="0 of 4 diamond pieces collected">
+                <span>Mga pirasong nakolekta</span>
+                <div class="diamond-mission-collection-pieces" aria-hidden="true">
+                    <i data-diamond-collection-piece="0"><svg viewBox="0 0 100 100"><path d="M92 20V80H8Z"></path></svg></i>
+                    <i data-diamond-collection-piece="1"><svg viewBox="0 0 100 100"><path d="M8 20L92 80H8Z"></path></svg></i>
+                    <i data-diamond-collection-piece="2"><svg viewBox="0 0 100 100"><path d="M8 20H92V80Z"></path></svg></i>
+                    <i data-diamond-collection-piece="3"><svg viewBox="0 0 100 100"><path d="M8 20H92L8 80Z"></path></svg></i>
+                </div>
+            </div>
+            <svg class="diamond-mission-storage" viewBox="3 3 354 274" role="img" aria-label="Assembly board with four empty diamond slots" xmlns="http://www.w3.org/2000/svg" hidden>
                 <rect x="7" y="7" width="346" height="266" rx="8" fill="#635f9d" stroke="#bbecff" stroke-width="8"/>
                 <rect x="23" y="23" width="314" height="234" rx="4" fill="#a9d7e8"/>
                 <path d="M180 23V257M23 140H337" fill="none" stroke="#6b9db4" stroke-width="3"/>
@@ -1577,6 +1588,15 @@
                     <path class="diamond-mission-storage-slot" d="M180 140H317L180 238Z"/>
                 </g>
             </svg>
+            <div class="diamond-mission-assembly-choices" role="group" aria-label="Choose the matching diamond piece" hidden>
+                <span>Piliin ang tamang piraso upang mabuo ang dyamante</span>
+                <div class="diamond-mission-assembly-choice-row">
+                    <button type="button" data-diamond-choice="0" aria-label="Diamond piece 1"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M92 20V80H8Z"></path></svg></button>
+                    <button type="button" data-diamond-choice="1" aria-label="Diamond piece 2"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M8 20L92 80H8Z"></path></svg></button>
+                    <button type="button" data-diamond-choice="2" aria-label="Diamond piece 3"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M8 20H92V80Z"></path></svg></button>
+                    <button type="button" data-diamond-choice="3" aria-label="Diamond piece 4"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M8 20H92L8 80Z"></path></svg></button>
+                </div>
+            </div>
             <div class="diamond-mission-reveal" role="img" aria-label="Completed diamond changing into a crystal" hidden>
                 <svg class="diamond-mission-reveal-shape" viewBox="0 0 274 196" preserveAspectRatio="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
                     <g fill="#52cfee" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">
@@ -1919,7 +1939,7 @@
 
     
 
-    <script src="script.js?v=20261002-709"></script>
+    <script src="script.js?v=20261002-751"></script>
     </div>
 
     <script>
@@ -2425,7 +2445,7 @@
                     if (event.pointerType === 'mouse' && event.button !== 0) return;
 
                     const target = event.target instanceof Element ? event.target : null;
-                    if (target?.closest('.game-return-btn, .shape-collection-widget, .shape-collection-dashboard')) return;
+                    if (target?.closest('.game-return-btn')) return;
 
                     activePointerId = event.pointerId;
                     startX = event.clientX;
@@ -2484,102 +2504,6 @@
 
                 map.addEventListener('scroll', clampCurrentScroll, { passive: true });
             };
-
-            const setupShapeCollectionChest = () => {
-                const page = pages.game3;
-                if (!page) return;
-
-                const widget = page.querySelector('.shape-collection-widget');
-                const chestButton = page.querySelector('.shape-collection-chest');
-                const chestOpenVideo = page.querySelector('.shape-collection-chest-open-video');
-                const chestSteadyVideo = page.querySelector('.shape-collection-chest-steady-video');
-                const dashboard = page.querySelector('.shape-collection-dashboard');
-                const closeButton = page.querySelector('.shape-collection-close');
-                if (!widget || !chestButton || !chestOpenVideo || !chestSteadyVideo || !dashboard || !closeButton) return;
-                let steadyTransitionTimer = null;
-                let dashboardOpenTimer = null;
-
-                const resetChestVideos = () => {
-                    if (steadyTransitionTimer) {
-                        window.clearTimeout(steadyTransitionTimer);
-                        steadyTransitionTimer = null;
-                    }
-
-                    if (dashboardOpenTimer) {
-                        window.clearTimeout(dashboardOpenTimer);
-                        dashboardOpenTimer = null;
-                    }
-
-                    chestOpenVideo.pause();
-                    chestSteadyVideo.pause();
-                    chestOpenVideo.currentTime = 0;
-                    chestSteadyVideo.currentTime = 0;
-                };
-
-                const playSteadyChest = () => {
-                    if (dashboard.hidden) return;
-
-                    if (steadyTransitionTimer) {
-                        window.clearTimeout(steadyTransitionTimer);
-                    }
-
-                    chestSteadyVideo.currentTime = 0;
-                    const steadyPromise = chestSteadyVideo.play();
-                    if (steadyPromise) {
-                        steadyPromise.catch(() => {});
-                    }
-
-                    widget.classList.add('is-steady');
-                    steadyTransitionTimer = window.setTimeout(() => {
-                        widget.classList.remove('is-opening');
-                        steadyTransitionTimer = null;
-                    }, 260);
-                };
-
-                const openDashboard = () => {
-                    resetChestVideos();
-                    widget.classList.add('is-open', 'is-opening');
-                    widget.classList.remove('is-steady');
-                    chestButton.setAttribute('aria-expanded', 'true');
-                    chestOpenVideo.playbackRate = 1.65;
-                    const playPromise = chestOpenVideo.play();
-                    if (playPromise) {
-                        playPromise.catch(playSteadyChest);
-                    }
-
-                    dashboardOpenTimer = window.setTimeout(() => {
-                        dashboard.hidden = false;
-                        dashboardOpenTimer = null;
-                        closeButton.focus({ preventScroll: true });
-                    }, 520);
-                };
-
-                const closeDashboard = () => {
-                    widget.classList.remove('is-open', 'is-opening', 'is-steady');
-                    dashboard.hidden = true;
-                    chestButton.setAttribute('aria-expanded', 'false');
-                    resetChestVideos();
-                    chestButton.focus({ preventScroll: true });
-                };
-
-                chestButton.addEventListener('click', () => {
-                    if (dashboard.hidden) {
-                        openDashboard();
-                    }
-                });
-
-                closeButton.addEventListener('click', closeDashboard);
-
-                chestOpenVideo.addEventListener('ended', playSteadyChest);
-
-                dashboard.addEventListener('keydown', (event) => {
-                    if (event.key === 'Escape') {
-                        closeDashboard();
-                    }
-                });
-            };
-
-            setupShapeCollectionChest();
 
             const setRoute = (routeData, replace = false) => {
                 const routeName = routeData?.routeName || 'title';
@@ -2911,7 +2835,7 @@
                                 <div class="intro-notification-tabs" role="tablist" aria-label="Notification categories">
                                     <button class="intro-notification-tab is-active" id="intro-notification-game-tab" type="button" role="tab" aria-selected="true" aria-controls="intro-notification-content" data-notification-tab="game" tabindex="0">
                                         <svg class="intro-notification-speaker-icon" viewBox="0 0 96 96" aria-hidden="true"><path class="speaker-body" d="M35 34 70 18v60L35 62Z"/><path class="speaker-back" d="M18 36h18v28H18c-6 0-10-6-10-14s4-14 10-14Z"/><path class="speaker-handle" d="M32 61h15l9 25H40Z"/><path class="speaker-gloss" d="M43 37 62 28"/></svg>
-                                        <span>Game Notifications</span>
+                                        <span>Game Missions</span>
                                         <span class="intro-notification-tab-unread-indicator" data-notification-tab-indicator aria-hidden="true" hidden></span>
                                     </button>
                                     <button class="intro-notification-tab" id="intro-notification-system-tab" type="button" role="tab" aria-selected="false" aria-controls="intro-notification-content" data-notification-tab="system" tabindex="-1">
@@ -4460,26 +4384,115 @@
                     detail: 'Claim this reward to add it to your balance.',
                 });
             };
-            const createProgressRewardBadge = (actions) => {
-                const badge = document.createElement('span');
-                badge.className = 'circle-lesson-progress-reward';
-                badge.setAttribute('role', 'status');
-                badge.innerHTML = `
-                    <svg viewBox="0 0 32 32" aria-hidden="true">
-                        <path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/>
-                        <path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/>
-                        <path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/>
-                    </svg>
-                    <strong></strong>
-                `;
-                const buttons = actions.querySelectorAll('.circle-lesson-progress-button');
-                if (buttons.length > 1) {
-                    actions.insertBefore(badge, buttons[1]);
-                } else {
-                    actions.appendChild(badge);
+            const progressMissionNotificationRuns = new WeakMap();
+            const progressMissionAudioSource = 'assets/Audios/Sound effects/progress.mp3';
+            const progressMissionInitialDelay = 1000;
+            const progressCompletionTitles = Object.freeze({
+                1: 'Lesson Complete!',
+                2: 'Mission Complete!',
+                3: 'Game Complete!',
+            });
+            const syncProgressCompletionTitle = (progress, starStage) => {
+                const completionTitle = progressCompletionTitles[starStage];
+                const title = progress.querySelector('.circle-lesson-progress-title');
+                if (!completionTitle || !title) return;
+                if (title.getAttribute('aria-label') !== completionTitle) {
+                    title.setAttribute('aria-label', completionTitle);
                 }
-                actions.classList.add('has-progress-reward');
-                return badge;
+                const titleText = title.querySelector('textPath');
+                if (titleText && titleText.textContent !== completionTitle) {
+                    titleText.textContent = completionTitle;
+                }
+            };
+            const createProgressMissionNotification = (actions) => {
+                const notification = document.createElement('span');
+                notification.className = 'circle-lesson-progress-notification';
+                notification.setAttribute('role', 'status');
+                notification.setAttribute('aria-live', 'polite');
+                actions.appendChild(notification);
+                return notification;
+            };
+            const stopProgressMissionNotifications = (progress) => {
+                const run = progressMissionNotificationRuns.get(progress);
+                if (run) {
+                    run.timers.forEach((timerId) => window.clearTimeout(timerId));
+                    if (run.audio) {
+                        run.audio.onended = null;
+                        run.audio.onerror = null;
+                        run.audio.pause();
+                    }
+                    progressMissionNotificationRuns.delete(progress);
+                }
+                const notification = progress.querySelector('.circle-lesson-progress-notification');
+                if (notification) {
+                    notification.classList.remove('is-visible');
+                    notification.textContent = '';
+                }
+            };
+            const getProgressMissionMessages = (progress, shape, starStage) => {
+                const shapeLabel = learnscapeShapeLabels[shape];
+                const carrotReward = progressRewardsByShape[shape]?.[starStage] || 0;
+                if (starStage === 1) {
+                    return [
+                        `${shapeLabel} Lesson Complete!`,
+                        `You earned 1 star in ${shapeLabel}!`,
+                        `You earned ${carrotReward} carrots!`,
+                    ];
+                }
+                if (starStage === 2) {
+                    return [
+                        `${shapeLabel} Mission Complete!`,
+                        `You earned 2 stars in ${shapeLabel}!`,
+                        `You earned ${carrotReward} carrots!`,
+                    ];
+                }
+                return [
+                    `${shapeLabel} Object Detection Complete!`,
+                    `You earned 3 stars in ${shapeLabel}!`,
+                    `${shapeLabel} Badge Earned!`,
+                    `You earned ${carrotReward} carrots!`,
+                ];
+            };
+            const showProgressMissionNotifications = (progress, shape, starStage) => {
+                const activeRun = progressMissionNotificationRuns.get(progress);
+                if (activeRun?.shape === shape && activeRun?.starStage === starStage) return;
+                if (activeRun) stopProgressMissionNotifications(progress);
+                const actions = progress.querySelector('.circle-lesson-progress-actions');
+                if (!actions) return;
+                const notification = actions.querySelector('.circle-lesson-progress-notification')
+                    || createProgressMissionNotification(actions);
+                const run = { timers: [], audio: null, shape, starStage };
+                progressMissionNotificationRuns.set(progress, run);
+                getProgressMissionMessages(progress, shape, starStage).forEach((message, index) => {
+                    const showTimer = window.setTimeout(() => {
+                        notification.classList.remove('is-visible');
+                        notification.textContent = message;
+                        void notification.offsetWidth;
+                        notification.classList.add('is-visible');
+                        if (run.audio) {
+                            run.audio.onended = null;
+                            run.audio.onerror = null;
+                            run.audio.pause();
+                        }
+                        if (window.Audio && (window.__learnscapeSoundScale?.() ?? 1) > 0) {
+                            const audio = new window.Audio(progressMissionAudioSource);
+                            run.audio = audio;
+                            audio.preload = 'auto';
+                            audio.playsInline = true;
+                            audio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+                            const releaseAudio = () => {
+                                if (run.audio === audio) run.audio = null;
+                            };
+                            audio.onended = releaseAudio;
+                            audio.onerror = releaseAudio;
+                            audio.play().catch(releaseAudio);
+                        }
+                    }, progressMissionInitialDelay + (index * 2300));
+                    const hideTimer = window.setTimeout(() => {
+                        notification.classList.remove('is-visible');
+                    }, progressMissionInitialDelay + (index * 2300) + 1750);
+                    run.timers.push(showTimer, hideTimer);
+                });
             };
             const syncLearnscapeProgressReward = (progress) => {
                 if (!progress) return;
@@ -4490,26 +4503,24 @@
                 const starStage = Math.max(0, Math.min(3, Number(stars.dataset.earnedStars) || 0));
                 const rewardShape = getProgressRewardShape(progress);
                 const reward = progressRewardsByShape[rewardShape]?.[starStage] || 0;
-                let badge = actions.querySelector('.circle-lesson-progress-reward');
-                if (!reward) {
-                    badge?.remove();
-                    actions.classList.remove('has-progress-reward');
+                syncProgressCompletionTitle(progress, starStage);
+                actions.querySelector('.circle-lesson-progress-reward')?.remove();
+                actions.classList.remove('has-progress-reward');
+                if (!starStage || !rewardShape) {
+                    stopProgressMissionNotifications(progress);
                     return;
                 }
-
-                badge ||= createProgressRewardBadge(actions);
-                const rewardText = `+${reward}`;
-                const rewardValue = badge.querySelector('strong');
-                if (rewardValue.textContent !== rewardText) rewardValue.textContent = rewardText;
-                badge.setAttribute('aria-label', `Reward: ${reward} carrots`);
-                badge.dataset.reward = String(reward);
-                badge.dataset.starStage = String(starStage);
 
                 const page = progress.closest('section[id]');
                 const isVisible = progress.getAttribute('aria-hidden') === 'false'
                     && !progress.hidden
                     && !page?.hidden;
-                if (!isVisible) return;
+                if (!isVisible) {
+                    stopProgressMissionNotifications(progress);
+                    return;
+                }
+
+                showProgressMissionNotifications(progress, rewardShape, starStage);
 
                 if (starStage === 3 && rewardShape) {
                     awardLearnscapeProfileBadge(rewardShape);
@@ -4527,7 +4538,6 @@
                 const wasAwarded = claimedProgressRewards.has(rewardIdentity)
                     || readSoundSetting(rewardStorageKey, 'false') === 'true'
                     || legacyRewardWasAwarded;
-                badge.classList.toggle('is-awarded', wasAwarded);
                 if (wasAwarded) {
                     claimedProgressRewards.add(rewardIdentity);
                     if (legacyRewardWasAwarded) writeSoundSetting(rewardStorageKey, 'true');
@@ -4538,8 +4548,6 @@
                 writeSoundSetting(rewardStorageKey, 'true');
                 addProgressNotifications(progress, rewardShape, starStage, reward, rewardIdentity);
                 window.addLearnscapeResource('stars', 1);
-                badge.classList.add('is-awarded', 'is-new-reward');
-                window.setTimeout(() => badge.classList.remove('is-new-reward'), 900);
             };
             const syncAllLearnscapeProgressRewards = () => {
                 document.querySelectorAll('.circle-lesson-progress').forEach(syncLearnscapeProgressReward);

@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-const appVersion = '20261002-709';
+const appVersion = '20261002-751';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -223,6 +223,7 @@ const appVersion = '20261002-709';
     };
 
     const playNumberChoiceAudio = (number) => {
+        if (number === null || number === undefined || number === '') return false;
         const value = Math.floor(Number(number));
         if (value === 0 && window.Audio && (window.__learnscapeSoundScale?.() ?? 1) > 0) {
             stopNumberChoiceAudio();
@@ -324,7 +325,6 @@ const appVersion = '20261002-709';
         if (control.matches('[data-triangle-count-answer], .oval-board-card')) return null;
 
         if (control.classList.contains('game-return-btn')) return 'backChime';
-        if (control.classList.contains('shape-collection-chest')) return 'chestChime';
         if (control.classList.contains('shape-collection-close')) return 'thunk';
         if (control.classList.contains('circle-illustration-play-button')) return 'chime';
         if (control.classList.contains('circle-illustration-skip-button')) return 'tap';
@@ -408,6 +408,7 @@ const appVersion = '20261002-709';
     }
 
     const loadingLinks = document.querySelectorAll('.loading-link');
+    const appBackButtons = document.querySelectorAll('.game-return-btn');
     let isNavigating = false;
     const loadingDuration = 1000;
     const titlePage = document.getElementById('learnscape-title-page');
@@ -1368,8 +1369,14 @@ const appVersion = '20261002-709';
     const diamondMissionPauseOverlay = diamondMissionGame?.querySelector('.diamond-mission-pause-overlay') || null;
     const diamondMissionGameOver = diamondMissionGame?.querySelector('.diamond-mission-game-over') || null;
     const diamondMissionRetryButton = diamondMissionGameOver?.querySelector('.diamond-mission-retry-button') || null;
+    const diamondMissionCart = diamondMissionGame?.querySelector('.diamond-mission-cart') || null;
+    const diamondMissionCartProgress = diamondMissionCart?.querySelector('.diamond-mission-cart-progress') || null;
+    const diamondMissionCollectionPanel = diamondMissionGame?.querySelector('.diamond-mission-collection-panel') || null;
+    const diamondMissionCollectionPieces = Array.from(diamondMissionCollectionPanel?.querySelectorAll('[data-diamond-collection-piece]') || []);
     const diamondMissionStorage = diamondMissionGame?.querySelector('.diamond-mission-storage') || null;
     const diamondMissionStorageSlots = Array.from(diamondMissionStorage?.querySelectorAll('.diamond-mission-storage-slot') || []);
+    const diamondMissionAssemblyChoices = diamondMissionGame?.querySelector('.diamond-mission-assembly-choices') || null;
+    const diamondMissionAssemblyButtons = Array.from(diamondMissionAssemblyChoices?.querySelectorAll('[data-diamond-choice]') || []);
     const diamondMissionReveal = diamondMissionGame?.querySelector('.diamond-mission-reveal') || null;
     const diamondMissionCelebration = diamondMissionPage?.querySelector('.diamond-mission-celebration') || null;
     const diamondMissionConfetti = diamondMissionCelebration?.querySelector('.diamond-mission-confetti') || null;
@@ -1480,6 +1487,8 @@ const appVersion = '20261002-709';
     let diamondMissionBatSequence = 0;
     let diamondMissionDecoyIndex = 0;
     let diamondMissionRevealStarted = false;
+    let diamondMissionAssemblyActive = false;
+    let diamondMissionAssemblyIndex = 0;
     let diamondMissionPaused = false;
     let diamondMissionLives = 3;
     let diamondMissionGameOverStarted = false;
@@ -4282,10 +4291,14 @@ const appVersion = '20261002-709';
         { name: 'medium', up: '-1.35rem', down: '1.5rem', duration: '1.7s' },
         { name: 'extra-strong', up: '-2.75rem', down: '2.9rem', duration: '1.3s' },
     ];
+    const DIAMOND_BAT_BATCH_SIZE = 5;
+    const DIAMOND_BAT_STAY_MS = 5000;
+    const DIAMOND_BAT_ENTER_MS = 720;
+    const DIAMOND_BAT_BATCH_GAP_MS = 120;
     const diamondBatDecoys = [
         { name: 'circle', path: 'M16 84V20A64 64 0 0 1 80 84Z', color: '#f7b4ca' },
         { name: 'square', path: 'M18 18H82V82H18Z', color: '#f8d677' },
-        { name: 'triangle', path: 'M18 82H82L18 30Z', color: '#a9d894' },
+        { name: 'flower', path: 'M50 18C61 4 79 12 76 29C94 28 99 48 84 58C96 73 80 89 64 80C57 97 36 96 31 79C14 88 2 70 14 56C0 44 8 25 26 28C24 11 42 5 50 18Z', color: '#d58df1' },
         { name: 'rectangle', path: 'M14 29H86V71H14Z', color: '#f4b784' },
         { name: 'oval', path: 'M18 84V31A62 38 0 0 1 82 84Z', color: '#bcb2f5' },
         { name: 'heart', path: 'M17 82V43C17 15 57 10 73 37C83 53 64 68 50 82Z', color: '#f4a5b8' },
@@ -4430,16 +4443,31 @@ const appVersion = '20261002-709';
         diamondMissionBatSequence = 0;
         diamondMissionDecoyIndex = 0;
         diamondMissionRevealStarted = false;
+        diamondMissionAssemblyActive = false;
+        diamondMissionAssemblyIndex = 0;
         diamondMissionCollectedPieces.clear();
         diamondMissionBatLayer?.replaceChildren();
         diamondMissionGame?.querySelectorAll('.diamond-mission-flying-piece').forEach((piece) => {
             piece.getAnimations().forEach((animation) => animation.cancel());
             piece.remove();
         });
-        diamondMissionStorageSlots.forEach((slot) => slot.classList.remove('is-filled'));
+        if (diamondMissionCartProgress) diamondMissionCartProgress.textContent = '0/4';
+        diamondMissionCart?.setAttribute('aria-label', 'Collection cart: 0 of 4 diamond pieces');
+        diamondMissionCollectionPanel?.setAttribute('aria-label', '0 of 4 diamond pieces collected');
+        diamondMissionCollectionPieces.forEach((piece) => piece.classList.remove('is-collected', 'is-latest'));
+        diamondMissionStorageSlots.forEach((slot) => slot.classList.remove('is-filled', 'is-active'));
         diamondMissionStorage?.classList.remove('is-complete');
-        diamondMissionStorage?.setAttribute('aria-label', 'Storage board with four empty pieces of a diamond');
-        diamondMissionGame?.classList.remove('is-revealing');
+        if (diamondMissionStorage) {
+            diamondMissionStorage.setAttribute('hidden', '');
+            diamondMissionStorage.setAttribute('aria-label', 'Assembly board with four empty diamond slots');
+        }
+        if (diamondMissionAssemblyChoices) diamondMissionAssemblyChoices.hidden = true;
+        diamondMissionAssemblyButtons.forEach((button) => {
+            button.disabled = false;
+            button.classList.remove('is-placed', 'is-wrong');
+            button.style.removeProperty('order');
+        });
+        diamondMissionGame?.classList.remove('is-revealing', 'is-assembling');
         if (diamondMissionReveal) {
             diamondMissionReveal.hidden = true;
             diamondMissionReveal.classList.remove('is-transforming');
@@ -4468,6 +4496,9 @@ const appVersion = '20261002-709';
     const startDiamondMissionReveal = (session) => {
         if (!diamondMissionReveal || !diamondMissionGame || diamondMissionRevealStarted) return;
         diamondMissionRevealStarted = true;
+        diamondMissionAssemblyActive = false;
+        diamondMissionStorageSlots.forEach((slot) => slot.classList.remove('is-active'));
+        if (diamondMissionAssemblyChoices) diamondMissionAssemblyChoices.hidden = true;
         diamondMissionTimers.push(window.setTimeout(() => {
             if (session !== diamondMissionSession || diamondMissionPage?.hidden) return;
             const gameRect = diamondMissionGame.getBoundingClientRect();
@@ -4529,6 +4560,134 @@ const appVersion = '20261002-709';
         }, 550));
     };
 
+    const updateDiamondMissionCart = (latestPieceIndex = -1) => {
+        const collectedCount = diamondMissionCollectedPieces.size;
+        if (diamondMissionCartProgress) diamondMissionCartProgress.textContent = `${collectedCount}/4`;
+        diamondMissionCart?.setAttribute('aria-label', `Collection cart: ${collectedCount} of 4 diamond pieces`);
+        diamondMissionCollectionPanel?.setAttribute('aria-label', `${collectedCount} of 4 diamond pieces collected`);
+        diamondMissionCollectionPieces.forEach((piece, index) => {
+            piece.classList.toggle('is-collected', diamondMissionCollectedPieces.has(index));
+            piece.classList.remove('is-latest');
+            if (index === latestPieceIndex) {
+                piece.getBoundingClientRect();
+                piece.classList.add('is-latest');
+            }
+        });
+    };
+
+    const syncDiamondMissionAssemblySlot = () => {
+        diamondMissionStorageSlots.forEach((slot, index) => {
+            slot.classList.toggle('is-active', diamondMissionAssemblyActive && index === diamondMissionAssemblyIndex);
+        });
+        diamondMissionStorage?.setAttribute(
+            'aria-label',
+            diamondMissionAssemblyIndex >= diamondMissionStorageSlots.length
+                ? 'Completed diamond on the assembly board'
+                : `Assembly board: place diamond piece ${diamondMissionAssemblyIndex + 1} of 4`,
+        );
+    };
+
+    const startDiamondMissionAssembly = (session) => {
+        if (session !== diamondMissionSession
+            || diamondMissionPage?.hidden
+            || diamondMissionAssemblyActive
+            || diamondMissionCollectedPieces.size < 4) return;
+        diamondMissionAssemblyActive = true;
+        diamondMissionAssemblyIndex = 0;
+        stopDiamondMissionBatsAudio();
+        if (diamondMissionBatInterval !== null) window.clearTimeout(diamondMissionBatInterval);
+        diamondMissionBatInterval = null;
+        if (diamondMissionPauseButton) diamondMissionPauseButton.hidden = true;
+        diamondMissionBatLayer?.querySelectorAll('.diamond-mission-bat').forEach((bat) => {
+            bat.classList.add('is-caught');
+            window.setTimeout(() => bat.remove(), 350);
+        });
+
+        diamondMissionTimers.push(window.setTimeout(() => {
+            if (session !== diamondMissionSession || diamondMissionPage?.hidden) return;
+            diamondMissionStorageSlots.forEach((slot) => slot.classList.remove('is-filled', 'is-active'));
+            diamondMissionStorage?.classList.remove('is-complete');
+            if (diamondMissionStorage) diamondMissionStorage.removeAttribute('hidden');
+            if (diamondMissionAssemblyChoices) diamondMissionAssemblyChoices.hidden = false;
+            const choiceOrder = shuffleValues([0, 1, 2, 3]);
+            diamondMissionAssemblyButtons.forEach((button, index) => {
+                button.disabled = false;
+                button.classList.remove('is-placed', 'is-wrong');
+                button.style.order = String(choiceOrder[index]);
+            });
+            diamondMissionGame?.classList.add('is-assembling');
+            diamondMissionStorage?.getBoundingClientRect();
+            syncDiamondMissionAssemblySlot();
+            playUiClickSound('boardSuccess');
+        }, 520));
+    };
+
+    const placeDiamondMissionAssemblyPiece = (button) => {
+        if (!diamondMissionAssemblyActive || !diamondMissionGame || button.disabled) return;
+        const choiceIndex = Number(button.dataset.diamondChoice);
+        if (choiceIndex !== diamondMissionAssemblyIndex) {
+            button.classList.remove('is-wrong');
+            button.getBoundingClientRect();
+            button.classList.add('is-wrong');
+            button.addEventListener('animationend', () => button.classList.remove('is-wrong'), { once: true });
+            playDiamondMissionWrongShapeAudio();
+            return;
+        }
+
+        const slot = diamondMissionStorageSlots[choiceIndex];
+        const sourceSvg = button.querySelector('svg');
+        if (!slot || !sourceSvg) return;
+        const gameRect = diamondMissionGame.getBoundingClientRect();
+        const sourceRect = sourceSvg.getBoundingClientRect();
+        const slotRect = slot.getBoundingClientRect();
+        const flyingPiece = sourceSvg.cloneNode(true);
+        button.disabled = true;
+        button.classList.remove('is-wrong');
+        button.classList.add('is-placed');
+        playDiamondMissionCorrectShapeAudio();
+
+        flyingPiece.setAttribute('class', 'diamond-mission-flying-piece is-assembly-snap');
+        flyingPiece.style.left = `${sourceRect.left - gameRect.left}px`;
+        flyingPiece.style.top = `${sourceRect.top - gameRect.top}px`;
+        flyingPiece.style.width = `${sourceRect.width}px`;
+        flyingPiece.style.height = `${sourceRect.height}px`;
+        diamondMissionGame.append(flyingPiece);
+
+        const endX = slotRect.left + slotRect.width / 2 - sourceRect.left - sourceRect.width / 2;
+        const endY = slotRect.top + slotRect.height / 2 - sourceRect.top - sourceRect.height / 2;
+        const scaleX = slotRect.width / Math.max(1, sourceRect.width);
+        const scaleY = slotRect.height / Math.max(1, sourceRect.height);
+        const snap = flyingPiece.animate([
+            { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+            { transform: `translate(${endX}px, ${endY}px) scale(${scaleX}, ${scaleY})`, opacity: 1 },
+        ], {
+            duration: 620,
+            easing: 'cubic-bezier(0.2, 0.82, 0.24, 1.08)',
+            fill: 'forwards',
+        });
+        snap.onfinish = () => {
+            flyingPiece.remove();
+            if (!diamondMissionAssemblyActive || diamondMissionPage?.hidden) return;
+            slot.classList.remove('is-active');
+            slot.classList.add('is-filled');
+            diamondMissionAssemblyIndex += 1;
+            syncDiamondMissionAssemblySlot();
+            if (diamondMissionAssemblyIndex < diamondMissionStorageSlots.length) return;
+            diamondMissionStorage?.classList.add('is-complete');
+            diamondMissionAssemblyActive = false;
+            if (diamondMissionAssemblyChoices) diamondMissionAssemblyChoices.hidden = true;
+            const session = diamondMissionSession;
+            diamondMissionTimers.push(window.setTimeout(
+                () => startDiamondMissionReveal(session),
+                650,
+            ));
+        };
+    };
+
+    diamondMissionAssemblyButtons.forEach((button) => {
+        button.addEventListener('click', () => placeDiamondMissionAssemblyPiece(button));
+    });
+
     const releaseDiamondBatPiece = (piece, slotIndex, session) => {
         if (!diamondMissionGame) return;
         const gameRect = diamondMissionGame.getBoundingClientRect();
@@ -4542,21 +4701,18 @@ const appVersion = '20261002-709';
         diamondMissionGame.append(flyingPiece);
         piece.style.visibility = 'hidden';
 
-        const slotRect = slotIndex >= 0 ? diamondMissionStorageSlots[slotIndex]?.getBoundingClientRect() : null;
-        const endX = slotRect
-            ? slotRect.left + slotRect.width / 2 - pieceRect.left - pieceRect.width / 2
+        const cartRect = slotIndex >= 0 ? diamondMissionCart?.getBoundingClientRect() : null;
+        const endX = cartRect
+            ? cartRect.left + cartRect.width * 0.5 - pieceRect.left - pieceRect.width / 2
             : (Math.random() - 0.5) * 90;
-        const endY = slotRect
-            ? slotRect.top + slotRect.height / 2 - pieceRect.top - pieceRect.height / 2
+        const endY = cartRect
+            ? cartRect.top + cartRect.height * 0.32 - pieceRect.top - pieceRect.height / 2
             : gameRect.bottom - pieceRect.top + pieceRect.height + 20;
-        const slotScale = slotRect
-            ? Math.min(slotRect.width / (pieceRect.width * 0.84), slotRect.height / (pieceRect.height * 0.6))
-            : 1;
-        const frames = slotRect
+        const frames = cartRect
             ? [
                 { transform: 'translate(0, 0) scale(1)', opacity: 1 },
-                { transform: `translate(${endX}px, ${endY}px) scale(${slotScale})`, opacity: 1, offset: 0.82 },
-                { transform: `translate(${endX}px, ${endY}px) scale(${slotScale})`, opacity: 0 },
+                { transform: `translate(${endX}px, ${endY}px) scale(0.58)`, opacity: 1, offset: 0.84 },
+                { transform: `translate(${endX}px, ${endY}px) scale(0.42)`, opacity: 0 },
             ]
             : [
                 { transform: 'translate(0, 0) rotate(0deg)', opacity: 1 },
@@ -4564,25 +4720,19 @@ const appVersion = '20261002-709';
                 { transform: `translate(${endX}px, ${endY}px) rotate(175deg)`, opacity: 0 },
             ];
         const flight = flyingPiece.animate(frames, {
-            duration: slotRect ? 650 : 720,
-            easing: slotRect ? 'cubic-bezier(0.22, 0.8, 0.24, 1)' : 'ease-in',
+            duration: cartRect ? 650 : 720,
+            easing: cartRect ? 'cubic-bezier(0.22, 0.8, 0.24, 1)' : 'ease-in',
             fill: 'forwards',
         });
         flight.onfinish = () => {
             flyingPiece.remove();
-            if (!slotRect || session !== diamondMissionSession || diamondMissionPage?.hidden) return;
-            diamondMissionStorageSlots[slotIndex]?.classList.add('is-filled');
-            if (diamondMissionCollectedPieces.size === 4 && diamondMissionStorageSlots.every((slot) => slot.classList.contains('is-filled'))) {
-                diamondMissionStorage?.classList.add('is-complete');
-                if (diamondMissionBatInterval !== null) window.clearInterval(diamondMissionBatInterval);
-                diamondMissionBatInterval = null;
-                diamondMissionBatLayer?.replaceChildren();
-                startDiamondMissionReveal(session);
-            }
+            if (!cartRect || session !== diamondMissionSession || diamondMissionPage?.hidden) return;
+            updateDiamondMissionCart(slotIndex);
+            if (diamondMissionCollectedPieces.size === 4) startDiamondMissionAssembly(session);
         };
     };
 
-    const sendDiamondBatAway = (bat) => {
+    const sendDiamondBatAway = (bat, playFlySound = true) => {
         if (!diamondMissionGame) return;
         const gameRect = diamondMissionGame.getBoundingClientRect();
         const batRect = bat.getBoundingClientRect();
@@ -4590,22 +4740,23 @@ const appVersion = '20261002-709';
         bat.style.animation = 'none';
         bat.style.left = `${batRect.left - gameRect.left}px`;
         bat.style.top = `${batRect.top - gameRect.top}px`;
+        bat.style.opacity = '1';
         bat.style.transform = 'none';
         bat.classList.add('is-exiting');
-        playDiamondMissionBatFlyAudio();
+        if (playFlySound) playDiamondMissionBatFlyAudio();
         const distance = fliesLeft
             ? -(batRect.right - gameRect.left + batRect.width)
             : gameRect.right - batRect.left + batRect.width;
         const exit = bat.animate([
             { transform: 'translateX(0)' },
             { transform: `translateX(${distance}px)` },
-        ], { duration: 480, easing: 'cubic-bezier(0.55, 0, 1, 0.55)', fill: 'forwards' });
+        ], { duration: 700, easing: 'cubic-bezier(0.42, 0, 0.78, 0.58)', fill: 'forwards' });
         exit.onfinish = () => bat.remove();
     };
 
-    const spawnDiamondMissionBat = (guaranteeDiamond = false, forceDecoy = false) => {
+    const spawnDiamondMissionBat = (guaranteeDiamond = false, forceDecoy = false, batchPosition = null) => {
         if (!diamondMissionBatLayer || diamondMissionPage?.hidden || !diamondMissionGame?.classList.contains('is-active') || diamondMissionCollectedPieces.size === 4) return;
-        if (diamondMissionBatLayer.childElementCount >= 5) return;
+        if (diamondMissionBatLayer.querySelectorAll('.diamond-mission-bat:not(.is-exiting)').length >= DIAMOND_BAT_BATCH_SIZE) return;
 
         const flyingPieces = new Set(Array.from(diamondMissionBatLayer.querySelectorAll('[data-diamond-slot]'), (bat) => Number(bat.dataset.diamondSlot)));
         const availablePieces = diamondBatDiamondPaths.map((_, index) => index).filter((index) => !diamondMissionCollectedPieces.has(index) && !flyingPieces.has(index));
@@ -4616,7 +4767,9 @@ const appVersion = '20261002-709';
         bat.type = 'button';
         bat.className = 'diamond-mission-bat';
         bat.setAttribute('aria-label', slotIndex >= 0 ? 'Catch a diamond piece' : `Bat carrying ${decoy.name === 'oval' ? 'an' : 'a'} ${decoy.name} piece`);
-        bat.style.setProperty('--bat-top', `${[10, 20, 30, 40, 50][diamondMissionBatSequence % 5]}%`);
+        bat.style.setProperty('--bat-top', `${batchPosition?.top ?? [10, 20, 30, 40, 50][diamondMissionBatSequence % 5]}%`);
+        bat.style.setProperty('--bat-left', `${batchPosition?.left ?? 50}%`);
+        bat.style.setProperty('--bat-enter-delay', `${batchPosition?.delay ?? 0}ms`);
         const baseFlightSpeed = diamondBatFlightSpeeds[diamondMissionBatSequence % diamondBatFlightSpeeds.length];
         const flightSpeed = slotIndex >= 0
             ? { name: `${baseFlightSpeed.name}-diamond`, duration: baseFlightSpeed.duration * 0.7 }
@@ -4676,12 +4829,11 @@ const appVersion = '20261002-709';
             sendDiamondBatAway(bat);
             if (slotIndex >= 0 && !diamondMissionCollectedPieces.has(slotIndex)) {
                 diamondMissionCollectedPieces.add(slotIndex);
-                diamondMissionStorage?.setAttribute('aria-label', `Storage board with ${diamondMissionCollectedPieces.size} of 4 diamond pieces found`);
                 if (diamondMissionCollectedPieces.size < 4) playUiClickSound('chime');
                 if (diamondMissionCollectedPieces.size === 4) {
                     stopDiamondMissionBatsAudio();
                     if (diamondMissionPauseButton) diamondMissionPauseButton.hidden = true;
-                    if (diamondMissionBatInterval !== null) window.clearInterval(diamondMissionBatInterval);
+                    if (diamondMissionBatInterval !== null) window.clearTimeout(diamondMissionBatInterval);
                     diamondMissionBatInterval = null;
                     diamondMissionBatLayer.querySelectorAll('.diamond-mission-bat').forEach((flyingBat) => {
                         if (flyingBat === bat) return;
@@ -4691,18 +4843,70 @@ const appVersion = '20261002-709';
                 }
             }
         });
-        bat.addEventListener('animationend', (event) => {
-            if (event.target === bat) bat.remove();
-        });
         diamondMissionBatLayer.append(bat);
+    };
+
+    const scheduleNextDiamondMissionBatBatch = (delay = DIAMOND_BAT_BATCH_GAP_MS) => {
+        if (diamondMissionBatInterval !== null) window.clearTimeout(diamondMissionBatInterval);
+        diamondMissionBatInterval = window.setTimeout(() => {
+            diamondMissionBatInterval = null;
+            spawnDiamondMissionBatBatch();
+        }, delay);
+    };
+
+    const exitDiamondMissionBatBatch = () => {
+        diamondMissionBatInterval = null;
+        if (diamondMissionPaused
+            || diamondMissionGameOverStarted
+            || diamondMissionCollectedPieces.size >= 4
+            || diamondMissionPage?.hidden
+            || !diamondMissionGame?.classList.contains('is-active')) return;
+        const bats = Array.from(diamondMissionBatLayer?.querySelectorAll('.diamond-mission-bat:not(.is-exiting)') || []);
+        bats.forEach((bat, index) => sendDiamondBatAway(bat, index === 0));
+        scheduleNextDiamondMissionBatBatch();
+    };
+
+    const spawnDiamondMissionBatBatch = () => {
+        if (!diamondMissionBatLayer
+            || diamondMissionPaused
+            || diamondMissionGameOverStarted
+            || diamondMissionCollectedPieces.size >= 4
+            || diamondMissionPage?.hidden
+            || !diamondMissionGame?.classList.contains('is-active')) return;
+
+        diamondMissionBatLayer.querySelectorAll('.diamond-mission-bat:not(.is-exiting)').forEach((bat) => bat.remove());
+        const positions = shuffleValues([
+            { left: 12, top: 12 },
+            { left: 31, top: 32 },
+            { left: 50, top: 15 },
+            { left: 69, top: 38 },
+            { left: 88, top: 20 },
+        ]);
+        const batchHasDiamond = Math.random() < 0.68;
+        const diamondCarrierIndex = batchHasDiamond
+            ? Math.floor(Math.random() * DIAMOND_BAT_BATCH_SIZE)
+            : -1;
+        for (let index = 0; index < DIAMOND_BAT_BATCH_SIZE; index += 1) {
+            const carriesDiamond = index === diamondCarrierIndex;
+            spawnDiamondMissionBat(
+                carriesDiamond,
+                !carriesDiamond,
+                { ...positions[index], delay: index * 65 },
+            );
+        }
+        playDiamondMissionBatFlyAudio();
+        if (diamondMissionBatInterval !== null) window.clearTimeout(diamondMissionBatInterval);
+        diamondMissionBatInterval = window.setTimeout(
+            exitDiamondMissionBatBatch,
+            DIAMOND_BAT_ENTER_MS + ((DIAMOND_BAT_BATCH_SIZE - 1) * 65) + DIAMOND_BAT_STAY_MS,
+        );
     };
 
     const startDiamondMissionBats = () => {
         resetDiamondMissionBats();
         if (diamondMissionPauseButton) diamondMissionPauseButton.hidden = false;
         startDiamondMissionBatsAudio();
-        spawnDiamondMissionBat(false, true);
-        diamondMissionBatInterval = window.setInterval(spawnDiamondMissionBat, 1450);
+        spawnDiamondMissionBatBatch();
     };
 
     const setDiamondMissionPaused = (paused) => {
@@ -4740,7 +4944,11 @@ const appVersion = '20261002-709';
             if (!bat.classList.contains('is-caught') && !bat.classList.contains('is-exiting')) bat.disabled = false;
         });
         if (diamondMissionBatInterval === null && diamondMissionCollectedPieces.size < 4) {
-            diamondMissionBatInterval = window.setInterval(spawnDiamondMissionBat, 1450);
+            if (diamondMissionBatLayer?.querySelector('.diamond-mission-bat:not(.is-exiting)')) {
+                diamondMissionBatInterval = window.setTimeout(exitDiamondMissionBatBatch, DIAMOND_BAT_STAY_MS);
+            } else {
+                spawnDiamondMissionBatBatch();
+            }
         }
     };
 
@@ -6540,6 +6748,7 @@ const appVersion = '20261002-709';
 
     const handleHeartBalloonHit = ({ balloon, balloonRect, gameRect }) => {
         if (heartGameEnded || heartBalloonRoundTransitioning) return;
+        playNumberChoiceAudio(balloon.dataset.balloonNumber);
         const kind = balloon.dataset.balloonKind || (balloon.classList.contains('heart-floating-balloon') ? 'heart' : 'shape');
         const feedbackX = balloonRect.left - gameRect.left + (balloonRect.width / 2);
         const feedbackY = balloonRect.top - gameRect.top + (balloonRect.height * 0.3);
@@ -13281,6 +13490,8 @@ const appVersion = '20261002-709';
     const ovalMissionMessagePanel = ovalMissionGuide?.querySelector('.oval-mission-message-panel') || null;
     const ovalMissionMessageText = ovalMissionGuide?.querySelector('.oval-mission-message-text') || null;
     const ovalMissionStartButton = ovalMissionGuide?.querySelector('.oval-mission-start-button') || null;
+    const ovalTargetPicker = ovalBoardGamePage?.querySelector('.oval-target-picker') || null;
+    const ovalTargetButtons = Array.from(ovalTargetPicker?.querySelectorAll('[data-oval-target]') || []);
     const ovalMatchProgressValue = ovalBoardGamePage?.querySelector('.oval-match-progress-value') || null;
     const ovalMatchTimerPanel = ovalBoardGamePage?.querySelector('.oval-match-timer-panel') || null;
     const ovalMatchTimerValue = ovalMatchTimerPanel?.querySelector('.oval-match-timer-value') || null;
@@ -13327,11 +13538,37 @@ const appVersion = '20261002-709';
         side: 'center',
         challenge: true,
     }));
-    const ovalHalfPieces = [...ovalPairPieces, ...ovalChallengePieces];
-    for (let index = ovalHalfPieces.length - 1; index > 0; index -= 1) {
-        const swapIndex = Math.floor(Math.random() * (index + 1));
-        [ovalHalfPieces[index], ovalHalfPieces[swapIndex]] = [ovalHalfPieces[swapIndex], ovalHalfPieces[index]];
-    }
+    const ovalTargetConfigurations = new Map([
+        [5, { pairCount: 2, challenges: ['bomb'] }],
+        [10, { pairCount: 4, challenges: ['bomb', 'freeze'] }],
+        [15, { pairCount: 5, challenges: ['bomb', 'bomb', 'bomb', 'freeze', 'freeze'] }],
+    ]);
+    const shuffleOvalPieces = (pieces) => {
+        const shuffled = [...pieces];
+        for (let index = shuffled.length - 1; index > 0; index -= 1) {
+            const swapIndex = Math.floor(Math.random() * (index + 1));
+            [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+        }
+        return shuffled;
+    };
+    const buildOvalTargetPieces = (cardCount) => {
+        const configuration = ovalTargetConfigurations.get(cardCount) || ovalTargetConfigurations.get(15);
+        const pairPieces = ovalPairPieces.filter((piece) => Number(piece.number) <= configuration.pairCount);
+        const challengePools = {
+            bomb: ovalChallengePieces.filter((piece) => piece.challengeType === 'bomb'),
+            freeze: ovalChallengePieces.filter((piece) => piece.challengeType === 'freeze'),
+        };
+        const usedChallengeCounts = { bomb: 0, freeze: 0 };
+        const challenges = configuration.challenges.map((challengeType) => {
+            const challenge = challengePools[challengeType][usedChallengeCounts[challengeType]];
+            usedChallengeCounts[challengeType] += 1;
+            return challenge;
+        });
+        return shuffleOvalPieces([...pairPieces, ...challenges]);
+    };
+    let ovalTargetCardCount = 15;
+    let ovalTargetPairCount = 5;
+    let ovalHalfPieces = buildOvalTargetPieces(ovalTargetCardCount);
     let ovalOpenCards = [];
     let ovalMatchResolving = false;
     let ovalRewardHideTimer = null;
@@ -13360,6 +13597,7 @@ const appVersion = '20261002-709';
     let ovalGameOverActive = false;
     const ovalMissionAudioSource = 'assets/Audios/Voice over/oval mission.mp3';
     const ovalReadyAudioSource = 'assets/Audios/Voice over/Handa ka na ba.mp3';
+    const getActiveOvalBoardCards = () => ovalBoardCards.filter((card) => !card.hidden);
 
     const clearOvalMissionTimers = () => {
         ovalMissionTimers.forEach((timerId) => window.clearTimeout(timerId));
@@ -13367,7 +13605,7 @@ const appVersion = '20261002-709';
     };
 
     const updateOvalGameHud = () => {
-        if (ovalMatchProgressValue) ovalMatchProgressValue.textContent = `${ovalMatchedObjects.length}/5`;
+        if (ovalMatchProgressValue) ovalMatchProgressValue.textContent = `${ovalMatchedObjects.length}/${ovalTargetPairCount}`;
         if (ovalMatchTimerValue) ovalMatchTimerValue.textContent = `${ovalTimeRemaining}s`;
         ovalMatchTimerPanel?.classList.toggle('is-time-up', ovalTimeRemaining <= 0);
     };
@@ -13576,7 +13814,7 @@ const appVersion = '20261002-709';
 
     const showOvalPairHint = () => {
         clearOvalPairHint();
-        const availableCards = ovalBoardCards.filter((card) => (
+        const availableCards = getActiveOvalBoardCards().filter((card) => (
             card.dataset.ovalChallenge !== 'true'
             && !card.classList.contains('is-matched')
             && !card.classList.contains('is-clearing')
@@ -13628,7 +13866,7 @@ const appVersion = '20261002-709';
     };
 
     const triggerOvalFreeze = (card) => {
-        const candidates = ovalBoardCards
+        const candidates = getActiveOvalBoardCards()
             .filter((candidate) => (
                 candidate !== card
                 && candidate.dataset.ovalChallenge !== 'true'
@@ -13799,6 +14037,7 @@ const appVersion = '20261002-709';
             ovalMissionStartButton.hidden = true;
             ovalMissionStartButton.classList.remove('is-visible');
         }
+        if (ovalTargetPicker) ovalTargetPicker.hidden = true;
         ovalBoardGamePage?.classList.remove('is-mission-intro');
     };
 
@@ -13808,6 +14047,7 @@ const appVersion = '20261002-709';
         const session = ovalMissionSession;
         resetOvalBoardGame();
         ovalGameStarted = false;
+        if (ovalTargetPicker) ovalTargetPicker.hidden = true;
         ovalBoardGamePage.classList.add('is-mission-intro');
         ovalBoardStage?.setAttribute('aria-hidden', 'true');
         ovalBoardCards.forEach((card) => {
@@ -13887,21 +14127,22 @@ const appVersion = '20261002-709';
             ovalGameCelebration.classList.remove('is-active');
         }
 
+        ovalHalfPieces = buildOvalTargetPieces(ovalTargetCardCount);
         const resetPieces = [...ovalHalfPieces];
-        for (let index = resetPieces.length - 1; index > 0; index -= 1) {
-            const swapIndex = Math.floor(Math.random() * (index + 1));
-            [resetPieces[index], resetPieces[swapIndex]] = [resetPieces[swapIndex], resetPieces[index]];
-        }
+        ovalBoardStage?.setAttribute('aria-label', `${ovalTargetCardCount} oval board pieces`);
+        ovalBoardStage?.setAttribute('data-oval-target-size', String(ovalTargetCardCount));
         ovalBoardCards.forEach((card, index) => {
+            const isActiveCard = index < ovalTargetCardCount;
+            card.hidden = !isActiveCard;
             card.classList.remove('is-flipped', 'is-match-burst', 'is-pair-correct', 'is-pair-incorrect', 'is-clearing', 'is-matched', 'is-bomb-triggered', 'is-frozen', 'is-pair-hinting');
-            card.disabled = false;
+            card.disabled = !isActiveCard;
             card.setAttribute('aria-pressed', 'false');
-            applyOvalHalfPiece(card, resetPieces[index]);
+            if (isActiveCard) applyOvalHalfPiece(card, resetPieces[index]);
         });
     };
 
     const randomizeRemainingOvalObjects = () => {
-        const remainingCards = ovalBoardCards.filter((card) => !card.classList.contains('is-matched'));
+        const remainingCards = getActiveOvalBoardCards().filter((card) => !card.classList.contains('is-matched'));
         if (remainingCards.length <= 2) return;
 
         const originalChallengeTypes = remainingCards.map((card) => card.dataset.ovalChallengeType || '');
@@ -13935,7 +14176,7 @@ const appVersion = '20261002-709';
     };
 
     const previewRemainingOvalCards = (duration, onComplete) => {
-        const previewCards = ovalBoardCards.filter((card) => !card.classList.contains('is-matched'));
+        const previewCards = getActiveOvalBoardCards().filter((card) => !card.classList.contains('is-matched'));
         if (duration <= 0 || previewCards.length === 0) {
             onComplete?.();
             return;
@@ -13959,11 +14200,12 @@ const appVersion = '20261002-709';
     };
 
     const showOvalGameCelebration = () => {
-        if (!ovalGameCelebration || !ovalCompletedObjects || ovalMatchedObjects.length !== 5) return;
+        if (!ovalGameCelebration || !ovalCompletedObjects || ovalMatchedObjects.length !== ovalTargetPairCount) return;
         ovalGameStarted = false;
         stopOvalGameTimer();
         stopOvalTickingAudio();
         ovalBoardGamePage?.classList.add('is-celebrating');
+        ovalGameCelebration.dataset.ovalPairCount = String(ovalTargetPairCount);
         ovalCompletedObjects.replaceChildren();
         ovalMatchedObjects.forEach((piece, index) => {
             const object = document.createElement('img');
@@ -14107,30 +14349,25 @@ const appVersion = '20261002-709';
                         matchedCard.disabled = true;
                         matchedCard.setAttribute('aria-pressed', 'true');
                     });
-                    if (ovalMatchedObjects.length === 5) {
+                    if (ovalMatchedObjects.length === ovalTargetPairCount) {
                         window.setTimeout(showOvalGameCelebration, 260);
                     } else {
                         randomizeRemainingOvalObjects();
-                        const previewDuration = {
-                            1: 500,
-                            2: 500,
-                            3: 500,
-                        }[ovalMatchedObjects.length] || 0;
                         ovalMissionTimers.push(window.setTimeout(() => {
-                            previewRemainingOvalCards(previewDuration, () => {
+                            previewRemainingOvalCards(3000, () => {
                                 ovalTimerPausedForMatch = false;
                                 if (ovalGameStarted && !ovalGameOverActive && ovalTimeRemaining > 0) {
                                     runOvalGameTimer();
                                     syncOvalTickingAudio();
                                 }
                                 ovalMatchResolving = false;
-                                ovalBoardCards.forEach((card) => {
+                                getActiveOvalBoardCards().forEach((card) => {
                                     if (!card.classList.contains('is-matched')) card.disabled = false;
                                 });
                             });
                         }, 520));
                     }
-                    if (ovalMatchedObjects.length === 5) {
+                    if (ovalMatchedObjects.length === ovalTargetPairCount) {
                         window.setTimeout(() => {
                             ovalTimerPausedForMatch = false;
                             ovalMatchResolving = false;
@@ -14158,6 +14395,35 @@ const appVersion = '20261002-709';
         });
     });
 
+    const startOvalTargetRound = (cardCount) => {
+        const configuration = ovalTargetConfigurations.get(cardCount);
+        if (!configuration) return;
+        ovalTargetCardCount = cardCount;
+        ovalTargetPairCount = configuration.pairCount;
+        if (ovalTargetPicker) ovalTargetPicker.hidden = true;
+        resetOvalBoardGame();
+        ovalGameStarted = false;
+        ovalMatchResolving = true;
+        ovalBoardGamePage?.classList.remove('is-mission-intro');
+        ovalBoardStage?.setAttribute('aria-hidden', 'false');
+        getActiveOvalBoardCards().forEach((card) => { card.disabled = true; });
+        previewRemainingOvalCards(3000, () => {
+            ovalGameStarted = true;
+            ovalMatchResolving = false;
+            getActiveOvalBoardCards().forEach((card) => {
+                if (!card.classList.contains('is-matched')) card.disabled = false;
+            });
+            startOvalGameTimer();
+        });
+    };
+
+    ovalTargetButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            playUiClickSound('start');
+            startOvalTargetRound(Number(button.dataset.ovalTarget));
+        });
+    });
+
     ovalMissionStartButton?.addEventListener('click', () => {
         playUiClickSound('start');
         clearOvalMissionTimers();
@@ -14168,19 +14434,15 @@ const appVersion = '20261002-709';
         ovalMissionStartButton.hidden = true;
         ovalMissionGuide?.classList.remove('is-visible');
         ovalMissionGuide?.setAttribute('aria-hidden', 'true');
-        ovalBoardGamePage?.classList.remove('is-mission-intro');
-        ovalBoardStage?.setAttribute('aria-hidden', 'false');
         ovalMissionTimers.push(window.setTimeout(() => {
             if (ovalMissionGuide) ovalMissionGuide.hidden = true;
         }, 520));
-        previewRemainingOvalCards(3000, () => {
-            ovalGameStarted = true;
-            ovalMatchResolving = false;
-            ovalBoardCards.forEach((card) => {
-                if (!card.classList.contains('is-matched')) card.disabled = false;
-            });
-            startOvalGameTimer();
-        });
+        if (ovalTargetPicker) {
+            ovalTargetPicker.hidden = false;
+            ovalTargetButtons[0]?.focus({ preventScroll: true });
+        } else {
+            startOvalTargetRound(15);
+        }
     });
 
     ovalGameOverRetryButton?.addEventListener('click', () => {
@@ -14240,6 +14502,88 @@ const appVersion = '20261002-709';
     if (ovalBoardGamePage && !ovalBoardGamePage.hidden) {
         startOvalMissionIntro();
     }
+
+    const gameIslandShapeByPageId = Object.freeze({
+        'learnscape-shape-circle-page': 'circle',
+        'learnscape-circle-illustration-page': 'circle',
+        'learnscape-circle-camera-page': 'circle',
+        'learnscape-shape-square-page': 'square',
+        'learnscape-square-camera-page': 'square',
+        'learnscape-shape-area-3-page': 'triangle',
+        'learnscape-triangle-game-page': 'triangle',
+        'learnscape-triangle-camera-page': 'triangle',
+        'learnscape-shape-area-4-page': 'rectangle',
+        'learnscape-rectangle-delivery-page': 'rectangle',
+        'learnscape-rectangle-bakery-page': 'rectangle',
+        'learnscape-rectangle-bookstore-page': 'rectangle',
+        'learnscape-rectangle-toy-shop-page': 'rectangle',
+        'learnscape-rectangle-bakery1-page': 'rectangle',
+        'learnscape-rectangle-bookstore1-page': 'rectangle',
+        'learnscape-rectangle-toy-shop1-page': 'rectangle',
+        'learnscape-rectangle-camera-page': 'rectangle',
+        'learnscape-shape-area-5-page': 'oval',
+        'learnscape-oval-board-game-page': 'oval',
+        'learnscape-oval-camera-page': 'oval',
+        'learnscape-shape-area-6-page': 'heart',
+        'learnscape-heart-camera-page': 'heart',
+        'learnscape-shape-area-7-page': 'star',
+        'learnscape-star-camera-page': 'star',
+        'learnscape-shape-area-8-page': 'diamond',
+        'learnscape-diamond-camera-page': 'diamond',
+    });
+
+    const getBackButtonIslandShape = (button) => {
+        const page = button.closest('section[id]');
+        return page?.dataset.cameraShape || gameIslandShapeByPageId[page?.id] || '';
+    };
+
+    const gameIslandShapeLabels = Object.freeze({
+        circle: 'Circle',
+        square: 'Square',
+        triangle: 'Triangle',
+        rectangle: 'Rectangle',
+        oval: 'Oval',
+        heart: 'Heart',
+        star: 'Star',
+        diamond: 'Diamond',
+    });
+
+    appBackButtons.forEach((button) => {
+        const buttonIslandShape = getBackButtonIslandShape(button);
+        if (buttonIslandShape) {
+            button.setAttribute('aria-label', `Return to ${gameIslandShapeLabels[buttonIslandShape]} Island`);
+        }
+        button.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            if (isNavigating) return;
+
+            const islandShape = buttonIslandShape;
+            if (islandShape) {
+                const islandTarget = `game3?island=${encodeURIComponent(islandShape)}`;
+                const appNavigate = getAppNavigator();
+                if (typeof appNavigate === 'function') {
+                    appNavigate(islandTarget);
+                    return;
+                }
+                navigateApp(islandTarget);
+                return;
+            }
+
+            if (window.history.length > 1) {
+                window.history.back();
+                return;
+            }
+
+            const fallbackTarget = button.getAttribute('data-route') || button.getAttribute('href');
+            const appNavigate = getAppNavigator();
+            if (fallbackTarget && typeof appNavigate === 'function') {
+                appNavigate(fallbackTarget);
+                return;
+            }
+            if (fallbackTarget) navigateApp(fallbackTarget);
+        }, true);
+    });
 
     loadingLinks.forEach((link) => {
         link.addEventListener('click', (event) => {
@@ -14350,7 +14694,20 @@ const appVersion = '20261002-709';
         window.addEventListener('resize', updateGame3IslandButtons);
         window.addEventListener('learnscape:routechange', (event) => {
             if (event.detail?.route !== 'game3') return;
-            window.requestAnimationFrame(() => window.requestAnimationFrame(updateGame3IslandButtons));
+            const requestedShape = String(event.detail?.params?.island || '').trim().toLowerCase();
+            const requestedCardIndex = [...game3IslandCards].findIndex(
+                (card) => card.dataset.islandShape === requestedShape,
+            );
+            window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+                if (requestedCardIndex >= 0 && game3IslandCarousel.clientWidth > 0) {
+                    game3IslandCarousel.scrollTo({
+                        left: requestedCardIndex * game3IslandCarousel.clientWidth,
+                        behavior: 'auto',
+                    });
+                    game3Page.dataset.game3Island = String(requestedCardIndex + 1);
+                }
+                updateGame3IslandButtons();
+            }));
         });
         updateGame3IslandButtons();
     }
