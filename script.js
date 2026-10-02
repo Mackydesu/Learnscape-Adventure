@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-const appVersion = '20261002-751';
+const appVersion = '20261002-759';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -1301,7 +1301,7 @@ const appVersion = '20261002-751';
     const heartAimTrail = heartShotField?.querySelector('.heart-aim-trail') || null;
     const heartAimTrailGlow = heartShotField?.querySelector('.heart-aim-trail-glow') || null;
     const heartFlyingArrow = heartShotField?.querySelector('.heart-flying-arrow') || null;
-    const heartFloatingBalloons = Array.from(heartCupidGame?.querySelectorAll('.heart-floating-balloon, .shape-floating-balloon, .powerup-floating-balloon') || []);
+    const heartFloatingBalloons = Array.from(heartCupidGame?.querySelectorAll('.heart-floating-balloon, .shape-floating-balloon') || []);
     const heartPointBalloons = heartFloatingBalloons.filter((balloon) => balloon.dataset.balloonKind === 'heart');
     const heartShapePenaltyBalloons = heartFloatingBalloons.filter((balloon) => balloon.dataset.balloonKind === 'shape' || balloon.classList.contains('shape-floating-balloon'));
     const heartShapeOriginalColors = new Map(heartShapePenaltyBalloons.map((balloon) => [balloon, {
@@ -1320,8 +1320,6 @@ const appVersion = '20261002-751';
     const heartGameTimerValue = heartCupidGame?.querySelector('.heart-game-timer-value') || null;
     const heartGamePauseButton = heartCupidGame?.querySelector('.heart-game-pause-button') || null;
     const heartGamePauseOverlay = heartCupidGame?.querySelector('.heart-game-pause-overlay') || null;
-    const heartFreezeStatus = heartCupidGame?.querySelector('.heart-freeze-status') || null;
-    const heartFreezeCountdown = heartCupidGame?.querySelector('.heart-freeze-countdown') || null;
     const heartGameResult = heartCupidGame?.querySelector('.heart-game-result') || null;
     const heartGameResultTitle = heartCupidGame?.querySelector('.heart-game-result-title') || null;
     const heartGameResultCopy = heartCupidGame?.querySelector('.heart-game-result-copy') || null;
@@ -1395,14 +1393,15 @@ const appVersion = '20261002-751';
     const HEART_RAINBOW_START_DELAY_MS = 1800;
     const HEART_RAINBOW_DRAW_MS = 2400;
     const HEART_RAINBOW_HOLD_MS = 450;
+    const HEART_SETS_PER_COLOR = 5;
     const HEART_COLOR_CHALLENGES = [
-        { key: 'red', label: 'RED', required: 3, color: '#ff435f', edge: '#9d1737' },
-        { key: 'orange', label: 'ORANGE', required: 5, color: '#ff8a32', edge: '#a94516' },
-        { key: 'yellow', label: 'YELLOW', required: 6, color: '#ffd83d', edge: '#a86d08' },
-        { key: 'green', label: 'GREEN', required: 7, color: '#55c95c', edge: '#247431' },
-        { key: 'blue', label: 'BLUE', required: 8, color: '#3f9cff', edge: '#205ca8' },
-        { key: 'indigo', label: 'INDIGO', required: 9, color: '#5556c9', edge: '#2d2e79' },
-        { key: 'violet', label: 'VIOLET', required: 10, color: '#a653e5', edge: '#65269b' },
+        { key: 'red', label: 'RED', required: HEART_SETS_PER_COLOR, color: '#ff435f', edge: '#9d1737' },
+        { key: 'orange', label: 'ORANGE', required: HEART_SETS_PER_COLOR, color: '#ff8a32', edge: '#a94516' },
+        { key: 'yellow', label: 'YELLOW', required: HEART_SETS_PER_COLOR, color: '#ffd83d', edge: '#a86d08' },
+        { key: 'green', label: 'GREEN', required: HEART_SETS_PER_COLOR, color: '#55c95c', edge: '#247431' },
+        { key: 'blue', label: 'BLUE', required: HEART_SETS_PER_COLOR, color: '#3f9cff', edge: '#205ca8' },
+        { key: 'indigo', label: 'INDIGO', required: HEART_SETS_PER_COLOR, color: '#5556c9', edge: '#2d2e79' },
+        { key: 'violet', label: 'VIOLET', required: HEART_SETS_PER_COLOR, color: '#a653e5', edge: '#65269b' },
     ];
     const HEART_CELEBRATION_AUDIO_SOURCES = [
         'assets/Audios/Sound effects/completed.mp3',
@@ -1508,10 +1507,6 @@ const appVersion = '20261002-751';
     let heartGameClockTickingAudio = null;
     let heartGameTimesUpAudio = null;
     let heartGameLoseAudio = null;
-    let heartFreezeEndsAt = 0;
-    let heartFreezePausedRemainingMs = 0;
-    let heartFreezeTimer = null;
-    let heartFreezeCountdownTimer = null;
     const heartBalloonRespawnTimers = new Map();
     let heartBalloonRoundTimers = [];
     let heartBalloonRoundBalloons = [];
@@ -5963,9 +5958,7 @@ const appVersion = '20261002-751';
         });
     };
 
-    const getHeartBalloonPlaybackRate = () => (
-        heartGameSpeedRate * (heartFreezeEndsAt > performance.now() ? 0.24 : 1)
-    );
+    const getHeartBalloonPlaybackRate = () => heartGameSpeedRate;
 
     const formatHeartGameTime = (milliseconds) => {
         return String(Math.max(0, Math.ceil(milliseconds / 1000)));
@@ -6088,41 +6081,8 @@ const appVersion = '20261002-751';
         heartGameClockFrame = window.requestAnimationFrame(tick);
     };
 
-    const clearHeartFreeze = () => {
-        if (heartFreezeTimer !== null) window.clearTimeout(heartFreezeTimer);
-        if (heartFreezeCountdownTimer !== null) window.clearInterval(heartFreezeCountdownTimer);
-        heartFreezeTimer = null;
-        heartFreezeCountdownTimer = null;
-        heartFreezeEndsAt = 0;
-        heartFreezePausedRemainingMs = 0;
-        if (heartFreezeStatus) heartFreezeStatus.hidden = true;
-        heartCupidGame?.classList.remove('is-freeze-active');
-        setHeartBalloonPlaybackRate(heartGameSpeedRate);
-    };
-
-    const runHeartFreezeCountdown = (durationMs) => {
-        heartFreezeEndsAt = performance.now() + durationMs;
-        heartCupidGame?.classList.add('is-freeze-active');
-        if (heartFreezeStatus) heartFreezeStatus.hidden = false;
-        setHeartBalloonPlaybackRate(heartGameSpeedRate * 0.24);
-
-        const updateCountdown = () => {
-            const remaining = Math.max(0, heartFreezeEndsAt - performance.now());
-            if (heartFreezeCountdown) heartFreezeCountdown.textContent = (remaining / 1000).toFixed(1);
-        };
-        updateCountdown();
-        heartFreezeCountdownTimer = window.setInterval(updateCountdown, 100);
-        heartFreezeTimer = window.setTimeout(clearHeartFreeze, durationMs);
-    };
-
-    const activateHeartFreeze = () => {
-        clearHeartFreeze();
-        runHeartFreezeCountdown(5000);
-    };
-
     const resetHeartGamePauseUi = () => {
         heartGamePaused = false;
-        heartFreezePausedRemainingMs = 0;
         heartCupidGame?.classList.remove('is-paused');
         if (heartGamePauseOverlay) heartGamePauseOverlay.hidden = true;
         if (heartGamePauseButton) {
@@ -6150,12 +6110,6 @@ const appVersion = '20261002-751';
                 heartShotAnimationFrame = null;
             }
             resetHeartCupidBow();
-            heartFreezePausedRemainingMs = Math.max(0, heartFreezeEndsAt - performance.now());
-            if (heartFreezeTimer !== null) window.clearTimeout(heartFreezeTimer);
-            if (heartFreezeCountdownTimer !== null) window.clearInterval(heartFreezeCountdownTimer);
-            heartFreezeTimer = null;
-            heartFreezeCountdownTimer = null;
-            heartFreezeEndsAt = 0;
             heartFloatingBalloons.forEach((balloon) => {
                 balloon.getAnimations().forEach((animation) => animation.pause());
             });
@@ -6164,13 +6118,7 @@ const appVersion = '20261002-751';
         }
 
         if (heartCupidBowControl) heartCupidBowControl.disabled = false;
-        if (heartFreezePausedRemainingMs > 0) {
-            const remainingMs = heartFreezePausedRemainingMs;
-            heartFreezePausedRemainingMs = 0;
-            runHeartFreezeCountdown(remainingMs);
-        } else {
-            setHeartBalloonPlaybackRate(heartGameSpeedRate);
-        }
+        setHeartBalloonPlaybackRate(heartGameSpeedRate);
         heartFloatingBalloons.forEach((balloon) => {
             if (balloon.classList.contains('is-popping') || balloon.classList.contains('is-phase-hidden')) return;
             balloon.getAnimations().forEach((animation) => animation.play());
@@ -6672,7 +6620,6 @@ const appVersion = '20261002-751';
         resetHeartGamePauseUi();
         stopHeartGameClock();
         stopHeartGameClockTickingAudio();
-        clearHeartFreeze();
         if (heartShotAnimationFrame !== null) {
             window.cancelAnimationFrame(heartShotAnimationFrame);
             heartShotAnimationFrame = null;
@@ -6722,7 +6669,6 @@ const appVersion = '20261002-751';
         stopHeartGameClockTickingAudio();
         stopHeartGameEndAudio();
         resetHeartGamePauseUi();
-        clearHeartFreeze();
         heartGameColorIndex = 0;
         heartGameColorProgress = 0;
         heartGameTimeRemainingMs = HEART_ROUND_TIME_MS;
@@ -6809,28 +6755,6 @@ const appVersion = '20261002-751';
             return;
         }
 
-        if (kind === 'freeze') {
-            popHeartFloatingBalloon(balloon, balloonRect, gameRect, true, false);
-            activateHeartFreeze();
-            showHeartHitFeedback('SLOW 5s', feedbackX, feedbackY, 'freeze');
-            return;
-        }
-
-        if (kind === 'bomb') {
-            popHeartFloatingBalloon(balloon, balloonRect, gameRect, true, false);
-            showHeartHitFeedback('BOOM!', feedbackX, feedbackY, 'negative');
-            heartFloatingBalloons.forEach((candidate) => {
-                if (candidate === balloon || candidate.dataset.balloonKind !== 'heart' || candidate.classList.contains('is-popping')) return;
-                const candidateRect = candidate.getBoundingClientRect();
-                const isVisible = candidateRect.right > gameRect.left
-                    && candidateRect.left < gameRect.right
-                    && candidateRect.bottom > gameRect.top
-                    && candidateRect.top < gameRect.bottom
-                    && Number.parseFloat(window.getComputedStyle(candidate).opacity) > 0.1;
-                if (isVisible) popHeartFloatingBalloon(candidate, candidateRect, gameRect, false);
-            });
-            updateHeartGameHud();
-        }
     };
 
     const stopHeartCupidGame = () => {
@@ -6845,7 +6769,6 @@ const appVersion = '20261002-751';
             heartShotAnimationFrame = null;
         }
         heartGameEnded = true;
-        clearHeartFreeze();
         clearHeartBalloonRoundTimers();
         heartBalloonRoundId += 1;
         heartBalloonRoundBalloons = [];
@@ -7968,7 +7891,8 @@ const appVersion = '20261002-751';
                         jeepSequence.hidden = true;
                         jeepSequence.classList.remove('is-driving', 'is-arrived', 'is-exiting');
                     }
-                    startRectangleDialogue();
+                    activeShapeHowToKey = 'rectangle';
+                    openShapeHowToGuide('rectangle', null, startRectangleDialogue);
                 } else if (jeepSequence) {
                     stopRectangleDialogue();
                     jeepSequence.hidden = true;
@@ -8462,7 +8386,7 @@ const appVersion = '20261002-751';
                 resumeRectangleBossEncounter();
             }
             rectangleBossRetryWarningMilestone = null;
-        }, 80);
+        }, 700);
     });
 
     const resetRectangleDestinationJeeps = () => {
@@ -14725,6 +14649,314 @@ const appVersion = '20261002-751';
                 heroCharacter.classList.remove('is-hiding');
             }, 2000);
         });
+    });
+
+    const shapeHowToGuides = {
+        circle: {
+            island: 'Circle Island',
+            mission: 'Find all ten round objects before time runs out.',
+            steps: [
+                'Start the mission and wait for the countdown.',
+                'Search the scene for ten hidden circular objects.',
+                'Tap each circular object to collect it.',
+                'Every correct circle adds 1 second to the timer.',
+                'Avoid tapping incorrect areas.',
+                'After three incorrect taps, a circle briefly sparkles as a hint.',
+                'Collect all ten circles within the 60-second timer.',
+            ],
+            scopes: ['#learnscape-circle-illustration-page'],
+        },
+        square: {
+            island: 'Square Island',
+            mission: 'Fix Square Town.',
+            steps: [
+                'Find and tap five missing square objects to collect them.',
+                'Tap the matching object in the collection panel to fix the town.',
+                'Continue until Square Town is completed.',
+                'Choose a chocolate number range.',
+                'Count the square chocolates displayed.',
+                'Select the answer matching the number of chocolates.',
+            ],
+            scopes: ['#learnscape-shape-square-page'],
+        },
+        triangle: {
+            island: 'Triangle Island',
+            mission: 'Rebuild the bridge.',
+            steps: [
+                'Tap each tree to gather wood.',
+                'Each fallen tree releases three wood blocks.',
+                'Collect all nine wood blocks.',
+                'When the crafting board appears, tap the wood.',
+                'Each tap places one block into the bridge.',
+                'Continue until all nine slots are filled.',
+                'Answer the question to craft the bridge completely.',
+            ],
+            scopes: ['#learnscape-triangle-game-page'],
+        },
+        rectangle: {
+            island: 'Rectangle Island',
+            mission: 'Deliver three rectangular packages.',
+            steps: [
+                'Choose three rectangular items.',
+                'Start the delivery mission.',
+                'The jeepney travels and stops automatically at the destination.',
+                'Choose the correct parking shape.',
+                'Tap the correct delivery from the gathered items.',
+                'Defeat the Shape Monster.',
+                'Press Spacebar to make the jeepney jump.',
+                'Jump over incoming non-rectangle shapes.',
+                'Watch the fuel level as it decreases.',
+                'Collect rectangle shapes to restore fuel.',
+                'If fuel reaches zero, the game is over.',
+                'Deliver all items to complete the game.',
+            ],
+            scopes: [
+                '#learnscape-shape-area-4-page',
+                '#learnscape-rectangle-delivery-page',
+                '.rectangle-destination-page',
+                '.rectangle-interior-page',
+            ],
+        },
+        oval: {
+            island: 'Oval Island',
+            mission: 'Match all pairs before the 45-second timer expires.',
+            steps: [
+                'Choose the number of cards.',
+                'Memorize the cards during the three-second preview.',
+                'Flip the cards to find each matching pair.',
+                'A correct pair adds 5 seconds.',
+                'After every correct pair, the cards shuffle and receive another three-second preview.',
+                'After three wrong pairs, a matching pair briefly glows as a hint.',
+                'Beware of trap cards.',
+                'A bomb removes 5 seconds.',
+                'A freeze card freezes two regular cards for 5 seconds.',
+                'Find every pair before the timer reaches zero.',
+            ],
+            scopes: ['#learnscape-oval-board-game-page'],
+        },
+        heart: {
+            island: 'Heart Island',
+            mission: 'Shoot heart balloons in rainbow color order.',
+            steps: [
+                'Remember the target color.',
+                'Move the pointer or mouse to aim the heart bow.',
+                'Press Spacebar to fire.',
+                'Shoot the heart balloons matching the target color.',
+                'Each balloon set has a 10-second timer.',
+                'A non-heart balloon decreases the timer by 2 seconds.',
+                'Check your progress and fill all the colors for a rainbow show.',
+            ],
+            scopes: ['#learnscape-shape-area-6-page'],
+        },
+        star: {
+            island: 'Star Island',
+            mission: 'Catch the falling stars before time runs out.',
+            steps: [
+                'Choose a star target range.',
+                'The game randomly selects a target number from that range.',
+                'Move the mouse left and right to move the character holding a basket.',
+                'Align the basket to catch falling stars.',
+                'Avoid non-star shapes.',
+                'Catching a non-star shape decreases the timer by 1 second.',
+                'Catch the target number of stars before time runs out.',
+            ],
+            scopes: ['#learnscape-shape-area-7-page'],
+        },
+        diamond: {
+            island: 'Diamond Island',
+            mission: 'Collect diamond pieces, then assemble them correctly.',
+            steps: [
+                'A colony of bats enters the cave.',
+                'Tap a bat carrying a diamond piece.',
+                'Avoid tapping a non-diamond decoy, which removes one life.',
+                'Losing all three lives ends the mission.',
+                'After collecting the diamond pieces, assemble them correctly.',
+                'Look for the glowing empty slot.',
+                'Tap the piece that matches that slot.',
+                'An incorrect piece glows red.',
+                'Complete all four slots to transform the diamond into a magical crystal.',
+            ],
+            scopes: ['#learnscape-shape-area-8-page'],
+        },
+    };
+    const shapeHowToOverlay = document.querySelector('.shape-how-to-overlay');
+    const shapeHowToDialog = shapeHowToOverlay?.querySelector('.shape-how-to-dialog') || null;
+    const shapeHowToMission = shapeHowToOverlay?.querySelector('.shape-how-to-mission') || null;
+    const shapeHowToSteps = shapeHowToOverlay?.querySelector('.shape-how-to-steps') || null;
+    const shapeHowToContinue = shapeHowToOverlay?.querySelector('.shape-how-to-continue') || null;
+    const shapeHowToHelpButton = document.querySelector('.shape-how-to-help-button');
+    const shapeHowToStartBypass = new WeakSet();
+    const shapeHowToPauseButtons = Array.from(document.querySelectorAll([
+        '.rectangle-pause-button',
+        '.heart-game-pause-button',
+        '.star-mission-pause-button',
+        '.diamond-mission-pause-button',
+    ].join(', ')));
+    let activeShapeHowToKey = '';
+    let pendingShapeHowToStart = null;
+    let pendingShapeHowToContinue = null;
+    let shapeHowToReturnFocus = null;
+    let shapeHowToCloseTimer = null;
+
+    const isShapeHowToElementVisible = (element) => {
+        if (!element || element.hidden) return false;
+        const style = window.getComputedStyle(element);
+        return style.display !== 'none'
+            && style.visibility !== 'hidden'
+            && element.getClientRects().length > 0;
+    };
+
+    const renderShapeHowToGuide = (shapeKey) => {
+        const guide = shapeHowToGuides[shapeKey];
+        if (!guide || !shapeHowToSteps) return false;
+        if (shapeHowToMission) shapeHowToMission.textContent = guide.mission;
+        shapeHowToSteps.replaceChildren(...guide.steps.map((step) => {
+            const item = document.createElement('li');
+            item.textContent = step;
+            return item;
+        }));
+        return true;
+    };
+
+    const syncShapeHowToHelpPlacement = () => {
+        if (!shapeHowToHelpButton || shapeHowToHelpButton.hidden) return;
+        const pauseButton = shapeHowToPauseButtons.find(
+            (button) => isShapeHowToElementVisible(button),
+        );
+        if (!pauseButton) {
+            shapeHowToHelpButton.classList.remove('is-pause-companion');
+            shapeHowToHelpButton.style.removeProperty('left');
+            shapeHowToHelpButton.style.removeProperty('top');
+            return;
+        }
+        const pauseRect = pauseButton.getBoundingClientRect();
+        const helpSize = shapeHowToHelpButton.getBoundingClientRect().width || 54;
+        shapeHowToHelpButton.classList.add('is-pause-companion');
+        shapeHowToHelpButton.classList.remove('is-snapping');
+        shapeHowToHelpButton.style.left = `${Math.max(8, pauseRect.left - helpSize - 12)}px`;
+        shapeHowToHelpButton.style.top = `${Math.max(8, pauseRect.top + ((pauseRect.height - helpSize) / 2))}px`;
+    };
+
+    const showShapeHowToHelpButton = () => {
+        if (!shapeHowToHelpButton) return;
+        shapeHowToHelpButton.hidden = false;
+        shapeHowToHelpButton.classList.remove('is-snapping');
+        shapeHowToHelpButton.getBoundingClientRect();
+        shapeHowToHelpButton.classList.add('is-snapping');
+        window.setTimeout(() => shapeHowToHelpButton.classList.remove('is-snapping'), 540);
+        syncShapeHowToHelpPlacement();
+    };
+
+    const openShapeHowToGuide = (shapeKey, startButton = null, onContinue = null) => {
+        if (!shapeHowToOverlay || !renderShapeHowToGuide(shapeKey)) return;
+        if (shapeHowToCloseTimer !== null) window.clearTimeout(shapeHowToCloseTimer);
+        pendingShapeHowToStart = startButton;
+        pendingShapeHowToContinue = onContinue;
+        shapeHowToReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        shapeHowToOverlay.classList.remove('is-closing');
+        shapeHowToOverlay.hidden = false;
+        document.body.classList.add('is-shape-how-to-open');
+        shapeHowToOverlay.querySelector('.shape-how-to-scroll')?.scrollTo({ top: 0, behavior: 'auto' });
+        window.requestAnimationFrame(() => shapeHowToContinue?.focus({ preventScroll: true }));
+    };
+
+    const closeShapeHowToGuide = ({ beginMission = false } = {}) => {
+        if (!shapeHowToOverlay || shapeHowToOverlay.hidden) return;
+        const startButton = beginMission ? pendingShapeHowToStart : null;
+        const continueAction = beginMission ? pendingShapeHowToContinue : null;
+        pendingShapeHowToStart = null;
+        pendingShapeHowToContinue = null;
+        shapeHowToOverlay.classList.add('is-closing');
+        shapeHowToCloseTimer = window.setTimeout(() => {
+            shapeHowToCloseTimer = null;
+            shapeHowToOverlay.hidden = true;
+            shapeHowToOverlay.classList.remove('is-closing');
+            document.body.classList.remove('is-shape-how-to-open');
+            showShapeHowToHelpButton();
+            if (startButton?.isConnected) {
+                shapeHowToStartBypass.add(startButton);
+                startButton.click();
+                shapeHowToStartBypass.delete(startButton);
+            } else if (typeof continueAction === 'function') {
+                continueAction();
+            } else {
+                shapeHowToReturnFocus?.focus?.({ preventScroll: true });
+            }
+            shapeHowToReturnFocus = null;
+            window.requestAnimationFrame(syncShapeHowToHelpPlacement);
+            window.setTimeout(syncShapeHowToHelpPlacement, 300);
+        }, 190);
+    };
+
+    document.addEventListener('click', (event) => {
+        const startButton = event.target.closest?.('[data-how-to-shape]');
+        if (!startButton || shapeHowToStartBypass.has(startButton)) return;
+        const shapeKey = startButton.dataset.howToShape;
+        if (!shapeHowToGuides[shapeKey]) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        activeShapeHowToKey = shapeKey;
+        openShapeHowToGuide(shapeKey, startButton);
+    }, true);
+
+    shapeHowToContinue?.addEventListener('click', () => {
+        closeShapeHowToGuide({
+            beginMission: Boolean(pendingShapeHowToStart || pendingShapeHowToContinue),
+        });
+    });
+
+    shapeHowToHelpButton?.addEventListener('click', () => {
+        if (!activeShapeHowToKey) return;
+        const runningPauseButton = shapeHowToPauseButtons.find(
+            (button) => button.getAttribute('aria-pressed') !== 'true' && isShapeHowToElementVisible(button),
+        );
+        runningPauseButton?.click();
+        openShapeHowToGuide(activeShapeHowToKey);
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (!shapeHowToOverlay || shapeHowToOverlay.hidden) return;
+        if (event.code === 'Space') event.preventDefault();
+        if (event.key !== 'Tab' || !shapeHowToDialog || !shapeHowToContinue) {
+            event.stopPropagation();
+            return;
+        }
+        const focusable = [shapeHowToOverlay.querySelector('.shape-how-to-scroll'), shapeHowToContinue]
+            .filter((element) => element instanceof HTMLElement);
+        if (!focusable.length) return;
+        const currentIndex = focusable.indexOf(document.activeElement);
+        const nextIndex = event.shiftKey
+            ? (currentIndex <= 0 ? focusable.length - 1 : currentIndex - 1)
+            : (currentIndex >= focusable.length - 1 ? 0 : currentIndex + 1);
+        event.preventDefault();
+        event.stopPropagation();
+        focusable[nextIndex].focus({ preventScroll: true });
+    }, true);
+
+    const shapeHowToPauseObserver = new MutationObserver(syncShapeHowToHelpPlacement);
+    shapeHowToPauseButtons.forEach((button) => {
+        shapeHowToPauseObserver.observe(button, { attributes: true, attributeFilter: ['aria-pressed', 'hidden', 'class'] });
+    });
+    window.addEventListener('resize', syncShapeHowToHelpPlacement);
+    window.addEventListener('learnscape:routechange', () => {
+        window.requestAnimationFrame(syncShapeHowToHelpPlacement);
+        window.setTimeout(() => {
+            syncShapeHowToHelpPlacement();
+            if (!activeShapeHowToKey) return;
+            const guide = shapeHowToGuides[activeShapeHowToKey];
+            const remainsInMission = guide?.scopes.some((selector) => (
+                Array.from(document.querySelectorAll(selector)).some(isShapeHowToElementVisible)
+            ));
+            if (remainsInMission) return;
+            activeShapeHowToKey = '';
+            pendingShapeHowToStart = null;
+            if (shapeHowToHelpButton) shapeHowToHelpButton.hidden = true;
+            if (shapeHowToOverlay && !shapeHowToOverlay.hidden) {
+                shapeHowToOverlay.hidden = true;
+                shapeHowToOverlay.classList.remove('is-closing');
+                document.body.classList.remove('is-shape-how-to-open');
+            }
+        }, 80);
     });
 
     syncFullscreenClass();

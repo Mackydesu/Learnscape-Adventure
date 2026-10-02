@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20261002-751">
+    <link rel="stylesheet" href="style.css?v=20261002-760">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -70,6 +70,7 @@
                 <output id="intro-carrot-count">0</output>
             </div>
         </div>
+        <button class="shape-how-to-help-button" type="button" aria-label="How to play" aria-haspopup="dialog" hidden>?</button>
         <button class="intro-settings-button" type="button" aria-label="Settings" aria-expanded="false" aria-controls="intro-settings-panel">
             <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M20.2 3.5h7.6l1.1 5.1a16 16 0 0 1 3.2 1.3l4.5-2.5 5.4 5.4-2.5 4.5a16 16 0 0 1 1.3 3.2l5.1 1.1v7.6l-5.1 1.1a16 16 0 0 1-1.3 3.2l2.5 4.5-5.4 5.4-4.5-2.5a16 16 0 0 1-3.2 1.3l-1.1 5.1h-7.6l-1.1-5.1a16 16 0 0 1-3.2-1.3l-4.5 2.5L6 38.1l2.5-4.5a16 16 0 0 1-1.3-3.2l-5.1-1.1v-7.6l5.1-1.1a16 16 0 0 1 1.3-3.2L6 12.9l5.4-5.4 4.5 2.5a16 16 0 0 1 3.2-1.3l1.1-5.2Z"/><circle cx="24" cy="24" r="7"/></svg>
         </button>
@@ -88,6 +89,19 @@
                 <input id="intro-volume-slider" type="range" min="0" max="100" step="1" value="100">
             </label>
         </div>
+    </div>
+
+    <div class="shape-how-to-overlay" hidden>
+        <section class="shape-how-to-dialog" role="dialog" aria-modal="true" aria-labelledby="shape-how-to-title" aria-describedby="shape-how-to-mission">
+            <header class="shape-how-to-header">
+                <h2 id="shape-how-to-title">How to Play?</h2>
+            </header>
+            <div class="shape-how-to-scroll" tabindex="0">
+                <p id="shape-how-to-mission" class="shape-how-to-mission"></p>
+                <ol class="shape-how-to-steps"></ol>
+            </div>
+            <button class="shape-how-to-continue" type="button">Continue</button>
+        </section>
     </div>
 
     <main id="learnscape-title-page">
@@ -346,7 +360,7 @@
             <div class="square-mission-bubble" role="status" aria-live="polite">
                 <span class="square-mission-bubble-text"></span>
             </div>
-            <button class="square-mission-start-button" type="button" hidden>Start</button>
+            <button class="square-mission-start-button" type="button" data-how-to-shape="square" hidden>Start</button>
         </div>
         <h2 class="square-game-title" hidden>Hanapin ang mga nawawalang bagay sa Square Town</h2>
         <h2 class="square-placement-title" hidden>Ibalik ang mga bagay na nawawala</h2>
@@ -549,7 +563,7 @@
                 <span class="triangle-game-message-text"></span><span class="triangle-game-message-ending"><span class="triangle-game-message-last-word"></span><span class="triangle-game-message-dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></span>
             </span>
         </div>
-        <button class="circle-mission-start-button triangle-game-start-button" type="button" hidden>Start</button>
+        <button class="circle-mission-start-button triangle-game-start-button" type="button" data-how-to-shape="triangle" hidden>Start</button>
         <section class="circle-lesson-progress triangle-game-complete-progress" aria-label="Bridge progress" aria-hidden="true">
             <div class="circle-lesson-progress-board">
                 <img class="circle-lesson-progress-board-image" src="assets/Shape UI/progressboard.webp" alt="">
@@ -1130,7 +1144,7 @@
             <div class="oval-mission-message-panel" role="status" aria-live="polite">
                 <span class="oval-mission-message-text"></span>
             </div>
-            <button class="circle-mission-start-button oval-mission-start-button" type="button" hidden>Start</button>
+            <button class="circle-mission-start-button oval-mission-start-button" type="button" data-how-to-shape="oval" hidden>Start</button>
         </div>
         <div class="oval-target-picker" role="dialog" aria-modal="true" aria-labelledby="oval-target-picker-title" hidden>
             <div class="oval-target-picker-panel">
@@ -1224,7 +1238,7 @@
             <div class="heart-mission-message" role="status" aria-live="polite">
                 <span class="heart-mission-message-text"></span>
             </div>
-            <button class="circle-mission-start-button heart-mission-start-button" type="button" hidden>Start</button>
+            <button class="circle-mission-start-button heart-mission-start-button" type="button" data-how-to-shape="heart" hidden>Start</button>
         </div>
         <section class="heart-cupid-game" aria-label="Heart balloon bow game" hidden>
             <div class="heart-game-hud" aria-live="polite">
@@ -1247,10 +1261,6 @@
                         <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="26" r="17" fill="none" stroke="currentColor" stroke-width="4"></circle><path d="M24 26 V15 M24 26 L33 31 M18 5 H30 M24 5 V9" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"></path></svg>
                         <strong class="heart-game-timer-value">10</strong>
                     </div>
-                    <div class="heart-freeze-status" hidden>
-                        <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4 V44 M7 14 L41 34 M7 34 L41 14 M18 8 L24 14 L30 8 M18 40 L24 34 L30 40 M9 20 L17 18 L15 10 M39 28 L31 30 L33 38 M9 28 L17 30 L15 38 M39 20 L31 18 L33 10" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                        <strong class="heart-freeze-countdown">5.0</strong>
-                    </div>
                 </div>
             </div>
             <button class="heart-game-pause-button" type="button" aria-label="Pause heart game" aria-pressed="false">
@@ -1271,24 +1281,6 @@
                 <svg class="shape-floating-balloon is-large" viewBox="0 0 100 150" style="--balloon-x:70%;--balloon-duration:17.5s;--balloon-delay:-8s;--balloon-color:#55d9cf;--balloon-edge:#197a79;"><path d="M50 5 L90 42 L50 79 L10 42 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5" stroke-linejoin="round"></path><path d="M50 77 L42 91 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 90 C34 107 66 120 47 148" fill="none" stroke="#497b79" stroke-width="2.5"></path></svg>
                 <svg class="shape-floating-balloon is-large" viewBox="0 0 100 150" style="--balloon-x:83%;--balloon-duration:21s;--balloon-delay:-12s;--balloon-color:#ff78a7;--balloon-edge:#9b315c;"><path d="M50 5 L89 34 L74 79 H26 L11 34 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5" stroke-linejoin="round"></path><path d="M50 77 L42 91 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 90 C34 107 66 120 47 148" fill="none" stroke="#80566a" stroke-width="2.5"></path></svg>
                 <svg class="shape-floating-balloon is-large" viewBox="0 0 100 150" style="--balloon-x:96%;--balloon-duration:18.5s;--balloon-delay:-6s;--balloon-color:#f3a8ff;--balloon-edge:#763789;"><path d="M50 4 L61 28 L88 30 L68 48 L75 76 L50 61 L25 76 L32 48 L12 30 L39 28 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5" stroke-linejoin="round"></path><path d="M50 74 L42 88 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 87 C34 106 66 119 47 148" fill="none" stroke="#74557d" stroke-width="2.5"></path></svg>
-                <svg class="powerup-floating-balloon freeze-balloon is-large" data-balloon-kind="freeze" viewBox="0 0 100 150" style="--balloon-x:24%;--balloon-duration:25s;--balloon-delay:-18s;--balloon-color:#8eeaff;--balloon-edge:#2779ac;">
-                    <circle cx="50" cy="42" r="35" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5"></circle>
-                    <circle cx="50" cy="42" r="27" fill="rgba(255,255,255,0.2)" stroke="#eaffff" stroke-width="2"></circle>
-                    <path d="M50 19 V65 M30 30 L70 54 M30 54 L70 30 M43 22 L50 29 L57 22 M43 62 L50 55 L57 62" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
-                    <path d="M50 76 L42 89 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 88 C34 106 66 120 47 148" fill="none" stroke="#477991" stroke-width="2.5"></path>
-                </svg>
-                <svg class="powerup-floating-balloon bomb-balloon is-large" data-balloon-kind="bomb" viewBox="0 0 100 150" style="--balloon-x:77%;--balloon-duration:24s;--balloon-delay:-9s;--balloon-color:#343744;--balloon-edge:#11131a;">
-                    <circle cx="48" cy="47" r="34" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5"></circle>
-                    <ellipse cx="36" cy="34" rx="8" ry="11" fill="rgba(255,255,255,0.28)" transform="rotate(28 36 34)"></ellipse>
-                    <path d="M66 21 Q74 8 83 16" fill="none" stroke="#8a572d" stroke-width="6" stroke-linecap="round"></path><path d="M82 15 L88 8 M82 15 L91 17 M82 15 L79 5" stroke="#ffd34e" stroke-width="4" stroke-linecap="round"></path>
-                    <path d="M48 80 L40 92 H56 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M48 91 C32 108 64 120 45 148" fill="none" stroke="#535764" stroke-width="2.5"></path>
-                </svg>
-                <svg class="powerup-floating-balloon bomb-balloon is-large is-phase-hidden" data-balloon-kind="bomb" data-final-bomb="true" viewBox="0 0 100 150" style="--balloon-x:36%;--balloon-duration:18s;--balloon-delay:-13s;--balloon-color:#343744;--balloon-edge:#11131a;">
-                    <circle cx="48" cy="47" r="34" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5"></circle>
-                    <ellipse cx="36" cy="34" rx="8" ry="11" fill="rgba(255,255,255,0.28)" transform="rotate(28 36 34)"></ellipse>
-                    <path d="M66 21 Q74 8 83 16" fill="none" stroke="#8a572d" stroke-width="6" stroke-linecap="round"></path><path d="M82 15 L88 8 M82 15 L91 17 M82 15 L79 5" stroke="#ffd34e" stroke-width="4" stroke-linecap="round"></path>
-                    <path d="M48 80 L40 92 H56 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M48 91 C32 108 64 120 45 148" fill="none" stroke="#535764" stroke-width="2.5"></path>
-                </svg>
             </div>
             <svg class="heart-shot-field" aria-hidden="true" preserveAspectRatio="none">
                 <defs>
@@ -1420,7 +1412,7 @@
             <div class="star-mission-message" role="status" aria-live="polite">
                 <span class="star-mission-message-text"></span>
             </div>
-            <button class="circle-mission-start-button star-mission-start-button" type="button" hidden>Start</button>
+            <button class="circle-mission-start-button star-mission-start-button" type="button" data-how-to-shape="star" hidden>Start</button>
         </div>
         <div class="star-mission-walker" aria-hidden="true" hidden>
             <img class="star-mission-walker-character" src="assets/Character/idle.gif" alt="">
@@ -1538,7 +1530,7 @@
             <div class="diamond-mission-message" role="status" aria-live="polite">
                 <span class="diamond-mission-message-text"></span>
             </div>
-            <button class="circle-mission-start-button diamond-mission-start-button" type="button" hidden>Start</button>
+            <button class="circle-mission-start-button diamond-mission-start-button" type="button" data-how-to-shape="diamond" hidden>Start</button>
         </div>
         <div class="diamond-mission-blackout" aria-hidden="true" hidden></div>
         <section class="diamond-mission-game" aria-label="Diamond Mission game" hidden>
@@ -1569,7 +1561,7 @@
                 <strong class="diamond-mission-cart-progress">0/4</strong>
             </div>
             <div class="diamond-mission-collection-panel" role="status" aria-live="polite" aria-label="0 of 4 diamond pieces collected">
-                <span>Mga pirasong nakolekta</span>
+                <span>Mga pirasong dapat kolektahin</span>
                 <div class="diamond-mission-collection-pieces" aria-hidden="true">
                     <i data-diamond-collection-piece="0"><svg viewBox="0 0 100 100"><path d="M92 20V80H8Z"></path></svg></i>
                     <i data-diamond-collection-piece="1"><svg viewBox="0 0 100 100"><path d="M8 20L92 80H8Z"></path></svg></i>
@@ -1674,7 +1666,7 @@
             <div class="circle-mission-guide-bubble" role="status" aria-live="polite">
                 <span class="circle-mission-guide-text"></span>
             </div>
-            <button class="circle-mission-start-button" type="button" hidden>Start</button>
+            <button class="circle-mission-start-button" type="button" data-how-to-shape="circle" hidden>Start</button>
         </div>
         <section class="circle-hunt-ui" aria-label="Circle hunt" aria-hidden="true" hidden>
             <div class="circle-hunt-hud" aria-live="polite">
@@ -1939,7 +1931,7 @@
 
     
 
-    <script src="script.js?v=20261002-751"></script>
+    <script src="script.js?v=20261002-760"></script>
     </div>
 
     <script>
