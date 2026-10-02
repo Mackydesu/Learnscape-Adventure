@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-const appVersion = '20261001-671';
+const appVersion = '20261002-709';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -1303,8 +1303,10 @@ const appVersion = '20261001-671';
     const heartFloatingBalloons = Array.from(heartCupidGame?.querySelectorAll('.heart-floating-balloon, .shape-floating-balloon, .powerup-floating-balloon') || []);
     const heartPointBalloons = heartFloatingBalloons.filter((balloon) => balloon.dataset.balloonKind === 'heart');
     const heartShapePenaltyBalloons = heartFloatingBalloons.filter((balloon) => balloon.dataset.balloonKind === 'shape' || balloon.classList.contains('shape-floating-balloon'));
-    const heartFreezeBalloons = heartFloatingBalloons.filter((balloon) => balloon.dataset.balloonKind === 'freeze');
-    const heartBombBalloons = heartFloatingBalloons.filter((balloon) => balloon.dataset.balloonKind === 'bomb');
+    const heartShapeOriginalColors = new Map(heartShapePenaltyBalloons.map((balloon) => [balloon, {
+        color: balloon.style.getPropertyValue('--balloon-color'),
+        edge: balloon.style.getPropertyValue('--balloon-edge'),
+    }]));
     const heartCupidBowControl = heartCupidGame?.querySelector('.heart-cupid-bow-control') || null;
     const heartBowArt = heartCupidBowControl?.querySelector('.heart-bow-art') || null;
     const heartBowString = heartCupidBowControl?.querySelector('.heart-bow-string') || null;
@@ -1323,6 +1325,8 @@ const appVersion = '20261001-671';
     const heartGameResultTitle = heartCupidGame?.querySelector('.heart-game-result-title') || null;
     const heartGameResultCopy = heartCupidGame?.querySelector('.heart-game-result-copy') || null;
     const heartGameRetryButton = heartCupidGame?.querySelector('.heart-game-retry-button') || null;
+    const heartRainbowCompletion = heartMissionPage?.querySelector('.heart-rainbow-completion') || null;
+    const heartRainbowSparkles = heartRainbowCompletion?.querySelector('.heart-rainbow-sparkles') || null;
     const heartGameCelebration = heartMissionPage?.querySelector('.heart-game-celebration') || null;
     const heartCelebrationConfetti = heartGameCelebration?.querySelector('.heart-celebration-confetti') || null;
     const heartFinalProgress = heartMissionPage?.querySelector('.heart-final-progress') || null;
@@ -1369,14 +1373,21 @@ const appVersion = '20261001-671';
     const diamondMissionReveal = diamondMissionGame?.querySelector('.diamond-mission-reveal') || null;
     const diamondMissionCelebration = diamondMissionPage?.querySelector('.diamond-mission-celebration') || null;
     const diamondMissionConfetti = diamondMissionCelebration?.querySelector('.diamond-mission-confetti') || null;
-    const HEART_GAME_START_TIME_MS = 45000;
-    const HEART_GAME_LARGE_HEART_BONUS_MS = 5000;
-    const HEART_GAME_SMALL_HEART_BONUS_MS = 5000;
+    const HEART_ROUND_TIME_MS = 10000;
     const HEART_GAME_CLOCK_TICKING_AUDIO_SOURCE = 'assets/Audios/Sound effects/clock ticking.mp3';
     const HEART_GAME_TIMES_UP_AUDIO_SOURCE = 'assets/Audios/Sound effects/times up.mp3';
     const HEART_GAME_LOSE_AUDIO_SOURCE = 'assets/Audios/Sound effects/lose.mp3';
-    const HEART_GAME_TARGET_BALLOON_COUNT = 4;
+    const HEART_TARGET_CUE_AUDIO_SOURCE = 'assets/Audios/Sound effects/correct.mp3';
+    const HEART_TARGET_POP_AUDIO_SOURCE = 'assets/Audios/Sound effects/balloons.mp3';
+    const HEART_RAINBOW_AUDIO_SOURCE = 'assets/Audios/Sound effects/rainbow.mp3';
     const HEART_BALLOON_SPEED_VARIATIONS = [0.84, 1.08, 0.93, 1.17, 0.89, 1.12, 0.97, 1.2];
+    const HEART_ROUND_DECOY_COUNT = 4;
+    const HEART_ROUND_CUE_MS = 1250;
+    const HEART_ROUND_ENTER_MS = 1050;
+    const HEART_ROUND_LEAVE_MS = 760;
+    const HEART_RAINBOW_START_DELAY_MS = 1800;
+    const HEART_RAINBOW_DRAW_MS = 2400;
+    const HEART_RAINBOW_HOLD_MS = 450;
     const HEART_COLOR_CHALLENGES = [
         { key: 'red', label: 'RED', required: 3, color: '#ff435f', edge: '#9d1737' },
         { key: 'orange', label: 'ORANGE', required: 5, color: '#ff8a32', edge: '#a94516' },
@@ -1479,7 +1490,7 @@ const appVersion = '20261001-671';
     let heartLastAimClientY = null;
     let heartGameColorIndex = 0;
     let heartGameColorProgress = 0;
-    let heartGameTimeRemainingMs = HEART_GAME_START_TIME_MS;
+    let heartGameTimeRemainingMs = HEART_ROUND_TIME_MS;
     let heartGameClockFrame = null;
     let heartGameLastClockTick = null;
     let heartGameEnded = false;
@@ -1493,8 +1504,16 @@ const appVersion = '20261001-671';
     let heartFreezeTimer = null;
     let heartFreezeCountdownTimer = null;
     const heartBalloonRespawnTimers = new Map();
-    let heartGameDifficultyPhase = 0;
+    let heartBalloonRoundTimers = [];
+    let heartBalloonRoundBalloons = [];
+    let heartBalloonRoundTransitioning = false;
+    let heartBalloonRoundPendingAdvance = false;
+    let heartBalloonRoundId = 0;
+    let heartLastAnnouncedColorIndex = -1;
     let heartGameSpeedRate = 0.82;
+    let heartRainbowSession = 0;
+    let heartRainbowTimers = [];
+    let heartRainbowAudio = null;
     let heartCelebrationSession = 0;
     let heartCelebrationTimers = [];
     let heartCelebrationAudio = null;
@@ -5716,7 +5735,7 @@ const appVersion = '20261001-671';
         if (heartAimTrail) heartAimTrail.setAttribute('d', '');
         if (heartAimTrailGlow) heartAimTrailGlow.setAttribute('d', '');
         if (heartFlyingArrow) {
-            heartFlyingArrow.hidden = true;
+            heartFlyingArrow.setAttribute('hidden', '');
             heartFlyingArrow.removeAttribute('transform');
         }
         heartCurrentTrajectory = null;
@@ -5741,10 +5760,7 @@ const appVersion = '20261001-671';
     );
 
     const formatHeartGameTime = (milliseconds) => {
-        const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = totalSeconds % 60;
-        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        return String(Math.max(0, Math.ceil(milliseconds / 1000)));
     };
 
     const updateHeartGameHud = () => {
@@ -5782,7 +5798,7 @@ const appVersion = '20261001-671';
         });
         if (heartGameTimerValue) heartGameTimerValue.textContent = formatHeartGameTime(heartGameTimeRemainingMs);
         heartGameTimer?.setAttribute('aria-label', `${Math.max(0, Math.ceil(heartGameTimeRemainingMs / 1000))} seconds remaining`);
-        heartGameTimer?.classList.toggle('is-urgent', heartGameTimeRemainingMs <= 10000);
+        heartGameTimer?.classList.toggle('is-urgent', heartGameTimeRemainingMs <= 3000);
     };
 
     const stopHeartGameClock = () => {
@@ -5804,6 +5820,7 @@ const appVersion = '20261001-671';
     const syncHeartGameClockTickingAudio = () => {
         const shouldTick = !heartGameEnded
             && !heartGamePaused
+            && !heartBalloonRoundTransitioning
             && heartCupidGame
             && !heartCupidGame.hidden
             && heartGameTimeRemainingMs > 0
@@ -5950,9 +5967,10 @@ const appVersion = '20261001-671';
             if (balloon.classList.contains('is-popping') || balloon.classList.contains('is-phase-hidden')) return;
             balloon.getAnimations().forEach((animation) => animation.play());
         });
-        startHeartGameClock();
+        if (!heartBalloonRoundTransitioning) startHeartGameClock();
         syncHeartGameClockTickingAudio();
         restoreHeartCupidCursorAim();
+        if (heartBalloonRoundPendingAdvance) startNextHeartBalloonRound();
     };
 
     heartGamePauseButton?.addEventListener('click', () => setHeartGamePaused(!heartGamePaused));
@@ -5971,11 +5989,53 @@ const appVersion = '20261001-671';
         window.setTimeout(() => feedback.remove(), 900);
     };
 
+    const clearHeartBalloonRoundTimers = () => {
+        heartBalloonRoundTimers.forEach((timer) => window.clearTimeout(timer));
+        heartBalloonRoundTimers = [];
+    };
+
+    const clearHeartBalloonRoundClasses = (balloon) => {
+        balloon.classList.remove(
+            'is-round-entering',
+            'is-round-ready',
+            'is-round-leaving',
+            'is-round-hidden',
+        );
+        balloon.style.removeProperty('--round-x');
+        balloon.style.removeProperty('--round-y');
+        balloon.style.removeProperty('--round-delay');
+        balloon.style.removeProperty('--round-tilt');
+        balloon.style.removeProperty('--round-float-duration');
+    };
+
+    const showHeartRoundTargetCue = (challenge) => {
+        if (!heartCupidGame || !challenge) return;
+        heartCupidGame.querySelector('.heart-round-target-cue')?.remove();
+        const cue = document.createElement('div');
+        cue.className = 'heart-round-target-cue';
+        cue.setAttribute('role', 'status');
+        cue.setAttribute('aria-live', 'assertive');
+        cue.textContent = challenge.label;
+        cue.style.setProperty('--heart-cue-color', challenge.color);
+        cue.style.setProperty('--heart-cue-edge', challenge.edge);
+        heartCupidGame.appendChild(cue);
+        if (window.Audio) {
+            const cueAudio = new window.Audio(HEART_TARGET_CUE_AUDIO_SOURCE);
+            cueAudio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+            cueAudio.play().catch(() => playUiClickSound('chime'));
+        } else {
+            playUiClickSound('chime');
+        }
+        const cueTimer = window.setTimeout(() => cue.remove(), HEART_ROUND_CUE_MS);
+        heartBalloonRoundTimers.push(cueTimer);
+    };
+
     const resetHeartFloatingBalloon = (balloon) => {
         const lifecycle = heartBalloonRespawnTimers.get(balloon);
         if (lifecycle?.timer !== undefined) window.clearTimeout(lifecycle.timer);
         lifecycle?.burst?.remove();
         heartBalloonRespawnTimers.delete(balloon);
+        clearHeartBalloonRoundClasses(balloon);
         balloon.classList.remove('is-popping', 'is-respawning');
         ['left', 'top', 'bottom', 'width', 'height', 'opacity', 'transform'].forEach((property) => {
             balloon.style.removeProperty(property);
@@ -5988,6 +6048,120 @@ const appVersion = '20261001-671';
                 else animation.play();
             });
         });
+    };
+
+    const finishHeartBalloonRoundEntry = (roundId) => {
+        if (roundId !== heartBalloonRoundId || heartGameEnded) return;
+        heartBalloonRoundBalloons.forEach((balloon) => {
+            balloon.classList.remove('is-round-entering');
+            balloon.classList.add('is-round-ready');
+        });
+        heartBalloonRoundTransitioning = false;
+        syncHeartGameClockTickingAudio();
+        if (heartCupidBowControl) heartCupidBowControl.disabled = heartGamePaused;
+        restoreHeartCupidCursorAim();
+    };
+
+    const assignHeartBalloonNumber = (balloon, number) => {
+        if (!balloon) return;
+        let numberLabel = balloon.querySelector('.heart-balloon-number');
+        if (!numberLabel) {
+            numberLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            numberLabel.classList.add('heart-balloon-number');
+            numberLabel.setAttribute('x', '50');
+            numberLabel.setAttribute('y', '48');
+            numberLabel.setAttribute('aria-hidden', 'true');
+            balloon.appendChild(numberLabel);
+        }
+        const safeNumber = Math.max(0, Math.min(5, Number(number) || 0));
+        balloon.dataset.balloonNumber = String(safeNumber);
+        numberLabel.textContent = String(safeNumber);
+    };
+
+    const arrangeHeartBalloonRound = () => {
+        clearHeartBalloonRoundTimers();
+        heartBalloonRoundId += 1;
+        const roundId = heartBalloonRoundId;
+        const targetChallenge = HEART_COLOR_CHALLENGES[heartGameColorIndex];
+        if (!targetChallenge || heartGameEnded) return;
+
+        const targetBalloon = heartPointBalloons[0];
+        const decoys = shuffleValues([...heartShapePenaltyBalloons]).slice(0, HEART_ROUND_DECOY_COUNT);
+        const targetColorDecoys = new Set(shuffleValues([...decoys]).slice(0, 2));
+        heartBalloonRoundBalloons = shuffleValues([targetBalloon, ...decoys]);
+        const roundNumbers = shuffleValues([0, 1, 2, 3, 4, 5]);
+        const xSlots = shuffleValues([12, 31, 50, 69, 88]);
+        const ySlots = shuffleValues([30, 34, 38, 32, 36]);
+
+        heartFloatingBalloons.forEach((balloon) => {
+            const isDisplayed = heartBalloonRoundBalloons.includes(balloon);
+            resetHeartFloatingBalloon(balloon);
+            balloon.classList.add('is-large');
+            balloon.classList.add('is-round-hidden');
+            if (!isDisplayed) return;
+            const slotIndex = heartBalloonRoundBalloons.indexOf(balloon);
+            balloon.style.setProperty('--round-x', `${xSlots[slotIndex]}%`);
+            balloon.style.setProperty('--round-y', `${ySlots[slotIndex]}%`);
+            balloon.style.setProperty('--round-delay', `${slotIndex * 55}ms`);
+            balloon.style.setProperty('--round-tilt', `${Math.round((Math.random() * 8) - 4)}deg`);
+            balloon.style.setProperty('--round-float-duration', `${(2.4 + (Math.random() * 1.1)).toFixed(2)}s`);
+            assignHeartBalloonNumber(balloon, roundNumbers[slotIndex]);
+        });
+        heartShapePenaltyBalloons.forEach((balloon) => {
+            const originalColors = heartShapeOriginalColors.get(balloon);
+            if (originalColors) {
+                balloon.style.setProperty('--balloon-color', originalColors.color);
+                balloon.style.setProperty('--balloon-edge', originalColors.edge);
+            }
+            if (targetColorDecoys.has(balloon)) {
+                balloon.style.setProperty('--balloon-color', targetChallenge.color);
+                balloon.style.setProperty('--balloon-edge', targetChallenge.edge);
+            }
+        });
+        applyHeartBalloonColor(targetBalloon, targetChallenge);
+        const isNewTargetColor = heartLastAnnouncedColorIndex !== heartGameColorIndex;
+        if (isNewTargetColor) {
+            heartLastAnnouncedColorIndex = heartGameColorIndex;
+            showHeartRoundTargetCue(targetChallenge);
+        }
+        heartBalloonRoundTransitioning = true;
+        if (heartCupidBowControl) heartCupidBowControl.disabled = true;
+        const revealTimer = window.setTimeout(() => {
+            if (roundId !== heartBalloonRoundId || heartGameEnded) return;
+            stopHeartGameClock();
+            stopHeartGameClockTickingAudio();
+            heartGameTimeRemainingMs = HEART_ROUND_TIME_MS;
+            updateHeartGameHud();
+            if (!heartGamePaused) startHeartGameClock();
+            heartBalloonRoundBalloons.forEach((balloon) => {
+                balloon.classList.remove('is-round-hidden');
+                balloon.classList.add('is-round-entering');
+            });
+            const entryTimer = window.setTimeout(
+                () => finishHeartBalloonRoundEntry(roundId),
+                HEART_ROUND_ENTER_MS + ((heartBalloonRoundBalloons.length - 1) * 55),
+            );
+            heartBalloonRoundTimers.push(entryTimer);
+        }, isNewTargetColor ? HEART_ROUND_CUE_MS + 50 : 0);
+        heartBalloonRoundTimers.push(revealTimer);
+    };
+
+    const startNextHeartBalloonRound = () => {
+        if (heartGameEnded || heartBalloonRoundTransitioning) return;
+        if (heartGamePaused) {
+            heartBalloonRoundPendingAdvance = true;
+            return;
+        }
+        heartBalloonRoundPendingAdvance = false;
+        heartBalloonRoundTransitioning = true;
+        if (heartCupidBowControl) heartCupidBowControl.disabled = true;
+        heartBalloonRoundBalloons.forEach((balloon) => {
+            if (balloon.classList.contains('is-popping')) return;
+            balloon.classList.remove('is-round-entering', 'is-round-ready');
+            balloon.classList.add('is-round-leaving');
+        });
+        const leaveTimer = window.setTimeout(arrangeHeartBalloonRound, HEART_ROUND_LEAVE_MS);
+        heartBalloonRoundTimers.push(leaveTimer);
     };
 
     const respawnHeartFloatingBalloon = (balloon, previousXPercent) => {
@@ -6017,25 +6191,6 @@ const appVersion = '20261001-671';
         heartBalloonRespawnTimers.set(balloon, { timer: respawnTimer });
     };
 
-    const setHeartPhaseBalloonVisible = (balloon, visible) => {
-        const isHidden = balloon.classList.contains('is-phase-hidden');
-        if (visible === !isHidden) return;
-        resetHeartFloatingBalloon(balloon);
-        if (!visible) {
-            balloon.classList.add('is-phase-hidden');
-            return;
-        }
-        balloon.style.setProperty('--balloon-delay', '0s');
-        balloon.style.setProperty('--balloon-x', `${(7 + (Math.random() * 86)).toFixed(1)}%`);
-        balloon.classList.remove('is-phase-hidden');
-    };
-
-    const setHeartPhaseBalloonSize = (balloon, size) => {
-        const isSmall = size === 'small';
-        balloon.classList.toggle('is-small', isSmall);
-        balloon.classList.toggle('is-large', !isSmall);
-    };
-
     const applyHeartBalloonColor = (balloon, challenge) => {
         if (!balloon || !challenge) return;
         balloon.dataset.heartColor = challenge.key;
@@ -6043,68 +6198,7 @@ const appVersion = '20261001-671';
         balloon.style.setProperty('--balloon-edge', challenge.edge);
     };
 
-    const refreshHeartBalloonColors = () => {
-        const targetChallenge = HEART_COLOR_CHALLENGES[heartGameColorIndex];
-        if (!targetChallenge || !heartPointBalloons.length) return;
-
-        const orderedBalloons = [...heartPointBalloons].sort((first, second) => (
-            Number(first.classList.contains('is-popping') || first.classList.contains('is-respawning'))
-            - Number(second.classList.contains('is-popping') || second.classList.contains('is-respawning'))
-        ));
-        const otherChallenges = shuffleValues(
-            HEART_COLOR_CHALLENGES.filter((challenge) => challenge !== targetChallenge),
-        );
-        orderedBalloons.forEach((balloon, index) => {
-            const isTargetBalloon = index < HEART_GAME_TARGET_BALLOON_COUNT;
-            applyHeartBalloonColor(
-                balloon,
-                isTargetBalloon
-                    ? targetChallenge
-                    : otherChallenges[(index - HEART_GAME_TARGET_BALLOON_COUNT) % otherChallenges.length],
-            );
-            const isGreenTargetMix = heartGameColorIndex === 3 && isTargetBalloon;
-            const isLastThreeTarget = heartGameColorIndex >= 4 && isTargetBalloon;
-            const size = isLastThreeTarget || (isGreenTargetMix && index % 2 === 1)
-                ? 'small'
-                : 'large';
-            setHeartPhaseBalloonSize(balloon, size);
-        });
-    };
-
-    const updateHeartGameDifficulty = (force = false) => {
-        const phase = heartGameColorIndex < 2 ? 1 : heartGameColorIndex < 5 ? 2 : 3;
-        const finalSpeedStep = phase === 3 ? Math.min(2, heartGameColorIndex - 5) : 0;
-        const difficultyKey = (phase * 10) + finalSpeedStep;
-        const completedTargets = HEART_COLOR_CHALLENGES
-            .slice(0, heartGameColorIndex)
-            .reduce((total, challenge) => total + challenge.required, 0) + heartGameColorProgress;
-        heartGameSpeedRate = Math.min(1.85, 0.82 + (completedTargets * 0.022));
-        if (!force && difficultyKey === heartGameDifficultyPhase) {
-            setHeartBalloonPlaybackRate(getHeartBalloonPlaybackRate());
-            return;
-        }
-        heartGameDifficultyPhase = difficultyKey;
-
-        heartPointBalloons.forEach((balloon, index) => {
-            const visible = phase === 1 ? index < 5 : phase === 2 ? index < 5 : true;
-            setHeartPhaseBalloonVisible(balloon, visible);
-        });
-
-        heartShapePenaltyBalloons.forEach((balloon, index) => {
-            const visible = phase === 1 ? index < 4 : phase === 2 ? index < 6 : true;
-            setHeartPhaseBalloonVisible(balloon, visible);
-            setHeartPhaseBalloonSize(balloon, 'large');
-        });
-
-        heartFreezeBalloons.forEach((balloon) => setHeartPhaseBalloonVisible(balloon, phase >= 2));
-        heartBombBalloons.forEach((balloon, index) => {
-            setHeartPhaseBalloonVisible(balloon, phase >= 2 && (phase === 3 || index === 0));
-            setHeartPhaseBalloonSize(balloon, 'large');
-        });
-        setHeartBalloonPlaybackRate(getHeartBalloonPlaybackRate());
-    };
-
-    const popHeartFloatingBalloon = (balloon, balloonRect, gameRect, playSound = true) => {
+    const popHeartFloatingBalloon = (balloon, balloonRect, gameRect, playSound = true, respawn = true) => {
         const left = balloonRect.left - gameRect.left;
         const top = balloonRect.top - gameRect.top;
         const centerX = left + (balloonRect.width / 2);
@@ -6130,6 +6224,15 @@ const appVersion = '20261001-671';
         const popTimer = window.setTimeout(() => {
             heartBalloonRespawnTimers.delete(balloon);
             burst.remove();
+            if (!respawn) return;
+            if (heartBalloonRoundBalloons.includes(balloon)) {
+                balloon.classList.remove('is-popping', 'is-respawning');
+                ['left', 'top', 'bottom', 'width', 'height', 'opacity', 'transform'].forEach((property) => {
+                    balloon.style.removeProperty(property);
+                });
+                balloon.classList.add('is-round-ready');
+                return;
+            }
             respawnHeartFloatingBalloon(balloon, previousXPercent);
         }, 560);
         heartBalloonRespawnTimers.set(balloon, { timer: popTimer, burst });
@@ -6193,6 +6296,70 @@ const appVersion = '20261001-671';
         });
     };
 
+    const prepareHeartRainbowSparkles = () => {
+        if (!heartRainbowSparkles || heartRainbowSparkles.childElementCount) return;
+        for (let index = 0; index < 34; index += 1) {
+            const sparkle = document.createElement('span');
+            const x = 2 + (Math.random() * 96);
+            const normalizedX = x / 100;
+            const curveY = 82 - (68 * 4 * normalizedX * (1 - normalizedX));
+            sparkle.style.setProperty('--rainbow-sparkle-x', `${x.toFixed(1)}%`);
+            sparkle.style.setProperty('--rainbow-sparkle-y', `${Math.max(5, Math.min(88, curveY + ((Math.random() * 16) - 8))).toFixed(1)}%`);
+            sparkle.style.setProperty('--rainbow-sparkle-size', `${(0.55 + (Math.random() * 1.2)).toFixed(2)}rem`);
+            sparkle.style.setProperty('--rainbow-sparkle-delay', `${(0.15 + (Math.random() * 1.8)).toFixed(2)}s`);
+            sparkle.style.setProperty('--rainbow-sparkle-color', index % 3 === 0 ? '#fff9ae' : index % 3 === 1 ? '#ffffff' : '#ffb7ef');
+            heartRainbowSparkles.appendChild(sparkle);
+        }
+    };
+
+    const stopHeartRainbowCompletion = () => {
+        heartRainbowSession += 1;
+        heartRainbowTimers.forEach((timer) => window.clearTimeout(timer));
+        heartRainbowTimers = [];
+        if (heartRainbowAudio) {
+            heartRainbowAudio.pause();
+            heartRainbowAudio.currentTime = 0;
+            heartRainbowAudio = null;
+        }
+        heartRainbowCompletion?.classList.remove('is-active', 'is-finishing');
+        if (heartRainbowCompletion) heartRainbowCompletion.hidden = true;
+        heartMissionPage?.classList.remove('is-heart-rainbow-completion');
+    };
+
+    const startHeartRainbowCompletion = () => {
+        if (!heartMissionPage || heartMissionPage.hidden || !heartRainbowCompletion) {
+            startHeartVictoryCelebration();
+            return;
+        }
+        stopHeartRainbowCompletion();
+        const session = heartRainbowSession;
+        prepareHeartRainbowSparkles();
+        const launchTimer = window.setTimeout(() => {
+            if (session !== heartRainbowSession) return;
+            heartMissionPage.classList.add('is-heart-rainbow-completion');
+            heartRainbowCompletion.hidden = false;
+            heartRainbowCompletion.getBoundingClientRect();
+            heartRainbowCompletion.classList.add('is-active');
+            playUiClickSound('boardSuccess');
+            if (window.Audio) {
+                const rainbowAudio = new window.Audio(HEART_RAINBOW_AUDIO_SOURCE);
+                heartRainbowAudio = rainbowAudio;
+                rainbowAudio.preload = 'auto';
+                rainbowAudio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+                rainbowAudio.play().catch(() => {
+                    if (heartRainbowAudio === rainbowAudio) heartRainbowAudio = null;
+                });
+            }
+
+            const celebrationTimer = window.setTimeout(() => {
+                if (session !== heartRainbowSession) return;
+                startHeartVictoryCelebration();
+            }, HEART_RAINBOW_DRAW_MS + HEART_RAINBOW_HOLD_MS);
+            heartRainbowTimers.push(celebrationTimer);
+        }, HEART_RAINBOW_START_DELAY_MS);
+        heartRainbowTimers.push(launchTimer);
+    };
+
     const getHeartCelebrationAudio = (index) => {
         primeHeartCelebrationAudio();
         const cachedAudio = heartCelebrationAudioCache[index];
@@ -6229,6 +6396,7 @@ const appVersion = '20261001-671';
             heartGameCelebration?.classList.add('is-finishing');
             const revealTimer = window.setTimeout(() => {
                 if (session !== heartCelebrationSession) return;
+                stopHeartRainbowCompletion();
                 if (heartGameCelebration) heartGameCelebration.hidden = true;
                 heartMissionPage.classList.remove('is-heart-victory-celebration');
                 heartMissionPage.classList.add('is-heart-final-progress-visible');
@@ -6246,6 +6414,7 @@ const appVersion = '20261001-671';
     const startHeartVictoryCelebration = () => {
         if (!heartMissionPage || heartMissionPage.hidden) return;
         stopHeartVictoryCelebration();
+        heartMissionPage.classList.remove('is-heart-rainbow-preparing');
         const session = heartCelebrationSession;
         prepareHeartCelebrationConfetti();
         if (heartCupidGame) {
@@ -6310,7 +6479,18 @@ const appVersion = '20261001-671';
         if (reason === 'time') updateHeartGameHud();
         if (won) {
             stopHeartGameEndAudio();
-            startHeartVictoryCelebration();
+            heartBalloonRoundBalloons.forEach((balloon) => {
+                if (balloon.classList.contains('is-popping')) return;
+                balloon.classList.remove('is-round-entering', 'is-round-ready');
+                balloon.classList.add('is-round-leaving');
+            });
+            startHeartRainbowCompletion();
+            const clearSceneTimer = window.setTimeout(() => {
+                if (!heartGameEnded) return;
+                heartMissionPage?.classList.add('is-heart-rainbow-preparing');
+                heartCupidGame?.classList.add('is-clearing-for-rainbow');
+            }, HEART_ROUND_LEAVE_MS);
+            heartRainbowTimers.push(clearSceneTimer);
             return;
         }
         playHeartGameOverAudio(reason);
@@ -6337,34 +6517,39 @@ const appVersion = '20261001-671';
         clearHeartFreeze();
         heartGameColorIndex = 0;
         heartGameColorProgress = 0;
-        heartGameTimeRemainingMs = HEART_GAME_START_TIME_MS;
+        heartGameTimeRemainingMs = HEART_ROUND_TIME_MS;
         heartGameEnded = false;
-        heartGameDifficultyPhase = 0;
         heartGameSpeedRate = 0.82;
+        heartMissionPage?.classList.remove('is-heart-rainbow-preparing');
+        heartCupidGame?.classList.remove('is-clearing-for-rainbow');
+        clearHeartBalloonRoundTimers();
+        heartBalloonRoundId += 1;
+        heartBalloonRoundBalloons = [];
+        heartBalloonRoundTransitioning = false;
+        heartBalloonRoundPendingAdvance = false;
+        heartLastAnnouncedColorIndex = -1;
         if (heartCupidBowControl) heartCupidBowControl.disabled = false;
         heartGameResult?.classList.remove('is-visible');
         if (heartGameResult) heartGameResult.hidden = true;
         heartCupidGame?.querySelectorAll('.heart-hit-feedback').forEach((feedback) => feedback.remove());
+        heartCupidGame?.querySelector('.heart-round-target-cue')?.remove();
         heartFloatingBalloons.forEach(resetHeartFloatingBalloon);
-        updateHeartGameDifficulty(true);
-        refreshHeartBalloonColors();
+        arrangeHeartBalloonRound();
         updateHeartGameHud();
-        startHeartGameClock();
     };
 
     const handleHeartBalloonHit = ({ balloon, balloonRect, gameRect }) => {
-        if (heartGameEnded) return;
+        if (heartGameEnded || heartBalloonRoundTransitioning) return;
         const kind = balloon.dataset.balloonKind || (balloon.classList.contains('heart-floating-balloon') ? 'heart' : 'shape');
         const feedbackX = balloonRect.left - gameRect.left + (balloonRect.width / 2);
         const feedbackY = balloonRect.top - gameRect.top + (balloonRect.height * 0.3);
-        popHeartFloatingBalloon(balloon, balloonRect, gameRect, kind !== 'heart');
-
         if (kind === 'heart') {
             const challenge = HEART_COLOR_CHALLENGES[heartGameColorIndex];
             const poppedColor = HEART_COLOR_CHALLENGES.find(
                 (colorChallenge) => colorChallenge.key === balloon.dataset.heartColor,
             );
             if (!challenge || balloon.dataset.heartColor !== challenge.key) {
+                popHeartFloatingBalloon(balloon, balloonRect, gameRect, false, false);
                 showHeartHitFeedback(poppedColor?.label || 'HEART', feedbackX, feedbackY, 'negative');
                 if (window.Audio) {
                     const buzzerAudio = new window.Audio('assets/Audios/Sound effects/buzzer.mp3');
@@ -6375,15 +6560,15 @@ const appVersion = '20261001-671';
                 return;
             }
 
+            popHeartFloatingBalloon(balloon, balloonRect, gameRect, false, false);
+
             heartGameColorProgress += 1;
-            const timeBonusMs = balloon.classList.contains('is-small')
-                ? HEART_GAME_SMALL_HEART_BONUS_MS
-                : HEART_GAME_LARGE_HEART_BONUS_MS;
-            heartGameTimeRemainingMs += timeBonusMs;
-            syncHeartGameClockTickingAudio();
+            stopHeartGameClock();
+            stopHeartGameClockTickingAudio();
             showHeartHitFeedback(challenge.label, feedbackX, feedbackY, 'positive');
             if (window.Audio) {
-                const correctAudio = new window.Audio('assets/Audios/Sound effects/correct.mp3');
+                const correctAudio = new window.Audio(HEART_TARGET_POP_AUDIO_SOURCE);
+                correctAudio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
                 correctAudio.play().catch(() => playUiClickSound('chime'));
             } else {
                 playUiClickSound('chime');
@@ -6397,30 +6582,33 @@ const appVersion = '20261001-671';
                     finishHeartGame(true);
                     return;
                 }
-                refreshHeartBalloonColors();
-                playUiClickSound('starPop');
             }
-            updateHeartGameDifficulty();
             updateHeartGameHud();
+            heartBalloonRoundPendingAdvance = true;
+            const nextRoundTimer = window.setTimeout(startNextHeartBalloonRound, 260);
+            heartBalloonRoundTimers.push(nextRoundTimer);
             return;
         }
 
         if (kind === 'shape') {
-            heartGameTimeRemainingMs = Math.max(0, heartGameTimeRemainingMs - 10000);
+            popHeartFloatingBalloon(balloon, balloonRect, gameRect, true, false);
+            heartGameTimeRemainingMs = Math.max(0, heartGameTimeRemainingMs - 2000);
             syncHeartGameClockTickingAudio();
-            showHeartHitFeedback('-10s', feedbackX, feedbackY, 'negative');
+            showHeartHitFeedback('-2s', feedbackX, feedbackY, 'negative');
             updateHeartGameHud();
             if (heartGameTimeRemainingMs <= 0) finishHeartGame(false, 'time');
             return;
         }
 
         if (kind === 'freeze') {
+            popHeartFloatingBalloon(balloon, balloonRect, gameRect, true, false);
             activateHeartFreeze();
             showHeartHitFeedback('SLOW 5s', feedbackX, feedbackY, 'freeze');
             return;
         }
 
         if (kind === 'bomb') {
+            popHeartFloatingBalloon(balloon, balloonRect, gameRect, true, false);
             showHeartHitFeedback('BOOM!', feedbackX, feedbackY, 'negative');
             heartFloatingBalloons.forEach((candidate) => {
                 if (candidate === balloon || candidate.dataset.balloonKind !== 'heart' || candidate.classList.contains('is-popping')) return;
@@ -6437,6 +6625,7 @@ const appVersion = '20261001-671';
     };
 
     const stopHeartCupidGame = () => {
+        stopHeartRainbowCompletion();
         stopHeartVictoryCelebration();
         resetHeartGamePauseUi();
         stopHeartGameClock();
@@ -6448,6 +6637,12 @@ const appVersion = '20261001-671';
         }
         heartGameEnded = true;
         clearHeartFreeze();
+        clearHeartBalloonRoundTimers();
+        heartBalloonRoundId += 1;
+        heartBalloonRoundBalloons = [];
+        heartBalloonRoundTransitioning = false;
+        heartBalloonRoundPendingAdvance = false;
+        heartLastAnnouncedColorIndex = -1;
         heartFloatingBalloons.forEach(resetHeartFloatingBalloon);
         heartCupidGame?.querySelectorAll('.heart-balloon-pop-burst').forEach((burst) => burst.remove());
         heartCupidGame?.querySelectorAll('.heart-hit-feedback').forEach((feedback) => feedback.remove());
@@ -6459,6 +6654,8 @@ const appVersion = '20261001-671';
             heartCupidGame.hidden = true;
         }
         heartMissionPage?.classList.remove('is-heart-cupid-game-active');
+        heartMissionPage?.classList.remove('is-heart-rainbow-preparing');
+        heartCupidGame?.classList.remove('is-clearing-for-rainbow');
     };
 
     const startHeartCupidGame = () => {
@@ -6548,7 +6745,7 @@ const appVersion = '20261001-671';
         const trajectory = { ...heartCurrentTrajectory };
         heartCupidGame.classList.remove('is-aiming');
         heartCupidGame.classList.add('is-shooting');
-        heartFlyingArrow.hidden = false;
+        heartFlyingArrow.removeAttribute('hidden');
         playUiClickSound('spark');
         const startedAt = performance.now();
         const duration = 760;

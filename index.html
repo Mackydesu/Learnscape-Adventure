@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20261001-671">
+    <link rel="stylesheet" href="style.css?v=20261002-709">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -1212,7 +1212,7 @@
                 <strong>Time's Up!</strong>
             </div>
             <div class="oval-game-over-panel" hidden>
-                <strong>Game Over</strong>
+                <strong>Time's Up!</strong>
                 <span>Time's up!</span>
                 <button class="oval-game-over-retry" type="button">Retry</button>
             </div>
@@ -1251,9 +1251,9 @@
                     </div>
                 </div>
                 <div class="heart-game-center-hud">
-                    <div class="heart-game-timer" aria-label="45 seconds remaining">
+                    <div class="heart-game-timer" aria-label="10 seconds remaining">
                         <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="26" r="17" fill="none" stroke="currentColor" stroke-width="4"></circle><path d="M24 26 V15 M24 26 L33 31 M18 5 H30 M24 5 V9" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"></path></svg>
-                        <strong class="heart-game-timer-value">00:45</strong>
+                        <strong class="heart-game-timer-value">10</strong>
                     </div>
                     <div class="heart-freeze-status" hidden>
                         <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4 V44 M7 14 L41 34 M7 34 L41 14 M18 8 L24 14 L30 8 M18 40 L24 34 L30 40 M9 20 L17 18 L15 10 M39 28 L31 30 L33 38 M9 28 L17 30 L15 38 M39 20 L31 18 L33 10" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -1271,11 +1271,6 @@
             <div class="heart-balloon-field" aria-hidden="true">
                 <svg class="heart-balloon-defs" aria-hidden="true"><defs><symbol id="heartBalloonSymbol" viewBox="0 0 100 150"><path d="M50 84 C43 75 12 58 12 31 C12 10 38 3 50 23 C62 3 88 10 88 31 C88 58 57 75 50 84 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5"></path><ellipse cx="31" cy="28" rx="8" ry="13" fill="rgba(255,255,255,0.62)" transform="rotate(28 31 28)"></ellipse><path d="M50 82 L42 94 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 93 C34 109 66 119 47 148" fill="none" stroke="#8f5b72" stroke-width="2.5" stroke-linecap="round"></path></symbol></defs></svg>
                 <svg class="heart-floating-balloon is-large" data-balloon-kind="heart" viewBox="0 0 100 150" style="--balloon-x:12%;--balloon-duration:21s;--balloon-delay:-7s;--balloon-color:#ff4f91;--balloon-edge:#9d205a;"><use href="#heartBalloonSymbol"></use></svg>
-                <svg class="heart-floating-balloon is-large" data-balloon-kind="heart" viewBox="0 0 100 150" style="--balloon-x:38%;--balloon-duration:23s;--balloon-delay:-15s;--balloon-color:#f35dc4;--balloon-edge:#8d2577;"><use href="#heartBalloonSymbol"></use></svg>
-                <svg class="heart-floating-balloon is-large" data-balloon-kind="heart" viewBox="0 0 100 150" style="--balloon-x:63%;--balloon-duration:20s;--balloon-delay:-11s;--balloon-color:#ff8dba;--balloon-edge:#a82e68;"><use href="#heartBalloonSymbol"></use></svg>
-                <svg class="heart-floating-balloon is-small" data-balloon-kind="heart" viewBox="0 0 100 150" style="--balloon-x:88%;--balloon-duration:9s;--balloon-delay:-2s;--balloon-color:#ff665c;--balloon-edge:#9e2c35;"><use href="#heartBalloonSymbol"></use></svg>
-                <svg class="heart-floating-balloon is-small is-phase-hidden" data-balloon-kind="heart" data-final-heart="true" viewBox="0 0 100 150" style="--balloon-x:27%;--balloon-duration:8.6s;--balloon-delay:-5s;--balloon-color:#ff4f91;--balloon-edge:#9d205a;"><use href="#heartBalloonSymbol"></use></svg>
-                <svg class="heart-floating-balloon is-small is-phase-hidden" data-balloon-kind="heart" data-final-heart="true" viewBox="0 0 100 150" style="--balloon-x:73%;--balloon-duration:8.2s;--balloon-delay:-7s;--balloon-color:#ff72b6;--balloon-edge:#942b68;"><use href="#heartBalloonSymbol"></use></svg>
                 <svg class="shape-floating-balloon is-large" data-balloon-kind="shape" viewBox="0 0 100 150" style="--balloon-x:5%;--balloon-duration:18s;--balloon-delay:-3s;--balloon-color:#4fc5ff;--balloon-edge:#2166a5;"><circle cx="50" cy="42" r="34" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5"></circle><ellipse cx="35" cy="27" rx="8" ry="12" fill="rgba(255,255,255,0.62)" transform="rotate(28 35 27)"></ellipse><path d="M50 75 L42 88 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 87 C34 106 66 119 47 148" fill="none" stroke="#557086" stroke-width="2.5"></path></svg>
                 <svg class="shape-floating-balloon is-large" viewBox="0 0 100 150" style="--balloon-x:18%;--balloon-duration:20s;--balloon-delay:-14s;--balloon-color:#62d26f;--balloon-edge:#24713a;"><rect x="17" y="9" width="66" height="66" rx="8" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5"></rect><path d="M50 74 L42 88 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 87 C34 106 66 119 47 148" fill="none" stroke="#55765b" stroke-width="2.5"></path></svg>
                 <svg class="shape-floating-balloon is-large" viewBox="0 0 100 150" style="--balloon-x:31%;--balloon-duration:16.5s;--balloon-delay:-10s;--balloon-color:#ffd84a;--balloon-edge:#a66a14;"><path d="M50 7 L88 74 H12 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="5" stroke-linejoin="round"></path><path d="M50 72 L42 87 H58 Z" fill="var(--balloon-color)" stroke="var(--balloon-edge)" stroke-width="4"></path><path d="M50 86 C34 106 66 119 47 148" fill="none" stroke="#856b41" stroke-width="2.5"></path></svg>
@@ -1313,7 +1308,7 @@
                 <path class="heart-aim-trail"></path>
                 <g class="heart-flying-arrow" hidden>
                     <path d="M-34 0 H-4" fill="none" stroke="url(#heartFlyingArrowGradient)" stroke-width="7" stroke-linecap="round"></path>
-                    <path d="M-4 0 C-16 12 -10 28 4 25 C18 22 30 0 30 0 C30 0 18 -22 4 -25 C-10 -28 -16 -12 -4 0 Z" fill="#ff6cab" stroke="#8f2858" stroke-width="3"></path>
+                    <path class="heart-firing-projectile" d="M-4 0 C-16 12 -10 28 4 25 C18 22 30 0 30 0 C30 0 18 -22 4 -25 C-10 -28 -16 -12 -4 0 Z" fill="#ff58a4" stroke="#8f2858" stroke-width="3.5"></path>
                     <path d="M-31 0 L-43 -10 L-39 0 L-43 10 Z" fill="#ff78b5" stroke="#8f2858" stroke-width="3"></path>
                 </g>
             </svg>
@@ -1343,6 +1338,26 @@
                     <button class="heart-game-retry-button" type="button">Play Again</button>
                 </div>
             </div>
+        </section>
+        <section class="heart-rainbow-completion" role="status" aria-label="Rainbow complete!" hidden>
+            <div class="heart-rainbow-sparkles" aria-hidden="true"></div>
+            <svg class="heart-rainbow-arc" viewBox="0 0 1000 320" preserveAspectRatio="none" aria-hidden="true">
+                <defs>
+                    <filter id="heartRainbowGlow" x="-20%" y="-50%" width="140%" height="200%">
+                        <feGaussianBlur stdDeviation="8" result="blur"></feGaussianBlur>
+                        <feMerge><feMergeNode in="blur"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
+                    </filter>
+                </defs>
+                <g filter="url(#heartRainbowGlow)">
+                    <path class="heart-rainbow-band band-red" d="M 10 218 Q 500 -164 990 218"></path>
+                    <path class="heart-rainbow-band band-orange" d="M 10 218 Q 500 -164 990 218" transform="translate(0 15)"></path>
+                    <path class="heart-rainbow-band band-yellow" d="M 10 218 Q 500 -164 990 218" transform="translate(0 30)"></path>
+                    <path class="heart-rainbow-band band-green" d="M 10 218 Q 500 -164 990 218" transform="translate(0 45)"></path>
+                    <path class="heart-rainbow-band band-blue" d="M 10 218 Q 500 -164 990 218" transform="translate(0 60)"></path>
+                    <path class="heart-rainbow-band band-indigo" d="M 10 218 Q 500 -164 990 218" transform="translate(0 75)"></path>
+                    <path class="heart-rainbow-band band-violet" d="M 10 218 Q 500 -164 990 218" transform="translate(0 90)"></path>
+                </g>
+            </svg>
         </section>
         <section class="heart-game-celebration" role="status" aria-live="polite" hidden>
             <div class="heart-celebration-confetti" aria-hidden="true"></div>
@@ -1477,7 +1492,7 @@
                     </svg>
                 </div>
                 <strong class="star-mission-timeout-title">TIME'S UP!</strong>
-                <span class="star-mission-timeout-copy">Game Over</span>
+                <span class="star-mission-timeout-copy">Time's Up!</span>
                 <button class="star-mission-retry-button" type="button">Retry</button>
             </div>
         </section>
@@ -1904,7 +1919,7 @@
 
     
 
-    <script src="script.js?v=20261001-671"></script>
+    <script src="script.js?v=20261002-709"></script>
     </div>
 
     <script>

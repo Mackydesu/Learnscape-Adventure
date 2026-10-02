@@ -6279,21 +6279,21 @@ body *::after {
     align-items: center;
     justify-content: center;
     gap: 0.62rem;
-    min-width: clamp(8.8rem, 12vw, 11rem);
-    padding: clamp(0.55rem, 1vw, 0.78rem) clamp(0.8rem, 1.4vw, 1.15rem);
+    min-width: clamp(8rem, 11vw, 10rem);
+    padding: clamp(0.75rem, 1.4vw, 1.05rem) clamp(1rem, 2vw, 1.55rem);
     color: #317941;
     border-color: #4b9a59;
     background: rgba(235, 255, 218, 0.94);
 }
 
 .heart-game-timer svg {
-    width: clamp(2rem, 3vw, 2.65rem);
-    height: clamp(2rem, 3vw, 2.65rem);
+    width: clamp(3.2rem, 4.5vw, 4.2rem);
+    height: clamp(3.2rem, 4.5vw, 4.2rem);
 }
 
 .heart-game-timer-value {
     font-family: 'Fredoka', sans-serif;
-    font-size: clamp(1.4rem, 2.4vw, 2rem);
+    font-size: clamp(2.2rem, 4vw, 3.6rem);
     letter-spacing: 0;
 }
 
@@ -6429,18 +6429,18 @@ body *::after {
     }
 
     .heart-game-timer {
-        gap: 0.3rem;
-        min-width: 4.5rem;
-        padding: 0.35rem 0.42rem;
+        gap: 0.4rem;
+        min-width: 5.5rem;
+        padding: 0.5rem 0.58rem;
     }
 
     .heart-game-timer svg {
-        width: 1.35rem;
-        height: 1.35rem;
+        width: 2rem;
+        height: 2rem;
     }
 
     .heart-game-timer-value {
-        font-size: clamp(0.88rem, 3.8vw, 1.2rem);
+        font-size: clamp(1.45rem, 5vw, 2rem);
     }
 
     .heart-color-gauge {
@@ -6567,6 +6567,24 @@ body *::after {
     animation-play-state: paused !important;
 }
 
+.heart-cupid-game.is-clearing-for-rainbow .heart-game-hud,
+.heart-cupid-game.is-clearing-for-rainbow .heart-game-pause-button,
+.heart-cupid-game.is-clearing-for-rainbow .heart-balloon-field,
+.heart-cupid-game.is-clearing-for-rainbow .heart-shot-field,
+.heart-cupid-game.is-clearing-for-rainbow .heart-cupid-bow-control {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.45s ease, visibility 0s linear 0.45s;
+}
+
+#learnscape-shape-area-6-page.is-heart-rainbow-preparing > .game-return-btn {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.45s ease, visibility 0s linear 0.45s;
+}
+
 .heart-freeze-status {
     justify-self: center;
     display: flex;
@@ -6627,6 +6645,27 @@ body *::after {
     will-change: transform, opacity;
 }
 
+.heart-cupid-game .heart-floating-balloon,
+.heart-cupid-game .shape-floating-balloon,
+.heart-cupid-game .powerup-floating-balloon {
+    display: none;
+}
+
+.heart-cupid-game .heart-floating-balloon.is-round-entering,
+.heart-cupid-game .heart-floating-balloon.is-round-ready,
+.heart-cupid-game .heart-floating-balloon.is-round-leaving,
+.heart-cupid-game .heart-floating-balloon.is-popping,
+.heart-cupid-game .shape-floating-balloon.is-round-entering,
+.heart-cupid-game .shape-floating-balloon.is-round-ready,
+.heart-cupid-game .shape-floating-balloon.is-round-leaving,
+.heart-cupid-game .shape-floating-balloon.is-popping,
+.heart-cupid-game .powerup-floating-balloon.is-round-entering,
+.heart-cupid-game .powerup-floating-balloon.is-round-ready,
+.heart-cupid-game .powerup-floating-balloon.is-round-leaving,
+.heart-cupid-game .powerup-floating-balloon.is-popping {
+    display: block;
+}
+
 .heart-shot-field {
     position: absolute;
     inset: 0;
@@ -6637,15 +6676,86 @@ body *::after {
     pointer-events: none;
 }
 
-.heart-floating-balloon.is-small,
-.shape-floating-balloon.is-small {
-    width: 5.25rem;
-}
-
 .heart-floating-balloon.is-large,
 .shape-floating-balloon.is-large,
 .powerup-floating-balloon.is-large {
-    width: 8rem;
+    width: clamp(8rem, 15vw, 13rem);
+}
+
+.heart-balloon-number {
+    fill: #ffffff;
+    stroke: rgba(75, 24, 57, 0.92);
+    stroke-width: 4px;
+    paint-order: stroke fill;
+    font-family: "Quicksand", sans-serif;
+    font-size: 34px;
+    font-weight: 900;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+    filter: drop-shadow(0 2px 1px rgba(62, 18, 45, 0.35));
+}
+
+.heart-cupid-game .heart-floating-balloon.is-round-entering,
+.heart-cupid-game .shape-floating-balloon.is-round-entering,
+.heart-cupid-game .powerup-floating-balloon.is-round-entering,
+.heart-cupid-game .heart-floating-balloon.is-round-ready,
+.heart-cupid-game .shape-floating-balloon.is-round-ready,
+.heart-cupid-game .powerup-floating-balloon.is-round-ready,
+.heart-cupid-game .heart-floating-balloon.is-round-leaving,
+.heart-cupid-game .shape-floating-balloon.is-round-leaving,
+.heart-cupid-game .powerup-floating-balloon.is-round-leaving {
+    left: var(--round-x);
+    top: var(--round-y);
+    bottom: auto;
+}
+
+.heart-cupid-game .is-round-entering {
+    animation: heartBalloonRoundEnter 0.82s cubic-bezier(0.18, 0.78, 0.28, 1.05) var(--round-delay) both;
+}
+
+.heart-cupid-game .is-round-ready {
+    opacity: 1;
+    transform: translateX(-50%) rotate(var(--round-tilt));
+    animation: heartBalloonSteadyFloat var(--round-float-duration) ease-in-out infinite;
+}
+
+.heart-cupid-game .is-round-leaving {
+    animation: heartBalloonRoundLeave 0.72s cubic-bezier(0.45, 0, 0.85, 0.45) both;
+}
+
+.heart-cupid-game .is-round-hidden {
+    display: none !important;
+    opacity: 0;
+    animation: none;
+}
+
+.heart-round-target-cue {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 6;
+    width: max-content;
+    max-width: min(86vw, 36rem);
+    padding: clamp(1.1rem, 2.6vw, 1.75rem) clamp(2rem, 5vw, 4rem);
+    color: #ffffff;
+    font-family: 'Fredoka', sans-serif;
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    font-weight: 900;
+    line-height: 1.15;
+    text-align: center;
+    white-space: normal;
+    text-wrap: balance;
+    border: 0.3rem solid var(--heart-cue-edge);
+    border-radius: 999px;
+    background: var(--heart-cue-color);
+    box-shadow:
+        inset 0 0.18rem 0 rgba(255, 255, 255, 0.5),
+        0 0.3rem 0 var(--heart-cue-edge),
+        0 0.8rem 1.8rem rgba(67, 20, 48, 0.4);
+    text-shadow: 0 0.15rem 0 var(--heart-cue-edge);
+    pointer-events: none;
+    animation: heartRoundTargetCue 1.2s cubic-bezier(0.2, 0.8, 0.25, 1) both;
 }
 
 .heart-floating-balloon.is-popping,
@@ -6813,10 +6923,89 @@ body *::after {
     box-shadow: inset 0 0.12rem 0 rgba(255, 255, 255, 0.45), 0 0.1rem 0 #76264e;
 }
 
+.heart-rainbow-completion {
+    position: absolute;
+    inset: 0;
+    z-index: 24;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 50% 72%, rgba(255, 255, 220, 0.4), transparent 35%),
+        linear-gradient(180deg, rgba(91, 52, 143, 0.08), rgba(255, 179, 222, 0.2));
+    transition: opacity 0.45s ease, visibility 0s linear 0.45s;
+}
+
+.heart-rainbow-completion[hidden] {
+    display: none;
+}
+
+.heart-rainbow-completion.is-active {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease;
+}
+
+.heart-rainbow-completion.is-finishing {
+    opacity: 0;
+    transition-duration: 0.5s;
+}
+
+.shape-area-preview-page.is-heart-rainbow-completion .heart-cupid-game {
+    filter: brightness(0.78) saturate(0.86);
+    transition: filter 0.45s ease;
+}
+
+.heart-rainbow-arc {
+    position: absolute;
+    left: -1%;
+    bottom: -2%;
+    width: 102%;
+    height: 82%;
+    overflow: visible;
+}
+
+.heart-rainbow-band {
+    fill: none;
+    stroke-linecap: round;
+    stroke-dasharray: 1400;
+    stroke-dashoffset: 1400;
+    stroke-width: 17;
+    animation: heartRainbowArcDraw 2.4s linear forwards;
+}
+
+.heart-rainbow-band.band-red { stroke: #ff4257; }
+.heart-rainbow-band.band-orange { stroke: #ff9338; }
+.heart-rainbow-band.band-yellow { stroke: #ffe24a; }
+.heart-rainbow-band.band-green { stroke: #58d463; }
+.heart-rainbow-band.band-blue { stroke: #44a5ff; }
+.heart-rainbow-band.band-indigo { stroke: #5c58d9; }
+.heart-rainbow-band.band-violet { stroke: #b15bea; }
+
+.heart-rainbow-sparkles {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+}
+
+.heart-rainbow-sparkles span {
+    position: absolute;
+    left: var(--rainbow-sparkle-x);
+    top: var(--rainbow-sparkle-y);
+    width: var(--rainbow-sparkle-size);
+    height: var(--rainbow-sparkle-size);
+    opacity: 0;
+    background: var(--rainbow-sparkle-color);
+    clip-path: polygon(50% 0, 61% 36%, 100% 50%, 61% 64%, 50% 100%, 39% 64%, 0 50%, 39% 36%);
+    filter: drop-shadow(0 0 0.45rem var(--rainbow-sparkle-color));
+    animation: heartRainbowSparkle 0.9s ease-in-out var(--rainbow-sparkle-delay) infinite;
+}
+
 .heart-game-celebration {
     position: absolute;
     inset: 0;
-    z-index: 22;
+    z-index: 26;
     overflow: hidden;
     opacity: 0;
     visibility: hidden;
@@ -6949,6 +7138,18 @@ body *::after {
     100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
 }
 
+@keyframes heartRainbowArcDraw {
+    0% { stroke-dashoffset: 1400; opacity: 0.35; }
+    8% { opacity: 1; }
+    100% { stroke-dashoffset: 0; opacity: 1; }
+}
+
+@keyframes heartRainbowSparkle {
+    0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.2) rotate(0deg); }
+    45% { opacity: 1; transform: translate(-50%, -50%) scale(1.35) rotate(90deg); }
+    70% { opacity: 0.85; transform: translate(-50%, -50%) scale(0.9) rotate(145deg); }
+}
+
 @keyframes heartCelebrationConfettiFall {
     0% { opacity: 0; transform: translate3d(0, -12vh, 0) rotate(45deg) scale(0.45); }
     12% { opacity: 1; }
@@ -6993,6 +7194,26 @@ body *::after {
 
 .heart-flying-arrow {
     filter: drop-shadow(0 0 0.65rem rgba(255, 240, 135, 0.95));
+}
+
+.heart-flying-arrow[hidden] {
+    display: none;
+}
+
+.heart-cupid-game.is-shooting .heart-flying-arrow:not([hidden]) {
+    display: inline;
+}
+
+.heart-firing-projectile {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: heartFiringProjectilePulse 0.3s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 0.45rem #fff4a8) drop-shadow(0 0 0.8rem rgba(255, 74, 157, 0.95));
+}
+
+@keyframes heartFiringProjectilePulse {
+    from { transform: scale(1.05); }
+    to { transform: scale(1.28); }
 }
 
 .heart-cupid-bow-control {
@@ -7070,6 +7291,46 @@ body *::after {
         opacity: 0;
         transform: translate(calc(-50% + 0.65rem), -138vh) rotate(-3deg);
     }
+}
+
+@keyframes heartBalloonRoundEnter {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, 78vh) rotate(-7deg);
+    }
+    72% { opacity: 1; }
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) rotate(var(--round-tilt));
+    }
+}
+
+@keyframes heartBalloonRoundLeave {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) rotate(var(--round-tilt));
+    }
+    18% { transform: translate(-50%, 0.8rem) rotate(0deg); }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -85vh) rotate(8deg);
+    }
+}
+
+@keyframes heartBalloonSteadyFloat {
+    0%, 100% {
+        transform: translate(-50%, 0) rotate(var(--round-tilt));
+    }
+    50% {
+        transform: translate(-50%, -0.75rem) rotate(0deg);
+    }
+}
+
+@keyframes heartRoundTargetCue {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.35) rotate(-4deg); }
+    20% { opacity: 1; transform: translate(-50%, -50%) scale(1.12) rotate(2deg); }
+    34%, 72% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.88); }
 }
 
 @keyframes heartBalloonPop {
