@@ -244,6 +244,11 @@ body.game3-page {
     );
 }
 
+body.is-onboarding-profile-locked .onboarding-dim {
+    pointer-events: auto;
+    cursor: default;
+}
+
 .onboarding-coach {
     position: fixed;
     inset: 0;
@@ -609,15 +614,25 @@ body.is-page-loading > :not(.page-loading-overlay) {
     inset: 0;
     z-index: 999;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
+    padding: 2.5vw;
+    background: rgba(0, 0, 0, 0.72);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s ease;
+}
+
+body.is-initial-loading .page-loading-overlay {
+    align-items: flex-end;
     padding: clamp(1.5rem, 5vh, 4rem) clamp(1rem, 4vw, 3rem);
     background:
         linear-gradient(180deg, rgba(5, 40, 37, 0.08) 0%, rgba(4, 35, 30, 0.18) 56%, rgba(2, 20, 17, 0.68) 100%),
         url('assets/Backgrounds/bgintro.webp') center / cover no-repeat;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.28s ease;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
 }
 
 body.is-page-loading .page-loading-overlay {
@@ -768,7 +783,7 @@ body.is-windowed-fallback .fullscreen-restore-overlay {
     }
 }
 
-.page-loading-panel {
+.initial-loading-panel {
     position: relative;
     z-index: 1;
     display: flex;
@@ -779,7 +794,7 @@ body.is-windowed-fallback .fullscreen-restore-overlay {
     margin-bottom: max(0rem, env(safe-area-inset-bottom, 0px));
 }
 
-.page-loading-bar {
+.initial-loading-bar {
     width: 100%;
     height: clamp(1.45rem, 3.5vh, 2rem);
     padding: clamp(0.2rem, 0.5vw, 0.3rem);
@@ -793,7 +808,7 @@ body.is-windowed-fallback .fullscreen-restore-overlay {
         inset 0 0.12rem 0 rgba(255, 255, 255, 0.82);
 }
 
-.page-loading-bar span {
+.initial-loading-bar span {
     display: block;
     width: 100%;
     height: 100%;
@@ -826,13 +841,89 @@ body.is-windowed-fallback .fullscreen-restore-overlay {
     to { transform: scaleX(1); }
 }
 
-body.is-page-loading:not(.is-initial-loading) .page-loading-bar span {
-    animation: loadingBarFill 0.9s ease-out forwards, loadingBarStripes 0.55s linear infinite;
-}
-
 @keyframes loadingBarStripes {
     from { background-position: 0 0, 0 0; }
     to { background-position: 32px 0, 0 0; }
+}
+
+.route-loading-panel {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    width: auto;
+}
+
+body.is-page-loading:not(.is-initial-loading) .initial-loading-panel {
+    display: none;
+}
+
+body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
+    display: flex;
+}
+
+.page-loading-art {
+    display: block;
+    width: min(70vw, 420px);
+    max-height: 58vh;
+    border-radius: 14px;
+    object-fit: contain;
+    filter:
+        drop-shadow(0 12px 20px rgba(21, 63, 56, 0.26))
+        drop-shadow(0 0 20px rgba(255, 216, 77, 0.25));
+    animation: loadingFloat 1.8s ease-in-out infinite;
+}
+
+.route-loading-bar {
+    width: min(64vw, 380px);
+    height: 22px;
+    padding: 4px;
+    overflow: hidden;
+    border: 3px solid #7a4a2a;
+    border-radius: 999px;
+    background: #fff7d4;
+    box-shadow:
+        0 5px 0 #7a4a2a,
+        0 10px 18px rgba(21, 63, 56, 0.28),
+        inset 0 2px 0 rgba(255, 255, 255, 0.72);
+}
+
+.route-loading-bar span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.38) 0 12%, transparent 12% 24%) 0 0 / 32px 100%,
+        linear-gradient(90deg, #8bd943 0%, #4fd6e8 55%, #ffd84d 100%);
+    box-shadow: inset 0 -2px 0 rgba(21, 63, 56, 0.2);
+    transform-origin: left center;
+    animation: loadingBarFill 0.9s ease-out forwards, loadingBarStripes 0.45s linear infinite;
+}
+
+.route-loading-text {
+    display: inline-block;
+    width: fit-content;
+    max-width: min(82vw, 360px);
+    margin: 0;
+    padding: 10px 18px;
+    border: 1px solid rgba(255, 244, 95, 0.35);
+    border-radius: 999px;
+    background: rgba(21, 63, 56, 0.84);
+    color: #fffbe6;
+    box-shadow:
+        0 8px 18px rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    font: 700 clamp(1.05rem, 3vw, 1.4rem)/1.2 'Fredoka', sans-serif;
+    letter-spacing: 0.02em;
+    text-align: center;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.22);
+    white-space: nowrap;
+}
+
+@keyframes loadingFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
 }
 
 .game-start-page {

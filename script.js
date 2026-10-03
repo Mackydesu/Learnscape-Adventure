@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-const appVersion = '20261003-833';
+const appVersion = '20261003-837';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -11755,15 +11755,11 @@ const appVersion = '20261003-833';
         if (circleIllustrationReplayImage) {
             circleIllustrationReplayImage.src = 'assets/Buttons/Retry.webp';
         }
-        if (circleIllustrationProgress) circleIllustrationProgress.dataset.progressStage = 'hunt';
-        circleIllustrationReplayButton?.setAttribute('aria-label', 'Retry circle hunt');
-        const secondStarTimerId = window.setTimeout(() => {
+        if (circleIllustrationProgress) {
+            circleIllustrationProgress.dataset.progressStage = 'hunt';
             setCircleIllustrationEarnedStars(2);
-            circleIllustrationCelebrationTimers = circleIllustrationCelebrationTimers.filter(
-                (timerId) => timerId !== secondStarTimerId,
-            );
-        }, 40);
-        circleIllustrationCelebrationTimers.push(secondStarTimerId);
+        }
+        circleIllustrationReplayButton?.setAttribute('aria-label', 'Retry circle hunt');
     };
 
     const resetCircleHunt = () => {
@@ -12887,11 +12883,18 @@ const appVersion = '20261003-833';
     });
 
     const createLoadingMarkup = () => `
-        <div class="page-loading-panel" role="status">
+        <div class="page-loading-panel initial-loading-panel" role="status">
             <p class="page-loading-text">Game Loading...</p>
-            <div class="page-loading-bar" role="progressbar" aria-label="Loading game assets and contents" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="initial-loading-bar" role="progressbar" aria-label="Loading game assets and contents" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                 <span></span>
             </div>
+        </div>
+        <div class="page-loading-panel route-loading-panel" role="status">
+            <img class="page-loading-art" src="assets/Backgrounds/loadingscreen.png" alt="Loading">
+            <div class="route-loading-bar" aria-hidden="true">
+                <span></span>
+            </div>
+            <p class="route-loading-text">Loading Adventure</p>
         </div>
     `;
 
