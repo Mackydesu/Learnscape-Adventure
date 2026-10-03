@@ -13,9 +13,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20261003-831">
+    <link rel="stylesheet" href="style.css?v=20261003-833">
 </head>
-<body class="title-page">
+<body class="title-page is-page-loading is-initial-loading" aria-busy="true">
     <div id="app-shell-container" class="app-shell-container">
     <div class="rotate-overlay" aria-hidden="true">
         <div class="rotate-panel">
@@ -35,13 +35,12 @@
         </div>
     </div>
 
-    <div class="page-loading-overlay" aria-live="polite" hidden>
+    <div class="page-loading-overlay" aria-live="polite">
         <div class="page-loading-panel" role="status">
-            <img class="page-loading-art" src="assets/Backgrounds/loadingscreen.png" alt="Loading">
-            <div class="page-loading-bar" aria-hidden="true">
+            <p class="page-loading-text">Game Loading...</p>
+            <div class="page-loading-bar" role="progressbar" aria-label="Loading game assets and contents" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                 <span></span>
             </div>
-            <p class="page-loading-text">Loading Adventure</p>
         </div>
     </div>
 
@@ -50,11 +49,11 @@
             <p class="fullscreen-restore-kicker">Game Paused</p>
             <h2 id="fullscreen-restore-title">Fullscreen Paused</h2>
             <p id="fullscreen-restore-copy" class="fullscreen-restore-copy">Tap the button below to continue your adventure in fullscreen.</p>
-            <button class="fullscreen-restore-button" type="button" aria-label="Return game to fullscreen">
+            <button class="fullscreen-restore-button" type="button" aria-label="Enter fullscreen">
                 <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
                     <path d="M38 18H18v20M62 18h20v20M18 62v20h20M82 62v20H62"></path>
                 </svg>
-                <span>Return to Fullscreen</span>
+                <span>Enter Fullscreen</span>
             </button>
         </div>
     </div>
@@ -2142,7 +2141,7 @@
 
     
 
-    <script src="script.js?v=20261003-831"></script>
+    <script src="script.js?v=20261003-833"></script>
     </div>
 
     <script>
@@ -2465,6 +2464,7 @@
             };
 
             const loadingOverlay = document.querySelector('.page-loading-overlay');
+            const loadingProgressBar = loadingOverlay?.querySelector('.page-loading-bar');
             const body = document.body;
             const routeBodyClasses = ['title-page', 'about-page', 'game3-page', 'gameplay-page'];
             let loadingTimer = null;
@@ -2472,6 +2472,25 @@
             let currentRoute = 'title';
             let currentRouteKey = 'title';
             let isNavigating = false;
+            let isInitialBootReady = false;
+            let initialLoadingProgress = 0;
+            const initialBootStartedAt = performance.now();
+
+            const setInitialLoadingProgress = (value) => {
+                const nextValue = Math.max(initialLoadingProgress, Math.min(100, Math.round(value)));
+                initialLoadingProgress = nextValue;
+                loadingOverlay?.style.setProperty('--loading-progress', String(nextValue));
+                loadingProgressBar?.setAttribute('aria-valuenow', String(nextValue));
+            };
+            setInitialLoadingProgress(4);
+
+            const blockInteractionUntilReady = (event) => {
+                if (!body.classList.contains('is-initial-loading')) return;
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            };
+            document.addEventListener('click', blockInteractionUntilReady, true);
+            document.addEventListener('keydown', blockInteractionUntilReady, true);
 
             const aboutTabs = Array.from(document.querySelectorAll('[data-about-view]'));
             const aboutPanels = Array.from(document.querySelectorAll('[data-about-panel]'));
@@ -2517,6 +2536,7 @@
 
             const introFullscreenToggle = document.getElementById('intro-fullscreen-toggle');
             const fullscreenRestoreButton = document.querySelector('.fullscreen-restore-button');
+            const fullscreenRestoreButtonText = fullscreenRestoreButton?.querySelector('span');
             const fullscreenRestoreKicker = document.querySelector('.fullscreen-restore-kicker');
             const fullscreenRestoreTitle = document.getElementById('fullscreen-restore-title');
             const fullscreenRestoreCopy = document.getElementById('fullscreen-restore-copy');
@@ -2768,6 +2788,13 @@
                         ? 'Tap below to continue your adventure in fullscreen.'
                         : 'Tap the button below to continue your adventure in fullscreen.';
                 }
+                if (fullscreenRestoreButtonText) {
+                    fullscreenRestoreButtonText.textContent = isIntro ? 'Enter Fullscreen' : 'Return to Fullscreen';
+                }
+                fullscreenRestoreButton?.setAttribute(
+                    'aria-label',
+                    isIntro ? 'Enter fullscreen' : 'Return game to fullscreen',
+                );
 
                 Object.entries(pages).forEach(([name, page]) => {
                     if (!page) return;
@@ -2794,6 +2821,10 @@
             };
 
             const hideLoading = (onHidden = null) => {
+                if (body.classList.contains('is-initial-loading') && !isInitialBootReady) {
+                    return;
+                }
+
                 if (loadingTimer) {
                     window.clearTimeout(loadingTimer);
                     loadingTimer = null;
@@ -2806,6 +2837,7 @@
 
                 if (loadingOverlay) {
                     body.classList.remove('is-page-loading');
+                    body.setAttribute('aria-busy', 'false');
                     loadingHideTimer = window.setTimeout(() => {
                         loadingOverlay.hidden = true;
                         loadingHideTimer = null;
@@ -2826,6 +2858,7 @@
                     loadingOverlay.hidden = false;
                     loadingOverlay.getBoundingClientRect();
                     body.classList.add('is-page-loading');
+                    body.setAttribute('aria-busy', 'true');
                 }
             };
 
@@ -5530,8 +5563,102 @@
             document.addEventListener('MSFullscreenChange', pauseOnboardingOutsideFullscreen);
             if (hasAcceptedTermsPrivacy() && !isOnboardingComplete()) window.setTimeout(promptFullscreenBeforeOnboarding, 0);
 
+            const waitForWindowLoad = () => {
+                if (document.readyState === 'complete') return Promise.resolve();
+                return new Promise((resolve) => window.addEventListener('load', resolve, { once: true }));
+            };
+
+            const trackInitialImages = () => {
+                const images = Array.from(document.images);
+                if (!images.length) {
+                    setInitialLoadingProgress(70);
+                    return Promise.resolve();
+                }
+
+                let completedImages = 0;
+                const markImageComplete = () => {
+                    completedImages += 1;
+                    setInitialLoadingProgress(8 + ((completedImages / images.length) * 62));
+                };
+
+                return Promise.all(images.map((image) => new Promise((resolve) => {
+                    let settled = false;
+                    const finish = () => {
+                        if (settled) return;
+                        settled = true;
+                        image.removeEventListener('load', finish);
+                        image.removeEventListener('error', finish);
+                        markImageComplete();
+                        resolve();
+                    };
+
+                    if (image.complete) {
+                        if (typeof image.decode === 'function' && image.naturalWidth > 0) {
+                            image.decode().catch(() => undefined).then(finish);
+                        } else {
+                            finish();
+                        }
+                        return;
+                    }
+
+                    image.addEventListener('load', () => {
+                        if (typeof image.decode === 'function') {
+                            image.decode().catch(() => undefined).then(finish);
+                        } else {
+                            finish();
+                        }
+                    }, { once: true });
+                    image.addEventListener('error', finish, { once: true });
+                })));
+            };
+
+            const waitForGameInitialization = () => {
+                if (window.__learnscapeGameInitialized === true) return Promise.resolve();
+                return new Promise((resolve) => {
+                    window.addEventListener('learnscape:gameinitialized', resolve, { once: true });
+                });
+            };
+
+            const waitForFonts = () => {
+                if (!document.fonts?.ready) return Promise.resolve();
+                return document.fonts.ready.catch(() => undefined);
+            };
+
+            const completeInitialBoot = async () => {
+                const imagesReady = trackInitialImages();
+                const appReady = Promise.all([
+                    waitForWindowLoad(),
+                    waitForFonts(),
+                    waitForGameInitialization(),
+                ]);
+
+                await imagesReady;
+                setInitialLoadingProgress(78);
+                await appReady;
+                setInitialLoadingProgress(97);
+
+                const minimumLoadingTime = 1200;
+                const remainingTime = Math.max(0, minimumLoadingTime - (performance.now() - initialBootStartedAt));
+                if (remainingTime > 0) {
+                    await new Promise((resolve) => window.setTimeout(resolve, remainingTime));
+                }
+
+                await new Promise((resolve) => {
+                    window.requestAnimationFrame(() => window.requestAnimationFrame(resolve));
+                });
+
+                setInitialLoadingProgress(100);
+                await new Promise((resolve) => window.setTimeout(resolve, 350));
+
+                isInitialBootReady = true;
+                body.classList.remove('is-initial-loading');
+                hideLoading(() => fullscreenRestoreButton?.focus({ preventScroll: true }));
+                window.dispatchEvent(new CustomEvent('learnscape:appready'));
+            };
+
             syncFullscreenClass();
             setRoute(parseTarget(location.hash || 'title'), true);
+            completeInitialBoot();
         })();
     </script>
 </body>

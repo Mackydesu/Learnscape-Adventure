@@ -609,11 +609,12 @@ body.is-page-loading > :not(.page-loading-overlay) {
     inset: 0;
     z-index: 999;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
-    padding: 2.5vw;
-    background: rgba(0, 0, 0, 0.72);
-    backdrop-filter: blur(4px);
+    padding: clamp(1.5rem, 5vh, 4rem) clamp(1rem, 4vw, 3rem);
+    background:
+        linear-gradient(180deg, rgba(5, 40, 37, 0.08) 0%, rgba(4, 35, 30, 0.18) 56%, rgba(2, 20, 17, 0.68) 100%),
+        url('assets/Backgrounds/bgintro.webp') center / cover no-repeat;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.28s ease;
@@ -768,37 +769,28 @@ body.is-windowed-fallback .fullscreen-restore-overlay {
 }
 
 .page-loading-panel {
-    width: auto;
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 18px;
-}
-
-.page-loading-art {
-    width: min(70vw, 420px);
-    max-height: 58vh;
-    object-fit: contain;
-    display: block;
-    border-radius: 14px;
-    filter:
-        drop-shadow(0 12px 20px rgba(21, 63, 56, 0.26))
-        drop-shadow(0 0 20px rgba(255, 216, 77, 0.25));
-    animation: loadingFloat 1.8s ease-in-out infinite;
+    gap: clamp(0.65rem, 1.6vh, 1rem);
+    width: min(78vw, 46rem);
+    margin-bottom: max(0rem, env(safe-area-inset-bottom, 0px));
 }
 
 .page-loading-bar {
-    width: min(64vw, 380px);
-    height: 22px;
-    padding: 4px;
+    width: 100%;
+    height: clamp(1.45rem, 3.5vh, 2rem);
+    padding: clamp(0.2rem, 0.5vw, 0.3rem);
     overflow: hidden;
-    border: 3px solid #7a4a2a;
+    border: clamp(0.16rem, 0.35vw, 0.24rem) solid #633510;
     border-radius: 999px;
-    background: #fff7d4;
+    background: rgba(255, 251, 220, 0.94);
     box-shadow:
-        0 5px 0 #7a4a2a,
-        0 10px 18px rgba(21, 63, 56, 0.28),
-        inset 0 2px 0 rgba(255, 255, 255, 0.72);
+        0 0.28rem 0 #633510,
+        0 0.7rem 1.3rem rgba(0, 0, 0, 0.38),
+        inset 0 0.12rem 0 rgba(255, 255, 255, 0.82);
 }
 
 .page-loading-bar span {
@@ -807,43 +799,35 @@ body.is-windowed-fallback .fullscreen-restore-overlay {
     height: 100%;
     border-radius: inherit;
     background:
-        linear-gradient(90deg, rgba(255, 255, 255, 0.38) 0 12%, transparent 12% 24%) 0 0 / 32px 100%,
-        linear-gradient(90deg, #8bd943 0%, #4fd6e8 55%, #ffd84d 100%);
-    box-shadow: inset 0 -2px 0 rgba(21, 63, 56, 0.2);
+        linear-gradient(100deg, rgba(255, 255, 255, 0.46) 0 10%, transparent 10% 20%) 0 0 / 2.4rem 100%,
+        linear-gradient(90deg, #ff4d4d 0%, #ff9f32 17%, #ffe33d 34%, #65d44f 51%, #34cde1 68%, #4e7cff 84%, #bd58e8 100%);
+    box-shadow: inset 0 -0.15rem 0 rgba(56, 38, 75, 0.22), inset 0 0.12rem 0 rgba(255, 255, 255, 0.42);
     transform-origin: left center;
-    animation: loadingBarFill 0.9s ease-out forwards, loadingBarStripes 0.45s linear infinite;
+    transform: scaleX(calc(var(--loading-progress, 0) / 100));
+    transition: transform 0.28s ease-out;
+    animation: loadingBarStripes 0.55s linear infinite;
 }
 
 .page-loading-text {
     font-family: 'Fredoka', sans-serif;
-    display: inline-block;
-    width: fit-content;
-    max-width: min(82vw, 360px);
-    padding: 10px 18px;
-    border: 1px solid rgba(255, 244, 95, 0.35);
-    border-radius: 999px;
-    background: rgba(21, 63, 56, 0.84);
-    box-shadow:
-        0 8px 18px rgba(0, 0, 0, 0.22),
-        inset 0 1px 0 rgba(255, 255, 255, 0.12);
-    font-size: clamp(1.05rem, 3vw, 1.4rem);
-    font-weight: 700;
+    margin: 0;
+    color: #fffdf0;
+    font-size: clamp(1.35rem, 3.4vw, 2.2rem);
+    font-weight: 800;
     line-height: 1.2;
     text-align: center;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.035em;
     white-space: nowrap;
-    color: #fffbe6;
-    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.22);
-}
-
-@keyframes loadingFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+    text-shadow: 0 0.16rem 0 #174c35, 0 0.3rem 0.7rem rgba(0, 0, 0, 0.7);
 }
 
 @keyframes loadingBarFill {
     from { transform: scaleX(0.08); }
     to { transform: scaleX(1); }
+}
+
+body.is-page-loading:not(.is-initial-loading) .page-loading-bar span {
+    animation: loadingBarFill 0.9s ease-out forwards, loadingBarStripes 0.55s linear infinite;
 }
 
 @keyframes loadingBarStripes {

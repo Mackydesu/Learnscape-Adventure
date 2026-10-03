@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-const appVersion = '20261003-831';
+const appVersion = '20261003-833';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -12888,11 +12888,10 @@ const appVersion = '20261003-831';
 
     const createLoadingMarkup = () => `
         <div class="page-loading-panel" role="status">
-            <img class="page-loading-art" src="assets/Backgrounds/loadingscreen.png" alt="Loading">
-            <div class="page-loading-bar" aria-hidden="true">
+            <p class="page-loading-text">Game Loading...</p>
+            <div class="page-loading-bar" role="progressbar" aria-label="Loading game assets and contents" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                 <span></span>
             </div>
-            <p class="page-loading-text">Loading Adventure</p>
         </div>
     `;
 
@@ -15319,6 +15318,9 @@ const appVersion = '20261003-831';
         if (isFullscreenActive()) document.body.classList.remove('is-windowed-fallback');
         syncFullscreenClass();
     });
+
+    window.__learnscapeGameInitialized = true;
+    window.dispatchEvent(new CustomEvent('learnscape:gameinitialized'));
 
     // Service worker registration is disabled during development to avoid stale cached assets.
 });
