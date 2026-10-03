@@ -12,8 +12,8 @@
     <link rel="apple-touch-icon" href="assets/Character/ch1.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20261003-813">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=20261003-831">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -244,11 +244,120 @@
             <nav class="title-legal-links" aria-label="Legal and about links">
                 <a href="#terms-of-use-privacy">Terms of Use and Privacy</a>
                 <span aria-hidden="true">|</span>
-                <a href="#about-us">About Us</a>
+                <a class="loading-link" href="#about-us" data-route="about">About Us</a>
             </nav>
         </section>
 
     </main>
+
+    <section id="learnscape-about-page" class="learnscape-about-page" hidden>
+        <img class="about-page-background" src="assets/Backgrounds/bgintro.webp" alt="" aria-hidden="true">
+        <div class="about-page-shade" aria-hidden="true"></div>
+        <a class="about-back-button loading-link" href="#home" data-route="title" aria-label="Return to the home page">
+            <svg viewBox="0 0 80 80" aria-hidden="true" focusable="false">
+                <defs>
+                    <linearGradient id="about-back-rim" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#ffd84d"/>
+                        <stop offset="0.52" stop-color="#e49a16"/>
+                        <stop offset="1" stop-color="#9a4b0e"/>
+                    </linearGradient>
+                    <linearGradient id="about-back-face" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#82bd26"/>
+                        <stop offset="0.56" stop-color="#4f981d"/>
+                        <stop offset="1" stop-color="#2f7117"/>
+                    </linearGradient>
+                    <filter id="about-back-shadow" x="-30%" y="-30%" width="160%" height="175%">
+                        <feDropShadow dx="0" dy="4" stdDeviation="2.2" flood-color="#1f160b" flood-opacity="0.62"/>
+                    </filter>
+                </defs>
+                <g filter="url(#about-back-shadow)">
+                    <circle cx="40" cy="36" r="34" fill="#65300d"/>
+                    <circle cx="40" cy="36" r="31.5" fill="url(#about-back-rim)" stroke="#f8bc2b" stroke-width="1.5"/>
+                    <circle cx="40" cy="36" r="25.5" fill="#315f13" stroke="#6d340c" stroke-width="2.4"/>
+                    <circle cx="40" cy="35" r="22.5" fill="url(#about-back-face)"/>
+                    <path d="M24 25c7-8 21-12 32-5" fill="none" stroke="#c9eb73" stroke-width="3" stroke-linecap="round" opacity="0.62"/>
+                    <path d="M37 20.5 20.5 35.5 37 50v-9h19V30H37z" fill="#fffdf2" stroke="#35651c" stroke-width="2.5" stroke-linejoin="round"/>
+                    <path d="M25.5 35.5 38 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.75"/>
+                </g>
+            </svg>
+        </a>
+
+        <div class="about-page-shell">
+            <div class="about-page-layout">
+                <nav class="about-page-tabs" role="tablist" aria-label="About LearnScape">
+                    <button class="about-page-tab is-active" id="about-us-tab" type="button" role="tab" aria-selected="true" aria-controls="about-us-panel" data-about-view="about">
+                        <span class="about-tab-icon" aria-hidden="true">&#128101;</span>
+                        <span>About Us</span>
+                    </button>
+                    <button class="about-page-tab" id="credits-tab" type="button" role="tab" aria-selected="false" aria-controls="credits-panel" data-about-view="credits">
+                        <span class="about-tab-icon" aria-hidden="true">&#128214;</span>
+                        <span>Credits</span>
+                    </button>
+                </nav>
+
+                <div class="about-main-column">
+                <header class="about-page-header">
+                    <p>LearnScape Adventure</p>
+                    <h1 data-about-page-title>About Us</h1>
+                </header>
+
+                <div class="about-content-board">
+                    <section class="about-view-panel is-active" id="about-us-panel" role="tabpanel" aria-labelledby="about-us-tab" data-about-panel="about">
+                        <article class="about-intro-card">
+                            <img class="about-intro-character" src="assets/Character/ch2.webp" alt="LearnScape rabbit character">
+                            <div>
+                                <h2>LearnScape Adventure</h2>
+                                <p>LearnScape Adventure is an educational game designed for kindergarten learners to explore shapes in a fun and interactive way. Through engaging activities, colorful worlds, and real-world object detection, the game helps children recognize and identify shapes while building their confidence and curiosity.</p>
+                            </div>
+                        </article>
+
+                        <div class="about-section-heading">
+                            <h2>Meet the Team</h2>
+                            <p>The people behind LearnScape Adventure</p>
+                        </div>
+                        <figure class="about-team-feature">
+                            <div class="about-team-showcase">
+                                <blockquote class="about-team-verse about-team-verse-left">
+                                    <p>Whatever you do, work at it with all your heart, as working for the Lord.</p>
+                                    <cite>&mdash; Colossians 3:23</cite>
+                                </blockquote>
+                                <img src="assets/Team/Team.png" alt="The four student developers of LearnScape Adventure">
+                                <blockquote class="about-team-verse about-team-verse-right">
+                                    <p>Commit to the Lord whatever you do, and he will establish your plans.</p>
+                                    <cite>&mdash; Proverbs 16:3</cite>
+                                </blockquote>
+                            </div>
+                            <figcaption>
+                                <p>This web game was developed as a collaborative undergraduate thesis project by a team of four students.</p>
+                                <p><em>Mark Gil Narciso</em> engineered the core software application, integrated the web game engine, and built and trained the object detection architecture. To power the game's AI components, <em>Marissa Benitez, Margilyn Gamboa, and Aira Mae Esperanzate</em> spearheaded the dataset curation phase, focusing on gathering, filtering, and preparing the extensive library of images required to successfully train the object detection model. Together, the team managed the project from initial conceptualization to final research deployment.</p>
+                            </figcaption>
+                        </figure>
+                    </section>
+
+                    <section class="about-view-panel" id="credits-panel" role="tabpanel" aria-labelledby="credits-tab" data-about-panel="credits" hidden>
+                        <article class="about-thanks-card">
+                            <span class="about-thanks-icon" aria-hidden="true">&#10084;&#65039;</span>
+                            <div>
+                                <h2>Special Thanks</h2>
+                                <p>This game was made possible with the support, guidance, and resources from our family, friends, advisers, and everyone who believed in us.</p>
+                                <p>Thank you for being part of our LearnScape Adventure!</p>
+                            </div>
+                        </article>
+
+                        <div class="about-credit-grid">
+                            <article class="about-credit-card about-credit-blue"><span aria-hidden="true">&#128101;</span><div><h3>Development Team</h3><p>Game design, programming, UI/UX design, and overall development.</p></div></article>
+                            <article class="about-credit-card about-credit-green"><span aria-hidden="true">&#127912;</span><div><h3>Art &amp; Assets</h3><p>Game illustrations, backgrounds, characters, animations, and UI assets.</p></div></article>
+                            <article class="about-credit-card about-credit-pink"><span aria-hidden="true">&#127911;</span><div><h3>Audio &amp; Music</h3><p>Sound effects, background music, and audio resources used in the game.</p></div></article>
+                            <article class="about-credit-card about-credit-yellow"><span aria-hidden="true">&#128214;</span><div><h3>Educational Content</h3><p>Shape concepts, learning activities, and instructional materials for kindergarten learners.</p></div></article>
+                            <article class="about-credit-card about-credit-purple"><span aria-hidden="true">&#9881;&#65039;</span><div><h3>Technologies Used</h3><p>Object detection, web technologies, and open-source tools that helped us build this game.</p></div></article>
+                            <article class="about-credit-card about-credit-cyan"><span aria-hidden="true">&#10084;&#65039;</span><div><h3>To Our Supporters</h3><p>Our family, friends, teachers, and everyone who supported and encouraged us throughout this journey.</p></div></article>
+                        </div>
+                    </section>
+                </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <section id="learnscape-game3-page" class="game3-page" data-game3-island="1" hidden>
         <img class="game1-bg-image" src="assets/Backgrounds/skybg.webp" alt="" aria-hidden="true">
@@ -2033,7 +2142,7 @@
 
     
 
-    <script src="script.js?v=20261003-813"></script>
+    <script src="script.js?v=20261003-831"></script>
     </div>
 
     <script>
@@ -2044,6 +2153,12 @@
                     bodyClass: 'title-page',
                     pageId: 'learnscape-title-page',
                     hash: '#home',
+                },
+                about: {
+                    title: 'Learnscape Adventure - About Us',
+                    bodyClass: 'about-page',
+                    pageId: 'learnscape-about-page',
+                    hash: '#about-us',
                 },
                 game3: {
                     title: 'Learnscape Adventure - Shape Island',
@@ -2180,6 +2295,8 @@
                 home: 'title',
                 start: 'title',
                 'game-start': 'title',
+                about: 'about',
+                'about-us': 'about',
                 game3: 'game3',
                 shapeCircle: 'shapeCircle',
                 'shape-circle': 'shapeCircle',
@@ -2235,6 +2352,7 @@
                 'diamond-camera': 'diamondCamera',
                 '#home': 'title',
                 '#game-start': 'title',
+                '#about-us': 'about',
                 '#game3': 'game3',
                 '#shape-circle': 'shapeCircle',
                 '#shape-square': 'shapeSquare',
@@ -2316,6 +2434,7 @@
 
             const pages = {
                 title: document.getElementById('learnscape-title-page'),
+                about: document.getElementById('learnscape-about-page'),
                 game3: document.getElementById('learnscape-game3-page'),
                 shapeCircle: document.getElementById('learnscape-shape-circle-page'),
                 shapeSquare: document.getElementById('learnscape-shape-square-page'),
@@ -2347,12 +2466,42 @@
 
             const loadingOverlay = document.querySelector('.page-loading-overlay');
             const body = document.body;
-            const routeBodyClasses = ['title-page', 'game3-page', 'gameplay-page'];
+            const routeBodyClasses = ['title-page', 'about-page', 'game3-page', 'gameplay-page'];
             let loadingTimer = null;
             let loadingHideTimer = null;
             let currentRoute = 'title';
             let currentRouteKey = 'title';
             let isNavigating = false;
+
+            const aboutTabs = Array.from(document.querySelectorAll('[data-about-view]'));
+            const aboutPanels = Array.from(document.querySelectorAll('[data-about-panel]'));
+            const aboutPageTitle = document.querySelector('[data-about-page-title]');
+            const activateAboutPanel = (panelName) => {
+                if (aboutPageTitle) aboutPageTitle.textContent = panelName === 'credits' ? 'Credits' : 'About Us';
+                aboutTabs.forEach((tab) => {
+                    const isActive = tab.dataset.aboutView === panelName;
+                    tab.classList.toggle('is-active', isActive);
+                    tab.setAttribute('aria-selected', String(isActive));
+                    tab.tabIndex = isActive ? 0 : -1;
+                });
+                aboutPanels.forEach((panel) => {
+                    const isActive = panel.dataset.aboutPanel === panelName;
+                    panel.classList.toggle('is-active', isActive);
+                    panel.hidden = !isActive;
+                    if (isActive) panel.scrollTop = 0;
+                });
+            };
+            aboutTabs.forEach((tab, index) => {
+                tab.addEventListener('click', () => activateAboutPanel(tab.dataset.aboutView));
+                tab.addEventListener('keydown', (event) => {
+                    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+                    event.preventDefault();
+                    const direction = event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 1;
+                    const nextTab = aboutTabs[(index + direction + aboutTabs.length) % aboutTabs.length];
+                    activateAboutPanel(nextTab.dataset.aboutView);
+                    nextTab.focus();
+                });
+            });
 
             const isFullscreenActive = () => Boolean(
                 document.fullscreenElement ||
@@ -2817,7 +2966,7 @@
                                         <h3 id="intro-profile-collection-title">BADGE COLLECTIONS</h3>
                                         <div class="intro-profile-badges" aria-label="Shape badges">
                                             <div class="intro-profile-badge" data-profile-badge="circle" style="--badge-color:#1887ff;--badge-dark:#0d54b6" role="img" aria-label="Circle badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><circle class="badge-shape-shadow" cx="40" cy="43" r="18"/><circle class="badge-shape-face" cx="40" cy="39" r="18"/><path class="badge-shape-glint" d="M28 34c3-7 9-11 16-11"/></svg><span class="intro-profile-lock"></span></span><strong>Circle</strong></div>
-                                            <div class="intro-profile-badge" data-profile-badge="square" style="--badge-color:#8b2cf5;--badge-dark:#4c1197" role="img" aria-label="Square badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><rect class="badge-shape-shadow" x="22" y="25" width="36" height="36" rx="6"/><rect class="badge-shape-face" x="22" y="21" width="36" height="36" rx="6"/><path class="badge-shape-glint" d="M28 31v-4h17"/></svg><span class="intro-profile-lock"></span></span><strong>Square</strong></div>
+                                            <div class="intro-profile-badge" data-profile-badge="square" style="--badge-color:#8b2cf5;--badge-dark:#4c1197" role="img" aria-label="Square badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><rect class="badge-shape-shadow" x="22" y="25" width="36" height="36" rx="6"/><rect class="badge-shape-face" x="22" y="21" width="36" height="36" rx="6"/><path class="badge-shape-glint" d="M28 31v-4h17"/></svg><span class="intro-profile-lock"></span></span><strong>S<span class="badge-letter-q" aria-label="Q">O</span>UARE</strong></div>
                                             <div class="intro-profile-badge" data-profile-badge="triangle" style="--badge-color:#31c91d;--badge-dark:#14770c" role="img" aria-label="Triangle badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><path class="badge-shape-shadow" d="M40 20 62 61H18Z"/><path class="badge-shape-face" d="M40 16 62 57H18Z"/><path class="badge-shape-glint" d="m39 25-11 21"/></svg><span class="intro-profile-lock"></span></span><strong>Triangle</strong></div>
                                             <div class="intro-profile-badge" data-profile-badge="rectangle" style="--badge-color:#ff8a17;--badge-dark:#a74408" role="img" aria-label="Rectangle badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><rect class="badge-shape-shadow" x="14" y="29" width="52" height="28" rx="5"/><rect class="badge-shape-face" x="14" y="25" width="52" height="28" rx="5"/><path class="badge-shape-glint" d="M21 34v-3h23"/></svg><span class="intro-profile-lock"></span></span><strong>Rectangle</strong></div>
                                             <div class="intro-profile-badge" data-profile-badge="oval" style="--badge-color:#f33ca4;--badge-dark:#a31363" role="img" aria-label="Oval badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><ellipse class="badge-shape-shadow" cx="40" cy="43" rx="24" ry="17"/><ellipse class="badge-shape-face" cx="40" cy="39" rx="24" ry="17"/><path class="badge-shape-glint" d="M24 37c4-7 11-10 19-10"/></svg><span class="intro-profile-lock"></span></span><strong>Oval</strong></div>
@@ -4112,6 +4261,7 @@
                 if (!learnscapeShapeLabels[shape]) return;
                 const alreadyEarned = readSoundSetting(introProfileBadgeUnlockKey(shape), 'false') === 'true';
                 writeSoundSetting(introProfileBadgeUnlockKey(shape), 'true');
+                window.dispatchEvent(new CustomEvent('learnscape:badgeunlocked', { detail: { shape } }));
                 if (!alreadyEarned || !isProfileBadgeViewed(shape)) {
                     addLearnscapeNotification({
                         id: `badge:${shape}`,
@@ -4765,7 +4915,7 @@
             const registeredMedia = new WeakSet();
             const soundScale = () => isSoundMuted ? 0 : masterSoundVolume;
             window.__learnscapeSoundScale = soundScale;
-            const introBgmRoutes = new Set(['title', 'game3']);
+            const introBgmRoutes = new Set(['title', 'about', 'game3']);
             const introBgm = new Audio('assets/Audios/Bgm/intro.mp3');
             introBgm.loop = true;
             introBgm.preload = 'auto';

@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-const appVersion = '20261003-813';
+const appVersion = '20261003-831';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -1291,6 +1291,7 @@ const appVersion = '20261003-813';
     const shapePreviewProgressByPage = new Map();
     const shapePreviewIntroStates = new Map();
     const shapePreviewSceneCleanupByPage = new Map();
+    const shapePreviewMissionStartByPage = new Map();
     const heartMissionPage = document.getElementById('learnscape-shape-area-6-page');
     const heartMissionIntro = heartMissionPage?.querySelector('.heart-mission-intro') || null;
     const heartMissionCharacterWrap = heartMissionIntro?.querySelector('.heart-mission-character-wrap') || null;
@@ -3901,6 +3902,26 @@ const appVersion = '20261003-813';
         state.activeStage = 0;
         if (state.startButton) state.startButton.hidden = true;
         page.classList.remove('is-preview-intro-active', 'is-intro-click-ready');
+    };
+
+    const stopShapePreviewIntroAudioOnly = (page) => {
+        const state = getShapePreviewIntroState(page);
+        state.session += 1;
+        state.timers.forEach((timerId) => window.clearTimeout(timerId));
+        state.timers = [];
+        if (state.frame !== null) {
+            window.cancelAnimationFrame(state.frame);
+            state.frame = null;
+        }
+        if (state.audio) {
+            state.audio.onended = null;
+            state.audio.pause?.();
+            state.audio = null;
+        }
+        if (state.usesMissionAudio) {
+            stopShapeMissionCompletionAudio();
+            state.usesMissionAudio = false;
+        }
     };
 
     const startShapePreviewIntro = (page) => {
@@ -7540,6 +7561,9 @@ const appVersion = '20261003-813';
 
             rectangleDialogueTimers.push(window.setTimeout(() => playStage(0), rectangleMessagePauseMs));
         };
+        if (rectangleMissionGuideCharacter || rectangleMissionObjectPanel) {
+            shapePreviewMissionStartByPage.set(page, startRectangleDialogue);
+        }
 
         const startRectangleCompletionDialogue = () => {
             if (rectangleMissionCompleted || !rectangleMessageText || !isPageVisible(page)) return;
@@ -7892,7 +7916,13 @@ const appVersion = '20261003-813';
                         jeepSequence.classList.remove('is-driving', 'is-arrived', 'is-exiting');
                     }
                     activeShapeHowToKey = 'rectangle';
-                    openShapeHowToGuide('rectangle', null, startRectangleDialogue);
+                    if (hasSeenShapeHowToGuide('rectangle')) {
+                        showShapeHowToHelpButton();
+                        startRectangleDialogue();
+                    } else {
+                        markShapeHowToGuideSeen('rectangle');
+                        openShapeHowToGuide('rectangle', null, startRectangleDialogue);
+                    }
                 } else if (jeepSequence) {
                     stopRectangleDialogue();
                     jeepSequence.hidden = true;
@@ -14427,6 +14457,259 @@ const appVersion = '20261003-813';
         startOvalMissionIntro();
     }
 
+    const shapePhaseConfigurations = Object.freeze({
+        circle: { page: shapeCirclePage, start: '.shape-area-start-button', lesson: 'circleIllustration', mission: 'circleIllustration', detection: 'circleCamera' },
+        square: { page: shapeSquarePage, start: '.shape-area-square-start-button', lesson: 'shapeSquare', mission: 'shapeSquare', detection: 'squareCamera' },
+        triangle: { page: document.getElementById('learnscape-shape-area-3-page'), start: '.shape-area-preview-start-button', lesson: 'shapeArea3', mission: 'triangleGame', detection: 'triangleCamera' },
+        rectangle: { page: document.getElementById('learnscape-shape-area-4-page'), start: '.shape-area-preview-start-button', lesson: 'shapeArea4', mission: 'rectangleDelivery', detection: 'rectangleCamera' },
+        oval: { page: document.getElementById('learnscape-shape-area-5-page'), start: '.shape-area-preview-start-button', lesson: 'shapeArea5', mission: 'ovalBoardGame', detection: 'ovalCamera' },
+        heart: { page: heartMissionPage, start: '.shape-area-preview-start-button', lesson: 'shapeArea6', mission: 'shapeArea6', detection: 'heartCamera' },
+        star: { page: starMissionPage, start: '.shape-area-preview-start-button', lesson: 'shapeArea7', mission: 'shapeArea7', detection: 'starCamera' },
+        diamond: { page: diamondMissionPage, start: '.shape-area-preview-start-button', lesson: 'shapeArea8', mission: 'shapeArea8', detection: 'diamondCamera' },
+    });
+
+    const hasShapePhaseBadge = (shape) => {
+        try {
+            return window.localStorage.getItem(`learnscape-profile-badge-unlocked:${shape}`) === 'true';
+        } catch (error) {
+            return false;
+        }
+    };
+
+    const runShapePhaseWithLoading = (callback) => {
+        const runWithLoading = getAppLoadingTransition();
+        if (typeof runWithLoading === 'function' && runWithLoading(callback, { afterFade: true }) !== false) return;
+        callback();
+    };
+
+    const navigateToShapePhase = (route, callback = null) => {
+        if (typeof callback === 'function') {
+            const handleRoute = (event) => {
+                if (event.detail?.route !== route) return;
+                window.removeEventListener('learnscape:routechange', handleRoute);
+                window.setTimeout(callback, 0);
+            };
+            window.addEventListener('learnscape:routechange', handleRoute);
+        }
+        navigateApp(route);
+    };
+
+    const showDirectPreviewMission = (page, startMission) => {
+        if (!page || typeof startMission !== 'function') return;
+        resetShapePreviewPage(page);
+        const background = page.querySelector('.shape-area-bg');
+        const nextBackground = page.dataset.nextBackground || page.dataset.illustrationBackground;
+        if (background && nextBackground) background.src = nextBackground;
+        page.classList.remove('is-preview-intro-active', 'is-illustration-background', 'is-tv-lesson-image-visible', 'is-progress-visible');
+        page.classList.add('is-next-background');
+        page.querySelector('.shape-preview-video-stage')?.setAttribute('aria-hidden', 'true');
+        startMission();
+    };
+
+    const skipAutomaticHowToOnce = (startButton) => {
+        if (startButton) startButton.dataset.skipAutomaticHowTo = 'true';
+    };
+
+    const enableMissionHowToHelp = (shape) => {
+        activeShapeHowToKey = shape;
+        showShapeHowToHelpButton();
+    };
+
+    const showTriangleMissionStartDirectly = () => {
+        stopTriangleGameDialogue();
+        if (!triangleGameStartButton) return;
+        skipAutomaticHowToOnce(triangleGameStartButton);
+        triangleGameStartButton.hidden = false;
+        triangleGameStartButton.getBoundingClientRect();
+        triangleGameStartButton.classList.add('is-visible');
+        triangleGameStartButton.focus({ preventScroll: true });
+    };
+
+    const showOvalMissionStartDirectly = () => {
+        stopOvalMissionIntro();
+        resetOvalBoardGame();
+        ovalGameStarted = false;
+        ovalBoardGamePage?.classList.add('is-mission-intro');
+        ovalBoardStage?.setAttribute('aria-hidden', 'true');
+        ovalBoardCards.forEach((card) => { card.disabled = true; });
+        if (ovalMissionGuide) {
+            ovalMissionGuide.hidden = false;
+            ovalMissionGuide.setAttribute('aria-hidden', 'false');
+            ovalMissionGuide.classList.remove('is-visible');
+        }
+        if (!ovalMissionStartButton) return;
+        skipAutomaticHowToOnce(ovalMissionStartButton);
+        ovalMissionStartButton.hidden = false;
+        ovalMissionStartButton.getBoundingClientRect();
+        ovalMissionStartButton.classList.add('is-visible');
+        ovalMissionStartButton.focus({ preventScroll: true });
+    };
+
+    const showHeartMissionStartDirectly = () => {
+        stopHeartMissionSequence();
+        if (!heartMissionIntro || !heartMissionStartButton) return;
+        heartMissionPage?.classList.add('is-heart-mission-active');
+        heartMissionIntro.hidden = false;
+        heartMissionIntro.setAttribute('aria-hidden', 'false');
+        skipAutomaticHowToOnce(heartMissionStartButton);
+        heartMissionStartButton.hidden = false;
+        heartMissionStartButton.getBoundingClientRect();
+        heartMissionStartButton.classList.add('is-visible');
+        heartMissionStartButton.focus({ preventScroll: true });
+    };
+
+    const playUnlockedShapePhase = (shape, phase) => {
+        const config = shapePhaseConfigurations[shape];
+        if (!config || !hasShapePhaseBadge(shape) || !['lesson', 'mission', 'detection'].includes(phase)) return;
+        playUiClickSound('chime');
+
+        if (phase === 'detection') {
+            navigateToShapePhase(config.detection);
+            return;
+        }
+
+        if (shape === 'circle') {
+            navigateToShapePhase(config[phase], phase === 'lesson'
+                ? null
+                : () => {
+                    resetCircleIllustrationVideo();
+                    enableMissionHowToHelp('circle');
+                    showCircleHuntStart();
+                });
+            return;
+        }
+
+        if (shape === 'square') {
+            runShapePhaseWithLoading(() => {
+                if (phase === 'lesson') {
+                    showShapeSquareIllustration();
+                } else {
+                    skipAutomaticHowToOnce(shapeSquareMissionStartButton);
+                    returnToShapeSquareMissionStart();
+                }
+            });
+            return;
+        }
+
+        if (phase === 'mission' && shape === 'triangle') {
+            navigateToShapePhase(config.mission, showTriangleMissionStartDirectly);
+            return;
+        }
+
+        if (phase === 'mission' && shape === 'rectangle') {
+            runShapePhaseWithLoading(() => {
+                enableMissionHowToHelp('rectangle');
+                showDirectPreviewMission(
+                    config.page,
+                    shapePreviewMissionStartByPage.get(config.page),
+                );
+            });
+            return;
+        }
+
+        if (phase === 'mission' && shape === 'oval') {
+            navigateToShapePhase(config.mission, showOvalMissionStartDirectly);
+            return;
+        }
+
+        const previewPage = config.page;
+        if (phase === 'lesson') {
+            runShapePhaseWithLoading(() => {
+                stopShapePreviewIntro(previewPage);
+                showShapePreviewIllustration(previewPage);
+            });
+            return;
+        }
+
+        const missionStarters = {
+            heart: showHeartMissionStartDirectly,
+            star: () => {
+                skipAutomaticHowToOnce(starMissionStartButton);
+                showStarMissionRetryStart();
+            },
+            diamond: () => {
+                skipAutomaticHowToOnce(diamondMissionStartButton);
+                showDiamondMissionRetryStart();
+            },
+        };
+        runShapePhaseWithLoading(() => showDirectPreviewMission(previewPage, missionStarters[shape]));
+    };
+
+    const shapePhaseSelectors = new Map();
+    const syncShapePhaseSelector = (shape) => {
+        const record = shapePhaseSelectors.get(shape);
+        if (!record) return;
+        const earned = hasShapePhaseBadge(shape);
+        record.page.classList.toggle('has-shape-phase-selector', earned);
+        if (!earned || record.start.hidden || !isPageVisible(record.page)) {
+            record.page.classList.remove('is-shape-phase-selector-open');
+            record.selector.hidden = true;
+            return;
+        }
+        record.selector.hidden = !record.page.classList.contains('is-shape-phase-selector-open');
+    };
+
+    Object.entries(shapePhaseConfigurations).forEach(([shape, config]) => {
+        const page = config.page;
+        const start = page?.querySelector(config.start);
+        if (!page || !start) return;
+        const selector = document.createElement('section');
+        selector.className = 'shape-phase-selector';
+        selector.setAttribute('aria-label', `${shape[0].toUpperCase()}${shape.slice(1)} activities`);
+        selector.hidden = true;
+        ['lesson', 'mission', 'detection'].forEach((phase) => {
+            const choice = document.createElement('div');
+            choice.className = 'shape-phase-choice';
+            const label = document.createElement('strong');
+            label.textContent = `${phase[0].toUpperCase()}${phase.slice(1)}`;
+            const play = document.createElement('button');
+            play.className = 'shape-phase-play';
+            play.type = 'button';
+            play.dataset.shapePhase = phase;
+            play.textContent = '▶ Play';
+            play.addEventListener('click', () => {
+                selector.hidden = true;
+                playUnlockedShapePhase(shape, phase);
+            });
+            choice.append(label, play);
+            selector.appendChild(choice);
+        });
+        start.insertAdjacentElement('afterend', selector);
+        shapePhaseSelectors.set(shape, { page, start, selector });
+        start.addEventListener('click', (event) => {
+            if (!hasShapePhaseBadge(shape)) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            if (shape === 'circle') {
+                clearShapeCircleTimers();
+                stopShapeCircleIntroAudio();
+            } else if (shape === 'square') {
+                clearShapeSquareTimers();
+                stopShapeSquareIntroAudio();
+            } else {
+                stopShapePreviewIntroAudioOnly(page);
+            }
+            page.classList.add('is-shape-phase-selector-open');
+            selector.hidden = false;
+            selector.querySelector('.shape-phase-play')?.focus({ preventScroll: true });
+        }, true);
+        new MutationObserver(() => syncShapePhaseSelector(shape)).observe(start, {
+            attributes: true,
+            attributeFilter: ['hidden'],
+        });
+        syncShapePhaseSelector(shape);
+    });
+
+    window.addEventListener('learnscape:routechange', () => {
+        window.requestAnimationFrame(() => {
+            shapePhaseSelectors.forEach((record, shape) => syncShapePhaseSelector(shape));
+        });
+    });
+    window.addEventListener('learnscape:badgeunlocked', (event) => {
+        const shape = String(event.detail?.shape || '').toLowerCase();
+        window.requestAnimationFrame(() => syncShapePhaseSelector(shape));
+    });
+
     const gameIslandShapeByPageId = Object.freeze({
         'learnscape-shape-circle-page': 'circle',
         'learnscape-circle-illustration-page': 'circle',
@@ -14788,6 +15071,8 @@ const appVersion = '20261003-813';
     const shapeHowToStartBypass = new WeakSet();
     const shapeHowToStartButtons = Array.from(document.querySelectorAll('[data-how-to-shape]'));
     const shapeHowToShownForAppearance = new WeakSet();
+    const shapeHowToSeenThisSession = new Set();
+    const shapeHowToSeenStorageKey = (shapeKey) => `learnscape-how-to-seen:${shapeKey}`;
     const shapeHowToPauseButtons = Array.from(document.querySelectorAll([
         '.rectangle-pause-button',
         '.heart-game-pause-button',
@@ -14801,6 +15086,24 @@ const appVersion = '20261003-813';
     let shapeHowToReturnFocus = null;
     let shapeHowToCloseTimer = null;
     let shapeHowToStartSyncFrame = 0;
+
+    const hasSeenShapeHowToGuide = (shapeKey) => {
+        if (shapeHowToSeenThisSession.has(shapeKey)) return true;
+        try {
+            return window.localStorage.getItem(shapeHowToSeenStorageKey(shapeKey)) === 'true';
+        } catch (error) {
+            return false;
+        }
+    };
+
+    const markShapeHowToGuideSeen = (shapeKey) => {
+        shapeHowToSeenThisSession.add(shapeKey);
+        try {
+            window.localStorage.setItem(shapeHowToSeenStorageKey(shapeKey), 'true');
+        } catch (error) {
+            // The current session still remembers that this guide has been shown.
+        }
+    };
 
     const isShapeHowToElementVisible = (element) => {
         if (!element || element.hidden) return false;
@@ -14905,11 +15208,25 @@ const appVersion = '20261003-813';
                 shapeHowToShownForAppearance.delete(startButton);
                 continue;
             }
-            if (shapeHowToShownForAppearance.has(startButton)) continue;
             const shapeKey = startButton.dataset.howToShape;
-            if (!shapeHowToGuides[shapeKey] || (shapeHowToOverlay && !shapeHowToOverlay.hidden)) continue;
-            shapeHowToShownForAppearance.add(startButton);
+            if (!shapeHowToGuides[shapeKey]) continue;
+            if (startButton.dataset.skipAutomaticHowTo === 'true') {
+                delete startButton.dataset.skipAutomaticHowTo;
+                shapeHowToShownForAppearance.add(startButton);
+                activeShapeHowToKey = shapeKey;
+                showShapeHowToHelpButton();
+                continue;
+            }
             activeShapeHowToKey = shapeKey;
+            if (hasSeenShapeHowToGuide(shapeKey)) {
+                shapeHowToShownForAppearance.add(startButton);
+                showShapeHowToHelpButton();
+                continue;
+            }
+            if (shapeHowToShownForAppearance.has(startButton)
+                || (shapeHowToOverlay && !shapeHowToOverlay.hidden)) continue;
+            shapeHowToShownForAppearance.add(startButton);
+            markShapeHowToGuideSeen(shapeKey);
             openShapeHowToGuide(shapeKey, null, null, startButton);
             break;
         }
