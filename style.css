@@ -184,8 +184,14 @@ body.game3-page {
     box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.42);
 }
 
-.onboarding-dialog h2 { margin-bottom: 0.75rem; color: #164f5b; font-size: clamp(1.35rem, 4vw, 1.7rem); }
+.onboarding-dialog h2 { margin-bottom: 0.75rem; color: #164f5b; font-size: clamp(1.35rem, 4vw, 1.7rem); text-align: center; }
 .onboarding-dialog p { line-height: 1.5; }
+.onboarding-step[data-onboarding-step="name"] > p:first-child,
+.onboarding-step[data-onboarding-step="avatar"] > p:first-child {
+    font-size: clamp(1.15rem, 2.8vw, 1.35rem);
+    font-weight: 700;
+    line-height: 1.55;
+}
 .onboarding-dialog label { display: block; margin-top: 1rem; font-weight: 700; }
 .onboarding-dialog input[type="text"] { width: 100%; margin-top: 0.35rem; padding: 0.7rem 0.8rem; border: 1px solid #7ba5ab; border-radius: 0.5rem; color: #1d2b38; font: inherit; }
 .onboarding-error { margin-top: 0.45rem; color: #b3261e; font-weight: 700; }
@@ -193,6 +199,8 @@ body.game3-page {
 .onboarding-avatar-pick,
 .onboarding-avatar-continue,
 .onboarding-avatar-skip,
+.onboarding-experience-tutorial,
+.onboarding-experience-skip,
 .onboarding-coach-next {
     min-height: 2.65rem;
     padding: 0.55rem 1rem;
@@ -208,6 +216,16 @@ body.game3-page {
 .onboarding-avatar-actions { display: flex; justify-content: flex-end; gap: 0.7rem; margin-top: 1rem; }
 .onboarding-avatar-skip { color: #1e6573; background: #e4f2f3; }
 .onboarding-avatar-status { min-height: 1.35rem; margin-top: 0.65rem; color: #245866; font-weight: 700; }
+.onboarding-experience-question { color: #164f5b; font-size: clamp(1.2rem, 3.2vw, 1.5rem); font-weight: 900; text-align: center; }
+.onboarding-experience-actions { display: grid; gap: 0.8rem; margin-top: 1.15rem; }
+.onboarding-experience-actions button {
+    width: 100%;
+    min-height: 3.6rem;
+    padding: 0.75rem 1rem;
+    font-size: clamp(1.12rem, 2.6vw, 1.32rem);
+    line-height: 1.3;
+}
+.onboarding-experience-skip { color: #1e6573; background: #e4f2f3; }
 
 .onboarding-dim {
     position: fixed;
@@ -275,6 +293,11 @@ body.game3-page {
     text-shadow: 0 0.1rem 0 #7e3b0a, 0 0 0.7rem #ffd83d;
 }
 .intro-menu-panel.is-onboarding-active { z-index: 1110; }
+.intro-menu-close:disabled {
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.58;
+}
 
 .intro-shop-item.onboarding-circle-key-glow {
     animation: onboardingCircleKeyPanelGlow 0.85s ease-in-out infinite alternate;
@@ -19559,7 +19582,8 @@ h3 {
 }
 
 .intro-settings-panel[hidden] { display: none; }
-.intro-settings-home-button {
+.intro-settings-home-button,
+.intro-settings-tutorial-button {
     width: 100%;
     min-height: 3rem;
     border: 0.16rem solid #6f3712;
@@ -19573,13 +19597,21 @@ h3 {
 }
 
 .intro-settings-home-button:hover,
-.intro-settings-home-button:focus-visible {
+.intro-settings-home-button:focus-visible,
+.intro-settings-tutorial-button:hover,
+.intro-settings-tutorial-button:focus-visible {
     filter: brightness(1.08);
     transform: translateY(-0.08rem);
 }
 
-.intro-settings-home-button:active {
+.intro-settings-home-button:active,
+.intro-settings-tutorial-button:active {
     transform: translateY(0.12rem);
+}
+
+.intro-settings-tutorial-button {
+    background: linear-gradient(180deg, #8ff59a 0%, #35bd5c 55%, #16813d 100%);
+    text-shadow: 0 0.11rem 0 #0b5a2b;
 }
 
 .intro-settings-toggle { display: flex; align-items: center; justify-content: space-between; gap: 1rem; font-weight: 900; }

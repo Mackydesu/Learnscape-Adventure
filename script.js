@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-const appVersion = '20261003-802';
+const appVersion = '20261003-813';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -14786,6 +14786,8 @@ const appVersion = '20261003-802';
     const shapeHowToContinue = shapeHowToOverlay?.querySelector('.shape-how-to-continue') || null;
     const shapeHowToHelpButton = document.querySelector('.shape-how-to-help-button');
     const shapeHowToStartBypass = new WeakSet();
+    const shapeHowToStartButtons = Array.from(document.querySelectorAll('[data-how-to-shape]'));
+    const shapeHowToShownForAppearance = new WeakSet();
     const shapeHowToPauseButtons = Array.from(document.querySelectorAll([
         '.rectangle-pause-button',
         '.heart-game-pause-button',
@@ -14795,8 +14797,10 @@ const appVersion = '20261003-802';
     let activeShapeHowToKey = '';
     let pendingShapeHowToStart = null;
     let pendingShapeHowToContinue = null;
+    let pendingShapeHowToFocus = null;
     let shapeHowToReturnFocus = null;
     let shapeHowToCloseTimer = null;
+    let shapeHowToStartSyncFrame = 0;
 
     const isShapeHowToElementVisible = (element) => {
         if (!element || element.hidden) return false;
@@ -14847,11 +14851,12 @@ const appVersion = '20261003-802';
         syncShapeHowToHelpPlacement();
     };
 
-    const openShapeHowToGuide = (shapeKey, startButton = null, onContinue = null) => {
+    const openShapeHowToGuide = (shapeKey, startButton = null, onContinue = null, focusAfterClose = null) => {
         if (!shapeHowToOverlay || !renderShapeHowToGuide(shapeKey)) return;
         if (shapeHowToCloseTimer !== null) window.clearTimeout(shapeHowToCloseTimer);
         pendingShapeHowToStart = startButton;
         pendingShapeHowToContinue = onContinue;
+        pendingShapeHowToFocus = focusAfterClose;
         shapeHowToReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
         shapeHowToOverlay.classList.remove('is-closing');
         shapeHowToOverlay.hidden = false;
@@ -14864,8 +14869,10 @@ const appVersion = '20261003-802';
         if (!shapeHowToOverlay || shapeHowToOverlay.hidden) return;
         const startButton = beginMission ? pendingShapeHowToStart : null;
         const continueAction = beginMission ? pendingShapeHowToContinue : null;
+        const focusAfterClose = pendingShapeHowToFocus;
         pendingShapeHowToStart = null;
         pendingShapeHowToContinue = null;
+        pendingShapeHowToFocus = null;
         shapeHowToOverlay.classList.add('is-closing');
         shapeHowToCloseTimer = window.setTimeout(() => {
             shapeHowToCloseTimer = null;
@@ -14879,6 +14886,8 @@ const appVersion = '20261003-802';
                 shapeHowToStartBypass.delete(startButton);
             } else if (typeof continueAction === 'function') {
                 continueAction();
+            } else if (focusAfterClose?.isConnected) {
+                focusAfterClose.focus({ preventScroll: true });
             } else {
                 shapeHowToReturnFocus?.focus?.({ preventScroll: true });
             }
@@ -14888,16 +14897,37 @@ const appVersion = '20261003-802';
         }, 190);
     };
 
-    document.addEventListener('click', (event) => {
-        const startButton = event.target.closest?.('[data-how-to-shape]');
-        if (!startButton || shapeHowToStartBypass.has(startButton)) return;
-        const shapeKey = startButton.dataset.howToShape;
-        if (!shapeHowToGuides[shapeKey]) return;
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        activeShapeHowToKey = shapeKey;
-        openShapeHowToGuide(shapeKey, startButton);
-    }, true);
+    const syncShapeHowToStartGuides = () => {
+        shapeHowToStartSyncFrame = 0;
+        for (const startButton of shapeHowToStartButtons) {
+            const isVisible = isShapeHowToElementVisible(startButton);
+            if (!isVisible) {
+                shapeHowToShownForAppearance.delete(startButton);
+                continue;
+            }
+            if (shapeHowToShownForAppearance.has(startButton)) continue;
+            const shapeKey = startButton.dataset.howToShape;
+            if (!shapeHowToGuides[shapeKey] || (shapeHowToOverlay && !shapeHowToOverlay.hidden)) continue;
+            shapeHowToShownForAppearance.add(startButton);
+            activeShapeHowToKey = shapeKey;
+            openShapeHowToGuide(shapeKey, null, null, startButton);
+            break;
+        }
+    };
+
+    const scheduleShapeHowToStartGuideSync = () => {
+        if (shapeHowToStartSyncFrame) return;
+        shapeHowToStartSyncFrame = window.requestAnimationFrame(syncShapeHowToStartGuides);
+    };
+
+    const shapeHowToStartObserver = new MutationObserver(scheduleShapeHowToStartGuideSync);
+    shapeHowToStartObserver.observe(document.body, {
+        subtree: true,
+        childList: true,
+        attributes: true,
+        attributeFilter: ['hidden', 'class', 'style', 'aria-hidden'],
+    });
+    scheduleShapeHowToStartGuideSync();
 
     shapeHowToContinue?.addEventListener('click', () => {
         closeShapeHowToGuide({

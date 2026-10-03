@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20261003-802">
+    <link rel="stylesheet" href="style.css?v=20261003-813">
 </head>
 <body class="title-page">
     <div id="app-shell-container" class="app-shell-container">
@@ -75,6 +75,7 @@
             <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M20.2 3.5h7.6l1.1 5.1a16 16 0 0 1 3.2 1.3l4.5-2.5 5.4 5.4-2.5 4.5a16 16 0 0 1 1.3 3.2l5.1 1.1v7.6l-5.1 1.1a16 16 0 0 1-1.3 3.2l2.5 4.5-5.4 5.4-4.5-2.5a16 16 0 0 1-3.2 1.3l-1.1 5.1h-7.6l-1.1-5.1a16 16 0 0 1-3.2-1.3l-4.5 2.5L6 38.1l2.5-4.5a16 16 0 0 1-1.3-3.2l-5.1-1.1v-7.6l5.1-1.1a16 16 0 0 1 1.3-3.2L6 12.9l5.4-5.4 4.5 2.5a16 16 0 0 1 3.2-1.3l1.1-5.2Z"/><circle cx="24" cy="24" r="7"/></svg>
         </button>
         <div class="intro-settings-panel" id="intro-settings-panel" role="group" aria-label="Display settings" hidden>
+            <button class="intro-settings-tutorial-button" type="button" hidden>Tutorial</button>
             <button class="intro-settings-home-button" type="button">Home</button>
             <label class="intro-settings-toggle" for="intro-fullscreen-toggle">
                 <span>Fullscreen</span>
@@ -184,6 +185,13 @@
                 <div class="onboarding-avatar-actions">
                     <button class="onboarding-avatar-continue" type="button" hidden>Magpatuloy</button>
                     <button class="onboarding-avatar-skip" type="button">Skip for now</button>
+                </div>
+            </div>
+            <div class="onboarding-step onboarding-experience-step" data-onboarding-step="experience" hidden>
+                <p class="onboarding-experience-question">Nakapaglaro ka na ba nito dati?</p>
+                <div class="onboarding-experience-actions">
+                    <button class="onboarding-experience-tutorial" type="button">Hindi pa, turuan mo ako</button>
+                    <button class="onboarding-experience-skip" type="button">Oo naman, laro na agad</button>
                 </div>
             </div>
         </section>
@@ -2025,7 +2033,7 @@
 
     
 
-    <script src="script.js?v=20261003-802"></script>
+    <script src="script.js?v=20261003-813"></script>
     </div>
 
     <script>
@@ -2603,6 +2611,7 @@
                 syncIntroBgmForRoute(currentRoute);
 
                 const isIntro = currentRoute === 'title';
+                if (introSettingsTutorialButton) introSettingsTutorialButton.hidden = !isIntro;
                 if (fullscreenRestoreKicker) fullscreenRestoreKicker.textContent = isIntro ? 'Welcome, Adventurer' : 'Game Paused';
                 if (fullscreenRestoreTitle) fullscreenRestoreTitle.textContent = isIntro ? 'Ready to Explore?' : 'Fullscreen Paused';
                 if (fullscreenRestoreCopy) {
@@ -2963,11 +2972,13 @@
             const introClaimAudioSource = 'assets/Audios/Sound effects/claim.mp3';
             const introPadlockAudioSource = 'assets/Audios/Sound effects/padlock.mp3';
             const introAreaUnlockAudioSource = 'assets/Audios/Sound effects/new area unlock.mp3';
+            const introBadgeUnlockAudioSource = 'assets/Audios/Sound effects/badge unlock.mp3';
             let introShopNopeAudio = null;
             let introShopBuyAudio = null;
             let introClaimAudio = null;
             let introPadlockAudio = null;
             let introAreaUnlockAudio = null;
+            let introBadgeUnlockAudio = null;
             let introAreaUnlockFadeDelay = 0;
             let introAreaUnlockFadeFrame = 0;
             const introShopPurchaseKey = (shape) => `learnscape-shop-purchased:${shape}`;
@@ -3013,6 +3024,15 @@
                 if (introClaimAudio) {
                     introClaimAudio.onended = () => {
                         if (introClaimAudio?.ended) introClaimAudio = null;
+                    };
+                }
+            };
+            const playIntroBadgeUnlockSound = () => {
+                introBadgeUnlockAudio?.pause?.();
+                introBadgeUnlockAudio = playIntroShopFeedbackSound(introBadgeUnlockAudioSource, 'spark');
+                if (introBadgeUnlockAudio) {
+                    introBadgeUnlockAudio.onended = () => {
+                        if (introBadgeUnlockAudio?.ended) introBadgeUnlockAudio = null;
                     };
                 }
             };
@@ -3195,6 +3215,7 @@
                             badge.style.setProperty('--badge-reveal-delay', '0ms');
                             badge.classList.add('is-revealing');
                             badge.setAttribute('aria-label', `${shape} badge unlocking`);
+                            playIntroBadgeUnlockSound();
                             revealStarted = now;
                         }
                         if (revealStarted !== null && now - revealStarted >= 1700) {
@@ -3205,7 +3226,6 @@
                             viewedProfileBadges.add(shape);
                             writeSoundSetting(introProfileBadgeViewedKey(shape), 'true');
                             markLearnscapeNotificationRead(`badge:${shape}`);
-                            window.playUiClickSound?.('spark');
                             return;
                         }
                     }
@@ -3375,6 +3395,7 @@
                     introMenuCopy.innerHTML = content.copy || '';
                     introMenuPanel.dataset.panel = panelName;
                     introMenuPanel.hidden = false;
+                    introMenuClose.disabled = Boolean(onboardingStage && onboardingStage !== 'complete');
                     if (panelName === 'shop') syncIntroShopItems();
                     if (panelName === 'profile') syncIntroProfile();
                     if (panelName === 'notifications') renderIntroNotifications('game');
@@ -3580,15 +3601,24 @@
                 }
             });
             introMenuPanel?.addEventListener('click', (event) => {
-                if (event.target === introMenuPanel) closeIntroMenu();
+                if (event.target !== introMenuPanel) return;
+                if (onboardingStage && onboardingStage !== 'complete') return;
+                closeIntroMenu();
             });
             introMenuPanel?.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape') closeIntroMenu();
+                if (event.key !== 'Escape') return;
+                if (onboardingStage && onboardingStage !== 'complete') {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
+                closeIntroMenu();
             });
 
             const introSettings = document.querySelector('.intro-settings');
             const introSettingsButton = introSettings?.querySelector('.intro-settings-button');
             const introSettingsPanel = introSettings?.querySelector('.intro-settings-panel');
+            const introSettingsTutorialButton = introSettings?.querySelector('.intro-settings-tutorial-button');
             const introSettingsHomeButton = introSettings?.querySelector('.intro-settings-home-button');
             const soundMutedToggle = document.getElementById('intro-sound-muted');
             const soundVolumeSlider = document.getElementById('intro-volume-slider');
@@ -3612,7 +3642,7 @@
                     // Sound settings still apply for this session if storage is unavailable.
                 }
             };
-            const freshStartResetVersion = '2026-10-03-3';
+            const freshStartResetVersion = '2026-10-03-4';
             if (readSoundSetting('learnscape-fresh-start-reset-version', '') !== freshStartResetVersion) {
                 try {
                     Object.keys(window.localStorage)
@@ -4897,7 +4927,7 @@
                 termsPrivacyAwaitingFullscreen = true;
                 if (fullscreenRestoreKicker) fullscreenRestoreKicker.textContent = 'Before You Begin';
                 if (fullscreenRestoreTitle) fullscreenRestoreTitle.textContent = 'Enter Fullscreen';
-                if (fullscreenRestoreCopy) fullscreenRestoreCopy.textContent = 'Tap the button below before reading the Terms of Use and Privacy Policy.';
+                if (fullscreenRestoreCopy) fullscreenRestoreCopy.textContent = 'Tap the button below';
                 const label = fullscreenRestoreButton?.querySelector('span');
                 if (label) label.textContent = 'Enter Fullscreen';
             };
@@ -5117,6 +5147,10 @@
                 const starPill = resourceCountElements.stars?.closest('.intro-resource-pill-star');
                 showOnboardingCoach(starPill, 'Bilang ng mga star na nakolekta sa laro.', showCarrotGuide);
             };
+            const showOnboardingExperienceChoice = () => {
+                setOnboardingStage('experience');
+                showOnboardingDialog('experience');
+            };
             const showCarrotGuide = () => {
                 setOnboardingStage('carrots');
                 const carrotPill = resourceCountElements.carrots?.closest('.intro-resource-pill-carrot');
@@ -5163,8 +5197,9 @@
                 const target = introMenuCopy?.querySelector('.intro-profile-stats');
                 setOnboardingStage('profile-stats');
                 showOnboardingCoach(target, 'Dito makikita ang iyong mga bituin, carrots, at mga lugar na nabuksan.', () => {
-                    setOnboardingStage('close-profile');
-                    showOnboardingCoach(introMenuClose, 'Pindutin ang × upang isara ang Profile.');
+                    closeIntroMenu();
+                    setOnboardingStage('enter-world');
+                    showOnboardingCoach(document.querySelector('.btn-enter'), 'Pindutin ang ENTER upang pumunta sa Shape Island.');
                 });
             };
             const startOnboarding = () => {
@@ -5186,7 +5221,7 @@
                 onboardingAwaitingFullscreen = true;
                 if (fullscreenRestoreKicker) fullscreenRestoreKicker.textContent = 'Before You Begin';
                 if (fullscreenRestoreTitle) fullscreenRestoreTitle.textContent = 'Enter Fullscreen';
-                if (fullscreenRestoreCopy) fullscreenRestoreCopy.textContent = 'Tap the button below to begin in fullscreen.';
+                if (fullscreenRestoreCopy) fullscreenRestoreCopy.textContent = 'Tap the button below to play in fullscreen.';
                 const label = fullscreenRestoreButton?.querySelector('span');
                 if (label) label.textContent = 'Enter Fullscreen';
             };
@@ -5194,6 +5229,33 @@
                 hideOnboardingCoach();
                 writeSoundSetting(onboardingDoneKey, 'true');
                 setOnboardingStage('complete');
+            };
+            const skipOnboardingTutorial = () => {
+                if (onboardingDialog) onboardingDialog.hidden = true;
+                writeSoundSetting(learnscapeIslandUnlockKey('circle'), 'true');
+                syncLearnscapeIslandLocks();
+                finishOnboarding();
+            };
+            const replayOnboardingTutorial = () => {
+                if (introSettingsPanel) introSettingsPanel.hidden = true;
+                introSettingsButton?.setAttribute('aria-expanded', 'false');
+                closeIntroMenu();
+                hideOnboardingCoach();
+                writeSoundSetting(onboardingDoneKey, 'false');
+                writeSoundSetting(introShopPurchaseKey('circle'), 'false');
+                writeSoundSetting(learnscapeIslandUnlockKey('circle'), 'false');
+                if (readSoundSetting('learnscape-shop-selected', '') === 'circle') {
+                    writeSoundSetting('learnscape-shop-selected', '');
+                }
+                learnscapeNotifications = learnscapeNotifications.filter((item) => item.id !== 'shop:circle');
+                persistLearnscapeNotifications();
+                syncIntroNotificationUnreadIndicator();
+                const carrots = window.getLearnscapeResourceCount?.('carrots') ?? resourceCounts.carrots;
+                setLearnscapeResourceCount('carrots', carrots + getIntroShopCost('circle'));
+                syncIntroShopItems();
+                syncLearnscapeIslandLocks();
+                setOnboardingStage('');
+                beginShopTutorial();
             };
 
             onboardingDialog?.querySelector('.onboarding-next')?.addEventListener('click', () => {
@@ -5219,8 +5281,35 @@
                 onboardingAvatarContinue.hidden = false;
                 onboardingAvatarInput.value = '';
             });
-            onboardingAvatarContinue?.addEventListener('click', beginShopTutorial);
-            onboardingDialog?.querySelector('.onboarding-avatar-skip')?.addEventListener('click', beginShopTutorial);
+            onboardingAvatarContinue?.addEventListener('click', showOnboardingExperienceChoice);
+            onboardingDialog?.querySelector('.onboarding-avatar-skip')?.addEventListener('click', showOnboardingExperienceChoice);
+            onboardingDialog?.querySelector('.onboarding-experience-tutorial')?.addEventListener('click', beginShopTutorial);
+            onboardingDialog?.querySelector('.onboarding-experience-skip')?.addEventListener('click', skipOnboardingTutorial);
+            introSettingsTutorialButton?.addEventListener('click', replayOnboardingTutorial);
+
+            const isAllowedOnboardingInteraction = (eventTarget) => {
+                if (!onboardingStage || onboardingStage === 'complete' || isOnboardingComplete()) return true;
+                const target = eventTarget instanceof Element ? eventTarget : eventTarget?.parentElement;
+                if (!target) return false;
+                if (fullscreenRestoreButton?.contains(target)) return true;
+                if (onboardingDialog && !onboardingDialog.hidden) {
+                    const activeStep = onboardingDialog.querySelector('.onboarding-step:not([hidden])');
+                    return Boolean(activeStep?.contains(target));
+                }
+                if (onboardingStage === 'unlocking'
+                    && target.closest('.game3-island-card[data-island-shape="circle"] .game3-island-enter')) {
+                    return true;
+                }
+                if (onboardingCoachNext && !onboardingCoachNext.hidden && onboardingCoachNext.contains(target)) return true;
+                return Boolean(onboardingTarget?.contains(target));
+            };
+            const lockUnexplainedOnboardingInteraction = (event) => {
+                if (isAllowedOnboardingInteraction(event.target)) return;
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            };
+            document.addEventListener('pointerdown', lockUnexplainedOnboardingInteraction, true);
+            document.addEventListener('click', lockUnexplainedOnboardingInteraction, true);
 
             document.addEventListener('click', (event) => {
                 if (isOnboardingComplete()) return;
@@ -5229,7 +5318,7 @@
                 if (onboardingStage === 'open-shop' && target.matches('[data-intro-panel="shop"]')) {
                     window.setTimeout(() => {
                         setOnboardingStage('buy-circle');
-                        showOnboardingCoach(introMenuCopy?.querySelector('[data-shop-item="circle"]'), 'Pindutin ang Circle Key upang bilhin ito gamit ang carrots.');
+                        showOnboardingCoach(introMenuCopy?.querySelector('[data-shop-item="circle"]'), 'Pindutin ang item na gustong bilhin gamit ang carrots.');
                     }, 0);
                 } else if (onboardingStage === 'buy-circle' && target.matches('[data-shop-item="circle"]')) {
                     window.setTimeout(() => {
@@ -5244,11 +5333,6 @@
                     setOnboardingStage('unlocking');
                 } else if (onboardingStage === 'open-profile' && target.matches('[data-intro-panel="profile"]')) {
                     window.setTimeout(showProfileAvatarGuide, 0);
-                } else if (onboardingStage === 'close-profile' && target === introMenuClose) {
-                    window.setTimeout(() => {
-                        setOnboardingStage('enter-world');
-                        showOnboardingCoach(document.querySelector('.btn-enter'), 'Pindutin ang ENTER upang pumunta sa Shape Island.');
-                    }, 0);
                 } else if (onboardingStage === 'enter-world' && target.matches('.btn-enter')) {
                     hideOnboardingCoach();
                     setOnboardingStage('enter-circle');
@@ -5257,6 +5341,13 @@
                 }
             });
             window.addEventListener('learnscape:routechange', (event) => {
+                if (onboardingStage === 'enter-circle' && event.detail?.route === 'game3') {
+                    window.setTimeout(() => {
+                        const circleEnter = document.querySelector('.game3-island-card[data-island-shape="circle"] .game3-island-enter');
+                        showOnboardingCoach(circleEnter, 'Pindutin ang Enter upang buksan ang unang isla.');
+                    }, 0);
+                    return;
+                }
                 if (onboardingStage === 'enter-circle' && event.detail?.route === 'shapeCircle') finishOnboarding();
             });
             window.addEventListener('learnscape:islandunlocked', (event) => {
