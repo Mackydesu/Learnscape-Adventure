@@ -277,6 +277,9 @@ body.is-windowed-fallback .onboarding-coach {
         rgba(3, 15, 24, 0.7) 100%
     );
 }
+.onboarding-dim.is-tutorial-completion {
+    background: rgba(3, 15, 24, 0.38);
+}
 
 body.is-onboarding-profile-locked .onboarding-dim {
     pointer-events: auto;
@@ -313,6 +316,30 @@ body.is-onboarding-profile-locked .onboarding-dim {
 .onboarding-coach-card.is-profile-action-message {
     width: min(22rem, 42vw);
 }
+.onboarding-coach.is-tutorial-completion .onboarding-coach-card {
+    top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: min(40rem, calc(100vw - 2rem));
+    padding: 2rem;
+    text-align: center;
+    transform: translate(-50%, -50%);
+}
+.onboarding-coach.is-tutorial-completion .onboarding-coach-copy {
+    margin: 0;
+    font-size: 2rem;
+    line-height: 1.2;
+}
+.onboarding-coach.is-tutorial-completion .onboarding-coach-next {
+    display: block;
+    float: none;
+    margin: 1.25rem auto 0;
+}
+@media (max-width: 30rem) {
+    .onboarding-coach.is-tutorial-completion .onboarding-coach-card { padding: 1.4rem; }
+    .onboarding-coach.is-tutorial-completion .onboarding-coach-copy { font-size: 1.55rem; }
+}
 
 .onboarding-coach.is-tutorial-end-message .onboarding-coach-card {
     display: none;
@@ -340,6 +367,19 @@ body.is-onboarding-profile-locked .onboarding-dim {
 }
 
 .onboarding-coach-next { min-height: 3rem; margin-top: 0.9rem; padding-inline: 1.2rem; font-size: 1.08em; float: right; }
+.onboarding-hand {
+    position: fixed;
+    z-index: 2;
+    display: block;
+    width: clamp(3.8rem, 7vw, 5.4rem);
+    height: auto;
+    pointer-events: none;
+    user-select: none;
+    filter: drop-shadow(0 0.25rem 0.18rem rgba(0, 0, 0, 0.38));
+    animation: onboardingHandDrag 0.9s ease-in-out infinite alternate;
+}
+.onboarding-hand[hidden] { display: none; }
+.onboarding-hand.is-pointing-from-right { animation-name: onboardingHandDragFromRight; }
 .onboarding-target-glow {
     filter: brightness(1.16) drop-shadow(0 0 0.45rem #ffd83d) drop-shadow(0 0 0.9rem rgba(255, 244, 163, 0.95)) !important;
 }
@@ -385,6 +425,14 @@ body.is-onboarding-profile-locked .onboarding-dim {
     0% { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
     14%, 72% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     100% { opacity: 0; transform: translate(-50%, -50%) scale(1.08); }
+}
+@keyframes onboardingHandDrag {
+    from { transform: translate(-0.35rem, -0.12rem) rotate(-95deg) scale(0.96); }
+    to { transform: translate(0.45rem, 0.32rem) rotate(-86deg) scale(1.04); }
+}
+@keyframes onboardingHandDragFromRight {
+    from { transform: translate(0.35rem, -0.12rem) rotate(85deg) scale(0.96) scaleX(-1); }
+    to { transform: translate(-0.45rem, 0.32rem) rotate(94deg) scale(1.04) scaleX(-1); }
 }
 @keyframes onboardingCircleKeyGlow {
     from { filter: brightness(1.08) drop-shadow(0 0 0.35rem rgba(255, 224, 74, 0.9)); }

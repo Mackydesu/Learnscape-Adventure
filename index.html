@@ -219,6 +219,7 @@
 
     <div class="onboarding-dim" aria-hidden="true" hidden></div>
     <div class="onboarding-coach" aria-live="polite" hidden>
+        <img class="onboarding-hand" src="assets/Shape UI/drag-guide-hand.png" alt="" aria-hidden="true">
         <p class="onboarding-tutorial-end-message" hidden>End of tutorial</p>
         <div class="onboarding-coach-card">
             <p class="onboarding-coach-copy"></p>
@@ -3185,6 +3186,7 @@
             let introAreaUnlockFadeDelay = 0;
             let introAreaUnlockFadeFrame = 0;
             const introShopPurchaseKey = (shape) => `learnscape-shop-purchased:${shape}`;
+            let isTutorialSessionActive = false;
             const playIntroShopFeedbackSound = (source, fallbackKind) => {
                 if (!window.Audio) {
                     window.playUiClickSound?.(fallbackKind);
@@ -3316,11 +3318,15 @@
                 window.setTimeout(() => popout.remove(), 1150);
             };
             const syncIntroShopItems = () => {
-                const selectedShape = readSoundSetting('learnscape-shop-selected', '');
+                const selectedShape = isTutorialSessionActive
+                    ? (tutorialCircleKeyPurchased ? 'circle' : '')
+                    : readSoundSetting('learnscape-shop-selected', '');
                 introMenuCopy?.querySelectorAll('.intro-shop-item').forEach((item) => {
                     const shape = item.dataset.shopItem || '';
                     const itemCost = getIntroShopCost(shape);
-                    const isPurchased = readSoundSetting(introShopPurchaseKey(shape), 'false') === 'true';
+                    const isPurchased = isTutorialSessionActive
+                        ? shape === 'circle' && tutorialCircleKeyPurchased
+                        : readSoundSetting(introShopPurchaseKey(shape), 'false') === 'true';
                     const isSelected = isPurchased && shape === selectedShape;
                     const key = item.querySelector('.intro-shop-key');
                     if (key && !key.querySelector('.intro-shop-padlock')) {
@@ -3501,7 +3507,8 @@
                 let revealIndex = 0;
                 introProfileShapes.forEach((shape) => {
                     const badge = board.querySelector(`[data-profile-badge="${shape}"]`);
-                    const isUnlocked = readSoundSetting(introProfileBadgeUnlockKey(shape), 'false') === 'true';
+                    const isUnlocked = !isTutorialSessionActive
+                        && readSoundSetting(introProfileBadgeUnlockKey(shape), 'false') === 'true';
                     if (badge && isUnlocked && !isProfileBadgeViewed(shape)) {
                         if (!introMenuPanel.hidden && introMenuPanel.dataset.panel === 'profile') {
                             revealProfileBadge(badge, shape, 650 + revealIndex++ * 220);
@@ -3659,10 +3666,15 @@
                     event.stopPropagation();
                     const notificationItem = notificationAction.closest('[data-notification-id]');
                     if (notificationAction.dataset.notificationAction === 'use-key') {
+                        const isTutorialCircleKey = isTutorialCircleKeyNotification(notificationItem?.dataset.notificationId);
                         if (onboardingStage === 'use-key'
                             && notificationAction.dataset.notificationShape === 'circle') {
                             hideOnboardingCoach();
                             setOnboardingStage('unlocking');
+                        }
+                        if (isTutorialCircleKey) {
+                            window.useLearnscapeIslandKey?.('circle', notificationItem?.dataset.notificationId);
+                            return;
                         }
                         window.useLearnscapeIslandKey?.(
                             notificationAction.dataset.notificationShape,
@@ -3778,6 +3790,10 @@
                 const item = event.target.closest('.intro-shop-item');
                 if (!item || !introMenuCopy.contains(item)) return;
                 const shape = item.dataset.shopItem || '';
+                if (isTutorialCircleShopPurchase(shape)) {
+                    completeTutorialCircleShopPurchase(item);
+                    return;
+                }
                 const itemCost = getIntroShopCost(shape);
                 let didPurchase = false;
                 if (!item.classList.contains('is-purchased')) {
@@ -3910,10 +3926,10 @@
             });
             const learnscapeIslandUnlockKey = (shape) => `learnscape-island-unlocked:${shape}`;
             const isLearnscapeIslandUnlocked = (shape) => (
-                readSoundSetting(learnscapeIslandUnlockKey(shape), 'false') === 'true'
+                !isTutorialSessionActive && readSoundSetting(learnscapeIslandUnlockKey(shape), 'false') === 'true'
             );
             const isLearnscapeKeyPurchased = (shape) => (
-                readSoundSetting(introShopPurchaseKey(shape), 'false') === 'true'
+                !isTutorialSessionActive && readSoundSetting(introShopPurchaseKey(shape), 'false') === 'true'
             );
             const notificationShapeColors = Object.freeze({
                 circle: '#1887ff',
@@ -4100,6 +4116,7 @@
                 }
             };
             const persistPendingCarrotClaims = () => {
+                if (isTutorialSessionActive) return;
                 try {
                     const pending = learnscapeNotifications.filter((item) => (
                         item.isPreview !== true
@@ -4116,7 +4133,7 @@
                 ? [...readPendingCarrotClaims(), ...createNotificationPreviewItems()]
                 : readLearnscapeNotifications();
             const persistLearnscapeNotifications = () => {
-                if (isNotificationPreviewMode) return;
+                if (isNotificationPreviewMode || isTutorialSessionActive) return;
                 try {
                     window.localStorage.setItem(
                         learnscapeNotificationStorageKey,
@@ -4200,6 +4217,7 @@
             };
             const shouldShowUseKeyAction = (notification) => {
                 if (notification?.type !== 'shop' || !learnscapeShapeLabels[notification.shape]) return false;
+                if (isTutorialCircleKeyNotification(notification.id)) return onboardingStage === 'use-key';
                 if (!isLearnscapeKeyPurchased(notification.shape) || isLearnscapeIslandUnlocked(notification.shape)) return false;
                 const liveNotificationId = `shop:${notification.shape}`;
                 const hasLiveNotification = learnscapeNotifications.some((item) => item.id === liveNotificationId);
@@ -4317,7 +4335,7 @@
                         action.type = 'button';
                         action.dataset.notificationAction = 'claim-carrots';
                         action.setAttribute('aria-label', `Claim ${getNotificationCarrotAmount(notification)} carrots`);
-                        action.textContent = 'Claim';
+                        action.textContent = notification.id === tutorialCompletionRewardId ? 'Claim Reward' : 'Claim';
                         meta.appendChild(action);
                     } else if (notification.claimRequired === true && notification.claimed === true) {
                         const claimed = document.createElement('span');
@@ -4330,6 +4348,7 @@
                 });
             };
             const addLearnscapeNotification = (notification) => {
+                if (isTutorialSessionActive) return false;
                 if (!notification?.id || !notification?.title) return false;
                 if (notification.type === 'collection') return false;
                 if (learnscapeNotifications.some((item) => item.id === notification.id)) return false;
@@ -4361,6 +4380,7 @@
             window.addLearnscapeNotification = addLearnscapeNotification;
             window.getLearnscapeNotifications = () => [...learnscapeNotifications];
             const awardLearnscapeProfileBadge = (shape) => {
+                if (isTutorialSessionActive) return;
                 if (!learnscapeShapeLabels[shape]) return;
                 const alreadyEarned = readSoundSetting(introProfileBadgeUnlockKey(shape), 'false') === 'true';
                 writeSoundSetting(introProfileBadgeUnlockKey(shape), 'true');
@@ -4378,6 +4398,7 @@
             };
             let isCarrotClaimAnimationActive = false;
             const claimLearnscapeCarrotReward = (notificationId, claimButton) => {
+                if (isTutorialSessionActive) return false;
                 if (isCarrotClaimAnimationActive) return false;
                 const notification = learnscapeNotifications.find((item) => item.id === notificationId);
                 if (!isClaimableCarrotNotification(notification)) return false;
@@ -4494,6 +4515,24 @@
             };
             let activeIslandUnlockShape = '';
             const finishLearnscapeIslandUnlock = (shape, card) => {
+                if (isTutorialCircleUnlock(shape)) {
+                    card.classList.remove('is-locked', 'is-breaking-lock', 'is-unlocking');
+                    card.classList.add('is-unlocked', 'is-unlock-complete');
+                    card.classList.remove('is-key-ready');
+                    const enter = card.querySelector('.game3-island-enter');
+                    if (enter) {
+                        enter.setAttribute('aria-disabled', 'false');
+                        enter.tabIndex = 0;
+                        enter.textContent = 'Enter';
+                    }
+                    activeIslandUnlockShape = '';
+                    window.setTimeout(() => card.classList.remove('is-unlock-complete'), game3IslandEnterPulseDuration);
+                    window.dispatchEvent(new CustomEvent('learnscape:islandunlocked', {
+                        detail: { shape, tutorial: true },
+                    }));
+                    window.playUiClickSound?.('chime');
+                    return;
+                }
                 writeSoundSetting(learnscapeIslandUnlockKey(shape), 'true');
                 card.classList.remove('is-locked', 'is-breaking-lock', 'is-unlocking');
                 card.classList.add('is-unlocked', 'is-unlock-complete');
@@ -4526,7 +4565,7 @@
                     stopIntroPadlockSound();
                     card.classList.remove('is-breaking-lock');
                     const lock = card.querySelector('.game3-island-lock');
-                    lock?.remove();
+                    if (lock) lock.hidden = true;
                     card.classList.add('is-unlocking');
                     playIntroAreaUnlockSound(learnscapeIslandUnlockAnimationDuration);
                     window.setTimeout(
@@ -4595,19 +4634,22 @@
                 return true;
             };
             const useLearnscapeIslandKey = (shape, notificationId) => {
+                const isTutorialUnlock = isTutorialCircleUnlock(shape);
                 if (!learnscapeShapeLabels[shape] || activeIslandUnlockShape) return false;
-                if (!isLearnscapeKeyPurchased(shape) || isLearnscapeIslandUnlocked(shape)) return false;
-                markLearnscapeNotificationRead(notificationId);
+                if (!isTutorialUnlock && (!isLearnscapeKeyPurchased(shape) || isLearnscapeIslandUnlocked(shape))) return false;
+                if (!isTutorialUnlock) markLearnscapeNotificationRead(notificationId);
                 closeIntroMenu();
                 const game3Page = document.getElementById('learnscape-game3-page');
                 if (game3Page && !game3Page.hidden) {
                     animateLearnscapeIslandUnlock(shape, false);
+                    if (isTutorialUnlock) markTutorialCircleUnlockReady();
                     return true;
                 }
                 const waitForIslandPage = (event) => {
                     if (event.detail?.route !== 'game3') return;
                     window.removeEventListener('learnscape:routechange', waitForIslandPage);
                     animateLearnscapeIslandUnlock(shape, false);
+                    if (isTutorialUnlock) markTutorialCircleUnlockReady();
                 };
                 window.addEventListener('learnscape:routechange', waitForIslandPage);
                 window.__learnscapeNavigate?.('game3');
@@ -4621,7 +4663,10 @@
                 event.preventDefault();
                 event.stopImmediatePropagation();
                 const shape = card.dataset.islandShape || '';
-                if (isLearnscapeKeyPurchased(shape) && !activeIslandUnlockShape) {
+                const isTutorialKeyReady = shape === 'circle'
+                    && onboardingStage === 'unlocking'
+                    && tutorialCircleKeyPurchased;
+                if ((isLearnscapeKeyPurchased(shape) || isTutorialKeyReady) && !activeIslandUnlockShape) {
                     activeIslandUnlockShape = shape;
                     if (!animateLearnscapeIslandUnlock(shape)) activeIslandUnlockShape = '';
                     return;
@@ -4639,6 +4684,7 @@
                 return true;
             };
             window.addEventListener('learnscape:camera-complete', (event) => {
+                if (isTutorialSessionActive) return;
                 const shape = String(event.detail?.shape || '').trim().toLowerCase();
                 const shapeLabel = learnscapeShapeLabels[shape];
                 if (!shapeLabel) return;
@@ -4686,7 +4732,7 @@
                     output.textContent = String(nextValue);
                     output.closest('.intro-resource-pill')?.setAttribute('aria-label', `${nextValue} ${resource}`);
                 }
-                if (persist) writeSoundSetting(resourceStorageKeys[resource], String(nextValue));
+                if (persist && !isTutorialSessionActive) writeSoundSetting(resourceStorageKeys[resource], String(nextValue));
                 window.dispatchEvent(new CustomEvent('learnscape:resourcechange', {
                     detail: { resource, value: nextValue },
                 }));
@@ -4707,7 +4753,9 @@
             window.getLearnscapeResourceCount = (resource) => resourceCounts[resource] ?? 0;
             window.setLearnscapeResourceCount = setLearnscapeResourceCount;
             window.addLearnscapeResource = (resource, amount = 1) => (
-                setLearnscapeResourceCount(resource, (resourceCounts[resource] ?? 0) + Number(amount || 0))
+                isTutorialSessionActive
+                    ? (resourceCounts[resource] ?? 0)
+                    : setLearnscapeResourceCount(resource, (resourceCounts[resource] ?? 0) + Number(amount || 0))
             );
             const reconcileLearnscapeCarrotBalance = () => {
                 const hasTutorialCircleKey = isLearnscapeKeyPurchased('circle');
@@ -4938,6 +4986,7 @@
                 });
             };
             const syncLearnscapeProgressReward = (progress) => {
+                if (isTutorialSessionActive) return;
                 if (!progress) return;
                 const actions = progress.querySelector('.circle-lesson-progress-actions');
                 const stars = progress.querySelector('.circle-lesson-stars');
@@ -5267,6 +5316,7 @@
             const onboardingDim = document.querySelector('.onboarding-dim');
             const onboardingCoach = document.querySelector('.onboarding-coach');
             const onboardingCopy = onboardingCoach?.querySelector('.onboarding-coach-copy');
+            const onboardingHand = onboardingCoach?.querySelector('.onboarding-hand');
             const onboardingTutorialEndMessage = onboardingCoach?.querySelector('.onboarding-tutorial-end-message');
             const onboardingCoachCard = onboardingCoach?.querySelector('.onboarding-coach-card');
             const onboardingCoachNext = onboardingCoach?.querySelector('.onboarding-coach-next');
@@ -5279,25 +5329,24 @@
             const onboardingReplayResetKey = 'learnscape-onboarding-replay-reset-version';
             if (readSoundSetting(onboardingReplayResetKey, '') !== onboardingReplayResetVersion) {
                 try {
-                    window.localStorage.removeItem(onboardingDoneKey);
-                    window.localStorage.removeItem(introShopPurchaseKey('circle'));
-                    window.localStorage.removeItem(learnscapeIslandUnlockKey('circle'));
-                    if (readSoundSetting('learnscape-shop-selected', '') === 'circle') {
-                        window.localStorage.removeItem('learnscape-shop-selected');
-                    }
                     window.localStorage.setItem(onboardingReplayResetKey, onboardingReplayResetVersion);
-                    syncIntroShopItems();
-                    syncLearnscapeIslandLocks();
                 } catch (error) {
                     // The tutorial can still run for this session when storage is unavailable.
                 }
             }
+            const tutorialShopNotificationId = 'tutorial:shop:circle';
+            const tutorialCompletionRewardId = 'carrots:tutorial-completed';
+            const tutorialCompletionRewardIssuedKey = 'learnscape-tutorial-completion-reward-issued:v1';
             let onboardingStage = '';
             let onboardingTarget = null;
             let onboardingAwaitingFullscreen = false;
             let resumeOnboardingView = null;
             let tutorialEndMessageTimer = null;
             let tutorialEndMessageFinished = false;
+            let tutorialResourceSnapshot = null;
+            let tutorialNotificationsSnapshot = null;
+            let tutorialCircleKeyPurchased = false;
+            let tutorialCompletionRewardIssuedThisSession = false;
             const profileTutorialStages = new Set([
                 'profile-avatar',
                 'profile-name',
@@ -5307,6 +5356,55 @@
             ]);
 
             const isOnboardingComplete = () => readSoundSetting(onboardingDoneKey, 'false') === 'true';
+            const isTutorialCircleShopPurchase = (shape) => onboardingStage === 'buy-circle' && shape === 'circle';
+            const isTutorialCircleKeyNotification = (notificationId) => (
+                tutorialCircleKeyPurchased && notificationId === tutorialShopNotificationId
+            );
+            const isTutorialCircleUnlock = (shape) => onboardingStage === 'unlocking' && shape === 'circle';
+            const markTutorialCircleUnlockReady = () => {
+                const card = document.querySelector('.game3-island-card[data-island-shape="circle"]');
+                const enter = card?.querySelector('.game3-island-enter');
+                if (!card || !enter || !tutorialCircleKeyPurchased || isLearnscapeIslandUnlocked('circle')) return;
+                card.classList.add('is-locked', 'is-key-ready');
+                const lock = card.querySelector('.game3-island-lock');
+                if (lock) lock.hidden = false;
+                enter.setAttribute('aria-disabled', 'false');
+                enter.tabIndex = 0;
+                enter.textContent = 'Unlock';
+            };
+            const completeTutorialCircleShopPurchase = (item) => {
+                if (tutorialCircleKeyPurchased) return;
+                const carrotCost = getIntroShopCost('circle');
+                const availableCarrots = window.getLearnscapeResourceCount?.('carrots') ?? resourceCounts.carrots;
+                setLearnscapeResourceCount('carrots', Math.max(0, availableCarrots - carrotCost), false);
+                showIntroCarrotSpendPopout(carrotCost);
+                tutorialCircleKeyPurchased = true;
+                item.classList.add('is-purchased', 'is-selected');
+                item.setAttribute('aria-pressed', 'true');
+                introMenuCopy?.querySelectorAll('.intro-shop-item:not([data-shop-item="circle"])').forEach((shopItem) => {
+                    shopItem.classList.remove('is-selected');
+                    shopItem.setAttribute('aria-pressed', 'false');
+                });
+                setIntroShopStatus('Nabuksan na ang susi!', 'success');
+                if (!learnscapeNotifications.some((itemRecord) => itemRecord.id === tutorialShopNotificationId)) {
+                    learnscapeNotifications.unshift({
+                        id: tutorialShopNotificationId,
+                        category: 'game',
+                        type: 'shop',
+                        shape: 'circle',
+                        title: 'Circle key purchased',
+                        detail: 'Your tutorial key is ready to use.',
+                        createdAt: Date.now(),
+                        read: false,
+                        tutorialOnly: true,
+                    });
+                }
+                item.classList.remove('is-purchase-success');
+                void item.offsetWidth;
+                item.classList.add('is-purchase-success');
+                window.setTimeout(() => item.classList.remove('is-purchase-success'), 900);
+                playIntroShopBuySound();
+            };
             const isProfileTutorialLocked = () => (
                 profileTutorialStages.has(onboardingStage)
                 && onboardingCoach
@@ -5345,6 +5443,8 @@
                 onboardingTarget?.classList.remove('onboarding-carrot-highlight');
                 onboardingTarget?.classList.remove('onboarding-circle-key-glow');
                 onboardingTarget?.classList.remove('onboarding-use-key-glow');
+                if (onboardingHand) onboardingHand.hidden = true;
+                onboardingDim?.classList.remove('is-tutorial-completion');
                 onboardingDim?.style.removeProperty('--onboarding-spotlight-x');
                 onboardingDim?.style.removeProperty('--onboarding-spotlight-y');
                 onboardingDim?.style.removeProperty('--onboarding-spotlight-width');
@@ -5362,6 +5462,7 @@
                 if (onboardingCoach) {
                     onboardingCoach.hidden = true;
                     onboardingCoach.classList.remove('is-tutorial-end-message');
+                    onboardingCoach.classList.remove('is-tutorial-completion');
                 }
                 if (onboardingTutorialEndMessage) {
                     onboardingTutorialEndMessage.hidden = true;
@@ -5441,6 +5542,26 @@
                     onboardingCoachCard.style.right = 'auto';
                     onboardingCoachCard.style.bottom = 'auto';
                 }
+                if (onboardingHand) {
+                    const handWidth = onboardingHand.offsetWidth || 76;
+                    const sideGap = isProfileEditTarget ? 10 : 18;
+                    const preferRightSide = ['open-shop', 'buy-circle', 'open-notifications', 'use-key'].includes(onboardingStage);
+                    const rightSideLeft = rect.right + sideGap;
+                    const leftSideLeft = rect.left - handWidth - sideGap;
+                    const canUseRightSide = rightSideLeft + handWidth <= window.innerWidth - 8;
+                    const canUseLeftSide = leftSideLeft >= 8;
+                    const useRightSide = preferRightSide
+                        ? (canUseRightSide || !canUseLeftSide)
+                        : (!canUseLeftSide && canUseRightSide);
+                    const handLeft = useRightSide
+                        ? Math.min(window.innerWidth - handWidth - 8, rightSideLeft)
+                        : Math.max(8, leftSideLeft);
+                    const handTop = Math.max(8, Math.min(window.innerHeight - handWidth - 8, rect.top + (rect.height / 2) - (handWidth / 2)));
+                    onboardingHand.hidden = onboardingStage === 'tutorial-end';
+                    onboardingHand.classList.toggle('is-pointing-from-right', useRightSide);
+                    onboardingHand.style.left = `${handLeft}px`;
+                    onboardingHand.style.top = `${handTop}px`;
+                }
             };
             const isCircleIslandTutorialTarget = (target) => {
                 const card = target?.closest?.('.game3-island-card[data-island-shape="circle"]');
@@ -5452,25 +5573,34 @@
             };
             const showTutorialEndMessage = (target) => {
                 if (!isCircleIslandTutorialTarget(target)) return;
-                showOnboardingCoach(target, '');
-                if (!onboardingCoach || onboardingCoach.hidden || !onboardingTutorialEndMessage) return;
+                showOnboardingCoach(
+                    target,
+                    'Tutorial completed! Claim your reward in Game Missions.',
+                    finishOnboarding,
+                );
+                if (!onboardingCoach || onboardingCoach.hidden) return;
                 resumeOnboardingView = () => showTutorialEndMessage(target);
-                onboardingCoach.classList.add('is-tutorial-end-message');
-                if (onboardingDim) onboardingDim.hidden = true;
-                tutorialEndMessageFinished = false;
-                onboardingTutorialEndMessage.hidden = false;
-                onboardingTutorialEndMessage.classList.remove('is-visible');
-                void onboardingTutorialEndMessage.offsetWidth;
-                onboardingTutorialEndMessage.classList.add('is-visible');
-                if (tutorialEndMessageTimer !== null) window.clearTimeout(tutorialEndMessageTimer);
-                tutorialEndMessageTimer = window.setTimeout(() => {
-                    tutorialEndMessageTimer = null;
+                onboardingCoach.classList.remove('is-tutorial-end-message');
+                onboardingCoach.classList.add('is-tutorial-completion');
+                target.classList.remove('onboarding-target-glow', 'onboarding-highlight');
+                if (onboardingDim) {
+                    onboardingDim.classList.add('is-tutorial-completion');
+                    onboardingDim.hidden = false;
+                }
+                if (onboardingTutorialEndMessage) {
                     onboardingTutorialEndMessage.classList.remove('is-visible');
                     onboardingTutorialEndMessage.hidden = true;
-                    tutorialEndMessageFinished = true;
-                    finishOnboarding();
-                    pulseGame3IslandEnter(target);
-                }, 2600);
+                }
+                if (tutorialEndMessageTimer !== null) {
+                    window.clearTimeout(tutorialEndMessageTimer);
+                    tutorialEndMessageTimer = null;
+                }
+                tutorialEndMessageFinished = true;
+                if (onboardingCoachNext) {
+                    onboardingCoachNext.hidden = false;
+                    onboardingCoachNext.textContent = 'Claim Rewards';
+                    onboardingCoachNext.onclick = finishOnboarding;
+                }
             };
             const showOnboardingDialog = (step) => {
                 if (!isFullscreenActive()) {
@@ -5495,10 +5625,26 @@
                     onboardingNameInput.focus({ preventScroll: true });
                 }
             };
+            const activateTutorialSession = () => {
+                if (isTutorialSessionActive) return;
+                tutorialResourceSnapshot = {
+                    stars: window.getLearnscapeResourceCount?.('stars') ?? resourceCounts.stars,
+                    carrots: window.getLearnscapeResourceCount?.('carrots') ?? resourceCounts.carrots,
+                };
+                tutorialNotificationsSnapshot = learnscapeNotifications;
+                learnscapeNotifications = [];
+                tutorialCircleKeyPurchased = false;
+                isTutorialSessionActive = true;
+                cancelProfileBadgeReveals();
+                setLearnscapeResourceCount('stars', 0, false);
+                setLearnscapeResourceCount('carrots', getIntroShopCost('circle'), false);
+                syncIntroNotificationUnreadIndicator();
+                syncIntroShopItems();
+                syncLearnscapeIslandLocks();
+            };
             const beginShopTutorial = () => {
                 if (onboardingDialog) onboardingDialog.hidden = true;
-                const currentCarrots = window.getLearnscapeResourceCount?.('carrots') ?? resourceCounts.carrots;
-                setLearnscapeResourceCount('carrots', Math.max(currentCarrots, getIntroShopCost('circle')));
+                activateTutorialSession();
                 setOnboardingStage('stars');
                 const starPill = resourceCountElements.stars?.closest('.intro-resource-pill-star');
                 showOnboardingCoach(starPill, 'Bilang ng mga star na nakolekta sa laro.', showCarrotGuide);
@@ -5517,12 +5663,13 @@
                 carrotPill?.classList.add('onboarding-carrot-highlight');
             };
             const showUseKeyGuide = () => {
+                setOnboardingStage('use-key');
+                renderIntroNotifications('game');
                 const useKeyButton = introMenuCopy?.querySelector('[data-notification-action="use-key"][data-notification-shape="circle"]');
                 if (!useKeyButton) {
                     window.setTimeout(showUseKeyGuide, 80);
                     return;
                 }
-                setOnboardingStage('use-key');
                 showOnboardingCoach(useKeyButton, 'Pindutin ang Use Key upang mabuksan ang unang isla.');
             };
             const showProfileGuide = () => {
@@ -5560,6 +5707,7 @@
             };
             const startOnboarding = () => {
                 if (isOnboardingComplete() || !hasAcceptedTermsPrivacy() || onboardingStage) return;
+                activateTutorialSession();
                 if (!isFullscreenActive()) {
                     onboardingAwaitingFullscreen = true;
                     return;
@@ -5570,6 +5718,7 @@
             };
             const promptFullscreenBeforeOnboarding = () => {
                 if (isOnboardingComplete() || !hasAcceptedTermsPrivacy() || onboardingStage) return;
+                activateTutorialSession();
                 if (isFullscreenActive()) {
                     startOnboarding();
                     return;
@@ -5581,19 +5730,47 @@
                 const label = fullscreenRestoreButton?.querySelector('span');
                 if (label) label.textContent = 'Enter Fullscreen';
             };
-            const saveTutorialProgress = () => {
-                if (isLearnscapeKeyPurchased('circle')) {
-                    writeSoundSetting(introShopPurchaseKey('circle'), 'true');
+            const restoreTutorialGameplayState = () => {
+                if (isTutorialSessionActive && tutorialResourceSnapshot) {
+                    setLearnscapeResourceCount('stars', tutorialResourceSnapshot.stars, false);
+                    setLearnscapeResourceCount('carrots', tutorialResourceSnapshot.carrots, false);
                 }
-                if (isLearnscapeIslandUnlocked('circle')) {
-                    writeSoundSetting(learnscapeIslandUnlockKey('circle'), 'true');
-                }
+                tutorialResourceSnapshot = null;
+                if (tutorialNotificationsSnapshot) learnscapeNotifications = tutorialNotificationsSnapshot;
+                tutorialNotificationsSnapshot = null;
+                tutorialCircleKeyPurchased = false;
+                isTutorialSessionActive = false;
                 syncIntroShopItems();
                 syncLearnscapeIslandLocks();
+                syncIntroNotificationUnreadIndicator();
+            };
+            const issueTutorialCompletionReward = () => {
+                if (tutorialCompletionRewardIssuedThisSession
+                    || readSoundSetting(tutorialCompletionRewardIssuedKey, 'false') === 'true') return;
+                tutorialCompletionRewardIssuedThisSession = true;
+                addLearnscapeNotification({
+                    id: tutorialCompletionRewardId,
+                    type: 'reward',
+                    rewardAmount: 10,
+                    claimRequired: true,
+                    claimed: false,
+                    title: 'Tutorial completed: +10 carrots',
+                    detail: 'Claim your tutorial completion reward.',
+                });
+                writeSoundSetting(tutorialCompletionRewardIssuedKey, 'true');
             };
             const finishOnboarding = () => {
                 hideOnboardingCoach();
-                saveTutorialProgress();
+                restoreTutorialGameplayState();
+                writeSoundSetting(onboardingDoneKey, 'true');
+                setOnboardingStage('complete');
+                issueTutorialCompletionReward();
+                window.__learnscapeNavigate?.('title');
+                window.dispatchEvent(new CustomEvent('learnscape:open-game-missions'));
+            };
+            const skipOnboardingTutorial = () => {
+                if (onboardingDialog) onboardingDialog.hidden = true;
+                restoreTutorialGameplayState();
                 writeSoundSetting(onboardingDoneKey, 'true');
                 setOnboardingStage('complete');
             };
@@ -5603,20 +5780,20 @@
                 closeIntroMenu();
                 hideOnboardingCoach();
                 writeSoundSetting(onboardingDoneKey, 'false');
-                writeSoundSetting(introShopPurchaseKey('circle'), 'false');
-                writeSoundSetting(learnscapeIslandUnlockKey('circle'), 'false');
-                if (readSoundSetting('learnscape-shop-selected', '') === 'circle') {
-                    writeSoundSetting('learnscape-shop-selected', '');
-                }
-                learnscapeNotifications = learnscapeNotifications.filter((item) => item.id !== 'shop:circle');
-                persistLearnscapeNotifications();
-                syncIntroNotificationUnreadIndicator();
-                const carrots = window.getLearnscapeResourceCount?.('carrots') ?? resourceCounts.carrots;
-                setLearnscapeResourceCount('carrots', carrots + getIntroShopCost('circle'));
-                syncIntroShopItems();
-                syncLearnscapeIslandLocks();
+                restoreTutorialGameplayState();
                 setOnboardingStage('');
-                beginShopTutorial();
+                activateTutorialSession();
+                if (currentRoute === 'title') {
+                    beginShopTutorial();
+                    return;
+                }
+                const beginReplayOnHome = (event) => {
+                    if (event.detail?.route !== 'title') return;
+                    window.removeEventListener('learnscape:routechange', beginReplayOnHome);
+                    window.setTimeout(beginShopTutorial, 0);
+                };
+                window.addEventListener('learnscape:routechange', beginReplayOnHome);
+                window.__learnscapeNavigate?.('title');
             };
 
             onboardingDialog?.querySelector('.onboarding-next')?.addEventListener('click', () => {
@@ -5660,11 +5837,13 @@
                     && target.closest('.game3-island-card[data-island-shape="circle"] .game3-island-enter')) {
                     return true;
                 }
-                if (onboardingStage === 'tutorial-end'
-                    && target.closest('.game3-island-card[data-island-shape="circle"] .game3-island-enter')) {
-                    return true;
+                if (onboardingStage === 'tutorial-end') {
+                    return Boolean(
+                        onboardingCoachNext
+                        && !onboardingCoachNext.hidden
+                        && onboardingCoachNext.contains(target),
+                    );
                 }
-                if (onboardingStage === 'tutorial-end' && tutorialEndMessageFinished) return true;
                 if (onboardingCoachNext && !onboardingCoachNext.hidden && onboardingCoachNext.contains(target)) return true;
                 return Boolean(onboardingTarget?.contains(target));
             };
@@ -5704,6 +5883,10 @@
                 }
             });
             window.addEventListener('learnscape:routechange', (event) => {
+                if (onboardingStage === 'open-profile' && event.detail?.route === 'title') {
+                    window.setTimeout(showProfileGuide, 0);
+                    return;
+                }
                 if (onboardingStage === 'tutorial-end' && event.detail?.route === 'game3') {
                     window.setTimeout(() => {
                         const circleEnter = document.querySelector('.game3-island-card[data-island-shape="circle"] .game3-island-enter');
@@ -5718,8 +5901,8 @@
             });
             window.addEventListener('learnscape:islandunlocked', (event) => {
                 if (onboardingStage !== 'unlocking' || event.detail?.shape !== 'circle') return;
-                navigateWithLoading('title');
-                window.setTimeout(showProfileGuide, 1100);
+                setOnboardingStage('open-profile');
+                window.__learnscapeNavigate?.('title');
             });
             window.addEventListener('learnscape:termsaccepted', () => window.setTimeout(promptFullscreenBeforeOnboarding, 0));
             const resumeOnboardingAfterLayout = () => {
