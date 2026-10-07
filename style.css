@@ -156,6 +156,34 @@ body.game3-page {
     accent-color: #1e6573;
 }
 
+.terms-privacy-continue {
+    display: block;
+    min-width: 9rem;
+    margin: 1rem auto 0;
+    padding: 0.72rem 1.5rem;
+    border: 2px solid #164f5b;
+    border-radius: 0.5rem;
+    color: #fff;
+    background: #1e6573;
+    font: 700 1rem/1 var(--app-font);
+    cursor: pointer;
+}
+
+.terms-privacy-continue:hover:not(:disabled),
+.terms-privacy-continue:focus-visible {
+    background: #164f5b;
+    outline: 3px solid #ffd84d;
+    outline-offset: 2px;
+}
+
+.terms-privacy-continue:disabled {
+    opacity: 0.48;
+    cursor: not-allowed;
+}
+
+.terms-privacy-agreement[hidden],
+.terms-privacy-continue[hidden] { display: none; }
+
 .onboarding-dialog-overlay {
     position: fixed;
     inset: 0;
@@ -173,6 +201,15 @@ body.game3-page {
 .onboarding-dialog-overlay[hidden],
 .onboarding-dim[hidden],
 .onboarding-coach[hidden] { display: none; }
+
+body:not(.is-fullscreen-mode) .onboarding-dialog-overlay,
+body:not(.is-fullscreen-mode) .onboarding-dim,
+body:not(.is-fullscreen-mode) .onboarding-coach,
+body.is-windowed-fallback .onboarding-dialog-overlay,
+body.is-windowed-fallback .onboarding-dim,
+body.is-windowed-fallback .onboarding-coach {
+    display: none !important;
+}
 
 .onboarding-dialog {
     width: min(28rem, 100%);
@@ -199,8 +236,7 @@ body.game3-page {
 .onboarding-avatar-pick,
 .onboarding-avatar-continue,
 .onboarding-avatar-skip,
-.onboarding-experience-tutorial,
-.onboarding-experience-skip,
+.onboarding-experience-start,
 .onboarding-coach-next {
     min-height: 2.65rem;
     padding: 0.55rem 1rem;
@@ -225,8 +261,6 @@ body.game3-page {
     font-size: clamp(1.12rem, 2.6vw, 1.32rem);
     line-height: 1.3;
 }
-.onboarding-experience-skip { color: #1e6573; background: #e4f2f3; }
-
 .onboarding-dim {
     position: fixed;
     inset: 0;
@@ -280,9 +314,32 @@ body.is-onboarding-profile-locked .onboarding-dim {
     width: min(22rem, 42vw);
 }
 
+.onboarding-coach.is-tutorial-end-message .onboarding-coach-card {
+    display: none;
+}
+
+.onboarding-tutorial-end-message {
+    position: fixed;
+    z-index: 3;
+    top: 50%;
+    left: 50%;
+    width: min(88vw, 58rem);
+    margin: 0;
+    color: #fffdf0;
+    font: 900 clamp(2.4rem, 8vw, 6.5rem)/1.05 'Fredoka', sans-serif;
+    letter-spacing: 0;
+    text-align: center;
+    text-shadow: 0 0.12em 0 #7a3d12, 0 0.25em 0.45em rgba(21, 42, 19, 0.72);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0.7);
+}
+
+.onboarding-tutorial-end-message.is-visible {
+    animation: onboardingTutorialEndMessage 2.6s ease-in-out both;
+}
+
 .onboarding-coach-next { min-height: 3rem; margin-top: 0.9rem; padding-inline: 1.2rem; font-size: 1.08em; float: right; }
-.onboarding-hand { position: fixed; z-index: 2; display: block; width: clamp(3.8rem, 7vw, 5.4rem); height: auto; pointer-events: none; user-select: none; filter: drop-shadow(0 0.25rem 0.18rem rgba(0, 0, 0, 0.38)); animation: onboardingHandDrag 0.9s ease-in-out infinite alternate; }
-.onboarding-hand.is-pointing-from-right { animation-name: onboardingHandDragFromRight; }
 .onboarding-target-glow {
     filter: brightness(1.16) drop-shadow(0 0 0.45rem #ffd83d) drop-shadow(0 0 0.9rem rgba(255, 244, 163, 0.95)) !important;
 }
@@ -324,13 +381,10 @@ body.is-onboarding-profile-locked .onboarding-dim {
     animation: onboardingCircleKeyGlow 0.85s ease-in-out infinite alternate;
 }
 
-@keyframes onboardingHandDrag {
-    from { transform: translate(-0.35rem, -0.12rem) rotate(-95deg) scale(0.96); }
-    to { transform: translate(0.45rem, 0.32rem) rotate(-86deg) scale(1.04); }
-}
-@keyframes onboardingHandDragFromRight {
-    from { transform: translate(0.35rem, -0.12rem) rotate(85deg) scale(0.96) scaleX(-1); }
-    to { transform: translate(-0.45rem, 0.32rem) rotate(94deg) scale(1.04) scaleX(-1); }
+@keyframes onboardingTutorialEndMessage {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+    14%, 72% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.08); }
 }
 @keyframes onboardingCircleKeyGlow {
     from { filter: brightness(1.08) drop-shadow(0 0 0.35rem rgba(255, 224, 74, 0.9)); }
@@ -15291,8 +15345,25 @@ body *::after {
     backdrop-filter: blur(3px);
 }
 
-.camera-completion-home {
+.camera-completion-claim-rewards {
     aspect-ratio: 308 / 250;
+}
+
+.circle-lesson-progress.camera-completion-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-actions {
+    width: min(88vw, 64rem) !important;
+    gap: clamp(2rem, 7vw, 8rem) !important;
+    justify-content: center;
+}
+
+.circle-lesson-progress.camera-completion-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-notification {
+    top: auto;
+    bottom: calc(100% + clamp(0.8rem, 2vh, 1.5rem));
+    width: min(72vw, 26rem);
+    transform: translate(-50%, 0.5rem) scale(0.9);
+}
+
+.circle-lesson-progress.camera-completion-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-notification.is-visible {
+    transform: translate(-50%, 0) scale(1);
 }
 
 .circle-lesson-progress-button:has(.progress-button-svg) {
@@ -15303,6 +15374,10 @@ body *::after {
 
 .circle-lesson-progress-button[data-progress-control='next']:has(.progress-button-svg) {
     width: clamp(12rem, 24vw, 18rem) !important;
+}
+
+.circle-lesson-progress-button[data-progress-control='claim']:has(.progress-button-svg) {
+    width: clamp(16rem, 32vw, 24rem) !important;
 }
 
 .circle-lesson-progress-actions:has(.progress-button-svg) {
@@ -15322,6 +15397,15 @@ body *::after {
 }
 
 @media (max-width: 700px) {
+    .circle-lesson-progress.camera-completion-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-actions {
+        width: 94vw !important;
+        gap: clamp(1rem, 4vw, 1.5rem) !important;
+    }
+
+    .circle-lesson-progress.camera-completion-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-notification {
+        width: min(82vw, 20rem);
+    }
+
     .circle-lesson-progress-button:has(.progress-button-svg) {
         width: clamp(9rem, 42vw, 12rem) !important;
         height: clamp(5rem, 20vw, 6.8rem) !important;
@@ -15329,6 +15413,10 @@ body *::after {
 
     .circle-lesson-progress-button[data-progress-control='next']:has(.progress-button-svg) {
         width: clamp(9rem, 42vw, 12rem) !important;
+    }
+
+    .circle-lesson-progress-button[data-progress-control='claim']:has(.progress-button-svg) {
+        width: clamp(10.5rem, 47vw, 14rem) !important;
     }
 
     .circle-lesson-progress-actions:has(.progress-button-svg) {
@@ -15363,6 +15451,11 @@ body *::after {
     .circle-lesson-progress-actions .circle-lesson-progress-button:last-of-type,
     .circle-lesson-progress-button[data-progress-control='next']:has(.progress-button-svg) {
         width: clamp(6.2rem, 25vw, 8rem) !important;
+        height: clamp(4.8rem, 18vw, 6rem) !important;
+    }
+
+    .circle-lesson-progress-button[data-progress-control='claim']:has(.progress-button-svg) {
+        width: clamp(10.5rem, 47vw, 14rem) !important;
         height: clamp(4.8rem, 18vw, 6rem) !important;
     }
 }
@@ -18288,7 +18381,8 @@ body *::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .game3-island-card.is-key-ready .game3-island-enter {
+    .game3-island-card.is-key-ready .game3-island-enter,
+    .game3-island-enter.is-attention-pulse {
         animation: none;
     }
 
@@ -18445,7 +18539,19 @@ body *::after {
         inset 0 0.18rem 0 rgba(255, 255, 255, 0.78);
     cursor: pointer;
     transition: transform 150ms ease, filter 150ms ease, box-shadow 150ms ease;
-    animation: game3IslandEnterPulse 1.8s ease-in-out infinite;
+    animation: none;
+}
+
+.game3-island-enter.is-attention-pulse {
+    animation: game3IslandUnlockButtonPulse 1.25s ease-in-out 2;
+}
+
+.game3-island-card.is-unlocked .game3-island-enter {
+    animation: game3IslandUnlockButtonPulse 1.25s ease-in-out infinite;
+}
+
+.game3-island-card.is-unlocked .game3-island-enter.is-attention-pulse {
+    animation: game3IslandUnlockButtonPulse 1.25s ease-in-out 2;
 }
 
 .game3-island-enter:hover,
@@ -18466,21 +18572,6 @@ body *::after {
     cursor: not-allowed;
     filter: saturate(0.82);
     opacity: 0.94;
-}
-
-@keyframes game3IslandEnterPulse {
-    0%, 100% {
-        filter: brightness(1);
-    }
-
-    50% {
-        filter: brightness(1.14);
-        box-shadow:
-            0 0.42rem 0 var(--game3-card-shadow),
-            0 0 1.7rem var(--game3-card-highlight),
-            0 1rem 1.7rem rgba(23, 62, 96, 0.38),
-            inset 0 0.18rem 0 rgba(255, 255, 255, 0.82);
-    }
 }
 
 #learnscape-game3-page {

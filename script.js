@@ -521,7 +521,7 @@ const appVersion = '20261003-837';
                         <p class="circle-lesson-star-message" aria-live="polite">Wow! You found a ${shapeLabel.toLowerCase()} object!</p>
                         <div class="circle-lesson-progress-actions">
                             <button class="circle-lesson-progress-button camera-completion-replay" type="button" aria-label="Try the ${shapeLabel} camera challenge again"><img src="assets/Buttons/Retry.webp" alt=""></button>
-                            <button class="circle-lesson-progress-button camera-completion-home" type="button" aria-label="Return to the intro page"><img src="assets/Buttons/next.webp" alt=""></button>
+                            <button class="circle-lesson-progress-button camera-completion-claim-rewards" type="button" aria-label="Claim camera challenge rewards"><img src="assets/Buttons/next.webp" alt=""></button>
                         </div>
                     </div>
                 </section>
@@ -1638,29 +1638,40 @@ const appVersion = '20261003-837';
         }
 
         const isHomeControl = kind === 'home';
-        const actionLabel = isHomeControl ? 'HOME' : 'NEXT';
+        const isClaimControl = kind === 'claim';
+        const controlWidth = isClaimControl ? 410 : 310;
+        const viewBoxWidth = controlWidth + 20;
+        const labelX = isClaimControl ? 272 : 210;
+        const accentWidth = isClaimControl ? 246 : 166;
+        const labelFit = isClaimControl ? ' textLength="242" lengthAdjust="spacingAndGlyphs"' : '';
+        const actionLabel = isHomeControl ? 'HOME' : (isClaimControl ? 'CLAIM REWARDS' : 'NEXT');
         const actionIcon = isHomeControl
             ? `<path d="M48 83 83 49l35 34v39H94V96H72v26H48Z" fill="#0a6101" opacity=".38" transform="translate(0 4)"/>
                         <path d="M48 79 83 45l35 34v39H94V92H72v26H48Z" fill="url(#progressGreenIcon-${idSuffix})" stroke="#0e7203" stroke-width="4" stroke-linejoin="round"/>
                         <path d="M42 81 83 41l41 40" fill="none" stroke="url(#progressGreenIcon-${idSuffix})" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
                         <path d="M58 75 82 52" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity=".88"/>`
+            : isClaimControl
+                ? `<path d="M48 66h70v54H48Z" fill="#0a6101" opacity=".38" transform="translate(0 4)"/>
+                        <path d="M48 62h70v54H48Z" fill="url(#progressGreenIcon-${idSuffix})" stroke="#0e7203" stroke-width="4" stroke-linejoin="round"/>
+                        <path d="M43 62h80v-19H43Z" fill="url(#progressGreenIcon-${idSuffix})" stroke="#0e7203" stroke-width="4" stroke-linejoin="round"/>
+                        <path d="M83 43v73M48 80h70" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity=".88"/>`
             : `<path d="M65 49 112 82 65 115Z" fill="#0a6101" opacity=".38" transform="translate(0 4)"/>
                         <path d="M65 45 112 82 65 119Z" fill="url(#progressGreenIcon-${idSuffix})" stroke="#0e7203" stroke-width="4" stroke-linejoin="round"/>
                         <path d="M73 57 98 77" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity=".88"/>`;
 
         return `
-            <svg class="progress-button-svg progress-button-svg-${kind}" viewBox="0 0 330 170" aria-hidden="true" focusable="false">
+            <svg class="progress-button-svg progress-button-svg-${kind}" viewBox="0 0 ${viewBoxWidth} 170" aria-hidden="true" focusable="false">
                 <defs>
                     <linearGradient id="progressGreen-${idSuffix}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#87e82c"/><stop offset=".54" stop-color="#35b914"/><stop offset="1" stop-color="#148304"/></linearGradient>
                     <linearGradient id="progressGreenIcon-${idSuffix}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e8ffd9"/></linearGradient>
                     <filter id="progressNextShadow-${idSuffix}" x="-20%" y="-25%" width="140%" height="165%"><feDropShadow dx="0" dy="8" stdDeviation="5" flood-color="#075000" flood-opacity=".55"/></filter>
                 </defs>
                 <g filter="url(#progressNextShadow-${idSuffix})">
-                    <rect x="10" y="8" width="310" height="146" rx="55" fill="url(#progressGreen-${idSuffix})" stroke="#0d6503" stroke-width="8"/>
-                    <path d="M24 66C27 35 50 19 88 18h166" fill="none" stroke="#c9f982" stroke-width="6.5" stroke-linecap="round" opacity=".84"/>
+                    <rect x="10" y="8" width="${controlWidth}" height="146" rx="55" fill="url(#progressGreen-${idSuffix})" stroke="#0d6503" stroke-width="8"/>
+                    <path d="M24 66C27 35 50 19 88 18h${accentWidth}" fill="none" stroke="#c9f982" stroke-width="6.5" stroke-linecap="round" opacity=".84"/>
                     <circle cx="83" cy="82" r="51" fill="#159407" stroke="#0b6d02" stroke-width="5" opacity=".76"/>
                     ${actionIcon}
-                    <text x="210" y="99" text-anchor="middle" fill="#fffdf4" stroke="#0b6202" stroke-width="8" paint-order="stroke fill" font-family="Fredoka, Quicksand, sans-serif" font-size="50" font-weight="900" letter-spacing="1">${actionLabel}</text>
+                    <text x="${labelX}" y="99"${labelFit} text-anchor="middle" fill="#fffdf4" stroke="#0b6202" stroke-width="8" paint-order="stroke fill" font-family="Fredoka, Quicksand, sans-serif" font-size="${isClaimControl ? '38' : '50'}" font-weight="900" letter-spacing="1">${actionLabel}</text>
                 </g>
             </svg>`;
     };
@@ -1672,7 +1683,9 @@ const appVersion = '20261003-837';
             const source = image?.getAttribute('src') || '';
             const fileName = source.split('/').pop()?.toLowerCase() || '';
             const ariaLabel = (button.getAttribute('aria-label') || '').toLowerCase();
-            const kind = button.classList.contains('camera-completion-home') || ariaLabel.includes('intro page')
+            const kind = button.classList.contains('camera-completion-claim-rewards') || ariaLabel.includes('claim camera')
+                ? 'claim'
+                : ariaLabel.includes('intro page')
                 ? 'home'
                 : fileName === 'retry.webp' || ariaLabel.includes('retry') || ariaLabel.includes('try the')
                     ? 'retry'
@@ -12498,7 +12511,7 @@ const appVersion = '20261003-837';
         celebration?.setAttribute('aria-hidden', 'true');
         page.querySelector('.camera-completion-progress')?.setAttribute('aria-hidden', 'false');
         playUiClickSound('boardSuccess');
-        page.querySelector('.camera-completion-home')?.focus({ preventScroll: true });
+        page.querySelector('.camera-completion-claim-rewards')?.focus({ preventScroll: true });
         const starTimer = window.setTimeout(() => {
             if (page.classList.contains('is-camera-progress-visible')) playUiClickSound('starPop');
         }, 700);
@@ -13189,9 +13202,10 @@ const appVersion = '20261003-837';
         page.querySelector('.camera-completion-replay')?.addEventListener('click', () => {
             resetCameraCompletionFlow(page);
         });
-        page.querySelector('.camera-completion-home')?.addEventListener('click', () => {
+        page.querySelector('.camera-completion-claim-rewards')?.addEventListener('click', () => {
             resetCameraCompletionFlow(page);
             navigateApp('title');
+            window.dispatchEvent(new CustomEvent('learnscape:open-game-missions'));
         });
     });
 
@@ -15307,6 +15321,149 @@ const appVersion = '20261003-837';
             }
         }, 80);
     });
+
+    const cameraHowToOverlay = document.querySelector('.camera-how-to-overlay');
+    const cameraHowToHelpButton = document.querySelector('.camera-how-to-help-button');
+    const cameraHowToMission = cameraHowToOverlay?.querySelector('.shape-how-to-mission') || null;
+    const cameraHowToSteps = cameraHowToOverlay?.querySelector('.shape-how-to-steps') || null;
+    const cameraHowToContinue = cameraHowToOverlay?.querySelector('.shape-how-to-continue') || null;
+    const cameraHowToPages = Array.from(document.querySelectorAll('.circle-camera-page[data-camera-shape]'));
+    const cameraHowToShapeLabels = Object.freeze({
+        circle: 'Circle',
+        square: 'Square',
+        triangle: 'Triangle',
+        rectangle: 'Rectangle',
+        oval: 'Oval',
+        heart: 'Heart',
+        star: 'Star',
+        diamond: 'Diamond',
+    });
+    const cameraHowToSeenThisSession = new Set();
+    let activeCameraHowToShape = '';
+    let cameraHowToReturnFocus = null;
+    let cameraHowToCloseTimer = null;
+
+    const cameraHowToSeenStorageKey = (shape) => `learnscape-camera-how-to-seen:${shape}`;
+    const hasSeenCameraHowTo = (shape) => {
+        if (cameraHowToSeenThisSession.has(shape)) return true;
+        try {
+            return window.localStorage.getItem(cameraHowToSeenStorageKey(shape)) === 'true';
+        } catch (error) {
+            return false;
+        }
+    };
+    const markCameraHowToSeen = (shape) => {
+        cameraHowToSeenThisSession.add(shape);
+        try {
+            window.localStorage.setItem(cameraHowToSeenStorageKey(shape), 'true');
+        } catch (error) {
+            // The current session still remembers that this guide has been shown.
+        }
+    };
+    const getVisibleCameraHowToPage = () => (
+        cameraHowToPages.find((page) => isShapeHowToElementVisible(page)) || null
+    );
+    const renderCameraHowTo = (shape) => {
+        const shapeLabel = cameraHowToShapeLabels[shape];
+        if (!shapeLabel || !cameraHowToMission || !cameraHowToSteps) return false;
+        cameraHowToMission.textContent = `Present an object with a ${shapeLabel.toLowerCase()} geometric shape to the camera to unlock the chest.`;
+        const steps = [
+            `Check that the target shape is ${shapeLabel}.`,
+            `Present an object with a ${shapeLabel.toLowerCase()} shape inside the camera frame.`,
+            'Find the target shape three times, then open the unlocked chest.',
+        ];
+        cameraHowToSteps.replaceChildren(...steps.map((step) => {
+            const item = document.createElement('li');
+            item.textContent = step;
+            return item;
+        }));
+        return true;
+    };
+    const showCameraHowToHelpButton = () => {
+        if (!cameraHowToHelpButton || !activeCameraHowToShape) return;
+        cameraHowToHelpButton.hidden = false;
+        cameraHowToHelpButton.classList.remove('is-snapping');
+        void cameraHowToHelpButton.offsetWidth;
+        cameraHowToHelpButton.classList.add('is-snapping');
+        window.setTimeout(() => cameraHowToHelpButton.classList.remove('is-snapping'), 540);
+    };
+    const openCameraHowTo = (shape) => {
+        if (!cameraHowToOverlay || !renderCameraHowTo(shape)) return;
+        if (cameraHowToCloseTimer !== null) window.clearTimeout(cameraHowToCloseTimer);
+        cameraHowToReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        cameraHowToOverlay.classList.remove('is-closing');
+        cameraHowToOverlay.hidden = false;
+        document.body.classList.add('is-camera-how-to-open');
+        cameraHowToOverlay.querySelector('.shape-how-to-scroll')?.scrollTo({ top: 0, behavior: 'auto' });
+        window.requestAnimationFrame(() => cameraHowToContinue?.focus({ preventScroll: true }));
+    };
+    const closeCameraHowTo = () => {
+        if (!cameraHowToOverlay || cameraHowToOverlay.hidden) return;
+        const visiblePage = getVisibleCameraHowToPage();
+        const startButton = visiblePage?.querySelector('.circle-camera-start-button') || null;
+        cameraHowToOverlay.classList.add('is-closing');
+        cameraHowToCloseTimer = window.setTimeout(() => {
+            cameraHowToCloseTimer = null;
+            cameraHowToOverlay.hidden = true;
+            cameraHowToOverlay.classList.remove('is-closing');
+            document.body.classList.remove('is-camera-how-to-open');
+            showCameraHowToHelpButton();
+            if (startButton?.isConnected) startButton.focus({ preventScroll: true });
+            else cameraHowToReturnFocus?.focus?.({ preventScroll: true });
+            cameraHowToReturnFocus = null;
+        }, 190);
+    };
+    const syncCameraHowToGuide = () => {
+        const visiblePage = getVisibleCameraHowToPage();
+        if (!visiblePage) {
+            activeCameraHowToShape = '';
+            if (cameraHowToHelpButton) cameraHowToHelpButton.hidden = true;
+            if (cameraHowToOverlay && !cameraHowToOverlay.hidden) {
+                cameraHowToOverlay.hidden = true;
+                cameraHowToOverlay.classList.remove('is-closing');
+                document.body.classList.remove('is-camera-how-to-open');
+            }
+            return;
+        }
+        const shape = visiblePage.dataset.cameraShape || '';
+        if (!cameraHowToShapeLabels[shape]) return;
+        activeCameraHowToShape = shape;
+        if (hasSeenCameraHowTo(shape)) {
+            showCameraHowToHelpButton();
+            return;
+        }
+        markCameraHowToSeen(shape);
+        openCameraHowTo(shape);
+    };
+
+    cameraHowToContinue?.addEventListener('click', closeCameraHowTo);
+    cameraHowToHelpButton?.addEventListener('click', () => {
+        if (activeCameraHowToShape) openCameraHowTo(activeCameraHowToShape);
+    });
+    document.addEventListener('keydown', (event) => {
+        if (!cameraHowToOverlay || cameraHowToOverlay.hidden) return;
+        if (event.code === 'Space') event.preventDefault();
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            closeCameraHowTo();
+            return;
+        }
+        if (event.key !== 'Tab') {
+            event.stopPropagation();
+            return;
+        }
+        const focusable = [cameraHowToOverlay.querySelector('.shape-how-to-scroll'), cameraHowToContinue]
+            .filter((element) => element instanceof HTMLElement);
+        const currentIndex = focusable.indexOf(document.activeElement);
+        const nextIndex = event.shiftKey
+            ? (currentIndex <= 0 ? focusable.length - 1 : currentIndex - 1)
+            : (currentIndex >= focusable.length - 1 ? 0 : currentIndex + 1);
+        event.preventDefault();
+        event.stopPropagation();
+        focusable[nextIndex]?.focus({ preventScroll: true });
+    }, true);
+    window.addEventListener('learnscape:routechange', () => window.setTimeout(syncCameraHowToGuide, 80));
+    syncCameraHowToGuide();
 
     syncFullscreenClass();
     document.addEventListener('fullscreenchange', () => {
