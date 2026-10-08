@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20261003-837">
+    <link rel="stylesheet" href="style.css?v=20261008-2">
 </head>
 <body class="title-page is-page-loading is-initial-loading" aria-busy="true">
     <div id="app-shell-container" class="app-shell-container">
@@ -96,8 +96,19 @@
                 <span>Sound volume <output id="intro-volume-value" for="intro-volume-slider">100%</output></span>
                 <input id="intro-volume-slider" type="range" min="0" max="100" step="1" value="100">
             </label>
+            <button class="intro-settings-reset-button" type="button">Reset Game</button>
         </div>
     </div>
+
+    <dialog class="reset-game-dialog" role="alertdialog" aria-labelledby="reset-game-title" aria-describedby="reset-game-description">
+        <h2 id="reset-game-title">Reset Game?</h2>
+        <p id="reset-game-description">This deletes saved progress, rewards, profile, and tutorial status in this browser.</p>
+        <p class="reset-game-error" role="alert" hidden>Saved data could not be cleared. Please try again.</p>
+        <div class="reset-game-actions">
+            <button class="reset-game-cancel" type="button">Cancel</button>
+            <button class="reset-game-confirm" type="button">Reset Game</button>
+        </div>
+    </dialog>
 
     <div class="shape-how-to-overlay" hidden>
         <section class="shape-how-to-dialog" role="dialog" aria-modal="true" aria-labelledby="shape-how-to-title" aria-describedby="shape-how-to-mission">
@@ -2163,7 +2174,7 @@
 
     
 
-    <script src="script.js?v=20261003-837"></script>
+    <script src="script.js?v=20261008-2"></script>
     </div>
 
     <script>
@@ -3858,6 +3869,11 @@
             const introSettingsPanel = introSettings?.querySelector('.intro-settings-panel');
             const introSettingsTutorialButton = introSettings?.querySelector('.intro-settings-tutorial-button');
             const introSettingsHomeButton = introSettings?.querySelector('.intro-settings-home-button');
+            const introSettingsResetButton = introSettings?.querySelector('.intro-settings-reset-button');
+            const resetGameDialog = document.querySelector('.reset-game-dialog');
+            const resetGameCancelButton = resetGameDialog?.querySelector('.reset-game-cancel');
+            const resetGameConfirmButton = resetGameDialog?.querySelector('.reset-game-confirm');
+            const resetGameError = resetGameDialog?.querySelector('.reset-game-error');
             const soundMutedToggle = document.getElementById('intro-sound-muted');
             const soundVolumeSlider = document.getElementById('intro-volume-slider');
             const soundVolumeValue = document.getElementById('intro-volume-value');
@@ -3880,17 +3896,58 @@
                     // Sound settings still apply for this session if storage is unavailable.
                 }
             };
-            const freshStartResetVersion = '2026-10-03-4';
-            if (readSoundSetting('learnscape-fresh-start-reset-version', '') !== freshStartResetVersion) {
+            const savedGameMigrationKey = 'learnscape-save-migration-version';
+            const savedGameMigrations = [
+                {
+                    version: 1,
+                    migrate(storage) {
+                        const selectedShape = storage.getItem('learnscape-shop-selected');
+                        if (selectedShape && !Object.prototype.hasOwnProperty.call(introShopCosts, selectedShape)) {
+                            storage.removeItem('learnscape-shop-selected');
+                        }
+                    },
+                },
+            ];
+            const migrateSavedGame = () => {
                 try {
-                    Object.keys(window.localStorage)
-                        .filter((key) => key.startsWith('learnscape-') && key !== 'learnscape-app-version')
-                        .forEach((key) => window.localStorage.removeItem(key));
-                    window.localStorage.setItem('learnscape-fresh-start-reset-version', freshStartResetVersion);
+                    const storage = window.localStorage;
+                    let version = Number.parseInt(storage.getItem(savedGameMigrationKey) || '0', 10) || 0;
+                    savedGameMigrations.forEach((migration) => {
+                        if (version >= migration.version) return;
+                        migration.migrate(storage);
+                        storage.setItem(savedGameMigrationKey, String(migration.version));
+                        version = migration.version;
+                    });
                 } catch (error) {
-                    // The game still starts with its in-memory defaults when storage is unavailable.
+                    console.warn('Saved game migration could not be applied.', error);
                 }
-            }
+            };
+            migrateSavedGame();
+            const resetGameExactKeys = new Set([
+                'learnscape-star-count',
+                'learnscape-carrot-count',
+                'learnscape-shop-selected',
+                'learnscape-profile-name',
+                'learnscape-profile-avatar',
+                'learnscape-profile-frame',
+            ]);
+            const resetGameKeyPrefixes = [
+                'learnscape-shop-purchased:',
+                'learnscape-island-unlocked:',
+                'learnscape-profile-badge-unlocked:',
+                'learnscape-profile-badge-viewed:',
+                'learnscape-progress-reward:',
+                'learnscape-carrot-claimed:',
+                'learnscape-game-notifications:',
+                'learnscape-pending-carrot-claims:',
+                'learnscape-onboarding-complete:',
+                'learnscape-tutorial-completion-reward-issued:',
+                'learnscape-how-to-seen:',
+                'learnscape-camera-how-to-seen:',
+                'learnscape-temp-carrot-grant:',
+            ];
+            const isResettableGameKey = (key) => resetGameExactKeys.has(key)
+                || resetGameKeyPrefixes.some((prefix) => key.startsWith(prefix));
             const learnscapeNotificationStorageKey = 'learnscape-game-notifications:v1';
             const learnscapePendingCarrotClaimsKey = 'learnscape-pending-carrot-claims:v1';
             const learnscapeNotificationLimit = 120;
@@ -4464,7 +4521,6 @@
                             persistLearnscapeNotifications();
                             persistPendingCarrotClaims();
                             window.addLearnscapeResource('carrots', amount);
-                            reconcileLearnscapeCarrotBalance();
                             showIntroCarrotGainPopout(amount);
                             carrotPill.classList.remove('is-claim-impact');
                             void carrotPill.offsetWidth;
@@ -4708,14 +4764,6 @@
             if (activeLockedArea) {
                 window.setTimeout(() => setRoute({ routeName: 'game3', params: {} }), 0);
             }
-            const introShopResetVersion = '2026-09-26-1';
-            if (readSoundSetting('learnscape-shop-reset-version', '') !== introShopResetVersion) {
-                ['circle', 'square', 'triangle', 'rectangle', 'oval', 'heart', 'star', 'diamond'].forEach((shape) => {
-                    writeSoundSetting(introShopPurchaseKey(shape), 'false');
-                });
-                writeSoundSetting('learnscape-shop-selected', '');
-                writeSoundSetting('learnscape-shop-reset-version', introShopResetVersion);
-            }
             const resourceStorageKeys = {
                 stars: 'learnscape-star-count',
                 carrots: 'learnscape-carrot-count',
@@ -4757,33 +4805,6 @@
                     ? (resourceCounts[resource] ?? 0)
                     : setLearnscapeResourceCount(resource, (resourceCounts[resource] ?? 0) + Number(amount || 0))
             );
-            const reconcileLearnscapeCarrotBalance = () => {
-                const hasTutorialCircleKey = isLearnscapeKeyPurchased('circle');
-                if (!hasTutorialCircleKey) return resourceCounts.carrots;
-                const claimedRewardTotal = learnscapeNotifications.reduce((total, notification) => (
-                    notification.claimRequired === true && notification.claimed === true
-                        ? total + getNotificationCarrotAmount(notification)
-                        : total
-                ), 0);
-                if (claimedRewardTotal <= 0) return resourceCounts.carrots;
-                const purchasedKeyTotal = Object.keys(introShopCosts).reduce((total, shape) => (
-                    isLearnscapeKeyPurchased(shape) ? total + getIntroShopCost(shape) : total
-                ), 0);
-                const expectedMinimumBalance = Math.max(
-                    0,
-                    claimedRewardTotal + getIntroShopCost('circle') - purchasedKeyTotal,
-                );
-                if (resourceCounts.carrots < expectedMinimumBalance) {
-                    return setLearnscapeResourceCount('carrots', expectedMinimumBalance);
-                }
-                return resourceCounts.carrots;
-            };
-            const carrotBalanceRepairVersion = '2026-10-03-2';
-            const carrotBalanceRepairKey = 'learnscape-carrot-balance-repair-version';
-            if (readSoundSetting(carrotBalanceRepairKey, '') !== carrotBalanceRepairVersion) {
-                reconcileLearnscapeCarrotBalance();
-                writeSoundSetting(carrotBalanceRepairKey, carrotBalanceRepairVersion);
-            }
             window.addEventListener('learnscape:resourcechange', () => {
                 if (introMenuPanel?.dataset.panel === 'profile' && !introMenuPanel.hidden) syncIntroProfile();
             });
@@ -5174,6 +5195,35 @@
                 introSettingsButton?.setAttribute('aria-expanded', 'false');
                 navigateWithLoading('title');
             });
+            const resetSavedGame = () => {
+                try {
+                    const storage = window.localStorage;
+                    const savedKeys = [];
+                    for (let index = 0; index < storage.length; index += 1) {
+                        const key = storage.key(index);
+                        if (key && isResettableGameKey(key)) savedKeys.push(key);
+                    }
+                    savedKeys.forEach((key) => storage.removeItem(key));
+                } catch (error) {
+                    if (resetGameError) resetGameError.hidden = false;
+                    return;
+                }
+                const homeUrl = new URL(window.location.href);
+                homeUrl.hash = 'home';
+                window.history.replaceState(null, '', homeUrl.toString());
+                window.location.reload();
+            };
+            introSettingsResetButton?.addEventListener('click', () => {
+                if (resetGameError) resetGameError.hidden = true;
+                if (typeof resetGameDialog?.showModal === 'function') {
+                    resetGameDialog.showModal();
+                    resetGameCancelButton?.focus();
+                } else if (window.confirm('Reset saved game progress, rewards, profile, and tutorial status?')) {
+                    resetSavedGame();
+                }
+            });
+            resetGameCancelButton?.addEventListener('click', () => resetGameDialog.close());
+            resetGameConfirmButton?.addEventListener('click', resetSavedGame);
             introFullscreenToggle?.addEventListener('change', () => {
                 if (introFullscreenToggle.checked) {
                     fullscreenRestoreButton?.click();
@@ -5185,7 +5235,7 @@
                 if (exitFullscreen) Promise.resolve(exitFullscreen.call(document)).finally(syncFullscreenClass);
             });
             document.addEventListener('click', (event) => {
-                if (!introSettings?.contains(event.target)) {
+                if (!introSettings?.contains(event.target) && !resetGameDialog?.contains(event.target)) {
                     introSettingsPanel.hidden = true;
                     introSettingsButton?.setAttribute('aria-expanded', 'false');
                 }
@@ -5325,15 +5375,6 @@
             const onboardingAvatarInput = onboardingDialog?.querySelector('.onboarding-avatar-input');
             const onboardingAvatarStatus = onboardingDialog?.querySelector('.onboarding-avatar-status');
             const onboardingAvatarContinue = onboardingDialog?.querySelector('.onboarding-avatar-continue');
-            const onboardingReplayResetVersion = '2026-10-03-1';
-            const onboardingReplayResetKey = 'learnscape-onboarding-replay-reset-version';
-            if (readSoundSetting(onboardingReplayResetKey, '') !== onboardingReplayResetVersion) {
-                try {
-                    window.localStorage.setItem(onboardingReplayResetKey, onboardingReplayResetVersion);
-                } catch (error) {
-                    // The tutorial can still run for this session when storage is unavailable.
-                }
-            }
             const tutorialShopNotificationId = 'tutorial:shop:circle';
             const tutorialCompletionRewardId = 'carrots:tutorial-completed';
             const tutorialCompletionRewardIssuedKey = 'learnscape-tutorial-completion-reward-issued:v1';
@@ -5347,6 +5388,7 @@
             let tutorialNotificationsSnapshot = null;
             let tutorialCircleKeyPurchased = false;
             let tutorialCompletionRewardIssuedThisSession = false;
+            let isTutorialReplay = false;
             const profileTutorialStages = new Set([
                 'profile-avatar',
                 'profile-name',
@@ -5575,7 +5617,7 @@
                 if (!isCircleIslandTutorialTarget(target)) return;
                 showOnboardingCoach(
                     target,
-                    'Tutorial completed! Claim your reward in Game Missions.',
+                    isTutorialReplay ? 'Tutorial completed' : 'Tutorial completed! Claim your reward in Game Missions.',
                     finishOnboarding,
                 );
                 if (!onboardingCoach || onboardingCoach.hidden) return;
@@ -5598,7 +5640,7 @@
                 tutorialEndMessageFinished = true;
                 if (onboardingCoachNext) {
                     onboardingCoachNext.hidden = false;
-                    onboardingCoachNext.textContent = 'Claim Rewards';
+                    onboardingCoachNext.textContent = isTutorialReplay ? 'Close' : 'Claim Rewards';
                     onboardingCoachNext.onclick = finishOnboarding;
                 }
             };
@@ -5764,6 +5806,10 @@
                 restoreTutorialGameplayState();
                 writeSoundSetting(onboardingDoneKey, 'true');
                 setOnboardingStage('complete');
+                if (isTutorialReplay) {
+                    isTutorialReplay = false;
+                    return;
+                }
                 issueTutorialCompletionReward();
                 window.__learnscapeNavigate?.('title');
                 window.dispatchEvent(new CustomEvent('learnscape:open-game-missions'));
@@ -5779,6 +5825,7 @@
                 introSettingsButton?.setAttribute('aria-expanded', 'false');
                 closeIntroMenu();
                 hideOnboardingCoach();
+                isTutorialReplay = true;
                 writeSoundSetting(onboardingDoneKey, 'false');
                 restoreTutorialGameplayState();
                 setOnboardingStage('');

@@ -19910,6 +19910,51 @@ h3 {
     background: linear-gradient(180deg, #8ff59a 0%, #35bd5c 55%, #16813d 100%);
     text-shadow: 0 0.11rem 0 #0b5a2b;
 }
+.intro-settings-reset-button {
+    width: 100%;
+    min-height: 2.8rem;
+    border: 0.14rem solid #7d2b22;
+    border-radius: 0.5rem;
+    background: #fff8ed;
+    color: #8b2920;
+    font: 800 1.15rem/1.2 'Fredoka', 'Nunito', sans-serif;
+    cursor: pointer;
+}
+.intro-settings-reset-button:hover,
+.intro-settings-reset-button:focus-visible { background: #ffe3d9; }
+.reset-game-dialog {
+    width: min(28rem, calc(100vw - 2rem));
+    max-height: calc(100dvh - 2rem);
+    margin: auto;
+    padding: 1.5rem;
+    border: 0.18rem solid #7d4222;
+    border-radius: 0.6rem;
+    background: #fffdf5;
+    color: #322d27;
+    box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.35);
+    font-family: 'Nunito', sans-serif;
+}
+.reset-game-dialog::backdrop { background: rgba(3, 15, 24, 0.55); }
+.reset-game-dialog h2 { margin: 0 0 0.65rem; font: 800 1.6rem/1.2 'Fredoka', sans-serif; }
+.reset-game-dialog p { margin: 0; font-size: 1.05rem; line-height: 1.45; }
+.reset-game-dialog .reset-game-error { margin-top: 0.8rem; color: #a82f24; font-weight: 800; }
+.reset-game-actions { display: flex; justify-content: flex-end; gap: 0.7rem; margin-top: 1.5rem; }
+.reset-game-actions button {
+    min-height: 2.7rem;
+    padding: 0.55rem 1rem;
+    border: 0.12rem solid #7d4222;
+    border-radius: 0.5rem;
+    font: 800 1rem/1.2 'Fredoka', 'Nunito', sans-serif;
+    cursor: pointer;
+}
+.reset-game-cancel { background: #fff8ed; color: #3b250f; }
+.reset-game-confirm { background: #a82f24; color: #fff; }
+.reset-game-actions button:hover,
+.reset-game-actions button:focus-visible { filter: brightness(1.1); }
+@media (max-width: 30rem) {
+    .reset-game-actions { flex-direction: column; }
+    .reset-game-actions button { width: 100%; }
+}
 
 .intro-settings-toggle { display: flex; align-items: center; justify-content: space-between; gap: 1rem; font-weight: 900; }
 .intro-settings-toggle input { width: 1.2rem; height: 1.2rem; accent-color: #18864e; }

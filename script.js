@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-const appVersion = '20261003-837';
+const appVersion = '20261008-2';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -1705,6 +1705,26 @@ const appVersion = '20261003-837';
         }
         renderSvgControl();
     });
+    const replayRewardSelector = [
+        '[data-progress-control="replay"]',
+        '[data-progress-control="retry"]',
+        '.square-puzzle-retry-button',
+        '.rectangle-game-over-retry',
+        '.oval-game-over-retry',
+        '.heart-game-retry-button',
+        '.star-mission-retry-button',
+        '.diamond-mission-retry-button',
+    ].join(', ');
+    const lastReplayRewardAt = new WeakMap();
+    document.addEventListener('click', (event) => {
+        const button = event.target.closest?.(replayRewardSelector);
+        if (!button || button.disabled || button.closest('[hidden], [aria-hidden="true"]')
+            || !button.getClientRects().length || typeof window.addLearnscapeResource !== 'function') return;
+        const now = performance.now();
+        if (now - (lastReplayRewardAt.get(button) ?? -Infinity) < 750) return;
+        lastReplayRewardAt.set(button, now);
+        window.addLearnscapeResource('carrots', 1);
+    }, true);
     const circleIllustrationPage = document.getElementById('learnscape-circle-illustration-page');
     const circleIllustrationVideo = circleIllustrationPage?.querySelector('.circle-illustration-video') || null;
     const circleTvLessonImage = circleIllustrationPage?.querySelector('.circle-tv-lesson-image') || null;
@@ -15368,6 +15388,7 @@ const appVersion = '20261003-837';
         if (!shapeLabel || !cameraHowToMission || !cameraHowToSteps) return false;
         cameraHowToMission.textContent = `Present an object with a ${shapeLabel.toLowerCase()} geometric shape to the camera to unlock the chest.`;
         const steps = [
+            'Click Start Camera and allow camera access when your browser asks to begin detecting.',
             `Check that the target shape is ${shapeLabel}.`,
             `Present an object with a ${shapeLabel.toLowerCase()} shape inside the camera frame.`,
             'Find the target shape three times, then open the unlocked chest.',
