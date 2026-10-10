@@ -1,3 +1,4 @@
+console.log("GAMIFIED script.js is executing!");
 // Smooth scrolling for anchor links is handled by CSS scroll-behavior: smooth.
 
 document.addEventListener('DOMContentLoaded', async () => {

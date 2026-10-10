@@ -1,0 +1,79 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>YOLO11n Shape Recognition Test</title>
+
+    <style>
+        body {
+            background: #eaf6e7;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .camera-container {
+            position: relative;
+            width: min(100%, 800px);
+            margin: 20px auto;
+            background: #222;
+            border: 4px solid #4caf50;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        #webcam {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        #overlay {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        button {
+            padding: 12px 24px;
+            margin: 8px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        #status, #prediction {
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>YOLO11n Shape Recognition</h1>
+
+    <p id="status">Click Start Camera to begin.</p>
+
+    <div class="camera-container">
+        <video id="webcam" autoplay muted playsinline></video>
+        <canvas id="overlay"></canvas>
+    </div>
+
+    <div>
+        <button id="startButton">Start Camera</button>
+        <button id="scanButton" disabled>Scan Shape</button>
+        <button id="stopButton">Stop Camera</button>
+    </div>
+
+    <p id="prediction">No shape detected yet.</p>
+
+    <script
+        type="module"
+        src="/detection/camera-test.js">
+    </script>
+</body>
+</html>
