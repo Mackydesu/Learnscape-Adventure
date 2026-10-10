@@ -1,13 +1,37 @@
 {
+  
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+  
+    
+  "dev": "vite",
+  
+    
+  "build": "vite build",
+  
+    
+  "preview": "vite preview",
+  
+    
+  "deploy": "npm run build && wrangler deploy"
+  
   },
+  
   "dependencies": {
-    "onnxruntime-web": "^1.30.0"
+  
+    
+  "onnxruntime-web": "^1.30.0"
+  
   },
+  
   "devDependencies": {
-    "vite": "^8.3.4"
-  }
+  
+    
+  "vite": "^8.3.4",
+  
+    
+  "wrangler": "^4.149.0"
+  
+  },
+  
+  "type": "module"
 }
