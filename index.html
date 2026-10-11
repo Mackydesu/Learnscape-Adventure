@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20261008-2">
+    <link rel="stylesheet" href="style.css?v=20261011-3">
 </head>
 <body class="title-page is-page-loading is-initial-loading" aria-busy="true">
     <div id="app-shell-container" class="app-shell-container">
@@ -231,7 +231,6 @@
     <div class="onboarding-dim" aria-hidden="true" hidden></div>
     <div class="onboarding-coach" aria-live="polite" hidden>
         <img class="onboarding-hand" src="assets/Shape UI/drag-guide-hand.png" alt="" aria-hidden="true">
-        <p class="onboarding-tutorial-end-message" hidden>End of tutorial</p>
         <div class="onboarding-coach-card">
             <p class="onboarding-coach-copy"></p>
             <button class="onboarding-coach-next" type="button" hidden>Susunod</button>
@@ -2174,7 +2173,7 @@
 
     
 
-    <script src="/script.js?v=20261008-2"></script>
+    <script src="/script.js?v=20261011-1"></script>
     </div>
 
     <script>
@@ -2813,7 +2812,9 @@
                 syncIntroBgmForRoute(currentRoute);
 
                 const isIntro = currentRoute === 'title';
-                if (introSettingsTutorialButton) introSettingsTutorialButton.hidden = !isIntro;
+                if (introSettingsTutorialButton) {
+                    introSettingsTutorialButton.hidden = !isIntro || !isOnboardingComplete();
+                }
                 if (fullscreenRestoreKicker) fullscreenRestoreKicker.textContent = isIntro ? 'Welcome, Adventurer' : 'Game Paused';
                 if (fullscreenRestoreTitle) fullscreenRestoreTitle.textContent = isIntro ? 'Ready to Explore?' : 'Fullscreen Paused';
                 if (fullscreenRestoreCopy) {
@@ -3538,7 +3539,7 @@
                 input.value = name;
                 input.readOnly = true;
                 board.classList.remove('is-name-editing');
-                writeSoundSetting(introProfileNameKey, name);
+                if (!isTutorialSessionActive) writeSoundSetting(introProfileNameKey, name);
                 board.querySelectorAll('[data-profile-action="edit-name"] span').forEach((label) => {
                     label.textContent = 'Edit Name';
                 });
@@ -3580,7 +3581,7 @@
                     const avatarData = canvas.toDataURL('image/jpeg', 0.84);
                     URL.revokeObjectURL(objectUrl);
                     try {
-                        window.localStorage.setItem(introProfileAvatarKey, avatarData);
+                        if (!isTutorialSessionActive) window.localStorage.setItem(introProfileAvatarKey, avatarData);
                         const avatar = introMenuCopy?.querySelector('.intro-profile-avatar');
                         if (avatar) avatar.src = avatarData;
                         introMenuCopy?.querySelector('.intro-profile-board')?.classList.add('has-custom-avatar');
@@ -3767,7 +3768,7 @@
                     applyIntroProfileFramePreview(introProfilePendingFrame);
                     frameDialog.querySelector('.intro-profile-color-matrix input')?.focus({ preventScroll: true });
                 } else if (action === 'save-frame') {
-                    writeSoundSetting(introProfileFrameKey, introProfilePendingFrame);
+                    if (!isTutorialSessionActive) writeSoundSetting(introProfileFrameKey, introProfilePendingFrame);
                     frameDialog.hidden = true;
                     setIntroProfileStatus('Frame color saved!', 'success');
                 }
@@ -3951,6 +3952,29 @@
             const learnscapeNotificationStorageKey = 'learnscape-game-notifications:v1';
             const learnscapePendingCarrotClaimsKey = 'learnscape-pending-carrot-claims:v1';
             const learnscapeNotificationLimit = 120;
+            const retiredTutorialCompletionRewardId = 'carrots:tutorial-completed';
+            const removeRetiredTutorialCompletionReward = () => {
+                try {
+                    const storedNotifications = JSON.parse(window.localStorage.getItem(learnscapeNotificationStorageKey) || '[]');
+                    if (Array.isArray(storedNotifications)) {
+                        const notifications = storedNotifications.filter((item) => item?.id !== retiredTutorialCompletionRewardId);
+                        if (notifications.length !== storedNotifications.length) {
+                            window.localStorage.setItem(learnscapeNotificationStorageKey, JSON.stringify(notifications));
+                        }
+                    }
+                    const storedClaims = JSON.parse(window.localStorage.getItem(learnscapePendingCarrotClaimsKey) || '[]');
+                    if (Array.isArray(storedClaims)) {
+                        const claims = storedClaims.filter((item) => item?.id !== retiredTutorialCompletionRewardId);
+                        if (claims.length !== storedClaims.length) {
+                            window.localStorage.setItem(learnscapePendingCarrotClaimsKey, JSON.stringify(claims));
+                        }
+                    }
+                    window.localStorage.removeItem('learnscape-tutorial-completion-reward-issued:v1');
+                } catch (error) {
+                    // Legacy tutorial rewards are also filtered from the in-memory notification list.
+                }
+            };
+            removeRetiredTutorialCompletionReward();
             const learnscapeShapeLabels = Object.freeze({
                 circle: 'Circle',
                 square: 'Square',
@@ -4058,7 +4082,9 @@
                 try {
                     const stored = JSON.parse(window.localStorage.getItem(learnscapeNotificationStorageKey) || '[]');
                     return Array.isArray(stored)
-                        ? stored.filter((item) => item && item.id && item.title && item.type !== 'collection'
+                        ? stored.filter((item) => item && item.id && item.title
+                            && item.id !== retiredTutorialCompletionRewardId
+                            && item.type !== 'collection'
                             && !(String(item.id).startsWith('completion:')
                                 && (item.type === 'camera' || String(item.id).includes('-camera-page:'))))
                         : [];
@@ -4392,7 +4418,7 @@
                         action.type = 'button';
                         action.dataset.notificationAction = 'claim-carrots';
                         action.setAttribute('aria-label', `Claim ${getNotificationCarrotAmount(notification)} carrots`);
-                        action.textContent = notification.id === tutorialCompletionRewardId ? 'Claim Reward' : 'Claim';
+                        action.textContent = 'Claim';
                         meta.appendChild(action);
                     } else if (notification.claimRequired === true && notification.claimed === true) {
                         const claimed = document.createElement('span');
@@ -5367,7 +5393,6 @@
             const onboardingCoach = document.querySelector('.onboarding-coach');
             const onboardingCopy = onboardingCoach?.querySelector('.onboarding-coach-copy');
             const onboardingHand = onboardingCoach?.querySelector('.onboarding-hand');
-            const onboardingTutorialEndMessage = onboardingCoach?.querySelector('.onboarding-tutorial-end-message');
             const onboardingCoachCard = onboardingCoach?.querySelector('.onboarding-coach-card');
             const onboardingCoachNext = onboardingCoach?.querySelector('.onboarding-coach-next');
             const onboardingNameInput = document.getElementById('onboarding-player-name');
@@ -5376,18 +5401,13 @@
             const onboardingAvatarStatus = onboardingDialog?.querySelector('.onboarding-avatar-status');
             const onboardingAvatarContinue = onboardingDialog?.querySelector('.onboarding-avatar-continue');
             const tutorialShopNotificationId = 'tutorial:shop:circle';
-            const tutorialCompletionRewardId = 'carrots:tutorial-completed';
-            const tutorialCompletionRewardIssuedKey = 'learnscape-tutorial-completion-reward-issued:v1';
             let onboardingStage = '';
             let onboardingTarget = null;
             let onboardingAwaitingFullscreen = false;
             let resumeOnboardingView = null;
-            let tutorialEndMessageTimer = null;
-            let tutorialEndMessageFinished = false;
             let tutorialResourceSnapshot = null;
             let tutorialNotificationsSnapshot = null;
             let tutorialCircleKeyPurchased = false;
-            let tutorialCompletionRewardIssuedThisSession = false;
             let isTutorialReplay = false;
             const profileTutorialStages = new Set([
                 'profile-avatar',
@@ -5398,11 +5418,17 @@
             ]);
 
             const isOnboardingComplete = () => readSoundSetting(onboardingDoneKey, 'false') === 'true';
-            const isTutorialCircleShopPurchase = (shape) => onboardingStage === 'buy-circle' && shape === 'circle';
-            const isTutorialCircleKeyNotification = (notificationId) => (
-                tutorialCircleKeyPurchased && notificationId === tutorialShopNotificationId
+            const isTutorialCircleShopPurchase = (shape) => (
+                isTutorialReplay && onboardingStage === 'buy-circle' && shape === 'circle'
             );
-            const isTutorialCircleUnlock = (shape) => onboardingStage === 'unlocking' && shape === 'circle';
+            const isTutorialCircleKeyNotification = (notificationId) => (
+                isTutorialReplay
+                && tutorialCircleKeyPurchased
+                && notificationId === tutorialShopNotificationId
+            );
+            const isTutorialCircleUnlock = (shape) => (
+                isTutorialReplay && onboardingStage === 'unlocking' && shape === 'circle'
+            );
             const markTutorialCircleUnlockReady = () => {
                 const card = document.querySelector('.game3-island-card[data-island-shape="circle"]');
                 const enter = card?.querySelector('.game3-island-enter');
@@ -5457,7 +5483,7 @@
                 body.classList.toggle('is-onboarding-profile-locked', profileTutorialStages.has(stage));
             };
             const isOnboardingStageOnCurrentRoute = () => (
-                onboardingStage === 'tutorial-end'
+                onboardingStage === 'enter-first-island'
                     ? currentRoute === 'game3'
                     : currentRoute === 'title'
             );
@@ -5486,7 +5512,6 @@
                 onboardingTarget?.classList.remove('onboarding-circle-key-glow');
                 onboardingTarget?.classList.remove('onboarding-use-key-glow');
                 if (onboardingHand) onboardingHand.hidden = true;
-                onboardingDim?.classList.remove('is-tutorial-completion');
                 onboardingDim?.style.removeProperty('--onboarding-spotlight-x');
                 onboardingDim?.style.removeProperty('--onboarding-spotlight-y');
                 onboardingDim?.style.removeProperty('--onboarding-spotlight-width');
@@ -5495,20 +5520,10 @@
                 introMenuPanel?.classList.remove('is-onboarding-active');
             };
             const hideOnboardingCoach = () => {
-                if (tutorialEndMessageTimer !== null) {
-                    window.clearTimeout(tutorialEndMessageTimer);
-                    tutorialEndMessageTimer = null;
-                }
                 clearOnboardingTarget();
                 if (onboardingDim) onboardingDim.hidden = true;
                 if (onboardingCoach) {
                     onboardingCoach.hidden = true;
-                    onboardingCoach.classList.remove('is-tutorial-end-message');
-                    onboardingCoach.classList.remove('is-tutorial-completion');
-                }
-                if (onboardingTutorialEndMessage) {
-                    onboardingTutorialEndMessage.hidden = true;
-                    onboardingTutorialEndMessage.classList.remove('is-visible');
                 }
                 if (onboardingCoachNext) {
                     onboardingCoachNext.hidden = true;
@@ -5599,49 +5614,10 @@
                         ? Math.min(window.innerWidth - handWidth - 8, rightSideLeft)
                         : Math.max(8, leftSideLeft);
                     const handTop = Math.max(8, Math.min(window.innerHeight - handWidth - 8, rect.top + (rect.height / 2) - (handWidth / 2)));
-                    onboardingHand.hidden = onboardingStage === 'tutorial-end';
+                    onboardingHand.hidden = false;
                     onboardingHand.classList.toggle('is-pointing-from-right', useRightSide);
                     onboardingHand.style.left = `${handLeft}px`;
                     onboardingHand.style.top = `${handTop}px`;
-                }
-            };
-            const isCircleIslandTutorialTarget = (target) => {
-                const card = target?.closest?.('.game3-island-card[data-island-shape="circle"]');
-                return Boolean(
-                    card
-                    && card.querySelector('img')?.getAttribute('src') === 'assets/Shape UI/1.webp'
-                    && target.matches('.game3-island-enter'),
-                );
-            };
-            const showTutorialEndMessage = (target) => {
-                if (!isCircleIslandTutorialTarget(target)) return;
-                showOnboardingCoach(
-                    target,
-                    isTutorialReplay ? 'Tutorial completed' : 'Tutorial completed! Claim your reward in Game Missions.',
-                    finishOnboarding,
-                );
-                if (!onboardingCoach || onboardingCoach.hidden) return;
-                resumeOnboardingView = () => showTutorialEndMessage(target);
-                onboardingCoach.classList.remove('is-tutorial-end-message');
-                onboardingCoach.classList.add('is-tutorial-completion');
-                target.classList.remove('onboarding-target-glow', 'onboarding-highlight');
-                if (onboardingDim) {
-                    onboardingDim.classList.add('is-tutorial-completion');
-                    onboardingDim.hidden = false;
-                }
-                if (onboardingTutorialEndMessage) {
-                    onboardingTutorialEndMessage.classList.remove('is-visible');
-                    onboardingTutorialEndMessage.hidden = true;
-                }
-                if (tutorialEndMessageTimer !== null) {
-                    window.clearTimeout(tutorialEndMessageTimer);
-                    tutorialEndMessageTimer = null;
-                }
-                tutorialEndMessageFinished = true;
-                if (onboardingCoachNext) {
-                    onboardingCoachNext.hidden = false;
-                    onboardingCoachNext.textContent = isTutorialReplay ? 'Close' : 'Claim Rewards';
-                    onboardingCoachNext.onclick = finishOnboarding;
                 }
             };
             const showOnboardingDialog = (step) => {
@@ -5668,7 +5644,7 @@
                 }
             };
             const activateTutorialSession = () => {
-                if (isTutorialSessionActive) return;
+                if (isTutorialSessionActive || !isTutorialReplay) return;
                 tutorialResourceSnapshot = {
                     stars: window.getLearnscapeResourceCount?.('stars') ?? resourceCounts.stars,
                     carrots: window.getLearnscapeResourceCount?.('carrots') ?? resourceCounts.carrots,
@@ -5686,6 +5662,13 @@
             };
             const beginShopTutorial = () => {
                 if (onboardingDialog) onboardingDialog.hidden = true;
+                if (!isTutorialReplay && !isLearnscapeKeyPurchased('circle')) {
+                    const carrotCost = getIntroShopCost('circle');
+                    const availableCarrots = window.getLearnscapeResourceCount?.('carrots') ?? resourceCounts.carrots;
+                    if (availableCarrots < carrotCost) {
+                        setLearnscapeResourceCount('carrots', carrotCost);
+                    }
+                }
                 activateTutorialSession();
                 setOnboardingStage('stars');
                 const starPill = resourceCountElements.stars?.closest('.intro-resource-pill-star');
@@ -5786,39 +5769,20 @@
                 syncLearnscapeIslandLocks();
                 syncIntroNotificationUnreadIndicator();
             };
-            const issueTutorialCompletionReward = () => {
-                if (tutorialCompletionRewardIssuedThisSession
-                    || readSoundSetting(tutorialCompletionRewardIssuedKey, 'false') === 'true') return;
-                tutorialCompletionRewardIssuedThisSession = true;
-                addLearnscapeNotification({
-                    id: tutorialCompletionRewardId,
-                    type: 'reward',
-                    rewardAmount: 10,
-                    claimRequired: true,
-                    claimed: false,
-                    title: 'Tutorial completed: +10 carrots',
-                    detail: 'Claim your tutorial completion reward.',
-                });
-                writeSoundSetting(tutorialCompletionRewardIssuedKey, 'true');
-            };
             const finishOnboarding = () => {
                 hideOnboardingCoach();
                 restoreTutorialGameplayState();
                 writeSoundSetting(onboardingDoneKey, 'true');
                 setOnboardingStage('complete');
-                if (isTutorialReplay) {
-                    isTutorialReplay = false;
-                    return;
-                }
-                issueTutorialCompletionReward();
-                window.__learnscapeNavigate?.('title');
-                window.dispatchEvent(new CustomEvent('learnscape:open-game-missions'));
+                if (introSettingsTutorialButton) introSettingsTutorialButton.hidden = currentRoute !== 'title';
+                isTutorialReplay = false;
             };
             const skipOnboardingTutorial = () => {
                 if (onboardingDialog) onboardingDialog.hidden = true;
                 restoreTutorialGameplayState();
                 writeSoundSetting(onboardingDoneKey, 'true');
                 setOnboardingStage('complete');
+                if (introSettingsTutorialButton) introSettingsTutorialButton.hidden = currentRoute !== 'title';
             };
             const replayOnboardingTutorial = () => {
                 if (introSettingsPanel) introSettingsPanel.hidden = true;
@@ -5826,7 +5790,6 @@
                 closeIntroMenu();
                 hideOnboardingCoach();
                 isTutorialReplay = true;
-                writeSoundSetting(onboardingDoneKey, 'false');
                 restoreTutorialGameplayState();
                 setOnboardingStage('');
                 activateTutorialSession();
@@ -5872,7 +5835,8 @@
             introSettingsTutorialButton?.addEventListener('click', replayOnboardingTutorial);
 
             const isAllowedOnboardingInteraction = (eventTarget) => {
-                if (!onboardingStage || onboardingStage === 'complete' || isOnboardingComplete()) return true;
+                if (!onboardingStage || onboardingStage === 'complete'
+                    || (isOnboardingComplete() && !isTutorialReplay)) return true;
                 const target = eventTarget instanceof Element ? eventTarget : eventTarget?.parentElement;
                 if (!target) return false;
                 if (fullscreenRestoreButton?.contains(target)) return true;
@@ -5884,13 +5848,6 @@
                     && target.closest('.game3-island-card[data-island-shape="circle"] .game3-island-enter')) {
                     return true;
                 }
-                if (onboardingStage === 'tutorial-end') {
-                    return Boolean(
-                        onboardingCoachNext
-                        && !onboardingCoachNext.hidden
-                        && onboardingCoachNext.contains(target),
-                    );
-                }
                 if (onboardingCoachNext && !onboardingCoachNext.hidden && onboardingCoachNext.contains(target)) return true;
                 return Boolean(onboardingTarget?.contains(target));
             };
@@ -5901,9 +5858,18 @@
             };
             document.addEventListener('pointerdown', lockUnexplainedOnboardingInteraction, true);
             document.addEventListener('click', lockUnexplainedOnboardingInteraction, true);
+            document.addEventListener('click', (event) => {
+                if (!isTutorialReplay || onboardingStage !== 'enter-first-island') return;
+                const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+                const circleEnter = target?.closest('.game3-island-card[data-island-shape="circle"] .game3-island-enter');
+                if (!circleEnter) return;
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                finishOnboarding();
+            }, true);
 
             document.addEventListener('click', (event) => {
-                if (isOnboardingComplete()) return;
+                if (isOnboardingComplete() && !isTutorialReplay) return;
                 const target = event.target.closest?.('button, a');
                 if (!target) return;
                 if (onboardingStage === 'open-shop' && target.matches('[data-intro-panel="shop"]')) {
@@ -5926,7 +5892,7 @@
                     window.setTimeout(showProfileAvatarGuide, 0);
                 } else if (onboardingStage === 'enter-world' && target.matches('.btn-enter')) {
                     hideOnboardingCoach();
-                    setOnboardingStage('tutorial-end');
+                    setOnboardingStage('enter-first-island');
                 }
             });
             window.addEventListener('learnscape:routechange', (event) => {
@@ -5934,11 +5900,21 @@
                     window.setTimeout(showProfileGuide, 0);
                     return;
                 }
-                if (onboardingStage === 'tutorial-end' && event.detail?.route === 'game3') {
+                if (onboardingStage === 'enter-first-island' && event.detail?.route === 'game3') {
                     window.setTimeout(() => {
                         const circleEnter = document.querySelector('.game3-island-card[data-island-shape="circle"] .game3-island-enter');
-                        showTutorialEndMessage(circleEnter);
+                        setOnboardingStage('enter-first-island');
+                        showOnboardingCoach(
+                            circleEnter,
+                            isTutorialReplay
+                                ? 'Pindutin ang Enter upang tapusin ang tutorial.'
+                                : 'Pindutin ang Enter upang makapasok sa unang isla.',
+                        );
                     }, 0);
+                    return;
+                }
+                if (onboardingStage === 'enter-first-island' && event.detail?.route === 'shapeCircle') {
+                    window.setTimeout(finishOnboarding, 0);
                     return;
                 }
                 if (onboardingStage && onboardingStage !== 'complete' && !isOnboardingStageOnCurrentRoute()) {
@@ -5976,7 +5952,10 @@
                 resumeOnboardingAfterLayout();
             };
             const pauseOnboardingOutsideFullscreen = () => {
-                if (isFullscreenActive() || isOnboardingComplete() || !onboardingStage || onboardingStage === 'complete') return;
+                if (isFullscreenActive()
+                    || (isOnboardingComplete() && !isTutorialReplay)
+                    || !onboardingStage
+                    || onboardingStage === 'complete') return;
                 if (onboardingDialog) onboardingDialog.hidden = true;
                 hideOnboardingCoach();
                 onboardingAwaitingFullscreen = true;

@@ -277,10 +277,6 @@ body.is-windowed-fallback .onboarding-coach {
         rgba(3, 15, 24, 0.7) 100%
     );
 }
-.onboarding-dim.is-tutorial-completion {
-    background: rgba(3, 15, 24, 0.38);
-}
-
 body.is-onboarding-profile-locked .onboarding-dim {
     pointer-events: auto;
     cursor: default;
@@ -316,56 +312,6 @@ body.is-onboarding-profile-locked .onboarding-dim {
 .onboarding-coach-card.is-profile-action-message {
     width: min(22rem, 42vw);
 }
-.onboarding-coach.is-tutorial-completion .onboarding-coach-card {
-    top: 50% !important;
-    left: 50% !important;
-    right: auto !important;
-    bottom: auto !important;
-    width: min(40rem, calc(100vw - 2rem));
-    padding: 2rem;
-    text-align: center;
-    transform: translate(-50%, -50%);
-}
-.onboarding-coach.is-tutorial-completion .onboarding-coach-copy {
-    margin: 0;
-    font-size: 2rem;
-    line-height: 1.2;
-}
-.onboarding-coach.is-tutorial-completion .onboarding-coach-next {
-    display: block;
-    float: none;
-    margin: 1.25rem auto 0;
-}
-@media (max-width: 30rem) {
-    .onboarding-coach.is-tutorial-completion .onboarding-coach-card { padding: 1.4rem; }
-    .onboarding-coach.is-tutorial-completion .onboarding-coach-copy { font-size: 1.55rem; }
-}
-
-.onboarding-coach.is-tutorial-end-message .onboarding-coach-card {
-    display: none;
-}
-
-.onboarding-tutorial-end-message {
-    position: fixed;
-    z-index: 3;
-    top: 50%;
-    left: 50%;
-    width: min(88vw, 58rem);
-    margin: 0;
-    color: #fffdf0;
-    font: 900 clamp(2.4rem, 8vw, 6.5rem)/1.05 'Fredoka', sans-serif;
-    letter-spacing: 0;
-    text-align: center;
-    text-shadow: 0 0.12em 0 #7a3d12, 0 0.25em 0.45em rgba(21, 42, 19, 0.72);
-    opacity: 0;
-    pointer-events: none;
-    transform: translate(-50%, -50%) scale(0.7);
-}
-
-.onboarding-tutorial-end-message.is-visible {
-    animation: onboardingTutorialEndMessage 2.6s ease-in-out both;
-}
-
 .onboarding-coach-next { min-height: 3rem; margin-top: 0.9rem; padding-inline: 1.2rem; font-size: 1.08em; float: right; }
 .onboarding-hand {
     position: fixed;
@@ -421,11 +367,6 @@ body.is-onboarding-profile-locked .onboarding-dim {
     animation: onboardingCircleKeyGlow 0.85s ease-in-out infinite alternate;
 }
 
-@keyframes onboardingTutorialEndMessage {
-    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
-    14%, 72% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.08); }
-}
 @keyframes onboardingHandDrag {
     from { transform: translate(-0.35rem, -0.12rem) rotate(-95deg) scale(0.96); }
     to { transform: translate(0.45rem, 0.32rem) rotate(-86deg) scale(1.04); }
@@ -15123,8 +15064,18 @@ body *::after {
     object-fit: cover;
 }
 
+.camera-detection-overlay {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
 .circle-camera-scan-sweep {
     position: absolute;
+    z-index: 3;
     inset: -35% 0 auto;
     height: 34%;
     background: linear-gradient(180deg, transparent, rgba(33, 218, 255, 0.24), transparent);
@@ -15133,6 +15084,7 @@ body *::after {
 
 .circle-camera-corner {
     position: absolute;
+    z-index: 4;
     width: 4.8rem;
     height: 4.8rem;
     border-color: #ffffff;
@@ -15185,41 +15137,6 @@ body *::after {
         inset 0 0.15rem 0 rgba(255, 255, 255, 0.48),
         0 0.18rem 0 var(--camera-start-shadow),
         0 0 0.75rem rgba(83, 255, 135, 0.48);
-}
-
-.camera-temporary-okay-button {
-    position: absolute;
-    z-index: 7;
-    top: 1rem;
-    right: 1rem;
-    min-width: 7rem;
-    padding: 0.7rem 1.35rem;
-    border: 0.18rem solid #ffffff;
-    border-radius: 999px;
-    background: linear-gradient(180deg, #fff58a, #ffb51c);
-    box-shadow: inset 0 0.12rem 0 rgba(255, 255, 255, 0.7), 0 0.28rem 0 #9b5a00;
-    color: #5b3100;
-    font: 900 1.25rem/1 'Fredoka', 'Nunito', sans-serif;
-    cursor: pointer;
-}
-
-.camera-temporary-okay-button:hover {
-    filter: brightness(1.08);
-}
-
-.camera-temporary-okay-button:active {
-    transform: translateY(0.15rem);
-    box-shadow: inset 0 0.12rem 0 rgba(255, 255, 255, 0.55), 0 0.12rem 0 #9b5a00;
-}
-
-.camera-temporary-okay-button:disabled {
-    opacity: 0.48;
-    pointer-events: none;
-}
-
-.circle-camera-page.is-camera-chest-ready .camera-temporary-okay-button,
-.circle-camera-page.is-camera-completing .camera-temporary-okay-button {
-    opacity: 0;
 }
 
 .camera-detection-check {
@@ -15693,53 +15610,9 @@ body *::after {
     animation: cameraChestReadyGlow 1.25s ease-in-out infinite alternate;
 }
 
-.camera-open-chest-button {
-    position: relative;
-    z-index: 3;
-    display: none;
-    flex: 0 0 auto;
-    min-width: 11rem;
-    min-height: 3.5rem;
-    margin: 0.55rem auto 0;
-    padding: 0.65rem 1.25rem;
-    border: 0.2rem solid #fffbd1;
-    border-radius: 999px;
-    background: linear-gradient(180deg, #ffe96a, #ffad18 60%, #d56b05);
-    box-shadow: inset 0 0.13rem 0 rgba(255, 255, 255, 0.72), 0 0.28rem 0 #8d3c03, 0 0 1.1rem rgba(255, 226, 65, 0.76);
-    color: #5d2903;
-    font: 900 clamp(1.1rem, 1.6vw, 1.45rem)/1 'Fredoka', 'Quicksand', sans-serif;
-    letter-spacing: 0.025em;
-    text-transform: uppercase;
-    text-shadow: 0 0.08rem 0 #fff4a8;
-    cursor: pointer;
-}
-
-.circle-camera-page.is-camera-chest-ready .camera-open-chest-button {
-    display: block;
-    animation: cameraOpenChestButtonPulse 0.95s ease-in-out infinite alternate;
-}
-
-.circle-camera-page.is-camera-chest-unlocking .camera-open-chest-button {
-    opacity: 0;
-    pointer-events: none;
-    animation: none;
-    transform: scale(0.88);
-    transition: opacity 220ms ease, transform 220ms ease;
-}
-
-.camera-open-chest-button:hover,
-.camera-open-chest-button:focus-visible {
-    filter: brightness(1.08);
-}
-
 @keyframes cameraChestReadyGlow {
     from { filter: drop-shadow(0 0.65rem 0.45rem rgba(52, 25, 10, 0.38)) drop-shadow(0 0 0.3rem rgba(255, 220, 58, 0.62)); }
     to { filter: drop-shadow(0 0.65rem 0.45rem rgba(52, 25, 10, 0.38)) drop-shadow(0 0 1.25rem rgba(255, 243, 126, 1)); }
-}
-
-@keyframes cameraOpenChestButtonPulse {
-    from { transform: scale(0.96); box-shadow: inset 0 0.13rem 0 rgba(255, 255, 255, 0.72), 0 0.28rem 0 #8d3c03, 0 0 0.7rem rgba(255, 226, 65, 0.64); }
-    to { transform: scale(1.07); box-shadow: inset 0 0.13rem 0 rgba(255, 255, 255, 0.82), 0 0.28rem 0 #8d3c03, 0 0 1.65rem rgba(255, 243, 126, 1); }
 }
 
 .circle-camera-chest-lid,
@@ -22713,5 +22586,51 @@ body.about-page {
     .about-view-panel {
         padding: 0.7rem;
     }
+}
+
+.camera-detection-status {
+    position: absolute;
+    z-index: 8;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    left: 0.75rem;
+    margin: 0 auto;
+    width: fit-content;
+    max-width: calc(100% - 1.5rem);
+    padding: 0.45rem 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    border-radius: 999px;
+    background: rgba(8, 35, 49, 0.86);
+    color: #fff;
+    font: 700 0.92rem/1.25 'Nunito', sans-serif;
+    text-align: center;
+    text-wrap: balance;
+    pointer-events: none;
+}
+
+.circle-camera-page.is-camera-padlock-unlocked .circle-camera-chest-padlock {
+    animation: cameraPadlockPopOff 720ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.circle-camera-page.is-camera-chains-broken .circle-camera-chest-chain-a {
+    animation: cameraChainSnapLeft 760ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.circle-camera-page.is-camera-chains-broken .circle-camera-chest-chain-b {
+    animation: cameraChainSnapRight 760ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+@keyframes cameraPadlockPopOff {
+    0% { transform: translate(-50%, -10%) rotate(0); opacity: 1; }
+    40% { transform: translate(-50%, calc(-10% - 0.6rem)) rotate(-18deg); opacity: 1; }
+    100% { transform: translate(calc(-50% + 1.2rem), calc(-10% + 2.5rem)) rotate(42deg) scale(0.55); opacity: 0; }
+}
+
+@keyframes cameraChainSnapLeft {
+    to { transform: translate(-1.8rem, 1.2rem) rotate(-38deg); opacity: 0; }
+}
+
+@keyframes cameraChainSnapRight {
+    to { transform: translate(1.8rem, 1.2rem) rotate(38deg); opacity: 0; }
 }
 

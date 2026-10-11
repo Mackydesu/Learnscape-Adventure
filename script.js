@@ -4,7 +4,7 @@ console.log("GAMIFIED script.js is executing!");
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-const appVersion = '20261008-2';
+const appVersion = '20261011-1';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -433,7 +433,12 @@ const appVersion = '20261008-2';
     const circleCameraVideo = circleCameraPage?.querySelector('.circle-camera-video') || null;
     const shapeCameraPages = Array.from(document.querySelectorAll('.shape-camera-page'));
     const cameraPages = Array.from(document.querySelectorAll('.circle-camera-page'));
-    // The Okay button temporarily enters the same success flow that shape detection will call later.
+    const acceptedCameraAttemptIds = new WeakMap();
+    const dispatchCameraLifecycle = (type, page, video) => {
+        window.dispatchEvent(new CustomEvent(type, {
+            detail: { page, video, shape: page?.dataset.cameraShape || '' },
+        }));
+    };
     cameraPages.forEach((page) => {
         const shape = page.dataset.cameraShape || '';
         const shapeLabel = shape ? `${shape[0].toUpperCase()}${shape.slice(1)}` : 'Shape';
@@ -451,10 +456,6 @@ const appVersion = '20261008-2';
         }
 
         const unlockBoard = page.querySelector('.circle-camera-unlock-board');
-        if (unlockBoard && !unlockBoard.querySelector('.camera-open-chest-button')) {
-            unlockBoard.insertAdjacentHTML('beforeend', '<button class="camera-open-chest-button" type="button" disabled>Open Chest</button>');
-        }
-
         const chest = unlockBoard?.querySelector('.circle-camera-locked-chest');
         if (chest && !chest.querySelector('.camera-chest-3d-stage')) {
             const chainLinks = '<i class="camera-chest-chain-link"></i>'.repeat(10);
@@ -530,13 +531,6 @@ const appVersion = '20261008-2';
 
         }
 
-        if (page.querySelector('.camera-temporary-okay-button')) return;
-        const button = document.createElement('button');
-        button.className = 'camera-temporary-okay-button';
-        button.type = 'button';
-        button.textContent = 'Okay';
-        button.setAttribute('aria-label', `Simulate a correct ${page.dataset.cameraShape || 'camera'} detection`);
-        page.append(button);
     });
     const shapeSquarePage = document.getElementById('learnscape-shape-square-page');
     const triangleGamePage = document.getElementById('learnscape-triangle-game-page');
@@ -12274,6 +12268,7 @@ const appVersion = '20261008-2';
     };
 
     let circleCameraStream = null;
+    let circleCameraStartRequestId = 0;
 
     const setCircleCameraButtonText = (text) => {
         const label = circleCameraStartButton?.querySelector('strong');
@@ -12281,6 +12276,8 @@ const appVersion = '20261008-2';
     };
 
     const stopCircleCameraStream = () => {
+        circleCameraStartRequestId++;
+        dispatchCameraLifecycle('learnscape:camerastopped', circleCameraPage, circleCameraVideo);
         if (circleCameraStream) {
             circleCameraStream.getTracks().forEach((track) => track.stop());
             circleCameraStream = null;
@@ -12303,30 +12300,47 @@ const appVersion = '20261008-2';
             return;
         }
 
+        stopCircleCameraStream();
+        const requestId = ++circleCameraStartRequestId;
         circleCameraStartButton.disabled = true;
         setCircleCameraButtonText('Opening Camera...');
 
+        let stream = null;
         try {
-            stopCircleCameraStream();
-            circleCameraStartButton.disabled = true;
-            const stream = await navigator.mediaDevices.getUserMedia({
+            stream = await navigator.mediaDevices.getUserMedia({
                 video: {
                     facingMode: 'environment',
                 },
                 audio: false,
             });
+            if (requestId !== circleCameraStartRequestId || !isPageVisible(circleCameraPage)) {
+                stream.getTracks().forEach((track) => track.stop());
+                return;
+            }
             circleCameraStream = stream;
             circleCameraVideo.srcObject = stream;
             circleCameraVideo.hidden = false;
             await circleCameraVideo.play();
+            if (requestId !== circleCameraStartRequestId || !isPageVisible(circleCameraPage)) {
+                stream.getTracks().forEach((track) => track.stop());
+                if (circleCameraStream === stream) circleCameraStream = null;
+                if (circleCameraVideo.srcObject === stream) circleCameraVideo.srcObject = null;
+                return;
+            }
             setCircleCameraButtonText('Camera Ready');
+            dispatchCameraLifecycle('learnscape:camerastarted', circleCameraPage, circleCameraVideo);
         } catch (error) {
+            if (stream) stream.getTracks().forEach((track) => track.stop());
+            if (requestId !== circleCameraStartRequestId) return;
+            if (circleCameraStream === stream) circleCameraStream = null;
+            if (circleCameraVideo.srcObject === stream) circleCameraVideo.srcObject = null;
             circleCameraStartButton.disabled = false;
             setCircleCameraButtonText('Allow Camera');
         }
     };
 
     const shapeCameraStreams = new Map();
+    const shapeCameraStartRequestIds = new Map();
     const cameraCompletionTimers = new Map();
     const cameraCompletionAudio = new Map();
 
@@ -12336,6 +12350,8 @@ const appVersion = '20261008-2';
     };
 
     const stopShapeCameraStream = (page) => {
+        shapeCameraStartRequestIds.set(page, (shapeCameraStartRequestIds.get(page) || 0) + 1);
+        dispatchCameraLifecycle('learnscape:camerastopped', page, page?.querySelector('.circle-camera-video'));
         const stream = shapeCameraStreams.get(page);
         if (stream) {
             stream.getTracks().forEach((track) => track.stop());
@@ -12355,10 +12371,6 @@ const appVersion = '20261008-2';
         }
     };
 
-    const stopAllShapeCameraStreams = () => {
-        shapeCameraPages.forEach(stopShapeCameraStream);
-    };
-
     const startShapeCameraStream = async (page) => {
         const button = page?.querySelector('.circle-camera-start-button');
         const video = page?.querySelector('.circle-camera-video');
@@ -12368,22 +12380,39 @@ const appVersion = '20261008-2';
             return;
         }
 
+        stopShapeCameraStream(page);
+        const requestId = (shapeCameraStartRequestIds.get(page) || 0) + 1;
+        shapeCameraStartRequestIds.set(page, requestId);
         button.disabled = true;
         setShapeCameraButtonText(page, 'Opening Camera...');
 
+        let stream = null;
         try {
-            stopShapeCameraStream(page);
-            button.disabled = true;
-            const stream = await navigator.mediaDevices.getUserMedia({
+            stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: 'environment' },
                 audio: false,
             });
+            if (shapeCameraStartRequestIds.get(page) !== requestId || !isPageVisible(page)) {
+                stream.getTracks().forEach((track) => track.stop());
+                return;
+            }
             shapeCameraStreams.set(page, stream);
             video.srcObject = stream;
             video.hidden = false;
             await video.play();
+            if (shapeCameraStartRequestIds.get(page) !== requestId || !isPageVisible(page)) {
+                stream.getTracks().forEach((track) => track.stop());
+                if (shapeCameraStreams.get(page) === stream) shapeCameraStreams.delete(page);
+                if (video.srcObject === stream) video.srcObject = null;
+                return;
+            }
             setShapeCameraButtonText(page, 'Camera Ready');
+            dispatchCameraLifecycle('learnscape:camerastarted', page, video);
         } catch (error) {
+            if (stream) stream.getTracks().forEach((track) => track.stop());
+            if (shapeCameraStartRequestIds.get(page) !== requestId) return;
+            if (shapeCameraStreams.get(page) === stream) shapeCameraStreams.delete(page);
+            if (video.srcObject === stream) video.srcObject = null;
             button.disabled = false;
             setShapeCameraButtonText(page, 'Allow Camera');
         }
@@ -12458,25 +12487,57 @@ const appVersion = '20261008-2';
         cameraPages.forEach((page) => prepareCameraCelebrationBadge(page, page.dataset.cameraShape || ''));
     }, 0);
 
-    const resetCameraCompletionFlow = (page) => {
+    const cameraScanProgressStorageKey = 'learnscape-camera-scan-progress:v1';
+    const readCameraScanProgress = () => {
+        try {
+            const progress = JSON.parse(window.localStorage.getItem(cameraScanProgressStorageKey) || '{}');
+            return progress && typeof progress === 'object' && !Array.isArray(progress) ? progress : {};
+        } catch {
+            return {};
+        }
+    };
+    const saveCameraScanProgress = (page, count) => {
+        const shape = String(page?.dataset.cameraShape || '').trim().toLowerCase();
+        if (!shape) return;
+        const progress = readCameraScanProgress();
+        const savedCount = Math.max(0, Math.min(2, Math.floor(Number(count) || 0)));
+        if (savedCount) progress[shape] = savedCount;
+        else delete progress[shape];
+        try {
+            window.localStorage.setItem(cameraScanProgressStorageKey, JSON.stringify(progress));
+        } catch (error) {
+            console.warn('Camera scan progress could not be saved.', error);
+        }
+    };
+    const applyCameraScanProgress = (page, count) => {
+        const savedCount = Math.max(0, Math.min(3, Math.floor(Number(count) || 0)));
+        page.dataset.cameraDetectionCount = String(savedCount);
+        page.classList.toggle('is-camera-padlock-unlocked', savedCount >= 1);
+        page.classList.toggle('is-camera-chains-broken', savedCount >= 2);
+        const stars = Array.from(page.querySelectorAll('.camera-empty-stars .circle-lesson-star-slot'));
+        stars.forEach((star, index) => star.classList.toggle('is-earned', index < savedCount));
+        page.querySelector('.camera-empty-stars')?.setAttribute('aria-label', `${savedCount} of 3 stars earned`);
+    };
+    const restoreCameraScanProgress = (page) => {
+        const shape = String(page?.dataset.cameraShape || '').trim().toLowerCase();
+        const savedCount = readCameraScanProgress()[shape] || 0;
+        applyCameraScanProgress(page, savedCount);
+    };
+
+    const resetCameraCompletionFlow = (page, clearProgress = false) => {
         if (!page) return;
+        if (clearProgress) saveCameraScanProgress(page, 0);
         clearCameraCompletionTimers(page);
-        page.dataset.cameraDetectionCount = '0';
-        page.classList.remove('is-camera-completing', 'is-camera-detection-success', 'is-camera-chest-ready', 'is-camera-chest-unlocking', 'is-camera-chest-open', 'is-camera-celebrating', 'is-camera-progress-visible');
+        page.classList.remove('is-camera-completing', 'is-camera-detection-success', 'is-camera-chest-ready', 'is-camera-chest-unlocking', 'is-camera-chest-open', 'is-camera-celebrating', 'is-camera-progress-visible', 'is-camera-padlock-unlocked', 'is-camera-chains-broken');
         page.querySelector('.camera-detection-check')?.setAttribute('aria-hidden', 'true');
-        const detectionStars = Array.from(page.querySelectorAll('.camera-empty-stars .circle-lesson-star-slot'));
-        detectionStars.forEach((star) => star.classList.remove('is-earned'));
-        const emptyStars = page.querySelector('.camera-empty-stars');
-        emptyStars?.setAttribute('aria-label', '0 of 3 stars earned');
         const celebration = page.querySelector('.camera-completion-celebration');
         celebration?.classList.remove('is-active', 'is-ch8-visible');
         celebration?.setAttribute('aria-hidden', 'true');
         page.querySelector('.camera-completion-progress')?.setAttribute('aria-hidden', 'true');
-        const openChestButton = page.querySelector('.camera-open-chest-button');
-        if (openChestButton) openChestButton.disabled = true;
-        const okayButton = page.querySelector('.camera-temporary-okay-button');
-        if (okayButton) okayButton.disabled = false;
+        restoreCameraScanProgress(page);
     };
+
+    cameraPages.forEach(restoreCameraScanProgress);
 
     const registerCameraDetection = (page) => {
         if (
@@ -12484,21 +12545,15 @@ const appVersion = '20261008-2';
             || !isPageVisible(page)
             || page.classList.contains('is-camera-completing')
             || page.classList.contains('is-camera-chest-ready')
-            || page.classList.contains('is-camera-detection-success')
         ) return false;
 
         const currentCount = Math.max(0, Math.min(3, Number(page.dataset.cameraDetectionCount) || 0));
         if (currentCount >= 3) return false;
         const nextCount = currentCount + 1;
-        page.dataset.cameraDetectionCount = String(nextCount);
-
-        const stars = Array.from(page.querySelectorAll('.camera-empty-stars .circle-lesson-star-slot'));
-        stars.slice(0, nextCount).forEach((star) => star.classList.add('is-earned'));
-        page.querySelector('.camera-empty-stars')?.setAttribute('aria-label', `${nextCount} of 3 stars earned`);
+        saveCameraScanProgress(page, nextCount);
+        applyCameraScanProgress(page, nextCount);
         page.classList.add('is-camera-detection-success');
         page.querySelector('.camera-detection-check')?.setAttribute('aria-hidden', 'false');
-        const okayButton = page.querySelector('.camera-temporary-okay-button');
-        if (okayButton) okayButton.disabled = true;
         playUiClickSound('starPop');
 
         const detectionTimer = window.setTimeout(() => {
@@ -12507,14 +12562,8 @@ const appVersion = '20261008-2';
             page.querySelector('.camera-detection-check')?.setAttribute('aria-hidden', 'true');
             if (nextCount >= 3) {
                 page.classList.add('is-camera-chest-ready');
-                const openChestButton = page.querySelector('.camera-open-chest-button');
-                if (openChestButton) {
-                    openChestButton.disabled = false;
-                    openChestButton.focus({ preventScroll: true });
-                }
                 playUiClickSound('boardSuccess');
-            } else if (okayButton) {
-                okayButton.disabled = false;
+                completeCameraGame(page);
             }
         }, 850);
         const timers = cameraCompletionTimers.get(page) || [];
@@ -12549,15 +12598,11 @@ const appVersion = '20261008-2';
             || page.classList.contains('is-camera-completing')
             || Number(page.dataset.cameraDetectionCount) < 3
         ) return false;
-        if (!window.completeLearnscapeCameraChallenge?.(shape)) return false;
+        if (typeof window.completeLearnscapeCameraChallenge !== 'function') return false;
 
         clearCameraCompletionTimers(page);
         prepareCameraCelebrationBadge(page, shape);
         page.classList.add('is-camera-completing', 'is-camera-chest-unlocking');
-        const okayButton = page.querySelector('.camera-temporary-okay-button');
-        if (okayButton) okayButton.disabled = true;
-        const openChestButton = page.querySelector('.camera-open-chest-button');
-        if (openChestButton) openChestButton.disabled = true;
         const padlockSound = new Audio('assets/Audios/Sound effects/padlock.mp3');
         padlockSound.volume = 0.9;
         padlockSound.play().catch(() => playUiClickSound('chime'));
@@ -12570,7 +12615,13 @@ const appVersion = '20261008-2';
             if (isPageVisible(page)) playUiClickSound('chime');
         }, 2100));
         timers.push(window.setTimeout(() => {
-            if (isPageVisible(page)) page.classList.add('is-camera-chest-open');
+            if (!isPageVisible(page)) return;
+            page.classList.add('is-camera-chest-open');
+            if (!window.completeLearnscapeCameraChallenge(shape)) {
+                console.error(`Could not complete the ${shape} camera challenge.`);
+            } else {
+                saveCameraScanProgress(page, 0);
+            }
         }, 3450));
         timers.push(window.setTimeout(() => {
             if (!isPageVisible(page)) return;
@@ -12613,12 +12664,45 @@ const appVersion = '20261008-2';
         return true;
     };
 
-    // Future shape recognition should call this once for every correct detection.
-    window.completeLearnscapeCameraGame = (shape) => {
-        const normalizedShape = String(shape || '').trim().toLowerCase();
-        const page = cameraPages.find((cameraPage) => cameraPage.dataset.cameraShape === normalizedShape);
-        return page ? registerCameraDetection(page) : false;
+    window.completeLearnscapeCameraGame = (result, page, attemptId) => {
+        if (!result || result.verified !== true || !Number.isSafeInteger(attemptId)) return false;
+        const normalizedLabel = String(result.label || '').trim().toLowerCase();
+        const currentPage = page || cameraPages.find((cameraPage) => isPageVisible(cameraPage));
+        if (!currentPage || !cameraPages.includes(currentPage) || !isPageVisible(currentPage)) return false;
+        const currentShape = String(currentPage.dataset.cameraShape || '').trim().toLowerCase();
+        if (!currentShape || normalizedLabel !== currentShape) return false;
+        const acceptedAttempts = acceptedCameraAttemptIds.get(currentPage) || new Set();
+        if (acceptedAttempts.has(attemptId)) return false;
+        const accepted = registerCameraDetection(currentPage);
+        if (accepted) {
+            acceptedAttempts.add(attemptId);
+            acceptedCameraAttemptIds.set(currentPage, acceptedAttempts);
+        }
+        return accepted;
     };
+
+    window.addEventListener('learnscape:verified-shape', (event) => {
+        console.log('[GAME EVENT RECEIVED]', event.detail);
+        const { page, result, attemptId } = event.detail || {};
+        if (!result || result.verified !== true || !page || !isPageVisible(page)) return;
+        const detectedShape = String(result.label || '').trim().toLowerCase();
+        const targetShape = String(page.dataset.cameraShape || '').trim().toLowerCase();
+        if (detectedShape !== targetShape) {
+            const status = page.querySelector('.camera-detection-status');
+            if (status) status.textContent = `Verified ${detectedShape || 'shape'}, but this mission needs ${targetShape}. Remove it, then try again.`;
+            return;
+        }
+
+        if (window.completeLearnscapeCameraGame(result, page, attemptId)) {
+            const count = Number(page.dataset.cameraDetectionCount) || 0;
+            const status = page.querySelector('.camera-detection-status');
+            if (status) {
+                status.textContent = count >= 3
+                    ? 'Three verified scans complete. Opening the chest…'
+                    : `${targetShape[0].toUpperCase()}${targetShape.slice(1)} scan ${count} of 3 accepted. Remove it before the next scan.`;
+            }
+        }
+    });
 
     const playCircleIllustrationVideo = async () => {
         if (!circleIllustrationVideo || !isPageVisible(circleIllustrationPage)) return;
@@ -13214,17 +13298,11 @@ const appVersion = '20261008-2';
         });
     });
     cameraPages.forEach((page) => {
-        page.querySelector('.camera-temporary-okay-button')?.addEventListener('click', () => {
-            registerCameraDetection(page);
-        });
-        page.querySelector('.camera-open-chest-button')?.addEventListener('click', () => {
-            completeCameraGame(page);
-        });
         page.querySelector('.camera-completion-replay')?.addEventListener('click', () => {
-            resetCameraCompletionFlow(page);
+            resetCameraCompletionFlow(page, true);
         });
         page.querySelector('.camera-completion-claim-rewards')?.addEventListener('click', () => {
-            resetCameraCompletionFlow(page);
+            resetCameraCompletionFlow(page, true);
             navigateApp('title');
             window.dispatchEvent(new CustomEvent('learnscape:open-game-missions'));
         });
@@ -13418,9 +13496,10 @@ const appVersion = '20261008-2';
         if (event.detail?.route !== 'circleCamera') {
             stopCircleCameraStream();
         }
-        if (!/^(square|triangle|rectangle|oval|heart|star|diamond)Camera$/.test(event.detail?.route || '')) {
-            stopAllShapeCameraStreams();
-        }
+        const activeShapeCameraRoute = event.detail?.route || '';
+        shapeCameraPages.forEach((page) => {
+            if (activeShapeCameraRoute !== `${page.dataset.cameraShape}Camera`) stopShapeCameraStream(page);
+        });
         cameraPages.forEach((page) => {
             if (!isPageVisible(page)) resetCameraCompletionFlow(page);
         });
@@ -15392,7 +15471,7 @@ const appVersion = '20261008-2';
             'Click Start Camera and allow camera access when your browser asks to begin detecting.',
             `Check that the target shape is ${shapeLabel}.`,
             `Present an object with a ${shapeLabel.toLowerCase()} shape inside the camera frame.`,
-            'Find the target shape three times, then open the unlocked chest.',
+            'After each scan, remove the object completely before presenting it again. The chest opens after three separate verified scans.',
         ];
         cameraHowToSteps.replaceChildren(...steps.map((step) => {
             const item = document.createElement('li');

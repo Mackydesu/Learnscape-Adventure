@@ -2,8 +2,7 @@
 import * as ort from "onnxruntime-web";
 import { loadModel } from "./model.js";
 
-// IMPORTANT: These must match the class indices
-// in your original Roboflow data.yaml.
+// Matches the embedded `names` class-index metadata in public/models/final_model.onnx.
 export const CLASS_NAMES = [
     "circle",
     "diamond",

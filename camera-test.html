@@ -1,37 +1,20 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>YOLO11n Shape Recognition Test</title>
-
+    <title>Learnscape Camera Feed</title>
+    <link rel="stylesheet" href="/style.css">
     <style>
-        body {
-            background: #eaf6e7;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
+        .camera-test-page .circle-camera-scan-board {
+            width: min(74vw, 68rem);
         }
 
-        .camera-container {
+        .camera-test-page .circle-camera-viewfinder {
             position: relative;
-            width: min(100%, 800px);
-            margin: 20px auto;
-            background: #222;
-            border: 4px solid #4caf50;
-            border-radius: 12px;
-            overflow: hidden;
         }
 
-        #webcam {
-            display: block;
-            width: 100%;
-            height: auto;
-        }
-
-        #overlay {
+        .camera-test-page .camera-detection-overlay {
             position: absolute;
             inset: 0;
             width: 100%;
@@ -39,41 +22,68 @@
             pointer-events: none;
         }
 
-        button {
-            padding: 12px 24px;
-            margin: 8px;
-            font-size: 18px;
-            cursor: pointer;
+        .camera-test-page .camera-feed-status {
+            position: absolute;
+            z-index: 5;
+            left: 50%;
+            bottom: calc(2.5vh + 5rem);
+            width: min(90vw, 48rem);
+            margin: 0;
+            padding: 0.65rem 1rem;
+            transform: translateX(-50%);
+            border: 0.14rem solid rgba(255, 255, 255, 0.9);
+            border-radius: 999px;
+            background: rgba(18, 38, 53, 0.84);
+            color: white;
+            font: 800 clamp(0.95rem, 1.5vw, 1.25rem)/1.2 'Fredoka', 'Nunito', sans-serif;
+            text-align: center;
         }
 
-        #status, #prediction {
-            font-size: 20px;
-            font-weight: bold;
+        .camera-test-page .circle-camera-start-button {
+            top: auto;
+            bottom: 2.5vh;
+        }
+
+        @media (max-width: 700px) {
+            .camera-test-page .circle-camera-scan-board {
+                top: 7%;
+                width: 92vw;
+                height: 72vh;
+                padding: 5rem 0.7rem 0.7rem;
+            }
+
+            .camera-test-page .circle-camera-scan-title {
+                min-height: 3.5rem;
+                font-size: 1.05rem;
+            }
         }
     </style>
 </head>
-
 <body>
-    <h1>YOLO11n Shape Recognition</h1>
+    <section class="circle-camera-page camera-test-page" aria-label="Camera game feed">
+        <main class="circle-camera-scan-board">
+            <div class="circle-camera-scan-title">
+                <span class="circle-camera-icon" aria-hidden="true"></span>
+                <strong>Scan an object using the camera!</strong>
+            </div>
+            <div class="circle-camera-viewfinder" aria-label="Live camera feed">
+                <video id="webcam" class="circle-camera-video" autoplay playsinline muted></video>
+                <canvas id="overlay" class="camera-detection-overlay" aria-hidden="true"></canvas>
+                <span class="circle-camera-corner circle-camera-corner-tl"></span>
+                <span class="circle-camera-corner circle-camera-corner-tr"></span>
+                <span class="circle-camera-corner circle-camera-corner-bl"></span>
+                <span class="circle-camera-corner circle-camera-corner-br"></span>
+                <div class="circle-camera-scan-sweep" aria-hidden="true"></div>
+            </div>
+        </main>
 
-    <p id="status">Click Start Camera to begin.</p>
+        <p id="status" class="camera-feed-status" role="status" aria-live="polite">Press Start Camera to begin.</p>
+        <button id="startButton" class="circle-camera-start-button" type="button">
+            <span class="circle-camera-start-icon" aria-hidden="true"></span>
+            <strong>Start Camera</strong>
+        </button>
+    </section>
 
-    <div class="camera-container">
-        <video id="webcam" autoplay muted playsinline></video>
-        <canvas id="overlay"></canvas>
-    </div>
-
-    <div>
-        <button id="startButton">Start Camera</button>
-        <button id="scanButton" disabled>Scan Shape</button>
-        <button id="stopButton">Stop Camera</button>
-    </div>
-
-    <p id="prediction">No shape detected yet.</p>
-
-    <script
-        type="module"
-        src="/detection/camera-test.js">
-    </script>
+    <script type="module" src="/detection/camera-test.js"></script>
 </body>
 </html>

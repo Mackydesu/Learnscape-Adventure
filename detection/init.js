@@ -1,18 +1,14 @@
 import { loadModel } from "./model.js";
+import { initializeGameCameraDetection } from "./gameDetection.js";
 
-async function initializeDetection() {
-    try {
-        console.log("Starting ONNX initialization...");
+console.log("Starting ONNX initialization...");
+const modelReady = loadModel();
+initializeGameCameraDetection(modelReady);
 
-        const session = await loadModel();
-
-        console.log("YOLO11n model is ready!");
-        console.log("Input names:", session.inputNames);
-        console.log("Output names:", session.outputNames);
-
-    } catch (error) {
-        console.error("ONNX initialization error:", error);
-    }
-}
-
-initializeDetection();
+modelReady.then(session => {
+    console.log("YOLO11n model is ready!");
+    console.log("Input names:", session.inputNames);
+    console.log("Output names:", session.outputNames);
+}).catch(error => {
+    console.error("ONNX initialization error:", error);
+});
