@@ -9,7 +9,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="manifest" href="manifest.webmanifest">
-    <link rel="apple-touch-icon" href="assets/Character/ch1.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/app-icon-192.png">
+    <link rel="apple-touch-icon" href="assets/icons/app-icon-192.png">
+    <link rel="preload" as="audio" href="assets/Audios/Sound%20effects/chest%20open.mp3" type="audio/mpeg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -77,7 +79,7 @@
             </div>
         </div>
         <button class="shape-how-to-help-button" type="button" aria-label="How to play" aria-haspopup="dialog" hidden>?</button>
-        <button class="shape-how-to-help-button camera-how-to-help-button" type="button" aria-label="How to play the camera challenge" aria-haspopup="dialog" hidden>?</button>
+        <button class="shape-how-to-help-button camera-how-to-help-button" type="button" aria-label="Paano laruin ang hamon sa kamera" aria-haspopup="dialog" hidden>?</button>
         <button class="intro-settings-button" type="button" aria-label="Settings" aria-expanded="false" aria-controls="intro-settings-panel">
             <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M20.2 3.5h7.6l1.1 5.1a16 16 0 0 1 3.2 1.3l4.5-2.5 5.4 5.4-2.5 4.5a16 16 0 0 1 1.3 3.2l5.1 1.1v7.6l-5.1 1.1a16 16 0 0 1-1.3 3.2l2.5 4.5-5.4 5.4-4.5-2.5a16 16 0 0 1-3.2 1.3l-1.1 5.1h-7.6l-1.1-5.1a16 16 0 0 1-3.2-1.3l-4.5 2.5L6 38.1l2.5-4.5a16 16 0 0 1-1.3-3.2l-5.1-1.1v-7.6l5.1-1.1a16 16 0 0 1 1.3-3.2L6 12.9l5.4-5.4 4.5 2.5a16 16 0 0 1 3.2-1.3l1.1-5.2Z"/><circle cx="24" cy="24" r="7"/></svg>
         </button>
@@ -126,13 +128,13 @@
     <div class="shape-how-to-overlay camera-how-to-overlay" hidden>
         <section class="shape-how-to-dialog" role="dialog" aria-modal="true" aria-labelledby="camera-how-to-title" aria-describedby="camera-how-to-mission">
             <header class="shape-how-to-header">
-                <h2 id="camera-how-to-title">How to Play?</h2>
+                <h2 id="camera-how-to-title">Paano Laruin?</h2>
             </header>
             <div class="shape-how-to-scroll" tabindex="0">
                 <p id="camera-how-to-mission" class="shape-how-to-mission"></p>
                 <ol class="shape-how-to-steps"></ol>
             </div>
-            <button class="shape-how-to-continue" type="button">Continue</button>
+            <button class="shape-how-to-continue" type="button">Magpatuloy</button>
         </section>
     </div>
 
@@ -402,7 +404,6 @@
             </span>
             <span class="game3-page-title-island" aria-hidden="true">Island</span>
         </header>
-        <img class="game3-worldmap" src="assets/Shape UI/worldmap.webp" alt="" aria-hidden="true">
         <nav class="game3-island-carousel" aria-label="Shape Island areas">
             <div class="game3-island-card" data-island-shape="circle">
                 <img src="assets/Shape UI/1.webp" alt="1. Circle Meadow">
@@ -567,7 +568,7 @@
         </div>
         <section class="circle-lesson-progress square-lesson-progress" aria-label="Square lesson progress" aria-hidden="true">
             <div class="circle-lesson-progress-board">
-                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/progressboard.webp" alt="">
+                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/board.webp" alt="">
                 <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Lesson Complete!">
                     <path id="squareLessonTitleCurve" d="M 4 44 Q 100 32 196 44" fill="none"></path>
                     <text textLength="184" lengthAdjust="spacingAndGlyphs">
@@ -588,10 +589,10 @@
                 <p class="circle-lesson-star-message square-lesson-star-message" aria-live="polite"></p>
                 <div class="circle-lesson-progress-actions">
                     <button class="circle-lesson-progress-button" type="button" data-square-lesson-replay aria-label="Replay square lesson">
-                        <img src="assets/Buttons/replay.webp" alt="">
+                        <img  alt="">
                     </button>
                     <button class="circle-lesson-progress-button" type="button" data-square-lesson-next aria-label="Continue">
-                        <img src="assets/Buttons/next.webp" alt="">
+                        <img  alt="">
                     </button>
                 </div>
             </div>
@@ -808,7 +809,7 @@
         <button class="circle-mission-start-button triangle-game-start-button" type="button" data-how-to-shape="triangle" hidden>Start</button>
         <section class="circle-lesson-progress triangle-game-complete-progress" aria-label="Bridge progress" aria-hidden="true">
             <div class="circle-lesson-progress-board">
-                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/progressboard.webp" alt="">
+                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/board.webp" alt="">
                 <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Mission Complete!">
                     <path id="triangleBridgeCompleteTitleCurve" d="M 4 44 Q 100 32 196 44" fill="none"></path>
                     <text textLength="184" lengthAdjust="spacingAndGlyphs">
@@ -823,10 +824,10 @@
                 <p class="circle-lesson-star-message">Well done!</p>
                 <div class="circle-lesson-progress-actions">
                     <button class="circle-lesson-progress-button" type="button" data-triangle-game-replay aria-label="Retry bridge mission">
-                        <img src="assets/Buttons/Retry.webp" alt="">
+                        <img  alt="">
                     </button>
                     <button class="circle-lesson-progress-button" type="button" data-triangle-game-next aria-label="Continue to Shape Island">
-                        <img src="assets/Buttons/next.webp" alt="">
+                        <img  alt="">
                     </button>
                 </div>
             </div>
@@ -1083,7 +1084,7 @@
         <div class="rectangle-delivery-complete-confetti" aria-hidden="true" hidden></div>
         <section class="circle-lesson-progress rectangle-final-progress" aria-label="Rectangle mission progress" aria-hidden="true">
             <div class="circle-lesson-progress-board">
-                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/progressboard.webp" alt="">
+                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/board.webp" alt="">
                 <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Mission Complete!">
                     <path id="rectangleMissionCompleteTitleCurve" d="M 4 44 Q 100 32 196 44" fill="none"></path>
                     <text textLength="184" lengthAdjust="spacingAndGlyphs">
@@ -1098,10 +1099,10 @@
                 <p class="circle-lesson-star-message">Well done!</p>
                 <div class="circle-lesson-progress-actions">
                     <button class="circle-lesson-progress-button" type="button" data-rectangle-final-replay aria-label="Retry rectangle mission">
-                        <img src="assets/Buttons/Retry.webp" alt="">
+                        <img  alt="">
                     </button>
                     <button class="circle-lesson-progress-button" type="button" data-rectangle-final-next aria-label="Continue to camera game">
-                        <img src="assets/Buttons/next.webp" alt="">
+                        <img  alt="">
                     </button>
                 </div>
             </div>
@@ -1431,7 +1432,7 @@
         </div>
         <section class="circle-lesson-progress oval-final-progress" aria-label="Oval mission progress" aria-hidden="true">
             <div class="circle-lesson-progress-board">
-                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/progressboard.webp" alt="">
+                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/board.webp" alt="">
                 <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Mission Complete!">
                     <path id="ovalMissionCompleteTitleCurve" d="M 4 44 Q 100 32 196 44" fill="none"></path>
                     <text textLength="184" lengthAdjust="spacingAndGlyphs">
@@ -1446,10 +1447,10 @@
                 <p class="circle-lesson-star-message">Well done!</p>
                 <div class="circle-lesson-progress-actions">
                     <button class="circle-lesson-progress-button" type="button" data-oval-final-replay aria-label="Retry oval matching mission">
-                        <img src="assets/Buttons/Retry.webp" alt="">
+                        <img  alt="">
                     </button>
                     <button class="circle-lesson-progress-button" type="button" data-oval-final-next aria-label="Continue to oval camera game">
-                        <img src="assets/Buttons/next.webp" alt="">
+                        <img  alt="">
                     </button>
                 </div>
             </div>
@@ -1594,7 +1595,7 @@
         </section>
         <section class="circle-lesson-progress heart-final-progress" aria-label="Heart mission progress" aria-hidden="true">
             <div class="circle-lesson-progress-board">
-                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/progressboard.webp" alt="">
+                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/board.webp" alt="">
                 <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Mission Complete!">
                     <path id="heartMissionCompleteTitleCurve" d="M 4 44 Q 100 32 196 44" fill="none"></path>
                     <text textLength="184" lengthAdjust="spacingAndGlyphs"><textPath href="#heartMissionCompleteTitleCurve" startOffset="50%" text-anchor="middle">Mission Complete!</textPath></text>
@@ -1606,8 +1607,8 @@
                 </div>
                 <p class="circle-lesson-star-message">Excellent work!</p>
                 <div class="circle-lesson-progress-actions">
-                    <button class="circle-lesson-progress-button heart-final-replay" type="button" aria-label="Retry Heart Mission"><img src="assets/Buttons/Retry.webp" alt=""></button>
-                    <button class="circle-lesson-progress-button heart-final-next" type="button" aria-label="Continue to heart camera game"><img src="assets/Buttons/next.webp" alt=""></button>
+                    <button class="circle-lesson-progress-button heart-final-replay" type="button" aria-label="Retry Heart Mission"><img  alt=""></button>
+                    <button class="circle-lesson-progress-button heart-final-next" type="button" aria-label="Continue to heart camera game"><img  alt=""></button>
                 </div>
             </div>
         </section>
@@ -1969,7 +1970,7 @@
         </div>
         <section class="circle-lesson-progress" aria-label="Lesson progress" aria-hidden="true">
             <div class="circle-lesson-progress-board">
-                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/progressboard.webp" alt="">
+                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/board.webp" alt="">
                 <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Lesson Complete!">
                     <path id="circleLessonTitleCurve" d="M 4 44 Q 100 32 196 44" fill="none"></path>
                     <text textLength="184" lengthAdjust="spacingAndGlyphs">
@@ -1990,10 +1991,10 @@
                 <p class="circle-lesson-star-message" aria-live="polite"></p>
                 <div class="circle-lesson-progress-actions">
                     <button class="circle-lesson-progress-button" type="button" data-circle-lesson-replay aria-label="Replay lesson">
-                        <img src="assets/Buttons/replay.webp" alt="">
+                        <img  alt="">
                     </button>
                     <button class="circle-lesson-progress-button" type="button" data-circle-lesson-next aria-label="Continue">
-                        <img src="assets/Buttons/next.webp" alt="">
+                        <img  alt="">
                     </button>
                 </div>
             </div>
@@ -2513,6 +2514,10 @@
                 initialLoadingProgress = nextValue;
                 loadingOverlay?.style.setProperty('--loading-progress', String(nextValue));
                 loadingProgressBar?.setAttribute('aria-valuenow', String(nextValue));
+            };
+            const setInitialLoadingMessage = (message) => {
+                const loadingMessage = loadingOverlay?.querySelector('.page-loading-text');
+                if (loadingMessage) loadingMessage.textContent = message;
             };
             setInitialLoadingProgress(4);
 
@@ -5976,23 +5981,26 @@
             const trackInitialImages = () => {
                 const images = Array.from(document.images);
                 if (!images.length) {
-                    setInitialLoadingProgress(70);
+                    setInitialLoadingProgress(35);
                     return Promise.resolve();
                 }
 
                 let completedImages = 0;
+                const failedImages = [];
                 const markImageComplete = () => {
                     completedImages += 1;
-                    setInitialLoadingProgress(8 + ((completedImages / images.length) * 62));
+                    setInitialLoadingProgress(8 + ((completedImages / images.length) * 27));
                 };
 
                 return Promise.all(images.map((image) => new Promise((resolve) => {
                     let settled = false;
-                    const finish = () => {
+                    const hasSource = Boolean(image.currentSrc || image.getAttribute('src') || image.getAttribute('srcset'));
+                    const finish = (failed = false) => {
                         if (settled) return;
                         settled = true;
                         image.removeEventListener('load', finish);
                         image.removeEventListener('error', finish);
+                        if (failed && hasSource) failedImages.push(image.currentSrc || image.src);
                         markImageComplete();
                         resolve();
                     };
@@ -6001,7 +6009,7 @@
                         if (typeof image.decode === 'function' && image.naturalWidth > 0) {
                             image.decode().catch(() => undefined).then(finish);
                         } else {
-                            finish();
+                            finish(image.naturalWidth === 0 && hasSource);
                         }
                         return;
                     }
@@ -6013,8 +6021,75 @@
                             finish();
                         }
                     }, { once: true });
-                    image.addEventListener('error', finish, { once: true });
-                })));
+                    image.addEventListener('error', () => finish(true), { once: true });
+                }))).then(() => {
+                    if (failedImages.length) {
+                        throw new Error(`${failedImages.length} page images could not be loaded.`);
+                    }
+                });
+            };
+
+            const consumeResponse = async (response) => {
+                if (!response.body?.getReader) {
+                    await response.arrayBuffer();
+                    return;
+                }
+                const reader = response.body.getReader();
+                try {
+                    while (true) {
+                        const { done } = await reader.read();
+                        if (done) break;
+                    }
+                } finally {
+                    reader.releaseLock();
+                }
+            };
+
+            const preloadRuntimeAssets = async () => {
+                const manifestResponse = await fetch('/runtime-assets.json', { cache: 'no-cache' });
+                if (!manifestResponse.ok) {
+                    throw new Error(`Runtime asset manifest could not be loaded (${manifestResponse.status}).`);
+                }
+                const manifest = await manifestResponse.json();
+                if (!Array.isArray(manifest) || !manifest.length) {
+                    throw new Error('Runtime asset manifest is empty or invalid.');
+                }
+
+                let nextAssetIndex = 0;
+                let completedAssets = 0;
+                const failures = [];
+                const loadNextAsset = async () => {
+                    while (nextAssetIndex < manifest.length) {
+                        const assetUrl = manifest[nextAssetIndex++];
+                        try {
+                            let loaded = false;
+                            for (let attempt = 0; attempt < 2 && !loaded; attempt += 1) {
+                                try {
+                                    const response = await fetch(assetUrl, { cache: attempt ? 'reload' : 'force-cache' });
+                                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                                    await consumeResponse(response);
+                                    loaded = true;
+                                } catch (error) {
+                                    if (attempt === 1) throw error;
+                                }
+                            }
+                        } catch (error) {
+                            failures.push({ url: assetUrl, error });
+                            console.error(`Game asset failed to load: ${assetUrl}`, error);
+                        } finally {
+                            completedAssets += 1;
+                            const assetProgress = Math.round((completedAssets / manifest.length) * 100);
+                            setInitialLoadingMessage(`Loading game contents… ${assetProgress}%`);
+                            setInitialLoadingProgress(35 + ((completedAssets / manifest.length) * 57));
+                        }
+                    }
+                };
+
+                await Promise.all(Array.from({ length: Math.min(4, manifest.length) }, loadNextAsset));
+                if (failures.length) {
+                    throw new Error(`${failures.length} of ${manifest.length} game assets could not be loaded.`);
+                }
+                return manifest.length;
             };
 
             const waitForGameInitialization = () => {
@@ -6024,41 +6099,75 @@
                 });
             };
 
+            const waitForDetectionInitialization = () => {
+                if (window.__learnscapeDetectionReady === true) return Promise.resolve();
+                return new Promise((resolve) => {
+                    let settled = false;
+                    const finish = (event) => {
+                        if (settled) return;
+                        settled = true;
+                        window.clearTimeout(timeoutId);
+                        window.removeEventListener('learnscape:detectionready', finish);
+                        if (event?.detail?.ready === false) {
+                            console.warn('Camera detection did not initialize; the rest of the game will continue loading.');
+                        }
+                        resolve();
+                    };
+                    const timeoutId = window.setTimeout(() => {
+                        console.warn('Camera detection initialization timed out.');
+                        finish();
+                    }, 30000);
+                    window.addEventListener('learnscape:detectionready', finish, { once: true });
+                });
+            };
+
             const waitForFonts = () => {
                 if (!document.fonts?.ready) return Promise.resolve();
                 return document.fonts.ready.catch(() => undefined);
             };
 
             const completeInitialBoot = async () => {
-                const imagesReady = trackInitialImages();
-                const appReady = Promise.all([
-                    waitForWindowLoad(),
-                    waitForFonts(),
-                    waitForGameInitialization(),
-                ]);
+                try {
+                    const imagesReady = trackInitialImages();
+                    const appReady = Promise.all([
+                        waitForWindowLoad(),
+                        waitForFonts(),
+                        waitForGameInitialization(),
+                        waitForDetectionInitialization(),
+                    ]);
 
-                await imagesReady;
-                setInitialLoadingProgress(78);
-                await appReady;
-                setInitialLoadingProgress(97);
+                    await imagesReady;
+                    setInitialLoadingProgress(35);
+                    setInitialLoadingMessage('Loading game contents…');
+                    await preloadRuntimeAssets();
+                    setInitialLoadingProgress(94);
+                    setInitialLoadingMessage('Finishing game startup…');
+                    await appReady;
+                    setInitialLoadingProgress(97);
 
-                const minimumLoadingTime = 1200;
-                const remainingTime = Math.max(0, minimumLoadingTime - (performance.now() - initialBootStartedAt));
-                if (remainingTime > 0) {
-                    await new Promise((resolve) => window.setTimeout(resolve, remainingTime));
+                    const minimumLoadingTime = 1200;
+                    const remainingTime = Math.max(0, minimumLoadingTime - (performance.now() - initialBootStartedAt));
+                    if (remainingTime > 0) {
+                        await new Promise((resolve) => window.setTimeout(resolve, remainingTime));
+                    }
+
+                    await new Promise((resolve) => {
+                        window.requestAnimationFrame(() => window.requestAnimationFrame(resolve));
+                    });
+
+                    setInitialLoadingProgress(100);
+                    await new Promise((resolve) => window.setTimeout(resolve, 350));
+
+                    isInitialBootReady = true;
+                    body.classList.remove('is-initial-loading');
+                    hideLoading(() => fullscreenRestoreButton?.focus({ preventScroll: true }));
+                    window.dispatchEvent(new CustomEvent('learnscape:appready'));
+                } catch (error) {
+                    console.error('The game cannot finish loading all of its assets.', error);
+                    setInitialLoadingMessage('Some game files could not load. Check your connection, then refresh the page.');
+                    const initialLoadingPanel = loadingOverlay?.querySelector('.initial-loading-panel');
+                    initialLoadingPanel?.classList.add('has-loading-error');
                 }
-
-                await new Promise((resolve) => {
-                    window.requestAnimationFrame(() => window.requestAnimationFrame(resolve));
-                });
-
-                setInitialLoadingProgress(100);
-                await new Promise((resolve) => window.setTimeout(resolve, 350));
-
-                isInitialBootReady = true;
-                body.classList.remove('is-initial-loading');
-                hideLoading(() => fullscreenRestoreButton?.focus({ preventScroll: true }));
-                window.dispatchEvent(new CustomEvent('learnscape:appready'));
             };
 
             syncFullscreenClass();
@@ -6066,8 +6175,12 @@
             completeInitialBoot();
         })();
     </script>
+    <!-- Import map lets the camera detector run in both Vite and static Live Server. -->
+    <script type="importmap">
+        {"imports":{"onnxruntime-web":"/node_modules/onnxruntime-web/dist/ort.wasm.bundle.min.mjs","onnxruntime-web/wasm":"/node_modules/onnxruntime-web/dist/ort.wasm.bundle.min.mjs"}}
+    </script>
     <!-- ONNX Shape Detection -->
-<script type="module" src="/detection/init.js"></script>
+    <script type="module" src="/detection/init.js"></script>
 </body>
 </html>
 

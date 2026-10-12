@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 790" role="img" aria-labelledby="title desc">
+  <title id="title">Wooden adventure shop board</title>
+  <desc id="desc">A bright carved wooden shop board with a cream display area, gold bolts, and green leaf decorations.</desc>
+  <defs>
+    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d9822b"/>
+      <stop offset="0.48" stop-color="#a84d18"/>
+      <stop offset="1" stop-color="#70300f"/>
+    </linearGradient>
+    <linearGradient id="woodLight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f2a54b"/>
+      <stop offset="1" stop-color="#b85a1d"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff7d7"/>
+      <stop offset="1" stop-color="#efc775"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a8ed32"/>
+      <stop offset="0.52" stop-color="#35aa31"/>
+      <stop offset="1" stop-color="#13702d"/>
+    </linearGradient>
+    <radialGradient id="bolt" cx="35%" cy="28%" r="72%">
+      <stop offset="0" stop-color="#fff39b"/>
+      <stop offset="0.28" stop-color="#ffc62f"/>
+      <stop offset="1" stop-color="#a64c0b"/>
+    </radialGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="12" stdDeviation="9" flood-color="#3d1b09" flood-opacity=".42"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)" stroke-linejoin="round">
+    <path d="M82 116H638L673 164V725L640 758H80L47 725V164Z" fill="url(#wood)" stroke="#542309" stroke-width="12"/>
+    <path d="M103 145H617L641 176V704L615 730H105L79 704V176Z" fill="url(#paper)" stroke="#8b3e12" stroke-width="8"/>
+    <path d="M112 164H608L621 182V695L604 711H116L99 695V182Z" fill="#fff1bb" opacity=".78"/>
+
+    <path d="M67 111H653L666 131L649 158H71L54 131Z" fill="url(#woodLight)" stroke="#64280b" stroke-width="9"/>
+    <path d="M73 121H647" fill="none" stroke="#ffc46b" stroke-linecap="round" stroke-width="5" opacity=".7"/>
+    <path d="M70 724H650L672 746L657 772H63L48 746Z" fill="url(#woodLight)" stroke="#64280b" stroke-width="9"/>
+    <path d="M81 740H638" fill="none" stroke="#f3a753" stroke-linecap="round" stroke-width="5" opacity=".65"/>
+
+    <path d="M139 31H581L607 55L592 119H128L113 55Z" fill="url(#woodLight)" stroke="#572207" stroke-width="11"/>
+    <path d="M145 48H575" fill="none" stroke="#ffc06a" stroke-linecap="round" stroke-width="7" opacity=".78"/>
+    <path d="M155 92C252 74 468 111 568 86" fill="none" stroke="#80350d" stroke-linecap="round" stroke-width="6" opacity=".55"/>
+
+    <g fill="url(#bolt)" stroke="#74310a" stroke-width="4">
+      <circle cx="139" cy="60" r="10"/><circle cx="580" cy="60" r="10"/>
+      <circle cx="91" cy="187" r="9"/><circle cx="629" cy="187" r="9"/>
+      <circle cx="91" cy="688" r="9"/><circle cx="629" cy="688" r="9"/>
+      <circle cx="79" cy="744" r="10"/><circle cx="641" cy="744" r="10"/>
+    </g>
+
+    <g fill="url(#leaf)" stroke="#176128" stroke-width="5">
+      <path d="M126 82C88 81 72 58 80 35c31 0 49 14 46 47Z"/>
+      <path d="M129 80c-6-37 8-59 32-63 13 28 2 51-32 63Z"/>
+      <path d="M120 89c-33 18-59 9-68-13 23-22 48-18 68 13Z"/>
+      <path d="M594 82c38-1 54-24 46-47-31 0-49 14-46 47Z"/>
+      <path d="M591 80c6-37-8-59-32-63-13 28-2 51 32 63Z"/>
+      <path d="M600 89c33 18 59 9 68-13-23-22-48-18-68 13Z"/>
+      <path d="M79 572c-31-19-58-13-70 10 18 25 44 26 70-10Z"/>
+      <path d="M84 579c-9 35 2 58 26 64 16-26 8-50-26-64Z"/>
+      <path d="M641 585c31-19 58-13 70 10-18 25-44 26-70-10Z"/>
+      <path d="M636 592c9 35-2 58-26 64-16-26-8-50 26-64Z"/>
+    </g>
+  </g>
+</svg>

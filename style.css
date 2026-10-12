@@ -15062,6 +15062,10 @@ body *::after {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    /* Some front-facing camera drivers deliver mirrored video frames. Flip
+       the rendered image back to its real-world orientation. */
+    transform: scaleX(-1) !important;
+    -webkit-transform: scaleX(-1) !important;
 }
 
 .camera-detection-overlay {
@@ -15182,6 +15186,10 @@ body *::after {
 
 .circle-camera-page.is-camera-detection-success .camera-detection-check span {
     animation: cameraDetectionCheckPop 0.62s cubic-bezier(0.2, 1.45, 0.35, 1) both;
+}
+
+.camera-detection-celebration {
+    z-index: 23;
 }
 
 .camera-completion-celebration {
@@ -15538,6 +15546,8 @@ body *::after {
 }
 
 .camera-empty-stars .circle-lesson-star-slot.is-earned .camera-progress-star {
+    opacity: 1;
+    transform: scale(1);
     animation:
         circleLessonEarnedStarPop 0.68s cubic-bezier(0.2, 1.4, 0.35, 1) both,
         circleLessonStarShine 1.05s 0.18s ease-out both;
@@ -15545,6 +15555,59 @@ body *::after {
 
 .camera-empty-stars .circle-lesson-star-slot.is-earned::after {
     animation: circleLessonStarGlitter 1.15s 0.12s ease-out both;
+}
+
+.camera-chest-open-button {
+    position: relative;
+    z-index: 8;
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    min-width: clamp(9.5rem, 14vw, 13rem);
+    min-height: 3.25rem;
+    margin: 0.45rem auto 0;
+    padding: 0.55rem 1.35rem;
+    border: 0.2rem solid #fff3a6;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #ffca43 0%, #f4871d 58%, #bf4b0b 100%);
+    box-shadow:
+        inset 0 0.18rem 0 rgba(255, 255, 255, 0.68),
+        0 0.28rem 0 #78300b,
+        0 0 0.9rem rgba(255, 217, 84, 0.76);
+    color: #ffffff;
+    font: 900 clamp(1.3rem, 2vw, 1.8rem)/1 'Fredoka', 'Nunito', sans-serif;
+    letter-spacing: 0.03em;
+    text-shadow: 0 0.12rem 0 #81320a;
+    cursor: pointer;
+    transition: filter 160ms ease, transform 160ms ease;
+}
+
+.camera-chest-open-button[hidden] {
+    display: none !important;
+}
+
+.camera-chest-open-button:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: translateY(-0.08rem);
+}
+
+.camera-chest-open-button:active:not(:disabled) {
+    transform: translateY(0.14rem) scale(0.98);
+    box-shadow:
+        inset 0 0.12rem 0 rgba(255, 255, 255, 0.5),
+        0 0.14rem 0 #78300b,
+        0 0 0.65rem rgba(255, 217, 84, 0.58);
+}
+
+.circle-camera-page.is-camera-chest-ready .camera-chest-open-button:not([hidden]) {
+    animation: cameraChestOpenButtonPulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes cameraChestOpenButtonPulse {
+    from { box-shadow: inset 0 0.18rem 0 rgba(255, 255, 255, 0.68), 0 0.28rem 0 #78300b, 0 0 0.55rem rgba(255, 217, 84, 0.62); }
+    to { box-shadow: inset 0 0.18rem 0 rgba(255, 255, 255, 0.8), 0 0.28rem 0 #78300b, 0 0 1.4rem rgba(255, 239, 125, 1); }
 }
 
 .circle-camera-locked-chest {

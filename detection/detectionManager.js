@@ -48,7 +48,9 @@ function sleepUntilNextInference(ms, signal) {
 export async function trackLiveShapes(video, onFrame, options = {}) {
     const signal = options.signal;
     const intervalMs = Math.max(0, options.intervalMs ?? 90);
-    const stableVotes = Math.max(2, options.minVotes ?? DEFAULT_MIN_VOTES);
+    // Callers may deliberately choose a single processed frame, such as the
+    // game camera. Other callers continue to use their configured default.
+    const stableVotes = Math.max(1, options.minVotes ?? DEFAULT_MIN_VOTES);
     const tracks = [];
     let frame = 0;
 
@@ -64,6 +66,21 @@ export async function trackLiveShapes(video, onFrame, options = {}) {
             const geometry = lowConfidenceComplexShape
                 ? { verified: false, yoloLabel: item.label, geometricShape: null, reason: "Confidence is below the heart/star verification threshold." }
                 : verifyShape(video, item);
+            if (item.label === "circle" && !geometry.verified) {
+                console.log("[CIRCLE VERIFICATION FAILED]", {
+                    confidence: item.confidence,
+                    reason: geometry.reason,
+                    geometricShape: geometry.geometricShape,
+                    valid: geometry.geometry?.valid,
+                    consistent: geometry.geometry?.consistent,
+                    vertices: geometry.geometry?.count,
+                    circularity: geometry.geometry?.circularity,
+                    ellipseAspect: geometry.geometry?.ellipseAspect,
+                    concaveVertices: geometry.geometry?.concaveVertices,
+                    simplificationCounts: geometry.geometry?.simplificationCounts,
+                    simplificationShapes: geometry.geometry?.simplificationShapes
+                });
+            }
             return {
                 ...item,
                 label: geometry.verified && geometry.label ? geometry.label : item.label,
@@ -107,7 +124,8 @@ export async function trackLiveShapes(video, onFrame, options = {}) {
         for (let i = tracks.length - 1; i >= 0; i--) if (tracks[i].missed > 2) tracks.splice(i, 1);
 
         const visible = tracks.filter(track => track.missed <= 2).map(track => {
-            const votes = track.history.filter(item => item.label === track.label && item.verified).length;
+            const labelVotes = track.history.filter(item => item.label === track.label).length;
+            const geometryVotes = track.history.filter(item => item.label === track.label && item.verified).length;
             return {
                 ...track.box,
                 trackId: track.id,
@@ -116,9 +134,14 @@ export async function trackLiveShapes(video, onFrame, options = {}) {
                 relativeSize: track.relativeSize,
                 moveFartherAway: track.moveFartherAway,
                 geometry: track.geometry,
-                stable: votes >= stableVotes,
-                verified: votes >= stableVotes,
-                verifiedFrames: votes,
+                // Label stability drives the game flow. Geometry remains on the
+                // track as diagnostic information, but is not required before
+                // a recognised target can be awarded.
+                labelStable: labelVotes >= stableVotes,
+                labelFrames: labelVotes,
+                stable: labelVotes >= stableVotes,
+                verified: geometryVotes >= stableVotes,
+                verifiedFrames: geometryVotes,
                 stale: track.missed > 0
             };
         });

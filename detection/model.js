@@ -9,12 +9,18 @@ export async function loadModel() {
     try {
         console.log("Loading YOLO11n ONNX model...");
 
-        session = await ort.InferenceSession.create(
-            "/models/final_model.onnx",
-            {
-                executionProviders: ["wasm"]
+        let loadError = null;
+        for (const modelUrl of ["/models/final_model.onnx", "/public/models/final_model.onnx"]) {
+            try {
+                session = await ort.InferenceSession.create(modelUrl, {
+                    executionProviders: ["wasm"]
+                });
+                break;
+            } catch (error) {
+                loadError = error;
             }
-        );
+        }
+        if (!session) throw loadError || new Error("The shape detection model could not be loaded.");
 
         console.log("ONNX model loaded successfully!");
         console.log("Input:", session.inputNames);

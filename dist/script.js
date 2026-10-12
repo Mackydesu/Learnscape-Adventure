@@ -433,24 +433,45 @@ const appVersion = '20261011-1';
     const circleCameraVideo = circleCameraPage?.querySelector('.circle-camera-video') || null;
     const shapeCameraPages = Array.from(document.querySelectorAll('.shape-camera-page'));
     const cameraPages = Array.from(document.querySelectorAll('.circle-camera-page'));
+    const cameraTagalogShapeLabels = Object.freeze({
+        circle: 'Bilog', square: 'Parisukat', triangle: 'Tatsulok', rectangle: 'Parihaba',
+        oval: 'Bilohaba', heart: 'Puso', star: 'Bituin', diamond: 'Diyamante',
+    });
     const acceptedCameraAttemptIds = new WeakMap();
     const dispatchCameraLifecycle = (type, page, video) => {
         window.dispatchEvent(new CustomEvent(type, {
             detail: { page, video, shape: page?.dataset.cameraShape || '' },
         }));
     };
+    const setUnmirroredCameraPreview = (video) => {
+        if (!video) return;
+        video.dataset.cameraFeedFlipped = 'true';
+        video.style.setProperty('transform', 'scaleX(-1)', 'important');
+        video.style.setProperty('-webkit-transform', 'scaleX(-1)', 'important');
+    };
     cameraPages.forEach((page) => {
         const shape = page.dataset.cameraShape || '';
-        const shapeLabel = shape ? `${shape[0].toUpperCase()}${shape.slice(1)}` : 'Shape';
+        const shapeLabel = cameraTagalogShapeLabels[shape] || 'Hugis';
         const titleCurveId = `cameraCompleteTitleCurve-${shape || 'shape'}`;
         page.dataset.cameraDetectionCount = '0';
+
+        const targetCard = page.querySelector('.circle-camera-target-card');
+        targetCard?.setAttribute('aria-label', `Target na hugis: ${shapeLabel}`);
+        targetCard?.querySelector('h2') && (targetCard.querySelector('h2').textContent = 'Target na Hugis:');
+        const targetLabel = targetCard?.querySelector('strong');
+        if (targetLabel) targetLabel.textContent = shapeLabel;
+        page.querySelector('.circle-camera-scan-board')?.setAttribute('aria-label', 'Laro ng pagtukoy gamit ang kamera');
+        page.querySelector('.circle-camera-scan-title strong')?.replaceChildren('I-scan ang isang bagay gamit ang kamera!');
+        page.querySelector('.circle-camera-viewfinder')?.setAttribute('aria-label', 'Preview ng kamera');
+        page.querySelector('.circle-camera-unlock-board')?.setAttribute('aria-label', `Progreso ng hamon sa kamera para sa ${shapeLabel.toLowerCase()}`);
+        page.querySelector('.circle-camera-start-button strong')?.replaceChildren('Simulan ang Kamera');
 
         const unlockHeading = page.querySelector('.circle-camera-unlock-board h2');
         if (unlockHeading) {
             const emptyStars = document.createElement('div');
             emptyStars.className = 'camera-empty-stars';
             emptyStars.setAttribute('role', 'img');
-            emptyStars.setAttribute('aria-label', '0 of 3 stars earned');
+            emptyStars.setAttribute('aria-label', '0 sa 3 bituin ang nakuha');
             emptyStars.innerHTML = '<span class="circle-lesson-star-slot"><img class="camera-progress-star" src="assets/Shape UI/lesson-star.svg" alt=""></span><span class="circle-lesson-star-slot"><img class="camera-progress-star" src="assets/Shape UI/lesson-star.svg" alt=""></span><span class="circle-lesson-star-slot"><img class="camera-progress-star" src="assets/Shape UI/lesson-star.svg" alt=""></span>';
             unlockHeading.replaceWith(emptyStars);
         }
@@ -490,27 +511,42 @@ const appVersion = '20261011-1';
                 </span>
             `;
         }
+        if (unlockBoard && !unlockBoard.querySelector('.camera-chest-open-button')) {
+            unlockBoard.insertAdjacentHTML('beforeend', '<button class="camera-chest-open-button" type="button" hidden disabled aria-hidden="true" aria-label="Buksan ang kaban">Buksan</button>');
+        }
 
         const viewfinder = page.querySelector('.circle-camera-viewfinder');
         if (viewfinder && !viewfinder.querySelector('.camera-detection-check')) {
-            viewfinder.insertAdjacentHTML('beforeend', '<div class="camera-detection-check" role="status" aria-label="Correct shape detected" aria-hidden="true"><span aria-hidden="true"></span></div>');
+            viewfinder.insertAdjacentHTML('beforeend', '<div class="camera-detection-check" role="status" aria-label="Natukoy ang tamang hugis" aria-hidden="true"><span aria-hidden="true"></span></div>');
+        }
+        // Earlier builds appended a second confetti layer inside the camera
+        // viewfinder. Remove it in case this page was kept alive during an
+        // in-app navigation; correct scans now celebrate across the screen.
+        viewfinder?.querySelectorAll('.camera-detection-confetti').forEach((confetti) => confetti.remove());
+
+        if (!page.querySelector('.camera-detection-celebration')) {
+            page.insertAdjacentHTML('beforeend', `
+                <section class="circle-hunt-celebration camera-detection-celebration" aria-hidden="true">
+                    <div class="circle-hunt-confetti camera-detection-fullscreen-confetti" aria-hidden="true"></div>
+                </section>
+            `);
         }
 
         if (!page.querySelector('.camera-completion-celebration')) {
             page.insertAdjacentHTML('beforeend', `
-                <section class="circle-hunt-celebration camera-completion-celebration" aria-label="Camera challenge celebration" aria-hidden="true">
+                <section class="circle-hunt-celebration camera-completion-celebration" aria-label="Pagdiriwang ng hamon sa kamera" aria-hidden="true">
                     <div class="circle-hunt-confetti camera-completion-confetti" aria-hidden="true"></div>
                     <div class="camera-completion-celebration-copy" role="status">
-                        <strong>Congratulations!</strong>
+                        <strong>Binabati kita!</strong>
                         <span>Tama ang hugis na iyong nahanap</span>
                     </div>
-                    <div class="camera-celebration-badge" aria-label="${shapeLabel} badge unlocked"></div>
+                    <div class="camera-celebration-badge" aria-label="Na-unlock ang badge ng ${shapeLabel}"></div>
                     <img class="circle-hunt-character circle-hunt-character-ch7" src="assets/Character/ch7.webp" alt="Bibi celebrating">
                     <div class="circle-hunt-ch8-pop"><img class="circle-hunt-character-ch8" src="assets/Character/ch8.webp" alt="Bibi giving a thumbs up"></div>
                 </section>
-                <section class="circle-lesson-progress camera-completion-progress" aria-label="Camera challenge progress" aria-hidden="true">
+                <section class="circle-lesson-progress camera-completion-progress" aria-label="Progreso ng hamon sa kamera" aria-hidden="true">
                     <div class="circle-lesson-progress-board">
-                        <img class="circle-lesson-progress-board-image" src="assets/Shape UI/progressboard.webp" alt="">
+                        <img class="circle-lesson-progress-board-image" src="assets/Shape UI/board.webp" alt="">
                         <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Game Complete!">
                             <path id="${titleCurveId}" d="M 4 44 Q 100 32 196 44" fill="none"></path>
                             <text textLength="184" lengthAdjust="spacingAndGlyphs"><textPath href="#${titleCurveId}" startOffset="50%" text-anchor="middle">Game Complete!</textPath></text>
@@ -520,10 +556,10 @@ const appVersion = '20261011-1';
                             <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
                             <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
                         </div>
-                        <p class="circle-lesson-star-message" aria-live="polite">Wow! You found a ${shapeLabel.toLowerCase()} object!</p>
+                        <p class="circle-lesson-star-message" aria-live="polite">Ayos! May nakita kang ${shapeLabel.toLowerCase()} na bagay!</p>
                         <div class="circle-lesson-progress-actions">
-                            <button class="circle-lesson-progress-button camera-completion-replay" type="button" aria-label="Try the ${shapeLabel} camera challenge again"><img src="assets/Buttons/Retry.webp" alt=""></button>
-                            <button class="circle-lesson-progress-button camera-completion-claim-rewards" type="button" aria-label="Claim camera challenge rewards"><img src="assets/Buttons/next.webp" alt=""></button>
+                            <button class="circle-lesson-progress-button camera-completion-retry" type="button" aria-label="Ulitin ang hamon sa kamera para sa ${shapeLabel.toLowerCase()}"><img  alt=""></button>
+                            <button class="circle-lesson-progress-button camera-completion-claim-rewards" type="button" aria-label="Kunin ang gantimpala ng hamon sa kamera"><img alt=""></button>
                         </div>
                     </div>
                 </section>
@@ -1530,7 +1566,7 @@ const appVersion = '20261011-1';
 
         const boardImage = document.createElement('img');
         boardImage.className = 'circle-lesson-progress-board-image';
-        boardImage.src = 'assets/Shape UI/progressboard.webp';
+        boardImage.src = 'assets/Shape UI/board.webp';
         boardImage.alt = '';
 
         const svgNamespace = 'http://www.w3.org/2000/svg';
@@ -1588,7 +1624,7 @@ const appVersion = '20261011-1';
         replayButton.setAttribute('data-shape-preview-replay', '');
         replayButton.setAttribute('aria-label', 'Replay shape lesson');
         const replayImage = document.createElement('img');
-        replayImage.src = 'assets/Buttons/replay.webp';
+        replayImage.removeAttribute('src');
         replayImage.alt = '';
         replayButton.appendChild(replayImage);
 
@@ -1598,7 +1634,7 @@ const appVersion = '20261011-1';
         nextButton.setAttribute('data-shape-preview-next', '');
         nextButton.setAttribute('aria-label', 'Continue to Shape Island');
         const nextImage = document.createElement('img');
-        nextImage.src = 'assets/Buttons/next.webp';
+        nextImage.removeAttribute('src');
         nextImage.alt = '';
         nextButton.appendChild(nextImage);
 
@@ -1678,7 +1714,9 @@ const appVersion = '20261011-1';
             const source = image?.getAttribute('src') || '';
             const fileName = source.split('/').pop()?.toLowerCase() || '';
             const ariaLabel = (button.getAttribute('aria-label') || '').toLowerCase();
-            const kind = button.classList.contains('camera-completion-claim-rewards') || ariaLabel.includes('claim camera')
+            const kind = button.classList.contains('camera-completion-retry')
+                ? 'retry'
+                : button.classList.contains('camera-completion-claim-rewards') || ariaLabel.includes('claim camera')
                 ? 'claim'
                 : ariaLabel.includes('intro page')
                 ? 'home'
@@ -1713,7 +1751,7 @@ const appVersion = '20261011-1';
     const lastReplayRewardAt = new WeakMap();
     document.addEventListener('click', (event) => {
         const button = event.target.closest?.(replayRewardSelector);
-        if (!button || button.disabled || button.closest('[hidden], [aria-hidden="true"]')
+        if (!button || button.classList.contains('camera-completion-retry') || button.disabled || button.closest('[hidden], [aria-hidden="true"]')
             || !button.getClientRects().length || typeof window.addLearnscapeResource !== 'function') return;
         const now = performance.now();
         if (now - (lastReplayRewardAt.get(button) ?? -Infinity) < 750) return;
@@ -2860,9 +2898,9 @@ const appVersion = '20261011-1';
         shapeSquarePage.classList.add('is-progress-visible');
         shapeSquareProgress.dataset.progressStage = 'answer';
         shapeSquareProgress.setAttribute('aria-hidden', 'false');
-        if (shapeSquareReplayButtonImage) shapeSquareReplayButtonImage.src = 'assets/Buttons/Retry.webp';
+        if (shapeSquareReplayButtonImage) shapeSquareReplayButtonImage.removeAttribute('src');
         shapeSquareReplayButton?.setAttribute('aria-label', 'Retry square mission');
-        if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.src = 'assets/Buttons/next.webp';
+        if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.removeAttribute('src');
         shapeSquareNextButton?.setAttribute('aria-label', 'Continue');
         setShapeSquareEarnedStars(2);
         playUiClickSound('boardSuccess');
@@ -3049,9 +3087,9 @@ const appVersion = '20261011-1';
         shapeSquarePage.classList.remove('is-lesson-complete', 'is-square-puzzle-followup', 'is-progress-visible');
         shapeSquareProgress?.setAttribute('aria-hidden', 'true');
         if (shapeSquareProgress) shapeSquareProgress.dataset.progressStage = 'lesson';
-        if (shapeSquareReplayButtonImage) shapeSquareReplayButtonImage.src = 'assets/Buttons/replay.webp';
+        if (shapeSquareReplayButtonImage) shapeSquareReplayButtonImage.removeAttribute('src');
         shapeSquareReplayButton?.setAttribute('aria-label', 'Replay square lesson');
-        if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.src = 'assets/Buttons/next.webp';
+        if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.removeAttribute('src');
         shapeSquareNextButton?.setAttribute('aria-label', 'Continue');
         shapeSquarePage.classList.add('is-square-mission-guide');
         shapeSquareMissionGuide.hidden = false;
@@ -3596,9 +3634,9 @@ const appVersion = '20261011-1';
         resetSquareObjectPuzzle();
         setShapeSquareEarnedStars(0);
         if (shapeSquareProgress) shapeSquareProgress.dataset.progressStage = 'lesson';
-        if (shapeSquareReplayButtonImage) shapeSquareReplayButtonImage.src = 'assets/Buttons/replay.webp';
+        if (shapeSquareReplayButtonImage) shapeSquareReplayButtonImage.removeAttribute('src');
         shapeSquareReplayButton?.setAttribute('aria-label', 'Replay square lesson');
-        if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.src = 'assets/Buttons/next.webp';
+        if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.removeAttribute('src');
         shapeSquareNextButton?.setAttribute('aria-label', 'Continue');
         setShapeSquareSkipButtonVisible(false);
         shapeSquareVideo?.pause?.();
@@ -3630,9 +3668,9 @@ const appVersion = '20261011-1';
         shapeSquarePage.classList.remove('is-lesson-complete');
         shapeSquarePage.classList.add('is-progress-visible');
         shapeSquareProgress.dataset.progressStage = 'lesson';
-        if (shapeSquareReplayButtonImage) shapeSquareReplayButtonImage.src = 'assets/Buttons/replay.webp';
+        if (shapeSquareReplayButtonImage) shapeSquareReplayButtonImage.removeAttribute('src');
         shapeSquareReplayButton?.setAttribute('aria-label', 'Replay square lesson');
-        if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.src = 'assets/Buttons/next.webp';
+        if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.removeAttribute('src');
         shapeSquareNextButton?.setAttribute('aria-label', 'Continue');
         setShapeSquareEarnedStars(1);
         shapeSquareProgress.setAttribute('aria-hidden', 'false');
@@ -7126,7 +7164,7 @@ const appVersion = '20261011-1';
             progressStars.setAttribute('aria-label', '1 of 3 stars earned');
         }
         if (progressMessage) progressMessage.textContent = 'Well done!';
-        if (replayImage) replayImage.src = 'assets/Buttons/replay.webp';
+        if (replayImage) replayImage.removeAttribute('src');
         replayButton?.setAttribute('aria-label', 'Replay shape lesson');
         page.classList.remove('is-transitioning-to-illustration', 'is-illustration-background', 'is-tv-lesson-image-visible', 'is-progress-visible', 'is-next-background', 'is-fading-to-triangle-game', 'is-rectangle-village-departing');
         resetShapeTvChoices(page);
@@ -7164,7 +7202,7 @@ const appVersion = '20261011-1';
                 stars.setAttribute('aria-label', '2 of 3 stars earned');
             }
             if (message) message.textContent = 'Amazing! You collected all stars!';
-            if (replayImage) replayImage.src = 'assets/Buttons/Retry.webp';
+            if (replayImage) replayImage.removeAttribute('src');
             replayButton?.setAttribute('aria-label', 'Retry Star Mission');
         }
 
@@ -7188,7 +7226,7 @@ const appVersion = '20261011-1';
                 stars.setAttribute('aria-label', '2 of 3 stars earned');
             }
             if (message) message.textContent = 'Amazing! You found the crystal!';
-            if (replayImage) replayImage.src = 'assets/Buttons/Retry.webp';
+            if (replayImage) replayImage.removeAttribute('src');
             replayButton?.setAttribute('aria-label', 'Retry Diamond Mission');
         }
 
@@ -11781,7 +11819,7 @@ const appVersion = '20261011-1';
         circleIllustrationPage?.classList.remove('is-circle-hunt-active', 'is-circle-hunt-ended', 'is-circle-hunt-timeout', 'is-circle-hunt-timeout-intro', 'is-circle-hunt-timeout-result');
         showCircleIllustrationProgress();
         if (circleIllustrationReplayImage) {
-            circleIllustrationReplayImage.src = 'assets/Buttons/Retry.webp';
+            circleIllustrationReplayImage.removeAttribute('src');
         }
         if (circleIllustrationProgress) {
             circleIllustrationProgress.dataset.progressStage = 'hunt';
@@ -12227,7 +12265,7 @@ const appVersion = '20261011-1';
         circleIllustrationPage.classList.remove('is-lesson-complete');
         circleIllustrationPage.classList.add('is-progress-visible');
         if (circleIllustrationReplayImage) {
-            circleIllustrationReplayImage.src = 'assets/Buttons/replay.webp';
+            circleIllustrationReplayImage.removeAttribute('src');
         }
         circleIllustrationProgress.dataset.progressStage = 'lesson';
         circleIllustrationReplayButton?.setAttribute('aria-label', 'Replay lesson');
@@ -12289,21 +12327,21 @@ const appVersion = '20261011-1';
         }
         if (circleCameraStartButton) {
             circleCameraStartButton.disabled = false;
-            setCircleCameraButtonText('Start Camera');
+            setCircleCameraButtonText('Simulan ang Kamera');
         }
     };
 
     const startCircleCameraStream = async () => {
         if (!circleCameraStartButton || !circleCameraVideo) return;
         if (!navigator.mediaDevices?.getUserMedia) {
-            setCircleCameraButtonText('Camera Unavailable');
+            setCircleCameraButtonText('Walang Camera');
             return;
         }
 
         stopCircleCameraStream();
         const requestId = ++circleCameraStartRequestId;
         circleCameraStartButton.disabled = true;
-        setCircleCameraButtonText('Opening Camera...');
+        setCircleCameraButtonText('Binubuksan ang Kamera...');
 
         let stream = null;
         try {
@@ -12318,6 +12356,7 @@ const appVersion = '20261011-1';
                 return;
             }
             circleCameraStream = stream;
+            setUnmirroredCameraPreview(circleCameraVideo);
             circleCameraVideo.srcObject = stream;
             circleCameraVideo.hidden = false;
             await circleCameraVideo.play();
@@ -12327,7 +12366,7 @@ const appVersion = '20261011-1';
                 if (circleCameraVideo.srcObject === stream) circleCameraVideo.srcObject = null;
                 return;
             }
-            setCircleCameraButtonText('Camera Ready');
+            setCircleCameraButtonText('Handa na ang Kamera');
             dispatchCameraLifecycle('learnscape:camerastarted', circleCameraPage, circleCameraVideo);
         } catch (error) {
             if (stream) stream.getTracks().forEach((track) => track.stop());
@@ -12335,7 +12374,7 @@ const appVersion = '20261011-1';
             if (circleCameraStream === stream) circleCameraStream = null;
             if (circleCameraVideo.srcObject === stream) circleCameraVideo.srcObject = null;
             circleCameraStartButton.disabled = false;
-            setCircleCameraButtonText('Allow Camera');
+            setCircleCameraButtonText('Payagan ang Kamera');
         }
     };
 
@@ -12343,6 +12382,8 @@ const appVersion = '20261011-1';
     const shapeCameraStartRequestIds = new Map();
     const cameraCompletionTimers = new Map();
     const cameraCompletionAudio = new Map();
+    const cameraChestOpenAudio = new Map();
+    const cameraDetectionFeedbackTimers = new WeakMap();
 
     const setShapeCameraButtonText = (page, text) => {
         const label = page?.querySelector('.circle-camera-start-button strong');
@@ -12367,7 +12408,7 @@ const appVersion = '20261011-1';
         }
         if (button) {
             button.disabled = false;
-            setShapeCameraButtonText(page, 'Start Camera');
+            setShapeCameraButtonText(page, 'Simulan ang Kamera');
         }
     };
 
@@ -12376,7 +12417,7 @@ const appVersion = '20261011-1';
         const video = page?.querySelector('.circle-camera-video');
         if (!button || !video) return;
         if (!navigator.mediaDevices?.getUserMedia) {
-            setShapeCameraButtonText(page, 'Camera Unavailable');
+            setShapeCameraButtonText(page, 'Walang Camera');
             return;
         }
 
@@ -12384,7 +12425,7 @@ const appVersion = '20261011-1';
         const requestId = (shapeCameraStartRequestIds.get(page) || 0) + 1;
         shapeCameraStartRequestIds.set(page, requestId);
         button.disabled = true;
-        setShapeCameraButtonText(page, 'Opening Camera...');
+        setShapeCameraButtonText(page, 'Binubuksan ang Kamera...');
 
         let stream = null;
         try {
@@ -12397,6 +12438,7 @@ const appVersion = '20261011-1';
                 return;
             }
             shapeCameraStreams.set(page, stream);
+            setUnmirroredCameraPreview(video);
             video.srcObject = stream;
             video.hidden = false;
             await video.play();
@@ -12406,7 +12448,7 @@ const appVersion = '20261011-1';
                 if (video.srcObject === stream) video.srcObject = null;
                 return;
             }
-            setShapeCameraButtonText(page, 'Camera Ready');
+            setShapeCameraButtonText(page, 'Handa na ang Kamera');
             dispatchCameraLifecycle('learnscape:camerastarted', page, video);
         } catch (error) {
             if (stream) stream.getTracks().forEach((track) => track.stop());
@@ -12414,7 +12456,7 @@ const appVersion = '20261011-1';
             if (shapeCameraStreams.get(page) === stream) shapeCameraStreams.delete(page);
             if (video.srcObject === stream) video.srcObject = null;
             button.disabled = false;
-            setShapeCameraButtonText(page, 'Allow Camera');
+            setShapeCameraButtonText(page, 'Payagan ang Kamera');
         }
     };
 
@@ -12423,9 +12465,31 @@ const appVersion = '20261011-1';
         navigateApp(routeName);
     };
 
-    const clearCameraCompletionTimers = (page) => {
+    const clearCameraDetectionFeedback = (page) => {
+        const timerId = cameraDetectionFeedbackTimers.get(page);
+        if (timerId) window.clearTimeout(timerId);
+        cameraDetectionFeedbackTimers.delete(page);
+    };
+
+    const clearCameraDetectionCelebration = (page) => {
+        page?.classList.remove('is-camera-detection-celebrating');
+        const celebration = page?.querySelector('.camera-detection-celebration');
+        celebration?.classList.remove('is-active');
+        celebration?.setAttribute('aria-hidden', 'true');
+    };
+
+    const clearCameraCompletionTimers = (page, { preserveDetectionAudio = false, preserveDetectionCelebration = false } = {}) => {
+        clearCameraDetectionFeedback(page);
+        if (!preserveDetectionCelebration) clearCameraDetectionCelebration(page);
         (cameraCompletionTimers.get(page) || []).forEach((timerId) => window.clearTimeout(timerId));
         cameraCompletionTimers.delete(page);
+        const chestAudio = cameraChestOpenAudio.get(page);
+        if (chestAudio) {
+            chestAudio.onended = null;
+            chestAudio.onerror = null;
+            chestAudio.pause();
+            cameraChestOpenAudio.delete(page);
+        }
         const audio = cameraCompletionAudio.get(page);
         if (audio) {
             audio.onended = null;
@@ -12433,11 +12497,19 @@ const appVersion = '20261011-1';
             audio.pause();
             cameraCompletionAudio.delete(page);
         }
+        if (!preserveDetectionAudio) {
+            const successAudio = cameraDetectionAudio.get(page);
+            if (successAudio) {
+                successAudio.onended = null;
+                successAudio.onerror = null;
+                successAudio.pause();
+                cameraDetectionAudio.delete(page);
+            }
+        }
     };
 
-    const prepareCameraCompletionConfetti = (page) => {
-        const confetti = page?.querySelector('.camera-completion-confetti');
-        if (!confetti || confetti.childElementCount) return;
+    const populateCameraCelebrationConfetti = (confetti) => {
+        if (!confetti) return;
         const colors = ['#ff4f64', '#ffd83d', '#38c7e8', '#70d34b', '#ff8f32', '#ffffff'];
         for (let index = 0; index < 120; index += 1) {
             const piece = document.createElement('span');
@@ -12449,6 +12521,27 @@ const appVersion = '20261011-1';
             piece.style.setProperty('--confetti-size', `${0.35 + ((index * 5) % 13) / 10}rem`);
             confetti.appendChild(piece);
         }
+    };
+
+    const prepareCameraCompletionConfetti = (page) => {
+        const confetti = page?.querySelector('.camera-completion-confetti');
+        if (!confetti || confetti.childElementCount) return;
+        populateCameraCelebrationConfetti(confetti);
+    };
+
+    const showCameraDetectionCelebration = (page) => {
+        const celebration = page?.querySelector('.camera-detection-celebration');
+        const confetti = celebration?.querySelector('.camera-detection-fullscreen-confetti');
+        if (!celebration || !confetti) return;
+        clearCameraDetectionCelebration(page);
+        confetti.replaceChildren();
+        populateCameraCelebrationConfetti(confetti);
+        // Recreating the pieces gives every correct scan a fresh full-screen
+        // confetti fall, matching the final celebration.
+        void confetti.offsetWidth;
+        page.classList.add('is-camera-detection-celebrating');
+        celebration.setAttribute('aria-hidden', 'false');
+        celebration.classList.add('is-active');
     };
 
     const cameraBadgeArtwork = {
@@ -12488,6 +12581,48 @@ const appVersion = '20261011-1';
     }, 0);
 
     const cameraScanProgressStorageKey = 'learnscape-camera-scan-progress:v1';
+    const cameraDetectionAudio = new Map();
+    const playCameraDetectionCelebration = (page, onFinished = () => {}) => {
+        const previous = cameraDetectionAudio.get(page);
+        if (previous) {
+            previous.onended = null;
+            previous.onerror = null;
+            previous.pause();
+            cameraDetectionAudio.delete(page);
+        }
+        if (!window.Audio || (window.__learnscapeSoundScale?.() ?? 1) <= 0) {
+            onFinished();
+            return;
+        }
+        const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+        const correct = new Audio('assets/Audios/Sound effects/correct.mp3');
+        const cheering = new Audio('assets/Audios/Sound effects/kids cheering.mp3');
+        let finished = false;
+        let cheeringStarted = false;
+        const finish = () => {
+            if (finished) return;
+            finished = true;
+            if (cameraDetectionAudio.get(page) === correct || cameraDetectionAudio.get(page) === cheering) {
+                cameraDetectionAudio.delete(page);
+            }
+            onFinished();
+        };
+        cameraDetectionAudio.set(page, correct);
+        [correct, cheering].forEach((audio) => {
+            audio.preload = 'auto';
+            audio.playsInline = true;
+            audio.volume = Math.min(1, soundScale);
+        });
+        const playCheering = () => {
+            if (finished || cheeringStarted || cameraDetectionAudio.get(page) !== correct) return;
+            cheeringStarted = true;
+            cameraDetectionAudio.set(page, cheering);
+            cheering.onended = cheering.onerror = finish;
+            cheering.play().catch(finish);
+        };
+        correct.onended = correct.onerror = playCheering;
+        correct.play().catch(playCheering);
+    };
     const readCameraScanProgress = () => {
         try {
             const progress = JSON.parse(window.localStorage.getItem(cameraScanProgressStorageKey) || '{}');
@@ -12500,7 +12635,7 @@ const appVersion = '20261011-1';
         const shape = String(page?.dataset.cameraShape || '').trim().toLowerCase();
         if (!shape) return;
         const progress = readCameraScanProgress();
-        const savedCount = Math.max(0, Math.min(2, Math.floor(Number(count) || 0)));
+        const savedCount = Math.max(0, Math.min(3, Math.floor(Number(count) || 0)));
         if (savedCount) progress[shape] = savedCount;
         else delete progress[shape];
         try {
@@ -12509,18 +12644,37 @@ const appVersion = '20261011-1';
             console.warn('Camera scan progress could not be saved.', error);
         }
     };
+    const setCameraChestOpenButtonState = (page, isReady) => {
+        const button = page?.querySelector('.camera-chest-open-button');
+        if (!button) return;
+        const canOpen = Boolean(isReady) && !page.classList.contains('is-camera-completing');
+        button.hidden = !canOpen;
+        button.disabled = !canOpen;
+        button.setAttribute('aria-hidden', String(!canOpen));
+        if (canOpen) button.removeAttribute('tabindex');
+        else button.tabIndex = -1;
+    };
     const applyCameraScanProgress = (page, count) => {
         const savedCount = Math.max(0, Math.min(3, Math.floor(Number(count) || 0)));
         page.dataset.cameraDetectionCount = String(savedCount);
         page.classList.toggle('is-camera-padlock-unlocked', savedCount >= 1);
         page.classList.toggle('is-camera-chains-broken', savedCount >= 2);
-        const stars = Array.from(page.querySelectorAll('.camera-empty-stars .circle-lesson-star-slot'));
-        stars.forEach((star, index) => star.classList.toggle('is-earned', index < savedCount));
-        page.querySelector('.camera-empty-stars')?.setAttribute('aria-label', `${savedCount} of 3 stars earned`);
+        page.classList.toggle('is-camera-chest-ready', savedCount >= 3 && !page.classList.contains('is-camera-completing'));
+        setCameraChestOpenButtonState(page, savedCount >= 3);
+        const starsBoard = page.querySelector('.camera-empty-stars');
+        const stars = Array.from(starsBoard?.querySelectorAll('.circle-lesson-star-slot') || []);
+        stars.forEach((star, index) => {
+            const earned = index < savedCount;
+            star.classList.toggle('is-earned', earned);
+            star.dataset.earned = String(earned);
+        });
+        starsBoard?.setAttribute('data-earned-stars', String(savedCount));
+        starsBoard?.setAttribute('aria-label', `${savedCount} sa 3 bituin ang nakuha`);
     };
     const restoreCameraScanProgress = (page) => {
         const shape = String(page?.dataset.cameraShape || '').trim().toLowerCase();
-        applyCameraScanProgress(page, readCameraScanProgress()[shape] || 0);
+        const savedCount = readCameraScanProgress()[shape] || 0;
+        applyCameraScanProgress(page, savedCount);
     };
 
     const resetCameraCompletionFlow = (page, clearProgress = false) => {
@@ -12538,12 +12692,33 @@ const appVersion = '20261011-1';
 
     cameraPages.forEach(restoreCameraScanProgress);
 
+    const showCameraDetectionFeedback = (page) => {
+        clearCameraDetectionFeedback(page);
+        const check = page.querySelector('.camera-detection-check');
+        page.classList.remove('is-camera-detection-success');
+        check?.setAttribute('aria-hidden', 'true');
+        // Force the browser to restart the check animation for every
+        // separately accepted camera scan.
+        void page.offsetWidth;
+        page.classList.add('is-camera-detection-success');
+        check?.setAttribute('aria-hidden', 'false');
+        showCameraDetectionCelebration(page);
+        const timerId = window.setTimeout(() => {
+            if (!isPageVisible(page)) return;
+            page.classList.remove('is-camera-detection-success');
+            check?.setAttribute('aria-hidden', 'true');
+            cameraDetectionFeedbackTimers.delete(page);
+        }, 1900);
+        cameraDetectionFeedbackTimers.set(page, timerId);
+    };
+
     const registerCameraDetection = (page) => {
         if (
             !page
             || !isPageVisible(page)
             || page.classList.contains('is-camera-completing')
             || page.classList.contains('is-camera-chest-ready')
+            || page.classList.contains('is-camera-detection-celebrating')
         ) return false;
 
         const currentCount = Math.max(0, Math.min(3, Number(page.dataset.cameraDetectionCount) || 0));
@@ -12551,23 +12726,14 @@ const appVersion = '20261011-1';
         const nextCount = currentCount + 1;
         saveCameraScanProgress(page, nextCount);
         applyCameraScanProgress(page, nextCount);
-        page.classList.add('is-camera-detection-success');
-        page.querySelector('.camera-detection-check')?.setAttribute('aria-hidden', 'false');
-        playUiClickSound('starPop');
+        showCameraDetectionFeedback(page);
+        playCameraDetectionCelebration(page, () => clearCameraDetectionCelebration(page));
 
-        const detectionTimer = window.setTimeout(() => {
-            if (!isPageVisible(page)) return;
-            page.classList.remove('is-camera-detection-success');
-            page.querySelector('.camera-detection-check')?.setAttribute('aria-hidden', 'true');
-            if (nextCount >= 3) {
-                page.classList.add('is-camera-chest-ready');
-                playUiClickSound('boardSuccess');
-                completeCameraGame(page);
-            }
-        }, 850);
-        const timers = cameraCompletionTimers.get(page) || [];
-        timers.push(detectionTimer);
-        cameraCompletionTimers.set(page, timers);
+        if (nextCount >= 3) {
+            page.classList.add('is-camera-chest-ready');
+            setCameraChestOpenButtonState(page, true);
+            playUiClickSound('boardSuccess');
+        }
         return true;
     };
 
@@ -12597,36 +12763,32 @@ const appVersion = '20261011-1';
             || page.classList.contains('is-camera-completing')
             || Number(page.dataset.cameraDetectionCount) < 3
         ) return false;
-        if (typeof window.completeLearnscapeCameraChallenge !== 'function') return false;
-
-        clearCameraCompletionTimers(page);
+        // A fast Buksan click must not cut off the current correct-scan
+        // celebration. Its audio callback clears the full-screen confetti.
+        clearCameraCompletionTimers(page, {
+            preserveDetectionAudio: true,
+            preserveDetectionCelebration: true,
+        });
+        page.classList.remove('is-camera-detection-success');
+        page.querySelector('.camera-detection-check')?.setAttribute('aria-hidden', 'true');
+        setCameraChestOpenButtonState(page, false);
         prepareCameraCelebrationBadge(page, shape);
         page.classList.add('is-camera-completing', 'is-camera-chest-unlocking');
-        const padlockSound = new Audio('assets/Audios/Sound effects/padlock.mp3');
-        padlockSound.volume = 0.9;
-        padlockSound.play().catch(() => playUiClickSound('chime'));
-
         const timers = [];
-        timers.push(window.setTimeout(() => {
-            if (isPageVisible(page)) playUiClickSound('thunk');
-        }, 920));
-        timers.push(window.setTimeout(() => {
-            if (isPageVisible(page)) playUiClickSound('chime');
-        }, 2100));
-        timers.push(window.setTimeout(() => {
-            if (!isPageVisible(page)) return;
-            page.classList.add('is-camera-chest-open');
-            if (!window.completeLearnscapeCameraChallenge(shape)) {
-                console.error(`Could not complete the ${shape} camera challenge.`);
-            } else {
-                saveCameraScanProgress(page, 0);
-            }
-        }, 3450));
-        timers.push(window.setTimeout(() => {
-            if (!isPageVisible(page)) return;
-            if (page === circleCameraPage) stopCircleCameraStream();
-            else stopShapeCameraStream(page);
-            page.classList.remove('is-camera-chest-ready', 'is-camera-chest-unlocking');
+        const padlockSound = new Audio('assets/Audios/Sound effects/padlock.mp3');
+        const chestOpenSound = new Audio('assets/Audios/Sound effects/chest open.mp3');
+        let chestOpeningFinished = false;
+        let chestAudioFinished = false;
+        let celebrationStarted = false;
+        const startCelebrationWhenReady = () => {
+            if (
+                celebrationStarted
+                || !chestOpeningFinished
+                || !chestAudioFinished
+                || !isPageVisible(page)
+                || !page.classList.contains('is-camera-completing')
+            ) return;
+            celebrationStarted = true;
             page.classList.add('is-camera-celebrating');
             const celebration = page.querySelector('.camera-completion-celebration');
             prepareCameraCompletionConfetti(page);
@@ -12658,10 +12820,66 @@ const appVersion = '20261011-1';
                 finishCelebrationWhenReady();
             }, 3000);
             timers.push(celebrationAnimationTimer);
-        }, 3600));
+        };
+        const finishChestOpenAudio = () => {
+            if (chestAudioFinished) return;
+            chestAudioFinished = true;
+            if (cameraChestOpenAudio.get(page) === chestOpenSound) cameraChestOpenAudio.delete(page);
+            startCelebrationWhenReady();
+        };
+
+        padlockSound.volume = 0.9;
+        chestOpenSound.preload = 'auto';
+        chestOpenSound.playsInline = true;
+        chestOpenSound.volume = 0.9;
+        chestOpenSound.onended = finishChestOpenAudio;
+        chestOpenSound.onerror = finishChestOpenAudio;
+        cameraChestOpenAudio.set(page, chestOpenSound);
+        // This call runs in the Buksan click path, which lets the browser
+        // start the sound immediately instead of waiting for chest animation.
+        chestOpenSound.play().catch(finishChestOpenAudio);
+        padlockSound.play().catch(() => playUiClickSound('chime'));
+
+        timers.push(window.setTimeout(() => {
+            if (isPageVisible(page)) playUiClickSound('thunk');
+        }, 920));
+        timers.push(window.setTimeout(() => {
+            if (isPageVisible(page)) playUiClickSound('chime');
+        }, 2100));
+        timers.push(window.setTimeout(() => {
+            if (!isPageVisible(page) || !page.classList.contains('is-camera-completing')) return;
+            page.classList.add('is-camera-chest-open');
+            if (page === circleCameraPage) stopCircleCameraStream();
+            else stopShapeCameraStream(page);
+            page.classList.remove('is-camera-chest-ready', 'is-camera-chest-unlocking');
+            let challengeCompleted = false;
+            if (typeof window.completeLearnscapeCameraChallenge === 'function') {
+                challengeCompleted = window.completeLearnscapeCameraChallenge(shape) === true;
+            }
+            if (!challengeCompleted) {
+                // Recover the visual progression if an app-level bridge is unavailable.
+                window.dispatchEvent(new CustomEvent('learnscape:camera-complete', {
+                    detail: { shape },
+                }));
+            }
+            if (challengeCompleted || typeof window.completeLearnscapeCameraChallenge !== 'function') {
+                saveCameraScanProgress(page, 0);
+            }
+            chestOpeningFinished = true;
+            startCelebrationWhenReady();
+        }, 3450));
         cameraCompletionTimers.set(page, timers);
         return true;
     };
+
+    cameraPages.forEach((page) => {
+        page.querySelector('.camera-chest-open-button')?.addEventListener('click', () => {
+            if (!page.classList.contains('is-camera-chest-ready')) return;
+            const status = page.querySelector('.camera-detection-status');
+            if (status) status.textContent = 'Binubuksan ang kaban…';
+            if (!completeCameraGame(page)) setCameraChestOpenButtonState(page, true);
+        });
+    });
 
     window.completeLearnscapeCameraGame = (result, page, attemptId) => {
         if (!result || result.verified !== true || !Number.isSafeInteger(attemptId)) return false;
@@ -12684,11 +12902,11 @@ const appVersion = '20261011-1';
         console.log('[GAME EVENT RECEIVED]', event.detail);
         const { page, result, attemptId } = event.detail || {};
         if (!result || result.verified !== true || !page || !isPageVisible(page)) return;
-        const detectedShape = String(result.label || '').trim().toLowerCase();
+        const detectedShape = String(result.label || event.detail?.shape || '').trim().toLowerCase();
         const targetShape = String(page.dataset.cameraShape || '').trim().toLowerCase();
         if (detectedShape !== targetShape) {
             const status = page.querySelector('.camera-detection-status');
-            if (status) status.textContent = `Verified ${detectedShape || 'shape'}, but this mission needs ${targetShape}. Remove it, then try again.`;
+            if (status) status.textContent = `Natukoy ang ${cameraTagalogShapeLabels[detectedShape] || 'hugis'}, ngunit ${cameraTagalogShapeLabels[targetShape] || 'hugis'} ang kailangan sa misyong ito. Alisin ito, saka subukang muli.`;
             return;
         }
 
@@ -12696,9 +12914,10 @@ const appVersion = '20261011-1';
             const count = Number(page.dataset.cameraDetectionCount) || 0;
             const status = page.querySelector('.camera-detection-status');
             if (status) {
+                const shapeLabel = cameraTagalogShapeLabels[targetShape] || targetShape;
                 status.textContent = count >= 3
-                    ? 'Three verified scans complete. Opening the chest…'
-                    : `${targetShape[0].toUpperCase()}${targetShape.slice(1)} scan ${count} of 3 accepted. Remove it before the next scan.`;
+                    ? 'Tapos na ang tatlong tamang pag-scan. Pindutin ang Buksan para mabuksan ang kaban.'
+                    : `Tinatanggap ang pag-scan ng ${shapeLabel}. ${count} sa 3. Alisin ito bago ang susunod na pag-scan.`;
             }
         }
     });
@@ -13297,8 +13516,10 @@ const appVersion = '20261011-1';
         });
     });
     cameraPages.forEach((page) => {
-        page.querySelector('.camera-completion-replay')?.addEventListener('click', () => {
+        page.querySelector('.camera-completion-retry')?.addEventListener('click', () => {
             resetCameraCompletionFlow(page, true);
+            if (page === circleCameraPage) startCircleCameraStream();
+            else startShapeCameraStream(page);
         });
         page.querySelector('.camera-completion-claim-rewards')?.addEventListener('click', () => {
             resetCameraCompletionFlow(page, true);
@@ -14860,14 +15081,7 @@ const appVersion = '20261011-1';
     };
 
     const gameIslandShapeLabels = Object.freeze({
-        circle: 'Circle',
-        square: 'Square',
-        triangle: 'Triangle',
-        rectangle: 'Rectangle',
-        oval: 'Oval',
-        heart: 'Heart',
-        star: 'Star',
-        diamond: 'Diamond',
+        ...cameraTagalogShapeLabels,
     });
 
     appBackButtons.forEach((button) => {
@@ -15465,12 +15679,12 @@ const appVersion = '20261011-1';
     const renderCameraHowTo = (shape) => {
         const shapeLabel = cameraHowToShapeLabels[shape];
         if (!shapeLabel || !cameraHowToMission || !cameraHowToSteps) return false;
-        cameraHowToMission.textContent = `Present an object with a ${shapeLabel.toLowerCase()} geometric shape to the camera to unlock the chest.`;
+        cameraHowToMission.textContent = `Ipakita sa kamera ang bagay na may hugis na ${shapeLabel.toLowerCase()} upang mabuksan ang kaban.`;
         const steps = [
-            'Click Start Camera and allow camera access when your browser asks to begin detecting.',
-            `Check that the target shape is ${shapeLabel}.`,
-            `Present an object with a ${shapeLabel.toLowerCase()} shape inside the camera frame.`,
-            'After each scan, remove the object completely before presenting it again. The chest opens after three separate verified scans.',
+            'Pindutin ang Simulan ang Kamera at payagan ang paggamit ng kamera kapag hiningi ito ng browser.',
+            `Tiyaking ang target na hugis ay ${shapeLabel}.`,
+            `Ipakita sa loob ng frame ng kamera ang bagay na hugis ${shapeLabel.toLowerCase()}.`,
+            'Pagkatapos ng bawat pag-scan, alisin muna nang buo ang bagay bago ito muling ipakita. Bubukas ang kaban pagkatapos ng tatlong magkakahiwalay na tamang pag-scan.',
         ];
         cameraHowToSteps.replaceChildren(...steps.map((step) => {
             const item = document.createElement('li');

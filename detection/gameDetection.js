@@ -1,7 +1,19 @@
-import { detectStableShape, trackLiveShapes } from "./detectionManager.js";
+import { trackLiveShapes } from "./detectionManager.js";
 
-const TRACKING_OPTIONS = { intervalMs: 90, minVotes: 4 };
+// The camera game rewards the first clearly labeled target frame.  The
+// removal gate below still prevents a held object from being counted twice.
+const TRACKING_OPTIONS = { intervalMs: 90, minVotes: 1 };
 const REMOVAL_CONFIRMATION_FRAMES = 5;
+const TAGALOG_SHAPE_NAMES = Object.freeze({
+    circle: "bilog",
+    square: "parisukat",
+    triangle: "tatsulok",
+    rectangle: "parihaba",
+    oval: "bilohaba",
+    heart: "puso",
+    star: "bituin",
+    diamond: "diyamante"
+});
 
 let activeSession = null;
 let activeTask = Promise.resolve();
@@ -47,6 +59,15 @@ function setCameraStatus(page, message) {
     status.textContent = message;
 }
 
+function trackHasTargetLabel(track, targetShape) {
+    return String(track?.label || "").trim().toLowerCase() === targetShape;
+}
+
+function tagalogShapeName(shape, capitalized = false) {
+    const label = TAGALOG_SHAPE_NAMES[String(shape || "").trim().toLowerCase()] || String(shape || "hugis");
+    return capitalized ? `${label[0].toUpperCase()}${label.slice(1)}` : label;
+}
+
 function drawTrackedObjects(session, tracks) {
     const { viewfinder, canvas, context } = session.overlay;
     const width = viewfinder.clientWidth;
@@ -70,26 +91,32 @@ function drawTrackedObjects(session, tracks) {
     const offsetX = (width - video.videoWidth * scale) / 2;
     const offsetY = (height - video.videoHeight * scale) / 2;
 
-    for (const track of tracks) {
-        const x = track.x1 * scale + offsetX;
+    // The camera game follows one object at a time, like a mobile camera's
+    // focus frame. Prefer the target label if it is present.
+    const track = [...tracks].sort((a, b) => {
+        const targetDifference = Number(trackHasTargetLabel(b, session.shape)) - Number(trackHasTargetLabel(a, session.shape));
+        return targetDifference || Number(b.labelStable) - Number(a.labelStable) || b.confidence - a.confidence;
+    })[0];
+    if (!track) return;
+
+    {
+        const sourceX = track.x1 * scale + offsetX;
+        const sourceRight = track.x2 * scale + offsetX;
+        const x = session.video.dataset.cameraFeedFlipped === "true"
+            ? width - sourceRight
+            : sourceX;
         const y = track.y1 * scale + offsetY;
         const boxWidth = (track.x2 - track.x1) * scale;
         const boxHeight = (track.y2 - track.y1) * scale;
-        const color = track.verified ? "#35f178" : track.geometry?.verified ? "#ffe36a" : "#ff8a78";
+        const targetLabelMatched = trackHasTargetLabel(track, session.shape) && track.labelStable === true;
+        const color = targetLabelMatched ? "#35f178" : "#ffffff";
         context.globalAlpha = track.stale ? 0.55 : 1;
         context.strokeStyle = color;
         context.lineWidth = 3;
         context.strokeRect(x, y, boxWidth, boxHeight);
 
-        // Keep the live box label to the shape name only, matching camera-test.
-        let displayLabel = track.geometry?.verified === true
-            ? track.geometry.label || track.geometry.geometricShape
-            : track.label || "";
-        const shapeVotes = track.geometry?.geometry?.shapeVoteCounts;
-        if (track.geometry?.verified !== true && shapeVotes?.triangle > 0 &&
-            ["triangle", "diamond"].includes(track.label)) {
-            displayLabel = "triangle";
-        }
+        // Show the same YOLO label that determines whether this is the target.
+        const displayLabel = track.label || "";
         const text = String(displayLabel).toUpperCase();
         if (text) {
             context.font = "bold 16px Arial";
@@ -107,9 +134,15 @@ function drawTrackedObjects(session, tracks) {
 async function handleTrackedFrame(session, { frame, tracks }) {
     if (activeSession !== session || session.controller.signal.aborted) return;
     drawTrackedObjects(session, tracks);
+    // A correct scan owns the screen until its audio sequence finishes. Keep
+    // drawing the live overlay, but do not accept or remove another object
+    // until the game clears this state after the children finish cheering.
+    if (session.page.classList.contains("is-camera-detection-celebrating")) return;
     if (frame % 10 === 0) {
         console.log("[LIVE TRACKS]", tracks.map(track => ({
             label: track.label,
+            labelStable: track.labelStable,
+            labelFrames: track.labelFrames,
             verified: track.verified,
             geometryVerified: track.geometry?.verified,
             votes: track.verifiedFrames
@@ -123,55 +156,42 @@ async function handleTrackedFrame(session, { frame, tracks }) {
         if (session.absentFrames >= REMOVAL_CONFIRMATION_FRAMES) {
             session.waitingForRemoval = false;
             session.absentFrames = 0;
-            setCameraStatus(session.page, `Object removed. Show a ${session.shape} to scan again.`);
+            setCameraStatus(session.page, `Inalis na ang bagay. Ipakita muli ang ${tagalogShapeName(session.shape)} upang i-scan.`);
         } else if (tracks.length) {
-            setCameraStatus(session.page, "Remove the object from the camera frame before scanning again.");
+            setCameraStatus(session.page, "Alisin muna ang bagay mula sa frame ng kamera bago muling mag-scan.");
         }
         return;
     }
 
-    const verifiedTracks = tracks.filter(track => track.verified === true && track.geometry?.verified === true);
-    const selected = verifiedTracks
-        .filter(track => track.label === session.shape)
+    const selected = tracks
+        .filter(track => !track.stale && track.labelStable === true && trackHasTargetLabel(track, session.shape))
         .sort((a, b) => b.confidence - a.confidence)[0];
     if (selected) {
         if (session.confirming || frame - session.lastConfirmationFrame < 6) return;
         session.confirming = true;
         session.lastConfirmationFrame = frame;
-        setCameraStatus(session.page, `Confirming the ${session.shape} scan…`);
+        setCameraStatus(session.page, `Natukoy ang ${tagalogShapeName(session.shape)}. Magaling!`);
         try {
-            // The live box is only a candidate. The game progression consumes
-            // the stable, multi-frame verifier result for the active level.
-            const result = await detectStableShape(session.video, {
-                frameCount: 5,
-                minVotes: 4,
-                targetLabel: session.shape,
-                signal: session.controller.signal
-            });
-            console.log("[FINAL SCAN]", {
-                target: session.shape,
-                verified: result.verified,
-                label: result.label,
-                reason: result.reason,
-                failureCategory: result.failureCategory,
-                diagnostics: result.diagnostics
-            });
-            if (session.controller.signal.aborted || activeSession !== session) return;
-            if (result.verified === true && result.label === session.shape) {
-                session.waitingForRemoval = true;
-                session.absentFrames = 0;
-                window.dispatchEvent(new CustomEvent("learnscape:verified-shape", {
-                    detail: { page: session.page, shape: session.shape, result, attemptId: ++nextScanAttemptId }
-                }));
-            } else if (result.verified === true) {
-                setCameraStatus(session.page, `Verified ${result.label}, but this mission needs ${session.shape}.`);
-            } else if ((result.diagnostics?.candidateCount ?? 0) === 0) {
-                setCameraStatus(session.page, `Show a ${session.shape} inside the camera frame.`);
-            } else if (["geometry-mismatch", "unclear-contour"].includes(result.failureCategory)) {
-                setCameraStatus(session.page, "Hold the object steady against a plain background.");
-            } else {
-                setCameraStatus(session.page, `Keep the shape steady while it is checked for ${session.shape}.`);
-            }
+            // The green target frame, check mark, confetti, audio, and reward
+            // all begin together as soon as the label becomes stable.
+            session.waitingForRemoval = true;
+            session.absentFrames = 0;
+            window.dispatchEvent(new CustomEvent("learnscape:verified-shape", {
+                detail: {
+                    page: session.page,
+                    shape: session.shape,
+                    result: {
+                        verified: true,
+                        stable: true,
+                        label: session.shape,
+                        confidence: selected.confidence,
+                        verifiedFrames: selected.labelFrames,
+                        verificationType: "label-and-temporal",
+                        geometry: selected.geometry
+                    },
+                    attemptId: ++nextScanAttemptId
+                }
+            }));
         } finally {
             session.confirming = false;
         }
@@ -179,15 +199,12 @@ async function handleTrackedFrame(session, { frame, tracks }) {
     }
 
     if (!tracks.length) {
-        setCameraStatus(session.page, `Show a ${session.shape} inside the camera frame.`);
-    } else if (verifiedTracks.length) {
-        setCameraStatus(session.page, `Verified ${verifiedTracks[0].label}. Show a ${session.shape} for this mission.`);
-    } else if (tracks.some(track => track.geometry?.verified === true)) {
-        setCameraStatus(session.page, `Keep the shape steady while it is checked for ${session.shape}.`);
-    } else if (tracks.some(track => track.geometry?.geometry?.valid === false)) {
-        setCameraStatus(session.page, "Hold the object steady against a plain background.");
+        setCameraStatus(session.page, `Ipakita ang ${tagalogShapeName(session.shape)} sa loob ng frame ng kamera.`);
+    } else if (tracks.some(track => trackHasTargetLabel(track, session.shape))) {
+        setCameraStatus(session.page, `Panatilihin ang ${tagalogShapeName(session.shape)} sa frame habang kinukumpirma ang label.`);
     } else {
-        setCameraStatus(session.page, `Following ${tracks.length} object${tracks.length === 1 ? "" : "s"} · checking outline`);
+        const shownLabel = String(tracks[0]?.label || "object").toLowerCase();
+        setCameraStatus(session.page, `Natukoy ang ${tagalogShapeName(shownLabel, true)}. Ipakita ang ${tagalogShapeName(session.shape)} para sa misyong ito.`);
     }
 }
 
@@ -205,7 +222,7 @@ async function runDetection(session, modelReady) {
     try {
         await modelReady;
         if (signal.aborted || activeSession !== session) return;
-        setCameraStatus(page, `Show a ${session.shape} inside the camera frame.`);
+        setCameraStatus(page, `Ipakita ang ${tagalogShapeName(session.shape)} sa loob ng frame ng kamera.`);
         await trackLiveShapes(video, frameResult => handleTrackedFrame(session, frameResult), {
             ...TRACKING_OPTIONS,
             signal
@@ -221,7 +238,7 @@ async function runDetection(session, modelReady) {
             activeSession = null;
             clearOverlay(page);
             if (!signal.aborted && !session.failed && cameraPageVisible(page)) {
-                setCameraStatus(page, "Camera detection stopped. Restart the camera to continue.");
+                setCameraStatus(page, "Huminto ang pagkilala ng kamera. I-restart ang kamera upang magpatuloy.");
             }
         }
     }

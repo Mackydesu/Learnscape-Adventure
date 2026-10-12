@@ -33,6 +33,9 @@ export async function startWebcam(videoElement) {
     console.log("Camera permission granted!");
 
     videoElement.srcObject = cameraStream;
+    videoElement.dataset.cameraFeedFlipped = "true";
+    videoElement.style.setProperty("transform", "scaleX(-1)", "important");
+    videoElement.style.setProperty("-webkit-transform", "scaleX(-1)", "important");
     videoElement.muted = true;
     videoElement.playsInline = true;
 
