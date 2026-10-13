@@ -1469,6 +1469,8 @@ const appVersion = '20261011-1';
         15: 45,
         20: 60,
     };
+    const STAR_MISSION_FALL_INTERVAL_MS = 560;
+    const STAR_MISSION_SPAWN_KINDS = ['star', 'star', 'star', 'star', 'star', 'circle', 'triangle', 'square', 'diamond', 'oval'];
     let heartMissionSession = 0;
     let heartMissionTimers = [];
     let heartMissionAudio = null;
@@ -2903,6 +2905,7 @@ const appVersion = '20261011-1';
         if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.removeAttribute('src');
         shapeSquareNextButton?.setAttribute('aria-label', 'Continue');
         setShapeSquareEarnedStars(2);
+        window.syncLearnscapeProgressReward?.(shapeSquareProgress);
         playUiClickSound('boardSuccess');
         const starSoundTimer = window.setTimeout(() => {
             playUiClickSound('starPop');
@@ -3638,7 +3641,7 @@ const appVersion = '20261011-1';
         shapeSquareReplayButton?.setAttribute('aria-label', 'Replay square lesson');
         if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.removeAttribute('src');
         shapeSquareNextButton?.setAttribute('aria-label', 'Continue');
-        setShapeSquareSkipButtonVisible(false);
+        setShapeSquareSkipButtonVisible(true);
         shapeSquareVideo?.pause?.();
 
         if (shapeSquareVideo) {
@@ -3674,6 +3677,7 @@ const appVersion = '20261011-1';
         shapeSquareNextButton?.setAttribute('aria-label', 'Continue');
         setShapeSquareEarnedStars(1);
         shapeSquareProgress.setAttribute('aria-hidden', 'false');
+        window.syncLearnscapeProgressReward?.(shapeSquareProgress);
         setShapeSquareVideoStageVisible(false);
         shapeSquareNextButton?.focus({ preventScroll: true });
 
@@ -3714,7 +3718,7 @@ const appVersion = '20261011-1';
             await shapeSquareVideo.play();
         } catch (error) {
             setShapeSquarePlayButtonVisible(true);
-            setShapeSquareSkipButtonVisible(false);
+            setShapeSquareSkipButtonVisible(true);
             console.warn('Square lesson video could not play.', error);
         }
     };
@@ -5435,7 +5439,7 @@ const appVersion = '20261011-1';
         starMissionFallField?.getAnimations({ subtree: true }).forEach((animation) => animation.play());
         window.removeEventListener('mousemove', handleStarMissionWalkerMouseMove);
         window.addEventListener('mousemove', handleStarMissionWalkerMouseMove);
-        if (starMissionFallTimer === null) starMissionFallTimer = window.setInterval(spawnStarMissionFallingShape, 720);
+        if (starMissionFallTimer === null) starMissionFallTimer = window.setInterval(spawnStarMissionFallingShape, STAR_MISSION_FALL_INTERVAL_MS);
         if (starMissionCollisionFrame === null) {
             starMissionCollisionFrame = window.requestAnimationFrame(monitorStarMissionFallingShapes);
         }
@@ -5957,8 +5961,7 @@ const appVersion = '20261011-1';
 
     const spawnStarMissionFallingShape = () => {
         if (starMissionPaused || !starMissionFallField || !starMissionWalkerActive || starMissionPage?.hidden) return;
-        const kinds = ['star', 'star', 'star', 'circle', 'triangle', 'square', 'diamond', 'oval'];
-        const kind = kinds[Math.floor(Math.random() * kinds.length)];
+        const kind = STAR_MISSION_SPAWN_KINDS[Math.floor(Math.random() * STAR_MISSION_SPAWN_KINDS.length)];
         const isStar = kind === 'star';
         const xPercent = 8 + Math.random() * 84;
         const duration = isStar ? 4.3 + Math.random() * 1.2 : 3.4 + Math.random() * 1.1;
@@ -5991,7 +5994,7 @@ const appVersion = '20261011-1';
         starMissionFallField.hidden = false;
         spawnStarMissionFallingShape();
         if (starMissionFallTimer !== null) window.clearInterval(starMissionFallTimer);
-        starMissionFallTimer = window.setInterval(spawnStarMissionFallingShape, 720);
+        starMissionFallTimer = window.setInterval(spawnStarMissionFallingShape, STAR_MISSION_FALL_INTERVAL_MS);
         if (starMissionCollisionFrame !== null) window.cancelAnimationFrame(starMissionCollisionFrame);
         starMissionCollisionFrame = window.requestAnimationFrame(monitorStarMissionFallingShapes);
     };
@@ -6644,6 +6647,7 @@ const appVersion = '20261011-1';
                 heartMissionPage.classList.remove('is-heart-victory-celebration');
                 heartMissionPage.classList.add('is-heart-final-progress-visible');
                 heartFinalProgress?.setAttribute('aria-hidden', 'false');
+                window.syncLearnscapeProgressReward?.(heartFinalProgress);
                 playUiClickSound('boardSuccess');
                 heartCelebrationTimers.push(window.setTimeout(() => {
                     if (session === heartCelebrationSession) playUiClickSound('starPop');
@@ -7143,7 +7147,7 @@ const appVersion = '20261011-1';
         if (mascot) mascot.hidden = true;
         if (questionPanel) questionPanel.hidden = true;
         if (playButton) playButton.hidden = false;
-        if (skipButton) skipButton.hidden = page.dataset.lessonReplay !== 'true';
+        if (skipButton) skipButton.hidden = false;
         if (bridgeCharacterSequence) {
             bridgeCharacterSequence.hidden = true;
             bridgeCharacterSequence.classList.remove('is-walking');
@@ -7179,6 +7183,7 @@ const appVersion = '20261011-1';
         page.classList.add('is-progress-visible');
         videoStage?.setAttribute('aria-hidden', 'true');
         progress?.setAttribute('aria-hidden', 'false');
+        window.syncLearnscapeProgressReward?.(progress);
         playUiClickSound('boardSuccess');
         window.setTimeout(() => {
             if (isPageVisible(page) && page.classList.contains('is-progress-visible')) {
@@ -7260,7 +7265,7 @@ const appVersion = '20261011-1';
         if (mascot) mascot.hidden = Boolean(videoSource);
         if (questionPanel) questionPanel.hidden = Boolean(videoSource);
         if (playButton) playButton.hidden = false;
-        if (skipButton) skipButton.hidden = page.dataset.lessonReplay !== 'true';
+        if (skipButton) skipButton.hidden = false;
         videoStage?.setAttribute('aria-hidden', videoSource || lessonImage ? 'false' : 'true');
         page.classList.remove('is-transitioning-to-illustration');
         page.classList.add('is-illustration-background');
@@ -7882,7 +7887,7 @@ const appVersion = '20261011-1';
                 }
             }
             if (playButton) playButton.hidden = false;
-            if (skipButton) skipButton.hidden = page.dataset.lessonReplay !== 'true';
+            if (skipButton) skipButton.hidden = false;
         };
 
         const showLessonBackground = () => {
@@ -8070,6 +8075,7 @@ const appVersion = '20261011-1';
         if (!rectangleDeliveryPage || rectangleDeliveryPage.hidden || !rectangleDeliveryPage.classList.contains('is-final-complete-scene')) return;
         rectangleDeliveryPage.classList.add('is-rectangle-final-progress-visible');
         rectangleFinalProgress?.setAttribute('aria-hidden', 'false');
+        window.syncLearnscapeProgressReward?.(rectangleFinalProgress);
         playUiClickSound('boardSuccess');
         window.setTimeout(() => {
             if (rectangleDeliveryPage.classList.contains('is-rectangle-final-progress-visible')) {
@@ -9703,6 +9709,7 @@ const appVersion = '20261011-1';
         }
         triangleGameCompleteProgress.setAttribute('aria-hidden', 'false');
         triangleGamePage.classList.add('is-game-progress-visible');
+        window.syncLearnscapeProgressReward?.(triangleGameCompleteProgress);
         playUiClickSound('boardSuccess');
         triangleBridgeBuildTimers.push(window.setTimeout(() => {
             if (triangleGamePage.classList.contains('is-game-progress-visible')) playUiClickSound('starPop');
@@ -11824,6 +11831,7 @@ const appVersion = '20261011-1';
         if (circleIllustrationProgress) {
             circleIllustrationProgress.dataset.progressStage = 'hunt';
             setCircleIllustrationEarnedStars(2);
+            window.syncLearnscapeProgressReward?.(circleIllustrationProgress);
         }
         circleIllustrationReplayButton?.setAttribute('aria-label', 'Retry circle hunt');
     };
@@ -12271,6 +12279,7 @@ const appVersion = '20261011-1';
         circleIllustrationReplayButton?.setAttribute('aria-label', 'Replay lesson');
         setCircleIllustrationEarnedStars(1);
         circleIllustrationProgress.setAttribute('aria-hidden', 'false');
+        window.syncLearnscapeProgressReward?.(circleIllustrationProgress);
         circleIllustrationNextButton?.focus({ preventScroll: true });
 
         if (!wasAlreadyVisible && playRevealSound) {
@@ -12949,7 +12958,7 @@ const appVersion = '20261011-1';
             await circleIllustrationVideo.play();
         } catch (error) {
             setCircleIllustrationPlayButtonVisible(true);
-            setCircleIllustrationSkipButtonVisible(false);
+            setCircleIllustrationSkipButtonVisible(true);
             console.warn('Circle lesson video could not play.', error);
         }
     };
@@ -12978,7 +12987,7 @@ const appVersion = '20261011-1';
         circleIllustrationPage?.classList.remove('is-lesson-complete', 'is-tv-lesson-image-visible');
         resetShapeTvChoices(circleIllustrationPage);
         setCircleIllustrationEarnedStars(0);
-        setCircleIllustrationSkipButtonVisible(false);
+        setCircleIllustrationSkipButtonVisible(true);
         circleIllustrationVideo.pause?.();
         circleIllustrationVideo.hidden = false;
         if (circleTvLessonImage) circleTvLessonImage.hidden = true;
@@ -14199,6 +14208,7 @@ const appVersion = '20261011-1';
         if (ovalBoardGamePage.classList.contains('is-oval-final-progress-visible')) return;
         ovalBoardGamePage.classList.add('is-oval-final-progress-visible');
         ovalFinalProgress?.setAttribute('aria-hidden', 'false');
+        window.syncLearnscapeProgressReward?.(ovalFinalProgress);
         playUiClickSound('boardSuccess');
         ovalCelebrationSoundTimers.push(window.setTimeout(() => {
             if (ovalBoardGamePage.classList.contains('is-oval-final-progress-visible')) playUiClickSound('starPop');
@@ -14375,6 +14385,19 @@ const appVersion = '20261011-1';
     };
 
     const applyOvalHalfPiece = (card, halfPiece) => {
+        const cardFront = card.querySelector('.oval-card-front');
+        let cardImage = cardFront?.querySelector('.oval-card-image');
+        if (cardFront && !cardImage) {
+            cardImage = document.createElement('img');
+            cardImage.className = 'oval-card-image';
+            cardImage.alt = '';
+            cardImage.setAttribute('aria-hidden', 'true');
+            cardFront.append(cardImage);
+        }
+        if (cardImage) {
+            cardImage.src = halfPiece.image || '';
+            cardImage.hidden = Boolean(halfPiece.challenge);
+        }
         card.style.setProperty('--oval-piece-image', `url("${halfPiece.image}")`);
         card.style.setProperty('--oval-piece-position', `${halfPiece.side} center`);
         card.dataset.ovalPiece = `${halfPiece.image}-${halfPiece.side}`;
@@ -14812,6 +14835,37 @@ const appVersion = '20261011-1';
         }
     };
 
+    const shapePhaseProgressPages = Object.freeze({
+        circle: ['learnscape-circle-illustration-page'],
+        square: ['learnscape-shape-square-page'],
+        triangle: ['learnscape-shape-area-3-page', 'learnscape-triangle-game-page'],
+        rectangle: ['learnscape-shape-area-4-page', 'learnscape-rectangle-delivery-page'],
+        oval: ['learnscape-shape-area-5-page', 'learnscape-oval-board-game-page'],
+        heart: ['learnscape-shape-area-6-page'],
+        star: ['learnscape-shape-area-7-page'],
+        diamond: ['learnscape-shape-area-8-page'],
+    });
+
+    // A saved progress reward is written as soon as a lesson or mission is complete.
+    // Use it instead of waiting for the final camera badge so players can replay either
+    // activity from the island intro immediately after their first completion.
+    const hasShapePhaseCompletion = (shape) => {
+        if (hasShapePhaseBadge(shape)) return true;
+        const pageIds = shapePhaseProgressPages[shape] || [];
+        if (!pageIds.length) return false;
+        try {
+            for (let index = 0; index < window.localStorage.length; index += 1) {
+                const key = window.localStorage.key(index);
+                if (pageIds.some((pageId) => key?.startsWith(`learnscape-progress-reward:${pageId}:`))) {
+                    return true;
+                }
+            }
+        } catch (error) {
+            return false;
+        }
+        return false;
+    };
+
     const runShapePhaseWithLoading = (callback) => {
         const runWithLoading = getAppLoadingTransition();
         if (typeof runWithLoading === 'function' && runWithLoading(callback, { afterFade: true }) !== false) return;
@@ -14896,13 +14950,8 @@ const appVersion = '20261011-1';
 
     const playUnlockedShapePhase = (shape, phase) => {
         const config = shapePhaseConfigurations[shape];
-        if (!config || !hasShapePhaseBadge(shape) || !['lesson', 'mission', 'detection'].includes(phase)) return;
+        if (!config || !hasShapePhaseCompletion(shape) || !['lesson', 'mission'].includes(phase)) return;
         playUiClickSound('chime');
-
-        if (phase === 'detection') {
-            navigateToShapePhase(config.detection);
-            return;
-        }
 
         if (shape === 'circle') {
             navigateToShapePhase(config[phase], phase === 'lesson'
@@ -14975,7 +15024,7 @@ const appVersion = '20261011-1';
     const syncShapePhaseSelector = (shape) => {
         const record = shapePhaseSelectors.get(shape);
         if (!record) return;
-        const earned = hasShapePhaseBadge(shape);
+        const earned = hasShapePhaseCompletion(shape);
         record.page.classList.toggle('has-shape-phase-selector', earned);
         if (!earned || record.start.hidden || !isPageVisible(record.page)) {
             record.page.classList.remove('is-shape-phase-selector-open');
@@ -14993,7 +15042,7 @@ const appVersion = '20261011-1';
         selector.className = 'shape-phase-selector';
         selector.setAttribute('aria-label', `${shape[0].toUpperCase()}${shape.slice(1)} activities`);
         selector.hidden = true;
-        ['lesson', 'mission', 'detection'].forEach((phase) => {
+        ['lesson', 'mission'].forEach((phase) => {
             const choice = document.createElement('div');
             choice.className = 'shape-phase-choice';
             const label = document.createElement('strong');
@@ -15013,7 +15062,7 @@ const appVersion = '20261011-1';
         start.insertAdjacentElement('afterend', selector);
         shapePhaseSelectors.set(shape, { page, start, selector });
         start.addEventListener('click', (event) => {
-            if (!hasShapePhaseBadge(shape)) return;
+            if (!hasShapePhaseCompletion(shape)) return;
             event.preventDefault();
             event.stopImmediatePropagation();
             if (shape === 'circle') {
