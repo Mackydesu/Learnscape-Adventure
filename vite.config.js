@@ -1,6 +1,8 @@
 import { defineConfig } from "vite";
-import { cp, readdir, writeFile } from "node:fs/promises";
+import { cp, readdir, stat, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+
+const CLOUDFLARE_MAX_ASSET_BYTES = 25 * 1024 * 1024;
 
 async function collectFiles(directory) {
     const entries = await readdir(directory, { withFileTypes: true });
@@ -18,6 +20,23 @@ async function createRuntimeAssetList(projectRoot, modelPath) {
         ...assetFiles.map((filePath) => `/assets/${filePath.slice(assetsRoot.length + 1).replaceAll("\\", "/")}`),
         modelPath
     ];
+}
+
+async function validateCloudflareAssetSizes(directory) {
+    const files = await collectFiles(directory);
+    const fileSizes = await Promise.all(files.map(async (filePath) => ({
+        filePath,
+        size: (await stat(filePath)).size
+    })));
+    const oversizedFiles = fileSizes.filter(({ size }) => size > CLOUDFLARE_MAX_ASSET_BYTES);
+    if (!oversizedFiles.length) return;
+
+    const details = oversizedFiles
+        .map(({ filePath, size }) => `- ${filePath}: ${(size / 1024 / 1024).toFixed(2)} MiB`)
+        .join("\n");
+    throw new Error(
+        `Cloudflare Workers limits each static asset to 25 MiB. Compress or remove:\n${details}`
+    );
 }
 
 export default defineConfig(({ command }) => ({
@@ -63,9 +82,15 @@ export default defineConfig(({ command }) => ({
                     writeFile(resolve(projectRoot, "dist/runtime-assets.json"), manifestContents, "utf8"),
                     writeFile(resolve(projectRoot, "runtime-assets.json"), JSON.stringify(projectManifest), "utf8")
                 ]);
+                await validateCloudflareAssetSizes(resolve(projectRoot, "dist"));
             }
         }
     ],
+    resolve: {
+        alias: [
+            { find: /^onnxruntime-web$/, replacement: "onnxruntime-web/wasm" }
+        ]
+    },
     build: {
         rollupOptions: {
             input: {

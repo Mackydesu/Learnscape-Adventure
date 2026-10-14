@@ -12,7 +12,7 @@
   "preview": "vite preview",
   
     
-  "deploy": "npm run build && wrangler deploy"
+  "deploy": "wrangler deploy"
   
   },
   
