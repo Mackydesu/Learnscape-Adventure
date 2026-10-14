@@ -1,5 +1,5 @@
 
-import * as ort from "onnxruntime-web";
+import * as ort from "onnxruntime-web/wasm";
 import { loadModel } from "./model.js";
 
 // Matches the embedded `names` class-index metadata in public/models/final_model.onnx.
