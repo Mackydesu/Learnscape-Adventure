@@ -16,6 +16,9 @@ export const CLASS_NAMES = [
 
 const INPUT_SIZE = 640;
 const CONF_THRESHOLD = 0.50;
+const CLASS_CONFIDENCE_THRESHOLDS = Object.freeze({
+    circle: 0.65
+});
 const IOU_THRESHOLD = 0.45;
 
 const canvas = document.createElement("canvas");
@@ -163,7 +166,9 @@ function decodeOutput(output, meta) {
             }
         }
 
-        if (bestScore < CONF_THRESHOLD) continue;
+        const label = CLASS_NAMES[bestClass];
+        const confidenceThreshold = CLASS_CONFIDENCE_THRESHOLDS[label] ?? CONF_THRESHOLD;
+        if (bestScore < confidenceThreshold) continue;
 
         const cx = data[i];
         const cy = data[predictions + i];
@@ -196,7 +201,7 @@ function decodeOutput(output, meta) {
 
         boxes.push({
             classId: bestClass,
-            label: CLASS_NAMES[bestClass],
+            label,
             confidence: bestScore,
             x1, y1, x2, y2
         });

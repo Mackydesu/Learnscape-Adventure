@@ -1,18 +1,18 @@
 import { trackLiveShapes } from "./detectionManager.js";
 
-// The camera game rewards the first clearly labeled target frame.  The
+// The camera game rewards the first clearly labeled target frame. The
 // removal gate below still prevents a held object from being counted twice.
 const TRACKING_OPTIONS = { intervalMs: 90, minVotes: 1 };
 const REMOVAL_CONFIRMATION_FRAMES = 5;
-const TAGALOG_SHAPE_NAMES = Object.freeze({
-    circle: "bilog",
-    square: "parisukat",
-    triangle: "tatsulok",
-    rectangle: "parihaba",
-    oval: "bilohaba",
-    heart: "puso",
-    star: "bituin",
-    diamond: "diyamante"
+const SHAPE_NAMES = Object.freeze({
+    circle: "circle",
+    square: "square",
+    triangle: "triangle",
+    rectangle: "rectangle",
+    oval: "oval",
+    heart: "heart",
+    star: "star",
+    diamond: "diamond"
 });
 
 let activeSession = null;
@@ -59,13 +59,25 @@ function setCameraStatus(page, message) {
     status.textContent = message;
 }
 
+function notifyDetectionReady(session) {
+    if (session.readyNotified || activeSession !== session || session.controller.signal.aborted) return;
+    session.readyNotified = true;
+    window.dispatchEvent(new CustomEvent("learnscape:cameradetectionready", {
+        detail: { page: session.page, video: session.video, shape: session.shape }
+    }));
+}
+
 function trackHasTargetLabel(track, targetShape) {
     return String(track?.label || "").trim().toLowerCase() === targetShape;
 }
 
-function tagalogShapeName(shape, capitalized = false) {
-    const label = TAGALOG_SHAPE_NAMES[String(shape || "").trim().toLowerCase()] || String(shape || "hugis");
+function shapeName(shape, capitalized = false) {
+    const label = SHAPE_NAMES[String(shape || "").trim().toLowerCase()] || String(shape || "shape");
     return capitalized ? `${label[0].toUpperCase()}${label.slice(1)}` : label;
+}
+
+function targetCameraPrompt(shape) {
+    return `Magpakita ng bagay na hugis ${shapeName(shape, true)} sa Kamera`;
 }
 
 function drawTrackedObjects(session, tracks) {
@@ -134,9 +146,8 @@ function drawTrackedObjects(session, tracks) {
 async function handleTrackedFrame(session, { frame, tracks }) {
     if (activeSession !== session || session.controller.signal.aborted) return;
     drawTrackedObjects(session, tracks);
-    // A correct scan owns the screen until its audio sequence finishes. Keep
-    // drawing the live overlay, but do not accept or remove another object
-    // until the game clears this state after the children finish cheering.
+    // A correct scan owns the screen until its ordered audio and reward flow
+    // finishes. Keep drawing, but do not accept another object meanwhile.
     if (session.page.classList.contains("is-camera-detection-celebrating")) return;
     if (frame % 10 === 0) {
         console.log("[LIVE TRACKS]", tracks.map(track => ({
@@ -150,15 +161,17 @@ async function handleTrackedFrame(session, { frame, tracks }) {
     }
 
     if (session.waitingForRemoval) {
-        if (tracks.length === 0) session.absentFrames++;
+        const targetStillVisible = tracks.some(track => trackHasTargetLabel(track, session.shape));
+        if (!targetStillVisible) session.absentFrames++;
         else session.absentFrames = 0;
 
         if (session.absentFrames >= REMOVAL_CONFIRMATION_FRAMES) {
             session.waitingForRemoval = false;
             session.absentFrames = 0;
-            setCameraStatus(session.page, `Inalis na ang bagay. Ipakita muli ang ${tagalogShapeName(session.shape)} upang i-scan.`);
-        } else if (tracks.length) {
-            setCameraStatus(session.page, "Alisin muna ang bagay mula sa frame ng kamera bago muling mag-scan.");
+            setCameraStatus(session.page, targetCameraPrompt(session.shape));
+            // The curtain listener opens only after the old target has been
+            // absent for enough live frames to safely accept another scan.
+            notifyDetectionReady(session);
         }
         return;
     }
@@ -170,7 +183,7 @@ async function handleTrackedFrame(session, { frame, tracks }) {
         if (session.confirming || frame - session.lastConfirmationFrame < 6) return;
         session.confirming = true;
         session.lastConfirmationFrame = frame;
-        setCameraStatus(session.page, `Natukoy ang ${tagalogShapeName(session.shape)}. Magaling!`);
+        setCameraStatus(session.page, "Napakahusay!");
         try {
             // The green target frame, check mark, confetti, audio, and reward
             // all begin together as soon as the label becomes stable.
@@ -198,14 +211,7 @@ async function handleTrackedFrame(session, { frame, tracks }) {
         return;
     }
 
-    if (!tracks.length) {
-        setCameraStatus(session.page, `Ipakita ang ${tagalogShapeName(session.shape)} sa loob ng frame ng kamera.`);
-    } else if (tracks.some(track => trackHasTargetLabel(track, session.shape))) {
-        setCameraStatus(session.page, `Panatilihin ang ${tagalogShapeName(session.shape)} sa frame habang kinukumpirma ang label.`);
-    } else {
-        const shownLabel = String(tracks[0]?.label || "object").toLowerCase();
-        setCameraStatus(session.page, `Natukoy ang ${tagalogShapeName(shownLabel, true)}. Ipakita ang ${tagalogShapeName(session.shape)} para sa misyong ito.`);
-    }
+    setCameraStatus(session.page, targetCameraPrompt(session.shape));
 }
 
 function stopActiveSession(page = null) {
@@ -222,7 +228,10 @@ async function runDetection(session, modelReady) {
     try {
         await modelReady;
         if (signal.aborted || activeSession !== session) return;
-        setCameraStatus(page, `Ipakita ang ${tagalogShapeName(session.shape)} sa loob ng frame ng kamera.`);
+        if (!session.waitingForRemoval) notifyDetectionReady(session);
+        if (!session.waitingForRemoval) {
+            setCameraStatus(page, targetCameraPrompt(session.shape));
+        }
         await trackLiveShapes(video, frameResult => handleTrackedFrame(session, frameResult), {
             ...TRACKING_OPTIONS,
             signal
@@ -245,7 +254,7 @@ async function runDetection(session, modelReady) {
 }
 
 function startDetection(event, modelReady) {
-    const { page, video, shape } = event.detail ?? {};
+    const { page, video, shape, requireRemoval = false } = event.detail ?? {};
     const normalizedShape = String(shape ?? "").trim().toLowerCase();
     if (!page || !video || !normalizedShape || page.dataset.cameraShape !== normalizedShape || !cameraPageVisible(page)) return;
 
@@ -257,7 +266,8 @@ function startDetection(event, modelReady) {
         stream: video.srcObject,
         overlay: getOverlay(page),
         controller: new AbortController(),
-        waitingForRemoval: false,
+        waitingForRemoval: Boolean(requireRemoval),
+        readyNotified: false,
         absentFrames: 0,
         confirming: false,
         lastConfirmationFrame: -Infinity

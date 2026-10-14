@@ -85,7 +85,6 @@
         </button>
         <div class="intro-settings-panel" id="intro-settings-panel" role="group" aria-label="Display settings" hidden>
             <button class="intro-settings-tutorial-button" type="button" hidden>Tutorial</button>
-            <button class="intro-settings-home-button" type="button">Home</button>
             <label class="intro-settings-toggle" for="intro-fullscreen-toggle">
                 <span>Fullscreen</span>
                 <input id="intro-fullscreen-toggle" type="checkbox">
@@ -243,28 +242,11 @@
             <img class="hero-bg-video" src="assets/Backgrounds/bgintro.webp" alt="" aria-hidden="true">
             <img class="hero-title-art" src="assets/Backgrounds/title.webp" alt="Learnscape Adventure: Explore Shapes, Discover a Brighter World">
 
-            <nav class="intro-signpost" aria-label="Adventure menu">
-                <img class="intro-signpost-art" src="assets/Shape UI/post.webp" alt="">
-                <button class="intro-sign-button intro-sign-button-shop" type="button" data-intro-panel="shop" aria-label="Shop">
-                    <img src="assets/Buttons/Shop.webp" alt="Shop">
-                </button>
-                <button class="intro-sign-button intro-sign-button-profile" type="button" data-intro-panel="profile" aria-label="Profile">
-                    <img src="assets/Buttons/profile.webp" alt="Profile">
-                </button>
-                <button class="intro-sign-button intro-sign-button-notif" type="button" data-intro-panel="notifications" aria-label="Notifications">
-                    <img src="assets/Buttons/notif.webp" alt="Notifications">
-                    <span class="intro-notification-unread-indicator" aria-hidden="true" hidden></span>
+            <nav class="home-quick-menu" aria-label="Adventure menu">
+                <button class="home-quick-menu-button" type="button" data-intro-panel="profile" aria-label="Profile">
+                    <img src="assets/Buttons/profile.webp" alt="">
                 </button>
             </nav>
-
-            <div class="intro-menu-panel shape-collection-dashboard" role="dialog" aria-modal="true" aria-labelledby="intro-menu-title" hidden>
-                <div class="shape-collection-dashboard-card intro-menu-card">
-                    <button class="shape-collection-close intro-menu-close" type="button" aria-label="Close menu">&times;</button>
-                    <p class="shape-collection-kicker" id="intro-menu-kicker">Adventure Menu</p>
-                    <h2 id="intro-menu-title"></h2>
-                    <div class="intro-menu-copy" hidden></div>
-                </div>
-            </div>
 
             <a href="index.html#game3" class="btn btn-enter loading-link" data-route="game3">
                 <span class="btn-enter-icon" aria-hidden="true">▶</span>
@@ -281,6 +263,15 @@
         </section>
 
     </main>
+
+    <div class="intro-menu-panel shape-collection-dashboard" role="dialog" aria-modal="true" aria-labelledby="intro-menu-title" hidden>
+        <div class="shape-collection-dashboard-card intro-menu-card">
+            <button class="shape-collection-close intro-menu-close" type="button" aria-label="Close menu">&times;</button>
+            <p class="shape-collection-kicker" id="intro-menu-kicker">Adventure Menu</p>
+            <h2 id="intro-menu-title"></h2>
+            <div class="intro-menu-copy" hidden></div>
+        </div>
+    </div>
 
     <section id="learnscape-about-page" class="learnscape-about-page" hidden>
         <img class="about-page-background" src="assets/Backgrounds/bgintro.webp" alt="" aria-hidden="true">
@@ -361,7 +352,7 @@
                             </div>
                             <figcaption>
                                 <p>This web game was developed as a collaborative undergraduate thesis project by a team of four students.</p>
-                                <p><em>Mark Gil Narciso</em> engineered the core software application, integrated the web game engine, and built and trained the object detection architecture. To power the game's AI components, <em>Marissa Benitez, Margilyn Gamboa, and Aira Mae Esperanzate</em> spearheaded the dataset curation phase, focusing on gathering, filtering, and preparing the extensive library of images required to successfully train the object detection model. Together, the team managed the project from initial conceptualization to final research deployment.</p>
+                                <p><em>Mark Gil Narciso</em> engineered the core software application, integrated the web game engine, and built and trained the object detection architecture by utilizing different AI tools. To power the game's AI components, <em>Marissa Benitez, Margilyn Gamboa, and Aira Mae Esperanzate</em> spearheaded the dataset curation phase, focusing on gathering, filtering, and preparing the extensive library of images required to successfully train the object detection model. Together, the team managed the project from initial conceptualization to final research deployment.</p>
                             </figcaption>
                         </figure>
                     </section>
@@ -397,12 +388,15 @@
         <div class="game3-clouds" aria-hidden="true"></div>
         <div class="game3-fog" aria-hidden="true"></div>
         <div class="game1-entry-veil" aria-hidden="true"></div>
-        <header class="game3-page-title" aria-label="Shape Island">
-            <span class="game3-page-title-shape" aria-hidden="true">
-                <span>S</span><span>H</span><span>A</span><span>P</span><span>E</span>
-            </span>
-            <span class="game3-page-title-island" aria-hidden="true">Island</span>
-        </header>
+        <nav class="game3-quick-menu" aria-label="Adventure menu">
+            <button class="game3-quick-menu-button" type="button" data-intro-panel="shop" aria-label="Shop">
+                <img src="assets/Buttons/Shop.webp" alt="">
+            </button>
+            <button class="game3-quick-menu-button" type="button" data-intro-panel="notifications" aria-label="Notifications">
+                <img src="assets/Buttons/Notification.webp" alt="">
+                <span class="intro-notification-unread-indicator" aria-hidden="true" hidden></span>
+            </button>
+        </nav>
         <nav class="game3-island-carousel" aria-label="Shape Island areas">
             <div class="game3-island-card" data-island-shape="circle">
                 <img src="assets/Shape UI/1.webp" alt="1. Circle Meadow">
@@ -2176,7 +2170,7 @@
 
     
 
-    <script src="/script.js?v=20261011-1"></script>
+    <script src="/script.js?v=20261015-05"></script>
     </div>
 
     <script>
@@ -2811,12 +2805,13 @@
             };
 
             const setRoute = (routeData, replace = false) => {
+                if (introMenuPanel && !introMenuPanel.hidden) closeIntroMenu();
                 const routeName = routeData?.routeName || 'title';
                 const params = routeData?.params || {};
                 const route = routes[routeName] || routes.title;
                 currentRoute = routeName in routes ? routeName : 'title';
                 currentRouteKey = getRouteKey(currentRoute, params);
-                syncIntroBgmForRoute(currentRoute);
+                syncRouteBgmForRoute(currentRoute);
 
                 const isIntro = currentRoute === 'title';
                 if (introSettingsTutorialButton) {
@@ -3689,24 +3684,25 @@
                 if (shouldFocus) tab.focus({ preventScroll: true });
                 window.playUiClickSound?.('soft');
             };
-            window.addEventListener('learnscape:open-game-missions', () => {
-                const openGameMissions = () => {
-                    if (currentRoute !== 'title') return;
-                    openIntroMenu('notifications');
+            window.addEventListener('learnscape:open-shape-island-notifications', () => {
+                const openShapeIslandNotifications = () => {
+                    if (currentRoute !== 'game3') return;
+                    const trigger = pages.game3?.querySelector('[data-intro-panel="notifications"]');
+                    openIntroMenu('notifications', trigger);
                     selectIntroNotificationTab(
                         introMenuCopy?.querySelector('[data-notification-tab="game"]'),
                     );
                 };
-                if (currentRoute === 'title') {
-                    openGameMissions();
+                if (currentRoute === 'game3') {
+                    openShapeIslandNotifications();
                     return;
                 }
-                const openAfterHomeRoute = (event) => {
-                    if (event.detail?.route !== 'title') return;
-                    window.removeEventListener('learnscape:routechange', openAfterHomeRoute);
-                    window.setTimeout(openGameMissions, 0);
+                const openAfterShapeIslandRoute = (event) => {
+                    if (event.detail?.route !== 'game3') return;
+                    window.removeEventListener('learnscape:routechange', openAfterShapeIslandRoute);
+                    window.setTimeout(openShapeIslandNotifications, 0);
                 };
-                window.addEventListener('learnscape:routechange', openAfterHomeRoute);
+                window.addEventListener('learnscape:routechange', openAfterShapeIslandRoute);
             });
             introMenuCopy?.addEventListener('click', (event) => {
                 if (introMenuPanel?.dataset.panel !== 'notifications') return;
@@ -3910,7 +3906,6 @@
             const introSettingsButton = introSettings?.querySelector('.intro-settings-button');
             const introSettingsPanel = introSettings?.querySelector('.intro-settings-panel');
             const introSettingsTutorialButton = introSettings?.querySelector('.intro-settings-tutorial-button');
-            const introSettingsHomeButton = introSettings?.querySelector('.intro-settings-home-button');
             const introSettingsResetButton = introSettings?.querySelector('.intro-settings-reset-button');
             const resetGameDialog = document.querySelector('.reset-game-dialog');
             const resetGameCancelButton = resetGameDialog?.querySelector('.reset-game-cancel');
@@ -4307,16 +4302,16 @@
                 }).format(date);
             };
             const syncIntroNotificationUnreadIndicator = () => {
-                const button = document.querySelector('.intro-sign-button-notif');
-                const indicator = button?.querySelector('.intro-notification-unread-indicator');
                 const unreadCount = learnscapeNotifications.filter((item) => item.read !== true).length;
-                if (button && indicator) {
+                document.querySelectorAll('[data-intro-panel="notifications"]').forEach((button) => {
+                    const indicator = button.querySelector('.intro-notification-unread-indicator');
+                    if (!indicator) return;
                     indicator.hidden = unreadCount === 0;
                     button.dataset.unreadCount = String(unreadCount);
                     button.setAttribute('aria-label', unreadCount
                         ? `Notifications, ${unreadCount} unread`
                         : 'Notifications');
-                }
+                });
                 introMenuCopy?.querySelectorAll('[data-notification-tab]').forEach((tab) => {
                     const category = tab.dataset.notificationTab;
                     const categoryUnreadCount = learnscapeNotifications.filter((item) => (
@@ -4352,8 +4347,7 @@
                 && getNotificationCarrotAmount(notification) > 0
             );
             const getLearnscapeNotificationDisplayPriority = (notification) => {
-                const hasClaimableAction = isClaimableCarrotNotification(notification)
-                    || shouldShowUseKeyAction(notification);
+                const hasClaimableAction = isClaimableCarrotNotification(notification);
                 if (hasClaimableAction) return 0;
                 if (notification.read === true || notification.claimed === true) return 3;
                 if (notification.type === 'badge') return 1;
@@ -5182,6 +5176,105 @@
             introBgm.preload = 'auto';
             introBgm.playsInline = true;
             introBgm.volume = 0.5;
+            const missionBgmSourceByShape = new Map([
+                ['circle', 'assets/Audios/Bgm/circle&oval mission.mp3'],
+                ['square', 'assets/Audios/Bgm/square mission.mp3'],
+                ['triangle', 'assets/Audios/Bgm/triangle mission.mp3'],
+                ['rectangle', 'assets/Audios/Bgm/rectangle mission.mp3'],
+                ['oval', 'assets/Audios/Bgm/circle&oval mission.mp3'],
+                ['heart', 'assets/Audios/Bgm/heart mission.mp3'],
+                ['star', 'assets/Audios/Bgm/star mission.mp3'],
+                ['diamond', 'assets/Audios/Bgm/diamond mission.mp3'],
+            ]);
+            const missionRoutesByShape = new Map([
+                ['circle', new Set(['circleIllustration'])],
+                ['square', new Set(['shapeSquare'])],
+                ['triangle', new Set(['shapeArea3', 'triangleGame'])],
+                ['rectangle', new Set(['shapeArea4', 'rectangleDelivery', 'rectangleBakery', 'rectangleBookstore', 'rectangleToyShop', 'rectangleBakery1', 'rectangleBookstore1', 'rectangleToyShop1'])],
+                ['oval', new Set(['shapeArea5', 'ovalBoardGame'])],
+                ['heart', new Set(['shapeArea6'])],
+                ['star', new Set(['shapeArea7'])],
+                ['diamond', new Set(['shapeArea8'])],
+            ]);
+            const dedicatedMissionShapeByRoute = new Map([
+                ['triangleGame', 'triangle'],
+                ['rectangleDelivery', 'rectangle'],
+                ['rectangleBakery', 'rectangle'],
+                ['rectangleBookstore', 'rectangle'],
+                ['rectangleToyShop', 'rectangle'],
+                ['rectangleBakery1', 'rectangle'],
+                ['rectangleBookstore1', 'rectangle'],
+                ['rectangleToyShop1', 'rectangle'],
+                ['ovalBoardGame', 'oval'],
+            ]);
+            const missionBgmPhaseStorageKey = 'learnscape-active-mission-bgm-shape';
+            const missionBgmBySource = new Map();
+            let activeMissionBgm = null;
+            let activeMissionBgmSource = '';
+            let activeMissionBgmShape = (() => {
+                const savedShape = String(readSoundSetting(missionBgmPhaseStorageKey, '')).trim().toLowerCase();
+                return missionBgmSourceByShape.has(savedShape) ? savedShape : '';
+            })();
+
+            const saveMissionBgmPhase = () => {
+                writeSoundSetting(missionBgmPhaseStorageKey, activeMissionBgmShape);
+            };
+
+            const resetBgm = (audio) => {
+                if (!audio) return;
+                audio.pause();
+                try {
+                    audio.currentTime = 0;
+                } catch (error) {
+                    // Pausing is enough while the track is still loading.
+                }
+            };
+
+            const syncMissionBgmForRoute = (routeName) => {
+                if (!activeMissionBgmShape) {
+                    activeMissionBgmShape = dedicatedMissionShapeByRoute.get(routeName) || '';
+                    if (activeMissionBgmShape) saveMissionBgmPhase();
+                }
+                const allowedRoutes = missionRoutesByShape.get(activeMissionBgmShape);
+                if (activeMissionBgmShape && !allowedRoutes?.has(routeName)) {
+                    activeMissionBgmShape = '';
+                    saveMissionBgmPhase();
+                }
+                const source = missionBgmSourceByShape.get(activeMissionBgmShape) || '';
+                if (!source) {
+                    resetBgm(activeMissionBgm);
+                    activeMissionBgm = null;
+                    activeMissionBgmSource = '';
+                    return;
+                }
+
+                if (source !== activeMissionBgmSource) {
+                    resetBgm(activeMissionBgm);
+                    let nextBgm = missionBgmBySource.get(source);
+                    if (!nextBgm) {
+                        nextBgm = new Audio(source);
+                        nextBgm.loop = true;
+                        nextBgm.preload = 'auto';
+                        nextBgm.playsInline = true;
+                        nextBgm.volume = 0.5;
+                        missionBgmBySource.set(source, nextBgm);
+                    }
+                    activeMissionBgm = nextBgm;
+                    activeMissionBgmSource = source;
+                }
+
+                if (!activeMissionBgm?.paused) return;
+                activeMissionBgm.play().catch(() => {
+                    // The first pointer or keyboard interaction retries autoplay.
+                });
+            };
+
+            window.addEventListener('learnscape:mission-bgm-phase', (event) => {
+                const requestedShape = String(event.detail?.shape || '').trim().toLowerCase();
+                activeMissionBgmShape = missionBgmSourceByShape.has(requestedShape) ? requestedShape : '';
+                saveMissionBgmPhase();
+                syncMissionBgmForRoute(currentRoute);
+            });
 
             function syncIntroBgmForRoute(routeName) {
                 if (!introBgmRoutes.has(routeName)) {
@@ -5200,12 +5293,16 @@
                 });
             }
 
-            const unlockIntroBgm = () => {
-                if (!introBgmRoutes.has(currentRoute) || !introBgm.paused) return;
-                introBgm.play().catch(() => {});
+            function syncRouteBgmForRoute(routeName) {
+                syncIntroBgmForRoute(routeName);
+                syncMissionBgmForRoute(routeName);
+            }
+
+            const unlockRouteBgm = () => {
+                syncRouteBgmForRoute(currentRoute);
             };
-            document.addEventListener('pointerdown', unlockIntroBgm, { passive: true });
-            document.addEventListener('keydown', unlockIntroBgm);
+            document.addEventListener('pointerdown', unlockRouteBgm, { passive: true });
+            document.addEventListener('keydown', unlockRouteBgm);
             const applyMasterSoundVolume = () => {
                 window.dispatchEvent(new Event('learnscape:soundchange'));
                 if (!mediaVolumeDescriptor?.set) return;
@@ -5268,11 +5365,6 @@
                 const shouldOpen = introSettingsPanel.hidden;
                 introSettingsPanel.hidden = !shouldOpen;
                 introSettingsButton.setAttribute('aria-expanded', String(shouldOpen));
-            });
-            introSettingsHomeButton?.addEventListener('click', () => {
-                if (introSettingsPanel) introSettingsPanel.hidden = true;
-                introSettingsButton?.setAttribute('aria-expanded', 'false');
-                navigateWithLoading('title');
             });
             const resetSavedGame = () => {
                 try {
@@ -5453,6 +5545,7 @@
             const onboardingAvatarInput = onboardingDialog?.querySelector('.onboarding-avatar-input');
             const onboardingAvatarStatus = onboardingDialog?.querySelector('.onboarding-avatar-status');
             const onboardingAvatarContinue = onboardingDialog?.querySelector('.onboarding-avatar-continue');
+            const introEnterButton = document.querySelector('.btn-enter');
             const tutorialShopNotificationId = 'tutorial:shop:circle';
             let onboardingStage = '';
             let onboardingTarget = null;
@@ -5462,6 +5555,7 @@
             let tutorialNotificationsSnapshot = null;
             let tutorialCircleKeyPurchased = false;
             let isTutorialReplay = false;
+            let onboardingRequestedByEnter = false;
             const profileTutorialStages = new Set([
                 'profile-avatar',
                 'profile-name',
@@ -5531,10 +5625,18 @@
                 onboardingStage = stage;
                 body.classList.toggle('is-onboarding-profile-locked', profileTutorialStages.has(stage));
             };
+            const titleOnboardingStages = new Set([
+                'name',
+                'avatar',
+                'experience',
+                'open-profile',
+                'enter-world',
+                ...profileTutorialStages,
+            ]);
             const isOnboardingStageOnCurrentRoute = () => (
-                onboardingStage === 'enter-first-island'
-                    ? currentRoute === 'game3'
-                    : currentRoute === 'title'
+                titleOnboardingStages.has(onboardingStage)
+                    ? currentRoute === 'title'
+                    : currentRoute === 'game3'
             );
             const guardProfileTutorialInteraction = (event) => {
                 if (!isProfileTutorialLocked()) return;
@@ -5719,9 +5821,22 @@
                     }
                 }
                 activateTutorialSession();
-                setOnboardingStage('stars');
-                const starPill = resourceCountElements.stars?.closest('.intro-resource-pill-star');
-                showOnboardingCoach(starPill, 'Bilang ng mga star na nakolekta sa laro.', showCarrotGuide);
+                const showStarGuide = () => {
+                    setOnboardingStage('stars');
+                    const starPill = resourceCountElements.stars?.closest('.intro-resource-pill-star');
+                    showOnboardingCoach(starPill, 'Bilang ng mga star na nakolekta sa laro.', showCarrotGuide);
+                };
+                if (currentRoute === 'game3') {
+                    showStarGuide();
+                    return;
+                }
+                const showGuideOnShapeIsland = (event) => {
+                    if (event.detail?.route !== 'game3') return;
+                    window.removeEventListener('learnscape:routechange', showGuideOnShapeIsland);
+                    window.setTimeout(showStarGuide, 0);
+                };
+                window.addEventListener('learnscape:routechange', showGuideOnShapeIsland);
+                window.__learnscapeNavigate?.('game3');
             };
             const showOnboardingExperienceChoice = () => {
                 setOnboardingStage('experience');
@@ -5732,7 +5847,7 @@
                 const carrotPill = resourceCountElements.carrots?.closest('.intro-resource-pill-carrot');
                 showOnboardingCoach(carrotPill, 'Gamitin upang makabili ng gamit sa Shop.', () => {
                     setOnboardingStage('open-shop');
-                    showOnboardingCoach(document.querySelector('[data-intro-panel="shop"]'), 'Pindutin ang Shop para bumili.');
+                    showOnboardingCoach(document.querySelector('.game3-quick-menu [data-intro-panel="shop"]'), 'Pindutin ang Shop para bumili.');
                 });
                 carrotPill?.classList.add('onboarding-carrot-highlight');
             };
@@ -5748,7 +5863,7 @@
             };
             const showProfileGuide = () => {
                 setOnboardingStage('open-profile');
-                showOnboardingCoach(document.querySelector('[data-intro-panel="profile"]'), 'Pindutin ang Profile para makita ang iyong impormasyon.');
+                showOnboardingCoach(document.querySelector('.home-quick-menu [data-intro-panel="profile"]'), 'Pindutin ang Profile para makita ang iyong impormasyon.');
             };
             const showProfileAvatarGuide = () => {
                 const target = introMenuCopy?.querySelector('[data-profile-action="avatar-prompt"]');
@@ -5776,7 +5891,10 @@
                 showOnboardingCoach(target, 'Dito makikita ang iyong mga bituin, carrots, at mga lugar na nabuksan.', () => {
                     closeIntroMenu();
                     setOnboardingStage('enter-world');
-                    showOnboardingCoach(document.querySelector('.btn-enter'), 'Pindutin ang ENTER upang pumunta sa Shape Island.');
+                    showOnboardingCoach(
+                        introEnterButton,
+                        'Pindutin ang ENTER upang bumalik sa Shape Island.',
+                    );
                 });
             };
             const startOnboarding = () => {
@@ -5828,6 +5946,9 @@
                 restoreTutorialGameplayState();
                 writeSoundSetting(onboardingDoneKey, 'true');
                 setOnboardingStage('complete');
+                onboardingRequestedByEnter = false;
+                onboardingAwaitingFullscreen = false;
+                resumeOnboardingView = null;
                 addLearnscapeNotification({
                     id: 'tutorial:complete',
                     type: 'mission',
@@ -5854,17 +5975,7 @@
                 restoreTutorialGameplayState();
                 setOnboardingStage('');
                 activateTutorialSession();
-                if (currentRoute === 'title') {
-                    beginShopTutorial();
-                    return;
-                }
-                const beginReplayOnHome = (event) => {
-                    if (event.detail?.route !== 'title') return;
-                    window.removeEventListener('learnscape:routechange', beginReplayOnHome);
-                    window.setTimeout(beginShopTutorial, 0);
-                };
-                window.addEventListener('learnscape:routechange', beginReplayOnHome);
-                window.__learnscapeNavigate?.('title');
+                beginShopTutorial();
             };
 
             onboardingDialog?.querySelector('.onboarding-next')?.addEventListener('click', () => {
@@ -5894,6 +6005,17 @@
             onboardingDialog?.querySelector('.onboarding-avatar-skip')?.addEventListener('click', showOnboardingExperienceChoice);
             onboardingDialog?.querySelector('.onboarding-experience-start')?.addEventListener('click', beginShopTutorial);
             introSettingsTutorialButton?.addEventListener('click', replayOnboardingTutorial);
+            introEnterButton?.addEventListener('click', (event) => {
+                if (isOnboardingComplete() || onboardingStage === 'enter-world') return;
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                onboardingRequestedByEnter = true;
+                if (!hasAcceptedTermsPrivacy()) {
+                    promptFullscreenBeforeTermsPrivacy();
+                    return;
+                }
+                promptFullscreenBeforeOnboarding();
+            }, true);
 
             const isAllowedOnboardingInteraction = (eventTarget) => {
                 if (!onboardingStage || onboardingStage === 'complete'
@@ -5919,16 +6041,6 @@
             };
             document.addEventListener('pointerdown', lockUnexplainedOnboardingInteraction, true);
             document.addEventListener('click', lockUnexplainedOnboardingInteraction, true);
-            document.addEventListener('click', (event) => {
-                if (!isTutorialReplay || onboardingStage !== 'enter-first-island') return;
-                const target = event.target instanceof Element ? event.target : event.target?.parentElement;
-                const circleEnter = target?.closest('.game3-island-card[data-island-shape="circle"] .game3-island-enter');
-                if (!circleEnter) return;
-                event.preventDefault();
-                event.stopImmediatePropagation();
-                finishOnboarding();
-            }, true);
-
             document.addEventListener('click', (event) => {
                 if (isOnboardingComplete() && !isTutorialReplay) return;
                 const target = event.target.closest?.('button, a, [data-shop-item]');
@@ -5958,16 +6070,10 @@
                     return;
                 }
                 if (onboardingStage === 'enter-first-island' && event.detail?.route === 'game3') {
-                    window.setTimeout(() => {
-                        const circleEnter = document.querySelector('.game3-island-card[data-island-shape="circle"] .game3-island-enter');
-                        setOnboardingStage('enter-first-island');
-                        showOnboardingCoach(
-                            circleEnter,
-                            isTutorialReplay
-                                ? 'Pindutin ang Enter upang tapusin ang tutorial.'
-                                : 'Pindutin ang Enter upang makapasok sa unang isla.',
-                        );
-                    }, 0);
+                    // Returning to Shape Island is the final tutorial step.
+                    // Persist completion here so future visits to Home never
+                    // restart the walkthrough.
+                    window.setTimeout(finishOnboarding, 0);
                     return;
                 }
                 if (onboardingStage === 'enter-first-island' && event.detail?.route === 'shapeCircle') {
@@ -5981,10 +6087,14 @@
             });
             window.addEventListener('learnscape:islandunlocked', (event) => {
                 if (onboardingStage !== 'unlocking' || event.detail?.shape !== 'circle') return;
+                closeIntroMenu();
                 setOnboardingStage('open-profile');
                 window.__learnscapeNavigate?.('title');
             });
-            window.addEventListener('learnscape:termsaccepted', () => window.setTimeout(promptFullscreenBeforeOnboarding, 0));
+            window.addEventListener('learnscape:termsaccepted', () => {
+                if (!onboardingRequestedByEnter) return;
+                window.setTimeout(promptFullscreenBeforeOnboarding, 0);
+            });
             const resumeOnboardingAfterLayout = () => {
                 const resume = resumeOnboardingView || startOnboarding;
                 window.requestAnimationFrame(() => {
@@ -6023,8 +6133,6 @@
             document.addEventListener('fullscreenchange', pauseOnboardingOutsideFullscreen);
             document.addEventListener('webkitfullscreenchange', pauseOnboardingOutsideFullscreen);
             document.addEventListener('MSFullscreenChange', pauseOnboardingOutsideFullscreen);
-            if (hasAcceptedTermsPrivacy() && !isOnboardingComplete()) window.setTimeout(promptFullscreenBeforeOnboarding, 0);
-
             const waitForWindowLoad = () => {
                 if (document.readyState === 'complete') return Promise.resolve();
                 return new Promise((resolve) => window.addEventListener('load', resolve, { once: true }));
