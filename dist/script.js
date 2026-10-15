@@ -4,7 +4,7 @@ console.log("GAMIFIED script.js is executing!");
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-const appVersion = '20261015-05';
+const appVersion = '20261015-09';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
@@ -3115,10 +3115,29 @@ const appVersion = '20261015-05';
         if (!shapeSquarePage || !shapeSquareMissionGuide || !shapeSquareMissionStartButton) return;
         setShapeMissionBgmPhase('square');
 
+        clearShapeSquareTimers();
+        stopShapeSquareIntroAudio();
+        stopShapeSquareMissionAudio();
+        stopShapeSquareReadyAudio();
         stopShapeSquareCelebrationAudio();
         stopShapeSquareChocolateQuestionAudio();
         resetSquareObjectPuzzle();
-        shapeSquarePage.classList.remove('is-lesson-complete', 'is-square-puzzle-followup', 'is-progress-visible');
+        if (shapeSquareStartButton) shapeSquareStartButton.hidden = true;
+        shapeSquareStartButton?.classList.remove('is-clicking');
+        shapeSquarePage.classList.remove(
+            'is-transitioning-to-illustration',
+            'is-preparing-illustration-background',
+            'is-illustration-background',
+            'is-tv-lesson-image-visible',
+            'is-lesson-complete',
+            'is-square-puzzle-followup',
+            'is-progress-visible',
+            'is-shape-phase-selector-open',
+        );
+        if (shapeSquareBgImage) shapeSquareBgImage.src = shapeSquareAreaBackgroundSource;
+        setShapeSquareVideoStageVisible(false);
+        setShapeSquarePlayButtonVisible(false);
+        setShapeSquareSkipButtonVisible(false);
         shapeSquareProgress?.setAttribute('aria-hidden', 'true');
         if (shapeSquareProgress) shapeSquareProgress.dataset.progressStage = 'lesson';
         if (shapeSquareReplayButtonImage) shapeSquareReplayButtonImage.removeAttribute('src');
@@ -3831,6 +3850,7 @@ const appVersion = '20261015-05';
         stopShapeSquareIntroAudio();
         stopShapeSquareMissionAudio();
         stopShapeSquareReadyAudio();
+        hideShapeSquareMissionGuide();
         resetShapeSquareLessonVideo();
         shapeSquareSession += 1;
         if (shapeSquareStartPressTimer !== null) {
@@ -4030,6 +4050,7 @@ const appVersion = '20261015-05';
 
         stopShapePreviewIntro(page);
         const state = getShapePreviewIntroState(page);
+        if (state.startButton) state.startButton.hidden = false;
         const session = state.session;
         const completedShape = String(page.dataset.completedShape || '').trim().toLowerCase();
         const completedShapeLabel = completedShape.charAt(0).toUpperCase() + completedShape.slice(1);
@@ -10912,6 +10933,7 @@ const appVersion = '20261015-05';
         if (!isPageVisible(shapeSquarePage)) return;
 
         resetShapeSquareScene();
+        if (shapeSquareStartButton) shapeSquareStartButton.hidden = false;
         const session = shapeSquareSession;
 
         shapeSquareCharacter3.getBoundingClientRect();
@@ -15100,7 +15122,7 @@ const appVersion = '20261015-05';
         circle: { page: shapeCirclePage, start: '.shape-area-start-button', lesson: 'circleIllustration', mission: 'circleIllustration', detection: 'circleCamera' },
         square: { page: shapeSquarePage, start: '.shape-area-square-start-button', lesson: 'shapeSquare', mission: 'shapeSquare', detection: 'squareCamera' },
         triangle: { page: document.getElementById('learnscape-shape-area-3-page'), start: '.shape-area-preview-start-button', lesson: 'shapeArea3', mission: 'triangleGame', detection: 'triangleCamera' },
-        rectangle: { page: document.getElementById('learnscape-shape-area-4-page'), start: '.shape-area-preview-start-button', lesson: 'shapeArea4', mission: 'rectangleDelivery', detection: 'rectangleCamera' },
+        rectangle: { page: document.getElementById('learnscape-shape-area-4-page'), start: '.shape-area-preview-start-button', lesson: 'shapeArea4', mission: 'shapeArea4', detection: 'rectangleCamera' },
         oval: { page: document.getElementById('learnscape-shape-area-5-page'), start: '.shape-area-preview-start-button', lesson: 'shapeArea5', mission: 'ovalBoardGame', detection: 'ovalCamera' },
         heart: { page: heartMissionPage, start: '.shape-area-preview-start-button', lesson: 'shapeArea6', mission: 'shapeArea6', detection: 'heartCamera' },
         star: { page: starMissionPage, start: '.shape-area-preview-start-button', lesson: 'shapeArea7', mission: 'shapeArea7', detection: 'starCamera' },
@@ -15186,6 +15208,28 @@ const appVersion = '20261015-05';
         showShapeHowToHelpButton();
     };
 
+    const showCircleMissionStartDirectly = () => {
+        resetCircleIllustrationVideo();
+        circleIllustrationVideo?.pause?.();
+        circleIllustrationPage?.classList.add('is-lesson-complete');
+        setCircleIllustrationPlayButtonVisible(false);
+        setCircleIllustrationSkipButtonVisible(false);
+        if (!circleMissionGuide || !circleMissionStartButton) {
+            showCircleHuntStart();
+            return;
+        }
+        resetCircleMissionGuide();
+        circleMissionGuide.hidden = false;
+        circleMissionGuide.setAttribute('aria-hidden', 'false');
+        circleMissionGuide.getBoundingClientRect();
+        circleMissionGuide.classList.add('is-active');
+        skipAutomaticHowToOnce(circleMissionStartButton);
+        circleMissionStartButton.hidden = false;
+        circleMissionStartButton.getBoundingClientRect();
+        circleMissionStartButton.classList.add('is-visible');
+        circleMissionStartButton.focus({ preventScroll: true });
+    };
+
     const showTriangleMissionStartDirectly = () => {
         stopTriangleGameDialogue();
         if (!triangleGameStartButton) return;
@@ -15229,6 +15273,29 @@ const appVersion = '20261015-05';
         heartMissionStartButton.focus({ preventScroll: true });
     };
 
+    const showRectangleMissionStartDirectly = () => {
+        const page = shapePhaseConfigurations.rectangle.page;
+        const goButton = page?.querySelector('.rectangle-village-go-button') || null;
+        if (!page || !goButton) {
+            shapePreviewMissionStartByPage.get(page)?.();
+            return;
+        }
+        const messagePanel = page.querySelector('.rectangle-village-message-panel');
+        const messageText = page.querySelector('.rectangle-village-message-text');
+        const guideCharacter = page.querySelector('.rectangle-mission-guide-character');
+        const readyCharacter = page.querySelector('.rectangle-mission-guide-character-ch5');
+        if (messageText) {
+            messageText.textContent = 'Tara na! Sumakay na at simulan natin ang Bibi\u2019s Rectangle Delivery!';
+        }
+        if (messagePanel) messagePanel.hidden = false;
+        if (guideCharacter) guideCharacter.hidden = true;
+        if (readyCharacter) readyCharacter.hidden = false;
+        goButton.disabled = false;
+        goButton.hidden = false;
+        goButton.focus({ preventScroll: true });
+        enableMissionHowToHelp('rectangle');
+    };
+
     const playUnlockedShapePhase = (shape, phase) => {
         const config = shapePhaseConfigurations[shape];
         const isReplayPhase = ['lesson', 'mission'].includes(phase) && hasShapePhaseCompletion(shape);
@@ -15252,22 +15319,21 @@ const appVersion = '20261015-05';
                     circleIllustrationPlayButton?.focus({ preventScroll: true });
                 }
                 : () => {
-                    resetCircleIllustrationVideo();
+                    showCircleMissionStartDirectly();
                     enableMissionHowToHelp('circle');
-                    showCircleHuntStart();
                 });
             return true;
         }
 
         if (shape === 'square') {
+            if (phase === 'mission') {
+                skipAutomaticHowToOnce(shapeSquareMissionStartButton);
+                returnToShapeSquareMissionStart();
+                return true;
+            }
             runShapePhaseWithLoading(() => {
-                if (phase === 'lesson') {
-                    resetShapeSquareLessonVideo();
-                    showShapeSquareIllustration();
-                } else {
-                    skipAutomaticHowToOnce(shapeSquareMissionStartButton);
-                    returnToShapeSquareMissionStart();
-                }
+                resetShapeSquareLessonVideo();
+                showShapeSquareIllustration();
             });
             return true;
         }
@@ -15278,13 +15344,10 @@ const appVersion = '20261015-05';
         }
 
         if (phase === 'mission' && shape === 'rectangle') {
-            runShapePhaseWithLoading(() => {
-                enableMissionHowToHelp('rectangle');
-                showDirectPreviewMission(
-                    config.page,
-                    shapePreviewMissionStartByPage.get(config.page),
-                );
-            });
+            runShapePhaseWithLoading(() => showDirectPreviewMission(
+                config.page,
+                showRectangleMissionStartDirectly,
+            ));
             return true;
         }
 
