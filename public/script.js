@@ -3134,7 +3134,9 @@ const appVersion = '20261015-09';
             'is-progress-visible',
             'is-shape-phase-selector-open',
         );
-        if (shapeSquareBgImage) shapeSquareBgImage.src = shapeSquareAreaBackgroundSource;
+        // The Mission card should resume the same scene shown after earning the
+        // lesson's first star, rather than returning to Square Town's intro.
+        if (shapeSquareBgImage) shapeSquareBgImage.src = shapeSquareIllustrationBackgroundSource;
         setShapeSquareVideoStageVisible(false);
         setShapeSquarePlayButtonVisible(false);
         setShapeSquareSkipButtonVisible(false);
@@ -3144,7 +3146,7 @@ const appVersion = '20261015-09';
         shapeSquareReplayButton?.setAttribute('aria-label', 'Replay square lesson');
         if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.removeAttribute('src');
         shapeSquareNextButton?.setAttribute('aria-label', 'Continue');
-        shapeSquarePage.classList.add('is-square-mission-guide');
+        shapeSquarePage.classList.add('is-illustration-background', 'is-square-mission-guide');
         shapeSquareMissionGuide.hidden = false;
         shapeSquareMissionGuide.setAttribute('aria-hidden', 'false');
         shapeSquareMissionCharacter10.hidden = true;
@@ -7407,9 +7409,56 @@ const appVersion = '20261015-09';
         let bridgeDialogueFrame = null;
         let bridgeDialogueTimers = [];
         let bridgeDialogueAdvance = null;
+        let bridgeWalkAudio = null;
+        let bridgeShockAudio = null;
+
+        const stopBridgeTransitionAudio = () => {
+            [bridgeWalkAudio, bridgeShockAudio].forEach((audio) => {
+                if (!audio) return;
+                audio.pause?.();
+                try {
+                    audio.currentTime = 0;
+                } catch (error) {
+                    // The audio may not be ready to seek yet.
+                }
+            });
+            bridgeWalkAudio = null;
+            bridgeShockAudio = null;
+        };
+
+        const playBridgeWalkAudio = () => {
+            if (!window.Audio) return;
+            stopBridgeTransitionAudio();
+            const audio = new window.Audio('assets/Audios/Sound effects/walk.mp3');
+            bridgeWalkAudio = audio;
+            audio.preload = 'auto';
+            audio.playsInline = true;
+            audio.loop = true;
+            audio.play().catch(() => {
+                if (bridgeWalkAudio === audio) bridgeWalkAudio = null;
+            });
+        };
+
+        const playBridgeShockAudio = () => {
+            if (!window.Audio) return;
+            bridgeWalkAudio?.pause?.();
+            bridgeWalkAudio = null;
+            bridgeShockAudio?.pause?.();
+            const audio = new window.Audio('assets/Audios/Sound effects/shock.mp3');
+            bridgeShockAudio = audio;
+            audio.preload = 'auto';
+            audio.playsInline = true;
+            audio.onended = () => {
+                if (bridgeShockAudio === audio) bridgeShockAudio = null;
+            };
+            audio.play().catch(() => {
+                if (bridgeShockAudio === audio) bridgeShockAudio = null;
+            });
+        };
 
         const stopBridgeDialogue = () => {
             bridgeDialogueSession += 1;
+            stopBridgeTransitionAudio();
             bridgeDialogueTimers.forEach((timerId) => window.clearTimeout(timerId));
             bridgeDialogueTimers = [];
             if (bridgeDialogueFrame !== null) {
@@ -7909,6 +7958,8 @@ const appVersion = '20261015-09';
         bridgeYesButton?.addEventListener('click', () => {
             if (!isPageVisible(page) || !page.classList.contains('is-next-background') || bridgeYesButton.disabled) return;
             bridgeYesButton.disabled = true;
+            stopBridgeTransitionAudio();
+            setShapeMissionBgmPhase('triangle');
             page.classList.add('is-fading-to-triangle-game');
             const openTriangleGameTimer = window.setTimeout(() => {
                 window.location.hash = '#triangle-game';
@@ -7923,6 +7974,7 @@ const appVersion = '20261015-09';
             if (bridgeArrivalCharacter) bridgeArrivalCharacter.hidden = false;
             bridgeCharacterSequence.classList.remove('is-walking');
             startBridgeDialogue();
+            playBridgeShockAudio();
         });
 
         jeepSequence?.addEventListener('animationend', (event) => {
@@ -8023,9 +8075,9 @@ const appVersion = '20261015-09';
                 return;
             }
 
-            // The one-star Next click is a user gesture, so start the
-            // dedicated mission track immediately while the transition runs.
-            setShapeMissionBgmPhase(missionShape);
+            // Triangle Mountains starts its mission track only after the
+            // player confirms the bridge-help prompt with “Oo”.
+            if (missionShape !== 'triangle') setShapeMissionBgmPhase(missionShape);
 
             const nextBackgroundSource = page.dataset.nextBackground;
             if (!nextBackgroundSource) {
@@ -8088,6 +8140,7 @@ const appVersion = '20261015-09';
                     const startBridgeWalk = () => {
                         if (hasStartedWalking || !isPageVisible(page) || !page.classList.contains('is-next-background')) return;
                         hasStartedWalking = true;
+                        playBridgeWalkAudio();
                         bridgeCharacterSequence.classList.add('is-walking');
                         bridgeCharacterSequence.hidden = false;
                     };
@@ -9647,6 +9700,17 @@ const appVersion = '20261015-09';
     const triangleGameCompleteWalkingSource = 'assets/Character/walking.gif';
     const triangleGameCompleteVoiceSource = 'assets/Audios/Voice over/Mahusay.mp3';
     const triangleGameCompleteCheeringSource = 'assets/Audios/Sound effects/kids cheering.mp3';
+    const triangleWoodChopAudioSource = 'assets/Audios/Sound effects/wood chop.mp3';
+    const triangleWoodChopAudioPool = window.Audio
+        ? Array.from({ length: 3 }, () => {
+            const audio = new window.Audio(triangleWoodChopAudioSource);
+            audio.preload = 'auto';
+            audio.playsInline = true;
+            audio.load?.();
+            return audio;
+        })
+        : [];
+    let triangleWoodChopAudioIndex = 0;
     const triangleGameMessages = [
         'Para sa ating triangle mission.',
         'Kailangan nating ayusin ang tulay upang makapagpatuloy!',
@@ -9686,6 +9750,22 @@ const appVersion = '20261015-09';
             triangleTreeCutGuideTimer = null;
         }
         if (triangleTreeCutGuide) triangleTreeCutGuide.hidden = true;
+    };
+
+    const playTriangleWoodChopAudio = () => {
+        const audio = triangleWoodChopAudioPool[triangleWoodChopAudioIndex % triangleWoodChopAudioPool.length];
+        triangleWoodChopAudioIndex += 1;
+        if (!audio) {
+            playUiClickSound('wood');
+            return;
+        }
+        audio.pause();
+        try {
+            audio.currentTime = 0;
+        } catch (error) {
+            // The preloaded clip will begin at the earliest available frame.
+        }
+        audio.play().catch(() => playUiClickSound('wood'));
     };
 
     const positionTriangleTreeCutGuide = () => {
@@ -10541,6 +10621,7 @@ const appVersion = '20261015-09';
 
     const advanceTriangleGameTree = (tree) => {
         if (!triangleGameTreeGroup?.classList.contains('is-active') || !tree.classList.contains('is-clickable')) return;
+        playTriangleWoodChopAudio();
         scheduleTriangleTreeCutGuide();
         const currentStage = Number.parseInt(tree.dataset.treeStage || '0', 10);
         const nextStage = Math.min(currentStage + 1, 3);
@@ -10609,9 +10690,12 @@ const appVersion = '20261015-09';
         .reverse()
         .find((tree) => tree.classList.contains('is-clickable') && isPointOnTriangleGameTree(tree, clientX, clientY));
 
-    triangleGameStartButton?.addEventListener('click', () => {
-        triangleGameStartButton.classList.remove('is-visible');
-        triangleGameStartButton.hidden = true;
+    const startTriangleTreeMission = () => {
+        if (!triangleGamePage || triangleGamePage.hidden) return;
+        if (triangleGameStartButton) {
+            triangleGameStartButton.classList.remove('is-visible');
+            triangleGameStartButton.hidden = true;
+        }
         triangleGameTreeGroup?.classList.add('is-active');
         if (triangleWoodStorage) {
             triangleWoodStorage.hidden = false;
@@ -10627,7 +10711,9 @@ const appVersion = '20261015-09';
             tree.setAttribute('aria-label', `Tree ${treeIndex + 1}, 3 taps remaining`);
         });
         scheduleTriangleTreeCutGuide();
-    });
+    };
+
+    triangleGameStartButton?.addEventListener('click', startTriangleTreeMission);
 
     triangleGameTreeGroup?.addEventListener('click', (event) => {
         const tree = findTriangleGameTreeAtPoint(event.clientX, event.clientY);
@@ -12524,7 +12610,7 @@ const appVersion = '20261015-09';
             emphasis.textContent = 'Buksan ang Kamera';
             message.append('Pindutin ang ', emphasis);
         } else if (messageType === 'processing') {
-            message.textContent = 'Pinoproseso';
+            message.textContent = 'Please Wait...';
         } else if (messageType === 'ready') {
             message.textContent = 'Ready?';
         }
@@ -12821,6 +12907,19 @@ const appVersion = '20261015-09';
         badgeClone.removeAttribute('aria-label');
         badgeClone.classList.add('is-unlocked', 'camera-celebration-profile-badge');
         badgeClone.querySelector('.intro-profile-lock')?.remove();
+        // Keep the Square completion badge's playful slanted-Q lettering in
+        // sync with its Profile counterpart, including when built from the
+        // fallback badge artwork.
+        if (shape === 'square') {
+            const label = badgeClone.querySelector('strong');
+            if (label) {
+                const q = document.createElement('span');
+                q.className = 'badge-letter-q';
+                q.setAttribute('aria-label', 'Q');
+                q.textContent = 'O';
+                label.replaceChildren('S', q, 'UARE');
+            }
+        }
         celebrationBadge.appendChild(badgeClone);
     };
 
@@ -12898,15 +12997,22 @@ const appVersion = '20261015-09';
             console.warn('Camera scan progress could not be saved.', error);
         }
     };
-    const setCameraChestOpenButtonState = (page, isReady) => {
+    const setCameraChestOpenButtonState = (page, isReady, { enable = isReady } = {}) => {
         const button = page?.querySelector('.camera-chest-open-button');
         if (!button) return;
-        const canOpen = Boolean(isReady) && !page.classList.contains('is-camera-completing');
-        button.hidden = !canOpen;
+        const shouldShow = Boolean(isReady) && !page.classList.contains('is-camera-completing');
+        const canOpen = shouldShow && Boolean(enable);
+        const wasHidden = button.hidden;
+        button.hidden = !shouldShow;
         button.disabled = !canOpen;
-        button.setAttribute('aria-hidden', String(!canOpen));
+        button.setAttribute('aria-hidden', String(!shouldShow));
         if (canOpen) button.removeAttribute('tabindex');
         else button.tabIndex = -1;
+        if (shouldShow && wasHidden) {
+            button.classList.remove('is-revealing');
+            void button.offsetWidth;
+            button.classList.add('is-revealing');
+        }
     };
     const applyCameraChestProgress = (page, count, { enableOpen = true } = {}) => {
         const savedCount = Math.max(0, Math.min(3, Math.floor(Number(count) || 0)));
@@ -13013,6 +13119,9 @@ const appVersion = '20261015-09';
                 } else if (nextCount === 2) {
                     playCameraScanRewardAudio(page, 'assets/Audios/Sound effects/chain break.mp3');
                 } else {
+                    // Reveal the final action with its completion cue, then
+                    // enable it after the final star animation has finished.
+                    setCameraChestOpenButtonState(page, true, { enable: false });
                     playUiClickSound('boardSuccess');
                 }
 
@@ -15325,38 +15434,45 @@ const appVersion = '20261015-09';
     const openShapeMissionPhase = (shape, config) => {
         if (shape === 'circle') {
             navigateToShapePhase(config.mission, () => {
-                showCircleMissionStartDirectly();
+                resetCircleIllustrationVideo();
+                resetCircleMissionGuide();
+                showCircleHuntStart();
+                startCircleHuntCountdown();
                 enableMissionHowToHelp('circle');
             });
             return true;
         }
 
         if (shape === 'square') {
-            skipAutomaticHowToOnce(shapeSquareMissionStartButton);
-            returnToShapeSquareMissionStart();
-            enableMissionHowToHelp('square');
+            runShapePhaseWithLoading(() => {
+                returnToShapeSquareMissionStart();
+                // Match pressing the post-lesson Start button instead of leaving
+                // the player at that checkpoint. The checkpoint applies
+                // squaregame.webp before the playable mission is revealed.
+                showShapeSquareObjectGame();
+                enableMissionHowToHelp('square');
+            });
             return true;
         }
 
         if (shape === 'triangle') {
             navigateToShapePhase(config.mission, () => {
-                showTriangleMissionStartDirectly();
+                stopTriangleGameDialogue();
+                startTriangleTreeMission();
                 enableMissionHowToHelp('triangle');
             });
             return true;
         }
 
         if (shape === 'rectangle') {
-            runShapePhaseWithLoading(() => showDirectPreviewMission(
-                config.page,
-                showRectangleMissionStartDirectly,
-            ));
+            navigateToShapePhase('rectangleDelivery');
             return true;
         }
 
         if (shape === 'oval') {
             navigateToShapePhase(config.mission, () => {
-                showOvalMissionStartDirectly();
+                stopOvalMissionIntro();
+                startOvalTargetRound(15);
                 enableMissionHowToHelp('oval');
             });
             return true;
@@ -15364,17 +15480,25 @@ const appVersion = '20261015-09';
 
         const missionStarters = {
             heart: () => {
-                showHeartMissionStartDirectly();
+                stopHeartMissionSequence();
+                if (heartMissionIntro) {
+                    heartMissionIntro.hidden = true;
+                    heartMissionIntro.setAttribute('aria-hidden', 'true');
+                }
+                startHeartCupidGame();
                 enableMissionHowToHelp('heart');
             },
             star: () => {
-                skipAutomaticHowToOnce(starMissionStartButton);
-                showStarMissionRetryStart();
+                stopStarMissionSequence();
+                if (starMissionIntro) {
+                    starMissionIntro.hidden = true;
+                    starMissionIntro.setAttribute('aria-hidden', 'true');
+                }
+                showStarMissionSetup();
                 enableMissionHowToHelp('star');
             },
             diamond: () => {
-                skipAutomaticHowToOnce(diamondMissionStartButton);
-                showDiamondMissionRetryStart();
+                startDiamondMissionGame();
                 enableMissionHowToHelp('diamond');
             },
         };
@@ -15405,39 +15529,105 @@ const appVersion = '20261015-09';
             : openShapeMissionPhase(shape, config);
     };
 
+    const shapePhasePanelArt = Object.freeze({
+        circle: { lesson: 'assets/Backgrounds/circle.webp', mission: 'assets/Backgrounds/circlegame.webp' },
+        square: { lesson: 'assets/Backgrounds/square.webp', mission: 'assets/Backgrounds/squaregame.webp' },
+        triangle: { lesson: 'assets/Backgrounds/triangle.webp', mission: 'assets/Backgrounds/trianglegame.webp' },
+        rectangle: { lesson: 'assets/Backgrounds/rectangle.webp', mission: 'assets/Backgrounds/rectanglegame.webp' },
+        oval: { lesson: 'assets/Backgrounds/oval.webp', mission: 'assets/Backgrounds/oval.webp' },
+        heart: { lesson: 'assets/Backgrounds/heartmission.webp', mission: 'assets/Backgrounds/heartmission.webp' },
+        star: { lesson: 'assets/Backgrounds/star.webp', mission: 'assets/Backgrounds/starmission.webp' },
+        diamond: { lesson: 'assets/Backgrounds/diamond.webp', mission: 'assets/Backgrounds/diamond.webp' },
+    });
+
+    const shapePhasePanelCopy = Object.freeze({
+        lesson: { title: 'Lesson', description: 'Learn about the shape' },
+        mission: { title: 'Mission', description: 'Play the shape adventure' },
+        detection: { title: 'Detection', description: 'Find the shape with your camera' },
+    });
+
+    const shapeIslandNames = Object.freeze({
+        circle: 'Circle Meadow',
+        square: 'Square Town',
+        triangle: 'Triangle Mountains',
+        rectangle: 'Rectangle Village',
+        oval: 'Oval Garden',
+        heart: 'Heart City',
+        star: 'Star Forest',
+        diamond: 'Diamond Cave',
+    });
+
     const shapePhaseSelectors = new Map();
+    const isShapeIslandCompleted = (shape) => hasShapePhaseBadge(shape);
+
+    const setShapePhaseHubOpen = (record, isOpen) => {
+        record.page.classList.toggle('is-shape-phase-selector-open', isOpen);
+        record.selector.hidden = !isOpen;
+        record.selector.setAttribute('aria-hidden', String(!isOpen));
+    };
+
     const syncShapePhaseSelector = (shape) => {
         const record = shapePhaseSelectors.get(shape);
         if (!record) return;
-        const earned = hasShapePhaseCompletion(shape);
-        const detectionEarned = hasShapePhaseBadge(shape);
-        record.page.classList.toggle('has-shape-phase-selector', earned);
-        record.selector.classList.toggle('has-detection', detectionEarned);
-        const detectionChoice = record.selector.querySelector('[data-shape-phase-choice="detection"]');
-        if (detectionChoice) detectionChoice.hidden = !detectionEarned;
-        if (!earned || record.start.hidden || !isPageVisible(record.page)) {
-            record.page.classList.remove('is-shape-phase-selector-open');
-            record.selector.hidden = true;
-            return;
-        }
-        record.selector.hidden = !record.page.classList.contains('is-shape-phase-selector-open');
+        const completed = isShapeIslandCompleted(shape);
+        record.page.classList.toggle('has-shape-phase-selector', completed);
+        if (!completed || !isPageVisible(record.page)) setShapePhaseHubOpen(record, false);
     };
 
     Object.entries(shapePhaseConfigurations).forEach(([shape, config]) => {
         const page = config.page;
         const start = page?.querySelector(config.start);
         if (!page || !start) return;
+
         const selector = document.createElement('section');
         selector.className = 'shape-phase-selector';
-        selector.setAttribute('aria-label', `${shape[0].toUpperCase()}${shape.slice(1)} activities`);
+        selector.setAttribute('aria-label', `${shapeIslandNames[shape]} phase menu`);
+        selector.setAttribute('aria-hidden', 'true');
         selector.hidden = true;
+
+        const header = document.createElement('header');
+        header.className = 'shape-phase-hub-header';
+        const heading = document.createElement('h2');
+        heading.textContent = shapeIslandNames[shape];
+        const subheading = document.createElement('p');
+        subheading.textContent = 'Choose an activity';
+        const back = document.createElement('button');
+        back.className = 'shape-phase-hub-back';
+        back.type = 'button';
+        back.textContent = '‹ Back';
+        back.addEventListener('click', () => {
+            setShapePhaseHubOpen({ page, selector }, false);
+            start.focus({ preventScroll: true });
+        });
+        header.append(back, heading, subheading);
+
+        const choices = document.createElement('div');
+        choices.className = 'shape-phase-hub-choices';
         ['lesson', 'mission', 'detection'].forEach((phase) => {
-            const choice = document.createElement('div');
+            const panelCopy = shapePhasePanelCopy[phase];
+            const choice = document.createElement('article');
             choice.className = 'shape-phase-choice';
             choice.dataset.shapePhaseChoice = phase;
-            if (phase === 'detection') choice.hidden = !hasShapePhaseBadge(shape);
-            const label = document.createElement('strong');
-            label.textContent = `${phase[0].toUpperCase()}${phase.slice(1)}`;
+
+            const title = document.createElement('h3');
+            title.textContent = panelCopy.title;
+            const preview = document.createElement('div');
+            preview.className = `shape-phase-preview shape-phase-preview-${phase}`;
+            const artwork = shapePhasePanelArt[shape]?.[phase];
+            if (artwork) {
+                const image = document.createElement('img');
+                image.src = artwork;
+                image.alt = `${shape[0].toUpperCase()}${shape.slice(1)} ${panelCopy.title.toLowerCase()} preview`;
+                preview.appendChild(image);
+            } else {
+                const cameraIcon = document.createElement('span');
+                cameraIcon.className = `shape-phase-camera-shape shape-phase-camera-shape-${shape}`;
+                cameraIcon.setAttribute('aria-hidden', 'true');
+                preview.appendChild(cameraIcon);
+            }
+            const description = document.createElement('p');
+            description.className = 'shape-phase-description';
+            description.textContent = panelCopy.description;
             const play = document.createElement('button');
             play.className = 'shape-phase-play';
             play.type = 'button';
@@ -15445,27 +15635,27 @@ const appVersion = '20261015-09';
             play.textContent = '▶ Play';
             play.addEventListener('click', (event) => {
                 event.preventDefault();
-                event.stopPropagation();
                 if (play.disabled) return;
                 play.disabled = true;
                 play.setAttribute('aria-busy', 'true');
-                page.classList.remove('is-shape-phase-selector-open');
-                selector.hidden = true;
+                setShapePhaseHubOpen({ page, selector }, false);
                 if (playUnlockedShapePhase(shape, phase)) return;
 
                 play.disabled = false;
                 play.removeAttribute('aria-busy');
-                page.classList.add('is-shape-phase-selector-open');
-                selector.hidden = false;
+                setShapePhaseHubOpen({ page, selector }, true);
                 play.focus({ preventScroll: true });
             });
-            choice.append(label, play);
-            selector.appendChild(choice);
+            choice.append(title, preview, description, play);
+            choices.appendChild(choice);
         });
+        selector.append(header, choices);
         start.insertAdjacentElement('afterend', selector);
-        shapePhaseSelectors.set(shape, { page, start, selector });
+        const record = { page, start, selector };
+        shapePhaseSelectors.set(shape, record);
+
         start.addEventListener('click', (event) => {
-            if (!hasShapePhaseCompletion(shape)) return;
+            if (!isShapeIslandCompleted(shape)) return;
             event.preventDefault();
             event.stopImmediatePropagation();
             if (shape === 'circle') {
@@ -15481,14 +15671,9 @@ const appVersion = '20261015-09';
                 playButton.disabled = false;
                 playButton.removeAttribute('aria-busy');
             });
-            page.classList.add('is-shape-phase-selector-open');
-            selector.hidden = false;
+            setShapePhaseHubOpen(record, true);
             selector.querySelector('.shape-phase-play')?.focus({ preventScroll: true });
         }, true);
-        new MutationObserver(() => syncShapePhaseSelector(shape)).observe(start, {
-            attributes: true,
-            attributeFilter: ['hidden'],
-        });
         syncShapePhaseSelector(shape);
     });
 
