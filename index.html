@@ -11,10 +11,9 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/app-icon-192.png">
     <link rel="apple-touch-icon" href="assets/icons/app-icon-192.png">
-    <link rel="preload" as="audio" href="assets/Audios/Sound%20effects/chest%20open.mp3" type="audio/mpeg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="style.css?v=20261017-05">
 </head>
 <body class="title-page is-page-loading is-initial-loading" aria-busy="true">
@@ -2172,7 +2171,7 @@
 
     
 
-    <script src="/script.js?v=20261017-14"></script>
+    <script src="./script.js?v=20261017-16"></script>
     </div>
 
     <script>
@@ -6323,11 +6322,107 @@
             document.addEventListener('fullscreenchange', pauseOnboardingOutsideFullscreen);
             document.addEventListener('webkitfullscreenchange', pauseOnboardingOutsideFullscreen);
             document.addEventListener('MSFullscreenChange', pauseOnboardingOutsideFullscreen);
+const loadRuntimeAssets = async () => {
+    let persistentStorage = false;
+    if ('serviceWorker' in navigator && 'caches' in window) {
+        try {
+            const registration = await navigator.serviceWorker.register(new URL('sw.js', document.baseURI));
+            const pendingWorker = registration.installing || registration.waiting;
+            if (pendingWorker && pendingWorker.state !== 'activated') {
+                await new Promise((resolve, reject) => {
+                    const timeoutId = window.setTimeout(() => reject(new Error('Service worker activation timed out.')), 15000);
+                    const checkState = () => {
+                        if (!['activated', 'redundant'].includes(pendingWorker.state)) return;
+                        window.clearTimeout(timeoutId);
+                        pendingWorker.removeEventListener('statechange', checkState);
+                        if (pendingWorker.state === 'activated') resolve();
+                        else reject(new Error('Service worker activation failed.'));
+                    };
+                    pendingWorker.addEventListener('statechange', checkState);
+                    checkState();
+                });
+            }
+            persistentStorage = true;
+        } catch (error) {
+            console.warn('[Learnscape] Persistent asset storage is unavailable.', error);
+        }
+    }
+    const manifestUrl = new URL('runtime-assets.json', document.baseURI);
+    const manifestResponse = await fetch(manifestUrl, { cache: 'no-cache' });
+    if (!manifestResponse.ok) throw new Error('Unable to load the asset list.');
+    const manifest = await manifestResponse.json();
+    if (!manifest || !/^[a-f0-9]{20}$/.test(manifest.version) || !Array.isArray(manifest.assets) || !manifest.assets.length) {
+        throw new Error('The asset list is invalid.');
+    }
+
+    let assetCache = null;
+    if (persistentStorage) {
+        try {
+            assetCache = await caches.open(`learnscape-runtime-${manifest.version}`);
+        } catch (error) {
+            console.warn('[Learnscape] Persistent asset storage is unavailable.', error);
+        }
+    }
+
+    const urls = [...new Set(manifest.assets.map((path) => {
+        const url = new URL(path, manifestUrl);
+        if (url.origin !== manifestUrl.origin) throw new Error('Invalid asset origin.');
+        return url.href;
+    }))];
+    let nextAsset = 0;
+    let completed = 0;
+    const downloadAsset = async (url) => {
+        if (assetCache && await assetCache.match(url)) return;
+        let lastError;
+        for (let attempt = 0; attempt < 2; attempt++) {
+            const controller = new AbortController();
+            const timeoutId = window.setTimeout(() => controller.abort(), 120000);
+            try {
+                const response = await fetch(url, { cache: 'reload', signal: controller.signal });
+                const isHtml = (response.headers.get('content-type') || '').includes('text/html');
+                if (!response.ok || (isHtml && !/\.(?:html?)$/i.test(new URL(url).pathname))) {
+                    throw new Error(`Asset request failed: ${url} (${response.status})`);
+                }
+                if (assetCache) await assetCache.put(url, response);
+                else await response.arrayBuffer();
+                return;
+            } catch (error) {
+                lastError = error;
+            } finally {
+                window.clearTimeout(timeoutId);
+            }
+        }
+        throw lastError;
+    };
+
+    const worker = async () => {
+        while (nextAsset < urls.length) {
+            const url = urls[nextAsset++];
+            await downloadAsset(url);
+            completed++;
+            setInitialLoadingMessage(`Loading game assets… ${completed} / ${urls.length}`);
+            setInitialLoadingProgress(8 + (completed / urls.length) * 77);
+        }
+    };
+    const results = await Promise.allSettled(Array.from({ length: Math.min(6, urls.length) }, worker));
+    const failure = results.find((result) => result.status === 'rejected');
+    if (failure) throw failure.reason;
+
+    if (assetCache) {
+        const cacheName = `learnscape-runtime-${manifest.version}`;
+        const meta = await caches.open('learnscape-meta-v2');
+        await meta.put(new URL('__learnscape_active_cache__', document.baseURI).href, new Response(cacheName));
+        const keys = await caches.keys();
+        await Promise.all(keys.filter((key) => key.startsWith('learnscape-runtime-') && key !== cacheName)
+            .map((key) => caches.delete(key)));
+    }
+};
+
 const trackInitialImages = () => {
     const images = Array.from(document.images);
 
     if (!images.length) {
-        setInitialLoadingProgress(35);
+        setInitialLoadingProgress(95);
         return Promise.resolve();
     }
 
@@ -6338,13 +6433,14 @@ const trackInitialImages = () => {
         completedImages++;
 
         setInitialLoadingProgress(
-            8 + ((completedImages / images.length) * 27)
+            85 + ((completedImages / images.length) * 10)
         );
     };
 
     return Promise.all(
         images.map((image) => new Promise((resolve) => {
             let settled = false;
+            let retried = false;
             let timeoutId;
 
             const getSource = () =>
@@ -6387,20 +6483,27 @@ const trackInitialImages = () => {
                 }
             };
 
-            const onError = () => finish(true);
+            const onError = () => {
+                const attribute = image.getAttribute('src') ? 'src' : 'srcset';
+                const source = image.getAttribute(attribute);
+                if (!retried && source && typeof image.setAttribute === 'function') {
+                    retried = true;
+                    image.setAttribute(attribute, source);
+                    return;
+                }
+                finish(Boolean(source));
+            };
 
             timeoutId = window.setTimeout(() => finish(true), 8000);
+            image.addEventListener("load", onLoad);
+            image.addEventListener("error", onError);
             if (image.complete) {
                 if (image.naturalWidth > 0) {
                     onLoad();
                 } else {
-                    finish(Boolean(getSource()));
+                    onError();
                 }
-                return;
             }
-
-            image.addEventListener("load", onLoad, { once: true });
-            image.addEventListener("error", onError, { once: true });
         }))
     ).then(() => {
         if (failedImages.length > 0) {
@@ -6434,9 +6537,10 @@ const trackInitialImages = () => {
 
             const completeInitialBoot = async () => {
                 try {
-                    // Optional game media and camera detection load independently; a
-                    // missing lesson asset must not prevent the title screen opening.
-                    await Promise.all([trackInitialImages(), waitForGameInitialization()]);
+                    window.__learnscapeAssetsReady = loadRuntimeAssets();
+                    await window.__learnscapeAssetsReady;
+                    await waitForGameInitialization();
+                    await trackInitialImages();
                     setInitialLoadingMessage('Finishing game startup…');
                     setInitialLoadingProgress(97);
 
@@ -6445,10 +6549,6 @@ const trackInitialImages = () => {
                     if (remainingTime > 0) {
                         await new Promise((resolve) => window.setTimeout(resolve, remainingTime));
                     }
-
-                    await new Promise((resolve) => {
-                        window.requestAnimationFrame(() => window.requestAnimationFrame(resolve));
-                    });
 
                     setInitialLoadingProgress(100);
                     await new Promise((resolve) => window.setTimeout(resolve, 350));
@@ -6459,7 +6559,7 @@ const trackInitialImages = () => {
                     window.dispatchEvent(new CustomEvent('learnscape:appready'));
                 } catch (error) {
                     console.error('The game could not finish starting.', error);
-                    setInitialLoadingMessage('The game could not start. Check your connection and try again.');
+                    setInitialLoadingMessage('The game could not start. Check your connection and available storage, then try again.');
                     const initialLoadingPanel = loadingOverlay?.querySelector('.initial-loading-panel');
                     initialLoadingPanel?.classList.add('has-loading-error');
                     if (loadingRetryButton) {
@@ -6476,10 +6576,10 @@ const trackInitialImages = () => {
     </script>
     <!-- Import map lets the camera detector run in both Vite and static Live Server. -->
     <script type="importmap">
-        {"imports":{"onnxruntime-web":"/node_modules/onnxruntime-web/dist/ort.wasm.bundle.min.mjs","onnxruntime-web/wasm":"/node_modules/onnxruntime-web/dist/ort.wasm.bundle.min.mjs"}}
+        {"imports":{"onnxruntime-web":"./node_modules/onnxruntime-web/dist/ort.wasm.bundle.min.mjs","onnxruntime-web/wasm":"./node_modules/onnxruntime-web/dist/ort.wasm.bundle.min.mjs"}}
     </script>
     <!-- ONNX Shape Detection -->
-    <script type="module" src="/detection/init.js"></script>
+    <script type="module" src="./detection/init.js"></script>
 </body>
 </html>
 

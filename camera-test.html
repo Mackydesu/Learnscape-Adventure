@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learnscape Camera Feed</title>
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="./style.css">
     <style>
         .camera-test-page .circle-camera-scan-board {
             width: min(74vw, 68rem);
@@ -84,6 +84,9 @@
         </button>
     </section>
 
-    <script type="module" src="/detection/camera-test.js"></script>
+    <script type="importmap">
+        {"imports":{"onnxruntime-web":"./node_modules/onnxruntime-web/dist/ort.wasm.bundle.min.mjs","onnxruntime-web/wasm":"./node_modules/onnxruntime-web/dist/ort.wasm.bundle.min.mjs"}}
+    </script>
+    <script type="module" src="./detection/camera-test.js"></script>
 </body>
 </html>

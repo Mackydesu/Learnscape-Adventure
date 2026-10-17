@@ -2,7 +2,9 @@ import { loadModel } from "./model.js";
 import { initializeGameCameraDetection } from "./gameDetection.js";
 
 console.log("Starting ONNX initialization...");
-const modelReady = loadModel();
+// The model and its WASM runtime are part of the startup asset package.
+// Starting detection afterward lets it use the completed cache, including offline.
+const modelReady = Promise.resolve(window.__learnscapeAssetsReady).then(() => loadModel());
 initializeGameCameraDetection(modelReady);
 
 const signalDetectionReady = (ready, error = null) => {

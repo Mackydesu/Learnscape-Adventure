@@ -4,9 +4,6 @@ console.log("GAMIFIED script.js is executing!");
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-const appVersion = '20261017-01';
-    const appVersionKey = 'learnscape-app-version';
-    const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;
     const uiClickAudioContext = (() => {
         const AudioCtor = window.AudioContext || window.webkitAudioContext;
@@ -352,61 +349,6 @@ const appVersion = '20261017-01';
     }, true);
 
     window.playUiClickSound = playUiClickSound;
-
-    const clearCachedShell = async () => {
-        if ('serviceWorker' in navigator) {
-            const registrations = await navigator.serviceWorker.getRegistrations();
-            await Promise.all(registrations.map((registration) => registration.unregister()));
-        }
-
-        if ('caches' in window) {
-            const cacheKeys = await caches.keys();
-            await Promise.all(cacheKeys.map((cacheKey) => caches.delete(cacheKey)));
-        }
-    };
-
-    const ensureFreshShell = async () => {
-        let storedVersion = null;
-        const currentUrl = new URL(window.location.href);
-        const isFreshRequest = currentUrl.searchParams.get(freshParamKey) === appVersion;
-
-        try {
-            storedVersion = window.localStorage.getItem(appVersionKey);
-        } catch (error) {
-            storedVersion = null;
-        }
-
-        if (storedVersion === appVersion || isFreshRequest) {
-            try {
-                window.localStorage.setItem(appVersionKey, appVersion);
-            } catch (error) {
-                // The versioned URL is enough when storage is unavailable.
-            }
-            return false;
-        }
-
-        try {
-            window.localStorage.setItem(appVersionKey, appVersion);
-        } catch (error) {
-            // The fresh query parameter prevents a reload loop when storage is unavailable.
-        }
-
-        await Promise.race([
-            clearCachedShell(),
-            new Promise((resolve) => window.setTimeout(resolve, 800)),
-        ]);
-
-        const nextUrl = currentUrl;
-        nextUrl.searchParams.set(freshParamKey, appVersion);
-        window.location.replace(nextUrl.toString());
-        return true;
-    };
-
-    try {
-        if (await ensureFreshShell()) return;
-    } catch (error) {
-        console.warn('Fresh shell reset was not available.', error);
-    }
 
     const loadingLinks = document.querySelectorAll('.loading-link');
     const appBackButtons = document.querySelectorAll('.game-return-btn');

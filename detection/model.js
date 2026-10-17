@@ -10,7 +10,10 @@ export async function loadModel() {
         console.log("Loading YOLO11n ONNX model...");
 
         let loadError = null;
-        for (const modelUrl of ["/models/final_model.onnx", "/public/models/final_model.onnx"]) {
+        // Vite serves the public directory at the app root; a static checkout
+        // serves the same file under public/. Both paths stay within the app scope.
+        const modelPath = import.meta.env ? "models/final_model.onnx" : "public/models/final_model.onnx";
+        for (const modelUrl of [new URL(modelPath, document.baseURI).href]) {
             try {
                 session = await ort.InferenceSession.create(modelUrl, {
                     executionProviders: ["wasm"]
