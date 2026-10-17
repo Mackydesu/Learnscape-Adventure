@@ -875,8 +875,27 @@ body.is-windowed-fallback .fullscreen-restore-overlay {
     line-height: 1.2;
     text-align: center;
     letter-spacing: 0.035em;
-    white-space: nowrap;
+    white-space: normal;
     text-shadow: 0 0.16rem 0 #174c35, 0 0.3rem 0.7rem rgba(0, 0, 0, 0.7);
+}
+
+.initial-loading-retry {
+    padding: 0.65rem 1.5rem;
+    border: 0.15rem solid #fff6a3;
+    border-radius: 999px;
+    background: #168947;
+    color: #fffbd8;
+    font: 700 clamp(1rem, 2vw, 1.25rem) 'Fredoka', sans-serif;
+    cursor: pointer;
+}
+
+.initial-loading-retry[hidden] {
+    display: none;
+}
+
+.initial-loading-retry:focus-visible {
+    outline: 0.16rem solid white;
+    outline-offset: 0.2rem;
 }
 
 @keyframes loadingBarFill {

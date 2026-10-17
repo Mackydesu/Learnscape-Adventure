@@ -4,7 +4,7 @@ console.log("GAMIFIED script.js is executing!");
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
-const appVersion = '20261015-09';
+const appVersion = '20261017-01';
     const appVersionKey = 'learnscape-app-version';
     const freshParamKey = 'fresh';
     let uiClickMasterVolume = null;

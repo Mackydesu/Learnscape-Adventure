@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20261017-04">
+    <link rel="stylesheet" href="style.css?v=20261017-05">
 </head>
 <body class="title-page is-page-loading is-initial-loading" aria-busy="true">
     <div id="app-shell-container" class="app-shell-container">
@@ -43,6 +43,7 @@
             <div class="initial-loading-bar" role="progressbar" aria-label="Loading game assets and contents" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                 <span></span>
             </div>
+            <button class="initial-loading-retry" type="button" hidden>Try again</button>
         </div>
         <div class="page-loading-panel route-loading-panel" role="status">
             <img class="page-loading-art" src="assets/Backgrounds/loadingscreen.png" alt="Loading">
@@ -2171,7 +2172,7 @@
 
     
 
-    <script src="/script.js?v=20261017-13"></script>
+    <script src="/script.js?v=20261017-14"></script>
     </div>
 
     <script>
@@ -2495,6 +2496,7 @@
 
             const loadingOverlay = document.querySelector('.page-loading-overlay');
             const loadingProgressBar = loadingOverlay?.querySelector('.initial-loading-bar');
+            const loadingRetryButton = loadingOverlay?.querySelector('.initial-loading-retry');
             const body = document.body;
             const routeBodyClasses = ['title-page', 'about-page', 'game3-page', 'gameplay-page'];
             let loadingTimer = null;
@@ -2520,11 +2522,13 @@
 
             const blockInteractionUntilReady = (event) => {
                 if (!body.classList.contains('is-initial-loading')) return;
+                if (loadingRetryButton?.contains(event.target)) return;
                 event.preventDefault();
                 event.stopImmediatePropagation();
             };
             document.addEventListener('click', blockInteractionUntilReady, true);
             document.addEventListener('keydown', blockInteractionUntilReady, true);
+            loadingRetryButton?.addEventListener('click', () => window.location.reload());
 
             const aboutTabs = Array.from(document.querySelectorAll('[data-about-view]'));
             const aboutPanels = Array.from(document.querySelectorAll('[data-about-panel]'));
@@ -6319,176 +6323,121 @@
             document.addEventListener('fullscreenchange', pauseOnboardingOutsideFullscreen);
             document.addEventListener('webkitfullscreenchange', pauseOnboardingOutsideFullscreen);
             document.addEventListener('MSFullscreenChange', pauseOnboardingOutsideFullscreen);
-            const waitForWindowLoad = () => {
-                if (document.readyState === 'complete') return Promise.resolve();
-                return new Promise((resolve) => window.addEventListener('load', resolve, { once: true }));
-            };
+const trackInitialImages = () => {
+    const images = Array.from(document.images);
 
-            const trackInitialImages = () => {
-                const images = Array.from(document.images);
-                if (!images.length) {
-                    setInitialLoadingProgress(35);
-                    return Promise.resolve();
+    if (!images.length) {
+        setInitialLoadingProgress(35);
+        return Promise.resolve();
+    }
+
+    let completedImages = 0;
+    const failedImages = [];
+
+    const markImageComplete = () => {
+        completedImages++;
+
+        setInitialLoadingProgress(
+            8 + ((completedImages / images.length) * 27)
+        );
+    };
+
+    return Promise.all(
+        images.map((image) => new Promise((resolve) => {
+            let settled = false;
+            let timeoutId;
+
+            const getSource = () =>
+                image.currentSrc ||
+                image.getAttribute("src") ||
+                image.getAttribute("srcset") ||
+                "";
+
+            const finish = (failed = false) => {
+                if (settled) return;
+                settled = true;
+                window.clearTimeout(timeoutId);
+
+                image.removeEventListener("load", onLoad);
+                image.removeEventListener("error", onError);
+
+                if (failed) {
+                    const source = getSource();
+
+                    if (source) {
+                        failedImages.push(source);
+                        console.warn(
+                            "[Learnscape] Image failed:",
+                            source
+                        );
+                    }
                 }
 
-                let completedImages = 0;
-                const failedImages = [];
-                const markImageComplete = () => {
-                    completedImages += 1;
-                    setInitialLoadingProgress(8 + ((completedImages / images.length) * 27));
-                };
-
-                return Promise.all(images.map((image) => new Promise((resolve) => {
-                    let settled = false;
-                    const hasSource = Boolean(image.currentSrc || image.getAttribute('src') || image.getAttribute('srcset'));
-                    const finish = (failed = false) => {
-                        if (settled) return;
-                        settled = true;
-                        image.removeEventListener('load', finish);
-                        image.removeEventListener('error', finish);
-                        if (failed && hasSource) failedImages.push(image.currentSrc || image.src);
-                        markImageComplete();
-                        resolve();
-                    };
-
-                    if (image.complete) {
-                        if (typeof image.decode === 'function' && image.naturalWidth > 0) {
-                            image.decode().catch(() => undefined).then(finish);
-                        } else {
-                            finish(image.naturalWidth === 0 && hasSource);
-                        }
-                        return;
-                    }
-
-                    image.addEventListener('load', () => {
-                        if (typeof image.decode === 'function') {
-                            image.decode().catch(() => undefined).then(finish);
-                        } else {
-                            finish();
-                        }
-                    }, { once: true });
-                    image.addEventListener('error', () => finish(true), { once: true });
-                }))).then(() => {
-                    if (failedImages.length) {
-                        throw new Error(`${failedImages.length} page images could not be loaded.`);
-                    }
-                });
+                markImageComplete();
+                resolve();
             };
 
-            const consumeResponse = async (response) => {
-                if (!response.body?.getReader) {
-                    await response.arrayBuffer();
-                    return;
-                }
-                const reader = response.body.getReader();
-                try {
-                    while (true) {
-                        const { done } = await reader.read();
-                        if (done) break;
-                    }
-                } finally {
-                    reader.releaseLock();
+            const onLoad = () => {
+                if (typeof image.decode === "function") {
+                    image.decode()
+                        .then(() => finish())
+                        .catch(() => finish(image.naturalWidth === 0));
+                } else {
+                    finish(image.naturalWidth === 0);
                 }
             };
 
-            const preloadRuntimeAssets = async () => {
-                const manifestResponse = await fetch('/runtime-assets.json', { cache: 'no-cache' });
-                if (!manifestResponse.ok) {
-                    throw new Error(`Runtime asset manifest could not be loaded (${manifestResponse.status}).`);
-                }
-                const manifest = await manifestResponse.json();
-                if (!Array.isArray(manifest) || !manifest.length) {
-                    throw new Error('Runtime asset manifest is empty or invalid.');
-                }
+            const onError = () => finish(true);
 
-                let nextAssetIndex = 0;
-                let completedAssets = 0;
-                const failures = [];
-                const loadNextAsset = async () => {
-                    while (nextAssetIndex < manifest.length) {
-                        const assetUrl = manifest[nextAssetIndex++];
-                        try {
-                            let loaded = false;
-                            for (let attempt = 0; attempt < 2 && !loaded; attempt += 1) {
-                                try {
-                                    const response = await fetch(assetUrl, { cache: attempt ? 'reload' : 'force-cache' });
-                                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                                    await consumeResponse(response);
-                                    loaded = true;
-                                } catch (error) {
-                                    if (attempt === 1) throw error;
-                                }
-                            }
-                        } catch (error) {
-                            failures.push({ url: assetUrl, error });
-                            console.error(`Game asset failed to load: ${assetUrl}`, error);
-                        } finally {
-                            completedAssets += 1;
-                            const assetProgress = Math.round((completedAssets / manifest.length) * 100);
-                            setInitialLoadingMessage(`Loading game contents… ${assetProgress}%`);
-                            setInitialLoadingProgress(35 + ((completedAssets / manifest.length) * 57));
-                        }
-                    }
-                };
-
-                await Promise.all(Array.from({ length: Math.min(4, manifest.length) }, loadNextAsset));
-                if (failures.length) {
-                    throw new Error(`${failures.length} of ${manifest.length} game assets could not be loaded.`);
+            timeoutId = window.setTimeout(() => finish(true), 8000);
+            if (image.complete) {
+                if (image.naturalWidth > 0) {
+                    onLoad();
+                } else {
+                    finish(Boolean(getSource()));
                 }
-                return manifest.length;
-            };
+                return;
+            }
+
+            image.addEventListener("load", onLoad, { once: true });
+            image.addEventListener("error", onError, { once: true });
+        }))
+    ).then(() => {
+        if (failedImages.length > 0) {
+            console.warn(
+                `[Learnscape] ${failedImages.length} image(s) failed to load:`,
+                failedImages
+            );
+        }
+
+        console.log(
+            "[Learnscape] Initial image loading completed."
+        );
+    });
+};
 
             const waitForGameInitialization = () => {
                 if (window.__learnscapeGameInitialized === true) return Promise.resolve();
-                return new Promise((resolve) => {
-                    window.addEventListener('learnscape:gameinitialized', resolve, { once: true });
-                });
-            };
-
-            const waitForDetectionInitialization = () => {
-                if (window.__learnscapeDetectionReady === true) return Promise.resolve();
-                return new Promise((resolve) => {
-                    let settled = false;
-                    const finish = (event) => {
-                        if (settled) return;
-                        settled = true;
+                return new Promise((resolve, reject) => {
+                    const finish = () => {
                         window.clearTimeout(timeoutId);
-                        window.removeEventListener('learnscape:detectionready', finish);
-                        if (event?.detail?.ready === false) {
-                            console.warn('Camera detection did not initialize; the rest of the game will continue loading.');
-                        }
+                        window.removeEventListener('learnscape:gameinitialized', finish);
                         resolve();
                     };
                     const timeoutId = window.setTimeout(() => {
-                        console.warn('Camera detection initialization timed out.');
-                        finish();
-                    }, 30000);
-                    window.addEventListener('learnscape:detectionready', finish, { once: true });
+                        window.removeEventListener('learnscape:gameinitialized', finish);
+                        reject(new Error('Game initialization timed out.'));
+                    }, 15000);
+                    window.addEventListener('learnscape:gameinitialized', finish, { once: true });
                 });
-            };
-
-            const waitForFonts = () => {
-                if (!document.fonts?.ready) return Promise.resolve();
-                return document.fonts.ready.catch(() => undefined);
             };
 
             const completeInitialBoot = async () => {
                 try {
-                    const imagesReady = trackInitialImages();
-                    const appReady = Promise.all([
-                        waitForWindowLoad(),
-                        waitForFonts(),
-                        waitForGameInitialization(),
-                        waitForDetectionInitialization(),
-                    ]);
-
-                    await imagesReady;
-                    setInitialLoadingProgress(35);
-                    setInitialLoadingMessage('Loading game contents…');
-                    await preloadRuntimeAssets();
-                    setInitialLoadingProgress(94);
+                    // Optional game media and camera detection load independently; a
+                    // missing lesson asset must not prevent the title screen opening.
+                    await Promise.all([trackInitialImages(), waitForGameInitialization()]);
                     setInitialLoadingMessage('Finishing game startup…');
-                    await appReady;
                     setInitialLoadingProgress(97);
 
                     const minimumLoadingTime = 1200;
@@ -6509,10 +6458,14 @@
                     hideLoading(() => fullscreenRestoreButton?.focus({ preventScroll: true }));
                     window.dispatchEvent(new CustomEvent('learnscape:appready'));
                 } catch (error) {
-                    console.error('The game cannot finish loading all of its assets.', error);
-                    setInitialLoadingMessage('Some game files could not load. Check your connection, then refresh the page.');
+                    console.error('The game could not finish starting.', error);
+                    setInitialLoadingMessage('The game could not start. Check your connection and try again.');
                     const initialLoadingPanel = loadingOverlay?.querySelector('.initial-loading-panel');
                     initialLoadingPanel?.classList.add('has-loading-error');
+                    if (loadingRetryButton) {
+                        loadingRetryButton.hidden = false;
+                        loadingRetryButton.focus();
+                    }
                 }
             };
 
