@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Cache-only root request test</title>
+<body>
+    <h1>Cache-only root request test</h1>
+    <p id="status">Preparing service worker</p>
+    <button id="test" disabled>Request cached root page</button>
+    <script>
+        (async () => {
+            const status = document.querySelector('#status');
+            const button = document.querySelector('#test');
+            await navigator.serviceWorker.register(new URL('../../sw.js', location.href));
+            await navigator.serviceWorker.ready;
+            if (!navigator.serviceWorker.controller) {
+                await new Promise((resolve) => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true }));
+            }
+            button.disabled = false;
+            status.textContent = 'Ready';
+            button.addEventListener('click', async () => {
+                try {
+                    const response = await fetch(new URL('../../', location.href), { mode: 'same-origin', cache: 'only-if-cached' });
+                    const contents = await response.text();
+                    status.textContent = response.ok && /<title>Learnscape Adventure<\/title>/i.test(contents)
+                        ? 'Cached root page loaded'
+                        : `Unexpected response: ${response.status}`;
+                } catch (error) {
+                    status.textContent = `Request failed: ${error.message}`;
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

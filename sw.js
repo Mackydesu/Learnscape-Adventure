@@ -29,11 +29,13 @@ async function cachedResponse(request) {
     const cached = await match(request.url);
     if (cached) return cached;
 
-    // The installed start URL can be the project directory, while installation
-    // pre-caches index.html. Treat only that navigation as the same page.
+    // The project directory and index.html refer to the same document. This
+    // includes explicit fetches (e.g. a cache-only lookup) as well as normal
+    // navigations, but must not turn a missing image or media file into HTML.
     const scope = new URL(self.registration.scope);
     const url = new URL(request.url);
-    if (request.mode === 'navigate' && url.origin === scope.origin && url.pathname === scope.pathname) {
+    const isDocumentRequest = request.mode === 'navigate' || request.destination === '';
+    if (isDocumentRequest && url.origin === scope.origin && url.pathname === scope.pathname) {
       return match(new URL('index.html', scope).href);
     }
   } catch (error) {

@@ -58,11 +58,11 @@ function createWorker({ network, cacheAvailable = true } = {}) {
     });
     return {
         caches,
-        async request(path, { mode = 'no-cors', cache = 'default' } = {}) {
+        async request(path, { mode = 'no-cors', cache = 'default', destination = '' } = {}) {
             const pending = [];
             let response;
             listeners.get('fetch')({
-                request: { url: new URL(path, scope).href, method: 'GET', mode, cache, headers: new Headers() },
+                request: { url: new URL(path, scope).href, method: 'GET', mode, cache, destination, headers: new Headers() },
                 respondWith(promise) { response = promise; },
                 waitUntil(promise) { pending.push(promise); },
             });
@@ -80,6 +80,25 @@ test('offline project-root navigation falls back to the cached index page', asyn
     const response = await worker.request('./?launch=installed', { mode: 'navigate' });
     assert.equal(response.status, 200);
     assert.equal(await response.text(), 'cached home');
+});
+
+test('a cache-only fetch of the project root uses index.html without hitting the network', async () => {
+    let networkCalls = 0;
+    const worker = createWorker({ network: async () => { networkCalls += 1; throw new Error('ERR_CACHE_MISS'); } });
+    const shell = await worker.caches.open('learnscape-shell-v2');
+    await shell.put('https://game.test/Learnscape-Adventure/index.html', new Response('cached home'));
+    const response = await worker.request('./?launch=installed', { mode: 'same-origin', cache: 'only-if-cached' });
+    assert.equal(response.status, 200);
+    assert.equal(await response.text(), 'cached home');
+    assert.equal(networkCalls, 0);
+});
+
+test('a project-root image request never receives the HTML fallback', async () => {
+    const worker = createWorker();
+    const shell = await worker.caches.open('learnscape-shell-v2');
+    await shell.put('https://game.test/Learnscape-Adventure/index.html', new Response('cached home'));
+    const response = await worker.request('./', { destination: 'image' });
+    assert.equal(response.status, 503);
 });
 
 test('offline installed-app reloads use the cached index without serving stale asset reloads', async () => {
