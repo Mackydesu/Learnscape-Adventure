@@ -14,9 +14,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <script type="module" crossorigin src="./assets/main-DH9SdLe7.js"></script>
+  <script type="module" crossorigin src="./assets/main-CuN_i0DW.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/detectionManager-BUmNu-g5.js">
-  <link rel="stylesheet" crossorigin href="./assets/main-xsxcJXUj.css">
+  <link rel="stylesheet" crossorigin href="./assets/main-Bfjk08ia.css">
 </head>
 <body class="title-page is-page-loading is-initial-loading" aria-busy="true">
     <div id="app-shell-container" class="app-shell-container">
@@ -100,6 +100,7 @@
                 <input id="intro-volume-slider" type="range" min="0" max="100" step="1" value="100">
             </label>
             <button class="intro-settings-reset-button" type="button">Reset Game</button>
+            <button class="intro-settings-exit-button" type="button">Exit Game</button>
         </div>
     </div>
 
@@ -110,6 +111,14 @@
         <div class="reset-game-actions">
             <button class="reset-game-cancel" type="button">Cancel</button>
             <button class="reset-game-confirm" type="button">Reset Game</button>
+        </div>
+    </dialog>
+
+    <dialog class="exit-game-dialog" aria-labelledby="exit-game-title" aria-describedby="exit-game-description">
+        <h2 id="exit-game-title">Close the Game</h2>
+        <p id="exit-game-description">Your browser did not allow the game to close automatically. Please close this window or tab to exit. Your saved progress will remain.</p>
+        <div class="exit-game-actions">
+            <button class="exit-game-continue" type="button">Continue Playing</button>
         </div>
     </dialog>
 
@@ -2165,14 +2174,6 @@
         <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-8" aria-label="Return to Diamond Island intro"><span>‹</span>Back</a>
     </section>
 
-    
-
-    
-
-    
-
-    
-
     <script src="./script.js?v=20261017-18"></script>
     </div>
 
@@ -3936,10 +3937,13 @@
             const introSettingsPanel = introSettings?.querySelector('.intro-settings-panel');
             const introSettingsTutorialButton = introSettings?.querySelector('.intro-settings-tutorial-button');
             const introSettingsResetButton = introSettings?.querySelector('.intro-settings-reset-button');
+            const introSettingsExitButton = introSettings?.querySelector('.intro-settings-exit-button');
             const resetGameDialog = document.querySelector('.reset-game-dialog');
             const resetGameCancelButton = resetGameDialog?.querySelector('.reset-game-cancel');
             const resetGameConfirmButton = resetGameDialog?.querySelector('.reset-game-confirm');
             const resetGameError = resetGameDialog?.querySelector('.reset-game-error');
+            const exitGameDialog = document.querySelector('.exit-game-dialog');
+            const exitGameContinueButton = exitGameDialog?.querySelector('.exit-game-continue');
             const soundMutedToggle = document.getElementById('intro-sound-muted');
             const soundVolumeSlider = document.getElementById('intro-volume-slider');
             const soundVolumeValue = document.getElementById('intro-volume-value');
@@ -5613,6 +5617,38 @@
             });
             resetGameCancelButton?.addEventListener('click', () => resetGameDialog.close());
             resetGameConfirmButton?.addEventListener('click', resetSavedGame);
+            const showExitGameFallback = () => {
+                if (window.closed) return;
+                introSettingsPanel.hidden = true;
+                introSettingsButton?.setAttribute('aria-expanded', 'false');
+                // Reveal the browser or app window's own close control when possible.
+                const exitFullscreen = document.exitFullscreen
+                    || document.webkitExitFullscreen
+                    || document.msExitFullscreen;
+                if (isFullscreenActive() && exitFullscreen) {
+                    try {
+                        Promise.resolve(exitFullscreen.call(document)).catch(() => {}).finally(syncFullscreenClass);
+                    } catch (error) {
+                        // The instructions remain visible even if fullscreen cannot be exited.
+                    }
+                }
+                if (typeof exitGameDialog?.showModal === 'function') {
+                    if (!exitGameDialog.open) exitGameDialog.showModal();
+                    exitGameContinueButton?.focus();
+                } else {
+                    window.alert('Please close this window or tab to exit. Your saved progress will remain.');
+                }
+            };
+            introSettingsExitButton?.addEventListener('click', () => {
+                try {
+                    window.close();
+                } catch (error) {
+                    // Some browsers disallow closing windows opened by the user.
+                }
+                // If closing is blocked, the page remains alive to show instructions.
+                window.setTimeout(showExitGameFallback, 300);
+            });
+            exitGameContinueButton?.addEventListener('click', () => exitGameDialog.close());
             introFullscreenToggle?.addEventListener('change', () => {
                 if (introFullscreenToggle.checked) {
                     fullscreenRestoreButton?.click();
