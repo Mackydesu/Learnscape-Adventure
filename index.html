@@ -3839,6 +3839,13 @@
                     event.preventDefault();
                     event.stopPropagation();
                     const shape = useKeyButton.dataset.shopUseKey;
+                    // The purchase guide must advance before the key can be used.
+                    // This also recovers a guide left on the purchase step by an
+                    // older version after the shop item replaced its clicked DOM.
+                    if (onboardingStage === 'buy-circle' && shape === 'circle') {
+                        advanceCircleShopTutorial();
+                        return;
+                    }
                     if (onboardingStage === 'use-key' && shape === 'circle') {
                         hideOnboardingCoach();
                         setOnboardingStage('unlocking');
@@ -3851,6 +3858,7 @@
                 const shape = item.dataset.shopItem || '';
                 if (isTutorialCircleShopPurchase(shape)) {
                     completeTutorialCircleShopPurchase(item);
+                    advanceCircleShopTutorial();
                     return;
                 }
                 const itemCost = getIntroShopCost(shape);
@@ -3895,6 +3903,9 @@
                     playIntroShopBuySound();
                 } else {
                     window.playUiClickSound?.('chime');
+                }
+                if (onboardingStage === 'buy-circle' && shape === 'circle') {
+                    advanceCircleShopTutorial();
                 }
             });
             introMenuCopy?.addEventListener('keydown', (event) => {
@@ -6058,12 +6069,32 @@
                 });
                 carrotPill?.classList.add('onboarding-carrot-highlight');
             };
+            const advanceCircleShopTutorial = () => {
+                if (onboardingStage !== 'buy-circle') return;
+                if (isLearnscapeIslandUnlocked('circle')) {
+                    hideOnboardingCoach();
+                    closeIntroMenu();
+                    setOnboardingStage('open-profile');
+                    window.__learnscapeNavigate?.('title');
+                    return;
+                }
+                // Advance immediately: the purchase can replace the clicked
+                // cost element before its click bubbles to the document.
+                hideOnboardingCoach();
+                setOnboardingStage('use-key');
+                window.setTimeout(() => {
+                    if (onboardingStage === 'use-key') showUseKeyGuide();
+                }, 120);
+            };
             const showUseKeyGuide = () => {
                 setOnboardingStage('use-key');
                 openIntroMenu('shop');
                 const useKeyButton = introMenuCopy?.querySelector('[data-shop-use-key="circle"]');
                 if (!useKeyButton) {
-                    window.setTimeout(showUseKeyGuide, 80);
+                    // Do not trap the player in a retry loop if the key is no
+                    // longer available; return to the purchase instruction.
+                    setOnboardingStage('buy-circle');
+                    showOnboardingCoach(introMenuCopy?.querySelector('[data-shop-item="circle"]'), 'Pindutin ang item na gustong bilhin gamit ang carrots.');
                     return;
                 }
                 showOnboardingCoach(useKeyButton, 'Pindutin ang Use upang mabuksan ang unang isla.');
@@ -6257,10 +6288,6 @@
                         setOnboardingStage('buy-circle');
                         showOnboardingCoach(introMenuCopy?.querySelector('[data-shop-item="circle"]'), 'Pindutin ang item na gustong bilhin gamit ang carrots.');
                     }, 0);
-                } else if (onboardingStage === 'buy-circle' && target.matches('[data-shop-item="circle"]')) {
-                    window.setTimeout(() => {
-                        showUseKeyGuide();
-                    }, 120);
                 } else if (onboardingStage === 'use-key' && target.matches('[data-shop-use-key="circle"]')) {
                     hideOnboardingCoach();
                     setOnboardingStage('unlocking');

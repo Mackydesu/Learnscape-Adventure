@@ -75,7 +75,14 @@ self.addEventListener('fetch', (event) => {
     url.pathname.endsWith('/runtime-assets.json');
   event.respondWith((async () => {
     if (request.cache === 'reload') {
-      try { return await fetch(request); } catch (error) { return unavailableResponse(); }
+      try {
+        const response = await fetch(request);
+        if (response.ok || request.mode !== 'navigate') return response;
+      } catch (error) {
+        // Reloads for individual assets must not silently use an old version.
+        if (request.mode !== 'navigate') return unavailableResponse();
+      }
+      return (await cachedResponse(request)) || unavailableResponse();
     }
     if (isShell) {
       try {
@@ -85,7 +92,8 @@ self.addEventListener('fetch', (event) => {
             .then((cache) => cache.put(request, response.clone()))
             .catch(() => {}));
         }
-        return response;
+        if (response.ok) return response;
+        return (await cachedResponse(request)) || response;
       } catch (error) {
         const cached = await cachedResponse(request);
         if (cached) return cached;

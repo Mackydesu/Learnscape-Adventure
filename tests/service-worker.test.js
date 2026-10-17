@@ -82,6 +82,30 @@ test('offline project-root navigation falls back to the cached index page', asyn
     assert.equal(await response.text(), 'cached home');
 });
 
+test('offline installed-app reloads use the cached index without serving stale asset reloads', async () => {
+    const worker = createWorker();
+    const shell = await worker.caches.open('learnscape-shell-v2');
+    await shell.put('https://game.test/Learnscape-Adventure/index.html', new Response('cached home'));
+    await shell.put('https://game.test/Learnscape-Adventure/script.js', new Response('old script'));
+    for (const path of ['./?launch=installed', 'index.html']) {
+        const response = await worker.request(path, { mode: 'navigate', cache: 'reload' });
+        assert.equal(response.status, 200);
+        assert.equal(await response.text(), 'cached home');
+    }
+    assert.equal((await worker.request('script.js', { cache: 'reload' })).status, 503);
+});
+
+test('a failed shell HTTP response falls back to the last cached copy', async () => {
+    const worker = createWorker({ network: async () => new Response('unavailable', { status: 503 }) });
+    const shell = await worker.caches.open('learnscape-shell-v2');
+    await shell.put('https://game.test/Learnscape-Adventure/index.html', new Response('cached home'));
+    for (const cache of ['default', 'reload']) {
+        const response = await worker.request('./', { mode: 'navigate', cache });
+        assert.equal(response.status, 200);
+        assert.equal(await response.text(), 'cached home');
+    }
+});
+
 test('offline startup uses the manifest paired with the active asset cache', async () => {
     const worker = createWorker();
     const base = 'https://game.test/Learnscape-Adventure/';

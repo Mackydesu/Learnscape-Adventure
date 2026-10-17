@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Shop tutorial regression fixture</title>
+<style>
+    body { font: 20px sans-serif; padding: 2rem; }
+    .intro-shop-item { border: 2px solid #876; padding: 1rem; width: 14rem; }
+    .intro-shop-cost, button { display: block; margin-top: 1rem; cursor: pointer; }
+</style>
+<body>
+    <h1>Circle key tutorial test</h1>
+    <p id="stage">Buy the Circle key</p>
+    <p id="balance">10 carrots</p>
+    <div class="intro-menu-copy">
+        <div class="intro-shop-item" data-shop-item="circle" role="button" tabindex="0">
+            Circle key <span class="intro-shop-cost"><span>10 carrots</span></span>
+        </div>
+    </div>
+    <script>
+        (async () => {
+            const html = (await fetch('../../index.html').then((response) => response.text())).replace(/\r\n/g, '\n');
+            const extract = (start, end) => html.slice(html.indexOf(start), html.indexOf(end, html.indexOf(start)));
+            const guide = extract('            const advanceCircleShopTutorial =', '            const showProfileGuide =');
+            const handler = extract("            introMenuCopy?.addEventListener('click', (event) => {\n                const useKeyButton", "            introMenuCopy?.addEventListener('keydown', (event) => {\n                const item");
+            new Function(`
+                const introMenuCopy = document.querySelector('.intro-menu-copy');
+                let onboardingStage = 'buy-circle', purchased = false, carrots = 10;
+                const isTutorialCircleShopPurchase = () => false;
+                const isLearnscapeIslandUnlocked = () => false;
+                const getIntroShopCost = () => 10;
+                const resourceCounts = { carrots };
+                const setLearnscapeResourceCount = (_, amount) => { carrots = amount; document.querySelector('#balance').textContent = amount + ' carrots'; };
+                window.getLearnscapeResourceCount = () => carrots;
+                const showIntroCarrotSpendPopout = () => {};
+                const introShopPurchaseKey = () => 'circle-key';
+                const writeSoundSetting = (key) => { if (key === 'circle-key') purchased = true; };
+                const syncLearnscapeIslandLocks = () => {};
+                const setIntroShopStatus = () => {};
+                const addLearnscapeNotification = () => {};
+                const playIntroShopBuySound = () => {};
+                const playIntroShopNopeSound = () => {};
+                const pulseIntroCarrotCount = () => {};
+                const syncIntroShopItems = () => {
+                    if (!purchased) return;
+                    const cost = document.querySelector('.intro-shop-cost');
+                    const button = document.createElement('button');
+                    button.dataset.shopUseKey = 'circle';
+                    button.textContent = 'Use Circle key';
+                    cost.replaceChildren(button);
+                };
+                const hideOnboardingCoach = () => {};
+                const setOnboardingStage = (stage) => { onboardingStage = stage; document.body.dataset.stage = stage; };
+                const showOnboardingCoach = (target, message) => { document.querySelector('#stage').textContent = message; target?.focus(); };
+                const openIntroMenu = () => {};
+                const closeIntroMenu = () => {};
+                window.useLearnscapeIslandKey = () => { document.querySelector('#stage').textContent = 'Circle key used'; };
+                ${guide}
+                ${handler}
+                document.body.dataset.ready = 'true';
+            `)();
+        })();
+    </script>
+</body>
+</html>

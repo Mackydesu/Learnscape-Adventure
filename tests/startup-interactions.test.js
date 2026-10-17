@@ -165,3 +165,104 @@ test('counting audio requests playback inside the original user gesture', async 
 test('published and source game scripts stay in sync', () => {
     assert.equal(readFileSync(new URL('../public/script.js', import.meta.url), 'utf8'), script);
 });
+
+function shopTutorialHarness({ replay = false, carrots = 10, unlocked = false } = {}) {
+    const handlers = new Map();
+    const timers = [];
+    const calls = [];
+    let purchased = false;
+    let attached = true;
+    const classes = new Set();
+    const item = {
+        dataset: { shopItem: 'circle' }, offsetWidth: 10,
+        classList: {
+            contains: (value) => classes.has(value),
+            add: (value) => classes.add(value), remove: (value) => classes.delete(value),
+            toggle: (value, enabled) => enabled ? classes.add(value) : classes.delete(value),
+        },
+        setAttribute() {},
+    };
+    const useButton = { dataset: { shopUseKey: 'circle' } };
+    const menu = {
+        addEventListener: (name, handler) => handlers.set(name, handler),
+        contains: () => true,
+        querySelectorAll: () => [item],
+        querySelector: (selector) => selector.includes('use-key') ? (purchased ? useButton : null) : item,
+    };
+    const target = {
+        closest: (selector) => {
+            if (!attached) return null;
+            return selector === '.intro-shop-item' ? item : null;
+        },
+    };
+    const context = {
+        introMenuCopy: menu, onboardingStage: 'buy-circle',
+        isTutorialCircleShopPurchase: () => replay,
+        completeTutorialCircleShopPurchase: () => { purchased = true; },
+        isLearnscapeIslandUnlocked: () => unlocked,
+        getIntroShopCost: () => 10,
+        resourceCounts: { carrots },
+        setLearnscapeResourceCount: (_resource, value) => { context.resourceCounts.carrots = value; },
+        showIntroCarrotSpendPopout() {}, introShopPurchaseKey: () => 'circle-key',
+        writeSoundSetting: (key) => { if (key === 'circle-key') purchased = true; },
+        syncLearnscapeIslandLocks() {}, setIntroShopStatus() {}, addLearnscapeNotification() {},
+        syncIntroShopItems: () => { attached = false; },
+        playIntroShopBuySound() {}, playIntroShopNopeSound() {}, pulseIntroCarrotCount() {},
+        hideOnboardingCoach: () => calls.push('hide'),
+        setOnboardingStage: (stage) => { context.onboardingStage = stage; },
+        showOnboardingCoach: (node, message) => calls.push({ node, message }),
+        openIntroMenu: (name) => calls.push(`open:${name}`), closeIntroMenu: () => calls.push('close'),
+        window: {
+            getLearnscapeResourceCount: () => context.resourceCounts.carrots,
+            setTimeout: (callback, delay) => { timers.push({ callback, delay }); },
+            playUiClickSound() {}, useLearnscapeIslandKey: () => calls.push('use'),
+            __learnscapeNavigate: (route) => calls.push(`navigate:${route}`),
+        },
+    };
+    const normalizedHtml = html.replace(/\r\n/g, '\n');
+    const guide = excerpt(normalizedHtml, '            const advanceCircleShopTutorial =', '            const showProfileGuide =');
+    const handler = excerpt(normalizedHtml, "            introMenuCopy?.addEventListener('click', (event) => {\n                const useKeyButton", "            introMenuCopy?.addEventListener('keydown', (event) => {\n                const item");
+    vm.runInNewContext(guide + handler, context);
+    return {
+        context, calls, timers, item, useButton,
+        click: (eventTarget = target) => handlers.get('click')({ target: eventTarget, preventDefault() {}, stopPropagation() {} }),
+        setPurchased: () => { purchased = true; },
+    };
+}
+
+test('shop tutorial advances even if purchasing removes the clicked cost element', () => {
+    const guide = shopTutorialHarness();
+    guide.click();
+    assert.equal(guide.context.resourceCounts.carrots, 0);
+    assert.equal(guide.context.onboardingStage, 'use-key');
+    guide.timers.find(({ delay }) => delay === 120).callback();
+    assert.ok(guide.calls.includes('open:shop'));
+    assert.ok(guide.calls.some((call) => call.node === guide.useButton && call.message.includes('Use')));
+});
+
+test('shop tutorial does not advance when the purchase fails', () => {
+    const guide = shopTutorialHarness({ carrots: 0 });
+    guide.click();
+    assert.equal(guide.context.onboardingStage, 'buy-circle');
+    assert.equal(guide.timers.length, 0);
+});
+
+test('an early Use click repairs a guide left at the purchase step', () => {
+    const guide = shopTutorialHarness();
+    guide.setPurchased();
+    guide.click({ closest: (selector) => selector === '[data-shop-use-key]' ? guide.useButton : null });
+    assert.equal(guide.context.onboardingStage, 'use-key');
+    assert.equal(guide.calls.includes('use'), false);
+    guide.timers.find(({ delay }) => delay === 120).callback();
+    assert.ok(guide.calls.some((call) => call.node === guide.useButton));
+});
+
+test('tutorial replay and already unlocked islands do not get stuck at the shop', () => {
+    const replay = shopTutorialHarness({ replay: true });
+    replay.click();
+    assert.equal(replay.context.onboardingStage, 'use-key');
+    const unlocked = shopTutorialHarness({ unlocked: true });
+    unlocked.click();
+    assert.equal(unlocked.context.onboardingStage, 'open-profile');
+    assert.ok(unlocked.calls.includes('navigate:title'));
+});
