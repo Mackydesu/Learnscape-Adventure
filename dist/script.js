@@ -260,27 +260,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             numberChoiceAudioFrame = window.requestAnimationFrame(monitorSegment);
         };
-        const startPlayback = () => {
+        const seekToSegment = () => {
             if (numberChoiceAudio !== audio) return;
             try {
                 audio.currentTime = start;
             } catch (error) {
                 // Metadata loading will retry the seek before playback.
             }
-            audio.play().then(() => {
-                if (numberChoiceAudio !== audio) return;
-                monitorSegment();
-                numberChoiceAudioTimer = window.setTimeout(releaseAudio, ((end - start) * 1000) + 120);
-            }).catch(releaseAudio);
         };
         audio.onended = releaseAudio;
         audio.onerror = releaseAudio;
         if (audio.readyState >= 1) {
-            startPlayback();
+            seekToSegment();
         } else {
-            audio.addEventListener('loadedmetadata', startPlayback, { once: true });
-            audio.load?.();
+            audio.addEventListener('loadedmetadata', seekToSegment, { once: true });
         }
+        // Call play during the click, not later from loadedmetadata: browsers
+        // may reject the delayed call after the user gesture has expired.
+        audio.play().then(() => {
+            if (numberChoiceAudio !== audio) return;
+            monitorSegment();
+            numberChoiceAudioTimer = window.setTimeout(releaseAudio, ((end - start) * 1000) + 120);
+        }).catch(releaseAudio);
         return true;
     };
     window.playLearnscapeCountingNumber = playNumberChoiceAudio;
@@ -16358,6 +16359,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cameraHowToSteps = cameraHowToOverlay?.querySelector('.shape-how-to-steps') || null;
     const cameraHowToContinue = cameraHowToOverlay?.querySelector('.shape-how-to-continue') || null;
     const cameraHowToPages = Array.from(document.querySelectorAll('.circle-camera-page[data-camera-shape]'));
+    const cameraHowToBlockers = Array.from(document.querySelectorAll([
+        '.page-loading-overlay',
+        '.fullscreen-restore-overlay',
+        '.terms-privacy-overlay',
+        '.onboarding-dialog-overlay',
+        '.onboarding-dim',
+        '.onboarding-coach',
+    ].join(', ')));
     const cameraHowToShapeLabels = Object.freeze({
         circle: 'Circle',
         square: 'Square',
@@ -16373,7 +16382,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     let cameraHowToReturnFocus = null;
     let cameraHowToCloseTimer = null;
 
-    const cameraHowToSeenStorageKey = (shape) => `learnscape-camera-how-to-seen:${shape}`;
+    // Older versions marked a guide as seen before it could be read. Give
+    // existing players one fresh opportunity to see each camera guide.
+    const cameraHowToSeenStorageKey = (shape) => `learnscape-camera-how-to-seen-v2:${shape}`;
     const hasSeenCameraHowTo = (shape) => {
         if (cameraHowToSeenThisSession.has(shape)) return true;
         try {
@@ -16432,6 +16443,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!cameraHowToOverlay || cameraHowToOverlay.hidden) return;
         const visiblePage = getVisibleCameraHowToPage();
         const startButton = visiblePage?.querySelector('.circle-camera-start-button') || null;
+        if (activeCameraHowToShape) markCameraHowToSeen(activeCameraHowToShape);
         cameraHowToOverlay.classList.add('is-closing');
         cameraHowToCloseTimer = window.setTimeout(() => {
             cameraHowToCloseTimer = null;
@@ -16447,6 +16459,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const syncCameraHowToGuide = () => {
         const visiblePage = getVisibleCameraHowToPage();
         if (!visiblePage) {
+            if (cameraHowToCloseTimer !== null) {
+                window.clearTimeout(cameraHowToCloseTimer);
+                cameraHowToCloseTimer = null;
+            }
             activeCameraHowToShape = '';
             if (cameraHowToHelpButton) cameraHowToHelpButton.hidden = true;
             if (cameraHowToOverlay && !cameraHowToOverlay.hidden) {
@@ -16459,11 +16475,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const shape = visiblePage.dataset.cameraShape || '';
         if (!cameraHowToShapeLabels[shape]) return;
         activeCameraHowToShape = shape;
+        // Do not show or mark the guide while a loading screen, fullscreen
+        // prompt, terms dialog, or onboarding overlay covers the game.
+        if (cameraHowToBlockers.some(isShapeHowToElementVisible)) return;
         if (hasSeenCameraHowTo(shape)) {
             showCameraHowToHelpButton();
             return;
         }
-        markCameraHowToSeen(shape);
+        if (cameraHowToOverlay && !cameraHowToOverlay.hidden) return;
         openCameraHowTo(shape);
     };
 
@@ -16493,7 +16512,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         event.stopPropagation();
         focusable[nextIndex]?.focus({ preventScroll: true });
     }, true);
+    const cameraHowToVisibilityObserver = new MutationObserver(() => {
+        window.requestAnimationFrame(syncCameraHowToGuide);
+    });
+    [document.body, ...cameraHowToPages, ...cameraHowToBlockers].forEach((element) => {
+        cameraHowToVisibilityObserver.observe(element, {
+            attributes: true,
+            attributeFilter: ['hidden', 'class', 'style'],
+        });
+    });
     window.addEventListener('learnscape:routechange', () => window.setTimeout(syncCameraHowToGuide, 80));
+    window.addEventListener('learnscape:appready', syncCameraHowToGuide);
     syncCameraHowToGuide();
 
     syncFullscreenClass();

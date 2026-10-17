@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Learnscape startup interaction fixture</title>
+<style>
+    [hidden] { display: none !important; }
+    .page-loading-overlay, .camera-how-to-overlay { position: fixed; inset: 0; background: white; padding: 2rem; }
+    video { width: 25rem; max-width: 90vw; }
+</style>
+<body>
+    <button id="open-lesson">Open Circle lesson</button>
+    <button id="open-camera">Open camera challenge</button>
+    <div class="page-loading-overlay" hidden>Loading</div>
+    <div class="fullscreen-restore-overlay" hidden></div>
+    <div class="terms-privacy-overlay" hidden></div>
+    <div class="onboarding-dialog-overlay" hidden></div>
+    <div class="onboarding-dim" hidden></div>
+    <div class="onboarding-coach" hidden></div>
+    <section id="lesson" hidden>
+        <video playsinline preload="auto"><source src="../../assets/Videos/Circleshape.mp4" type="video/mp4"></video>
+        <button id="play-lesson">Play lesson</button>
+        <button id="skip-lesson">Skip lesson</button>
+    </section>
+    <section class="circle-camera-page" data-camera-shape="circle" hidden>
+        Camera challenge <button class="circle-camera-start-button">Start camera</button>
+    </section>
+    <button class="camera-how-to-help-button" hidden>Camera help</button>
+    <div class="camera-how-to-overlay" hidden>
+        <p class="shape-how-to-mission"></p>
+        <ol class="shape-how-to-steps"></ol>
+        <div class="shape-how-to-scroll"></div>
+        <button class="shape-how-to-continue">Continue</button>
+    </div>
+    <script>
+        (async () => {
+            const [html, script] = await Promise.all([
+                fetch('../../index.html').then((response) => response.text()),
+                fetch('../../script.js').then((response) => response.text()),
+            ]);
+            const extract = (text, start, end) => text.slice(text.indexOf(start), text.indexOf(end, text.indexOf(start)));
+            const lesson = document.querySelector('#lesson');
+            const camera = document.querySelector('.circle-camera-page');
+            const loader = document.querySelector('.page-loading-overlay');
+            const video = lesson.querySelector('video');
+
+            // Exercise the app's actual Circle player and route transition with
+            // only the unrelated game state replaced by no-ops.
+            const player = extract(script, '    const playCircleIllustrationVideo =', '    const showCircleTvLessonImage =');
+            new Function('circleIllustrationPage', 'circleIllustrationVideo', `
+                const isPageVisible = (page) => !page.hidden;
+                const resetCircleMissionGuide = () => {};
+                const hideCircleIllustrationProgress = () => {};
+                const resetCircleSortActivity = () => {};
+                const resetCircleHunt = () => {};
+                const setCircleIllustrationEarnedStars = () => {};
+                const resetShapeTvChoices = () => {};
+                const setCircleIllustrationPlayButtonVisible = (visible) => { document.querySelector('#play-lesson').hidden = !visible; };
+                const setCircleIllustrationSkipButtonVisible = (visible) => { document.querySelector('#skip-lesson').hidden = !visible; };
+                const circleTvLessonImage = null, circleTvMascot = null, circleTvQuestionPanel = null;
+                ${player}
+                window.__learnscapePlayCircleIllustrationVideo = playCircleIllustrationVideo;
+            `)(lesson, video);
+            const navigation = extract(html, '            const navigateWithLoading =', '            window.__learnscapeNavigate =');
+            const navigate = new Function('lesson', 'loader', `
+                const pages = { circleIllustration: lesson };
+                let currentRoute = 'shapeCircle', currentRouteKey = 'shapeCircle', isNavigating = false, loadingTimer;
+                const parseTarget = () => ({ routeName: 'circleIllustration', params: {} });
+                const getRouteKey = (route) => route;
+                const showLoading = () => { loader.hidden = false; };
+                const setRoute = (route) => { currentRoute = route.routeName; lesson.hidden = false; };
+                const hideLoading = (callback) => setTimeout(() => { loader.hidden = true; callback(); }, 300);
+                ${navigation}
+                return navigateWithLoading;
+            `)(lesson, loader);
+            document.querySelector('#open-lesson').addEventListener('click', () => navigate('circleIllustration'));
+            document.querySelector('#play-lesson').addEventListener('click', () => window.__learnscapePlayCircleIllustrationVideo());
+
+            // Exercise the real guide using normal DOM visibility and events.
+            const guide = extract(script, '    const cameraHowToOverlay =', '    syncFullscreenClass();');
+            new Function('isShapeHowToElementVisible', guide)((element) => Boolean(element && !element.hidden && getComputedStyle(element).display !== 'none'));
+            document.querySelector('#open-camera').addEventListener('click', () => {
+                video.pause();
+                lesson.hidden = true;
+                loader.hidden = false;
+                camera.hidden = false;
+                setTimeout(() => { loader.hidden = true; }, 500);
+            });
+            document.body.dataset.fixtureReady = 'true';
+        })();
+    </script>
+</body>
+</html>

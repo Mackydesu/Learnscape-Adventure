@@ -2173,7 +2173,7 @@
 
     
 
-    <script src="./script.js?v=20261017-17"></script>
+    <script src="./script.js?v=20261017-18"></script>
     </div>
 
     <script>
@@ -2912,14 +2912,23 @@
                 if (targetKey === currentRouteKey || isNavigating) return;
 
                 isNavigating = true;
-                if (routeData.routeName === 'circleIllustration') {
-                    window.__learnscapePlayCircleIllustrationVideo?.();
-                }
                 showLoading();
 
                 loadingTimer = window.setTimeout(() => {
                     setRoute(routeData);
-                    hideLoading();
+                    hideLoading(() => {
+                        // The lesson must be visible before its player can start.
+                        // A mission replay may have replaced the lesson while the
+                        // loading screen was fading, so do not restart it there.
+                        const lesson = pages.circleIllustration;
+                        if (routeData.routeName === 'circleIllustration'
+                            && currentRoute === 'circleIllustration'
+                            && lesson && !lesson.hidden
+                            && !lesson.classList.contains('is-lesson-complete')
+                            && !lesson.classList.contains('is-progress-visible')) {
+                            window.__learnscapePlayCircleIllustrationVideo?.();
+                        }
+                    });
                     isNavigating = false;
                 }, 1000);
             };
@@ -5520,6 +5529,13 @@
                         },
                     });
                     HTMLMediaElement.prototype.play = function (...args) {
+                        // A preload may have failed before the offline asset cache
+                        // finished downloading. Retry that media from the cache on
+                        // the next real playback request, while retaining the user gesture.
+                        if (this.error && !this.srcObject
+                            && (this.currentSrc || this.getAttribute('src') || this.querySelector('source[src]'))) {
+                            this.load();
+                        }
                         if (!baseMediaVolumes.has(this)) {
                             baseMediaVolumes.set(this, mediaVolumeDescriptor.get.call(this));
                         }
