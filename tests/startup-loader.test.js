@@ -21,7 +21,7 @@ function createStorage() {
 }
 
 // Run the actual inline startup code with controllable asset responses and events.
-function createHarness({ images = [], gameInitialized = true, assetFetch, storage = createStorage(), requestAnimationFrame = (callback) => setImmediate(callback), baseURI = 'https://game.test/index.html', manifest, timeout = (delay) => Math.ceil(delay / 100) } = {}) {
+function createHarness({ images = [], gameInitialized = true, assetFetch, storage = createStorage(), persistentStorage = true, requestAnimationFrame = (callback) => setImmediate(callback), baseURI = 'https://game.test/index.html', manifest, timeout = (delay) => Math.ceil(delay / 100) } = {}) {
     const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
     const start = html.indexOf('const loadRuntimeAssets =');
     const end = html.indexOf('            syncFullscreenClass();', start);
@@ -61,7 +61,7 @@ function createHarness({ images = [], gameInitialized = true, assetFetch, storag
         fullscreenRestoreButton: null,
         CustomEvent: class CustomEvent { constructor(type) { this.type = type; } },
         console: { log() {}, warn() {}, error() {} },
-        navigator: { serviceWorker: { register: async () => ({}) } },
+        navigator: persistentStorage ? { serviceWorker: { register: async () => ({}) } } : {},
         caches: storage,
         URL, Response, AbortController,
         fetch: async (url, options) => {
@@ -109,6 +109,18 @@ test('game opens after the packaged assets and game initialization are ready', a
     assert.equal(app.classes.has('is-initial-loading'), false);
     assert.equal(app.dispatched, 'learnscape:appready');
     assert.equal(app.retry.hidden, true);
+});
+
+test('a first successful load stores its manifest alongside the active offline assets', async () => {
+    const storage = createStorage();
+    const app = createHarness({ storage });
+    await app.run();
+    const cache = await storage.open('learnscape-runtime-0123456789abcdef0123');
+    const manifest = await cache.match('https://game.test/runtime-assets.json');
+    assert.ok(manifest, 'the asset list must be available even if the first page was not controlled');
+    assert.equal((await manifest.json()).version, '0123456789abcdef0123');
+    const meta = await storage.open('learnscape-meta-v2');
+    assert.equal(await (await meta.match('https://game.test/__learnscape_active_cache__')).text(), 'learnscape-runtime-0123456789abcdef0123');
 });
 
 test('initial loading text displays the same percentage as the progress bar', () => {
@@ -249,6 +261,78 @@ test('a failed asset download offers retry and retains successful downloads', as
     const offline = createHarness({ storage, assetFetch: () => { throw new Error('offline'); } });
     await offline.run();
     assert.equal(offline.hidden, true);
+});
+
+test('a damaged asset in the current cache is verified and downloaded again', async () => {
+    const storage = createStorage();
+    const version = '0123456789abcdef0123';
+    const cache = await storage.open(`learnscape-runtime-${version}`);
+    await cache.put('https://game.test/assets/voice.mp3', new Response('wrong'));
+    let requests = 0;
+    const app = createHarness({
+        storage,
+        manifest: {
+            version, assets: ['assets/voice.mp3'], sizes: { 'assets/voice.mp3': 5 },
+            hashes: { 'assets/voice.mp3': createHash('sha256').update('sound').digest('hex') },
+        },
+        assetFetch: async () => { requests++; return new Response('sound'); },
+    });
+    await app.run();
+    assert.equal(app.hidden, true);
+    assert.equal(requests, 1);
+    assert.equal(await (await cache.match('https://game.test/assets/voice.mp3')).text(), 'sound');
+});
+
+test('a same-size corrupted download is retried before startup reaches 100 percent', async () => {
+    let requests = 0;
+    const app = createHarness({
+        manifest: {
+            version: '0123456789abcdef0123', assets: ['assets/voice.mp3'], sizes: { 'assets/voice.mp3': 5 },
+            hashes: { 'assets/voice.mp3': createHash('sha256').update('sound').digest('hex') },
+        },
+        assetFetch: async () => new Response(++requests === 1 ? 'wrong' : 'sound'),
+    });
+    await app.run();
+    assert.equal(requests, 2);
+    assert.equal(app.hidden, true);
+    assert.ok(app.progressValues.includes(100));
+});
+
+test('a truncated download cannot activate a cache or report a successful boot', async () => {
+    const storage = createStorage();
+    const meta = await storage.open('learnscape-meta-v2');
+    const activeKey = 'https://game.test/__learnscape_active_cache__';
+    await meta.put(activeKey, new Response('learnscape-runtime-11111111111111111111'));
+    let requests = 0;
+    const app = createHarness({
+        storage,
+        manifest: {
+            version: '0123456789abcdef0123', assets: ['assets/lesson.mp4'], sizes: { 'assets/lesson.mp4': 5 },
+            hashes: { 'assets/lesson.mp4': createHash('sha256').update('video').digest('hex') },
+        },
+        assetFetch: async () => { requests++; return new Response('vid'); },
+    });
+    await app.run();
+    assert.equal(requests, 2);
+    assert.equal(app.hidden, false);
+    assert.equal(app.retry.hidden, false);
+    assert.equal(app.progressValues.includes(100), false);
+    assert.equal(await (await meta.match(activeKey)).text(), 'learnscape-runtime-11111111111111111111');
+});
+
+test('downloads are verified even when persistent storage is unavailable', async () => {
+    let requests = 0;
+    const app = createHarness({
+        persistentStorage: false,
+        manifest: {
+            version: '0123456789abcdef0123', assets: ['assets/voice.mp3'], sizes: { 'assets/voice.mp3': 5 },
+            hashes: { 'assets/voice.mp3': createHash('sha256').update('sound').digest('hex') },
+        },
+        assetFetch: async () => new Response(++requests === 1 ? 'bad' : 'sound'),
+    });
+    await app.run();
+    assert.equal(requests, 2);
+    assert.equal(app.hidden, true);
 });
 
 test('an update reuses verified unchanged assets and downloads changed files', async () => {

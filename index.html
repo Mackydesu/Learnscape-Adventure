@@ -6368,6 +6368,7 @@ const loadRuntimeAssets = async () => {
     const manifestUrl = new URL('runtime-assets.json', document.baseURI);
     const manifestResponse = await fetch(manifestUrl, { cache: 'no-cache' });
     if (!manifestResponse.ok) throw new Error('Unable to load the asset list.');
+    const offlineManifestResponse = manifestResponse.clone();
     const manifest = await manifestResponse.json();
     if (!manifest || !/^[a-f0-9]{20}$/.test(manifest.version) || !Array.isArray(manifest.assets) || !manifest.assets.length) {
         throw new Error('The asset list is invalid.');
@@ -6421,6 +6422,18 @@ const loadRuntimeAssets = async () => {
         verificationQueue = verification.catch(() => {});
         return verification.catch(() => false);
     };
+    const canHashAsset = (hash) => Boolean(window.crypto?.subtle && /^[a-f0-9]{64}$/.test(hash || ''));
+    const isTextAsset = (url) => /\.(?:html?|js|mjs|css|svg|webmanifest|json)$/i.test(new URL(url).pathname);
+    const verifyAsset = async (response, size, hash, url) => {
+        if (!response?.ok) return false;
+        if (canHashAsset(hash)) return matchesSavedAsset(response, hash, url);
+        // Text files may have different line endings on GitHub than locally.
+        // With no SHA-256 support, only binary sizes are safe to compare.
+        if (Number.isSafeInteger(size) && size >= 0 && !isTextAsset(url)) {
+            return (await response.clone().arrayBuffer()).byteLength === size;
+        }
+        return true;
+    };
     const updateAssetProgress = () => {
         const fraction = hasSizes ? Math.min(1, downloadedBytes / totalBytes) : completed / assets.length;
         setInitialLoadingProgress(8 + fraction * 77);
@@ -6434,9 +6447,12 @@ const loadRuntimeAssets = async () => {
             countedBytes = next;
             updateAssetProgress();
         };
-        if (assetCache && await assetCache.match(url)) {
-            countBytes(size);
-            return;
+        if (assetCache) {
+            const saved = await assetCache.match(url);
+            if (saved && await verifyAsset(saved, size, hash, url)) {
+                countBytes(size);
+                return;
+            }
         }
         for (const previousCache of previousCaches) {
             if (!assetCache) break;
@@ -6463,6 +6479,7 @@ const loadRuntimeAssets = async () => {
                 if (!response.ok || (isHtml && !/\.(?:html?)$/i.test(new URL(url).pathname))) {
                     throw new Error(`Asset request failed: ${url} (${response.status})`);
                 }
+                const verificationResponse = assetCache ? null : response.clone();
                 if (hasSizes && size > 256 * 1024 && response.body?.getReader) {
                     const reader = (assetCache ? response.clone() : response).body.getReader();
                     const trackDownload = async () => {
@@ -6479,6 +6496,11 @@ const loadRuntimeAssets = async () => {
                     await Promise.all([trackDownload(), assetCache ? assetCache.put(url, response) : Promise.resolve()]);
                 } else if (assetCache) await assetCache.put(url, response);
                 else await response.arrayBuffer();
+                window.clearTimeout(timeoutId);
+                const saved = assetCache ? await assetCache.match(url) : verificationResponse;
+                if (!await verifyAsset(saved, size, hash, url)) {
+                    throw new Error(`Asset verification failed: ${url}`);
+                }
                 countBytes(size);
                 return;
             } catch (error) {
@@ -6501,13 +6523,20 @@ const loadRuntimeAssets = async () => {
             updateAssetProgress();
         }
     };
-    const results = await Promise.allSettled(Array.from({ length: Math.min(6, assets.length) }, worker));
+    // Without Cache Storage, verification has to buffer a response clone in
+    // memory. Download one at a time in that fallback to avoid memory spikes.
+    const concurrency = assetCache ? 6 : 1;
+    const results = await Promise.allSettled(Array.from({ length: Math.min(concurrency, assets.length) }, worker));
     const failure = results.find((result) => result.status === 'rejected');
     if (failure) throw failure.reason;
 
     if (assetCache) {
         const cacheName = `learnscape-runtime-${manifest.version}`;
         const meta = await caches.open('learnscape-meta-v2');
+        // Store the matching manifest in the same complete cache before making
+        // it active. This also works on the first visit, before the service
+        // worker has taken control of the page.
+        await assetCache.put(manifestUrl.href, offlineManifestResponse);
         await meta.put(new URL('__learnscape_active_cache__', document.baseURI).href, new Response(cacheName));
         const keys = await caches.keys();
         await Promise.all(keys.filter((key) => key.startsWith('learnscape-runtime-') && key !== cacheName)

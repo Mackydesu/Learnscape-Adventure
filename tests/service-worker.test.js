@@ -82,6 +82,21 @@ test('offline project-root navigation falls back to the cached index page', asyn
     assert.equal(await response.text(), 'cached home');
 });
 
+test('offline startup uses the manifest paired with the active asset cache', async () => {
+    const worker = createWorker();
+    const base = 'https://game.test/Learnscape-Adventure/';
+    const meta = await worker.caches.open('learnscape-meta-v2');
+    const activeName = 'learnscape-runtime-0123456789abcdef0123';
+    await meta.put(`${base}__learnscape_active_cache__`, new Response(activeName));
+    const active = await worker.caches.open(activeName);
+    await active.put(`${base}runtime-assets.json`, new Response('verified manifest'));
+    const shell = await worker.caches.open('learnscape-shell-v2');
+    await shell.put(`${base}runtime-assets.json`, new Response('incomplete update manifest'));
+    const response = await worker.request('runtime-assets.json');
+    assert.equal(response.status, 200);
+    assert.equal(await response.text(), 'verified manifest');
+});
+
 test('an uncached failed resource returns an error response, not a rejected fetch', async () => {
     const worker = createWorker();
     for (const cache of ['default', 'reload']) {
