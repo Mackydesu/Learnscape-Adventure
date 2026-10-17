@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Installed launch test</title></head>
+<body>
+    <h1>Installed launch test page</h1>
+    <p id="result">Preparing the service worker and redirected cache...</p>
+    <a href="index.html?launched=1">Launch through index.html</a>
+    <script>
+        (async () => {
+            const result = document.getElementById('result');
+            if (location.search.includes('launched=1')) {
+                result.textContent = 'The app launch page loaded.';
+                return;
+            }
+            try {
+                const registration = await navigator.serviceWorker.register('./sw.js');
+                await navigator.serviceWorker.ready;
+                const response = await fetch('index.html');
+                if (!response.ok || !response.redirected) throw new Error('Fixture did not redirect.');
+                const shell = await caches.open('learnscape-shell-v2');
+                await shell.put(new URL('index.html', location.href), response);
+                result.textContent = registration.active && navigator.serviceWorker.controller
+                    ? 'Ready: redirected page cached and service worker controlling this page.'
+                    : 'Reload once to let the service worker take control.';
+            } catch (error) {
+                result.textContent = `Setup failed: ${error.message}`;
+            }
+        })();
+    </script>
+</body>
+</html>

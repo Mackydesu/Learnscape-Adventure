@@ -114,6 +114,36 @@ test('offline installed-app reloads use the cached index without serving stale a
     assert.equal((await worker.request('script.js', { cache: 'reload' })).status, 503);
 });
 
+test('navigation can use a previously redirected cached index without preserving its redirect history', async () => {
+    const worker = createWorker();
+    const shell = await worker.caches.open('learnscape-shell-v2');
+    const markRedirected = (response) => {
+        const clone = response.clone.bind(response);
+        Object.defineProperty(response, 'redirected', { value: true });
+        response.clone = () => markRedirected(clone());
+        return response;
+    };
+    await shell.put('https://game.test/Learnscape-Adventure/index.html', markRedirected(new Response('cached home', {
+        headers: { 'Content-Type': 'text/html' },
+    })));
+    for (const cache of ['default', 'reload']) {
+        const response = await worker.request('index.html', { mode: 'navigate', cache });
+        assert.equal(response.redirected, false);
+        assert.equal(response.headers.get('content-type'), 'text/html');
+        assert.equal(await response.text(), 'cached home');
+    }
+});
+
+test('navigation redirects are returned to the browser rather than replaced with cached HTML', async () => {
+    const redirect = { type: 'opaqueredirect', ok: false, redirected: false };
+    const worker = createWorker({ network: async () => redirect });
+    const shell = await worker.caches.open('learnscape-shell-v2');
+    await shell.put('https://game.test/Learnscape-Adventure/index.html', new Response('cached home'));
+    for (const cache of ['default', 'reload']) {
+        assert.equal(await worker.request('index.html', { mode: 'navigate', cache }), redirect);
+    }
+});
+
 test('a failed shell HTTP response falls back to the last cached copy', async () => {
     const worker = createWorker({ network: async () => new Response('unavailable', { status: 503 }) });
     const shell = await worker.caches.open('learnscape-shell-v2');

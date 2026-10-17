@@ -51,6 +51,18 @@ function unavailableResponse() {
   });
 }
 
+// Navigation requests use manual redirects. Chromium rejects a cached response
+// that followed a redirect, even if it contains a perfectly good HTML page.
+// Reconstruct only those navigation responses to remove their redirect history.
+function navigationSafeResponse(request, response) {
+  if (request.mode !== 'navigate' || !response.redirected) return response;
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
+}
+
 async function rangeResponse(response, range) {
   const bytes = await response.arrayBuffer();
   const match = /^bytes=(\d*)-(\d*)$/.exec(range);
@@ -79,6 +91,7 @@ self.addEventListener('fetch', (event) => {
     if (request.cache === 'reload') {
       try {
         const response = await fetch(request);
+        if (request.mode === 'navigate' && response.type === 'opaqueredirect') return response;
         if (response.ok || request.mode !== 'navigate') return response;
       } catch (error) {
         // Reloads for individual assets must not silently use an old version.
@@ -89,6 +102,9 @@ self.addEventListener('fetch', (event) => {
     if (isShell) {
       try {
         const response = await fetch(request);
+        // Let the browser follow navigation redirects rather than replacing
+        // an opaque redirect with a potentially stale cached document.
+        if (request.mode === 'navigate' && response.type === 'opaqueredirect') return response;
         if (response.ok) {
           event.waitUntil(caches.open(SHELL_CACHE)
             .then((cache) => cache.put(request, response.clone()))
@@ -111,5 +127,5 @@ self.addEventListener('fetch', (event) => {
       if (partial) return partial;
     }
     try { return await fetch(request); } catch (error) { return unavailableResponse(); }
-  })());
+  })().then((response) => navigationSafeResponse(request, response)));
 });

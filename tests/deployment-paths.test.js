@@ -23,6 +23,12 @@ test('page scripts and the install manifest stay within the project path', () =>
     assert.ok(existsSync(new URL('.nojekyll', root)), 'GitHub Pages must publish the ONNX runtime');
 });
 
+test('Cloudflare serves the installed app start file without redirecting it', () => {
+    const config = JSON.parse(read('wrangler.jsonc'));
+    assert.equal(config.assets.html_handling, 'none');
+    assert.equal(config.assets.not_found_handling, 'single-page-application');
+});
+
 test('the static asset list resolves within the project path', () => {
     const manifest = JSON.parse(read('runtime-assets.json'));
     assert.ok(manifest.assets.length > 0);
