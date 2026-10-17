@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash, webcrypto } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
@@ -20,7 +21,7 @@ function createStorage() {
 }
 
 // Run the actual inline startup code with controllable asset responses and events.
-function createHarness({ images = [], gameInitialized = true, assetFetch, storage = createStorage(), requestAnimationFrame = (callback) => setImmediate(callback), baseURI = 'https://game.test/index.html' } = {}) {
+function createHarness({ images = [], gameInitialized = true, assetFetch, storage = createStorage(), requestAnimationFrame = (callback) => setImmediate(callback), baseURI = 'https://game.test/index.html', manifest, timeout = (delay) => Math.ceil(delay / 100) } = {}) {
     const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
     const start = html.indexOf('const loadRuntimeAssets =');
     const end = html.indexOf('            syncFullscreenClass();', start);
@@ -37,8 +38,9 @@ function createHarness({ images = [], gameInitialized = true, assetFetch, storag
         document: { images, baseURI },
         window: {
             caches: storage,
+            crypto: webcrypto,
             __learnscapeGameInitialized: gameInitialized,
-            setTimeout: (callback, delay) => setTimeout(callback, Math.ceil(delay / 100)),
+            setTimeout: (callback, delay) => setTimeout(callback, timeout(delay)),
             clearTimeout,
             addEventListener: (name, callback) => listeners.set(name, callback),
             removeEventListener: (name, callback) => {
@@ -63,7 +65,7 @@ function createHarness({ images = [], gameInitialized = true, assetFetch, storag
         URL, Response, AbortController,
         fetch: async (url, options) => {
             url = String(url);
-            if (url.endsWith('/runtime-assets.json')) return new Response(JSON.stringify({
+            if (url.endsWith('/runtime-assets.json')) return new Response(JSON.stringify(manifest || {
                 version: '0123456789abcdef0123',
                 assets: ['assets/background.webp', 'assets/lesson.mp4'],
             }));
@@ -146,6 +148,61 @@ test('startup waits for a complete asset download', async () => {
     assert.equal(app.hidden, true);
 });
 
+test('large downloads report byte progress before the file finishes', async () => {
+    let stream;
+    const app = createHarness({
+        manifest: {
+            version: '0123456789abcdef0123',
+            assets: ['assets/lesson.mp4'],
+            sizes: { 'assets/lesson.mp4': 524288 },
+        },
+        assetFetch: async () => new Response(new ReadableStream({ start(controller) { stream = controller; } })),
+    });
+    const boot = app.run();
+    while (!stream) await new Promise((resolve) => setTimeout(resolve, 1));
+    stream.enqueue(new Uint8Array(262144));
+    for (let attempt = 0; attempt < 50 && !app.messages.some((message) => message.includes('50% downloaded')); attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 2));
+    }
+    assert.equal(app.hidden, false);
+    assert.ok(app.messages.some((message) => message.includes('0 / 1 (50% downloaded)')));
+    stream.enqueue(new Uint8Array(262144));
+    stream.close();
+    await boot;
+    assert.equal(app.hidden, true);
+    assert.ok(app.messages.some((message) => message.includes('100% downloaded')));
+});
+
+test('a slow large download is not aborted while bytes keep arriving', async () => {
+    let stream;
+    let attempts = 0;
+    const app = createHarness({
+        manifest: {
+            version: '0123456789abcdef0123',
+            assets: ['assets/lesson.mp4'],
+            sizes: { 'assets/lesson.mp4': 524288 },
+        },
+        timeout: (delay) => delay === 120000 ? 100 : Math.ceil(delay / 100),
+        assetFetch: async (url, options) => {
+            attempts++;
+            return new Response(new ReadableStream({ start(controller) {
+                stream = controller;
+                options.signal.addEventListener('abort', () => controller.error(new Error('download aborted')));
+            } }));
+        },
+    });
+    const boot = app.run();
+    while (!stream) await new Promise((resolve) => setTimeout(resolve, 1));
+    for (let chunk = 0; chunk < 8; chunk++) {
+        await new Promise((resolve) => setTimeout(resolve, 25));
+        stream.enqueue(new Uint8Array(65536));
+    }
+    stream.close();
+    await boot;
+    assert.equal(app.hidden, true);
+    assert.equal(attempts, 1);
+});
+
 test('a failed asset download offers retry and retains successful downloads', async () => {
     const storage = createStorage();
     const requests = [];
@@ -169,6 +226,75 @@ test('a failed asset download offers retry and retains successful downloads', as
     const offline = createHarness({ storage, assetFetch: () => { throw new Error('offline'); } });
     await offline.run();
     assert.equal(offline.hidden, true);
+});
+
+test('an update reuses verified unchanged assets and downloads changed files', async () => {
+    const storage = createStorage();
+    const previousName = 'learnscape-runtime-11111111111111111111';
+    const previous = await storage.open(previousName);
+    await previous.put('https://game.test/assets/background.webp', new Response('unchanged'));
+    await previous.put('https://game.test/assets/lesson.mp4', new Response('outdated'));
+    const meta = await storage.open('learnscape-meta-v2');
+    await meta.put('https://game.test/__learnscape_active_cache__', new Response(previousName));
+    const digest = (value) => createHash('sha256').update(value).digest('hex');
+    const requests = [];
+    const app = createHarness({
+        storage,
+        manifest: {
+            version: '22222222222222222222',
+            assets: ['assets/background.webp', 'assets/lesson.mp4'],
+            sizes: { 'assets/background.webp': 9, 'assets/lesson.mp4': 7 },
+            hashes: { 'assets/background.webp': digest('unchanged'), 'assets/lesson.mp4': digest('updated') },
+        },
+        assetFetch: async (url) => { requests.push(url); return new Response('updated'); },
+    });
+    await app.run();
+    assert.equal(app.hidden, true);
+    assert.deepEqual(requests, ['https://game.test/assets/lesson.mp4']);
+    const current = await storage.open('learnscape-runtime-22222222222222222222');
+    assert.equal(await (await current.match('https://game.test/assets/background.webp')).text(), 'unchanged');
+    assert.equal(await (await current.match('https://game.test/assets/lesson.mp4')).text(), 'updated');
+});
+
+test('an update resumes verified files from an incomplete older download', async () => {
+    const storage = createStorage();
+    const previous = await storage.open('learnscape-runtime-11111111111111111111');
+    await previous.put('https://game.test/assets/background.webp', new Response('saved'));
+    const requests = [];
+    const app = createHarness({
+        storage,
+        manifest: {
+            version: '22222222222222222222',
+            assets: ['assets/background.webp', 'assets/lesson.mp4'],
+            sizes: { 'assets/background.webp': 5, 'assets/lesson.mp4': 4 },
+            hashes: {
+                'assets/background.webp': createHash('sha256').update('saved').digest('hex'),
+                'assets/lesson.mp4': createHash('sha256').update('new!').digest('hex'),
+            },
+        },
+        assetFetch: async (url) => { requests.push(url); return new Response('new!'); },
+    });
+    await app.run();
+    assert.equal(app.hidden, true);
+    assert.deepEqual(requests, ['https://game.test/assets/lesson.mp4']);
+});
+
+test('verified text assets are reused across Windows and GitHub line endings', async () => {
+    const storage = createStorage();
+    const previous = await storage.open('learnscape-runtime-11111111111111111111');
+    await previous.put('https://game.test/assets/code.js', new Response('const x = 1;\r\n'));
+    const app = createHarness({
+        storage,
+        manifest: {
+            version: '22222222222222222222',
+            assets: ['assets/code.js'],
+            sizes: { 'assets/code.js': 13 },
+            hashes: { 'assets/code.js': createHash('sha256').update('const x = 1;\n').digest('hex') },
+        },
+        assetFetch: async () => { throw new Error('unchanged file should not download'); },
+    });
+    await app.run();
+    assert.equal(app.hidden, true);
 });
 
 test('an HTML fallback for a missing asset does not count as a successful download', async () => {

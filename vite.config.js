@@ -36,11 +36,20 @@ async function createRuntimeAssetList(projectRoot, modelPath) {
 
 async function createManifest(files, urls) {
     const hash = createHash("sha256");
+    const sizes = {};
+    const hashes = {};
     for (let index = 0; index < files.length; index++) {
+        const contents = await readFile(files[index]);
         hash.update(urls[index]);
-        hash.update(await readFile(files[index]));
+        hash.update(contents);
+        sizes[urls[index]] = contents.byteLength;
+        // Git can convert text files between CRLF locally and LF on the host.
+        const fingerprintContents = /\.(?:html?|js|mjs|css|svg|webmanifest|json)$/i.test(urls[index])
+            ? Buffer.from(contents.toString("utf8").replace(/\r\n/g, "\n"), "utf8")
+            : contents;
+        hashes[urls[index]] = createHash("sha256").update(fingerprintContents).digest("hex");
     }
-    return { version: hash.digest("hex").slice(0, 20), assets: urls };
+    return { version: hash.digest("hex").slice(0, 20), assets: urls, sizes, hashes };
 }
 
 async function createProjectManifest(projectRoot, modelFile, modelUrl = modelFile) {

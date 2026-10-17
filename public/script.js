@@ -14848,10 +14848,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             cardFront.append(cardImage);
         }
         if (cardImage) {
-            cardImage.src = halfPiece.image || '';
+            if (halfPiece.image) cardImage.src = halfPiece.image;
+            else cardImage.removeAttribute('src');
             cardImage.hidden = Boolean(halfPiece.challenge);
         }
-        card.style.setProperty('--oval-piece-image', `url("${halfPiece.image}")`);
+        card.style.setProperty('--oval-piece-image', halfPiece.image ? `url("${halfPiece.image}")` : 'none');
         card.style.setProperty('--oval-piece-position', `${halfPiece.side} center`);
         card.dataset.ovalPiece = `${halfPiece.image}-${halfPiece.side}`;
         card.dataset.ovalImage = halfPiece.image;

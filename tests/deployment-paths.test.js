@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import test from 'node:test';
 
@@ -28,5 +29,11 @@ test('the static asset list resolves within the project path', () => {
     for (const asset of manifest.assets) {
         assert.ok(new URL(asset, appBase).pathname.startsWith(appBase.pathname), asset);
         assert.ok(existsSync(new URL(asset, root)), `${asset} must exist`);
+        const contents = readFileSync(new URL(asset, root));
+        assert.equal(manifest.sizes[asset], contents.byteLength, `${asset} size`);
+        const fingerprint = /\.(?:html?|js|mjs|css|svg|webmanifest|json)$/i.test(asset)
+            ? Buffer.from(contents.toString('utf8').replace(/\r\n/g, '\n'), 'utf8')
+            : contents;
+        assert.equal(manifest.hashes[asset], createHash('sha256').update(fingerprint).digest('hex'), `${asset} hash`);
     }
 });

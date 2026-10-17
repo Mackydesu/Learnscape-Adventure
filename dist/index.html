@@ -1195,7 +1195,7 @@
                 <span class="rectangle-counter-target-label">Place it here!</span>
             </div>
             <div class="rectangle-counter-placed-item" aria-hidden="true" hidden>
-                <img class="rectangle-counter-placed-image" src="" alt="Naihatid na Tinapay">
+                <img class="rectangle-counter-placed-image" alt="Naihatid na Tinapay">
             </div>
         </div>
 
@@ -1243,7 +1243,7 @@
                 <span class="rectangle-counter-target-label">Place it here!</span>
             </div>
             <div class="rectangle-counter-placed-item" aria-hidden="true" hidden>
-                <img class="rectangle-counter-placed-image" src="" alt="Naihatid na Libro">
+                <img class="rectangle-counter-placed-image" alt="Naihatid na Libro">
             </div>
         </div>
 
@@ -1291,7 +1291,7 @@
                 <span class="rectangle-counter-target-label">Place it here!</span>
             </div>
             <div class="rectangle-counter-placed-item" aria-hidden="true" hidden>
-                <img class="rectangle-counter-placed-image" src="" alt="Naihatid na Laruan">
+                <img class="rectangle-counter-placed-image" alt="Naihatid na Laruan">
             </div>
         </div>
 
@@ -1419,7 +1419,7 @@
         <div class="oval-match-reward" aria-live="polite" aria-label="Matched oval object" hidden>
             <div class="oval-match-confetti" aria-hidden="true"></div>
             <span class="oval-match-burst" aria-hidden="true"></span>
-            <img class="oval-match-object" src="" alt="">
+            <img class="oval-match-object" alt="">
         </div>
         <div class="oval-game-celebration" role="status" aria-live="polite" hidden>
             <div class="oval-celebration-confetti" aria-hidden="true"></div>
@@ -2173,7 +2173,7 @@
 
     
 
-    <script src="./script.js?v=20261017-16"></script>
+    <script src="./script.js?v=20261017-17"></script>
     </div>
 
     <script>
@@ -6358,37 +6358,124 @@ const loadRuntimeAssets = async () => {
     }
 
     let assetCache = null;
+    let previousCaches = [];
     if (persistentStorage) {
         try {
             assetCache = await caches.open(`learnscape-runtime-${manifest.version}`);
+            const meta = await caches.open('learnscape-meta-v2');
+            const active = await meta.match(new URL('__learnscape_active_cache__', document.baseURI).href);
+            const activeName = active && await active.text();
+            const previousNames = (await caches.keys()).filter((name) =>
+                name !== `learnscape-runtime-${manifest.version}` && /^learnscape-runtime-[a-f0-9]{20}$/.test(name));
+            previousNames.sort((left, right) => Number(right === activeName) - Number(left === activeName));
+            previousCaches = await Promise.all(previousNames.map((name) => caches.open(name)));
         } catch (error) {
             console.warn('[Learnscape] Persistent asset storage is unavailable.', error);
         }
     }
 
-    const urls = [...new Set(manifest.assets.map((path) => {
+    const assets = [...new Map(manifest.assets.map((path) => {
         const url = new URL(path, manifestUrl);
         if (url.origin !== manifestUrl.origin) throw new Error('Invalid asset origin.');
-        return url.href;
-    }))];
+        return [url.href, { url: url.href, size: manifest.sizes?.[path], hash: manifest.hashes?.[path] }];
+    })).values()];
+    const totalBytes = assets.reduce((sum, asset) => sum + (asset.size || 0), 0);
+    const hasSizes = totalBytes > 0 && assets.every((asset) => Number.isSafeInteger(asset.size) && asset.size >= 0);
     let nextAsset = 0;
     let completed = 0;
-    const downloadAsset = async (url) => {
-        if (assetCache && await assetCache.match(url)) return;
+    let downloadedBytes = 0;
+    let lastProgressMessage = '';
+    let verificationQueue = Promise.resolve();
+    const matchesSavedAsset = (response, expectedHash, url) => {
+        if (!window.crypto?.subtle || !/^[a-f0-9]{64}$/.test(expectedHash || '')) return Promise.resolve(false);
+        // Hash one saved file at a time to avoid buffering several large videos at once.
+        const verification = verificationQueue.then(async () => {
+            let bytes = new Uint8Array(await response.clone().arrayBuffer());
+            if (/\.(?:html?|js|mjs|css|svg|webmanifest|json)$/i.test(new URL(url).pathname)) {
+                const normalized = new Uint8Array(bytes.length);
+                let length = 0;
+                for (let index = 0; index < bytes.length; index++) {
+                    if (bytes[index] === 13 && bytes[index + 1] === 10) continue;
+                    normalized[length++] = bytes[index];
+                }
+                bytes = normalized.subarray(0, length);
+            }
+            const digest = await window.crypto.subtle.digest('SHA-256', bytes);
+            return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('') === expectedHash;
+        });
+        verificationQueue = verification.catch(() => {});
+        return verification.catch(() => false);
+    };
+    const updateAssetProgress = () => {
+        const fraction = hasSizes ? Math.min(1, downloadedBytes / totalBytes) : completed / assets.length;
+        const detail = hasSizes ? ` (${Math.floor(fraction * 100)}% downloaded)` : '';
+        const message = `Loading game assets… ${completed} / ${assets.length}${detail}`;
+        if (message !== lastProgressMessage) {
+            lastProgressMessage = message;
+            setInitialLoadingMessage(message);
+            setInitialLoadingProgress(8 + fraction * 77);
+        }
+    };
+    const downloadAsset = async ({ url, size, hash }) => {
+        let countedBytes = 0;
+        const countBytes = (bytes) => {
+            if (!hasSizes) return;
+            const next = Math.max(0, Math.min(size, bytes));
+            downloadedBytes += next - countedBytes;
+            countedBytes = next;
+            updateAssetProgress();
+        };
+        if (assetCache && await assetCache.match(url)) {
+            countBytes(size);
+            return;
+        }
+        for (const previousCache of previousCaches) {
+            if (!assetCache) break;
+            const saved = await previousCache.match(url);
+            if (saved && await matchesSavedAsset(saved, hash, url)) {
+                await assetCache.put(url, saved);
+                countBytes(size);
+                return;
+            }
+        }
         let lastError;
         for (let attempt = 0; attempt < 2; attempt++) {
             const controller = new AbortController();
-            const timeoutId = window.setTimeout(() => controller.abort(), 120000);
+            let timeoutId;
+            let tracking = true;
+            const resetInactivityTimeout = () => {
+                window.clearTimeout(timeoutId);
+                timeoutId = window.setTimeout(() => controller.abort(), 120000);
+            };
+            resetInactivityTimeout();
             try {
                 const response = await fetch(url, { cache: 'reload', signal: controller.signal });
                 const isHtml = (response.headers.get('content-type') || '').includes('text/html');
                 if (!response.ok || (isHtml && !/\.(?:html?)$/i.test(new URL(url).pathname))) {
                     throw new Error(`Asset request failed: ${url} (${response.status})`);
                 }
-                if (assetCache) await assetCache.put(url, response);
+                if (hasSizes && size > 256 * 1024 && response.body?.getReader) {
+                    const reader = (assetCache ? response.clone() : response).body.getReader();
+                    const trackDownload = async () => {
+                        let received = 0;
+                        while (true) {
+                            const { done, value } = await reader.read();
+                            if (done) break;
+                            if (!tracking) break;
+                            received += value.byteLength;
+                            countBytes(received);
+                            resetInactivityTimeout();
+                        }
+                    };
+                    await Promise.all([trackDownload(), assetCache ? assetCache.put(url, response) : Promise.resolve()]);
+                } else if (assetCache) await assetCache.put(url, response);
                 else await response.arrayBuffer();
+                countBytes(size);
                 return;
             } catch (error) {
+                tracking = false;
+                controller.abort();
+                countBytes(0);
                 lastError = error;
             } finally {
                 window.clearTimeout(timeoutId);
@@ -6398,15 +6485,14 @@ const loadRuntimeAssets = async () => {
     };
 
     const worker = async () => {
-        while (nextAsset < urls.length) {
-            const url = urls[nextAsset++];
-            await downloadAsset(url);
+        while (nextAsset < assets.length) {
+            const asset = assets[nextAsset++];
+            await downloadAsset(asset);
             completed++;
-            setInitialLoadingMessage(`Loading game assets… ${completed} / ${urls.length}`);
-            setInitialLoadingProgress(8 + (completed / urls.length) * 77);
+            updateAssetProgress();
         }
     };
-    const results = await Promise.allSettled(Array.from({ length: Math.min(6, urls.length) }, worker));
+    const results = await Promise.allSettled(Array.from({ length: Math.min(6, assets.length) }, worker));
     const failure = results.find((result) => result.status === 'rejected');
     if (failure) throw failure.reason;
 

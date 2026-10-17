@@ -21,9 +21,32 @@ async function activeCache() {
 }
 
 async function cachedResponse(request) {
-  const cache = await activeCache();
-  return (cache && await cache.match(request.url, { ignoreSearch: true })) ||
-    (await caches.open(SHELL_CACHE)).match(request.url, { ignoreSearch: true });
+  try {
+    const cache = await activeCache();
+    const shell = await caches.open(SHELL_CACHE);
+    const match = async (url) => (cache && await cache.match(url, { ignoreSearch: true })) ||
+      shell.match(url, { ignoreSearch: true });
+    const cached = await match(request.url);
+    if (cached) return cached;
+
+    // The installed start URL can be the project directory, while installation
+    // pre-caches index.html. Treat only that navigation as the same page.
+    const scope = new URL(self.registration.scope);
+    const url = new URL(request.url);
+    if (request.mode === 'navigate' && url.origin === scope.origin && url.pathname === scope.pathname) {
+      return match(new URL('index.html', scope).href);
+    }
+  } catch (error) {
+    // Unavailable cache storage must not stop an otherwise working network request.
+  }
+  return null;
+}
+
+function unavailableResponse() {
+  return new Response('The requested game resource is temporarily unavailable.', {
+    status: 503,
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+  });
 }
 
 async function rangeResponse(response, range) {
@@ -51,19 +74,22 @@ self.addEventListener('fetch', (event) => {
   const isShell = request.mode === 'navigate' || /\.(?:html|js|css)$/.test(url.pathname) ||
     url.pathname.endsWith('/runtime-assets.json');
   event.respondWith((async () => {
-    if (request.cache === 'reload') return fetch(request);
+    if (request.cache === 'reload') {
+      try { return await fetch(request); } catch (error) { return unavailableResponse(); }
+    }
     if (isShell) {
       try {
         const response = await fetch(request);
         if (response.ok) {
-          const cache = await caches.open(SHELL_CACHE);
-          event.waitUntil(cache.put(request, response.clone()));
+          event.waitUntil(caches.open(SHELL_CACHE)
+            .then((cache) => cache.put(request, response.clone()))
+            .catch(() => {}));
         }
         return response;
       } catch (error) {
         const cached = await cachedResponse(request);
         if (cached) return cached;
-        throw error;
+        return unavailableResponse();
       }
     }
 
@@ -74,6 +100,6 @@ self.addEventListener('fetch', (event) => {
       const partial = await rangeResponse(cached, range);
       if (partial) return partial;
     }
-    return fetch(request);
+    try { return await fetch(request); } catch (error) { return unavailableResponse(); }
   })());
 });
