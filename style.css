@@ -10347,10 +10347,10 @@ body *::after {
     top: clamp(1rem, 2.5vh, 1.8rem);
     left: 50%;
     display: grid;
-    grid-template-columns: auto minmax(10rem, 22rem) auto;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
     gap: 0.7rem;
-    width: min(52rem, 66vw);
+    width: min(36rem, 75vw);
     box-sizing: border-box;
     padding: 0.6rem 0.9rem;
     border: 0.22rem solid #5b2618;
@@ -20172,6 +20172,19 @@ h3 {
     transition: none;
 }
 
+.shape-how-to-help-button.is-heart-companion {
+    --heart-help-settings-gap: clamp(0.45rem, 1vw, 0.75rem);
+    position: fixed;
+    z-index: 125;
+    top: max(8px, calc(clamp(0.75rem, 2.4vh, 1.5rem) + clamp(1.625rem, 2.75vw, 2.3rem) - clamp(1.525rem, 2.55vw, 2.125rem)));
+    right: min(calc(clamp(0.75rem, 2.4vw, 1.75rem) + clamp(3.25rem, 5.5vw, 4.6rem) + var(--heart-help-settings-gap)), calc(100vw - clamp(3.05rem, 5.1vw, 4.25rem) - 8px));
+    transition: right 220ms ease, transform 160ms ease, filter 160ms ease;
+}
+
+.shape-how-to-help-button.is-heart-companion.is-heart-pause-visible {
+    right: min(calc(clamp(0.75rem, 2.4vw, 1.75rem) + clamp(3.25rem, 5.5vw, 4.6rem) + clamp(3.25rem, 5.5vw, 4.6rem) + clamp(0.45rem, 1vw, 0.75rem) + 12px), calc(100vw - clamp(3.05rem, 5.1vw, 4.25rem) - 8px));
+}
+
 .shape-how-to-help-button.is-pause-companion.is-snapping {
     animation: none;
 }
@@ -20428,7 +20441,8 @@ h3 {
     .hero-title-art { animation: none; }
 }
 
-.intro-notification-unread-indicator {
+.intro-notification-unread-indicator,
+.intro-shop-available-indicator {
     position: absolute;
     top: 10%;
     right: 4%;
@@ -20443,7 +20457,8 @@ h3 {
     animation: intro-notification-unread-pulse 1.8s ease-in-out infinite;
 }
 
-.intro-notification-unread-indicator[hidden] {
+.intro-notification-unread-indicator[hidden],
+.intro-shop-available-indicator[hidden] {
     display: none;
 }
 
@@ -20483,6 +20498,7 @@ h3 {
 
 @media (max-width: 520px) {
     .intro-settings { gap: 0.35rem; }
+    .shape-how-to-help-button.is-heart-companion { --heart-help-settings-gap: 0.35rem; }
     .intro-home-resources { gap: 0.25rem; }
     .intro-resource-pill {
         min-width: 3.7rem;
@@ -21256,6 +21272,20 @@ h3 {
 
 .intro-shop-item:hover { filter: brightness(1.06); transform: translateY(-0.12rem); }
 .intro-shop-item:active { transform: translateY(0.1rem) scale(0.985); }
+.intro-shop-item.is-available-to-purchase::after {
+    content: '';
+    position: absolute;
+    top: 0.35rem;
+    right: 0.35rem;
+    z-index: 5;
+    width: clamp(0.72rem, 2.2vw, 1.05rem);
+    aspect-ratio: 1;
+    border: 0.13rem solid #fff5df;
+    border-radius: 50%;
+    background: #f32343;
+    box-shadow: 0 0.12rem 0 #8c1026, 0 0 0.55rem rgba(255, 35, 66, 0.8);
+    pointer-events: none;
+}
 .intro-shop-item:focus-visible {
     outline: 0.22rem solid #31a950;
     outline-offset: 0.12rem;

@@ -796,12 +796,25 @@ const appVersion = '20261015-09';
     };
     const updateRectangleEngineSound = syncRectangleDrivingSound;
 
+    const setRectangleBossBgmState = (active, paused = false) => {
+        window.dispatchEvent(new CustomEvent('learnscape:rectangle-boss-bgm', {
+            detail: { active, paused },
+        }));
+    };
+
+    const setRectangleBossWarningState = (active) => {
+        window.dispatchEvent(new CustomEvent('learnscape:rectangle-boss-warning', {
+            detail: { active },
+        }));
+    };
+
     const setRectangleGamePaused = (paused) => {
         if (!rectangleDeliveryPage || rectangleDeliveryPage.hidden || rectangleDeliveryPage.classList.contains('is-final-complete-scene')) {
             paused = false;
         }
         if (rectangleGamePaused === paused) return;
         rectangleGamePaused = paused;
+        if (rectangleBossActive) setRectangleBossBgmState(true, paused);
         rectangleDeliveryPage?.classList.toggle('is-paused', paused);
         if (rectanglePauseOverlay) rectanglePauseOverlay.hidden = !paused;
         if (rectanglePauseButton) {
@@ -1437,7 +1450,7 @@ const appVersion = '20261015-09';
     const HEART_RAINBOW_START_DELAY_MS = 1800;
     const HEART_RAINBOW_DRAW_MS = 2400;
     const HEART_RAINBOW_HOLD_MS = 450;
-    const HEART_SETS_PER_COLOR = 5;
+    const HEART_SETS_PER_COLOR = 3;
     const HEART_COLOR_CHALLENGES = [
         { key: 'red', label: 'RED', required: HEART_SETS_PER_COLOR, color: '#ff435f', edge: '#9d1737' },
         { key: 'orange', label: 'ORANGE', required: HEART_SETS_PER_COLOR, color: '#ff8a32', edge: '#a94516' },
@@ -1768,26 +1781,6 @@ const appVersion = '20261015-09';
         }
         renderSvgControl();
     });
-    const replayRewardSelector = [
-        '[data-progress-control="replay"]',
-        '[data-progress-control="retry"]',
-        '.square-puzzle-retry-button',
-        '.rectangle-game-over-retry',
-        '.oval-game-over-retry',
-        '.heart-game-retry-button',
-        '.star-mission-retry-button',
-        '.diamond-mission-retry-button',
-    ].join(', ');
-    const lastReplayRewardAt = new WeakMap();
-    document.addEventListener('click', (event) => {
-        const button = event.target.closest?.(replayRewardSelector);
-        if (!button || button.classList.contains('camera-completion-retry') || button.disabled || button.closest('[hidden], [aria-hidden="true"]')
-            || !button.getClientRects().length || typeof window.addLearnscapeResource !== 'function') return;
-        const now = performance.now();
-        if (now - (lastReplayRewardAt.get(button) ?? -Infinity) < 750) return;
-        lastReplayRewardAt.set(button, now);
-        window.addLearnscapeResource('carrots', 1);
-    }, true);
     const circleIllustrationPage = document.getElementById('learnscape-circle-illustration-page');
     const circleIllustrationVideo = circleIllustrationPage?.querySelector('.circle-illustration-video') || null;
     const circleTvLessonImage = circleIllustrationPage?.querySelector('.circle-tv-lesson-image') || null;
@@ -2523,6 +2516,7 @@ const appVersion = '20261015-09';
         if (!shapeSquareMissionAudio) return;
 
         shapeSquareMissionAudio.onended = null;
+        shapeSquareMissionAudio.onerror = null;
         shapeSquareMissionAudio.pause();
         try {
             shapeSquareMissionAudio.currentTime = 0;
@@ -3626,28 +3620,39 @@ const appVersion = '20261015-09';
         });
 
         const AudioCtor = window.Audio;
+        let readyScheduled = false;
+        const scheduleReadyStage = (delay) => {
+            if (readyScheduled || session !== shapeSquareSession) return;
+            readyScheduled = true;
+            const timerId = window.setTimeout(() => showMissionStage(readyStageIndex), delay);
+            shapeSquareTimers.push(timerId);
+        };
         if (AudioCtor) {
             const missionAudio = new AudioCtor(shapeSquareMissionAudioSource);
             shapeSquareMissionAudio = missionAudio;
             missionAudio.preload = 'auto';
             missionAudio.playsInline = true;
             missionAudio.volume = 1;
+            let fallbackTimerId = null;
             missionAudio.onended = () => {
-                if (shapeSquareMissionAudio === missionAudio) shapeSquareMissionAudio = null;
-            };
-            missionAudio.play().catch(() => {
-                if (shapeSquareMissionAudio === missionAudio) shapeSquareMissionAudio = null;
-            });
-
-            const stopMissionAudioTimerId = window.setTimeout(() => {
                 if (shapeSquareMissionAudio !== missionAudio) return;
+                window.clearTimeout(fallbackTimerId);
+                shapeSquareMissionAudio = null;
+                scheduleReadyStage(300);
+            };
+            const handleMissionAudioFailure = () => {
+                if (shapeSquareMissionAudio !== missionAudio) return;
+                window.clearTimeout(fallbackTimerId);
                 stopShapeSquareMissionAudio();
-            }, 8500);
-            shapeSquareTimers.push(stopMissionAudioTimerId);
+                scheduleReadyStage(0);
+            };
+            missionAudio.onerror = handleMissionAudioFailure;
+            fallbackTimerId = window.setTimeout(handleMissionAudioFailure, 8800);
+            shapeSquareTimers.push(fallbackTimerId);
+            missionAudio.play().then(() => window.clearTimeout(fallbackTimerId)).catch(() => {});
+        } else {
+            scheduleReadyStage(8800);
         }
-
-        const readyTimerId = window.setTimeout(() => showMissionStage(readyStageIndex), 8800);
-        shapeSquareTimers.push(readyTimerId);
 
     };
 
@@ -3797,6 +3802,7 @@ const appVersion = '20261015-09';
     const showShapeSquareFinalMessage = () => {
         if (!shapeSquarePage || !isPageVisible(shapeSquarePage)) return;
 
+        setShapeMissionBgmPhase('');
         clearShapeSquareTimers();
         stopShapeSquareIntroAudio();
         stopShapeSquareMissionAudio();
@@ -4252,17 +4258,21 @@ const appVersion = '20261015-09';
         }
 
         let completed = false;
+        let fallbackTimer = null;
         const finish = () => {
             if (completed || session !== heartMissionSession) return;
             completed = true;
+            if (fallbackTimer !== null) window.clearTimeout(fallbackTimer);
             if (heartMissionAudio) {
                 heartMissionAudio.onended = null;
                 heartMissionAudio.onerror = null;
+                heartMissionAudio.pause?.();
                 heartMissionAudio = null;
             }
             onComplete?.();
         };
-        heartMissionTimers.push(window.setTimeout(finish, fallbackDuration));
+        fallbackTimer = window.setTimeout(finish, fallbackDuration);
+        heartMissionTimers.push(fallbackTimer);
         if (!window.Audio) return;
 
         const audio = new window.Audio(source);
@@ -4273,7 +4283,7 @@ const appVersion = '20261015-09';
         audio.onended = finish;
         audio.onerror = finish;
         audio.load?.();
-        audio.play().catch(() => {});
+        audio.play().then(() => window.clearTimeout(fallbackTimer)).catch(() => {});
     };
 
     const startHeartMissionSequence = () => {
@@ -4348,17 +4358,21 @@ const appVersion = '20261015-09';
         }
 
         let completed = false;
+        let fallbackTimer = null;
         const finish = () => {
             if (completed || session !== starMissionSession) return;
             completed = true;
+            if (fallbackTimer !== null) window.clearTimeout(fallbackTimer);
             if (starMissionAudio) {
                 starMissionAudio.onended = null;
                 starMissionAudio.onerror = null;
+                starMissionAudio.pause?.();
                 starMissionAudio = null;
             }
             onComplete?.();
         };
-        starMissionTimers.push(window.setTimeout(finish, fallbackDuration));
+        fallbackTimer = window.setTimeout(finish, fallbackDuration);
+        starMissionTimers.push(fallbackTimer);
         if (!window.Audio) return;
 
         const audio = new window.Audio(source);
@@ -4369,7 +4383,7 @@ const appVersion = '20261015-09';
         audio.onended = finish;
         audio.onerror = finish;
         audio.load?.();
-        audio.play().catch(() => {});
+        audio.play().then(() => window.clearTimeout(fallbackTimer)).catch(() => {});
     };
 
     const startStarMissionSequence = () => {
@@ -5142,17 +5156,21 @@ const appVersion = '20261015-09';
         }
 
         let completed = false;
+        let fallbackTimer = null;
         const finish = () => {
             if (completed || session !== diamondMissionSession) return;
             completed = true;
+            if (fallbackTimer !== null) window.clearTimeout(fallbackTimer);
             if (diamondMissionAudio) {
                 diamondMissionAudio.onended = null;
                 diamondMissionAudio.onerror = null;
+                diamondMissionAudio.pause?.();
                 diamondMissionAudio = null;
             }
             onComplete?.();
         };
-        diamondMissionTimers.push(window.setTimeout(finish, fallbackDuration));
+        fallbackTimer = window.setTimeout(finish, fallbackDuration);
+        diamondMissionTimers.push(fallbackTimer);
         if (!window.Audio) return;
 
         const audio = new window.Audio(source);
@@ -5163,7 +5181,7 @@ const appVersion = '20261015-09';
         audio.onended = finish;
         audio.onerror = finish;
         audio.load?.();
-        audio.play().catch(() => {});
+        audio.play().then(() => window.clearTimeout(fallbackTimer)).catch(() => {});
     };
 
     const startDiamondMissionSequence = () => {
@@ -7239,7 +7257,10 @@ const appVersion = '20261015-09';
         page.classList.remove('is-tv-lesson-image-visible');
         page.classList.add('is-progress-visible');
         videoStage?.setAttribute('aria-hidden', 'true');
-        progress?.setAttribute('aria-hidden', 'false');
+        if (progress) {
+            progress.hidden = false;
+            progress.setAttribute('aria-hidden', 'false');
+        }
         window.syncLearnscapeProgressReward?.(progress);
         playUiClickSound('boardSuccess');
         window.setTimeout(() => {
@@ -7358,14 +7379,6 @@ const appVersion = '20261015-09';
     };
 
     shapePreviewPages.forEach((page) => {
-        const missionShape = {
-            'learnscape-shape-area-3-page': 'triangle',
-            'learnscape-shape-area-4-page': 'rectangle',
-            'learnscape-shape-area-5-page': 'oval',
-            'learnscape-shape-area-6-page': 'heart',
-            'learnscape-shape-area-7-page': 'star',
-            'learnscape-shape-area-8-page': 'diamond',
-        }[page.id] || '';
         const videoStage = page.querySelector('.shape-preview-video-stage');
         const startButton = page.querySelector('.shape-area-preview-start-button');
         const video = page.querySelector('.shape-preview-video');
@@ -7959,7 +7972,6 @@ const appVersion = '20261015-09';
             if (!isPageVisible(page) || !page.classList.contains('is-next-background') || bridgeYesButton.disabled) return;
             bridgeYesButton.disabled = true;
             stopBridgeTransitionAudio();
-            setShapeMissionBgmPhase('triangle');
             page.classList.add('is-fading-to-triangle-game');
             const openTriangleGameTimer = window.setTimeout(() => {
                 window.location.hash = '#triangle-game';
@@ -8057,6 +8069,7 @@ const appVersion = '20261015-09';
                 showDiamondMissionRetryStart();
                 return;
             }
+            setShapeMissionBgmPhase('');
             page.classList.remove('is-progress-visible');
             progress?.setAttribute('aria-hidden', 'true');
             resetShapeTvChoices(page);
@@ -8074,10 +8087,6 @@ const appVersion = '20261015-09';
                 window.location.hash = '#game3';
                 return;
             }
-
-            // Triangle Mountains starts its mission track only after the
-            // player confirms the bridge-help prompt with “Oo”.
-            if (missionShape !== 'triangle') setShapeMissionBgmPhase(missionShape);
 
             const nextBackgroundSource = page.dataset.nextBackground;
             if (!nextBackgroundSource) {
@@ -8889,6 +8898,13 @@ const appVersion = '20261015-09';
     const rectangleBossHealth = rectangleBossEncounter?.querySelector('.rectangle-boss-health');
     const rectangleBossHealthValue = rectangleBossEncounter?.querySelector('.rectangle-boss-health-value');
     const rectangleBossEffects = rectangleBossEncounter?.querySelector('.rectangle-boss-effects');
+    const rectangleBossWarningAudio = window.Audio ? new window.Audio('assets/Audios/Sound effects/danger.mp3') : null;
+    if (rectangleBossWarningAudio) {
+        rectangleBossWarningAudio.preload = 'auto';
+        rectangleBossWarningAudio.playsInline = true;
+        rectangleBossWarningAudio.loop = true;
+        rectangleBossWarningAudio.volume = 0.5;
+    }
     const rectangleBossDeliveryMilestones = [1, 2];
     const rectangleBossCompletedMilestones = new Set();
     let rectangleBossHealthPoints = 100;
@@ -8933,6 +8949,16 @@ const appVersion = '20261015-09';
     };
 
     const canSpawnRectangleBossGas = () => rectangleBossCurrentMilestone !== 2;
+
+    const stopRectangleBossWarningAudio = () => {
+        if (!rectangleBossWarningAudio) return;
+        rectangleBossWarningAudio.pause();
+        try {
+            rectangleBossWarningAudio.currentTime = 0;
+        } catch (error) {
+            // The warning sound may not have loaded metadata yet.
+        }
+    };
 
     const clearRectangleBossTimers = () => {
         [rectangleBossAttackTimer, rectangleBossGasTimer, rectangleBossBlinkTimer, rectangleBossFlashTimer, rectangleBossFinishTimer, rectangleBossAutoLaserTimer]
@@ -9005,6 +9031,9 @@ const appVersion = '20261015-09';
 
     const stopRectangleBossEncounter = ({ resetHealth = true } = {}) => {
         rectangleBossActive = false;
+        setRectangleBossBgmState(false);
+        setRectangleBossWarningState(false);
+        stopRectangleBossWarningAudio();
         rectangleRoadHitUntil = performance.now() + 1200;
         clearRectangleBossTimers();
         rectangleBossEffects?.replaceChildren();
@@ -9165,6 +9194,7 @@ const appVersion = '20261015-09';
     const finishRectangleBossBattle = () => {
         if (!rectangleBossActive || rectangleGamePaused) return;
         rectangleBossActive = false;
+        setRectangleBossBgmState(false);
         rectangleRoadHitUntil = performance.now() + 1200;
         if (rectangleBossCurrentMilestone !== null) {
             rectangleBossCompletedMilestones.add(rectangleBossCurrentMilestone);
@@ -9263,6 +9293,7 @@ const appVersion = '20261015-09';
         const milestone = getRectangleBossMilestone();
         if (!rectangleBossWarning || !milestone) return;
         if (rectangleBossWarningAcknowledged && rectangleBossWarningMilestone === milestone) return;
+        const wasWarningVisible = !rectangleBossWarning.hidden;
         rectangleBossWarningMilestone = milestone;
         rectangleBossWarningAcknowledged = false;
         if (rectangleDeliveryInstructionAudio) {
@@ -9297,7 +9328,13 @@ const appVersion = '20261015-09';
         rectangleBossWarning.hidden = false;
         rectangleBossWarning.getBoundingClientRect();
         rectangleBossWarning.classList.add('is-visible');
-        playUiClickSound('alert');
+        if (!wasWarningVisible) {
+            setRectangleBossWarningState(true);
+            if (rectangleBossWarningAudio) {
+                stopRectangleBossWarningAudio();
+                rectangleBossWarningAudio.play().catch(() => {});
+            }
+        }
         rectangleBossWarningNext?.focus({ preventScroll: true });
     };
 
@@ -9319,6 +9356,7 @@ const appVersion = '20261015-09';
         }
 
         rectangleBossActive = true;
+        setRectangleBossBgmState(true, rectangleGamePaused);
         rectangleObstacleContacts.clear();
         rectangleBossCurrentMilestone = milestone;
         rectangleBossHealthPoints = 100;
@@ -9378,6 +9416,9 @@ const appVersion = '20261015-09';
     rectangleBossWarningContinue?.addEventListener('click', () => {
         if (rectangleBossWarningAcknowledged) return;
         rectangleBossWarningAcknowledged = true;
+        stopRectangleBossWarningAudio();
+        setRectangleBossBgmState(true, rectangleGamePaused);
+        setRectangleBossWarningState(false);
         playUiClickSound('chime');
         rectangleBossWarning?.classList.remove('is-visible');
         window.setTimeout(() => {
@@ -9385,6 +9426,7 @@ const appVersion = '20261015-09';
             rectangleRoadLoopPaused = false;
             rectangleRoadStrip?.classList.remove('is-loop-paused');
             startRectangleBossEncounter();
+            if (!rectangleBossActive) setRectangleBossBgmState(false);
         }, 240);
     });
 
@@ -9412,6 +9454,8 @@ const appVersion = '20261015-09';
         if (event.detail?.route === 'rectangleDelivery') {
             window.setTimeout(startRectangleBossEncounter, 140);
         } else {
+            stopRectangleBossWarningAudio();
+            setRectangleBossWarningState(false);
             rectangleBossWarning?.classList.remove('is-visible');
             if (rectangleBossWarning) rectangleBossWarning.hidden = true;
             if (rectangleBossActive) stopRectangleBossEncounter({ resetHealth: true });
@@ -9565,6 +9609,26 @@ const appVersion = '20261015-09';
         }
     };
 
+    let rectangleCounterWrongAudio = null;
+    const playRectangleCounterWrongAudio = () => {
+        if (!window.Audio) {
+            playUiClickSound('thunk');
+            return;
+        }
+        if (!rectangleCounterWrongAudio) {
+            rectangleCounterWrongAudio = new window.Audio('assets/Audios/Sound effects/buzzer.mp3');
+            rectangleCounterWrongAudio.preload = 'auto';
+            rectangleCounterWrongAudio.playsInline = true;
+        }
+        rectangleCounterWrongAudio.pause();
+        try {
+            rectangleCounterWrongAudio.currentTime = 0;
+        } catch (error) {
+            // The clip may not have loaded metadata yet.
+        }
+        rectangleCounterWrongAudio.play().catch(() => playUiClickSound('thunk'));
+    };
+
     const deliverRectangleObjectToCounter = (page, object) => {
         const itemType = object.dataset.rectangleItem;
         const rightObject = page.dataset.rightObject;
@@ -9572,9 +9636,10 @@ const appVersion = '20261015-09';
         if (!counterStorage) return;
 
         if (itemType === rightObject) {
+            rectangleCounterWrongAudio?.pause();
             completeRectangleCounterDelivery(page, object, counterStorage);
         } else {
-            playUiClickSound('thunk');
+            playRectangleCounterWrongAudio();
             object.classList.add('is-wrong', 'is-returning');
             window.setTimeout(() => {
                 object.classList.remove('is-wrong', 'is-returning');
@@ -9722,7 +9787,7 @@ const appVersion = '20261015-09';
         { start: 0, end: 2.5 },
         { start: 2.5, end: 6.6 },
         { start: 6.6, end: 9.5 },
-        { start: 9.5, end: 13.3 },
+        { start: 9.5, end: Number.POSITIVE_INFINITY },
         { start: 0, end: Number.POSITIVE_INFINITY, source: 'assets/Audios/Voice over/Handa ka na ba.mp3' },
     ];
     let triangleGameDialogueSession = 0;
@@ -10097,6 +10162,8 @@ const appVersion = '20261015-09';
             triangleGameDialogueFrame = null;
         }
         if (triangleGameDialogueAudio) {
+            triangleGameDialogueAudio.onended = null;
+            triangleGameDialogueAudio.onerror = null;
             triangleGameDialogueAudio.pause?.();
             triangleGameDialogueAudio = null;
         }
@@ -10221,13 +10288,18 @@ const appVersion = '20261015-09';
 
             const finishAudio = () => {
                 if (session !== triangleGameDialogueSession || triangleGameDialogueAudio !== audio) return;
+                audio.onended = null;
+                audio.onerror = null;
                 audio.pause?.();
                 triangleGameDialogueAudio = null;
+                if (triangleGameDialogueFrame !== null) window.cancelAnimationFrame(triangleGameDialogueFrame);
                 triangleGameDialogueFrame = null;
                 audioFinished = true;
                 unlockStage();
             };
 
+            audio.onended = finishAudio;
+            audio.onerror = finishAudio;
             audio.play().then(() => {
                 const stopAtSegmentEnd = () => {
                     if (session !== triangleGameDialogueSession || triangleGameDialogueAudio !== audio) return;
@@ -10959,6 +11031,7 @@ const appVersion = '20261015-09';
             pendingShapeChoiceAction = null;
             stopShapeChoiceAudio();
             if (choice.hasAttribute('data-correct-answer')) {
+                stopShapeQuestionAudio();
                 shapeWrongAnswerAudio?.pause();
                 choices.forEach((item) => {
                     item.disabled = true;
@@ -10968,7 +11041,10 @@ const appVersion = '20261015-09';
                 });
                 choice.classList.add('is-correct');
                 choice.closest('.shape-tv-choice-item')?.classList.add('is-correct');
-                playShapeTvCelebration(lessonPage, choiceGroup);
+                playShapeNameAudio(choice.textContent, choice, () => {
+                    if (!isPageVisible(lessonPage) || !lessonPage.classList.contains('is-tv-lesson-image-visible')) return;
+                    playShapeTvCelebration(lessonPage, choiceGroup);
+                });
                 return;
             }
 
@@ -10992,17 +11068,30 @@ const appVersion = '20261015-09';
         };
 
         choices.forEach((choice) => {
-            choice.addEventListener('pointerenter', () => {
+            let isPointerFocusing = false;
+            choice.addEventListener('pointerdown', () => {
+                isPointerFocusing = true;
+            });
+            choice.addEventListener('pointerup', () => {
+                isPointerFocusing = false;
+            });
+            choice.addEventListener('pointercancel', () => {
+                isPointerFocusing = false;
+            });
+            choice.addEventListener('pointerenter', (event) => {
+                if (event.pointerType !== 'mouse') return;
                 if (choiceGroup.querySelector('[data-answer-pending="true"]')) return;
                 playShapeChoiceAudio(choice, true);
             });
 
             choice.addEventListener('focus', () => {
+                if (isPointerFocusing || !choice.matches(':focus-visible')) return;
                 if (choiceGroup.querySelector('[data-answer-pending="true"]')) return;
                 playShapeChoiceAudio(choice, true);
             });
 
             choice.addEventListener('pointerleave', () => {
+                isPointerFocusing = false;
                 if (pendingShapeChoice === choice && !pendingShapeChoiceAction) pendingShapeChoice = null;
             });
 
@@ -11290,6 +11379,7 @@ const appVersion = '20261015-09';
         if (!circleMissionGuideAudio) return;
 
         circleMissionGuideAudio.onended = null;
+        circleMissionGuideAudio.onerror = null;
         circleMissionGuideAudio.pause();
         try {
             circleMissionGuideAudio.currentTime = 0;
@@ -11555,6 +11645,7 @@ const appVersion = '20261015-09';
                 }
                 if (circleMissionGuideAudio) {
                     circleMissionGuideAudio.onended = null;
+                    circleMissionGuideAudio.onerror = null;
                     circleMissionGuideAudio.pause();
                     circleMissionGuideAudio = null;
                 }
@@ -11581,6 +11672,19 @@ const appVersion = '20261015-09';
 
             circleMissionGuideAudio = audio;
             audio.onended = playReadyMessage;
+            const handleMissionAudioFailure = () => {
+                if (circleMissionGuideAudio !== audio) return;
+                audio.onended = null;
+                audio.onerror = null;
+                audio.pause();
+                circleMissionGuideAudio = null;
+                if (circleMissionGuideAudioFrame !== null) {
+                    window.cancelAnimationFrame(circleMissionGuideAudioFrame);
+                    circleMissionGuideAudioFrame = null;
+                }
+                playWithoutAudio();
+            };
+            audio.onerror = handleMissionAudioFailure;
             audio.play().then(() => {
                 const syncMessagesToAudio = () => {
                     if (
@@ -11595,20 +11699,11 @@ const appVersion = '20261015-09';
                     });
                     showSegment(segmentIndex);
 
-                    if (audio.currentTime >= lastSegment.end) {
-                        playReadyMessage();
-                        return;
-                    }
                     circleMissionGuideAudioFrame = window.requestAnimationFrame(syncMessagesToAudio);
                 };
 
                 syncMessagesToAudio();
-            }).catch(() => {
-                if (circleMissionGuideAudio !== audio) return;
-                audio.onended = null;
-                circleMissionGuideAudio = null;
-                playWithoutAudio();
-            });
+            }).catch(handleMissionAudioFailure);
         };
 
         circleMissionGuideTimers.push(window.setTimeout(() => {
@@ -13911,6 +14006,7 @@ const appVersion = '20261015-09';
             retryCircleHunt();
             return;
         }
+        setShapeMissionBgmPhase('');
         resetCircleIllustrationVideo();
         circleIllustrationPlayButton?.focus({ preventScroll: true });
     });
@@ -14040,6 +14136,7 @@ const appVersion = '20261015-09';
             returnToShapeSquareMissionStart();
             return;
         }
+        setShapeMissionBgmPhase('');
         resetShapeSquareLessonVideo();
         setShapeSquareVideoStageVisible(true);
         shapeSquarePlayButton?.focus({ preventScroll: true });
@@ -14687,6 +14784,8 @@ const appVersion = '20261015-09';
 
     const stopOvalMissionAudio = () => {
         if (!ovalMissionAudio) return;
+        ovalMissionAudio.onended = null;
+        ovalMissionAudio.onerror = null;
         ovalMissionAudio.pause();
         try {
             ovalMissionAudio.currentTime = 0;
@@ -14708,6 +14807,7 @@ const appVersion = '20261015-09';
             if (ovalMissionAudio) {
                 ovalMissionAudio.onended = null;
                 ovalMissionAudio.onerror = null;
+                ovalMissionAudio.pause?.();
                 ovalMissionAudio = null;
             }
             onComplete?.();
@@ -14723,9 +14823,9 @@ const appVersion = '20261015-09';
         audio.playsInline = true;
         audio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
         audio.onended = finish;
-        audio.onerror = () => {};
+        audio.onerror = finish;
         audio.load?.();
-        audio.play().catch(() => {});
+        audio.play().then(() => window.clearTimeout(fallbackTimer)).catch(() => {});
     };
 
     const stopOvalMissionIntro = () => {
@@ -15437,6 +15537,7 @@ const appVersion = '20261015-09';
                 resetCircleIllustrationVideo();
                 resetCircleMissionGuide();
                 showCircleHuntStart();
+                setShapeMissionBgmPhase('circle');
                 startCircleHuntCountdown();
                 enableMissionHowToHelp('circle');
             });
@@ -15504,7 +15605,10 @@ const appVersion = '20261015-09';
         };
         const startMission = missionStarters[shape];
         if (!startMission) return false;
-        runShapePhaseWithLoading(() => showDirectPreviewMission(config.page, startMission));
+        runShapePhaseWithLoading(() => showDirectPreviewMission(config.page, () => {
+            setShapeMissionBgmPhase(shape);
+            startMission();
+        }));
         return true;
     };
 
@@ -15513,7 +15617,13 @@ const appVersion = '20261015-09';
         const isReplayPhase = ['lesson', 'mission'].includes(phase) && hasShapePhaseCompletion(shape);
         const isDetectionPhase = phase === 'detection' && hasShapePhaseBadge(shape);
         if (!config || (!isReplayPhase && !isDetectionPhase)) return false;
-        setShapeMissionBgmPhase(phase === 'mission' ? shape : '');
+        const replayRoute = phase === 'mission' && shape === 'rectangle'
+            ? 'rectangleDelivery'
+            : config[phase];
+        window.dispatchEvent(new CustomEvent('learnscape:replay-start', {
+            detail: { shape, starStage: phase === 'lesson' ? 1 : phase === 'mission' ? 2 : 3, route: replayRoute },
+        }));
+        if (phase !== 'mission') setShapeMissionBgmPhase('');
         playUiClickSound('chime');
 
         if (phase === 'detection') {
@@ -15994,7 +16104,7 @@ const appVersion = '20261015-09';
                 'Remember the target color.',
                 'Move the pointer or mouse to aim the heart bow.',
                 'Press Spacebar to fire.',
-                'Shoot the heart balloons matching the target color.',
+                'Shoot three heart balloons matching each target color.',
                 'Each balloon set has a 10-second timer.',
                 'A non-heart balloon decreases the timer by 2 seconds.',
                 'Check your progress and fill all the colors for a rainbow show.',
@@ -16097,6 +16207,20 @@ const appVersion = '20261015-09';
 
     const syncShapeHowToHelpPlacement = () => {
         if (!shapeHowToHelpButton || shapeHowToHelpButton.hidden) return;
+        if (activeShapeHowToKey === 'heart') {
+            const classes = shapeHowToHelpButton.classList;
+            if (classes.contains('is-pause-companion')) classes.remove('is-pause-companion');
+            if (classes.contains('is-snapping')) classes.remove('is-snapping');
+            if (!classes.contains('is-heart-companion')) classes.add('is-heart-companion');
+            const pauseVisible = isShapeHowToElementVisible(heartGamePauseButton);
+            if (classes.contains('is-heart-pause-visible') !== pauseVisible) {
+                classes.toggle('is-heart-pause-visible', pauseVisible);
+            }
+            if (shapeHowToHelpButton.style.left) shapeHowToHelpButton.style.removeProperty('left');
+            if (shapeHowToHelpButton.style.top) shapeHowToHelpButton.style.removeProperty('top');
+            return;
+        }
+        shapeHowToHelpButton.classList.remove('is-heart-companion', 'is-heart-pause-visible');
         const pauseButton = shapeHowToPauseButtons.find(
             (button) => isShapeHowToElementVisible(button),
         );
@@ -16116,7 +16240,13 @@ const appVersion = '20261015-09';
 
     const showShapeHowToHelpButton = () => {
         if (!shapeHowToHelpButton) return;
+        if (activeShapeHowToKey === 'heart') {
+            if (shapeHowToHelpButton.hidden) shapeHowToHelpButton.hidden = false;
+            syncShapeHowToHelpPlacement();
+            return;
+        }
         shapeHowToHelpButton.hidden = false;
+        shapeHowToHelpButton.classList.remove('is-heart-companion', 'is-heart-pause-visible');
         shapeHowToHelpButton.classList.remove('is-snapping');
         shapeHowToHelpButton.getBoundingClientRect();
         shapeHowToHelpButton.classList.add('is-snapping');
@@ -16254,6 +16384,9 @@ const appVersion = '20261015-09';
     shapeHowToPauseButtons.forEach((button) => {
         shapeHowToPauseObserver.observe(button, { attributes: true, attributeFilter: ['aria-pressed', 'hidden', 'class'] });
     });
+    if (heartCupidGame) {
+        shapeHowToPauseObserver.observe(heartCupidGame, { attributes: true, attributeFilter: ['hidden', 'class'] });
+    }
     window.addEventListener('resize', syncShapeHowToHelpPlacement);
     window.addEventListener('learnscape:routechange', () => {
         window.requestAnimationFrame(syncShapeHowToHelpPlacement);

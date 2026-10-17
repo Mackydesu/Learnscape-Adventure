@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20261016-13">
+    <link rel="stylesheet" href="style.css?v=20261017-04">
 </head>
 <body class="title-page is-page-loading is-initial-loading" aria-busy="true">
     <div id="app-shell-container" class="app-shell-container">
@@ -391,6 +391,7 @@
         <nav class="game3-quick-menu" aria-label="Adventure menu">
             <button class="game3-quick-menu-button" type="button" data-intro-panel="shop" aria-label="Shop">
                 <img src="assets/Buttons/Shop.webp" alt="">
+                <span class="intro-shop-available-indicator" aria-hidden="true" hidden></span>
             </button>
             <button class="game3-quick-menu-button" type="button" data-intro-panel="notifications" aria-label="Notifications">
                 <img src="assets/Buttons/Notification.webp" alt="">
@@ -2170,7 +2171,7 @@
 
     
 
-    <script src="/script.js?v=20261016-11"></script>
+    <script src="/script.js?v=20261017-13"></script>
     </div>
 
     <script>
@@ -2811,7 +2812,7 @@
                 const route = routes[routeName] || routes.title;
                 currentRoute = routeName in routes ? routeName : 'title';
                 currentRouteKey = getRouteKey(currentRoute, params);
-                syncRouteBgmForRoute(currentRoute);
+                syncRouteBgmForRoute(currentRoute, true);
 
                 const isIntro = currentRoute === 'title';
                 if (introSettingsTutorialButton) {
@@ -3401,6 +3402,7 @@
                     if (cost) cost.classList.toggle('is-owned', isPurchased && !canUseKey);
                     if (!canUseKey && costValue) costValue.textContent = isPurchased ? 'Owned' : String(itemCost);
                 });
+                syncIntroShopAvailability();
             };
 
             const setIntroShopStatus = (message, state = '') => {
@@ -4128,6 +4130,7 @@
                     return [];
                 }
             };
+            const heartMissionCarrotReward = 25;
             const createNotificationPreviewItems = () => {
                 const shapeOrder = Object.keys(learnscapeShapeLabels);
                 const carrotRewards = Object.freeze({
@@ -4136,7 +4139,7 @@
                     triangle: [6, 9, 15],
                     rectangle: [8, 12, 20],
                     oval: [10, 20, 30],
-                    heart: [15, 25, 40],
+                    heart: [15, heartMissionCarrotReward, 40],
                     star: [20, 30, 50],
                     diamond: [50, 50, 50],
                 });
@@ -4292,6 +4295,23 @@
                 persistPendingCarrotClaims();
             };
             repairCircleMissionRewardNotifications();
+            const repairHeartMissionRewardNotification = () => {
+                const rewardId = 'carrots:learnscape-shape-area-6-page:complete';
+                const notification = learnscapeNotifications.find((item) => item.id === rewardId);
+                if (!notification || notification.isPreview === true || notification.claimed === true) return;
+                const title = `Heart reward: +${heartMissionCarrotReward} carrots`;
+                if (notification.stage === 2
+                    && Number(notification.rewardAmount) === heartMissionCarrotReward
+                    && notification.title === title) return;
+                notification.shape = 'heart';
+                notification.stage = 2;
+                notification.rewardAmount = heartMissionCarrotReward;
+                notification.title = title;
+                notification.detail = 'Claim this reward to add it to your balance.';
+                persistLearnscapeNotifications();
+                persistPendingCarrotClaims();
+            };
+            repairHeartMissionRewardNotification();
             const formatLearnscapeNotificationTime = (timestamp) => {
                 const date = new Date(Number(timestamp) || Date.now());
                 return new Intl.DateTimeFormat(undefined, {
@@ -4847,7 +4867,32 @@
                     ? (resourceCounts[resource] ?? 0)
                     : setLearnscapeResourceCount(resource, (resourceCounts[resource] ?? 0) + Number(amount || 0))
             );
-            window.addEventListener('learnscape:resourcechange', () => {
+            const syncIntroShopAvailability = () => {
+                const availableShapes = Object.keys(introShopCosts).filter((shape) => {
+                    const isPurchased = isTutorialSessionActive
+                        ? shape === 'circle' && tutorialCircleKeyPurchased
+                        : readSoundSetting(introShopPurchaseKey(shape), 'false') === 'true';
+                    return !isPurchased && resourceCounts.carrots >= getIntroShopCost(shape);
+                });
+                document.querySelectorAll('[data-intro-panel="shop"]').forEach((button) => {
+                    const indicator = button.querySelector('.intro-shop-available-indicator');
+                    if (indicator) indicator.hidden = availableShapes.length === 0;
+                    button.setAttribute('aria-label', availableShapes.length
+                        ? `Shop, ${availableShapes.length} ${availableShapes.length === 1 ? 'item' : 'items'} available to purchase`
+                        : 'Shop');
+                });
+                introMenuCopy?.querySelectorAll('.intro-shop-item').forEach((item) => {
+                    const shape = item.dataset.shopItem || '';
+                    const isAvailable = availableShapes.includes(shape);
+                    item.classList.toggle('is-available-to-purchase', isAvailable);
+                    if (!item.classList.contains('is-purchased')) {
+                        item.setAttribute('aria-label', `${shape} key, ${isAvailable ? 'available to purchase' : 'locked'}, costs ${getIntroShopCost(shape)} carrots`);
+                    }
+                });
+            };
+            syncIntroShopAvailability();
+            window.addEventListener('learnscape:resourcechange', (event) => {
+                if (event.detail?.resource === 'carrots') syncIntroShopAvailability();
                 if (introMenuPanel?.dataset.panel === 'profile' && !introMenuPanel.hidden) syncIntroProfile();
             });
             const progressRewardsByShape = Object.freeze({
@@ -4856,7 +4901,7 @@
                 triangle: [0, 6, 9, 15],
                 rectangle: [0, 8, 12, 20],
                 oval: [0, 10, 20, 30],
-                heart: [0, 15, 25, 40],
+                heart: [0, 15, heartMissionCarrotReward, 40],
                 star: [0, 20, 30, 50],
                 diamond: [0, 50, 50, 50],
             });
@@ -4904,10 +4949,56 @@
                 if (stage === 'hunt' || stage === 'answer' || title.includes('mission')) return 'mission';
                 return 'lesson';
             };
-            const addProgressNotifications = (progress, shape, starStage, reward, rewardIdentity) => {
+            const replayBonusAmounts = Object.freeze({ 1: 1, 2: 2, 3: 3 });
+            const replayBonusControls = [
+                '[data-progress-control="replay"]',
+                '[data-progress-control="retry"]',
+                '.square-puzzle-retry-button',
+                '.rectangle-game-over-retry',
+                '.oval-game-over-retry',
+                '.heart-game-retry-button',
+                '.star-mission-retry-button',
+                '.diamond-mission-retry-button',
+            ].join(', ');
+            let pendingReplayBonus = null;
+            window.addEventListener('learnscape:replay-start', (event) => {
+                if (isTutorialSessionActive) return;
+                const { shape, starStage, route } = event.detail || {};
+                const pageId = routes[route]?.pageId;
+                if (!replayBonusAmounts[starStage] || progressRewardShapeByPageId[pageId] !== shape) return;
+                pendingReplayBonus = { shape, starStage, pageId };
+                document.getElementById(pageId)?.querySelectorAll('.circle-lesson-progress')
+                    .forEach(stopProgressMissionNotifications);
+            });
+            document.addEventListener('click', (event) => {
+                const button = event.target.closest?.(replayBonusControls);
+                if (isTutorialSessionActive || !button || button.disabled
+                    || button.closest('[hidden], [aria-hidden="true"]') || !button.getClientRects().length) return;
+                const progress = button.closest('.circle-lesson-progress');
+                const shape = getProgressRewardShape(button);
+                const starStage = progress
+                    ? Number(progress.querySelector('.circle-lesson-stars')?.dataset.earnedStars)
+                    : 2;
+                if (!shape || !replayBonusAmounts[starStage]) return;
+                pendingReplayBonus = { shape, starStage, pageId: button.closest('section[id]')?.id };
+                // A retry starts a new completion sequence, even if the old
+                // progress panel has not finished hiding yet.
+                if (progress) stopProgressMissionNotifications(progress);
+            }, true);
+            window.addEventListener('learnscape:routechange', (event) => {
+                if (!pendingReplayBonus) return;
+                const nextPageId = routes[event.detail?.route]?.pageId;
+                const sameMission = pendingReplayBonus.starStage === 2
+                    && (progressRewardShapeByPageId[nextPageId] === pendingReplayBonus.shape
+                        || (pendingReplayBonus.shape === 'rectangle'
+                            && /^learnscape-rectangle-(bakery|bookstore|toy-shop)/.test(nextPageId || '')))
+                    && !String(nextPageId || '').includes('camera');
+                if (nextPageId !== pendingReplayBonus.pageId && !sameMission) pendingReplayBonus = null;
+            });
+            const addProgressNotifications = (progress, shape, starStage, reward, rewardIdentity, completionTypeOverride = '') => {
                 const shapeLabel = learnscapeShapeLabels[shape];
                 if (!shapeLabel) return;
-                const completionType = getProgressNotificationType(progress);
+                const completionType = completionTypeOverride || getProgressNotificationType(progress);
                 // The camera-complete event already posts the detection notification.
                 if (completionType !== 'camera') {
                     addLearnscapeNotification({
@@ -4926,16 +5017,20 @@
                     title: `You earned ${starStage} ${starStage === 1 ? 'star' : 'stars'} in ${shapeLabel}`,
                     detail: 'Your star total has been updated.',
                 });
+                const carrotNotificationId = `carrots:${rewardIdentity}`;
+                const carrotAlreadyClaimed = readSoundSetting(`learnscape-carrot-claimed:${carrotNotificationId}`, 'false') === 'true';
                 addLearnscapeNotification({
-                    id: `carrots:${rewardIdentity}`,
+                    id: carrotNotificationId,
                     type: 'reward',
                     shape,
                     stage: starStage,
                     rewardAmount: reward,
                     claimRequired: true,
-                    claimed: false,
+                    claimed: carrotAlreadyClaimed,
                     title: `${shapeLabel} reward: +${reward} carrots`,
-                    detail: 'Claim this reward to add it to your balance.',
+                    detail: carrotAlreadyClaimed
+                        ? `${reward} carrots were added to your balance.`
+                        : 'Claim this reward to add it to your balance.',
                 });
             };
             const progressMissionNotificationRuns = new WeakMap();
@@ -4983,8 +5078,12 @@
                     notification.textContent = '';
                 }
             };
-            const getProgressMissionMessages = (progress, shape, starStage) => {
+            const getProgressMissionMessages = (shape, starStage, bonusAmount) => {
                 const shapeLabel = learnscapeShapeLabels[shape];
+                if (bonusAmount) {
+                    const phase = starStage === 1 ? 'Lesson' : starStage === 2 ? 'Mission' : 'Camera Game';
+                    return [`${shapeLabel} ${phase} Completed!`, `Bonus +${bonusAmount} carrot`];
+                }
                 const carrotReward = progressRewardsByShape[shape]?.[starStage] || 0;
                 if (starStage === 1) {
                     return [
@@ -5007,7 +5106,7 @@
                     `You earned ${carrotReward} carrots!`,
                 ];
             };
-            const showProgressMissionNotifications = (progress, shape, starStage) => {
+            const showProgressMissionNotifications = (progress, shape, starStage, bonusAmount) => {
                 const activeRun = progressMissionNotificationRuns.get(progress);
                 if (activeRun?.shape === shape && activeRun?.starStage === starStage) return;
                 if (activeRun) stopProgressMissionNotifications(progress);
@@ -5017,7 +5116,7 @@
                     || createProgressMissionNotification(actions);
                 const run = { timers: [], audio: null, shape, starStage };
                 progressMissionNotificationRuns.set(progress, run);
-                getProgressMissionMessages(progress, shape, starStage).forEach((message, index) => {
+                getProgressMissionMessages(shape, starStage, bonusAmount).forEach((message, index) => {
                     const showTimer = window.setTimeout(() => {
                         notification.classList.remove('is-visible');
                         notification.textContent = message;
@@ -5075,8 +5174,6 @@
                     return;
                 }
 
-                showProgressMissionNotifications(progress, rewardShape, starStage);
-
                 if (starStage === 3 && rewardShape) {
                     awardLearnscapeProfileBadge(rewardShape);
                 }
@@ -5093,6 +5190,17 @@
                 const wasAwarded = claimedProgressRewards.has(rewardIdentity)
                     || readSoundSetting(rewardStorageKey, 'false') === 'true'
                     || legacyRewardWasAwarded;
+                let bonusAmount = 0;
+                if (pendingReplayBonus?.shape === rewardShape
+                    && pendingReplayBonus.starStage === starStage) {
+                    bonusAmount = replayBonusAmounts[starStage];
+                    pendingReplayBonus = null;
+                    // A pending attempt is consumed once, independently of
+                    // whether an older progress notification is still active.
+                    stopProgressMissionNotifications(progress);
+                    window.addLearnscapeResource('carrots', bonusAmount);
+                }
+                showProgressMissionNotifications(progress, rewardShape, starStage, bonusAmount);
                 if (wasAwarded) {
                     claimedProgressRewards.add(rewardIdentity);
                     if (legacyRewardWasAwarded) writeSoundSetting(rewardStorageKey, 'true');
@@ -5111,6 +5219,43 @@
             const syncAllLearnscapeProgressRewards = () => {
                 document.querySelectorAll('.circle-lesson-progress').forEach(syncLearnscapeProgressReward);
             };
+            const restoreStarMissionReward = () => {
+                if (isTutorialSessionActive) return;
+                const rewardIdentity = 'learnscape-shape-area-7-page:hunt';
+                const storageKey = `learnscape-progress-reward:${rewardIdentity}`;
+                const wasRecorded = readSoundSetting(storageKey, 'false') === 'true'
+                    || progressRewardStages.some((stage) => (
+                        readSoundSetting(`${storageKey}:${stage}`, 'false') === 'true'
+                    ));
+                // Camera progress or a saved reward record proves the player
+                // made it past the mission even if its panel never saved it.
+                const hasStarBadge = readSoundSetting(introProfileBadgeUnlockKey('star'), 'false') === 'true';
+                let hasStarCameraProgress = false;
+                try {
+                    const cameraProgress = JSON.parse(readSoundSetting('learnscape-camera-scan-progress:v1', '{}'));
+                    hasStarCameraProgress = Number(cameraProgress?.star) >= 1;
+                } catch (error) {
+                    // Invalid camera data is not evidence of a completed mission.
+                }
+                const carrotNotificationId = `carrots:${rewardIdentity}`;
+                const carrotAlreadyClaimed = readSoundSetting(`learnscape-carrot-claimed:${carrotNotificationId}`, 'false') === 'true';
+                const alreadyHasRewardRecord = learnscapeNotifications.some((item) => (
+                    [`completion:${rewardIdentity}`, `stars:${rewardIdentity}`, carrotNotificationId].includes(item.id)
+                )) || carrotAlreadyClaimed;
+                if (!wasRecorded && !hasStarBadge && !hasStarCameraProgress && !alreadyHasRewardRecord) return;
+                if (!wasRecorded && !alreadyHasRewardRecord) window.addLearnscapeResource('stars', 1);
+                claimedProgressRewards.add(rewardIdentity);
+                writeSoundSetting(storageKey, 'true');
+                const existingCarrotNotification = learnscapeNotifications.find((item) => item.id === carrotNotificationId);
+                if (carrotAlreadyClaimed && existingCarrotNotification && existingCarrotNotification.claimed !== true) {
+                    existingCarrotNotification.claimed = true;
+                    existingCarrotNotification.detail = `${progressRewardsByShape.star[2]} carrots were added to your balance.`;
+                    persistLearnscapeNotifications();
+                    persistPendingCarrotClaims();
+                }
+                addProgressNotifications(null, 'star', 2, progressRewardsByShape.star[2], rewardIdentity, 'mission');
+            };
+            restoreStarMissionReward();
             const awardLearnscapeCameraCompletionReward = (shape) => {
                 if (isTutorialSessionActive) return false;
                 const normalizedShape = String(shape || '').trim().toLowerCase();
@@ -5207,18 +5352,15 @@
                 ['rectangleToyShop1', 'rectangle'],
                 ['ovalBoardGame', 'oval'],
             ]);
-            const missionBgmPhaseStorageKey = 'learnscape-active-mission-bgm-shape';
             const missionBgmBySource = new Map();
             let activeMissionBgm = null;
             let activeMissionBgmSource = '';
-            let activeMissionBgmShape = (() => {
-                const savedShape = String(readSoundSetting(missionBgmPhaseStorageKey, '')).trim().toLowerCase();
-                return missionBgmSourceByShape.has(savedShape) ? savedShape : '';
-            })();
-
-            const saveMissionBgmPhase = () => {
-                writeSoundSetting(missionBgmPhaseStorageKey, activeMissionBgmShape);
-            };
+            let activeMissionBgmShape = '';
+            let lastMissionBgmRoute = '';
+            let rectangleBossBgm = null;
+            let rectangleBossBgmActive = false;
+            let rectangleBossBgmPaused = false;
+            let rectangleBossWarningActive = false;
 
             const resetBgm = (audio) => {
                 if (!audio) return;
@@ -5230,21 +5372,25 @@
                 }
             };
 
-            const syncMissionBgmForRoute = (routeName) => {
-                if (!activeMissionBgmShape) {
+            const syncMissionBgmForRoute = (routeName, resetPhase = false) => {
+                if (resetPhase || routeName !== lastMissionBgmRoute) {
+                    lastMissionBgmRoute = routeName;
                     activeMissionBgmShape = dedicatedMissionShapeByRoute.get(routeName) || '';
-                    if (activeMissionBgmShape) saveMissionBgmPhase();
                 }
                 const allowedRoutes = missionRoutesByShape.get(activeMissionBgmShape);
                 if (activeMissionBgmShape && !allowedRoutes?.has(routeName)) {
                     activeMissionBgmShape = '';
-                    saveMissionBgmPhase();
                 }
                 const source = missionBgmSourceByShape.get(activeMissionBgmShape) || '';
                 if (!source) {
                     resetBgm(activeMissionBgm);
                     activeMissionBgm = null;
                     activeMissionBgmSource = '';
+                    return;
+                }
+
+                if ((rectangleBossBgmActive || rectangleBossWarningActive) && routeName === 'rectangleDelivery') {
+                    activeMissionBgm?.pause();
                     return;
                 }
 
@@ -5272,7 +5418,6 @@
             window.addEventListener('learnscape:mission-bgm-phase', (event) => {
                 const requestedShape = String(event.detail?.shape || '').trim().toLowerCase();
                 activeMissionBgmShape = missionBgmSourceByShape.has(requestedShape) ? requestedShape : '';
-                saveMissionBgmPhase();
                 syncMissionBgmForRoute(currentRoute);
             });
 
@@ -5293,10 +5438,49 @@
                 });
             }
 
-            function syncRouteBgmForRoute(routeName) {
-                syncIntroBgmForRoute(routeName);
-                syncMissionBgmForRoute(routeName);
+            function syncRectangleBossBgmForRoute(routeName) {
+                if (!rectangleBossBgmActive || routeName !== 'rectangleDelivery') {
+                    resetBgm(rectangleBossBgm);
+                    return;
+                }
+                if (rectangleBossBgmPaused) {
+                    rectangleBossBgm?.pause();
+                    return;
+                }
+                if (!rectangleBossBgm) {
+                    rectangleBossBgm = new Audio('assets/Audios/Bgm/boss fight.mp3');
+                    rectangleBossBgm.loop = true;
+                    rectangleBossBgm.preload = 'auto';
+                    rectangleBossBgm.playsInline = true;
+                    rectangleBossBgm.volume = 0.5;
+                }
+                if (!rectangleBossBgm.paused) return;
+                rectangleBossBgm.play().catch(() => {
+                    // The first pointer or keyboard interaction retries autoplay.
+                });
             }
+
+            function syncRouteBgmForRoute(routeName, resetPhase = false) {
+                if (routeName !== 'rectangleDelivery') {
+                    rectangleBossBgmActive = false;
+                    rectangleBossBgmPaused = false;
+                    rectangleBossWarningActive = false;
+                }
+                syncIntroBgmForRoute(routeName);
+                syncMissionBgmForRoute(routeName, resetPhase);
+                syncRectangleBossBgmForRoute(routeName);
+            }
+
+            window.addEventListener('learnscape:rectangle-boss-bgm', (event) => {
+                rectangleBossBgmActive = Boolean(event.detail?.active) && currentRoute === 'rectangleDelivery';
+                rectangleBossBgmPaused = rectangleBossBgmActive && Boolean(event.detail?.paused);
+                syncRouteBgmForRoute(currentRoute);
+            });
+
+            window.addEventListener('learnscape:rectangle-boss-warning', (event) => {
+                rectangleBossWarningActive = Boolean(event.detail?.active) && currentRoute === 'rectangleDelivery';
+                syncRouteBgmForRoute(currentRoute);
+            });
 
             const unlockRouteBgm = () => {
                 syncRouteBgmForRoute(currentRoute);
@@ -5590,7 +5774,9 @@
                 showIntroCarrotSpendPopout(carrotCost);
                 tutorialCircleKeyPurchased = true;
                 item.classList.add('is-purchased', 'is-selected');
+                syncIntroShopAvailability();
                 item.setAttribute('aria-pressed', 'true');
+                item.setAttribute('aria-label', 'circle key, unlocked');
                 introMenuCopy?.querySelectorAll('.intro-shop-item:not([data-shop-item="circle"])').forEach((shopItem) => {
                     shopItem.classList.remove('is-selected');
                     shopItem.setAttribute('aria-pressed', 'false');
