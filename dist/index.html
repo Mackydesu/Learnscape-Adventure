@@ -40,7 +40,7 @@
 
     <div class="page-loading-overlay" aria-live="polite">
         <div class="page-loading-panel initial-loading-panel" role="status">
-            <p class="page-loading-text">Game Loading...</p>
+            <p class="page-loading-text">Game Loading...(0%)</p>
             <div class="initial-loading-bar" role="progressbar" aria-label="Loading game assets and contents" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                 <span></span>
             </div>
@@ -2498,6 +2498,7 @@
             const loadingOverlay = document.querySelector('.page-loading-overlay');
             const loadingProgressBar = loadingOverlay?.querySelector('.initial-loading-bar');
             const loadingRetryButton = loadingOverlay?.querySelector('.initial-loading-retry');
+            const loadingMessage = loadingOverlay?.querySelector('.page-loading-text');
             const body = document.body;
             const routeBodyClasses = ['title-page', 'about-page', 'game3-page', 'gameplay-page'];
             let loadingTimer = null;
@@ -2511,12 +2512,13 @@
 
             const setInitialLoadingProgress = (value) => {
                 const nextValue = Math.max(initialLoadingProgress, Math.min(100, Math.round(value)));
+                if (nextValue === initialLoadingProgress) return;
                 initialLoadingProgress = nextValue;
                 loadingOverlay?.style.setProperty('--loading-progress', String(nextValue));
                 loadingProgressBar?.setAttribute('aria-valuenow', String(nextValue));
+                if (loadingMessage) loadingMessage.textContent = `Game Loading...(${nextValue}%)`;
             };
             const setInitialLoadingMessage = (message) => {
-                const loadingMessage = loadingOverlay?.querySelector('.page-loading-text');
                 if (loadingMessage) loadingMessage.textContent = message;
             };
             setInitialLoadingProgress(4);
@@ -6384,7 +6386,6 @@ const loadRuntimeAssets = async () => {
     let nextAsset = 0;
     let completed = 0;
     let downloadedBytes = 0;
-    let lastProgressMessage = '';
     let verificationQueue = Promise.resolve();
     const matchesSavedAsset = (response, expectedHash, url) => {
         if (!window.crypto?.subtle || !/^[a-f0-9]{64}$/.test(expectedHash || '')) return Promise.resolve(false);
@@ -6408,13 +6409,7 @@ const loadRuntimeAssets = async () => {
     };
     const updateAssetProgress = () => {
         const fraction = hasSizes ? Math.min(1, downloadedBytes / totalBytes) : completed / assets.length;
-        const detail = hasSizes ? ` (${Math.floor(fraction * 100)}% downloaded)` : '';
-        const message = `Loading game assets… ${completed} / ${assets.length}${detail}`;
-        if (message !== lastProgressMessage) {
-            lastProgressMessage = message;
-            setInitialLoadingMessage(message);
-            setInitialLoadingProgress(8 + fraction * 77);
-        }
+        setInitialLoadingProgress(8 + fraction * 77);
     };
     const downloadAsset = async ({ url, size, hash }) => {
         let countedBytes = 0;
@@ -6629,7 +6624,6 @@ const trackInitialImages = () => {
                     await window.__learnscapeAssetsReady;
                     await waitForGameInitialization();
                     await trackInitialImages();
-                    setInitialLoadingMessage('Finishing game startup…');
                     setInitialLoadingProgress(97);
 
                     const minimumLoadingTime = 1200;

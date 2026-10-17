@@ -29,6 +29,7 @@ function createHarness({ images = [], gameInitialized = true, assetFetch, storag
 
     const listeners = new Map();
     const messages = [];
+    const progressValues = [];
     const classes = new Set(['is-initial-loading']);
     let hidden = false;
     let dispatched = null;
@@ -51,7 +52,7 @@ function createHarness({ images = [], gameInitialized = true, assetFetch, storag
         },
         performance: { now: () => 2000 },
         initialBootStartedAt: 0,
-        setInitialLoadingProgress: () => {},
+        setInitialLoadingProgress: (value) => progressValues.push(value),
         setInitialLoadingMessage: (message) => messages.push(message),
         loadingOverlay: { querySelector: () => ({ classList: { add: () => {} } }) },
         loadingRetryButton: retry,
@@ -85,6 +86,7 @@ function createHarness({ images = [], gameInitialized = true, assetFetch, storag
         retry,
         classes,
         messages,
+        progressValues,
     };
 }
 
@@ -107,6 +109,27 @@ test('game opens after the packaged assets and game initialization are ready', a
     assert.equal(app.classes.has('is-initial-loading'), false);
     assert.equal(app.dispatched, 'learnscape:appready');
     assert.equal(app.retry.hidden, true);
+});
+
+test('initial loading text displays the same percentage as the progress bar', () => {
+    const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+    assert.match(html, /<p class="page-loading-text">Game Loading\.\.\.\(0%\)<\/p>/);
+    const start = html.indexOf('            const setInitialLoadingProgress =');
+    const end = html.indexOf('            const setInitialLoadingMessage =', start);
+    assert.ok(start >= 0 && end > start);
+    const label = { textContent: 'Game Loading...(0%)' };
+    const attributes = new Map([['aria-valuenow', '0']]);
+    const context = {
+        loadingMessage: label,
+        loadingOverlay: { style: { setProperty() {} } },
+        loadingProgressBar: { setAttribute: (name, value) => attributes.set(name, value) },
+    };
+    vm.runInNewContext('let initialLoadingProgress = 0;\n' + html.slice(start, end) + '\nglobalThis.setProgress = setInitialLoadingProgress;', context);
+    for (const [value, expected] of [[0, 0], [46.5, 47], [84, 84], [100, 100], [20, 100]]) {
+        context.setProgress(value);
+        assert.equal(label.textContent, `Game Loading...(${expected}%)`);
+        assert.equal(attributes.get('aria-valuenow'), String(expected));
+    }
 });
 
 test('startup completes even when animation frames are paused', async () => {
@@ -161,16 +184,16 @@ test('large downloads report byte progress before the file finishes', async () =
     const boot = app.run();
     while (!stream) await new Promise((resolve) => setTimeout(resolve, 1));
     stream.enqueue(new Uint8Array(262144));
-    for (let attempt = 0; attempt < 50 && !app.messages.some((message) => message.includes('50% downloaded')); attempt++) {
+    for (let attempt = 0; attempt < 50 && !app.progressValues.some((value) => value >= 46.5); attempt++) {
         await new Promise((resolve) => setTimeout(resolve, 2));
     }
     assert.equal(app.hidden, false);
-    assert.ok(app.messages.some((message) => message.includes('0 / 1 (50% downloaded)')));
+    assert.ok(app.progressValues.some((value) => value >= 46.5 && value < 85));
     stream.enqueue(new Uint8Array(262144));
     stream.close();
     await boot;
     assert.equal(app.hidden, true);
-    assert.ok(app.messages.some((message) => message.includes('100% downloaded')));
+    assert.ok(app.progressValues.includes(100));
 });
 
 test('a slow large download is not aborted while bytes keep arriving', async () => {
