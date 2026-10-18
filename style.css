@@ -15,6 +15,12 @@
     --settings-safe-right: clamp(5.5rem, 8vw, 7.1rem);
 }
 
+/* Prevent Android's text autosizing from changing the scaled scene layout. */
+html.is-phone-landscape {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
 * {
     margin: 0;
     padding: 0;

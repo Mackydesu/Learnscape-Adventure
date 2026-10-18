@@ -3,6 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        // The game scenes are composed for a laptop-sized landscape viewport.
+        // Let Android phones render that same layout in a virtual viewport so
+        // CSS positioning and pointer coordinates scale together.
+        (() => {
+            const viewport = document.querySelector('meta[name="viewport"]');
+            const isAndroidPhone = /Android.*Mobile/i.test(navigator.userAgent);
+            if (!viewport || !isAndroidPhone) return;
+
+            const updatePhoneViewport = () => {
+                const orientation = window.screen?.orientation?.type;
+                const isLandscape = orientation
+                    ? orientation.startsWith('landscape')
+                    : window.innerWidth > window.innerHeight;
+                const content = isLandscape
+                    ? 'width=1366'
+                    : 'width=device-width, initial-scale=1.0';
+
+                if (viewport.content !== content) viewport.content = content;
+                document.documentElement.classList.toggle('is-phone-landscape', isLandscape);
+            };
+
+            updatePhoneViewport();
+            window.screen?.orientation?.addEventListener('change', updatePhoneViewport);
+            window.addEventListener('orientationchange', updatePhoneViewport);
+            window.addEventListener('resize', updatePhoneViewport);
+            window.addEventListener('pageshow', updatePhoneViewport);
+        })();
+    </script>
     <title>Learnscape Adventure</title>
     <meta name="theme-color" content="#153f38">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,9 +43,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <script type="module" crossorigin src="./assets/main-CuN_i0DW.js"></script>
+  <script type="module" crossorigin src="./assets/main-DzZdOAdA.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/detectionManager-BUmNu-g5.js">
-  <link rel="stylesheet" crossorigin href="./assets/main-Bfjk08ia.css">
+  <link rel="stylesheet" crossorigin href="./assets/main-D_Oo4hTU.css">
 </head>
 <body class="title-page is-page-loading is-initial-loading" aria-busy="true">
     <div id="app-shell-container" class="app-shell-container">
