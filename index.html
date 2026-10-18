@@ -10,6 +10,8 @@
         (() => {
             const viewport = document.querySelector('meta[name="viewport"]');
             const isAndroidPhone = /Android.*Mobile/i.test(navigator.userAgent);
+            const isPhone = /Android.*Mobile|iPhone|iPod/i.test(navigator.userAgent);
+            document.documentElement.classList.toggle('is-phone', isPhone);
             if (!viewport || !isAndroidPhone) return;
 
             const updatePhoneViewport = () => {
@@ -2963,7 +2965,8 @@
                             && currentRoute === 'circleIllustration'
                             && lesson && !lesson.hidden
                             && !lesson.classList.contains('is-lesson-complete')
-                            && !lesson.classList.contains('is-progress-visible')) {
+                            && !lesson.classList.contains('is-progress-visible')
+                            && !document.documentElement.classList.contains('is-phone')) {
                             window.__learnscapePlayCircleIllustrationVideo?.();
                         }
                     });

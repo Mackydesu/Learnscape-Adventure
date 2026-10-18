@@ -30,6 +30,7 @@ test('Circle lesson starts only after its route is visible and loading fades', (
             setTimeout: (callback) => { callbacks.push(callback); return 1; },
             __learnscapePlayCircleIllustrationVideo: () => events.push('play'),
         },
+        document: { documentElement: { classList: { contains: () => false } } },
         loadingTimer: null,
     };
     vm.runInNewContext(excerpt(html, '            const navigateWithLoading =', '            window.__learnscapeNavigate =') + '\nglobalThis.navigate = navigateWithLoading;', context);
@@ -42,6 +43,15 @@ test('Circle lesson starts only after its route is visible and loading fades', (
 
     events.length = 0;
     context.currentRoute = 'shapeCircle';
+    context.document.documentElement.classList.contains = (name) => name === 'is-phone';
+    context.navigate('circleIllustration');
+    callbacks.shift()();
+    callbacks.shift()();
+    assert.deepEqual(events, ['loading', 'route', 'fade'], 'phones must wait for an explicit lesson Play action');
+
+    events.length = 0;
+    context.currentRoute = 'shapeCircle';
+    context.document.documentElement.classList.contains = () => false;
     context.navigate('circleIllustration');
     callbacks.shift()();
     lessonClasses.add('is-lesson-complete');
