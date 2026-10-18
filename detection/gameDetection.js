@@ -127,7 +127,8 @@ function drawTrackedObjects(session, tracks) {
         context.lineWidth = 3;
         context.strokeRect(x, y, boxWidth, boxHeight);
 
-        // Show the same YOLO label that determines whether this is the target.
+        // Show the same tracked label (including contour corrections) used
+        // to determine whether this is the target.
         const displayLabel = track.label || "";
         const text = String(displayLabel).toUpperCase();
         if (text) {

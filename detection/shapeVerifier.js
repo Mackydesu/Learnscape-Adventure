@@ -383,15 +383,19 @@ export function verifyShape(video, detection, options = {}) {
         if (!geometry.valid) return { verified: false, yoloLabel: detection.label,
             geometricShape: null, correctedLabel: null, reason: geometry.reason, geometry };
         const geometricShape = geometry.geometricShape;
-        // A confident three- or four-sided contour can correct YOLO's class,
-        // including when YOLO initially called it a square or rectangle.
+        // Clear contours can correct a conflicting YOLO class. Squares and
+        // rectangles require agreement at all three simplification scales;
+        // a bounding-box ratio alone is not enough to make that correction.
         const triangleRulePassed = geometricShape === "triangle" && geometry.triangleRulePassed;
         const diamondRulePassed = geometricShape === "diamond" && geometry.diamondRulePassed;
         // A two-scale diamond contour may agree with a true diamond despite
         // webcam noise. When YOLO proposed triangle, require all three scales
         // to agree before correcting that label to diamond.
         const diamondCanCorrectTriangle = detection.label !== "triangle" || geometry.diamondStrongRulePassed;
-        const contourRulePassed = triangleRulePassed || (diamondRulePassed && diamondCanCorrectTriangle);
+        const squareRectangleCorrection = geometry.consistent &&
+            ((detection.label === "square" && geometricShape === "rectangle") ||
+             (detection.label === "rectangle" && geometricShape === "square"));
+        const contourRulePassed = triangleRulePassed || (diamondRulePassed && diamondCanCorrectTriangle) || squareRectangleCorrection;
         const correctedLabel = contourRulePassed && geometricShape !== detection.label ? geometricShape : null;
         const verified = geometry.consistent && (geometricShape === detection.label || contourRulePassed);
         const reason = !geometry.consistent
