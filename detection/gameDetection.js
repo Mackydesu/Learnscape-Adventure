@@ -112,11 +112,7 @@ function drawTrackedObjects(session, tracks) {
     if (!track) return;
 
     {
-        const sourceX = track.x1 * scale + offsetX;
-        const sourceRight = track.x2 * scale + offsetX;
-        const x = session.video.dataset.cameraFeedFlipped === "true"
-            ? width - sourceRight
-            : sourceX;
+        const x = track.x1 * scale + offsetX;
         const y = track.y1 * scale + offsetY;
         const boxWidth = (track.x2 - track.x1) * scale;
         const boxHeight = (track.y2 - track.y1) * scale;

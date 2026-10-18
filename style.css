@@ -15400,10 +15400,6 @@ body *::after {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* Some front-facing camera drivers deliver mirrored video frames. Flip
-       the rendered image back to its real-world orientation. */
-    transform: scaleX(-1) !important;
-    -webkit-transform: scaleX(-1) !important;
 }
 
 .camera-detection-overlay {
@@ -17688,6 +17684,64 @@ body *::after {
 
 .oval-board-stage[data-oval-target-size="10"] .oval-board-card:nth-child(even) {
     width: clamp(9.2rem, 16vw, 18rem);
+}
+
+@media (orientation: landscape) and (max-height: 700px) {
+    .oval-board-title-panel {
+        width: 36vw;
+        padding: 0.35rem 0.5rem;
+        font-size: clamp(1rem, 5vh, 2rem);
+    }
+
+    .oval-match-progress-panel,
+    .oval-match-timer-panel {
+        width: 17vw;
+        min-width: 0;
+        gap: 0.3rem;
+        padding: 0.35rem;
+        font-size: clamp(0.65rem, 2.8vh, 1rem);
+    }
+
+    .oval-match-progress-panel { right: 69vw; }
+    .oval-match-timer-panel { left: 69vw; }
+    .oval-match-progress-panel strong,
+    .oval-match-timer-panel strong { font-size: clamp(0.8rem, 3.5vh, 1.4rem); }
+    .oval-timer-clock-icon { width: clamp(1.1rem, 5vh, 2rem); }
+
+    .oval-board-stage:not([data-oval-target-size="5"]) {
+        top: 24%;
+        bottom: 3%;
+        grid-template-rows: repeat(3, minmax(0, 1fr));
+        row-gap: min(1vh, 0.4rem);
+        transform: translateX(-50%);
+    }
+
+    .oval-board-stage:not([data-oval-target-size="5"]) .oval-board-card:nth-child(odd) {
+        width: min(8.6vw, 14.8vh, 9.8rem);
+    }
+
+    .oval-board-stage:not([data-oval-target-size="5"]) .oval-board-card:nth-child(even) {
+        width: min(12.2vw, 22vh, 14.1rem);
+    }
+
+    .oval-board-stage[data-oval-target-size="10"] { grid-template-rows: repeat(2, minmax(0, 1fr)); }
+    .oval-board-stage[data-oval-target-size="10"] .oval-board-card:nth-child(odd) {
+        width: min(11.8vw, 23vh, 13rem);
+    }
+    .oval-board-stage[data-oval-target-size="10"] .oval-board-card:nth-child(even) {
+        width: min(16vw, 34vh, 18rem);
+    }
+    .oval-board-stage[data-oval-target-size="5"] .oval-board-card:nth-child(odd) {
+        width: min(12vw, 32vh, 13.5rem);
+    }
+    .oval-board-stage[data-oval-target-size="5"] .oval-board-card:nth-child(even) {
+        width: min(17vw, 47vh, 19rem);
+    }
+
+    .oval-board-game-page .oval-board-card .oval-card-number,
+    .oval-board-game-page .oval-board-card:nth-child(even) .oval-card-number {
+        font-size: clamp(1rem, 8vh, 3rem);
+    }
 }
 
 .oval-board-card:nth-child(even) .oval-card-face::before {
@@ -20577,6 +20631,7 @@ h3 {
 
 .intro-menu-panel[data-panel="shop"] .intro-menu-card {
     width: min(35rem, 94vw, calc((100vh - 1.5rem) * 720 / 790));
+    container-type: inline-size;
     min-height: 0;
     padding: 0;
     border: 0;
@@ -20605,14 +20660,18 @@ h3 {
 .intro-menu-panel[data-panel="shop"] .intro-menu-card > h2 {
     position: absolute;
     z-index: 4;
-    top: clamp(1.45rem, 4vw, 2rem);
+    top: 4%;
     left: 50%;
+    display: grid;
+    place-items: center;
     width: 58%;
+    height: 10.5%;
     margin: 0;
-    transform: translateX(-50%) scaleX(1.08);
+    transform: translateX(-50%);
     color: #fff3a5;
     font-family: 'Arial Black', 'Arial Rounded MT Bold', 'Quicksand', sans-serif;
-    font-size: clamp(2.1rem, 7vw, 3.8rem);
+    font-size: clamp(1rem, 5vh, 2.9rem);
+    font-size: clamp(1.25rem, 8cqw, 2.9rem);
     font-weight: 900;
     line-height: 1;
     letter-spacing: 0;
@@ -20624,13 +20683,15 @@ h3 {
 
 .intro-menu-panel[data-panel="shop"] .intro-menu-close {
     z-index: 6;
-    top: clamp(3rem, 8vw, 4.3rem);
-    right: clamp(0.15rem, 2vw, 0.8rem);
-    width: clamp(2.45rem, 7vw, 3.25rem);
+    top: 4%;
+    right: 1%;
+    width: clamp(1.6rem, 6vh, 2.7rem);
+    width: clamp(1.6rem, 9cqw, 2.7rem);
     border: 0.2rem solid #69240b;
     background: linear-gradient(180deg, #ff6b45, #df251d 68%, #9d110d);
     color: #fff8d7;
-    font-size: clamp(1.7rem, 4vw, 2.2rem);
+    font-size: clamp(1rem, 4vh, 1.8rem);
+    font-size: clamp(1rem, 6cqw, 1.8rem);
     text-shadow: 0 0.1rem 0 #7a170d;
     box-shadow: inset 0 0.12rem 0 rgba(255, 255, 255, 0.68), 0 0.28rem 0 #5a230c, 0 0.5rem 0.7rem rgba(49, 18, 4, 0.3);
     transition: transform 150ms ease, filter 150ms ease, box-shadow 150ms ease;
@@ -21469,7 +21530,8 @@ h3 {
     z-index: 2;
     top: 48%;
     left: 50%;
-    width: clamp(3.65rem, 11vw, 4.8rem);
+    width: clamp(2rem, 7vh, 3.2rem);
+    width: clamp(2rem, 11cqw, 3.2rem);
     height: auto;
     overflow: visible;
     filter: drop-shadow(0 0.24rem 0.12rem rgba(50, 28, 11, 0.62));
@@ -22862,7 +22924,7 @@ body.about-page {
     flex: 0 0 auto;
     align-self: center;
     min-width: min(32rem, 62vw);
-    margin: clamp(-1.5rem, -2.6vh, -0.8rem) auto clamp(0.55rem, 1.4vh, 0.95rem);
+    margin: 0 auto clamp(0.55rem, 1.4vh, 0.95rem);
     padding: clamp(0.45rem, 1vh, 0.7rem) clamp(1.5rem, 4vw, 3.5rem);
     border: 0.24rem solid #71300e;
     border-radius: 1rem;
@@ -23211,7 +23273,8 @@ body.about-page {
     display: flex;
     flex-direction: column;
     gap: clamp(0.5rem, 1.2vh, 0.8rem);
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     padding: clamp(0.55rem, 1.3vw, 1rem);
 }
 
@@ -23237,16 +23300,16 @@ body.about-page {
 }
 
 #credits-panel .about-credit-grid {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
     min-height: 0;
     margin-top: 0;
     gap: clamp(0.4rem, 0.9vw, 0.7rem);
 }
 
 #credits-panel .about-credit-card {
-    min-height: 0;
+    min-height: min-content;
     padding: clamp(0.65rem, 1.15vw, 0.9rem);
 }
 
@@ -23280,6 +23343,14 @@ body.about-page {
     .about-credit-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
+    #credits-panel .about-credit-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 520px) {
+    #credits-panel .about-credit-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-height: 560px) and (orientation: landscape) {
@@ -23300,6 +23371,177 @@ body.about-page {
 
     .about-view-panel {
         padding: 0.7rem;
+    }
+}
+
+/* Keep the three camera panels side by side on short landscape screens. */
+@media (orientation: landscape) and (max-width: 1050px),
+       (orientation: landscape) and (max-height: 700px) {
+    body:has(.circle-camera-page:not([hidden])) .intro-settings {
+        top: clamp(0.3rem, 1vh, 0.6rem);
+        gap: 0.35rem;
+    }
+
+    body:has(.circle-camera-page:not([hidden])) :is(.intro-settings-button, .camera-how-to-help-button) {
+        width: clamp(2rem, 9vh, 3.25rem);
+    }
+
+    body:has(.circle-camera-page:not([hidden])) .camera-how-to-help-button {
+        font-size: clamp(1.1rem, 5vh, 2rem);
+    }
+
+    .circle-camera-page:not(.camera-test-page) .game-return-btn {
+        top: 1.5%;
+        padding: 0.28rem 0.65rem;
+        font-size: clamp(0.75rem, 3.2vh, 1.25rem);
+    }
+
+    .circle-camera-page:not(.camera-test-page) .circle-camera-target-card,
+    .circle-camera-page:not(.camera-test-page) .circle-camera-unlock-board {
+        top: 15%;
+        bottom: auto;
+        width: 21.5%;
+        min-width: 0;
+        height: 66%;
+        padding: clamp(0.3rem, 1.5vh, 0.9rem);
+    }
+
+    .circle-camera-page:not(.camera-test-page) .circle-camera-target-card {
+        left: 1.5%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-evenly;
+    }
+
+    .circle-camera-page:not(.camera-test-page) .circle-camera-unlock-board {
+        right: 1.5%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .circle-camera-page:not(.camera-test-page) .circle-camera-target-card h2 {
+        font-size: clamp(0.7rem, 3.5vh, 1.65rem);
+    }
+
+    .circle-camera-page:not(.camera-test-page) .circle-camera-target-shape {
+        flex: 0 0 auto;
+        width: min(14vw, 29vh, 11rem);
+        margin: 0 auto;
+    }
+
+    .circle-camera-page:not(.camera-test-page) .circle-camera-target-card strong {
+        width: 90%;
+        min-width: 0;
+        min-height: 0;
+        padding: 0.25em 0.1em;
+        font-size: clamp(0.7rem, 3.4vh, 1.6rem);
+    }
+
+    .circle-camera-page:not(.camera-test-page) .circle-camera-scan-board {
+        top: 7%;
+        width: 50%;
+        height: 71%;
+        padding: clamp(2.45rem, 11vh, 4.3rem) clamp(0.4rem, 1vw, 0.9rem) clamp(0.4rem, 1vw, 0.9rem);
+    }
+
+    .circle-camera-page:not(.camera-test-page) .circle-camera-scan-title {
+        top: clamp(0.3rem, 1.4vh, 0.7rem);
+        gap: clamp(0.3rem, 1vw, 0.8rem);
+        width: calc(100% - 1rem);
+        height: clamp(2rem, 8.5vh, 3.4rem);
+        min-height: 0;
+        padding: 0.15rem 0.35rem;
+        font-size: clamp(0.7rem, 3.2vh, 1.45rem);
+    }
+
+    .circle-camera-page:not(.camera-test-page) .circle-camera-icon {
+        flex: 0 0 auto;
+        width: clamp(1.45rem, 4vh, 2.4rem);
+        height: clamp(1.15rem, 3.3vh, 1.8rem);
+    }
+
+    .circle-camera-page:not(.camera-test-page) .circle-camera-icon::after {
+        width: 42%;
+        border-width: 0.12rem;
+    }
+
+    .circle-camera-page:not(.camera-test-page) .circle-camera-start-button {
+        top: auto;
+        bottom: 3%;
+        min-width: 0;
+        min-height: 0;
+        padding: 0.35rem 1rem;
+        gap: 0.5rem;
+        font-size: clamp(0.75rem, 3.4vh, 1.45rem);
+    }
+
+    .circle-camera-page:not(.camera-test-page) .camera-empty-stars {
+        min-height: 0;
+        margin: 0 0 0.3rem;
+    }
+
+    .circle-camera-page:not(.camera-test-page) .camera-empty-stars .circle-lesson-star-slot {
+        width: min(4.6vw, 8vh, 3.4rem);
+    }
+
+    .circle-camera-page:not(.camera-test-page) .circle-camera-locked-chest {
+        width: min(85%, 32vh, 12rem);
+        max-height: none;
+        margin: 0 auto;
+    }
+
+    .circle-camera-page:not(.camera-test-page) .camera-chest-3d-stage {
+        --camera-chest-width: min(15vw, 27vh, 10.5rem);
+        --camera-chest-half-width: calc(var(--camera-chest-width) / 2);
+        --camera-chest-depth: calc(var(--camera-chest-width) * 0.34);
+        --camera-chest-full-depth: calc(var(--camera-chest-depth) * 2);
+        --camera-chest-base-height: calc(var(--camera-chest-width) * 0.4);
+        --camera-chest-base-half-height: calc(var(--camera-chest-base-height) / 2);
+        --camera-chest-lid-height: calc(var(--camera-chest-width) * 0.3);
+        --camera-chest-lid-half-height: calc(var(--camera-chest-lid-height) / 2);
+    }
+
+    .circle-camera-page:not(.camera-test-page) .camera-chest-chain-link {
+        flex-basis: min(1.42rem, 3.5vh);
+        width: min(1.42rem, 3.5vh);
+        height: min(0.82rem, 2vh);
+        margin-left: max(-0.24rem, -0.6vh);
+    }
+
+    .circle-camera-page:not(.camera-test-page) .circle-camera-chest-padlock {
+        width: calc(var(--camera-chest-width) * 0.28);
+        height: calc(var(--camera-chest-width) * 0.38);
+    }
+
+    .circle-camera-page:not(.camera-test-page) .camera-chest-padlock-shackle {
+        width: 73%;
+        height: 55%;
+        border-width: clamp(0.12rem, 1.5vh, 0.48rem);
+    }
+
+    .circle-camera-page:not(.camera-test-page) .camera-chest-padlock-body {
+        top: 43%;
+        width: 100%;
+        height: 57%;
+    }
+
+    .circle-camera-page:not(.camera-test-page) .camera-chest-padlock-body::before {
+        width: clamp(0.18rem, 1vh, 0.5rem);
+        height: clamp(0.18rem, 1vh, 0.5rem);
+    }
+
+    .circle-camera-page:not(.camera-test-page) .camera-chest-padlock-body::after {
+        border-left-width: clamp(0.09rem, 0.48vh, 0.24rem);
+        border-right-width: clamp(0.09rem, 0.48vh, 0.24rem);
+        border-top-width: clamp(0.25rem, 1.4vh, 0.7rem);
+    }
+
+    .circle-camera-page:not(.camera-test-page) .camera-chest-open-button {
+        min-width: 0;
+        min-height: 0;
+        padding: 0.3rem 0.9rem;
+        font-size: clamp(0.75rem, 3vh, 1.15rem);
     }
 }
 

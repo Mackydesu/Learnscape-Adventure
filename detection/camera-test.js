@@ -34,11 +34,7 @@ function drawTrackedObjects(tracks) {
     const offsetY = (height - video.videoHeight * scale) / 2;
 
     for (const track of tracks) {
-        const sourceX = track.x1 * scale + offsetX;
-        const sourceRight = track.x2 * scale + offsetX;
-        const x = video.dataset.cameraFeedFlipped === "true"
-            ? width - sourceRight
-            : sourceX;
+        const x = track.x1 * scale + offsetX;
         const y = track.y1 * scale + offsetY;
         const boxWidth = (track.x2 - track.x1) * scale;
         const boxHeight = (track.y2 - track.y1) * scale;

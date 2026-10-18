@@ -386,12 +386,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             detail: { page, video, shape: page?.dataset.cameraShape || '', ...extraDetail },
         }));
     };
-    const setUnmirroredCameraPreview = (video) => {
-        if (!video) return;
-        video.dataset.cameraFeedFlipped = 'true';
-        video.style.setProperty('transform', 'scaleX(-1)', 'important');
-        video.style.setProperty('-webkit-transform', 'scaleX(-1)', 'important');
-    };
     cameraPages.forEach((page) => {
         const shape = page.dataset.cameraShape || '';
         const shapeLabel = cameraShapeLabels[shape] || 'Shape';
@@ -12591,7 +12585,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
             circleCameraStream = stream;
-            setUnmirroredCameraPreview(circleCameraVideo);
             circleCameraVideo.srcObject = stream;
             circleCameraVideo.hidden = false;
             await circleCameraVideo.play();
@@ -12828,7 +12821,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
             shapeCameraStreams.set(page, stream);
-            setUnmirroredCameraPreview(video);
             video.srcObject = stream;
             video.hidden = false;
             await video.play();
