@@ -21874,6 +21874,8 @@ body:has(.intro-menu-panel[data-panel="notifications"]:not([hidden])) .intro-res
 }
 
 .intro-profile-collection {
+    display: flex;
+    flex-direction: column;
     flex: 1;
     min-height: 0;
     padding: clamp(0.45rem, 1.45vh, 0.8rem) clamp(0.5rem, 1.1vw, 0.85rem) clamp(0.5rem, 1.6vh, 0.9rem);
@@ -21884,6 +21886,7 @@ body:has(.intro-menu-panel[data-panel="notifications"]:not([hidden])) .intro-res
 }
 
 .intro-profile-collection h3 {
+    flex: 0 0 auto;
     margin-bottom: clamp(0.3rem, 1.15vh, 0.58rem);
     font-family: 'Fredoka', 'Quicksand', sans-serif;
     font-size: clamp(0.78rem, 2.2vh, 1.15rem);
@@ -21897,14 +21900,11 @@ body:has(.intro-menu-panel[data-panel="notifications"]:not([hidden])) .intro-res
 
 .intro-profile-badges {
     display: grid;
+    flex: 1 1 0;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    align-content: space-evenly;
-    height: calc(100% - clamp(1.15rem, 4vh, 2rem));
-    gap: clamp(0.3rem, 1vh, 0.58rem) clamp(0.28rem, 0.75vw, 0.55rem);
-}
-
-html.is-phone-landscape .intro-profile-badges {
     grid-template-rows: repeat(2, minmax(0, 1fr));
+    min-height: 0;
+    gap: clamp(0.1rem, 0.5vh, 0.35rem) clamp(0.15rem, 0.6vw, 0.55rem);
 }
 
 .intro-profile-badge {
@@ -21918,7 +21918,7 @@ html.is-phone-landscape .intro-profile-badges {
     transition: filter 180ms ease, opacity 180ms ease;
 }
 
-html.is-phone-landscape .intro-profile-board .intro-profile-badge {
+.intro-profile-board .intro-profile-badge {
     grid-template-rows: minmax(0, 1fr) auto;
     min-height: 0;
 }
@@ -21965,10 +21965,11 @@ html.is-phone-landscape .intro-profile-board .intro-profile-badge {
     transform: translateY(-7%);
 }
 
-html.is-phone-landscape .intro-profile-board .intro-profile-medal {
+.intro-profile-board .intro-profile-medal {
     width: auto;
-    height: min(100%, clamp(3.6rem, 12.5vh, 6.6rem));
+    height: min(100%, 6.6rem);
     max-width: 100%;
+    min-height: 0;
 }
 
 .intro-profile-medal::before {
@@ -22367,8 +22368,12 @@ html.is-phone-landscape .intro-profile-board .intro-profile-medal {
     .intro-profile-avatar-column { gap: 1.6%; }
     .intro-profile-action { min-height: 1.72rem; }
     .intro-profile-badges { gap: 0.08rem 0.35rem; }
-    .intro-profile-medal { width: min(100%, 3.65rem); }
-    .intro-profile-badge strong { margin-top: -0.12rem; font-size: 0.5rem; }
+    .intro-profile-badge strong { margin-top: -0.12rem; padding: 0.08rem 0.2rem; font-size: clamp(0.42rem, 1.55vh, 0.68rem); }
+    .intro-profile-stat { gap: 0.25rem; padding: 0 0.15rem; }
+    .intro-profile-stats :is(svg, img),
+    .intro-profile-stat:last-child::before { width: clamp(1rem, 5vh, 2rem); }
+    .intro-profile-stats small { font-size: clamp(0.45rem, 1.7vh, 0.8rem); }
+    .intro-profile-stats strong { font-size: clamp(0.7rem, 3vh, 1.2rem); }
 }
 
 
@@ -23639,5 +23644,312 @@ body.about-page {
     100% {
         transform: translate(var(--camera-chain-link-land-x), var(--camera-chain-link-land-y)) rotate(var(--camera-chain-link-land-angle)) scaleY(var(--camera-chain-link-scale-y));
     }
+}
+
+/* Keep guide characters and their dialogue within short landscape viewports. */
+@media (orientation: landscape) and (max-height: 700px) {
+    body:not(.is-fullscreen-mode) .shape-area-character-speaker,
+    body.is-fullscreen-mode .shape-area-character-speaker {
+        left: 3%;
+        bottom: 0;
+        width: auto;
+        height: min(62vh, 31rem);
+        max-width: 25vw;
+        object-fit: contain;
+        object-position: bottom;
+    }
+
+    body:not(.is-fullscreen-mode) .shape-area-speech-bubble-ch3,
+    body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
+        left: 25%;
+        bottom: 3%;
+        width: min(65vw, 50rem);
+        box-sizing: border-box;
+        padding: clamp(0.4rem, 1.4vh, 0.9rem) clamp(0.6rem, 2vw, 1.4rem);
+        font-size: clamp(0.8rem, 3.5vh, 1.65rem);
+        translate: 0 0;
+    }
+
+    .shape-area-square-character {
+        height: min(62vh, 34rem);
+        max-width: 27vw;
+        object-fit: contain;
+        object-position: bottom;
+    }
+
+    #learnscape-shape-square-page .shape-area-square-speech-bubble,
+    .shape-area-preview-page .shape-preview-intro-bubble {
+        left: 25%;
+        right: auto;
+        bottom: 3%;
+        width: min(65vw, var(--shape-intro-panel-width, 43rem));
+        min-height: 0;
+        padding: clamp(0.45rem, 1.5vh, 0.8rem) clamp(0.6rem, 1.5vw, 1.2rem);
+        font-size: clamp(0.8rem, 3.2vh, 1.35rem);
+        translate: 0 0;
+    }
+
+    #learnscape-shape-area-4-page .shape-preview-intro-bubble,
+    #learnscape-shape-area-4-page .shape-preview-intro-bubble.is-ch4 {
+        left: 5%;
+        right: auto;
+    }
+
+    .shape-area-square-speech-bubble .shape-intro-bubble-text {
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .circle-mission-guide-character,
+    .oval-mission-character {
+        width: min(24vw, 60vh, 22rem);
+        max-height: 68vh;
+    }
+
+    .circle-mission-guide-bubble,
+    .circle-mission-guide-bubble.is-short-message {
+        --circle-guide-tail-x: 12%;
+        top: 4%;
+        bottom: auto;
+        left: 25%;
+        width: min(50vw, 32rem);
+        max-width: 70vw;
+        min-width: 0;
+        box-sizing: border-box;
+        padding: clamp(0.45rem, 1.5vh, 0.85rem) clamp(0.6rem, 1.5vw, 1.2rem);
+        font-size: clamp(0.8rem, 3.4vh, 1.45rem);
+        overflow-wrap: anywhere;
+        transform: translateY(0.45rem) scale(0.96);
+    }
+
+    .circle-mission-guide-bubble.is-short-message { width: fit-content; }
+    .circle-mission-guide.is-bubble-visible .circle-mission-guide-bubble {
+        transform: translateY(0) scale(1);
+    }
+
+    .oval-mission-message-panel {
+        top: 4%;
+        bottom: auto;
+        left: 25%;
+        width: min(52vw, 43rem);
+        min-height: 0;
+        padding: clamp(0.45rem, 1.5vh, 0.9rem) clamp(0.75rem, 2vw, 1.5rem);
+        font-size: clamp(0.85rem, 3.5vh, 1.8rem);
+        overflow-wrap: anywhere;
+    }
+    .oval-mission-message-panel::after {
+        bottom: -0.7rem;
+        width: clamp(0.7rem, 3vh, 1.35rem);
+        height: clamp(0.7rem, 3vh, 1.35rem);
+        border-width: 0 0.2rem 0.2rem 0;
+    }
+
+    #learnscape-shape-square-page .square-mission-guide .square-mission-character {
+        left: 16%;
+        height: min(63vh, 32rem);
+        max-width: 35vw;
+        object-fit: contain;
+        object-position: bottom;
+    }
+    #learnscape-shape-square-page .square-mission-character-ch12,
+    #learnscape-shape-square-page .square-mission-character-ch13 {
+        height: min(63vh, 32rem);
+        max-width: 35vw;
+        object-fit: contain;
+        object-position: bottom;
+    }
+    .square-chocolate-question-bubble {
+        top: 4%;
+        bottom: auto;
+        left: 25%;
+        max-width: min(50vw, 34rem);
+        padding: clamp(0.45rem, 1.5vh, 0.85rem) clamp(0.7rem, 1.8vw, 1.3rem);
+        font-size: clamp(0.85rem, 3.2vh, 1.5rem);
+        overflow-wrap: anywhere;
+    }
+    .circle-hunt-character-ch7,
+    .square-kids-cheer-character-ch7 { width: min(24vw, 60vh, 25rem); }
+    .circle-hunt-ch8-pop,
+    .square-kids-cheer-character-ch8 { width: min(20vw, 50vh, 19rem); }
+
+    #learnscape-shape-square-page .square-mission-bubble {
+        top: 4%;
+        bottom: auto;
+        width: fit-content;
+        max-width: min(65vw, 36rem);
+        padding: clamp(0.45rem, 1.5vh, 0.85rem) clamp(0.7rem, 1.8vw, 1.3rem);
+        font-size: clamp(0.85rem, 3.5vh, 1.7rem);
+        overflow-wrap: anywhere;
+    }
+
+    .circle-mission-start-button,
+    .square-mission-start-button {
+        min-width: min(25vw, 38vh, 20rem);
+        min-height: 0;
+        padding: clamp(0.45rem, 1.6vh, 0.9rem) clamp(1rem, 3vw, 2.5rem);
+        font-size: clamp(1.15rem, 6vh, 2.8rem);
+    }
+
+    .heart-mission-character-wrap,
+    .heart-celebration-character-wrap { width: min(24vw, 55vh, 24rem); }
+    .star-mission-character-wrap { width: min(24vw, 55vh, 27rem); }
+    .star-mission-intro.is-active .star-mission-character-wrap { left: 13%; }
+    .star-mission-celebration-ch7,
+    .star-mission-celebration-ch8 { height: min(60vh, 28rem); bottom: 4%; }
+    .heart-mission-character,
+    .star-mission-character { max-height: 65vh; object-fit: contain; }
+    .diamond-mission-cave { width: min(32vw, 62vh, 34rem); max-height: 70vh; object-fit: contain; }
+    .diamond-mission-cave-baseline { width: min(32vw, 62vh, 34rem); }
+
+    .heart-mission-message,
+    .star-mission-message,
+    .diamond-mission-message {
+        width: min(70vw, 46rem);
+        padding: clamp(0.45rem, 1.4vh, 0.9rem) clamp(0.75rem, 2vw, 1.5rem);
+        font-size: clamp(0.85rem, 3.4vh, 1.7rem);
+        overflow-wrap: anywhere;
+    }
+
+    .heart-mission-message,
+    .diamond-mission-message { top: 4%; }
+    .star-mission-message { bottom: 4%; }
+
+    .rectangle-mission-guide-character {
+        position: absolute;
+        left: 41.5%;
+        bottom: 22%;
+        z-index: 11;
+        display: block;
+        width: min(18vw, 55vh, 19rem);
+        max-height: 58vh;
+        object-fit: contain;
+        pointer-events: none;
+        transform: translateX(-50%);
+        animation: rectangleMissionGuideEnter 520ms cubic-bezier(0.2, 0.95, 0.3, 1.15) both;
+    }
+
+    .rectangle-village-message-panel {
+        width: min(88vw, 61rem);
+        height: auto;
+        min-height: 0;
+        padding: clamp(0.4rem, 1.5vh, 0.75rem) 1rem;
+        font-size: clamp(0.8rem, 3.2vh, 1.35rem);
+        overflow-wrap: anywhere;
+    }
+    .rectangle-village-go-button {
+        bottom: 22%;
+        width: min(16vw, 26vh, 13rem);
+        height: auto;
+        padding: 0.35rem 0.5rem;
+        font-size: clamp(1rem, 4.5vh, 2.2rem);
+    }
+    .rectangle-staff-bubble {
+        max-width: min(35vw, 16rem);
+        padding: clamp(0.35rem, 1.2vh, 0.7rem) clamp(0.5rem, 1.5vw, 1rem);
+        font-size: clamp(0.8rem, 3vh, 1.25rem);
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .triangle-game-character {
+        position: absolute;
+        left: 3%;
+        bottom: 22%;
+        z-index: 8;
+        width: auto;
+        height: min(55vh, 22rem);
+        max-width: 25vw;
+        object-fit: contain;
+        object-position: bottom;
+        opacity: 0;
+        transition: opacity 0.3s ease, transform 0.38s ease;
+    }
+    .triangle-game-character.is-ch17 { height: min(58vh, 24rem); }
+    .triangle-game-character.is-visible { opacity: 1; transform: translateY(0) scale(1); }
+
+    .triangle-game-message-panel {
+        position: absolute;
+        left: 50%;
+        bottom: 3%;
+        z-index: 9;
+        display: flex;
+        align-items: center;
+        width: min(76vw, 50rem);
+        min-height: 0;
+        box-sizing: border-box;
+        padding: clamp(0.45rem, 1.5vh, 0.85rem) clamp(0.7rem, 1.5vw, 1.4rem);
+        border: 0.2rem solid #5b3518;
+        border-radius: 0.5rem;
+        background: linear-gradient(180deg, #ffe78e, #cd9139 54%, #6f451c);
+        box-shadow: inset 0 0.2rem 0 rgba(255,255,255,0.58), 0 0.35rem 0 #3e240f;
+        color: #fffbd8;
+        font-size: clamp(0.85rem, 3.2vh, 1.5rem);
+        font-weight: 900;
+        line-height: 1.2;
+        text-shadow: 0 0.09em 0 #663713;
+        opacity: 0;
+        transform: translateX(-50%) translateY(0.55rem) scale(0.97);
+    }
+    .triangle-game-message-panel.is-visible { opacity: 1; transform: translateX(-50%); }
+    .triangle-game-message-content { white-space: normal; overflow-wrap: anywhere; }
+    .triangle-game-message-dots { display: none; }
+    .triangle-game-message-panel.is-message-complete:not(.is-final-message) .triangle-game-message-dots { display: inline-flex; }
+
+    #learnscape-shape-area-3-page .triangle-bridge-message-panel {
+        min-height: 0;
+        padding: clamp(0.45rem, 1.5vh, 0.85rem) 1rem;
+        font-size: clamp(0.85rem, 3.2vh, 1.5rem);
+    }
+    .triangle-bridge-message-dots { display: none; }
+    .triangle-bridge-message-panel.is-message-complete:not(.is-final-message) .triangle-bridge-message-dots { display: inline-flex; }
+    .triangle-bridge-character-sequence {
+        position: absolute;
+        left: 11.5%;
+        bottom: 42.7%;
+        z-index: 8;
+        width: min(18vw, 16rem);
+        height: min(32vh, 24rem);
+        pointer-events: none;
+        transform: translateX(-50%);
+    }
+    .triangle-bridge-character-sequence img {
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        width: auto;
+        height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+        transform: translateX(-50%);
+    }
+    .triangle-bridge-character-sequence.is-walking { animation: triangleBridgeWalkDesktop 2.19s linear forwards; }
+    .triangle-bridge-yes-button {
+        bottom: clamp(4.5rem, 25vh, 8rem);
+        min-height: 0;
+        padding: 0.45rem 1rem;
+        font-size: clamp(1rem, 4vh, 1.7rem);
+    }
+}
+
+@media (orientation: landscape) and (max-height: 700px) and (max-width: 900px) {
+    .triangle-bridge-yes-button {
+        position: absolute;
+        left: 50%;
+        bottom: 25%;
+        z-index: 10;
+        min-width: 5rem;
+        padding: 0.45rem 1rem;
+        border: 0.18rem solid #633015;
+        border-radius: 0.5rem;
+        background: linear-gradient(180deg, #fff18a, #efae35 54%, #b9631f);
+        box-shadow: inset 0 0.18rem 0 rgba(255,255,255,0.62), 0 0.25rem 0 #48200e;
+        color: #fffbd3;
+        font-size: clamp(1rem, 4vh, 1.7rem);
+        font-weight: 900;
+        opacity: 0;
+        transform: translate(-50%, 0.5rem) scale(0.94);
+        transition: opacity 0.24s ease, transform 0.3s ease;
+    }
+    .triangle-bridge-yes-button.is-visible { opacity: 1; transform: translate(-50%, 0) scale(1); }
 }
 

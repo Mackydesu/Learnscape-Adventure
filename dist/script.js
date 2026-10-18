@@ -9542,7 +9542,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const by = Number(bubble.dataset.sourceY || 180);
             const bw = Number(bubble.dataset.sourceWidth || 300);
             bubble.style.left = `${offsetX + ((bx + bw / 2) * scale)}px`;
-            bubble.style.top = `${offsetY + (by * scale)}px`;
+            bubble.style.top = `${Math.max(offsetY + (by * scale), Math.min(pageRect.height * 0.22, 64))}px`;
         }
     };
 
