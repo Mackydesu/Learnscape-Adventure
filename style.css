@@ -15,8 +15,9 @@
     --settings-safe-right: clamp(5.5rem, 8vw, 7.1rem);
 }
 
-/* Prevent Android's text autosizing from changing the scaled scene layout. */
+/* Match the desktop scene's rem sizing in the Android virtual viewport. */
 html.is-phone-landscape {
+    font-size: 16px;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
 }
@@ -20575,7 +20576,7 @@ h3 {
 .intro-guide-portrait { width: clamp(5rem, 12vw, 8rem); max-height: 10rem; object-fit: contain; }
 
 .intro-menu-panel[data-panel="shop"] .intro-menu-card {
-    width: min(35rem, 94vw);
+    width: min(35rem, 94vw, calc((100vh - 1.5rem) * 720 / 790));
     min-height: 0;
     padding: 0;
     border: 0;
@@ -21018,6 +21019,7 @@ h3 {
     min-height: 0;
     box-sizing: border-box;
     display: grid;
+    grid-auto-rows: max-content;
     align-content: start;
     gap: 0.7rem;
     padding: 0.08rem 0.25rem 0.35rem;
@@ -21287,7 +21289,7 @@ h3 {
 
 .intro-shop-board {
     position: relative;
-    width: min(35rem, 94vw);
+    width: min(35rem, 94vw, calc((100vh - 1.5rem) * 720 / 790));
     aspect-ratio: 720 / 790;
     margin: 0 auto;
     padding: 24% 13.7% 10.5%;
@@ -21557,8 +21559,8 @@ h3 {
 
 @media (max-width: 430px), (max-height: 650px) {
     .intro-menu-panel[data-panel="shop"] { padding: 0.35rem; }
-    .intro-menu-panel[data-panel="shop"] .intro-menu-card { width: min(28rem, 96vw); }
-    .intro-shop-board { width: min(28rem, 96vw); }
+    .intro-menu-panel[data-panel="shop"] .intro-menu-card,
+    .intro-shop-board { width: min(28rem, 96vw, calc((100vh - 1.5rem) * 720 / 790)); }
     .intro-shop-item { min-height: 6.3rem; }
     .intro-shop-key img { max-height: 4.4rem; }
 }
@@ -21839,6 +21841,10 @@ body:has(.intro-menu-panel[data-panel="notifications"]:not([hidden])) .intro-res
     gap: clamp(0.3rem, 1vh, 0.58rem) clamp(0.28rem, 0.75vw, 0.55rem);
 }
 
+html.is-phone-landscape .intro-profile-badges {
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
 .intro-profile-badge {
     position: relative;
     display: grid;
@@ -21848,6 +21854,11 @@ body:has(.intro-menu-panel[data-panel="notifications"]:not([hidden])) .intro-res
     filter: grayscale(1);
     opacity: 0.74;
     transition: filter 180ms ease, opacity 180ms ease;
+}
+
+html.is-phone-landscape .intro-profile-board .intro-profile-badge {
+    grid-template-rows: minmax(0, 1fr) auto;
+    min-height: 0;
 }
 
 .intro-profile-badge.is-unlocked {
@@ -21890,6 +21901,12 @@ body:has(.intro-menu-panel[data-panel="notifications"]:not([hidden])) .intro-res
         0 0.34rem 0.45rem rgba(75, 37, 0, 0.28);
     clip-path: polygon(50% 0%, 59% 8%, 70% 3%, 77% 14%, 89% 13%, 91% 26%, 100% 32%, 94% 43%, 100% 53%, 91% 61%, 92% 74%, 79% 77%, 72% 89%, 60% 84%, 50% 100%, 40% 84%, 28% 89%, 21% 77%, 8% 74%, 9% 61%, 0% 53%, 6% 43%, 0% 32%, 9% 26%, 11% 13%, 23% 14%, 30% 3%, 41% 8%);
     transform: translateY(-7%);
+}
+
+html.is-phone-landscape .intro-profile-board .intro-profile-medal {
+    width: auto;
+    height: min(100%, clamp(3.6rem, 12.5vh, 6.6rem));
+    max-width: 100%;
 }
 
 .intro-profile-medal::before {
