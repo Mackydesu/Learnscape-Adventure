@@ -49,6 +49,91 @@ test('Circle lesson starts only after its route is visible and loading fades', (
     assert.deepEqual(events, ['loading', 'route', 'fade'], 'mission replay must not restart the lesson');
 });
 
+function circlePlayerHarness() {
+    const classes = new Set();
+    const pending = [];
+    const warnings = [];
+    const controls = {};
+    const lesson = {
+        hidden: false,
+        classList: {
+            add: (...names) => names.forEach((name) => classes.add(name)),
+            remove: (...names) => names.forEach((name) => classes.delete(name)),
+            contains: (name) => classes.has(name),
+        },
+    };
+    const video = {
+        hidden: false, currentTime: 0,
+        play: () => new Promise((resolve, reject) => pending.push({ resolve, reject })),
+        pause() {},
+    };
+    const context = {
+        circleIllustrationPage: lesson, circleIllustrationVideo: video,
+        circleTvLessonImage: { hidden: true }, circleTvMascot: null, circleTvQuestionPanel: null,
+        isPageVisible: (page) => !page.hidden,
+        resetCircleMissionGuide() {}, hideCircleIllustrationProgress() {}, resetCircleSortActivity() {},
+        resetCircleHunt() {}, setCircleIllustrationEarnedStars() {}, resetShapeTvChoices() {},
+        setCircleIllustrationPlayButtonVisible: (visible) => { controls.play = visible; },
+        setCircleIllustrationSkipButtonVisible: (visible) => { controls.skip = visible; },
+        console: { warn: (...args) => warnings.push(args) }, window: {},
+    };
+    const code = excerpt(script, '    let circleIllustrationPlayRequestId =', '    const isInShell =');
+    vm.runInNewContext(code + '\nglobalThis.showLessonImage = showCircleTvLessonImage;', context);
+    return { ...context, lesson, video, controls, pending, warnings };
+}
+
+test('interrupted Circle playback cannot restore controls after skipping or resetting', async () => {
+    const player = circlePlayerHarness();
+    let playing = player.window.__learnscapePlayCircleIllustrationVideo();
+    player.showLessonImage();
+    player.pending.shift().reject({ name: 'AbortError' });
+    await playing;
+    assert.equal(player.controls.play, false);
+    assert.equal(player.controls.skip, false);
+    assert.equal(player.circleTvLessonImage.hidden, false);
+
+    playing = player.window.__learnscapePlayCircleIllustrationVideo();
+    player.window.__learnscapeResetCircleIllustrationVideo();
+    player.pending.shift().reject({ name: 'AbortError' });
+    await playing;
+    assert.equal(player.controls.play, true);
+    assert.equal(player.controls.skip, true);
+    assert.equal(player.warnings.length, 0);
+});
+
+test('only the current Circle play request can change retry controls', async () => {
+    const player = circlePlayerHarness();
+    const first = player.window.__learnscapePlayCircleIllustrationVideo();
+    const second = player.window.__learnscapePlayCircleIllustrationVideo();
+    player.pending.shift().reject({ name: 'AbortError' });
+    await first;
+    assert.equal(player.controls.play, false);
+    player.pending.shift().reject({ name: 'NotAllowedError' });
+    await second;
+    assert.equal(player.controls.play, true);
+    assert.equal(player.controls.skip, true);
+    assert.equal(player.warnings.length, 1);
+
+    const interrupted = player.window.__learnscapePlayCircleIllustrationVideo();
+    player.pending.shift().reject({ name: 'AbortError' });
+    await interrupted;
+    assert.equal(player.controls.play, true, 'a still-visible interrupted lesson can be retried');
+    assert.equal(player.warnings.length, 1);
+});
+
+test('unsupported landscape locking is harmless but unexpected errors remain visible', async () => {
+    const warnings = [];
+    const context = { window: { screen: { orientation: {} } }, console: { warn: (...args) => warnings.push(args) } };
+    vm.runInNewContext(excerpt(script, '    const lockLandscape =', '    const enterFullscreenFlow =') + '\nglobalThis.lockLandscape = lockLandscape;', context);
+    await context.lockLandscape();
+    context.window.screen.orientation.lock = async () => { throw { name: 'NotSupportedError' }; };
+    await context.lockLandscape();
+    assert.equal(warnings.length, 0);
+    context.window.screen.orientation.lock = async () => { throw { name: 'SecurityError' }; };
+    await context.lockLandscape();
+    assert.equal(warnings.length, 1);
+});
+
 function cameraGuideHarness() {
     const listeners = new Map();
     const stored = new Map([['learnscape-camera-how-to-seen:circle', 'true']]);

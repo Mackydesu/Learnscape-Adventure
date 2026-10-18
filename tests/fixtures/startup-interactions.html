@@ -45,7 +45,7 @@
 
             // Exercise the app's actual Circle player and route transition with
             // only the unrelated game state replaced by no-ops.
-            const player = extract(script, '    const playCircleIllustrationVideo =', '    const showCircleTvLessonImage =');
+            const player = extract(script, '    let circleIllustrationPlayRequestId =', '    const showCircleTvLessonImage =');
             new Function('circleIllustrationPage', 'circleIllustrationVideo', `
                 const isPageVisible = (page) => !page.hidden;
                 const resetCircleMissionGuide = () => {};

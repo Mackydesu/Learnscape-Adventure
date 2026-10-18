@@ -13372,9 +13372,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    let circleIllustrationPlayRequestId = 0;
+
     const playCircleIllustrationVideo = async () => {
         if (!circleIllustrationVideo || !isPageVisible(circleIllustrationPage)) return;
 
+        const playRequestId = ++circleIllustrationPlayRequestId;
         try {
             resetCircleMissionGuide();
             hideCircleIllustrationProgress();
@@ -13398,15 +13401,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             await circleIllustrationVideo.play();
         } catch (error) {
+            if (playRequestId !== circleIllustrationPlayRequestId
+                || !isPageVisible(circleIllustrationPage)
+                || circleIllustrationVideo.hidden
+                || circleIllustrationPage?.classList.contains('is-lesson-complete')
+                || circleIllustrationPage?.classList.contains('is-progress-visible')
+                || circleIllustrationPage?.classList.contains('is-tv-lesson-image-visible')) return;
+
             setCircleIllustrationPlayButtonVisible(true);
             setCircleIllustrationSkipButtonVisible(true);
-            console.warn('Circle lesson video could not play.', error);
+            if (error?.name !== 'AbortError') {
+                console.warn('Circle lesson video could not play.', error);
+            }
         }
     };
 
     const showCircleTvLessonImage = () => {
         if (!circleIllustrationPage || !circleIllustrationVideo || !circleTvLessonImage) return;
 
+        circleIllustrationPlayRequestId++;
         hideCircleIllustrationProgress();
         circleIllustrationVideo.pause();
         circleIllustrationVideo.hidden = true;
@@ -13421,6 +13434,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const resetCircleIllustrationVideo = () => {
         if (!circleIllustrationVideo) return;
 
+        circleIllustrationPlayRequestId++;
         resetCircleMissionGuide();
         hideCircleIllustrationProgress();
         resetCircleSortActivity();
@@ -13599,7 +13613,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             await orientation.lock('landscape');
         } catch (error) {
-            console.warn('Landscape lock was not available.', error);
+            if (error?.name !== 'NotSupportedError') {
+                console.warn('Landscape lock was not available.', error);
+            }
         }
     };
 
