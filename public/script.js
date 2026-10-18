@@ -9677,6 +9677,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const triangleGameBackground = triangleGamePage?.querySelector('.shape-area-bg') || null;
     const triangleGameTreeGroup = triangleGamePage?.querySelector('.triangle-game-tree-group') || null;
     const triangleGameTrees = Array.from(triangleGamePage?.querySelectorAll('[data-triangle-game-tree]') || []);
+    const triangleTreeAxe = triangleGameTreeGroup?.querySelector('.triangle-tree-axe') || null;
     const triangleTreeCutGuide = triangleGameTreeGroup?.querySelector('.triangle-tree-cut-guide') || null;
     const triangleWoodStorage = triangleGamePage?.querySelector('.triangle-wood-storage') || null;
     const triangleWoodStorageImage = triangleWoodStorage?.querySelector('.triangle-wood-storage-image') || null;
@@ -10034,6 +10035,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const resetTriangleGameTrees = () => {
         hideTriangleTreeCutGuide();
+        triangleTreeAxe?.classList.remove('is-swinging');
         triangleWoodCollectionSession += 1;
         triangleBridgeBuildSession += 1;
         triangleBridgeBuildTimers.forEach((timerId) => window.clearTimeout(timerId));
@@ -10634,8 +10636,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
+    const swingTriangleTreeAxe = (tree) => {
+        if (!triangleTreeAxe || !triangleGameTreeGroup) return;
+        const groupRect = triangleGameTreeGroup.getBoundingClientRect();
+        const treeRect = tree.getBoundingClientRect();
+        if (!groupRect.width || !groupRect.height) return;
+
+        // The leaning tree artwork moves the trunk to the right of its image.
+        const trunkX = tree.dataset.treeStage === '2' ? 0.68 : 0.5;
+        const trunkY = tree.dataset.treeStage === '2' ? 0.75 : 0.77;
+        const trunkPositionX = (treeRect.left - groupRect.left + treeRect.width * trunkX) / groupRect.width;
+        triangleTreeAxe.style.left = `${trunkPositionX * 100}%`;
+        triangleTreeAxe.style.top = `${((treeRect.top - groupRect.top + treeRect.height * trunkY) / groupRect.height) * 100}%`;
+        triangleTreeAxe.classList.toggle('is-from-left', trunkPositionX > 0.85);
+        triangleTreeAxe.classList.remove('is-swinging');
+        triangleTreeAxe.getBoundingClientRect();
+        triangleTreeAxe.classList.add('is-swinging');
+    };
+
     const advanceTriangleGameTree = (tree) => {
         if (!triangleGameTreeGroup?.classList.contains('is-active') || !tree.classList.contains('is-clickable')) return;
+        swingTriangleTreeAxe(tree);
         playTriangleWoodChopAudio();
         scheduleTriangleTreeCutGuide();
         const currentStage = Number.parseInt(tree.dataset.treeStage || '0', 10);
@@ -10729,6 +10750,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     triangleGameStartButton?.addEventListener('click', startTriangleTreeMission);
+
+    triangleTreeAxe?.addEventListener('animationend', () => triangleTreeAxe.classList.remove('is-swinging'));
 
     triangleGameTreeGroup?.addEventListener('click', (event) => {
         const tree = findTriangleGameTreeAtPoint(event.clientX, event.clientY);

@@ -12428,6 +12428,48 @@ body *::after {
     100% { transform: translateX(var(--tree-shift-x)) scaleX(-1) rotate(0deg) scale(1); }
 }
 
+.triangle-tree-axe {
+    position: absolute;
+    z-index: 18;
+    width: clamp(5rem, 8vw, 8rem);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-13%, -36%);
+}
+
+.triangle-tree-axe svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    filter: drop-shadow(0.2rem 0.3rem 0.18rem rgba(35, 25, 12, 0.38));
+    transform-origin: 86% 90%;
+}
+
+.triangle-tree-axe.is-from-left {
+    transform: translate(-87%, -36%) scaleX(-1);
+}
+
+.triangle-tree-axe.is-swinging {
+    animation: triangleTreeAxeAppear 0.42s ease-out both;
+}
+
+.triangle-tree-axe.is-swinging svg {
+    animation: triangleTreeAxeSwing 0.42s ease-out both;
+}
+
+@keyframes triangleTreeAxeAppear {
+    0%, 72% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes triangleTreeAxeSwing {
+    0% { transform: rotate(42deg); }
+    35% { transform: rotate(-4deg); }
+    55% { transform: rotate(3deg); }
+    100% { transform: rotate(28deg); }
+}
+
 @keyframes triangleWoodStorageBump {
     0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
     45% { transform: translateY(-0.42rem) scale(1.16) rotate(-2deg); }
@@ -12464,6 +12506,14 @@ body *::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .triangle-tree-axe.is-swinging {
+        animation-duration: 0.2s;
+    }
+
+    .triangle-tree-axe.is-swinging svg {
+        animation: none;
+    }
+
     .triangle-tree-cut-guide {
         animation: none;
     }
