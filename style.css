@@ -15545,6 +15545,17 @@ body *::after {
     object-fit: cover;
 }
 
+/* Some desktop webcam drivers expose an already mirrored stream. Flip the
+   rendered feed and its tracking layer together so the view is natural while
+   detection boxes remain on their objects. Phone camera previews are unchanged. */
+@media (min-width: 901px) {
+    .circle-camera-video,
+    .camera-detection-overlay {
+        transform: scaleX(-1);
+        transform-origin: center;
+    }
+}
+
 .camera-detection-overlay {
     position: absolute;
     z-index: 2;
@@ -20536,7 +20547,7 @@ h3 {
 }
 
 .shape-how-to-mission::before {
-    content: 'Mission: ';
+    content: 'Misyon: ';
     color: #a84419;
 }
 
