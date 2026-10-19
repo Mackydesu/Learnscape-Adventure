@@ -24088,3 +24088,197 @@ body.about-page {
     .triangle-bridge-yes-button.is-visible { opacity: 1; transform: translate(-50%, 0) scale(1); }
 }
 
+/*
+ * Phone dialogue uses a shared bottom panel.  The game switches landscape
+ * phones to a wide viewport, so the short-screen condition is intentional:
+ * it keeps that mode aligned with portrait phones as well.
+ */
+@media (max-width: 900px), (orientation: portrait), (max-height: 700px) {
+    :is(
+        .shape-area-speech-bubble,
+        .shape-area-square-speech-bubble,
+        .shape-preview-intro-bubble,
+        .circle-mission-guide-bubble,
+        .square-mission-bubble,
+        .square-chocolate-question-bubble,
+        .oval-mission-message-panel,
+        .rectangle-staff-bubble,
+        .rectangle-village-message-panel,
+        .heart-mission-message,
+        .star-mission-message,
+        .diamond-mission-message,
+        .triangle-bridge-message-panel,
+        .triangle-game-message-panel
+    ) {
+        position: absolute;
+        left: 50% !important;
+        right: auto !important;
+        top: auto !important;
+        bottom: max(0.8rem, env(safe-area-inset-bottom)) !important;
+        z-index: 40;
+        width: min(86vw, 46rem) !important;
+        max-width: calc(100vw - 1.5rem) !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        max-height: min(28svh, 10rem);
+        box-sizing: border-box;
+        padding: clamp(0.55rem, 1.8vh, 0.9rem) clamp(0.8rem, 2.4vw, 1.3rem) !important;
+        border-radius: 0.65rem !important;
+        translate: 0 0 !important;
+        overflow: auto;
+        overflow-wrap: anywhere;
+        text-align: center !important;
+        white-space: normal !important;
+    }
+
+    :is(
+        .shape-area-speech-bubble,
+        .shape-area-square-speech-bubble,
+        .shape-preview-intro-bubble,
+        .circle-mission-guide-bubble,
+        .square-mission-bubble,
+        .square-chocolate-question-bubble,
+        .oval-mission-message-panel,
+        .rectangle-staff-bubble,
+        .rectangle-village-message-panel,
+        .heart-mission-message,
+        .star-mission-message,
+        .diamond-mission-message,
+        .triangle-bridge-message-panel,
+        .triangle-game-message-panel
+    )::before,
+    :is(
+        .shape-area-speech-bubble,
+        .shape-area-square-speech-bubble,
+        .shape-preview-intro-bubble,
+        .circle-mission-guide-bubble,
+        .square-mission-bubble,
+        .square-chocolate-question-bubble,
+        .oval-mission-message-panel,
+        .rectangle-staff-bubble
+    )::after {
+        content: none !important;
+    }
+
+    :is(
+        .shape-area-speech-bubble.is-visible,
+        .shape-area-square-speech-bubble.is-entering,
+        .circle-mission-guide.is-bubble-visible .circle-mission-guide-bubble,
+        .square-mission-bubble.is-entering,
+        .square-chocolate-question-bubble.is-visible,
+        .oval-mission-guide.is-visible .oval-mission-message-panel,
+        .rectangle-staff-bubble.is-visible,
+        .heart-mission-intro.is-message-visible .heart-mission-message,
+        .star-mission-intro.is-message-visible .star-mission-message,
+        .diamond-mission-guide.is-message-visible .diamond-mission-message,
+        .triangle-bridge-message-panel.is-visible,
+        .triangle-game-message-panel.is-visible
+    ) {
+        transform: translate(-50%, 0) scale(1) !important;
+    }
+
+    /* Keep the guide character visible without covering the play space. */
+    .triangle-game-character {
+        left: 2%;
+        bottom: 0;
+        z-index: 7;
+        height: min(42svh, 17rem);
+        max-width: 19vw;
+        object-position: left bottom;
+    }
+
+    .triangle-game-character.is-ch17 {
+        height: min(46svh, 18rem);
+    }
+
+    /* These rules were previously desktop-only, leaving phone trees with no
+       positioned box.  Keep their trunks anchored to the scene ground. */
+    .triangle-game-tree-group {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        pointer-events: none;
+    }
+
+    .triangle-game-tree-group.is-active {
+        pointer-events: auto;
+    }
+
+    .triangle-game-tree {
+        --tree-shift-x: 0%;
+        position: absolute;
+        display: block;
+        width: auto;
+        height: min(68svh, 27rem);
+        object-fit: contain;
+        object-position: center bottom;
+        filter: drop-shadow(0.24rem 0.38rem 0.3rem rgba(28, 72, 27, 0.3));
+        transform: translateX(var(--tree-shift-x)) scaleX(-1);
+        transform-origin: center bottom;
+        transition: filter 0.2s ease;
+        user-select: none;
+        -webkit-user-drag: none;
+    }
+
+    .triangle-game-tree-one {
+        left: 36%;
+        bottom: 0;
+    }
+
+    .triangle-game-tree-two {
+        left: 58%;
+        bottom: 0;
+        height: min(74svh, 30rem);
+    }
+
+    .triangle-game-tree-three {
+        right: -7%;
+        left: auto;
+        bottom: 0;
+        height: min(64svh, 25rem);
+    }
+
+    .triangle-game-tree-one[data-tree-stage="1"],
+    .triangle-game-tree-two[data-tree-stage="1"] { --tree-shift-x: -1%; }
+
+    .triangle-game-tree-one[data-tree-stage="2"],
+    .triangle-game-tree-two[data-tree-stage="2"] { --tree-shift-x: -12%; }
+
+    .triangle-game-tree-one[data-tree-stage="3"] {
+        --tree-shift-x: -38%;
+        height: min(58svh, 23rem);
+    }
+
+    .triangle-game-tree-one[data-tree-stage="4"] {
+        --tree-shift-x: -44%;
+        height: min(31svh, 12rem);
+    }
+
+    .triangle-game-tree-two[data-tree-stage="3"] {
+        --tree-shift-x: -38%;
+        height: min(63svh, 25rem);
+    }
+
+    .triangle-game-tree-two[data-tree-stage="4"] {
+        --tree-shift-x: -44%;
+        height: min(34svh, 13.5rem);
+    }
+
+    .triangle-game-tree-three[data-tree-stage="2"] { --tree-shift-x: -9%; }
+
+    .triangle-game-tree-three[data-tree-stage="3"] {
+        --tree-shift-x: -9%;
+        height: min(52svh, 20.5rem);
+    }
+
+    .triangle-game-tree-three[data-tree-stage="4"] {
+        --tree-shift-x: -9%;
+        height: min(28svh, 11rem);
+    }
+
+    /* The answer row lifts above its bottom instruction panel on phones. */
+    #learnscape-shape-square-page .square-answer-tiles {
+        top: 43%;
+    }
+}
+
