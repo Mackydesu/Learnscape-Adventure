@@ -2020,6 +2020,7 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
     box-shadow:
         inset 0 0 0 0.14rem rgba(255, 255, 255, 0.03),
         inset 0 -1rem 1.35rem rgba(0, 0, 0, 0.42);
+    container-type: inline-size;
 }
 
 .circle-illustration-video {
@@ -3119,7 +3120,7 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
 
     .circle-illustration-shape-5 {
         --circle-shape-size: clamp(3rem, 6.6vw, 4.4rem);
-        left: 31.5%;
+        left: 25%;
         top: 16.5%;
     }
 
@@ -3144,13 +3145,13 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
     .circle-illustration-shape-9 {
         --circle-shape-size: clamp(3.6rem, 7.6vw, 5.2rem);
         left: 53.2%;
-        top: 70%;
+        top: 30%;
     }
 
     .circle-illustration-shape-10 {
         --circle-shape-size: clamp(5.7rem, 12vw, 8.2rem);
         left: 45.2%;
-        top: 79.5%;
+        top: 70%;
     }
 
     .circle-illustration-video-stage {
@@ -3205,7 +3206,7 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
 
     .circle-illustration-shape-5 {
         --circle-shape-size: clamp(2.8rem, 6.2vw, 4rem);
-        left: 31.5%;
+        left: 25%;
         top: 16.5%;
     }
 
@@ -3230,13 +3231,13 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
     .circle-illustration-shape-9 {
         --circle-shape-size: clamp(3.3rem, 7.4vw, 4.8rem);
         left: 53.2%;
-        top: 70%;
+        top: 30%;
     }
 
     .circle-illustration-shape-10 {
         --circle-shape-size: clamp(5.1rem, 12vw, 7.2rem);
         left: 45.2%;
-        top: 79.5%;
+        top: 70%;
     }
 
     .circle-lesson-progress-board {
@@ -4309,8 +4310,8 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 .shape-tv-celebration-copy {
     position: absolute;
     top: 6%;
-    left: 5%;
-    width: 90%;
+    left: 4%;
+    width: 92%;
     z-index: 5;
     display: grid;
     gap: 0.2rem;
@@ -4323,14 +4324,20 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 }
 
 .shape-tv-celebration-copy strong {
-    font-size: clamp(3.9rem, 7vw, 5.4rem);
-    line-height: 1.02;
+    max-width: 100%;
+    font-size: clamp(1.35rem, 6.5cqw, 4rem);
+    line-height: 0.98;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
 }
 
 .shape-tv-celebration-copy span {
-    font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+    max-width: 100%;
+    font-size: clamp(0.8rem, 3.1cqw, 1.8rem);
     font-weight: 700;
     line-height: 1.1;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
 }
 
 .shape-tv-celebration-confetti {
@@ -4411,8 +4418,9 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 }
 
 @media (max-width: 900px), (max-height: 500px) {
-    .shape-tv-celebration-copy strong { font-size: clamp(2.5rem, 9vw, 3.4rem); }
-    .shape-tv-celebration-copy span { font-size: clamp(1.25rem, 4.8vw, 1.7rem); }
+    .shape-tv-celebration-copy { top: 4%; }
+    .shape-tv-celebration-copy strong { font-size: clamp(1.2rem, 5.9cqw, 2.7rem); }
+    .shape-tv-celebration-copy span { font-size: clamp(0.72rem, 2.8cqw, 1.35rem); }
     .shape-tv-celebration-character { height: 49%; }
 }
 
@@ -24280,5 +24288,113 @@ body.about-page {
     #learnscape-shape-square-page .square-answer-tiles {
         top: 43%;
     }
+}
+
+/* Square success state: preserve a single horizontal centering offset for Ch12
+   and leave sufficient room above it for the congratulatory panel on phones. */
+@media (max-width: 900px), (orientation: portrait) {
+    #learnscape-shape-square-page .square-mission-character-ch12 {
+        translate: 0 0;
+        transform: translateX(-50%);
+    }
+
+    #learnscape-shape-square-page.is-square-answer-completing .square-puzzle-celebration-text,
+    #learnscape-shape-square-page.is-square-kids-cheering .square-puzzle-celebration-text {
+        top: clamp(5.5rem, 16svh, 9rem);
+    }
+}
+
+html.is-phone-landscape #learnscape-shape-square-page .square-mission-character-ch12 {
+    translate: 0 0;
+    transform: translateX(-50%);
+}
+
+html.is-phone-landscape #learnscape-shape-square-page.is-square-answer-completing .square-puzzle-celebration-text,
+html.is-phone-landscape #learnscape-shape-square-page.is-square-kids-cheering .square-puzzle-celebration-text {
+    top: clamp(5.5rem, 16svh, 9rem);
+}
+
+/* The chocolate-count round keeps its guide and controls clear of the puzzle
+   on phones.  This intentionally overrides the shared bottom message panel. */
+@media (max-width: 900px), (orientation: portrait) {
+    #learnscape-shape-square-page.is-square-puzzle-followup .square-mission-character-ch13 {
+        left: max(0.5rem, env(safe-area-inset-left));
+        bottom: 0;
+        height: min(48svh, 21rem);
+        max-width: 30vw;
+        translate: 0 0;
+        transform: none;
+    }
+
+    #learnscape-shape-square-page.is-square-puzzle-followup .square-chocolate-question-bubble {
+        left: max(0.65rem, env(safe-area-inset-left)) !important;
+        top: auto !important;
+        bottom: calc(min(48svh, 21rem) + 0.7rem) !important;
+        width: fit-content !important;
+        max-width: min(54vw, 19rem) !important;
+        max-height: none !important;
+        padding: clamp(0.42rem, 1.1vh, 0.68rem) clamp(0.6rem, 1.5vw, 0.9rem) !important;
+        font-size: clamp(0.8rem, 2.3vw, 1.1rem);
+        line-height: 1.16;
+        text-align: center !important;
+        translate: 0 0 !important;
+        transform: translateY(0.45rem) scale(0.96) !important;
+        overflow: visible;
+    }
+
+    #learnscape-shape-square-page.is-square-puzzle-followup .square-chocolate-question-bubble.is-visible {
+        transform: translateY(0) scale(1) !important;
+    }
+
+    #learnscape-shape-square-page.is-square-puzzle-followup .square-answer-tiles {
+        top: 68% !important;
+        width: min(88vw, 38rem);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: clamp(0.35rem, 1.2vw, 0.75rem);
+    }
+
+    #learnscape-shape-square-page.is-square-puzzle-followup .square-answer-tile {
+        font-size: clamp(1.55rem, 6vw, 3.1rem);
+    }
+}
+
+html.is-phone-landscape #learnscape-shape-square-page.is-square-puzzle-followup .square-mission-character-ch13 {
+    left: max(0.5rem, env(safe-area-inset-left));
+    bottom: 0;
+    height: min(48svh, 21rem);
+    max-width: 30vw;
+    translate: 0 0;
+    transform: none;
+}
+
+html.is-phone-landscape #learnscape-shape-square-page.is-square-puzzle-followup .square-chocolate-question-bubble {
+    left: max(0.65rem, env(safe-area-inset-left)) !important;
+    top: auto !important;
+    bottom: calc(min(48svh, 21rem) + 0.7rem) !important;
+    width: fit-content !important;
+    max-width: min(54vw, 19rem) !important;
+    max-height: none !important;
+    padding: clamp(0.42rem, 1.1vh, 0.68rem) clamp(0.6rem, 1.5vw, 0.9rem) !important;
+    font-size: clamp(0.8rem, 2.3vw, 1.1rem);
+    line-height: 1.16;
+    text-align: center !important;
+    translate: 0 0 !important;
+    transform: translateY(0.45rem) scale(0.96) !important;
+    overflow: visible;
+}
+
+html.is-phone-landscape #learnscape-shape-square-page.is-square-puzzle-followup .square-chocolate-question-bubble.is-visible {
+    transform: translateY(0) scale(1) !important;
+}
+
+html.is-phone-landscape #learnscape-shape-square-page.is-square-puzzle-followup .square-answer-tiles {
+    top: 68% !important;
+    width: min(88vw, 38rem);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(0.35rem, 1.2vw, 0.75rem);
+}
+
+html.is-phone-landscape #learnscape-shape-square-page.is-square-puzzle-followup .square-answer-tile {
+    font-size: clamp(1.55rem, 6vw, 3.1rem);
 }
 
