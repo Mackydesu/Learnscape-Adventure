@@ -7726,7 +7726,9 @@ body *::after {
 .heart-cupid-game.is-clearing-for-rainbow .heart-game-pause-button,
 .heart-cupid-game.is-clearing-for-rainbow .heart-balloon-field,
 .heart-cupid-game.is-clearing-for-rainbow .heart-shot-field,
-.heart-cupid-game.is-clearing-for-rainbow .heart-cupid-bow-control {
+.heart-cupid-game.is-clearing-for-rainbow .heart-cupid-bow-control,
+.heart-cupid-game.is-clearing-for-rainbow .heart-mobile-aim-controls,
+.heart-cupid-game.is-clearing-for-rainbow .heart-mobile-shoot-button {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -8345,6 +8347,98 @@ body *::after {
 
 .heart-cupid-bow-control:active {
     box-shadow: none;
+}
+
+.heart-mobile-aim-controls,
+.heart-mobile-shoot-button {
+    display: none;
+}
+
+@media (max-width: 900px), (hover: none) and (pointer: coarse) {
+    .heart-cupid-bow-control {
+        width: clamp(11rem, 38vw, 15rem);
+        bottom: clamp(-1.4rem, -2.2vh, -0.55rem);
+    }
+
+    .heart-mobile-aim-controls {
+        position: absolute;
+        left: calc(50% - min(19vw, 7.5rem) - 7.4rem);
+        bottom: 0.8rem;
+        z-index: 4;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .heart-mobile-aim-button {
+        display: grid;
+        place-items: center;
+        width: 3.45rem;
+        aspect-ratio: 1;
+        padding: 0;
+        border: 0;
+        background: linear-gradient(135deg, #fff5a4 0%, #ffbc3c 52%, #ef6e25 100%);
+        color: #762843;
+        filter: drop-shadow(0 0.2rem 0 #8d3650) drop-shadow(0 0.4rem 0.5rem rgba(75, 24, 46, 0.34));
+        font: 900 1.4rem/1 Arial, sans-serif;
+        text-shadow: 0 0.08rem 0 rgba(255, 255, 255, 0.75);
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .heart-mobile-aim-button.is-left {
+        clip-path: polygon(0 50%, 100% 0, 100% 100%);
+    }
+
+    .heart-mobile-aim-button.is-right {
+        clip-path: polygon(100% 50%, 0 0, 0 100%);
+    }
+
+    .heart-mobile-aim-button.is-left span { transform: translateX(0.2rem); }
+    .heart-mobile-aim-button.is-right span { transform: translateX(-0.2rem); }
+
+    .heart-mobile-aim-button:active {
+        filter: brightness(0.88) drop-shadow(0 0.08rem 0 #8d3650);
+        transform: translateY(0.12rem);
+    }
+
+    .heart-mobile-aim-button:focus-visible {
+        outline: 0.22rem solid #fffbe0;
+        outline-offset: 0.18rem;
+    }
+
+    .heart-mobile-shoot-button {
+        position: absolute;
+        left: calc(50% + min(19vw, 7.5rem) + 0.45rem);
+        bottom: 0.8rem;
+        z-index: 4;
+        display: grid;
+        place-items: center;
+        min-width: 6.5rem;
+        min-height: 3.45rem;
+        padding: 0.45rem 0.8rem 0.5rem;
+        border: 0.18rem solid #85284d;
+        border-radius: 0.8rem;
+        background: linear-gradient(180deg, #ffc3df 0%, #f34f98 58%, #bc2463 100%);
+        box-shadow: inset 0 0.14rem 0 rgba(255, 246, 250, 0.76), 0 0.22rem 0 #7a2145, 0 0.45rem 0.7rem rgba(75, 24, 46, 0.34);
+        color: #fff9e9;
+        font: 900 1.2rem/1 'Fredoka', 'Nunito', sans-serif;
+        letter-spacing: 0.04em;
+        text-shadow: 0 0.1rem 0 #7c1f4b;
+        text-transform: uppercase;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .heart-mobile-shoot-button:active:not(:disabled) {
+        transform: translateY(0.14rem);
+        box-shadow: inset 0 0.14rem 0 rgba(255, 246, 250, 0.52), 0 0.08rem 0 #7a2145;
+    }
+
+    .heart-mobile-shoot-button:focus-visible {
+        outline: 0.22rem solid #fffbe0;
+        outline-offset: 0.15rem;
+    }
 }
 
 .heart-cupid-bow {
@@ -10935,6 +11029,10 @@ body *::after {
     animation: rectangleGasPenalty 420ms ease-in-out 3, rectangleGasDangerGlow 0.72s ease-in-out infinite alternate;
 }
 
+.rectangle-boss-jump-button {
+    display: none;
+}
+
 .rectangle-delivery-progress {
     --delivery-progress: 0%;
     position: absolute;
@@ -11184,6 +11282,43 @@ body *::after {
     .rectangle-gas-icon {
         width: 2.6rem;
         height: 3.05rem;
+    }
+
+    .rectangle-delivery-page.is-boss-battle .rectangle-boss-jump-button {
+        position: absolute;
+        left: calc(50% + min(7.9rem, 22vw));
+        bottom: 0.65rem;
+        z-index: 21;
+        display: grid;
+        min-width: 7.8rem;
+        min-height: 3.8rem;
+        padding: 0.45rem 0.7rem 0.5rem;
+        border: 0.18rem solid #7b3517;
+        border-radius: 0.75rem;
+        background: linear-gradient(180deg, #fff27c 0%, #ffb22d 56%, #ec741c 100%);
+        box-shadow: inset 0 0.13rem 0 rgba(255, 255, 255, 0.72), 0 0.22rem 0 #8c3514, 0 0.42rem 0.7rem rgba(69, 30, 12, 0.34);
+        color: #5a230f;
+        font: 900 1.35rem/1 'Fredoka', 'Nunito', sans-serif;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        text-shadow: 0 0.08rem 0 rgba(255, 252, 205, 0.82);
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .rectangle-delivery-page.is-boss-battle .rectangle-boss-jump-button:active:not(:disabled) {
+        transform: translateY(0.14rem);
+        box-shadow: inset 0 0.13rem 0 rgba(255, 255, 255, 0.56), 0 0.08rem 0 #8c3514;
+    }
+
+    .rectangle-delivery-page.is-boss-battle .rectangle-boss-jump-button:focus-visible {
+        outline: 0.22rem solid #fffbe0;
+        outline-offset: 0.15rem;
+    }
+
+    .rectangle-delivery-page.is-boss-battle .rectangle-boss-jump-button:disabled {
+        filter: grayscale(0.6) brightness(0.75);
+        opacity: 0.72;
     }
 
     .rectangle-delivery-progress {

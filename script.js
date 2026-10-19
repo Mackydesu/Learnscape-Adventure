@@ -1306,6 +1306,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const heartBowArt = heartCupidBowControl?.querySelector('.heart-bow-art') || null;
     const heartBowString = heartCupidBowControl?.querySelector('.heart-bow-string') || null;
     const heartBowArrowParts = Array.from(heartCupidBowControl?.querySelectorAll('.heart-bow-arrow, .heart-bow-arrow-head, .heart-bow-arrow-feather') || []);
+    const heartMobileAimButtons = Array.from(heartCupidGame?.querySelectorAll('[data-heart-aim-step]') || []);
+    const heartMobileShootButton = heartCupidGame?.querySelector('.heart-mobile-shoot-button') || null;
     const heartColorGauge = heartCupidGame?.querySelector('.heart-color-gauge') || null;
     const heartColorTargetIcon = heartCupidGame?.querySelector('.heart-color-target-icon') || null;
     const heartColorGaugeFill = heartCupidGame?.querySelector('.heart-color-gauge-fill') || null;
@@ -6970,6 +6972,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateHeartCupidAim(heartLastAimClientX, heartLastAimClientY);
     };
 
+    const nudgeHeartCupidAim = (direction) => {
+        if (
+            heartGameEnded
+            || heartGamePaused
+            || !heartCupidGame
+            || heartCupidGame.hidden
+            || heartCupidGame.classList.contains('is-shooting')
+        ) return;
+        const gameRect = heartCupidGame.getBoundingClientRect();
+        const pivot = {
+            x: gameRect.width / 2,
+            y: gameRect.height - Math.max(34, gameRect.height * 0.055),
+        };
+        const currentAngle = Number.parseFloat(heartCupidBowControl?.style.getPropertyValue('--heart-bow-angle')) || 0;
+        const angle = Math.max(-72, Math.min(72, currentAngle + (direction * 9)));
+        const angleRadians = (angle - 90) * Math.PI / 180;
+        const targetDistance = Math.max(gameRect.width, gameRect.height) * 0.72;
+        heartLastAimClientX = gameRect.left + pivot.x + (Math.cos(angleRadians) * targetDistance);
+        heartLastAimClientY = gameRect.top + pivot.y + (Math.sin(angleRadians) * targetDistance);
+        updateHeartCupidAim(heartLastAimClientX, heartLastAimClientY);
+    };
+
     const fireHeartCupidArrow = () => {
         if (heartGameEnded || heartGamePaused || heartCupidGame?.classList.contains('is-shooting')) return;
         restoreHeartCupidCursorAim();
@@ -7038,6 +7062,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     heartCupidBowControl?.addEventListener('dragstart', (event) => event.preventDefault());
+    heartMobileAimButtons.forEach((button) => {
+        button.addEventListener('click', () => nudgeHeartCupidAim(Number(button.dataset.heartAimStep)));
+    });
+    heartMobileShootButton?.addEventListener('click', fireHeartCupidArrow);
     window.addEventListener('resize', () => {
         sizeHeartShotField();
         restoreHeartCupidCursorAim();
@@ -9225,6 +9253,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }, 780);
     };
+
+    rectangleBossJumpButton?.addEventListener('click', jumpRectangleBossJeep);
 
     const showRectangleBossWarning = ({ startGuideIndex = 0 } = {}) => {
         const milestone = getRectangleBossMilestone();
