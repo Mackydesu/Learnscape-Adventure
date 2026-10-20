@@ -134,7 +134,14 @@ function drawTrackedObjects(session, tracks) {
             context.fillStyle = color;
             context.fillRect(x, labelY, labelWidth, 25);
             context.fillStyle = "#173026";
-            context.fillText(text, x + 7, labelY + 18);
+            // On desktop the canvas is mirrored with the video so the box
+            // tracks the preview. Counter-mirror only the glyphs: the label
+            // chip stays attached to its mirrored box while its text remains
+            // readable.
+            context.save();
+            context.scale(-1, 1);
+            context.fillText(text, -(x + labelWidth - 7), labelY + 18);
+            context.restore();
         }
     }
     context.globalAlpha = 1;

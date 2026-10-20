@@ -12,13 +12,26 @@ function drawingFunction(file, endMarker, context) {
     return vm.runInNewContext(`${source.slice(start, end)}\ndrawTrackedObjects`, context);
 }
 
-test('camera detection frames follow the unmirrored video through cover cropping', () => {
+function createDrawingContext() {
     const rectangles = [];
-    const context = {
-        setTransform() {}, clearRect() {},
-        strokeRect: (...bounds) => rectangles.push(bounds),
-        measureText: () => ({ width: 20 }), fillRect() {}, fillText() {},
+    const textTransforms = [];
+    const fillTextCalls = [];
+    return {
+        rectangles,
+        textTransforms,
+        fillTextCalls,
+        context: {
+            setTransform() {}, clearRect() {}, save() {}, restore() {},
+            scale: (...transform) => textTransforms.push(transform),
+            strokeRect: (...bounds) => rectangles.push(bounds),
+            measureText: () => ({ width: 20 }), fillRect() {},
+            fillText: (...arguments_) => fillTextCalls.push(arguments_),
+        },
     };
+}
+
+test('camera detection frames follow the unmirrored video through cover cropping', () => {
+    const { rectangles, context } = createDrawingContext();
     const video = { videoWidth: 640, videoHeight: 480, dataset: { cameraFeedFlipped: 'true' } };
     const viewfinder = { clientWidth: 360, clientHeight: 240 };
     const canvas = {};
@@ -36,6 +49,30 @@ test('camera detection frames follow the unmirrored video through cover cropping
     drawTest([track]);
 
     assert.deepEqual(rectangles, [[36, 52.5, 54, 67.5], [36, 52.5, 54, 67.5]]);
+});
+
+test('camera labels counter-mirror their glyphs while boxes follow the preview', () => {
+    const gameDrawing = createDrawingContext();
+    const testDrawing = createDrawingContext();
+    const video = { videoWidth: 640, videoHeight: 480 };
+    const viewfinder = { clientWidth: 360, clientHeight: 240 };
+    const track = { x1: 64, y1: 120, x2: 160, y2: 240, label: 'square', confidence: 0.9, labelStable: true };
+    const window = { devicePixelRatio: 1 };
+
+    const drawGame = drawingFunction('../detection/gameDetection.js', 'async function handleTrackedFrame', {
+        window, trackHasTargetLabel: (item, shape) => item.label === shape,
+    });
+    drawGame({ video, overlay: { viewfinder, canvas: {}, context: gameDrawing.context }, shape: 'square' }, [track]);
+
+    const drawTest = drawingFunction('../detection/camera-test.js', 'function startLiveFeed', {
+        window, video, viewfinder, overlay: {}, ctx: testDrawing.context,
+    });
+    drawTest([track]);
+
+    assert.deepEqual(gameDrawing.textTransforms, [[-1, 1]]);
+    assert.deepEqual(testDrawing.textTransforms, [[-1, 1]]);
+    assert.equal(gameDrawing.fillTextCalls[0][1], -63);
+    assert.equal(testDrawing.fillTextCalls[0][1], -63);
 });
 
 test('the camera test preview starts without mirroring the stream', async () => {

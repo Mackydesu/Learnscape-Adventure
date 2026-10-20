@@ -66,7 +66,13 @@ function drawTrackedObjects(tracks) {
         ctx.fillStyle = color;
         ctx.fillRect(x, labelY, labelWidth, 25);
         ctx.fillStyle = "#173026";
-        ctx.fillText(text, x + 7, labelY + 18);
+        // The desktop preview mirrors this canvas with the camera feed.
+        // Reverse the text drawing transform only, leaving the label chip
+        // aligned with its mirrored tracking box.
+        ctx.save();
+        ctx.scale(-1, 1);
+        ctx.fillText(text, -(x + labelWidth - 7), labelY + 18);
+        ctx.restore();
     }
 }
 
