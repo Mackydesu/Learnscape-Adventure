@@ -10857,7 +10857,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const playShapeNameAudio = async (shapeName, choice = null, onFinished = null) => {
         const normalizedShapeName = String(shapeName || '').trim().toLowerCase();
-        const dedicatedAudio = shapeChoiceAudios.get(normalizedShapeName);
+        const shapeAudioKeyByName = {
+            bilog: 'circle',
+            parisukat: 'square',
+            tatsulok: 'triangle',
+            parihaba: 'rectangle',
+            bilohaba: 'oval',
+            puso: 'heart',
+            bituin: 'star',
+            dyamante: 'diamond',
+        };
+        const dedicatedAudio = shapeChoiceAudios.get(shapeAudioKeyByName[normalizedShapeName] || normalizedShapeName);
         if (!dedicatedAudio || (window.__learnscapeSoundScale?.() ?? 1) === 0) {
             if (choice) choice.dataset.nameHeard = 'true';
             onFinished?.();
@@ -10968,8 +10978,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelectorAll('.shape-tv-choices').forEach((choiceGroup) => {
         const choices = Array.from(choiceGroup.querySelectorAll('.shape-tv-choice'));
         const choiceAssetNames = {
-            circle: 'circle', square: 'square', triangle: 'triangle', rectangle: 'rectangle',
-            oval: 'oval', heart: 'heart', star: 'star', diamond: 'diamond',
+            bilog: 'circle', parisukat: 'square', tatsulok: 'triangle', parihaba: 'rectangle',
+            bilohaba: 'oval', puso: 'heart', bituin: 'star', dyamante: 'diamond',
         };
         choices.forEach((choice) => {
             const shapeName = choice.textContent.trim().toLowerCase();
