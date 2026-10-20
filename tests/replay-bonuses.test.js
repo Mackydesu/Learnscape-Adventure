@@ -35,8 +35,8 @@ function createHarness({ savedValues = {}, savedNotifications = [] } = {}) {
         game3: { pageId: 'learnscape-game3-page' },
     };
     const context = {
-        heartMissionCarrotReward: 25,
-        learnscapeShapeLabels: { circle: 'Circle', rectangle: 'Rectangle', star: 'Star' },
+        heartMissionCarrotReward: 20,
+        learnscapeShapeLabels: { circle: 'Circle', rectangle: 'Rectangle', heart: 'Heart', star: 'Star' },
         learnscapeNotifications: notifications,
         introProfileBadgeUnlockKey: (shape) => `learnscape-profile-badge-unlocked:${shape}`,
         isTutorialSessionActive: false,
@@ -212,6 +212,24 @@ test('first completions keep their original progress messages', () => {
         'Circle Object Detection Complete!', 'You earned 3 stars in Circle!',
         'Circle Badge Earned!', 'You earned 7 carrots!',
     ]);
+});
+
+test('Heart mission awards +20 carrots and records the matching notification', () => {
+    const app = createHarness();
+    const { progress } = app.makeProgress({
+        shape: 'heart',
+        stage: 2,
+        pageId: 'learnscape-shape-area-6-page',
+        progressStage: null,
+    });
+
+    app.sync(progress);
+    app.flush();
+
+    assert.ok(app.shownMessages.includes('You earned 20 carrots!'));
+    const reward = app.notifications.find((item) => item.id === 'carrots:learnscape-shape-area-6-page:complete');
+    assert.equal(reward?.rewardAmount, 20);
+    assert.equal(reward?.title, 'Heart reward: +20 carrots');
 });
 
 test('a saved completion can earn another bonus in a new session', () => {
