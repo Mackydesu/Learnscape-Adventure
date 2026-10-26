@@ -28,19 +28,19 @@ Travel through eight exciting shape adventures:
 
 🔵 Circle
 
-💎 Diamond
+🟪 Square
 
-❤️ Heart
-
-🥚 Oval
+🔺 Triangle
 
 ▭ Rectangle
 
-🟪 Square
+🥚 Oval
+
+❤️ Heart
 
 ⭐ Star
 
-🔺 Triangle
+💎 Diamond
 
 Each level introduces a different shape and provides opportunities to practice recognizing it.
 
