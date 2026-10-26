@@ -377,8 +377,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeCameraPages = Array.from(document.querySelectorAll('.shape-camera-page'));
     const cameraPages = Array.from(document.querySelectorAll('.circle-camera-page'));
     const cameraShapeLabels = Object.freeze({
-        circle: 'Circle', square: 'Square', triangle: 'Triangle', rectangle: 'Rectangle',
-        oval: 'Oval', heart: 'Heart', star: 'Star', diamond: 'Diamond',
+        circle: 'Bilog', square: 'Parisukat', triangle: 'Tatsulok', rectangle: 'Parihaba',
+        oval: 'Bilohaba', heart: 'Puso', star: 'Bituin', diamond: 'Dyamante',
     });
     const acceptedCameraAttemptIds = new WeakMap();
     const dispatchCameraLifecycle = (type, page, video, extraDetail = {}) => {
@@ -393,8 +393,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         page.dataset.cameraDetectionCount = '0';
 
         const targetCard = page.querySelector('.circle-camera-target-card');
-        targetCard?.setAttribute('aria-label', `Target shape: ${shapeLabel}`);
-        targetCard?.querySelector('h2') && (targetCard.querySelector('h2').textContent = 'Target Shape:');
+        targetCard?.setAttribute('aria-label', `Target na hugis: ${shapeLabel}`);
+        targetCard?.querySelector('h2') && (targetCard.querySelector('h2').textContent = 'Target na Hugis:');
         const targetLabel = targetCard?.querySelector('strong');
         if (targetLabel) targetLabel.textContent = shapeLabel;
         page.querySelector('.circle-camera-scan-board')?.setAttribute('aria-label', 'Laro ng pagtukoy gamit ang kamera');

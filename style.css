@@ -15433,6 +15433,11 @@ body *::after {
     text-shadow: 0 0.08em 0 #fff7d5;
 }
 
+.circle-camera-target-card h2 {
+    font-size: clamp(1.1rem, 1.6vw, 1.7rem);
+    white-space: nowrap;
+}
+
 .circle-camera-target-shape {
     width: clamp(8rem, 13vw, 13.5rem);
     aspect-ratio: 1;
@@ -23580,7 +23585,7 @@ body.about-page {
     }
 
     .circle-camera-page:not(.camera-test-page) .circle-camera-target-card h2 {
-        font-size: clamp(0.7rem, 3.5vh, 1.65rem);
+        font-size: clamp(0.65rem, 2.55vh, 1.2rem);
     }
 
     .circle-camera-page:not(.camera-test-page) .circle-camera-target-shape {
