@@ -4205,6 +4205,7 @@
                     return [];
                 }
             };
+            const heartVideoLessonCarrotReward = 20;
             const heartMissionCarrotReward = 20;
             const createNotificationPreviewItems = () => {
                 const shapeOrder = Object.keys(learnscapeShapeLabels);
@@ -4214,7 +4215,7 @@
                     triangle: [6, 9, 15],
                     rectangle: [8, 12, 20],
                     oval: [10, 20, 30],
-                    heart: [15, heartMissionCarrotReward, 40],
+                    heart: [heartVideoLessonCarrotReward, heartMissionCarrotReward, 40],
                     star: [20, 30, 50],
                     diamond: [50, 50, 50],
                 });
@@ -4370,23 +4371,39 @@
                 persistPendingCarrotClaims();
             };
             repairCircleMissionRewardNotifications();
-            const repairHeartMissionRewardNotification = () => {
-                const rewardId = 'carrots:learnscape-shape-area-6-page:complete';
-                const notification = learnscapeNotifications.find((item) => item.id === rewardId);
-                if (!notification || notification.isPreview === true || notification.claimed === true) return;
-                const title = `Heart reward: +${heartMissionCarrotReward} carrots`;
-                if (notification.stage === 2
-                    && Number(notification.rewardAmount) === heartMissionCarrotReward
-                    && notification.title === title) return;
-                notification.shape = 'heart';
-                notification.stage = 2;
-                notification.rewardAmount = heartMissionCarrotReward;
-                notification.title = title;
-                notification.detail = 'Claim this reward to add it to your balance.';
+            const repairHeartRewardNotifications = () => {
+                const heartRewards = [
+                    {
+                        id: 'carrots:learnscape-shape-area-6-page:lesson',
+                        stage: 1,
+                        amount: heartVideoLessonCarrotReward,
+                    },
+                    {
+                        id: 'carrots:learnscape-shape-area-6-page:complete',
+                        stage: 2,
+                        amount: heartMissionCarrotReward,
+                    },
+                ];
+                let didRepair = false;
+                heartRewards.forEach(({ id, stage, amount }) => {
+                    const notification = learnscapeNotifications.find((item) => item.id === id);
+                    if (!notification || notification.isPreview === true || notification.claimed === true) return;
+                    const title = `Heart reward: +${amount} carrots`;
+                    if (notification.stage === stage
+                        && Number(notification.rewardAmount) === amount
+                        && notification.title === title) return;
+                    notification.shape = 'heart';
+                    notification.stage = stage;
+                    notification.rewardAmount = amount;
+                    notification.title = title;
+                    notification.detail = 'Claim this reward to add it to your balance.';
+                    didRepair = true;
+                });
+                if (!didRepair) return;
                 persistLearnscapeNotifications();
                 persistPendingCarrotClaims();
             };
-            repairHeartMissionRewardNotification();
+            repairHeartRewardNotifications();
             const formatLearnscapeNotificationTime = (timestamp) => {
                 const date = new Date(Number(timestamp) || Date.now());
                 return new Intl.DateTimeFormat(undefined, {
@@ -4976,7 +4993,7 @@
                 triangle: [0, 6, 9, 15],
                 rectangle: [0, 8, 12, 20],
                 oval: [0, 10, 20, 30],
-                heart: [0, 15, heartMissionCarrotReward, 40],
+                heart: [0, heartVideoLessonCarrotReward, heartMissionCarrotReward, 40],
                 star: [0, 20, 30, 50],
                 diamond: [0, 50, 50, 50],
             });

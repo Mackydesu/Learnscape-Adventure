@@ -35,6 +35,7 @@ function createHarness({ savedValues = {}, savedNotifications = [] } = {}) {
         game3: { pageId: 'learnscape-game3-page' },
     };
     const context = {
+        heartVideoLessonCarrotReward: 20,
         heartMissionCarrotReward: 20,
         learnscapeShapeLabels: { circle: 'Circle', rectangle: 'Rectangle', heart: 'Heart', star: 'Star' },
         learnscapeNotifications: notifications,
@@ -214,20 +215,20 @@ test('first completions keep their original progress messages', () => {
     ]);
 });
 
-test('Heart mission awards +20 carrots and records the matching notification', () => {
+test('Heart video lesson awards +20 carrots and records the matching notification', () => {
     const app = createHarness();
     const { progress } = app.makeProgress({
         shape: 'heart',
-        stage: 2,
+        stage: 1,
         pageId: 'learnscape-shape-area-6-page',
-        progressStage: null,
+        progressStage: 'lesson',
     });
 
     app.sync(progress);
     app.flush();
 
     assert.ok(app.shownMessages.includes('You earned 20 carrots!'));
-    const reward = app.notifications.find((item) => item.id === 'carrots:learnscape-shape-area-6-page:complete');
+    const reward = app.notifications.find((item) => item.id === 'carrots:learnscape-shape-area-6-page:lesson');
     assert.equal(reward?.rewardAmount, 20);
     assert.equal(reward?.title, 'Heart reward: +20 carrots');
 });
