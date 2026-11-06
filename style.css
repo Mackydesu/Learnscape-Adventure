@@ -24594,9 +24594,9 @@ html.is-phone-landscape #learnscape-shape-square-page.is-square-puzzle-followup 
 .circle-lesson-progress-actions:has(.progress-button-svg),
 .circle-lesson-progress.camera-completion-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-actions {
     bottom: 5% !important;
-    width: min(68vw, 56rem) !important;
-    gap: clamp(3rem, 9vw, 12rem) !important;
-    justify-content: center !important;
+    width: min(86vw, 78rem) !important;
+    gap: clamp(6rem, 18vw, 22rem) !important;
+    justify-content: space-between !important;
 }
 
 @media (max-width: 700px) {
@@ -24612,8 +24612,9 @@ html.is-phone-landscape #learnscape-shape-square-page.is-square-puzzle-followup 
 
     .circle-lesson-progress-actions:has(.progress-button-svg),
     .circle-lesson-progress.camera-completion-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-actions {
-        width: min(92vw, 28rem) !important;
-        gap: clamp(1.5rem, 7vw, 3.25rem) !important;
+        width: min(94vw, 30rem) !important;
+        gap: clamp(3rem, 13vw, 5rem) !important;
+        justify-content: space-between !important;
     }
 }
 
