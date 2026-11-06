@@ -2938,6 +2938,13 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
     outline: none;
 }
 
+/* Island cards keep a readable action label instead of the generic forward icon. */
+.game3-island-enter {
+    min-width: clamp(12rem, 20vw, 16rem);
+    padding-inline: clamp(2.2rem, 4.4vw, 3.55rem);
+    letter-spacing: 0.02em;
+}
+
 .circle-illustration-page.is-progress-visible .circle-illustration-video-stage,
 .circle-illustration-page.is-lesson-complete .circle-illustration-video-stage {
     opacity: 0;
