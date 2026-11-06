@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ['Continue Playing', 'Magpatuloy sa Laro'],
         ['Skip for now', 'Laktawan muna'],
         ['ENTER', 'PASOK'],
-        ['Terms of Use and Privacy', 'Patakaran at Pribado'],
+        ['Terms of Use and Privacy', 'Mga Tuntunin ng Paggamit at Patakaran sa Pribado'],
         ['About Us', 'Tungkol sa Amin'],
         ['Credits', 'Mga Kredito'],
         ['Enter', 'Pasok'],
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ['Edit Name', 'Palitan ang Pangalan'],
         ['Change Frame', 'Palitan ang Frame'],
         ['Player Name', 'Pangalan ng Manlalaro'],
-        ['BADGE COLLECTIONS', 'MGA BADGE'],
+        ['BADGE COLLECTIONS', 'MGA TANDA'],
         ['Stars Earned', 'Nakuhang Bituin'],
         ['Carrots Collected', 'Nakuhang Karot'],
         ['Areas Unlocked', 'Bukas na Lugar'],
@@ -124,13 +124,210 @@ document.addEventListener('DOMContentLoaded', async () => {
         ['Game Missions', 'Mga Misyon'],
         ['System Updates', 'Mga Update'],
         ['Game notifications will appear here.', 'Lalabas dito ang mga paalala ng laro.'],
+        ['Halimbawa: Adventurer', 'Halimbawa: Manlalakbay'],
+        ['Tap the button below to continue your adventure in fullscreen.', 'Pindutin ang button sa ibaba upang magpatuloy sa buong screen.'],
+        ['This deletes saved progress, rewards, profile, and tutorial status in this browser.', 'Buburahin nito ang na-save na progreso, gantimpala, profile, at gabay sa browser na ito.'],
+        ['Saved data could not be cleared. Please try again.', 'Hindi nabura ang na-save na datos. Subukan muli.'],
+        ['Your browser did not allow the game to close automatically. Please close this window or tab to exit. Your saved progress will remain.', 'Hindi pinayagan ng browser na isara ang laro. Isara ang window o tab na ito upang lumabas. Mananatili ang na-save mong progreso.'],
+        ['Privacy Policy and Terms of Use', 'Patakaran sa Pribado at mga Tuntunin ng Paggamit'],
+        ['Privacy Policy', 'Patakaran sa Pribado'],
+        ['Terms of Use', 'Mga Tuntunin ng Paggamit'],
+        ['Effective date:', 'Petsa ng bisa:'],
+        ['Privacy contact:', 'Kontak para sa pribado:'],
+        ['Learnscape Adventure is a shape-learning game for children and families.', 'Ang Learnscape Adventure ay larong nagtuturo ng mga hugis para sa mga bata at pamilya.'],
+        ['Information stored on your device', 'Impormasyong naka-save sa iyong device'],
+        [`Learnscape stores game information in your browser on the device you use. This may include your chosen player’s name, optional avatar image, frame color, sound settings, game progress, badges, stars, carrots, and game notifications.`, 'Nag-iimbak ang Learnscape ng impormasyon ng laro sa browser ng iyong device. Maaaring kasama rito ang napiling pangalan ng manlalaro, larawan ng avatar, kulay ng frame, tunog, progreso, badge, bituin, karot, at mga paalala ng laro.'],
+        ['This information helps the game remember your progress. It is not sent to our server by the current version of Learnscape.', 'Tinutulungan nito ang laro na maalala ang iyong progreso. Hindi ito ipinapadala sa aming server ng kasalukuyang Learnscape.'],
+        ['You can remove this information by clearing Learnscape website data in your browser settings or using the reset game feature to clear game progress.', 'Maaari mong burahin ang impormasyong ito sa settings ng browser o sa pag-reset ng laro.'],
+        ['Camera Challenge and object detection', 'Hamon sa Kamera at pagtukoy ng bagay'],
+        ['Learnscape asks for camera access only after you choose', 'Hihingi lang ng pahintulot sa kamera ang Learnscape kapag pinili mo ang'],
+        ['In the current version, Learnscape displays a live camera preview for the Camera Challenge. We do not record, save, upload, transmit, or share camera photos, video, or audio. Camera access ends when you leave the Camera Challenge, finish it, close the game, or revoke camera permission in your device settings.', 'Sa kasalukuyang bersyon, nagpapakita ang Learnscape ng live na preview ng kamera para sa Hamon sa Kamera. Hindi kami nagre-record, nagsa-save, nag-a-upload, nagpapadala, o nagbabahagi ng larawan, video, o tunog mula sa kamera. Hihinto ang paggamit ng kamera kapag umalis ka sa hamon, natapos mo ito, isinara ang laro, o binawi ang pahintulot sa settings ng device.'],
+        ['The current version does not use facial recognition, biometric identification, cloud object detection, or automated decisions about a child.', 'Hindi gumagamit ang kasalukuyang bersyon ng pagkilala sa mukha, biometric na pagkakakilanlan, cloud na pagtukoy ng bagay, o awtomatikong pagpapasya tungkol sa bata.'],
+        ['Children’s privacy', 'Pribado ng mga bata'],
+        ['Learnscape is designed to minimize data collection. Children should ask a parent, guardian, or teacher before using the camera or choosing an avatar image.', 'Dinisenyo ang Learnscape upang kakaunti lang ang makolektang datos. Dapat magtanong ang bata sa magulang, tagapag-alaga, o guro bago gamitin ang kamera o pumili ng larawan ng avatar.'],
+        ['We do not ask children to provide contact details, address, phone number, school, precise location, or social-media account information to play the game.', 'Hindi namin hinihingi sa mga bata ang contact details, address, numero ng telepono, paaralan, eksaktong lokasyon, o social-media account upang maglaro.'],
+        ['Parents or guardians may contact us at', 'Maaaring makipag-ugnayan ang mga magulang o tagapag-alaga sa amin sa'],
+        ['to ask questions, request access to information we hold, request deletion, or withdraw permission for future processing.', 'upang magtanong, humiling ng impormasyon, magpabura ng datos, o bawiin ang pahintulot sa susunod na paggamit.'],
+        ['Sharing', 'Pagbabahagi'],
+        ['We do not sell children’s information. We do not use targeted advertising or behavioral profiling.', 'Hindi namin ibinebenta ang impormasyon ng mga bata. Hindi kami gumagamit ng naka-target na patalastas o pagsusuri ng ugali.'],
+        ['The current website loads fonts from Google Fonts. This may cause the browser to connect to Google’s services. We will identify any future service providers here before using them with personal information.', 'Kumukuha ang kasalukuyang website ng font mula sa Google Fonts. Maaaring kumonekta ang browser sa serbisyo ng Google. Ilalagay namin dito ang anumang serbisyo bago ito gumamit ng personal na impormasyon.'],
+        ['Security and retention', 'Seguridad at pag-iingat ng datos'],
+        ['We use reasonable safeguards appropriate to the information we process. Local game data remains on the device until the player clears it, browser data is cleared, or the browser removes it. We retain server-side data only as long as necessary for the stated purpose, if server-side features are added.', 'Gumagamit kami ng angkop na proteksiyon para sa impormasyong pinoproseso. Nananatili ang lokal na datos ng laro sa device hanggang burahin ito ng manlalaro, ng browser, o ng device. Magtatago lang kami ng datos sa server kung kailangan at kung magdagdag ng mga feature sa server.'],
+        ['Your rights and contact', 'Iyong mga karapatan at kontak'],
+        ['Depending on applicable law, you may have rights to access, correct, erase, object to, or complain about the use of personal information. Contact', 'Ayon sa naaangkop na batas, maaari kang magkaroon ng karapatang makita, itama, burahin, tutulan, o ireklamo ang paggamit ng personal na impormasyon. Makipag-ugnayan muna sa'],
+        ['first. Philippine users may also contact the', 'Maaari ring makipag-ugnayan ang mga gumagamit sa Pilipinas sa'],
+        ['Changes', 'Mga Pagbabago'],
+        ['If we materially change how Learnscape handles personal information, especially camera or child data, we will provide notice before the new processing begins.', 'Kung may malaking pagbabago sa paraan ng Learnscape sa paggamit ng personal na impormasyon, lalo na sa datos ng kamera o bata, magbibigay kami ng abiso bago ito simulan.'],
+        ['Learnscape Adventure is an educational game for learning and practising shapes.', 'Ang Learnscape Adventure ay larong pang-edukasyon para matuto at magsanay sa mga hugis.'],
+        ['By using Learnscape, you agree to use it safely and respectfully. A parent, guardian, or teacher should supervise younger players, especially when the Camera Challenge or optional avatar image is used.', 'Sa paggamit ng Learnscape, sumasang-ayon kang gamitin ito nang ligtas at may paggalang. Dapat gabayan ng magulang, tagapag-alaga, o guro ang mas batang manlalaro, lalo na kapag ginagamit ang Hamon sa Kamera o larawan ng avatar.'],
+        ['You may use Learnscape for personal, classroom, and educational purposes. You may not copy, sell, reverse engineer, disrupt, or use the game, its artwork, music, or code except as permitted by law or written permission from the team.', 'Maaari mong gamitin ang Learnscape para sa sarili, klase, at pag-aaral. Hindi maaaring kopyahin, ibenta, sirain, o gamitin ang laro, sining, musika, o code maliban kung pinapayagan ng batas o ng nakasulat na pahintulot ng grupo.'],
+        ['Learnscape is provided for educational enjoyment. Progress, rewards, and game availability are not guaranteed and may change as the game is improved.', 'Ibinibigay ang Learnscape para sa masayang pag-aaral. Maaaring magbago ang progreso, gantimpala, at pagkakaroon ng laro habang pinapabuti ito.'],
+        ['To the extent permitted by law, the team is not responsible for indirect losses arising from use of the game. Nothing in these terms removes rights that cannot legally be excluded.', 'Hangga’t pinapayagan ng batas, hindi pananagutan ng grupo ang di-tuwirang pinsalang dulot ng paggamit ng laro. Hindi inaalis ng mga tuntuning ito ang mga karapatang hindi maaaring alisin ng batas.'],
+        ['Questions about these Terms or Privacy Policy can be sent to', 'Maaaring ipadala ang tanong tungkol sa mga Tuntunin o Patakaran sa Pribado sa'],
+        ['or contact', 'o makipag-ugnayan sa'],
+        ['I agree with the terms and privacy policy', 'Sumasang-ayon ako sa mga tuntunin at patakaran sa pribado.'],
+        ['Adventure Menu', 'Menu ng Laro'],
+        ['About Us', 'Tungkol sa Amin'],
+        ['LearnScape Adventure is an educational game designed for kindergarten learners to explore shapes in a fun and interactive way. Through engaging activities, colorful worlds, and real-world object detection, the game helps children recognize and identify shapes while building their confidence and curiosity.', 'Ang LearnScape Adventure ay larong pang-edukasyon para sa mga batang nasa kindergarten upang masayang tuklasin ang mga hugis. Sa mga gawain, makukulay na mundo, at pagtukoy ng totoong bagay, natutulungan nitong makilala ang mga hugis at mapaunlad ang tiwala at pagkamausisa ng bata.'],
+        ['Meet the Team', 'Kilalanin ang Grupo'],
+        ['The people behind LearnScape Adventure', 'Ang mga bumuo ng LearnScape Adventure'],
+        ['Whatever you do, work at it with all your heart, as working for the Lord.', 'Anuman ang iyong gawin, gawin mo nang buong puso, na parang para sa Panginoon.'],
+        ['Commit to the Lord whatever you do, and he will establish your plans.', 'Ipagkatiwala mo sa Panginoon ang lahat ng iyong ginagawa, at kanyang pagtitibayin ang iyong mga plano.'],
+        ['This web game was developed as a collaborative undergraduate thesis project by a team of four students.', 'Ang larong ito sa web ay binuo bilang sama-samang tesis ng apat na mag-aaral.'],
+        ['engineered the core software application, integrated the web game engine, and built and trained the object detection architecture by utilizing different AI tools. To power the game\'s AI components,', 'ang bumuo ng pangunahing software, naglagay ng game engine, at nagsanay ng sistema sa pagtukoy ng bagay gamit ang iba’t ibang AI tool. Para sa AI ng laro,'],
+        ['spearheaded the dataset curation phase, focusing on gathering, filtering, and preparing the extensive library of images required to successfully train the object detection model. Together, the team managed the project from initial conceptualization to final research deployment.', 'ang nanguna sa pagkuha, pagsala, at paghahanda ng maraming larawang kailangan upang sanayin ang modelong tumutukoy ng bagay. Sama-samang pinamahalaan ng grupo ang proyekto mula sa unang ideya hanggang sa huling pagsasaliksik.'],
+        ['Special Thanks', 'Espesyal na Pasasalamat'],
+        ['This game was made possible with the support, guidance, and resources from our family, friends, advisers, and everyone who believed in us.', 'Naging posible ang larong ito dahil sa suporta, gabay, at tulong mula sa aming pamilya, kaibigan, tagapayo, at lahat ng naniwala sa amin.'],
+        ['Thank you for being part of our LearnScape Adventure!', 'Salamat sa pagiging bahagi ng aming LearnScape Adventure!'],
+        ['Development Team', 'Grupo sa Pagbuo'],
+        ['Game design, programming, UI/UX design, and overall development.', 'Disenyo ng laro, programming, disenyo ng UI/UX, at kabuuang pagbuo.'],
+        ['Art & Assets', 'Sining at mga Asset'],
+        ['Game illustrations, backgrounds, characters, animations, and UI assets.', 'Mga guhit, background, karakter, animation, at UI asset ng laro.'],
+        ['Audio & Music', 'Tunog at Musika'],
+        ['Sound effects, background music, and audio resources used in the game.', 'Sound effect, background music, at iba pang tunog na ginamit sa laro.'],
+        ['Educational Content', 'Nilalamang Pang-edukasyon'],
+        ['Shape concepts, learning activities, and instructional materials for kindergarten learners.', 'Mga konsepto ng hugis, gawaing pampagkatuto, at materyales para sa mga batang nasa kindergarten.'],
+        ['Technologies Used', 'Mga Teknolohiyang Ginamit'],
+        ['Object detection, web technologies, and open-source tools that helped us build this game.', 'Pagtukoy ng bagay, teknolohiyang web, at open-source na tool na tumulong sa pagbuo ng laro.'],
+        ['To Our Supporters', 'Para sa Aming mga Tagasuporta'],
+        ['Our family, friends, teachers, and everyone who supported and encouraged us throughout this journey.', 'Ang aming pamilya, kaibigan, guro, at lahat ng sumuporta at nagpalakas ng loob namin sa paglalakbay na ito.'],
+        ['Circle Meadow', 'Parang Bilog'],
+        ['Square Town', 'Bayan ng Parisukat'],
+        ['Triangle Mountains', 'Kabundukan ng Tatsulok'],
+        ['Rectangle Village', 'Nayon ng Parihaba'],
+        ['Oval Garden', 'Hardin ng Bilohaba'],
+        ['Heart City', 'Lungsod ng Puso'],
+        ['Star Forest', 'Gubat ng Bituin'],
+        ['Diamond Cave', 'Kuweba ng Dyamante'],
+        ['Coming soon castle island', 'Malapit nang dumating na pulong kastilyo'],
+        ['Show previous island', 'Ipakita ang nakaraang pulo'],
+        ['Show next island', 'Ipakita ang susunod na pulo'],
+        ['Return to Home', 'Balik sa Simula'],
+        ['Return to the home page', 'Balik sa pahina ng simula'],
+        ['About LearnScape', 'Tungkol sa LearnScape'],
+        ['LearnScape rabbit character', 'Kuneho ng LearnScape'],
+        ['The four student developers of LearnScape Adventure', 'Apat na mag-aaral na bumuo ng LearnScape Adventure'],
+        ['Learn about the shape', 'Alamin ang hugis'],
+        ['Play the shape adventure', 'Laruin ang pakikipagsapalaran sa hugis'],
+        ['Find the shape with your camera', 'Hanapin ang hugis gamit ang kamera'],
+        ['Lesson progress', 'Progreso ng Aralin'],
+        ['Video controls', 'Mga kontrol ng video'],
+        ['Choose the shape name', 'Piliin ang pangalan ng hugis'],
+        ['Delivered', 'Naihatid'],
+        ['Out of Gas!', 'Ubos na ang Gas!'],
+        ['Deliver this:', 'Ihatid ito:'],
+        ['Place it here!', 'Ilagay dito!'],
+        ['Oval Match Game', 'Larong Pagtutugma ng Bilohaba'],
+        ['Matched Pairs', 'Magkaparehong Pares'],
+        ['Time', 'Oras'],
+        ['2 pairs + bomb', '2 pares + bomba'],
+        ['4 pairs + traps', '4 pares + bitag'],
+        ['5 pairs + traps', '5 pares + bitag'],
+        ['Excellent work!', 'Napakahusay!'],
+        ['Try again!', 'Subukan muli!'],
+        ['Target na Hugis:', 'Target na Hugis:'],
+        ['🔵 Circles:', '🔵 Mga Bilog:'],
+        ['Loading game assets and contents', 'Naglo-load ang mga asset at nilalaman ng laro'],
+        ['Loading', 'Naglo-load'],
+        ['Adventure progress', 'Progreso ng pakikipagsapalaran'],
+        ['0 stars', '0 bituin'],
+        ['0 carrots', '0 karot'],
+        ['Settings', 'Mga Setting'],
+        ['Display settings', 'Mga setting sa display'],
+        ['Legal and about links', 'Mga link ng tuntunin at tungkol sa amin'],
+        ['Shop', 'Tindahan'],
+        ['Notifications', 'Mga Paalala'],
+        ['Shape Island areas', 'Mga lugar sa Pulo ng mga Hugis'],
+        ['Coming soon island. Look for later updates.', 'Pulong malapit nang dumating. Abangan ang susunod na update.'],
+        ['Return to Shape Island', 'Balik sa Pulo ng mga Hugis'],
+        ['Return to Circle Area', 'Balik sa Lugar ng Bilog'],
+        ['Return to Area 3', 'Balik sa Lugar 3'],
+        ['Return to Area 5', 'Balik sa Lugar 5'],
+        ['Return to Rectangle Village', 'Balik sa Nayon ng Parihaba'],
+        ['Return to Rectangle Delivery', 'Balik sa Hatiran ng Parihaba'],
+        ['Continue to Shape Island', 'Tumuloy sa Pulo ng mga Hugis'],
+        ['Continue to camera game', 'Tumuloy sa larong kamera'],
+        ['Continue to oval camera game', 'Tumuloy sa larong kamera ng bilohaba'],
+        ['Continue to heart camera game', 'Tumuloy sa larong kamera ng puso'],
+        ['Square lesson scene', 'Eksena ng aralin sa parisukat'],
+        ['Triangle lesson scene', 'Eksena ng aralin sa tatsulok'],
+        ['Rectangle lesson scene', 'Eksena ng aralin sa parihaba'],
+        ['Oval lesson scene', 'Eksena ng aralin sa bilohaba'],
+        ['Heart lesson scene', 'Eksena ng aralin sa puso'],
+        ['Star lesson scene', 'Eksena ng aralin sa bituin'],
+        ['Diamond lesson scene', 'Eksena ng aralin sa dyamante'],
+        ['Circle lesson scene', 'Eksena ng aralin sa bilog'],
+        ['Out of Gas!', 'Ubos na ang gasolina!'],
+        ['Shape Monster', 'Halimaw na Hugis'],
+        ['Gas remaining', 'Natitirang gasolina'],
+        ['Current delivery', 'Kasalukuyang hatid'],
+        ['Circular clock', 'Bilog na orasan'],
+        ['Triangular sign', 'Tatsulok na karatula'],
+        ['Heart balloon', 'Lobong puso'],
+        ['Bakery', 'Panaderya'],
+        ['Toy Shop', 'Tindahan ng Laruan'],
+        ['Inside the bakery', 'Loob ng panaderya'],
+        ['Inside the bookstore', 'Loob ng aklatan'],
+        ['Inside the toy shop', 'Loob ng tindahan ng laruan'],
+        ['Rainbow complete!', 'Tapos na ang bahaghari!'],
+        ['Find all ten circle objects', 'Hanapin ang sampung bilog na bagay'],
+        ['Circle hunt', 'Paghahanap ng Bilog'],
+        ['Bibi celebrating', 'Nagdiwang si Bibi'],
+        ['Bibi giving a thumbs up', 'Nag-thumbs up si Bibi'],
+        ['Camera detection game layout', 'Ayos ng larong pagtukoy sa kamera'],
+        ['Shape key shop items', 'Mga susi ng hugis sa tindahan'],
+        ['Player profile', 'Talaan ng manlalaro'],
+        ['Avatar settings', 'Mga setting ng avatar'],
+        ['Player avatar', 'Avatar ng manlalaro'],
+        ['Shape badges', 'Mga badge ng hugis'],
+        ['Player progress totals', 'Kabuuang progreso ng manlalaro'],
+        ['Suggested frame colors', 'Mungkahing kulay ng frame'],
+        ['Custom frame color', 'Sariling kulay ng frame'],
+        ['Notifications panel', 'Panel ng mga paalala'],
+        ['Notification categories', 'Mga uri ng paalala'],
     ]);
+
+    const tagalogTerms = [
+        ['Square', 'Parisukat'], ['Triangle', 'Tatsulok'], ['Rectangle', 'Parihaba'],
+        ['Circle', 'Bilog'], ['Oval', 'Bilohaba'], ['Heart', 'Puso'],
+        ['Star', 'Bituin'], ['Diamond', 'Dyamante'], ['Shape', 'Hugis'],
+        ['Lesson', 'Aralin'], ['Mission', 'Misyon'], ['Game', 'Laro'],
+        ['Camera', 'Kamera'], ['Island', 'Pulo'], ['Area', 'Lugar'],
+        ['Home', 'Simula'], ['Profile', 'Talaan'], ['Settings', 'Mga Setting'],
+        ['Challenge', 'Hamon'], ['Choose', 'Piliin'], ['Play', 'Maglaro'],
+        ['Replay', 'Ulitin'], ['Retry', 'Ulitin'], ['Next', 'Susunod'],
+        ['Start', 'Simulan'], ['Skip', 'Laktawan'], ['Return', 'Balik'],
+        ['Continue', 'Magpatuloy'], ['Loading', 'Naglo-load'], ['Locked', 'Naka-lock'],
+        ['Complete', 'Tapos'], ['progress', 'progreso'], ['Progress', 'Progreso'],
+        ['video', 'video'], ['Video', 'Video'], ['Preview', 'Preview'],
+        ['Storage', 'Lagayan'], ['storage', 'lagayan'], ['Target', 'Layunin'],
+        ['Stars', 'Bituin'], ['stars', 'bituin'], ['Carrots', 'Karot'], ['carrots', 'karot'],
+        ['seconds', 'segundo'], ['Seconds', 'Segundo'], ['lives', 'buhay'], ['Lives', 'Buhay'],
+        ['objects', 'bagay'], ['Objects', 'Bagay'], ['object', 'bagay'], ['Object', 'Bagay'],
+        ['pieces', 'piraso'], ['Pieces', 'Piraso'], ['piece', 'piraso'], ['Piece', 'Piraso'],
+        ['badge', 'tanda'], ['Badges', 'Mga tanda'], ['frame', 'frame'], ['Frame', 'Frame'],
+    ];
 
     const translatePlayerCopy = (copy) => {
         const value = String(copy ?? '');
         const direct = tagalogCopy.get(value.trim());
         if (direct) return value.replace(value.trim(), direct);
-        return value
+        const translated = value
+            .replace(/^Game Loading\.\.\.\((\d+)%\)$/i, 'Naglo-load ang laro...($1%)')
+            .replace(/^Loading Adventure$/i, 'Naglo-load ang Laro')
+            .replace(/^(?!(?:Play|Skip|Replay)\b)(.+) lesson video$/i, 'Video ng aralin sa $1')
+            .replace(/^(.+) lesson progress$/i, 'Progreso ng aralin sa $1')
+            .replace(/^(.+) lesson scene$/i, 'Eksena ng aralin sa $1')
+            .replace(/^(.+) character$/i, 'Karakter ng $1')
+            .replace(/^(.+) camera challenge progress$/i, 'Progreso ng hamon sa kamera ng $1')
+            .replace(/^Return to (.+) Island intro$/i, 'Balik sa simula ng Pulo ng $1')
+            .replace(/^(.+) badge locked$/i, 'Naka-lock ang badge ng $1')
+            .replace(/^(.+) key, costs (\d+) carrots$/i, 'Susi ng $1, halaga: $2 karot')
+            .replace(/^(\d+) of (\d+) (stars|diamond pieces) (earned|collected)$/i, '$1 sa $2 $3 ang nakuha')
+            .replace(/^(\d+) (seconds|lives) remaining$/i, '$1 $2 ang natitira')
+            .replace(/^(.+) object (\d+)$/i, '$1 na bagay $2')
+            .replace(/^(.+) board card (\d+)$/i, 'Kard ng $1 na board $2')
+            .replace(/^(.+) piece (\d+)$/i, 'Piraso ng $1 $2')
             .replace(/^Pause (.+) game$/i, 'Ihinto muna ang laro ng $1')
             .replace(/^Resume (.+) game$/i, 'Ipagpatuloy ang laro ng $1')
             .replace(/^Replay (.+) lesson$/i, 'Ulitin ang aralin sa $1')
@@ -142,18 +339,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             .replace(/^Return to (.+)$/i, 'Balik sa $1')
             .replace(/^Close (.+)$/i, 'Isara ang $1')
             .replace(/^Use (.+) frame$/i, 'Gamitin ang $1 na frame')
-            .replace(/^(.+) badge locked$/i, 'Naka-lock ang badge ng $1')
             .replace(/^(\d+) of (\d+) stars earned$/i, '$1 sa $2 bituin ang nakuha')
             .replace(/^Completed colors: (\d+) of (\d+)$/i, 'Nabuo mong kulay: $1 sa $2')
             .replace(/^Answer (\d+)$/i, 'Sagot $1')
             .replace(/^Target Stars: (\d+)$/i, 'Target na Bituin: $1')
             .replace(/^(\d+) seconds remaining$/i, '$1 segundong natitira');
+        return tagalogTerms.reduce((result, [english, tagalog]) =>
+            result.replace(new RegExp(`\\b${english}\\b`, 'gi'), tagalog), translated);
     };
 
     const translateTextNode = (node) => {
-        if (!node?.nodeValue?.trim()) return;
+        if (!node?.nodeValue?.trim() || !/[A-Za-z]/.test(node.nodeValue)) return;
         const translated = translatePlayerCopy(node.nodeValue);
         if (translated !== node.nodeValue) node.nodeValue = translated;
+    };
+
+    const localizePlayerCopyAttributes = (element, names = ['aria-label', 'alt', 'title', 'placeholder']) => {
+        if (!element?.getAttribute) return;
+        names.forEach((attribute) => {
+            const value = element.getAttribute(attribute);
+            const translated = translatePlayerCopy(value);
+            if (value && translated !== value) element.setAttribute(attribute, translated);
+        });
     };
 
     const localizePlayerFacingCopy = (root = document.body) => {
@@ -169,13 +376,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             translateTextNode(node);
             node = walker.nextNode();
         }
-        root.querySelectorAll?.('[aria-label], [alt], [title], [placeholder]').forEach((element) => {
-            ['aria-label', 'alt', 'title', 'placeholder'].forEach((attribute) => {
-                const value = element.getAttribute(attribute);
-                const translated = translatePlayerCopy(value);
-                if (value && translated !== value) element.setAttribute(attribute, translated);
-            });
-        });
+        localizePlayerCopyAttributes(root);
+        root.querySelectorAll?.('[aria-label], [alt], [title], [placeholder]').forEach(localizePlayerCopyAttributes);
     };
 
     // Translate once at startup, then only when the game changes screens. Watching every
@@ -192,6 +394,44 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     window.addEventListener('load', queuePlayerCopyLocalization, { once: true });
     window.addEventListener('learnscape:routechange', queuePlayerCopyLocalization);
+
+    // Dynamic mission copy is localized one changed node at a time. This keeps
+    // newly created messages in Tagalog without repeatedly scanning the page
+    // while the loading percentage changes.
+    const DynamicCopyMutationObserver = window.MutationObserver || globalThis.MutationObserver;
+    if (DynamicCopyMutationObserver && document.body) {
+        new DynamicCopyMutationObserver((records) => {
+            records.forEach((record) => {
+                if (record.type === 'characterData') {
+                    translateTextNode(record.target);
+                    return;
+                }
+                if (record.type === 'attributes') {
+                    localizePlayerCopyAttributes(record.target, [record.attributeName]);
+                    return;
+                }
+                record.addedNodes?.forEach((node) => {
+                    if (node.nodeType === 3) {
+                        translateTextNode(node);
+                    } else if (node.nodeType === 1 && !node.matches?.('script, style')) {
+                        // Only inspect the newly inserted element itself and its
+                        // direct text. Its descendants will emit their own record
+                        // if they change, so this never scans a large game scene.
+                        localizePlayerCopyAttributes(node);
+                        node.childNodes?.forEach((child) => {
+                            if (child.nodeType === 3) translateTextNode(child);
+                        });
+                    }
+                });
+            });
+        }).observe(document.body, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+            attributes: true,
+            attributeFilter: ['aria-label', 'alt', 'title', 'placeholder'],
+        });
+    }
 
     // Missions create and rename controls after the player has started. Keep only
     // those controls localized; unlike a page-wide observer, this never walks the
@@ -863,7 +1103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (rectangleRoadToggle) {
             rectangleRoadToggle.disabled = true;
             rectangleRoadToggle.classList.remove('is-wrong-stop');
-            rectangleRoadToggle.textContent = 'Empty';
+            rectangleRoadToggle.textContent = 'Wala';
             rectangleRoadToggle.setAttribute('aria-label', 'Out of gas');
         }
         if (rectangleBossJumpButton) rectangleBossJumpButton.disabled = true;
@@ -1430,7 +1670,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleRoadStrip?.classList.remove('is-auto-looping', 'is-loop-paused');
         if (rectangleRoadToggle) {
             rectangleRoadToggle.classList.remove('is-wrong-stop');
-            rectangleRoadToggle.textContent = 'Stop';
+            rectangleRoadToggle.textContent = 'Hinto';
             rectangleRoadToggle.setAttribute('aria-label', 'Stop at this delivery');
             rectangleRoadToggle.setAttribute('aria-pressed', 'false');
         }
@@ -1803,7 +2043,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         titleTextPath.setAttribute('href', `#${titleCurveId}`);
         titleTextPath.setAttribute('startOffset', '50%');
         titleTextPath.setAttribute('text-anchor', 'middle');
-        titleTextPath.textContent = 'Lesson Complete!';
+        titleTextPath.textContent = 'Tapos na ang Aralin!';
         titleText.appendChild(titleTextPath);
         title.append(titleCurve, titleText);
 
@@ -1826,7 +2066,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const message = document.createElement('p');
         message.className = 'circle-lesson-star-message';
-        message.textContent = 'Well done!';
+        message.textContent = 'Magaling!';
 
         const actions = document.createElement('div');
         actions.className = 'circle-lesson-progress-actions';
@@ -4478,7 +4718,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         stopHeartMissionSequence();
         const session = heartMissionSession;
         heartMissionPage.classList.add('is-heart-mission-active');
-        heartMissionMessageText.textContent = 'Para sa ating Heart Mission, putukin ang mga lobong hugis puso!';
+        heartMissionMessageText.textContent = 'Para sa ating Misyon ng Puso, putukin ang mga lobong hugis puso!';
         heartMissionIntro.hidden = false;
         heartMissionIntro.setAttribute('aria-hidden', 'false');
         heartMissionIntro.getBoundingClientRect();
@@ -4578,7 +4818,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         stopStarMissionSequence();
         const session = starMissionSession;
         starMissionIntro.classList.remove('is-ready-message');
-        starMissionMessageText.textContent = 'Para sa ating Star Mission, kolektahin ang lahat ng mga bituin na nahuhulog mula sa langit.';
+        starMissionMessageText.textContent = 'Para sa ating Misyon ng Bituin, kolektahin ang lahat ng bituing nahuhulog mula sa langit.';
         starMissionIntro.hidden = false;
         starMissionIntro.setAttribute('aria-hidden', 'false');
         starMissionIntro.getBoundingClientRect();
@@ -5375,7 +5615,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setShapeMissionBgmPhase('diamond');
         stopDiamondMissionSequence();
         const session = diamondMissionSession;
-        diamondMissionMessageText.textContent = 'Para sa ating Diamond Mission, buuin ang hugis na nasa puzzle sa pamamagitan ng paghahanap ng mga parte neto sa kweba.';
+        diamondMissionMessageText.textContent = 'Para sa ating Misyon ng Dyamante, buuin ang hugis na nasa puzzle sa pamamagitan ng paghahanap ng mga bahagi nito sa kuweba.';
         diamondMissionGuide.hidden = false;
         diamondMissionGuide.setAttribute('aria-hidden', 'false');
         diamondMissionGuide.getBoundingClientRect();
@@ -7002,14 +7242,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         playHeartGameOverAudio(reason);
         if (heartGameResultTitle) {
-            heartGameResultTitle.textContent = won ? 'Mission Complete!' : reason === 'time' ? "Time's Up!" : 'Out of Lives!';
+            heartGameResultTitle.textContent = won ? 'Tapos na ang Misyon!' : reason === 'time' ? 'Ubos na ang Oras!' : 'Wala nang Buhay!';
         }
         if (heartGameResultCopy) {
             heartGameResultCopy.textContent = won
-                ? 'You completed the rainbow!'
+                ? 'Nabuo mo ang bahaghari!'
                 : `Completed colors: ${heartGameColorIndex} of ${HEART_COLOR_CHALLENGES.length}`;
         }
-        if (heartGameRetryButton) heartGameRetryButton.textContent = won ? 'Play Again' : 'Retry';
+        if (heartGameRetryButton) heartGameRetryButton.textContent = won ? 'Maglaro Muli' : 'Ulitin';
         if (heartGameResult) {
             heartGameResult.hidden = false;
             heartGameResult.getBoundingClientRect();
@@ -7454,7 +7694,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             progressStars.dataset.earnedStars = '1';
             progressStars.setAttribute('aria-label', '1 of 3 stars earned');
         }
-        if (progressMessage) progressMessage.textContent = 'Well done!';
+        if (progressMessage) progressMessage.textContent = 'Magaling!';
         if (replayImage) replayImage.removeAttribute('src');
         replayButton?.setAttribute('aria-label', 'Replay shape lesson');
         page.classList.remove('is-transitioning-to-illustration', 'is-illustration-background', 'is-tv-lesson-image-visible', 'is-progress-visible', 'is-next-background', 'is-fading-to-triangle-game', 'is-rectangle-village-departing');
@@ -7496,7 +7736,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 stars.dataset.earnedStars = '2';
                 stars.setAttribute('aria-label', '2 of 3 stars earned');
             }
-            if (message) message.textContent = 'Amazing! You collected all stars!';
+            if (message) message.textContent = 'Ang galing! Nakuha mo ang lahat ng bituin!';
             if (replayImage) replayImage.removeAttribute('src');
             replayButton?.setAttribute('aria-label', 'Retry Star Mission');
         }
@@ -7520,7 +7760,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 stars.dataset.earnedStars = '2';
                 stars.setAttribute('aria-label', '2 of 3 stars earned');
             }
-            if (message) message.textContent = 'Amazing! You found the crystal!';
+            if (message) message.textContent = 'Ang galing! Nahanap mo ang kristal!';
             if (replayImage) replayImage.removeAttribute('src');
             replayButton?.setAttribute('aria-label', 'Retry Diamond Mission');
         }
@@ -8645,7 +8885,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleDeliveryTaskPanel.classList.add('is-visible');
         if (rectangleRoadToggle && rectangleDeliveryJeepSequence?.classList.contains('is-arrived')) {
             rectangleRoadToggle.disabled = isComplete;
-            if (isComplete) rectangleRoadToggle.textContent = 'Done';
+            if (isComplete) rectangleRoadToggle.textContent = 'Tapos';
         }
         if (rectangleBossJumpButton) rectangleBossJumpButton.disabled = isComplete;
         const isBossIntroPending = getRectangleBossMilestone() !== null;
@@ -8657,7 +8897,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleDeliveryTaskItems.forEach((item) => {
             item.hidden = true;
         });
-        if (rectangleDeliveryTaskItemName) rectangleDeliveryTaskItemName.textContent = 'CONGRATULATIONS!';
+        if (rectangleDeliveryTaskItemName) rectangleDeliveryTaskItemName.textContent = 'BINABATI KITA!';
         if (rectangleDeliveryTaskDestinationName) rectangleDeliveryTaskDestinationName.textContent = 'Naihatid mo lahat ng gamit';
         rectangleDeliveryTaskPanel.hidden = false;
         rectangleDeliveryTaskPanel.getBoundingClientRect();
@@ -8678,7 +8918,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (rectangleRoadToggle) {
             rectangleRoadToggle.disabled = true;
             rectangleRoadToggle.classList.remove('is-wrong-stop', 'is-boss-attack');
-            rectangleRoadToggle.textContent = 'Done';
+            rectangleRoadToggle.textContent = 'Tapos';
             rectangleRoadToggle.setAttribute('aria-label', 'All deliveries completed');
         }
         if (rectangleBossJumpButton) rectangleBossJumpButton.disabled = true;
@@ -9223,7 +9463,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (rectangleRoadToggle) {
             rectangleRoadToggle.disabled = false;
             rectangleRoadToggle.classList.remove('is-boss-attack');
-            rectangleRoadToggle.textContent = 'Stop';
+            rectangleRoadToggle.textContent = 'Hinto';
             rectangleRoadToggle.setAttribute('aria-label', 'Stop at this delivery');
         }
         if (rectangleBossJumpButton) {
@@ -9427,7 +9667,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleDeliveryJeepSequence?.classList.remove('is-boss-jumping');
         if (rectangleRoadToggle) rectangleRoadToggle.disabled = true;
         if (rectangleBossJumpButton) rectangleBossJumpButton.disabled = true;
-        if (rectangleDeliveryInstructionPanel) rectangleDeliveryInstructionPanel.textContent = 'Shape Monster defeated!';
+        if (rectangleDeliveryInstructionPanel) rectangleDeliveryInstructionPanel.textContent = 'Natalo ang Halimaw na Hugis!';
         playUiClickSound('boardSuccess');
 
         rectangleBossFinishTimer = window.setTimeout(() => {
@@ -15457,7 +15697,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const guideCharacter = page.querySelector('.rectangle-mission-guide-character');
         const readyCharacter = page.querySelector('.rectangle-mission-guide-character-ch5');
         if (messageText) {
-            messageText.textContent = 'Tara na! Sumakay na at simulan natin ang Bibi\u2019s Rectangle Delivery!';
+            messageText.textContent = 'Tara na! Sumakay na at simulan natin ang Hatiran ng Parihaba ni Bibi!';
         }
         if (messagePanel) messagePanel.hidden = false;
         if (guideCharacter) guideCharacter.hidden = true;
@@ -15614,20 +15854,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const shapePhasePanelCopy = Object.freeze({
-        lesson: { title: 'Lesson', description: 'Learn about the shape' },
-        mission: { title: 'Mission', description: 'Play the shape adventure' },
-        detection: { title: 'Detection', description: 'Find the shape with your camera' },
+        lesson: { title: 'Aralin', description: 'Alamin ang hugis' },
+        mission: { title: 'Misyon', description: 'Laruin ang pakikipagsapalaran sa hugis' },
+        detection: { title: 'Pagtukoy', description: 'Hanapin ang hugis gamit ang kamera' },
     });
 
     const shapeIslandNames = Object.freeze({
-        circle: 'Circle Meadow',
-        square: 'Square Town',
-        triangle: 'Triangle Mountains',
-        rectangle: 'Rectangle Village',
-        oval: 'Oval Garden',
-        heart: 'Heart City',
-        star: 'Star Forest',
-        diamond: 'Diamond Cave',
+        circle: 'Parang Bilog',
+        square: 'Bayan ng Parisukat',
+        triangle: 'Kabundukan ng Tatsulok',
+        rectangle: 'Nayon ng Parihaba',
+        oval: 'Hardin ng Bilohaba',
+        heart: 'Lungsod ng Puso',
+        star: 'Gubat ng Bituin',
+        diamond: 'Kuweba ng Dyamante',
     });
 
     const shapePhaseSelectors = new Map();
@@ -15663,11 +15903,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const heading = document.createElement('h2');
         heading.textContent = shapeIslandNames[shape];
         const subheading = document.createElement('p');
-        subheading.textContent = 'Choose an activity';
+        subheading.textContent = 'Pumili ng gawain';
         const back = document.createElement('button');
         back.className = 'shape-phase-hub-back';
         back.type = 'button';
-        back.textContent = '‹ Back';
+        back.textContent = '‹ Balik';
         back.addEventListener('click', () => {
             setShapePhaseHubOpen({ page, selector }, false);
             start.focus({ preventScroll: true });
@@ -15705,7 +15945,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             play.className = 'shape-phase-play';
             play.type = 'button';
             play.dataset.shapePhase = phase;
-            play.textContent = '▶ Play';
+            play.textContent = '▶ Maglaro';
             play.addEventListener('click', (event) => {
                 event.preventDefault();
                 if (play.disabled) return;
