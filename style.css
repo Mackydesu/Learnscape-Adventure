@@ -12467,17 +12467,13 @@ body *::after {
         z-index: 8;
         display: block;
         width: auto;
-        height: clamp(19rem, 50vh, 31rem);
+        height: clamp(23rem, 60vh, 38rem);
         object-fit: contain;
         object-position: left bottom;
         filter: drop-shadow(0.45rem 0.7rem 0.65rem rgba(31, 48, 24, 0.3));
         opacity: 0;
         transform: translateY(0.7rem) scale(0.95);
         transition: opacity 0.3s ease, transform 0.38s cubic-bezier(0.2, 1.15, 0.35, 1);
-    }
-
-    .triangle-game-character.is-ch17 {
-        height: clamp(21rem, 56vh, 35rem);
     }
 
     .triangle-game-character.is-visible {
@@ -24016,14 +24012,13 @@ body.about-page {
         bottom: 22%;
         z-index: 8;
         width: auto;
-        height: min(55vh, 22rem);
+        height: min(62vh, 26rem);
         max-width: 25vw;
         object-fit: contain;
         object-position: bottom;
         opacity: 0;
         transition: opacity 0.3s ease, transform 0.38s ease;
     }
-    .triangle-game-character.is-ch17 { height: min(58vh, 24rem); }
     .triangle-game-character.is-visible { opacity: 1; transform: translateY(0) scale(1); }
 
     .triangle-game-message-panel {
@@ -24206,13 +24201,9 @@ body.about-page {
         left: 2%;
         bottom: 0;
         z-index: 7;
-        height: min(42svh, 17rem);
+        height: min(50svh, 20rem);
         max-width: 19vw;
         object-position: left bottom;
-    }
-
-    .triangle-game-character.is-ch17 {
-        height: min(46svh, 18rem);
     }
 
     /* These rules were previously desktop-only, leaving phone trees with no

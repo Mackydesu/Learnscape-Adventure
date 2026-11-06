@@ -10074,10 +10074,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const segment = triangleGameAudioSegments[stageIndex];
             if (!message || !segment || session !== triangleGameDialogueSession || triangleGamePage.hidden) return;
 
-            triangleGameCharacter.src = stageIndex === triangleGameMessages.length - 1
-                ? 'assets/Character/ch17.webp'
-                : 'assets/Character/ch6.webp';
-            triangleGameCharacter.classList.toggle('is-ch17', stageIndex === triangleGameMessages.length - 1);
+            triangleGameCharacter.src = 'assets/Character/ch6.webp';
             triangleGameDialogueAdvance = null;
             triangleGamePage.classList.remove('is-dialog-ready');
             triangleGameMessagePanel.classList.remove('is-message-complete', 'is-final-message');
