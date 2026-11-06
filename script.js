@@ -25,6 +25,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         ['Exit Game', 'Lumabas sa Laro'],
         ['Close the Game', 'Isara ang Laro'],
         ['Cancel', 'Kanselahin'],
+        ['OK', 'Sige'],
+        ['Back', 'Balik'],
+        ['‹ Back', '‹ Balik'],
         ['Continue Playing', 'Magpatuloy sa Laro'],
         ['Skip for now', 'Laktawan muna'],
         ['ENTER', 'PASOK'],
@@ -81,6 +84,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         ['Please Wait...', 'Sandali...'],
         ['Ready?', 'Handa na?'],
         ['Choose an activity', 'Pumili ng gawain'],
+        ['Replay Lesson', 'Ulitin ang Aralin'],
+        ['Camera help', 'Gabay sa Kamera'],
+        ['Close menu', 'Isara ang Menu'],
+        ['Close terms and privacy policy', 'Isara ang Patakaran at Pribado'],
+        ['Rotate to landscape', 'Iikot nang pahiga'],
+        ['Enter fullscreen', 'Pumasok sa Buong Screen'],
+        ['Jump the jeepney', 'Talunin ang jeep'],
         ['Start Camera', 'Buksan ang Kamera'],
         ['Scan an object using the camera!', 'I-scan ang isang bagay gamit ang kamera!'],
         ['Camera preview placeholder', 'Preview ng kamera'],
@@ -126,8 +136,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             .replace(/^Retry (.+) Mission$/i, 'Ulitin ang Misyon ng $1')
             .replace(/^Retry the (.+) mission$/i, 'Ulitin ang misyon ng $1')
             .replace(/^Skip (.+) lesson video$/i, 'Laktawan ang aralin sa $1')
+            .replace(/^Play (.+) lesson video$/i, 'I-play ang aralin sa $1')
+            .replace(/^Continue to (.+)$/i, 'Tumuloy sa $1')
             .replace(/^Return to (.+)$/i, 'Balik sa $1')
             .replace(/^Close (.+)$/i, 'Isara ang $1')
+            .replace(/^Use (.+) frame$/i, 'Gamitin ang $1 na frame')
             .replace(/^(.+) badge locked$/i, 'Naka-lock ang badge ng $1')
             .replace(/^(\d+) of (\d+) stars earned$/i, '$1 sa $2 bituin ang nakuha')
             .replace(/^Completed colors: (\d+) of (\d+)$/i, 'Nabuo mong kulay: $1 sa $2')
@@ -178,6 +191,59 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     window.addEventListener('load', queuePlayerCopyLocalization, { once: true });
     window.addEventListener('learnscape:routechange', queuePlayerCopyLocalization);
+
+    // Missions create and rename controls after the player has started. Keep only
+    // those controls localized; unlike a page-wide observer, this never walks the
+    // full game while the loading bar is updating.
+    const playerControlSelector = 'button, [role="button"], input[type="button"], input[type="submit"], .game-return-btn, .game3-island-enter';
+    const localizePlayerControl = (control) => {
+        if (!control?.matches?.(playerControlSelector)) return;
+        localizePlayerFacingCopy(control);
+        if (control.matches('input[type="button"], input[type="submit"]')) {
+            const translated = translatePlayerCopy(control.value);
+            if (translated !== control.value) control.value = translated;
+        }
+    };
+    const findPlayerControl = (node) => {
+        if (node?.nodeType === 1) return node.closest?.(playerControlSelector) || null;
+        return node?.parentElement?.closest?.(playerControlSelector) || null;
+    };
+    const pendingPlayerControls = new Set();
+    let isPlayerControlLocalizationQueued = false;
+    const queuePlayerControlLocalization = (control) => {
+        if (!control) return;
+        pendingPlayerControls.add(control);
+        if (isPlayerControlLocalizationQueued) return;
+        isPlayerControlLocalizationQueued = true;
+        window.setTimeout(() => {
+            isPlayerControlLocalizationQueued = false;
+            pendingPlayerControls.forEach(localizePlayerControl);
+            pendingPlayerControls.clear();
+        }, 0);
+    };
+    const PlayerControlMutationObserver = window.MutationObserver || globalThis.MutationObserver;
+    if (PlayerControlMutationObserver && document.body) {
+        new PlayerControlMutationObserver((records) => {
+            records.forEach((record) => {
+                const changedControl = findPlayerControl(record.target);
+                if (changedControl) queuePlayerControlLocalization(changedControl);
+                record.addedNodes?.forEach((node) => {
+                    if (node.nodeType !== 1) {
+                        queuePlayerControlLocalization(findPlayerControl(node));
+                        return;
+                    }
+                    if (node.matches?.(playerControlSelector)) queuePlayerControlLocalization(node);
+                    node.querySelectorAll?.(playerControlSelector).forEach(queuePlayerControlLocalization);
+                });
+            });
+        }).observe(document.body, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+            attributes: true,
+            attributeFilter: ['aria-label', 'title', 'value'],
+        });
+    }
 
     let uiClickMasterVolume = null;
     const uiClickAudioContext = (() => {
