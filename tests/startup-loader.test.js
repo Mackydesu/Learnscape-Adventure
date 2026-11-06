@@ -125,11 +125,11 @@ test('a first successful load stores its manifest alongside the active offline a
 
 test('initial loading text displays the same percentage as the progress bar', () => {
     const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-    assert.match(html, /<p class="page-loading-text">Game Loading\.\.\.\(0%\)<\/p>/);
+    assert.match(html, /<p class="page-loading-text">Naglo-load ang laro\.\.\.\(0%\)<\/p>/);
     const start = html.indexOf('            const setInitialLoadingProgress =');
     const end = html.indexOf('            const setInitialLoadingMessage =', start);
     assert.ok(start >= 0 && end > start);
-    const label = { textContent: 'Game Loading...(0%)' };
+    const label = { textContent: 'Naglo-load ang laro...(0%)' };
     const attributes = new Map([['aria-valuenow', '0']]);
     const context = {
         loadingMessage: label,
@@ -139,7 +139,7 @@ test('initial loading text displays the same percentage as the progress bar', ()
     vm.runInNewContext('let initialLoadingProgress = 0;\n' + html.slice(start, end) + '\nglobalThis.setProgress = setInitialLoadingProgress;', context);
     for (const [value, expected] of [[0, 0], [46.5, 47], [84, 84], [100, 100], [20, 100]]) {
         context.setProgress(value);
-        assert.equal(label.textContent, `Game Loading...(${expected}%)`);
+        assert.equal(label.textContent, `Naglo-load ang laro...(${expected}%)`);
         assert.equal(attributes.get('aria-valuenow'), String(expected));
     }
 });
@@ -459,7 +459,7 @@ test('a failed core initialization shows an accessible retry instead of hanging'
     assert.equal(app.hidden, false);
     assert.equal(app.retry.hidden, false);
     assert.equal(app.focused, true);
-    assert.match(app.messages.at(-1), /try again/i);
+    assert.match(app.messages.at(-1), /subukan muli/i);
 });
 
 test('the retry button remains interactive while other controls are blocked', () => {
