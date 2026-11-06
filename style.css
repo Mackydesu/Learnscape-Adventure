@@ -1540,7 +1540,7 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
 
 .circle-hunt-start-button[hidden],
 .circle-hunt-play-again-button[hidden] {
-    display: none;
+    display: none !important;
 }
 
 .circle-hunt-countdown {
