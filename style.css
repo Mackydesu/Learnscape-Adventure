@@ -3649,8 +3649,9 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
 
 @media (min-width: 701px) {
     .shape-phase-hub-choices {
-        width: min(97vw, 108rem);
-        gap: clamp(0.8rem, 1.8vw, 1.75rem);
+        width: min(92vw, 96rem);
+        max-width: calc(100vw - 3rem);
+        gap: clamp(0.75rem, 1.5vw, 1.5rem);
     }
 }
 
@@ -24546,6 +24547,14 @@ html.is-phone-landscape #learnscape-shape-square-page.is-square-puzzle-followup 
 .game-icon-button.icon-back::after { content: '‹'; font-size: clamp(2.35rem, 5vw, 3.4rem); }
 .game-icon-button.icon-forward::after { content: '›'; font-size: clamp(2.35rem, 5vw, 3.4rem); }
 .game-icon-button.icon-skip::after { content: '⏭'; font-size: clamp(1.25rem, 3vw, 2rem); }
+.game-icon-button.icon-play::after {
+    content: '';
+    inline-size: 0;
+    block-size: 0;
+    border-block: clamp(0.72rem, 1.55vw, 1.15rem) solid transparent;
+    border-inline-start: clamp(1.05rem, 2.2vw, 1.65rem) solid currentColor;
+    transform: translateX(16.67%);
+}
 .game-icon-button.icon-retry::after { content: '↻'; font-size: clamp(2rem, 4.4vw, 3rem); }
 .game-icon-button.icon-check::after { content: '✓'; font-size: clamp(2rem, 4.4vw, 3rem); }
 .game-icon-button.icon-jump::after { content: '↥'; font-size: clamp(2rem, 4.4vw, 3rem); }
@@ -24559,22 +24568,25 @@ html.is-phone-landscape #learnscape-shape-square-page.is-square-puzzle-followup 
 
 .game-icon-button.circle-camera-start-button::after { display: none; }
 
+/* A hidden lesson Skip control must stay hidden while shape choices are shown. */
+.circle-illustration-skip-button[hidden] { display: none !important; }
+
 /* The star-progress artwork used to reserve most of each button for English text. */
 .circle-lesson-progress-button:has(.progress-button-svg) {
-    width: clamp(5.1rem, 10vw, 7.3rem) !important;
-    height: clamp(5.1rem, 10vw, 7.3rem) !important;
+    width: clamp(6rem, 11.5vw, 8.8rem) !important;
+    height: clamp(6rem, 11.5vw, 8.8rem) !important;
     aspect-ratio: 1 !important;
 }
 
 .circle-lesson-progress-button[data-progress-control='next']:has(.progress-button-svg),
 .circle-lesson-progress-button[data-progress-control='claim']:has(.progress-button-svg) {
-    width: clamp(5.1rem, 10vw, 7.3rem) !important;
+    width: clamp(6rem, 11.5vw, 8.8rem) !important;
 }
 
 .circle-lesson-progress-actions:has(.progress-button-svg),
 .circle-lesson-progress.camera-completion-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-actions {
-    width: min(30vw, 15rem) !important;
-    gap: clamp(0.55rem, 1.8vw, 1rem) !important;
+    width: min(44vw, 30rem) !important;
+    gap: clamp(1.5rem, 4.5vw, 5rem) !important;
     justify-content: center !important;
 }
 
@@ -24585,13 +24597,14 @@ html.is-phone-landscape #learnscape-shape-square-page.is-square-puzzle-followup 
     }
 
     .circle-lesson-progress-button:has(.progress-button-svg) {
-        width: clamp(4.25rem, 19vw, 5.8rem) !important;
-        height: clamp(4.25rem, 19vw, 5.8rem) !important;
+        width: clamp(5rem, 22vw, 6.6rem) !important;
+        height: clamp(5rem, 22vw, 6.6rem) !important;
     }
 
     .circle-lesson-progress-actions:has(.progress-button-svg),
     .circle-lesson-progress.camera-completion-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-actions {
-        width: min(48vw, 12rem) !important;
+        width: min(82vw, 26rem) !important;
+        gap: clamp(1.1rem, 5vw, 2.2rem) !important;
     }
 }
 

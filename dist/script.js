@@ -1654,9 +1654,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <path d="M48 62h70v54H48Z" fill="url(#progressGreenIcon-${idSuffix})" stroke="#0e7203" stroke-width="4" stroke-linejoin="round"/>
                         <path d="M43 62h80v-19H43Z" fill="url(#progressGreenIcon-${idSuffix})" stroke="#0e7203" stroke-width="4" stroke-linejoin="round"/>
                         <path d="M83 43v73M48 80h70" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity=".88"/>`
-            : `<path d="M65 49 112 82 65 115Z" fill="#0a6101" opacity=".38" transform="translate(0 4)"/>
-                        <path d="M65 45 112 82 65 119Z" fill="url(#progressGreenIcon-${idSuffix})" stroke="#0e7203" stroke-width="4" stroke-linejoin="round"/>
-                        <path d="M73 57 98 77" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity=".88"/>`;
+            : `<path d="M65 49 119 82 65 115Z" fill="#0a6101" opacity=".38" transform="translate(0 4)"/>
+                        <path d="M65 45 119 82 65 119Z" fill="url(#progressGreenIcon-${idSuffix})" stroke="#0e7203" stroke-width="4" stroke-linejoin="round"/>
+                        <path d="M74 57 102 78" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity=".88"/>`;
 
         return `
             <svg class="progress-button-svg progress-button-svg-${kind}" viewBox="0 0 ${viewBoxWidth} 170" aria-hidden="true" focusable="false">
