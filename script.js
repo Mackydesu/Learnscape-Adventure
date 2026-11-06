@@ -15374,14 +15374,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const shapeIslandNames = Object.freeze({
-        circle: 'Parang Bilog',
-        square: 'Bayan ng Parisukat',
-        triangle: 'Kabundukan ng Tatsulok',
-        rectangle: 'Nayon ng Parihaba',
-        oval: 'Hardin ng Bilohaba',
-        heart: 'Lungsod ng Puso',
-        star: 'Gubat ng Bituin',
-        diamond: 'Kuweba ng Dyamante',
+        circle: 'Circle Meadow',
+        square: 'Square Town',
+        triangle: 'Triangle Mountains',
+        rectangle: 'Rectangle Village',
+        oval: 'Oval Garden',
+        heart: 'Heart City',
+        star: 'Star Forest',
+        diamond: 'Diamond Cave',
     });
 
     const shapePhaseSelectors = new Map();

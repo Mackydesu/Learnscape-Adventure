@@ -3635,6 +3635,12 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
     font-size: clamp(1.12rem, 2.05vw, 1.6rem);
 }
 
+/* The icon-only phase action sits in the middle of its card, not at its edge. */
+.shape-phase-play.game-icon-button {
+    justify-self: center;
+    align-self: center;
+}
+
 @media (max-width: 700px) {
     .shape-phase-selector { padding: 0.65rem; gap: 0.45rem; }
     .shape-phase-hub-header { min-height: 3.8rem; }
