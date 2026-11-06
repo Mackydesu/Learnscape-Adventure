@@ -758,7 +758,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (rectanglePauseOverlay) rectanglePauseOverlay.hidden = !paused;
         if (rectanglePauseButton) {
             rectanglePauseButton.setAttribute('aria-pressed', paused ? 'true' : 'false');
-            rectanglePauseButton.setAttribute('aria-label', paused ? 'Ipagpatuloy ang laro ng parihaba' : 'Ihinto muna ang laro ng parihaba');
+            rectanglePauseButton.setAttribute('aria-label', paused ? 'Resume rectangle game' : 'Pause rectangle game');
         }
 
         if (paused) {
@@ -1595,7 +1595,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         replayButton.className = 'circle-lesson-progress-button';
         replayButton.type = 'button';
         replayButton.setAttribute('data-shape-preview-replay', '');
-        replayButton.setAttribute('aria-label', 'Ulitin ang aralin sa hugis');
+        replayButton.setAttribute('aria-label', 'Replay shape lesson');
         const replayImage = document.createElement('img');
         replayImage.removeAttribute('src');
         replayImage.alt = '';
@@ -1605,7 +1605,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         nextButton.className = 'circle-lesson-progress-button';
         nextButton.type = 'button';
         nextButton.setAttribute('data-shape-preview-next', '');
-        nextButton.setAttribute('aria-label', 'Tumuloy sa Pulo ng mga Hugis');
+        nextButton.setAttribute('aria-label', 'Continue to Shape Island');
         const nextImage = document.createElement('img');
         nextImage.removeAttribute('src');
         nextImage.alt = '';
@@ -2866,9 +2866,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeSquareProgress.dataset.progressStage = 'answer';
         shapeSquareProgress.setAttribute('aria-hidden', 'false');
         if (shapeSquareReplayButtonImage) shapeSquareReplayButtonImage.removeAttribute('src');
-        shapeSquareReplayButton?.setAttribute('aria-label', 'Ulitin ang misyon ng parisukat');
+        shapeSquareReplayButton?.setAttribute('aria-label', 'Retry square mission');
         if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.removeAttribute('src');
-        shapeSquareNextButton?.setAttribute('aria-label', 'Magpatuloy');
+        shapeSquareNextButton?.setAttribute('aria-label', 'Continue');
         setShapeSquareEarnedStars(2);
         window.syncLearnscapeProgressReward?.(shapeSquareProgress);
         playUiClickSound('boardSuccess');
@@ -3078,7 +3078,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeSquareProgress?.setAttribute('aria-hidden', 'true');
         if (shapeSquareProgress) shapeSquareProgress.dataset.progressStage = 'lesson';
         if (shapeSquareReplayButtonImage) shapeSquareReplayButtonImage.removeAttribute('src');
-        shapeSquareReplayButton?.setAttribute('aria-label', 'Ulitin ang aralin sa parisukat');
+        shapeSquareReplayButton?.setAttribute('aria-label', 'Replay square lesson');
         if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.removeAttribute('src');
         shapeSquareNextButton?.setAttribute('aria-label', 'Continue');
         shapeSquarePage.classList.add('is-illustration-background', 'is-square-mission-guide');
@@ -3636,9 +3636,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         setShapeSquareEarnedStars(0);
         if (shapeSquareProgress) shapeSquareProgress.dataset.progressStage = 'lesson';
         if (shapeSquareReplayButtonImage) shapeSquareReplayButtonImage.removeAttribute('src');
-            shapeSquareReplayButton?.setAttribute('aria-label', 'Ulitin ang aralin sa parisukat');
+            shapeSquareReplayButton?.setAttribute('aria-label', 'Replay square lesson');
         if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.removeAttribute('src');
-            shapeSquareNextButton?.setAttribute('aria-label', 'Magpatuloy');
+            shapeSquareNextButton?.setAttribute('aria-label', 'Continue');
         setShapeSquareSkipButtonVisible(true);
         shapeSquareVideo?.pause?.();
 
@@ -3670,9 +3670,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeSquarePage.classList.add('is-progress-visible');
         shapeSquareProgress.dataset.progressStage = 'lesson';
         if (shapeSquareReplayButtonImage) shapeSquareReplayButtonImage.removeAttribute('src');
-        shapeSquareReplayButton?.setAttribute('aria-label', 'Ulitin ang aralin sa parisukat');
+        shapeSquareReplayButton?.setAttribute('aria-label', 'Replay square lesson');
         if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.removeAttribute('src');
-        shapeSquareNextButton?.setAttribute('aria-label', 'Magpatuloy');
+        shapeSquareNextButton?.setAttribute('aria-label', 'Continue');
         setShapeSquareEarnedStars(1);
         shapeSquareProgress.setAttribute('aria-hidden', 'false');
         window.syncLearnscapeProgressReward?.(shapeSquareProgress);
@@ -4530,7 +4530,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (diamondMissionPauseButton) {
             diamondMissionPauseButton.hidden = true;
             diamondMissionPauseButton.setAttribute('aria-pressed', 'false');
-            diamondMissionPauseButton.setAttribute('aria-label', 'Ihinto muna ang laro ng dyamante');
+            diamondMissionPauseButton.setAttribute('aria-label', 'Pause diamond game');
         }
         if (diamondMissionRevealAudioFrame !== null) {
             window.cancelAnimationFrame(diamondMissionRevealAudioFrame);
@@ -4868,7 +4868,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const bat = document.createElement('button');
         bat.type = 'button';
         bat.className = 'diamond-mission-bat';
-        bat.setAttribute('aria-label', slotIndex >= 0 ? 'Hulihin ang piraso ng dyamante' : `Paniking may dalang pirasong ${decoy.name}`);
+        bat.setAttribute('aria-label', slotIndex >= 0 ? 'Catch a diamond piece' : `Bat carrying ${decoy.name === 'oval' ? 'an' : 'a'} ${decoy.name} piece`);
         bat.style.setProperty('--bat-top', `${batchPosition?.top ?? [10, 20, 30, 40, 50][diamondMissionBatSequence % 5]}%`);
         bat.style.setProperty('--bat-left', `${batchPosition?.left ?? 50}%`);
         bat.style.setProperty('--bat-enter-delay', `${batchPosition?.delay ?? 0}ms`);
@@ -5021,7 +5021,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (diamondMissionPauseOverlay) diamondMissionPauseOverlay.hidden = !paused;
         if (diamondMissionPauseButton) {
             diamondMissionPauseButton.setAttribute('aria-pressed', paused ? 'true' : 'false');
-            diamondMissionPauseButton.setAttribute('aria-label', paused ? 'Ipagpatuloy ang laro ng dyamante' : 'Ihinto muna ang laro ng dyamante');
+            diamondMissionPauseButton.setAttribute('aria-label', paused ? 'Resume diamond game' : 'Pause diamond game');
         }
 
         if (paused) {
@@ -5428,7 +5428,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (starMissionPauseButton) {
             starMissionPauseButton.hidden = hideButton;
             starMissionPauseButton.setAttribute('aria-pressed', 'false');
-            starMissionPauseButton.setAttribute('aria-label', 'Ihinto muna ang laro ng bituin');
+            starMissionPauseButton.setAttribute('aria-label', 'Pause star game');
         }
     };
 
@@ -5440,7 +5440,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (starMissionPauseOverlay) starMissionPauseOverlay.hidden = !paused;
         if (starMissionPauseButton) {
             starMissionPauseButton.setAttribute('aria-pressed', paused ? 'true' : 'false');
-            starMissionPauseButton.setAttribute('aria-label', paused ? 'Ipagpatuloy ang laro ng bituin' : 'Ihinto muna ang laro ng bituin');
+            starMissionPauseButton.setAttribute('aria-label', paused ? 'Resume star game' : 'Pause star game');
         }
 
         if (paused) {
@@ -6198,7 +6198,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (heartGamePauseOverlay) heartGamePauseOverlay.hidden = true;
         if (heartGamePauseButton) {
             heartGamePauseButton.setAttribute('aria-pressed', 'false');
-            heartGamePauseButton.setAttribute('aria-label', 'Ihinto muna ang laro ng puso');
+            heartGamePauseButton.setAttribute('aria-label', 'Pause heart game');
         }
     };
 
@@ -6210,7 +6210,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (heartGamePauseOverlay) heartGamePauseOverlay.hidden = !paused;
         if (heartGamePauseButton) {
             heartGamePauseButton.setAttribute('aria-pressed', paused ? 'true' : 'false');
-            heartGamePauseButton.setAttribute('aria-label', paused ? 'Ipagpatuloy ang laro ng puso' : 'Ihinto muna ang laro ng puso');
+            heartGamePauseButton.setAttribute('aria-label', paused ? 'Resume heart game' : 'Pause heart game');
         }
 
         if (paused) {
@@ -6769,7 +6769,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ? 'Nabuo mo ang bahaghari!'
                 : `Completed colors: ${heartGameColorIndex} of ${HEART_COLOR_CHALLENGES.length}`;
         }
-        if (heartGameRetryButton) heartGameRetryButton.textContent = won ? 'Maglaro Muli' : 'Ulitin';
+        if (heartGameRetryButton) heartGameRetryButton.textContent = won ? 'Play Again' : 'Retry';
         if (heartGameResult) {
             heartGameResult.hidden = false;
             heartGameResult.getBoundingClientRect();
@@ -7216,7 +7216,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         if (progressMessage) progressMessage.textContent = 'Magaling!';
         if (replayImage) replayImage.removeAttribute('src');
-        replayButton?.setAttribute('aria-label', 'Ulitin ang aralin sa hugis');
+        replayButton?.setAttribute('aria-label', 'Replay shape lesson');
         page.classList.remove('is-transitioning-to-illustration', 'is-illustration-background', 'is-tv-lesson-image-visible', 'is-progress-visible', 'is-next-background', 'is-fading-to-triangle-game', 'is-rectangle-village-departing');
         resetShapeTvChoices(page);
     };
@@ -7258,7 +7258,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             if (message) message.textContent = 'Ang galing! Nakuha mo ang lahat ng bituin!';
             if (replayImage) replayImage.removeAttribute('src');
-            replayButton?.setAttribute('aria-label', 'Ulitin ang misyon ng bituin');
+            replayButton?.setAttribute('aria-label', 'Retry Star Mission');
         }
 
         stopStarMissionEndFlow();
@@ -7282,7 +7282,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             if (message) message.textContent = 'Ang galing! Nahanap mo ang kristal!';
             if (replayImage) replayImage.removeAttribute('src');
-            replayButton?.setAttribute('aria-label', 'Ulitin ang misyon ng dyamante');
+            replayButton?.setAttribute('aria-label', 'Retry Diamond Mission');
         }
 
         stopDiamondMissionSequence();
@@ -11796,7 +11796,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             setCircleIllustrationEarnedStars(2);
             window.syncLearnscapeProgressReward?.(circleIllustrationProgress);
         }
-        circleIllustrationReplayButton?.setAttribute('aria-label', 'Ulitin ang paghahanap ng bilog');
+        circleIllustrationReplayButton?.setAttribute('aria-label', 'Retry circle hunt');
     };
 
     const resetCircleHunt = () => {
@@ -11813,7 +11813,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (circleHuntUi) circleHuntUi.hidden = true;
         if (circleHuntStartButton) {
             circleHuntStartButton.hidden = false;
-            circleHuntStartButton.textContent = 'SIMULAN';
+            circleHuntStartButton.textContent = 'START';
         }
         if (circleHuntPlayAgainButton) circleHuntPlayAgainButton.hidden = true;
         if (circleHuntCountdown) {
@@ -12239,7 +12239,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             circleIllustrationReplayImage.removeAttribute('src');
         }
         circleIllustrationProgress.dataset.progressStage = 'lesson';
-        circleIllustrationReplayButton?.setAttribute('aria-label', 'Ulitin ang aralin');
+        circleIllustrationReplayButton?.setAttribute('aria-label', 'Replay lesson');
         setCircleIllustrationEarnedStars(1);
         circleIllustrationProgress.setAttribute('aria-hidden', 'false');
         window.syncLearnscapeProgressReward?.(circleIllustrationProgress);
@@ -15427,7 +15427,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const back = document.createElement('button');
         back.className = 'shape-phase-hub-back';
         back.type = 'button';
-        back.textContent = '‹ Balik';
+        back.textContent = '‹ Back';
         back.addEventListener('click', () => {
             setShapePhaseHubOpen({ page, selector }, false);
             start.focus({ preventScroll: true });
@@ -15465,7 +15465,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             play.className = 'shape-phase-play';
             play.type = 'button';
             play.dataset.shapePhase = phase;
-            play.textContent = '▶ Maglaro';
+            play.textContent = '▶ Play';
             play.addEventListener('click', (event) => {
                 event.preventDefault();
                 if (play.disabled) return;
@@ -15561,7 +15561,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     appBackButtons.forEach((button) => {
         const buttonIslandShape = getBackButtonIslandShape(button);
         if (buttonIslandShape) {
-            button.setAttribute('aria-label', `Balik sa Pulo ng ${gameIslandShapeLabels[buttonIslandShape]}`);
+            button.setAttribute('aria-label', `Return to ${gameIslandShapeLabels[buttonIslandShape]} Island`);
         }
         button.addEventListener('click', (event) => {
             event.preventDefault();

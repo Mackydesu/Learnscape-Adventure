@@ -63,8 +63,8 @@
             <div class="rotate-button-cue" aria-hidden="true">
                 <span class="rotate-button-cue-hand">👆</span>
             </div>
-            <button class="rotate-button" type="button" aria-label="Iikot nang pahiga">
-                <span class="rotate-button-text">PINDUTIN DITO</span>
+            <button class="rotate-button" type="button" aria-label="Rotate to landscape">
+                <span class="rotate-button-text">TAP HERE</span>
             </button>
         </div>
     </div>
@@ -75,7 +75,7 @@
             <div class="initial-loading-bar" role="progressbar" aria-label="Naglo-load ang mga asset at nilalaman ng laro" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                 <span></span>
             </div>
-            <button class="initial-loading-retry" type="button" hidden>Subukan muli</button>
+            <button class="initial-loading-retry" type="button" hidden>Try again</button>
         </div>
         <div class="page-loading-panel route-loading-panel" role="status">
             <img class="page-loading-art" src="./assets/loadingscreen-DPjL8ncT.png" alt="Naglo-load">
@@ -91,11 +91,11 @@
             <p class="fullscreen-restore-kicker">Nakahinto ang Laro</p>
             <h2 id="fullscreen-restore-title">Nakahinto ang Buong Screen</h2>
             <p id="fullscreen-restore-copy" class="fullscreen-restore-copy">Pindutin ang button sa ibaba upang magpatuloy sa buong screen.</p>
-            <button class="fullscreen-restore-button" type="button" aria-label="Pumasok sa Buong Screen">
+            <button class="fullscreen-restore-button" type="button" aria-label="Enter fullscreen">
                 <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
                     <path d="M38 18H18v20M62 18h20v20M18 62v20h20M82 62v20H62"></path>
                 </svg>
-                <span>Buong Screen</span>
+                <span>Enter Fullscreen</span>
             </button>
         </div>
     </div>
@@ -113,11 +113,11 @@
         </div>
         <button class="shape-how-to-help-button" type="button" aria-label="Paano laruin" aria-haspopup="dialog" hidden>?</button>
         <button class="shape-how-to-help-button camera-how-to-help-button" type="button" aria-label="Paano laruin ang hamon sa kamera" aria-haspopup="dialog" hidden>?</button>
-        <button class="intro-settings-button" type="button" aria-label="Mga Setting" aria-expanded="false" aria-controls="intro-settings-panel">
+        <button class="intro-settings-button" type="button" aria-label="Settings" aria-expanded="false" aria-controls="intro-settings-panel">
             <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M20.2 3.5h7.6l1.1 5.1a16 16 0 0 1 3.2 1.3l4.5-2.5 5.4 5.4-2.5 4.5a16 16 0 0 1 1.3 3.2l5.1 1.1v7.6l-5.1 1.1a16 16 0 0 1-1.3 3.2l2.5 4.5-5.4 5.4-4.5-2.5a16 16 0 0 1-3.2 1.3l-1.1 5.1h-7.6l-1.1-5.1a16 16 0 0 1-3.2-1.3l-4.5 2.5L6 38.1l2.5-4.5a16 16 0 0 1-1.3-3.2l-5.1-1.1v-7.6l5.1-1.1a16 16 0 0 1 1.3-3.2L6 12.9l5.4-5.4 4.5 2.5a16 16 0 0 1 3.2-1.3l1.1-5.2Z"/><circle cx="24" cy="24" r="7"/></svg>
         </button>
         <div class="intro-settings-panel" id="intro-settings-panel" role="group" aria-label="Mga setting sa display" hidden>
-            <button class="intro-settings-tutorial-button" type="button" hidden>Gabay</button>
+            <button class="intro-settings-tutorial-button" type="button" hidden>Tutorial</button>
             <label class="intro-settings-toggle" for="intro-fullscreen-toggle">
                 <span>Buong Screen</span>
                 <input id="intro-fullscreen-toggle" type="checkbox">
@@ -130,8 +130,8 @@
                 <span>Lakas ng Tunog <output id="intro-volume-value" for="intro-volume-slider">100%</output></span>
                 <input id="intro-volume-slider" type="range" min="0" max="100" step="1" value="100">
             </label>
-            <button class="intro-settings-reset-button" type="button">I-reset ang Laro</button>
-            <button class="intro-settings-exit-button" type="button">Lumabas sa Laro</button>
+            <button class="intro-settings-reset-button" type="button">Reset Game</button>
+            <button class="intro-settings-exit-button" type="button">Exit Game</button>
         </div>
     </div>
 
@@ -140,8 +140,8 @@
         <p id="reset-game-description">Buburahin nito ang na-save na progreso, gantimpala, profile, at gabay sa browser na ito.</p>
         <p class="reset-game-error" role="alert" hidden>Hindi nabura ang na-save na datos. Subukan muli.</p>
         <div class="reset-game-actions">
-            <button class="reset-game-cancel" type="button">Kanselahin</button>
-            <button class="reset-game-confirm" type="button">I-reset ang Laro</button>
+            <button class="reset-game-cancel" type="button">Cancel</button>
+            <button class="reset-game-confirm" type="button">Reset Game</button>
         </div>
     </dialog>
 
@@ -149,7 +149,7 @@
         <h2 id="exit-game-title">Isara ang Laro</h2>
         <p id="exit-game-description">Hindi pinayagan ng browser na isara ang laro. Isara ang window o tab na ito upang lumabas. Mananatili ang na-save mong progreso.</p>
         <div class="exit-game-actions">
-            <button class="exit-game-continue" type="button">Magpatuloy sa Laro</button>
+            <button class="exit-game-continue" type="button">Continue Playing</button>
         </div>
     </dialog>
 
@@ -162,7 +162,7 @@
                 <p id="shape-how-to-mission" class="shape-how-to-mission"></p>
                 <ol class="shape-how-to-steps"></ol>
             </div>
-            <button class="shape-how-to-continue" type="button">Magpatuloy</button>
+            <button class="shape-how-to-continue" type="button">Continue</button>
         </section>
     </div>
 
@@ -175,7 +175,7 @@
                 <p id="camera-how-to-mission" class="shape-how-to-mission"></p>
                 <ol class="shape-how-to-steps"></ol>
             </div>
-            <button class="shape-how-to-continue" type="button">Magpatuloy</button>
+            <button class="shape-how-to-continue" type="button">Continue</button>
         </section>
     </div>
 
@@ -183,7 +183,7 @@
         <section class="terms-privacy-dialog" role="dialog" aria-modal="true" aria-labelledby="terms-privacy-title">
             <header class="terms-privacy-header">
                 <h2 id="terms-privacy-title">Patakaran sa Pribado at mga Tuntunin ng Paggamit</h2>
-                <button class="terms-privacy-close" type="button" aria-label="Isara ang Patakaran at Pribado" hidden>&times;</button>
+                <button class="terms-privacy-close" type="button" aria-label="Close terms and privacy policy" hidden>&times;</button>
             </header>
             <div class="terms-privacy-scroll" tabindex="0">
                 <article>
@@ -234,7 +234,7 @@
                     <input class="terms-privacy-checkbox" type="checkbox">
                     <span>Sumasang-ayon ako sa mga tuntunin at patakaran sa pribado.</span>
                 </label>
-                <button class="terms-privacy-continue" type="button" disabled>Magpatuloy</button>
+                <button class="terms-privacy-continue" type="button" disabled>Continue</button>
             </div>
         </section>
     </div>
@@ -247,7 +247,7 @@
                 <label for="onboarding-player-name">Pangalan ng manlalaro</label>
                 <input id="onboarding-player-name" type="text" maxlength="24" autocomplete="nickname" placeholder="Halimbawa: Manlalakbay">
                 <p class="onboarding-error" role="alert" hidden>Pakiusap, maglagay ng pangalan.</p>
-                <button class="onboarding-next" type="button">Magpatuloy</button>
+                <button class="onboarding-next" type="button">Continue</button>
             </div>
             <div class="onboarding-step" data-onboarding-step="avatar" hidden>
                 <p>Pumili ng larawan para sa iyong Profile. Maaari mo rin itong baguhin mamaya.</p>
@@ -255,8 +255,8 @@
                 <button class="onboarding-avatar-pick" type="button">Pumili ng Avatar</button>
                 <p class="onboarding-avatar-status" role="status"></p>
                 <div class="onboarding-avatar-actions">
-                    <button class="onboarding-avatar-continue" type="button" hidden>Magpatuloy</button>
-                    <button class="onboarding-avatar-skip" type="button">Laktawan muna</button>
+                    <button class="onboarding-avatar-continue" type="button" hidden>Continue</button>
+                    <button class="onboarding-avatar-skip" type="button">Skip for now</button>
                 </div>
             </div>
             <div class="onboarding-step onboarding-experience-step" data-onboarding-step="experience" hidden>
@@ -273,7 +273,7 @@
         <img class="onboarding-hand" src="./assets/drag-guide-hand-9zrSCxmv.png" alt="" aria-hidden="true">
         <div class="onboarding-coach-card">
             <p class="onboarding-coach-copy"></p>
-            <button class="onboarding-coach-next" type="button" hidden>Susunod</button>
+            <button class="onboarding-coach-next" type="button" hidden>Next</button>
         </div>
     </div>
 
@@ -290,7 +290,7 @@
 
             <a href="index.html#game3" class="btn btn-enter loading-link" data-route="game3">
                 <span class="btn-enter-icon" aria-hidden="true">▶</span>
-                <span class="btn-enter-label">PASOK</span>
+                <span class="btn-enter-label">ENTER</span>
             </a>
 
             <img class="hero-character hero-character-ground" src="./assets/ch1-DaitT-3x.svg" alt="Peeking adventure character">
@@ -306,7 +306,7 @@
 
     <div class="intro-menu-panel shape-collection-dashboard" role="dialog" aria-modal="true" aria-labelledby="intro-menu-title" hidden>
         <div class="shape-collection-dashboard-card intro-menu-card">
-            <button class="shape-collection-close intro-menu-close" type="button" aria-label="Isara ang Menu">&times;</button>
+            <button class="shape-collection-close intro-menu-close" type="button" aria-label="Close menu">&times;</button>
             <p class="shape-collection-kicker" id="intro-menu-kicker">Menu ng Laro</p>
             <h2 id="intro-menu-title"></h2>
             <div class="intro-menu-copy" hidden></div>
@@ -316,7 +316,7 @@
     <section id="learnscape-about-page" class="learnscape-about-page" hidden>
         <img class="about-page-background" src="./assets/bgintro-7KTJo2Ih.webp" alt="" aria-hidden="true">
         <div class="about-page-shade" aria-hidden="true"></div>
-        <a class="about-back-button loading-link" href="#home" data-route="title" aria-label="Balik sa pahina ng simula">
+        <a class="about-back-button loading-link" href="#home" data-route="title" aria-label="Return to the home page">
             <svg viewBox="0 0 80 80" aria-hidden="true" focusable="false">
                 <defs>
                     <linearGradient id="about-back-rim" x1="0" y1="0" x2="0" y2="1">
@@ -350,11 +350,11 @@
                 <nav class="about-page-tabs" role="tablist" aria-label="Tungkol sa LearnScape">
                     <button class="about-page-tab is-active" id="about-us-tab" type="button" role="tab" aria-selected="true" aria-controls="about-us-panel" data-about-view="about">
                         <span class="about-tab-icon" aria-hidden="true">&#128101;</span>
-                        <span>Tungkol sa Amin</span>
+                        <span>About Us</span>
                     </button>
                     <button class="about-page-tab" id="credits-tab" type="button" role="tab" aria-selected="false" aria-controls="credits-panel" data-about-view="credits">
                         <span class="about-tab-icon" aria-hidden="true">&#128214;</span>
-                        <span>Mga Kredito</span>
+                        <span>Credits</span>
                     </button>
                 </nav>
 
@@ -429,11 +429,11 @@
         <div class="game3-fog" aria-hidden="true"></div>
         <div class="game1-entry-veil" aria-hidden="true"></div>
         <nav class="game3-quick-menu" aria-label="Adventure menu">
-            <button class="game3-quick-menu-button" type="button" data-intro-panel="shop" aria-label="Tindahan">
+            <button class="game3-quick-menu-button" type="button" data-intro-panel="shop" aria-label="Shop">
                 <img src="./assets/Shop-BbAJGsuR.webp" alt="">
                 <span class="intro-shop-available-indicator" aria-hidden="true" hidden></span>
             </button>
-            <button class="game3-quick-menu-button" type="button" data-intro-panel="notifications" aria-label="Mga Paalala">
+            <button class="game3-quick-menu-button" type="button" data-intro-panel="notifications" aria-label="Notifications">
                 <img src="./assets/Notification-Cpdii91W.webp" alt="">
                 <span class="intro-notification-unread-indicator" aria-hidden="true" hidden></span>
             </button>
@@ -442,42 +442,42 @@
             <div class="game3-island-card" data-island-shape="circle">
                 <img src="./assets/1-DnwclzEs.webp" alt="1. Circle Meadow">
                 <svg class="game3-island-lock" viewBox="0 0 120 145" role="img" aria-label="Locked" hidden><use class="game3-island-lock-shackle" href="#game3-padlock-shackle"></use><use class="game3-island-lock-body" href="#game3-padlock-body"></use></svg>
-                <a class="game3-island-enter loading-link" href="index.html" data-route="shape-circle">Pasok</a>
+                <a class="game3-island-enter loading-link" href="index.html" data-route="shape-circle">Enter</a>
             </div>
             <div class="game3-island-card" data-island-shape="square">
                 <img src="./assets/2-Cj8Gu6or.webp" alt="2. Square Town">
                 <svg class="game3-island-lock" viewBox="0 0 120 145" role="img" aria-label="Locked" hidden><use class="game3-island-lock-shackle" href="#game3-padlock-shackle"></use><use class="game3-island-lock-body" href="#game3-padlock-body"></use></svg>
-                <a class="game3-island-enter loading-link" href="index.html" data-route="shape-square">Pasok</a>
+                <a class="game3-island-enter loading-link" href="index.html" data-route="shape-square">Enter</a>
             </div>
             <div class="game3-island-card" data-island-shape="triangle">
                 <img src="./assets/3-Dwt5l1wD.webp" alt="3. Triangle Mountains">
                 <svg class="game3-island-lock" viewBox="0 0 120 145" role="img" aria-label="Locked" hidden><use class="game3-island-lock-shackle" href="#game3-padlock-shackle"></use><use class="game3-island-lock-body" href="#game3-padlock-body"></use></svg>
-                <a class="game3-island-enter loading-link" href="index.html" data-route="shape-area-3">Pasok</a>
+                <a class="game3-island-enter loading-link" href="index.html" data-route="shape-area-3">Enter</a>
             </div>
             <div class="game3-island-card" data-island-shape="rectangle">
                 <img src="./assets/4-B6yU-9ie.webp" alt="4. Rectangle Village">
                 <svg class="game3-island-lock" viewBox="0 0 120 145" role="img" aria-label="Locked" hidden><use class="game3-island-lock-shackle" href="#game3-padlock-shackle"></use><use class="game3-island-lock-body" href="#game3-padlock-body"></use></svg>
-                <a class="game3-island-enter loading-link" href="index.html" data-route="shape-area-4">Pasok</a>
+                <a class="game3-island-enter loading-link" href="index.html" data-route="shape-area-4">Enter</a>
             </div>
             <div class="game3-island-card" data-island-shape="oval">
                 <img src="./assets/5-ByDPhJE0.webp" alt="5. Oval Garden">
                 <svg class="game3-island-lock" viewBox="0 0 120 145" role="img" aria-label="Locked" hidden><use class="game3-island-lock-shackle" href="#game3-padlock-shackle"></use><use class="game3-island-lock-body" href="#game3-padlock-body"></use></svg>
-                <a class="game3-island-enter loading-link" href="index.html" data-route="shape-area-5">Pasok</a>
+                <a class="game3-island-enter loading-link" href="index.html" data-route="shape-area-5">Enter</a>
             </div>
             <div class="game3-island-card" data-island-shape="heart">
                 <img src="./assets/6-Bu-vtoSo.webp" alt="6. Heart City">
                 <svg class="game3-island-lock" viewBox="0 0 120 145" role="img" aria-label="Locked" hidden><use class="game3-island-lock-shackle" href="#game3-padlock-shackle"></use><use class="game3-island-lock-body" href="#game3-padlock-body"></use></svg>
-                <a class="game3-island-enter loading-link" href="index.html" data-route="shape-area-6">Pasok</a>
+                <a class="game3-island-enter loading-link" href="index.html" data-route="shape-area-6">Enter</a>
             </div>
             <div class="game3-island-card" data-island-shape="star">
                 <img src="./assets/7-KtTEjvBC.webp" alt="7. Star Forest">
                 <svg class="game3-island-lock" viewBox="0 0 120 145" role="img" aria-label="Locked" hidden><use class="game3-island-lock-shackle" href="#game3-padlock-shackle"></use><use class="game3-island-lock-body" href="#game3-padlock-body"></use></svg>
-                <a class="game3-island-enter loading-link" href="index.html" data-route="shape-area-7">Pasok</a>
+                <a class="game3-island-enter loading-link" href="index.html" data-route="shape-area-7">Enter</a>
             </div>
             <div class="game3-island-card" data-island-shape="diamond">
                 <img src="./assets/8-CMpqaWzY.webp" alt="8. Diamond Cave">
                 <svg class="game3-island-lock" viewBox="0 0 120 145" role="img" aria-label="Locked" hidden><use class="game3-island-lock-shackle" href="#game3-padlock-shackle"></use><use class="game3-island-lock-body" href="#game3-padlock-body"></use></svg>
-                <a class="game3-island-enter loading-link" href="index.html" data-route="shape-area-8">Pasok</a>
+                <a class="game3-island-enter loading-link" href="index.html" data-route="shape-area-8">Enter</a>
             </div>
             <div class="game3-island-card game3-coming-soon-card" aria-label="Pulong malapit nang dumating. Abangan ang susunod na update.">
                 <img src="./assets/coming%20soon-BgA8ns0e.webp" alt="Malapit nang dumating na pulong kastilyo">
@@ -530,15 +530,15 @@
                 </symbol>
             </defs>
         </svg>
-        <button class="game3-island-prev" type="button" aria-label="Ipakita ang nakaraang pulo" disabled></button>
-        <button class="game3-island-next" type="button" aria-label="Ipakita ang susunod na pulo"></button>
+        <button class="game3-island-prev" type="button" aria-label="Show previous island" disabled></button>
+        <button class="game3-island-next" type="button" aria-label="Show next island"></button>
         <div class="game1-intro" aria-hidden="true">
             <div class="game1-intro-card">
                 <span class="game1-intro-kicker">Laro 3</span>
                 <h2 class="game1-intro-title">Pulo ng mga Hugis</h2>
             </div>
         </div>
-        <a class="game3-home-button loading-link" href="index.html#home" data-route="title" aria-label="Balik sa Simula" title="Home">
+        <a class="game3-home-button loading-link" href="index.html#home" data-route="title" aria-label="Return to Home" title="Home">
             <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M7 23 24 8l17 15v18a3 3 0 0 1-3 3H29V31H19v13H10a3 3 0 0 1-3-3Z"/><path d="m5 24 19-17 19 17" fill="none"/></svg>
         </a>
 
@@ -549,13 +549,13 @@
         <img class="shape-area-character shape-area-character-speaker shape-area-character-ch3" src="./assets/ch3-Bkx_-aED.webp" alt="" aria-hidden="true" hidden>
         <img class="shape-area-character shape-area-character-speaker shape-area-character-ch4" src="./assets/ch4-_fTVZia4.webp" alt="" aria-hidden="true" hidden>
         <img class="shape-area-character shape-area-character-speaker shape-area-character-ch5" src="./assets/ch5-BaGMJBs1.webp" alt="" aria-hidden="true" hidden>
-        <button class="shape-area-start-button loading-link" type="button" data-route="circle-illustration">Simulan</button>
+        <button class="shape-area-start-button loading-link" type="button" data-route="circle-illustration">Start</button>
         <div class="shape-area-speech-bubble shape-area-speech-bubble-ch3" data-messages="[&quot;MABUHAY! Ako nga pala si Bibi&quot;,&quot;Ikinagagalak kitang makilala&quot;,&quot;Maligayang pagdating sa aking munting paraiso&quot;,&quot;Kung saan pag-aaralan natin ang iba't-ibang hugis&quot;,&quot;Simulan natin sa Circle o Bilog!&quot;,&quot;Handa ka na ba?&quot;]" aria-hidden="true" hidden>
             <span class="shape-area-speech-bubble-text"></span>
         </div>
-        <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Balik sa Pulo ng mga Hugis">
+        <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Return to Shape Island">
             <span>‹</span>
-            Balik
+            Back
         </a>
     </section>
 
@@ -568,7 +568,7 @@
         <div class="shape-area-square-speech-bubble" role="status" aria-live="polite">
             <span>Maligayang pagbabalik!</span>
         </div>
-        <button class="shape-area-square-start-button loading-link" type="button" data-route="square-illustration">Simulan</button>
+        <button class="shape-area-square-start-button loading-link" type="button" data-route="square-illustration">Start</button>
         <div class="circle-illustration-video-stage square-illustration-video-stage" aria-hidden="true">
             <div class="circle-illustration-tv-frame">
                 <div class="circle-illustration-tv-screen">
@@ -580,12 +580,12 @@
                     <div class="shape-tv-question-panel square-tv-question-panel" hidden>Anong hugis ako?</div>
                     <div class="shape-tv-choices" aria-label="Piliin ang pangalan ng hugis">
                         <div class="shape-tv-choice-column">
-                            <button class="shape-tv-choice" type="button">Parihaba</button>
-                            <button class="shape-tv-choice" type="button" data-correct-answer>Parisukat</button>
+                            <button class="shape-tv-choice" type="button">Rectangle</button>
+                            <button class="shape-tv-choice" type="button" data-correct-answer>Square</button>
                         </div>
                         <div class="shape-tv-choice-column">
-                            <button class="shape-tv-choice" type="button">Bilog</button>
-                            <button class="shape-tv-choice" type="button">Dyamante</button>
+                            <button class="shape-tv-choice" type="button">Circle</button>
+                            <button class="shape-tv-choice" type="button">Diamond</button>
                         </div>
                     </div>
                     <button class="circle-illustration-play-button square-illustration-play-button" type="button" aria-label="Play square lesson video">
@@ -594,7 +594,7 @@
                         </svg>
                     </button>
                     <div class="circle-illustration-video-controls" aria-label="Mga kontrol ng video">
-                        <button class="circle-illustration-skip-button square-illustration-skip-button" type="button" aria-label="Skip square lesson video" hidden>Laktawan</button>
+                        <button class="circle-illustration-skip-button square-illustration-skip-button" type="button" aria-label="Skip square lesson video" hidden>Skip</button>
                     </div>
                 </div>
                 <div class="circle-illustration-tv-stand-row" aria-hidden="true">
@@ -628,7 +628,7 @@
                     <button class="circle-lesson-progress-button" type="button" data-square-lesson-replay aria-label="Replay square lesson">
                         <img  alt="">
                     </button>
-                    <button class="circle-lesson-progress-button" type="button" data-square-lesson-next aria-label="Magpatuloy">
+                    <button class="circle-lesson-progress-button" type="button" data-square-lesson-next aria-label="Continue">
                         <img  alt="">
                     </button>
                 </div>
@@ -640,7 +640,7 @@
             <div class="square-mission-bubble" role="status" aria-live="polite">
                 <span class="square-mission-bubble-text"></span>
             </div>
-            <button class="square-mission-start-button" type="button" data-how-to-shape="square" hidden>Simulan</button>
+            <button class="square-mission-start-button" type="button" data-how-to-shape="square" hidden>Start</button>
         </div>
         <h2 class="square-game-title" hidden>Hanapin ang mga nawawalang bagay sa Bayan ng Parisukat</h2>
         <h2 class="square-placement-title" hidden>Ibalik ang mga bagay na nawawala</h2>
@@ -694,8 +694,8 @@
             <span style="--size: 1.08rem; --color: #f28db2; --x: 12rem; --y: -12rem; --r: -83deg; --delay: .16s"></span>
             <span style="--size: .76rem; --color: #ffe98b; --x: 34rem; --y: -23rem; --r: -52deg; --delay: .22s"></span>
         </div>
-        <button class="square-puzzle-next-button" type="button" aria-label="Magpatuloy" hidden>Susunod</button>
-        <button class="square-puzzle-retry-button" type="button" aria-label="Retry the square mission" hidden>Ulitin</button>
+        <button class="square-puzzle-next-button" type="button" aria-label="Continue" hidden>Next</button>
+        <button class="square-puzzle-retry-button" type="button" aria-label="Retry the square mission" hidden>Retry</button>
         <img class="square-mission-character square-mission-character-ch12" src="./assets/ch12-DM2bjYsE.webp" alt="Celebration character" aria-hidden="true" hidden>
         <img class="square-mission-character square-mission-character-ch13" src="./assets/ch13-BBZsCkYx.webp" alt="Celebration character" aria-hidden="true" hidden>
         <div class="square-chocolate-question-bubble" role="status" aria-live="polite" hidden>
@@ -705,15 +705,15 @@
         <div class="square-kids-cheer-character square-kids-cheer-character-ch8" aria-hidden="true" hidden>
             <img src="./assets/ch8-x6T7mYiH.webp" alt="">
         </div>
-        <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Balik sa Pulo ng mga Hugis">
+        <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Return to Shape Island">
             <span>‹</span>
-            Balik
+            Back
         </a>
     </section>
 
     <section id="learnscape-shape-area-3-page" class="shape-area-page shape-area-preview-page" data-completed-shape="square" data-area-background="assets/Backgrounds/Area3.webp" data-illustration-background="assets/Backgrounds/triangle.webp" data-next-background="assets/Backgrounds/triangle1.webp" data-video-source="assets/Videos/triangleshape.mp4" hidden>
         <img class="game1-bg-image shape-area-bg" src="./assets/Area3-BfKIKgnb.webp" alt="" aria-hidden="true">
-        <button class="shape-area-preview-start-button" type="button">Simulan</button>
+        <button class="shape-area-preview-start-button" type="button">Start</button>
         <div class="circle-illustration-video-stage shape-preview-video-stage" aria-hidden="true">
             <div class="circle-illustration-tv-frame">
                 <div class="circle-illustration-tv-screen">
@@ -723,19 +723,19 @@
                     <div class="shape-tv-question-panel shape-preview-question-panel" hidden>Anong hugis ako?</div>
                     <div class="shape-tv-choices" aria-label="Piliin ang pangalan ng hugis">
                         <div class="shape-tv-choice-column">
-                            <button class="shape-tv-choice" type="button">Bituin</button>
-                            <button class="shape-tv-choice" type="button" data-correct-answer>Tatsulok</button>
+                            <button class="shape-tv-choice" type="button">Star</button>
+                            <button class="shape-tv-choice" type="button" data-correct-answer>Triangle</button>
                         </div>
                         <div class="shape-tv-choice-column">
-                            <button class="shape-tv-choice" type="button">Parihaba</button>
-                            <button class="shape-tv-choice" type="button">Dyamante</button>
+                            <button class="shape-tv-choice" type="button">Rectangle</button>
+                            <button class="shape-tv-choice" type="button">Diamond</button>
                         </div>
                     </div>
                     <button class="circle-illustration-play-button shape-preview-play-button" type="button" aria-label="Play triangle lesson video">
                         <svg class="circle-illustration-play-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path class="circle-illustration-play-triangle" d="M40 30 L72 50 L40 70 Z"></path></svg>
                     </button>
                     <div class="circle-illustration-video-controls" aria-label="Mga kontrol ng video">
-                        <button class="circle-illustration-skip-button shape-preview-skip-button" type="button" aria-label="Skip triangle lesson video" hidden>Laktawan</button>
+                        <button class="circle-illustration-skip-button shape-preview-skip-button" type="button" aria-label="Skip triangle lesson video" hidden>Skip</button>
                     </div>
                 </div>
                 <div class="circle-illustration-tv-stand-row" aria-hidden="true"><span class="circle-illustration-tv-stand circle-illustration-tv-stand-left"></span><span class="circle-illustration-tv-stand circle-illustration-tv-stand-right"></span></div>
@@ -750,10 +750,10 @@
                 <span class="triangle-bridge-message-text"></span><span class="triangle-bridge-message-dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span>
             </span>
         </div>
-        <button class="triangle-bridge-yes-button" type="button" aria-label="Oo, tutulungan kitang ayusin ang tulay" hidden>Oo</button>
-        <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Balik sa Pulo ng mga Hugis">
+        <button class="triangle-bridge-yes-button" type="button" aria-label="Oo, tutulungan kitang ayusin ang tulay" hidden>Yes</button>
+        <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Return to Shape Island">
             <span>‹</span>
-            Balik
+            Back
         </a>
     </section>
 
@@ -837,7 +837,7 @@
                 <span class="triangle-game-message-text"></span><span class="triangle-game-message-ending"><span class="triangle-game-message-last-word"></span><span class="triangle-game-message-dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></span>
             </span>
         </div>
-        <button class="circle-mission-start-button triangle-game-start-button" type="button" data-how-to-shape="triangle" hidden>Simulan</button>
+        <button class="circle-mission-start-button triangle-game-start-button" type="button" data-how-to-shape="triangle" hidden>Start</button>
         <section class="circle-lesson-progress triangle-game-complete-progress" aria-label="Bridge progress" aria-hidden="true">
             <div class="circle-lesson-progress-board">
                 <img class="circle-lesson-progress-board-image" src="./assets/board-GlJvk3TK.webp" alt="">
@@ -857,15 +857,15 @@
                     <button class="circle-lesson-progress-button" type="button" data-triangle-game-replay aria-label="Retry bridge mission">
                         <img  alt="">
                     </button>
-                    <button class="circle-lesson-progress-button" type="button" data-triangle-game-next aria-label="Tumuloy sa Pulo ng mga Hugis">
+                    <button class="circle-lesson-progress-button" type="button" data-triangle-game-next aria-label="Continue to Shape Island">
                         <img  alt="">
                     </button>
                 </div>
             </div>
         </section>
-        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-3" aria-label="Balik sa Lugar 3">
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-3" aria-label="Return to Area 3">
             <span>‹</span>
-            Balik
+            Back
         </a>
     </section>
 
@@ -876,7 +876,7 @@
             <img class="rectangle-jeep-arrived" src="./assets/jeep1-DgzmPXbs.webp" alt="" hidden>
         </div>
         <aside class="rectangle-mission-object-panel" aria-label="Choose three rectangle-shaped objects" hidden>
-            <button class="rectangle-mission-object" type="button" data-rectangle-object="clock" aria-label="Bilog na orasan" disabled>
+            <button class="rectangle-mission-object" type="button" data-rectangle-object="clock" aria-label="Circular clock" disabled>
                 <img src="./assets/circle-clock-DMShdqaS.webp" alt="">
             </button>
             <button class="rectangle-mission-object" type="button" data-rectangle-object="books" data-rectangle-correct aria-label="Libro" disabled>
@@ -885,10 +885,10 @@
             <button class="rectangle-mission-object" type="button" data-rectangle-object="toy-box" data-rectangle-correct aria-label="Laruan" disabled>
                 <img src="./assets/rectangle-toy-box-Bz6nIry-.webp" alt="">
             </button>
-            <button class="rectangle-mission-object" type="button" data-rectangle-object="triangle-sign" aria-label="Tatsulok na karatula" disabled>
+            <button class="rectangle-mission-object" type="button" data-rectangle-object="triangle-sign" aria-label="Triangular sign" disabled>
                 <img src="./assets/triangle-sign-Ceqci5Bt.webp" alt="">
             </button>
-            <button class="rectangle-mission-object" type="button" data-rectangle-object="heart-balloon" aria-label="Lobong puso" disabled>
+            <button class="rectangle-mission-object" type="button" data-rectangle-object="heart-balloon" aria-label="Heart balloon" disabled>
                 <img src="./assets/heart-balloon-vMfFTRGR.webp" alt="">
             </button>
             <button class="rectangle-mission-object" type="button" data-rectangle-object="bread-tray" data-rectangle-correct aria-label="Tinapay" disabled>
@@ -909,8 +909,8 @@
         <div class="rectangle-village-message-panel" role="status" aria-live="polite" hidden>
             <span class="rectangle-village-message-text"></span>
         </div>
-        <button class="rectangle-village-go-button" type="button" hidden>Tara &gt;</button>
-        <button class="shape-area-preview-start-button" type="button">Simulan</button>
+        <button class="rectangle-village-go-button" type="button" hidden>Go &gt;</button>
+        <button class="shape-area-preview-start-button" type="button">Start</button>
         <div class="circle-illustration-video-stage shape-preview-video-stage" aria-hidden="true">
             <div class="circle-illustration-tv-frame">
                 <div class="circle-illustration-tv-screen">
@@ -920,27 +920,27 @@
                     <div class="shape-tv-question-panel shape-preview-question-panel" hidden>Anong hugis ako?</div>
                     <div class="shape-tv-choices" aria-label="Piliin ang pangalan ng hugis">
                         <div class="shape-tv-choice-column">
-                            <button class="shape-tv-choice" type="button" data-correct-answer>Parihaba</button>
-                            <button class="shape-tv-choice" type="button">Parisukat</button>
+                            <button class="shape-tv-choice" type="button" data-correct-answer>Rectangle</button>
+                            <button class="shape-tv-choice" type="button">Square</button>
                         </div>
                         <div class="shape-tv-choice-column">
-                            <button class="shape-tv-choice" type="button">Bilohaba</button>
-                            <button class="shape-tv-choice" type="button">Tatsulok</button>
+                            <button class="shape-tv-choice" type="button">Oval</button>
+                            <button class="shape-tv-choice" type="button">Triangle</button>
                         </div>
                     </div>
                     <button class="circle-illustration-play-button shape-preview-play-button" type="button" aria-label="Play rectangle lesson video">
                         <svg class="circle-illustration-play-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path class="circle-illustration-play-triangle" d="M40 30 L72 50 L40 70 Z"></path></svg>
                     </button>
                     <div class="circle-illustration-video-controls" aria-label="Mga kontrol ng video">
-                        <button class="circle-illustration-skip-button shape-preview-skip-button" type="button" aria-label="Skip rectangle lesson video" hidden>Laktawan</button>
+                        <button class="circle-illustration-skip-button shape-preview-skip-button" type="button" aria-label="Skip rectangle lesson video" hidden>Skip</button>
                     </div>
                 </div>
                 <div class="circle-illustration-tv-stand-row" aria-hidden="true"><span class="circle-illustration-tv-stand circle-illustration-tv-stand-left"></span><span class="circle-illustration-tv-stand circle-illustration-tv-stand-right"></span></div>
             </div>
         </div>
-        <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Balik sa Pulo ng mga Hugis">
+        <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Return to Shape Island">
             <span>‹</span>
-            Balik
+            Back
         </a>
     </section>
 
@@ -1013,7 +1013,7 @@
                 <button class="rectangle-boss-warning-next" type="button" aria-label="Susunod na gabay">
                     <span aria-hidden="true"></span>
                 </button>
-                <button class="rectangle-boss-warning-continue" type="button">Magpatuloy</button>
+                <button class="rectangle-boss-warning-continue" type="button">Continue</button>
             </div>
         </div>
         <section class="rectangle-boss-encounter" aria-label="Shape monster battle" hidden>
@@ -1073,7 +1073,7 @@
             </span>
             <strong class="rectangle-gas-value">100%</strong>
         </div>
-        <button class="rectangle-boss-jump-button" type="button" aria-label="Talunin ang jeep" hidden>Talón</button>
+        <button class="rectangle-boss-jump-button" type="button" aria-label="Jump the jeepney" hidden>Jump</button>
         <div class="rectangle-delivery-progress" role="status" aria-live="polite" aria-label="Deliveries completed: 0 of 3">
             <span class="rectangle-delivery-progress-title">Naihatid</span>
             <strong class="rectangle-delivery-progress-count"><span>0</span>/3</strong>
@@ -1086,7 +1086,7 @@
                 <div class="rectangle-game-over-gauge" aria-hidden="true"><span>0%</span></div>
                 <p>Ubos na ang gasolina!</p>
                 <h2 id="rectangle-game-over-title">Tapos ang Laro</h2>
-                <button class="rectangle-game-over-retry" type="button">Ulitin</button>
+                <button class="rectangle-game-over-retry" type="button">Retry</button>
             </div>
         </div>
         <div class="rectangle-delivery-jeep-sequence" aria-hidden="true" hidden>
@@ -1133,15 +1133,15 @@
                     <button class="circle-lesson-progress-button" type="button" data-rectangle-final-replay aria-label="Retry rectangle mission">
                         <img  alt="">
                     </button>
-                    <button class="circle-lesson-progress-button" type="button" data-rectangle-final-next aria-label="Tumuloy sa larong kamera">
+                    <button class="circle-lesson-progress-button" type="button" data-rectangle-final-next aria-label="Continue to camera game">
                         <img  alt="">
                     </button>
                 </div>
             </div>
         </section>
-        <a class="game-return-btn" href="index.html#shape-area-4" aria-label="Balik sa Nayon ng Parihaba">
+        <a class="game-return-btn" href="index.html#shape-area-4" aria-label="Return to Rectangle Village">
             <span>‹</span>
-            Balik
+            Back
         </a>
     </section>
 
@@ -1164,9 +1164,9 @@
         <div class="rectangle-parking-instruction-panel" role="status" aria-live="polite" hidden>
             Iparada ang jeep sa Parihaba.
         </div>
-        <a class="game-return-btn loading-link" href="index.html#rectangle-delivery" data-route="rectangleDelivery" aria-label="Balik sa Hatiran ng Parihaba">
+        <a class="game-return-btn loading-link" href="index.html#rectangle-delivery" data-route="rectangleDelivery" aria-label="Return to Rectangle Delivery">
             <span>‹</span>
-            Balik
+            Back
         </a>
     </section>
 
@@ -1189,9 +1189,9 @@
         <div class="rectangle-parking-instruction-panel" role="status" aria-live="polite" hidden>
             Iparada ang jeep sa Parihaba.
         </div>
-        <a class="game-return-btn loading-link" href="index.html#rectangle-delivery" data-route="rectangleDelivery" aria-label="Balik sa Hatiran ng Parihaba">
+        <a class="game-return-btn loading-link" href="index.html#rectangle-delivery" data-route="rectangleDelivery" aria-label="Return to Rectangle Delivery">
             <span>‹</span>
-            Balik
+            Back
         </a>
     </section>
 
@@ -1214,9 +1214,9 @@
         <div class="rectangle-parking-instruction-panel" role="status" aria-live="polite" hidden>
             Iparada ang jeep sa Parihaba.
         </div>
-        <a class="game-return-btn loading-link" href="index.html#rectangle-delivery" data-route="rectangleDelivery" aria-label="Balik sa Hatiran ng Parihaba">
+        <a class="game-return-btn loading-link" href="index.html#rectangle-delivery" data-route="rectangleDelivery" aria-label="Return to Rectangle Delivery">
             <span>‹</span>
-            Balik
+            Back
         </a>
     </section>
 
@@ -1262,9 +1262,9 @@
             </div>
         </section>
 
-        <a class="game-return-btn loading-link" href="index.html#rectangle-delivery" data-route="rectangleDelivery" aria-label="Balik sa Hatiran ng Parihaba">
+        <a class="game-return-btn loading-link" href="index.html#rectangle-delivery" data-route="rectangleDelivery" aria-label="Return to Rectangle Delivery">
             <span>‹</span>
-            Balik
+            Back
         </a>
     </section>
 
@@ -1310,9 +1310,9 @@
             </div>
         </section>
 
-        <a class="game-return-btn loading-link" href="index.html#rectangle-delivery" data-route="rectangleDelivery" aria-label="Balik sa Hatiran ng Parihaba">
+        <a class="game-return-btn loading-link" href="index.html#rectangle-delivery" data-route="rectangleDelivery" aria-label="Return to Rectangle Delivery">
             <span>‹</span>
-            Balik
+            Back
         </a>
     </section>
 
@@ -1358,15 +1358,15 @@
             </div>
         </section>
 
-        <a class="game-return-btn loading-link" href="index.html#rectangle-delivery" data-route="rectangleDelivery" aria-label="Balik sa Hatiran ng Parihaba">
+        <a class="game-return-btn loading-link" href="index.html#rectangle-delivery" data-route="rectangleDelivery" aria-label="Return to Rectangle Delivery">
             <span>‹</span>
-            Balik
+            Back
         </a>
     </section>
 
     <section id="learnscape-shape-area-5-page" class="shape-area-page shape-area-preview-page" data-completed-shape="rectangle" data-area-background="assets/Backgrounds/Area5.webp" data-illustration-background="assets/Backgrounds/oval.webp" data-video-source="assets/Videos/ovalshape.mp4" data-camera-route="ovalBoardGame" hidden>
         <img class="game1-bg-image shape-area-bg" src="./assets/Area5-vzPfYERg.webp" alt="" aria-hidden="true">
-        <button class="shape-area-preview-start-button" type="button">Simulan</button>
+        <button class="shape-area-preview-start-button" type="button">Start</button>
         <div class="circle-illustration-video-stage shape-preview-video-stage" aria-hidden="true">
             <div class="circle-illustration-tv-frame">
                 <div class="circle-illustration-tv-screen">
@@ -1376,27 +1376,27 @@
                     <div class="shape-tv-question-panel shape-preview-question-panel" hidden>Anong hugis ako?</div>
                     <div class="shape-tv-choices" aria-label="Piliin ang pangalan ng hugis">
                         <div class="shape-tv-choice-column">
-                            <button class="shape-tv-choice" type="button">Bilog</button>
-                            <button class="shape-tv-choice" type="button">Puso</button>
+                            <button class="shape-tv-choice" type="button">Circle</button>
+                            <button class="shape-tv-choice" type="button">Heart</button>
                         </div>
                         <div class="shape-tv-choice-column">
-                            <button class="shape-tv-choice" type="button" data-correct-answer>Bilohaba</button>
-                            <button class="shape-tv-choice" type="button">Parihaba</button>
+                            <button class="shape-tv-choice" type="button" data-correct-answer>Oval</button>
+                            <button class="shape-tv-choice" type="button">Rectangle</button>
                         </div>
                     </div>
                     <button class="circle-illustration-play-button shape-preview-play-button" type="button" aria-label="Play oval lesson video">
                         <svg class="circle-illustration-play-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path class="circle-illustration-play-triangle" d="M40 30 L72 50 L40 70 Z"></path></svg>
                     </button>
                     <div class="circle-illustration-video-controls" aria-label="Mga kontrol ng video">
-                        <button class="circle-illustration-skip-button shape-preview-skip-button" type="button" aria-label="Skip oval lesson video" hidden>Laktawan</button>
+                        <button class="circle-illustration-skip-button shape-preview-skip-button" type="button" aria-label="Skip oval lesson video" hidden>Skip</button>
                     </div>
                 </div>
                 <div class="circle-illustration-tv-stand-row" aria-hidden="true"><span class="circle-illustration-tv-stand circle-illustration-tv-stand-left"></span><span class="circle-illustration-tv-stand circle-illustration-tv-stand-right"></span></div>
             </div>
         </div>
-        <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Balik sa Pulo ng mga Hugis">
+        <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Return to Shape Island">
             <span>‹</span>
-            Balik
+            Back
         </a>
     </section>
 
@@ -1419,16 +1419,16 @@
             <div class="oval-mission-message-panel" role="status" aria-live="polite">
                 <span class="oval-mission-message-text"></span>
             </div>
-            <button class="circle-mission-start-button oval-mission-start-button" type="button" data-how-to-shape="oval" hidden>Simulan</button>
+            <button class="circle-mission-start-button oval-mission-start-button" type="button" data-how-to-shape="oval" hidden>Start</button>
         </div>
         <div class="oval-target-picker" role="dialog" aria-modal="true" aria-labelledby="oval-target-picker-title" hidden>
             <div class="oval-target-picker-panel">
                 <strong id="oval-target-picker-title">Pumili ng mga kard na layunin</strong>
                 <span>Ilang kard ang gusto mong laruin?</span>
                 <div class="oval-target-picker-choices">
-                    <button type="button" data-oval-target="5"><b>5</b><small>2 pares + bomba</small></button>
-                    <button type="button" data-oval-target="10"><b>10</b><small>4 pares + bitag</small></button>
-                    <button type="button" data-oval-target="15"><b>15</b><small>5 pares + bitag</small></button>
+                    <button type="button" data-oval-target="5"><b>5</b><small>2 pairs + bomb</small></button>
+                    <button type="button" data-oval-target="10"><b>10</b><small>4 pairs + traps</small></button>
+                    <button type="button" data-oval-target="15"><b>15</b><small>5 pairs + traps</small></button>
                 </div>
             </div>
         </div>
@@ -1481,7 +1481,7 @@
                     <button class="circle-lesson-progress-button" type="button" data-oval-final-replay aria-label="Retry oval matching mission">
                         <img  alt="">
                     </button>
-                    <button class="circle-lesson-progress-button" type="button" data-oval-final-next aria-label="Tumuloy sa larong kamera ng bilohaba">
+                    <button class="circle-lesson-progress-button" type="button" data-oval-final-next aria-label="Continue to oval camera game">
                         <img  alt="">
                     </button>
                 </div>
@@ -1495,12 +1495,12 @@
             <div class="oval-game-over-panel" hidden>
                 <strong>Ubos na ang Oras!</strong>
                 <span>Ubos na ang Oras!</span>
-                <button class="oval-game-over-retry" type="button">Ulitin</button>
+                <button class="oval-game-over-retry" type="button">Retry</button>
             </div>
         </div>
-        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-5" aria-label="Balik sa Lugar 5">
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-5" aria-label="Return to Area 5">
             <span>‹</span>
-            Balik
+            Back
         </a>
     </section>
 
@@ -1513,7 +1513,7 @@
             <div class="heart-mission-message" role="status" aria-live="polite">
                 <span class="heart-mission-message-text"></span>
             </div>
-            <button class="circle-mission-start-button heart-mission-start-button" type="button" data-how-to-shape="heart" hidden>Simulan</button>
+            <button class="circle-mission-start-button heart-mission-start-button" type="button" data-how-to-shape="heart" hidden>Start</button>
         </div>
         <section class="heart-cupid-game" aria-label="Heart balloon bow game" hidden>
             <div class="heart-game-hud" aria-live="polite">
@@ -1594,12 +1594,12 @@
                 <button class="heart-mobile-aim-button is-left" type="button" data-heart-aim-step="-1" aria-label="Aim left"><span aria-hidden="true">&#9664;</span></button>
                 <button class="heart-mobile-aim-button is-right" type="button" data-heart-aim-step="1" aria-label="Aim right"><span aria-hidden="true">&#9654;</span></button>
             </div>
-            <button class="heart-mobile-shoot-button" type="button">Pana</button>
+            <button class="heart-mobile-shoot-button" type="button">Shoot</button>
             <div class="heart-game-result" role="dialog" aria-modal="true" aria-labelledby="heart-game-result-title" hidden>
                 <div class="heart-game-result-panel">
                     <strong id="heart-game-result-title" class="heart-game-result-title">Tapos na ang Misyon!</strong>
                     <span class="heart-game-result-copy">Nabuo mo ang bahaghari!</span>
-                    <button class="heart-game-retry-button" type="button">Maglaro Muli</button>
+                    <button class="heart-game-retry-button" type="button">Play Again</button>
                 </div>
             </div>
         </section>
@@ -1645,11 +1645,11 @@
                 <p class="circle-lesson-star-message">Napakahusay!</p>
                 <div class="circle-lesson-progress-actions">
                     <button class="circle-lesson-progress-button heart-final-replay" type="button" aria-label="Retry Heart Mission"><img  alt=""></button>
-                    <button class="circle-lesson-progress-button heart-final-next" type="button" aria-label="Tumuloy sa larong kamera ng puso"><img  alt=""></button>
+                    <button class="circle-lesson-progress-button heart-final-next" type="button" aria-label="Continue to heart camera game"><img  alt=""></button>
                 </div>
             </div>
         </section>
-        <button class="shape-area-preview-start-button" type="button">Simulan</button>
+        <button class="shape-area-preview-start-button" type="button">Start</button>
         <div class="circle-illustration-video-stage shape-preview-video-stage" aria-hidden="true">
             <div class="circle-illustration-tv-frame">
                 <div class="circle-illustration-tv-screen">
@@ -1659,27 +1659,27 @@
                     <div class="shape-tv-question-panel shape-preview-question-panel" hidden>Anong hugis ako?</div>
                     <div class="shape-tv-choices" aria-label="Piliin ang pangalan ng hugis">
                         <div class="shape-tv-choice-column">
-                            <button class="shape-tv-choice" type="button">Bituin</button>
-                            <button class="shape-tv-choice" type="button" data-correct-answer>Puso</button>
+                            <button class="shape-tv-choice" type="button">Star</button>
+                            <button class="shape-tv-choice" type="button" data-correct-answer>Heart</button>
                         </div>
                         <div class="shape-tv-choice-column">
-                            <button class="shape-tv-choice" type="button">Bilog</button>
-                            <button class="shape-tv-choice" type="button">Bilohaba</button>
+                            <button class="shape-tv-choice" type="button">Circle</button>
+                            <button class="shape-tv-choice" type="button">Oval</button>
                         </div>
                     </div>
                     <button class="circle-illustration-play-button shape-preview-play-button" type="button" aria-label="Play heart lesson video">
                         <svg class="circle-illustration-play-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path class="circle-illustration-play-triangle" d="M40 30 L72 50 L40 70 Z"></path></svg>
                     </button>
                     <div class="circle-illustration-video-controls" aria-label="Mga kontrol ng video">
-                        <button class="circle-illustration-skip-button shape-preview-skip-button" type="button" aria-label="Skip heart lesson video" hidden>Laktawan</button>
+                        <button class="circle-illustration-skip-button shape-preview-skip-button" type="button" aria-label="Skip heart lesson video" hidden>Skip</button>
                     </div>
                 </div>
                 <div class="circle-illustration-tv-stand-row" aria-hidden="true"><span class="circle-illustration-tv-stand circle-illustration-tv-stand-left"></span><span class="circle-illustration-tv-stand circle-illustration-tv-stand-right"></span></div>
             </div>
         </div>
-        <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Balik sa Pulo ng mga Hugis">
+        <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Return to Shape Island">
             <span>‹</span>
-            Balik
+            Back
         </a>
     </section>
 
@@ -1692,7 +1692,7 @@
             <div class="star-mission-message" role="status" aria-live="polite">
                 <span class="star-mission-message-text"></span>
             </div>
-            <button class="circle-mission-start-button star-mission-start-button" type="button" data-how-to-shape="star" hidden>Simulan</button>
+            <button class="circle-mission-start-button star-mission-start-button" type="button" data-how-to-shape="star" hidden>Start</button>
         </div>
         <div class="star-mission-walker" aria-hidden="true" hidden>
             <img class="star-mission-walker-character" src="./assets/idle-BJBAKQcb.gif" alt="">
@@ -1757,10 +1757,10 @@
                 </div>
                 <strong class="star-mission-timeout-title">UBOS NA ANG ORAS!</strong>
                 <span class="star-mission-timeout-copy">Ubos na ang Oras!</span>
-                <button class="star-mission-retry-button" type="button">Ulitin</button>
+                <button class="star-mission-retry-button" type="button">Retry</button>
             </div>
         </section>
-        <button class="shape-area-preview-start-button" type="button">Simulan</button>
+        <button class="shape-area-preview-start-button" type="button">Start</button>
         <div class="circle-illustration-video-stage shape-preview-video-stage" aria-hidden="true">
             <div class="circle-illustration-tv-frame">
                 <div class="circle-illustration-tv-screen">
@@ -1770,27 +1770,27 @@
                     <div class="shape-tv-question-panel shape-preview-question-panel" hidden>Anong hugis ako?</div>
                     <div class="shape-tv-choices" aria-label="Piliin ang pangalan ng hugis">
                         <div class="shape-tv-choice-column">
-                            <button class="shape-tv-choice" type="button">Dyamante</button>
-                            <button class="shape-tv-choice" type="button">Tatsulok</button>
+                            <button class="shape-tv-choice" type="button">Diamond</button>
+                            <button class="shape-tv-choice" type="button">Triangle</button>
                         </div>
                         <div class="shape-tv-choice-column">
-                            <button class="shape-tv-choice" type="button">Puso</button>
-                            <button class="shape-tv-choice" type="button" data-correct-answer>Bituin</button>
+                            <button class="shape-tv-choice" type="button">Heart</button>
+                            <button class="shape-tv-choice" type="button" data-correct-answer>Star</button>
                         </div>
                     </div>
                     <button class="circle-illustration-play-button shape-preview-play-button" type="button" aria-label="Play star lesson video">
                         <svg class="circle-illustration-play-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path class="circle-illustration-play-triangle" d="M40 30 L72 50 L40 70 Z"></path></svg>
                     </button>
                     <div class="circle-illustration-video-controls" aria-label="Mga kontrol ng video">
-                        <button class="circle-illustration-skip-button shape-preview-skip-button" type="button" aria-label="Skip star lesson video" hidden>Laktawan</button>
+                        <button class="circle-illustration-skip-button shape-preview-skip-button" type="button" aria-label="Skip star lesson video" hidden>Skip</button>
                     </div>
                 </div>
                 <div class="circle-illustration-tv-stand-row" aria-hidden="true"><span class="circle-illustration-tv-stand circle-illustration-tv-stand-left"></span><span class="circle-illustration-tv-stand circle-illustration-tv-stand-right"></span></div>
             </div>
         </div>
-        <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Balik sa Pulo ng mga Hugis">
+        <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Return to Shape Island">
             <span>‹</span>
-            Balik
+            Back
         </a>
     </section>
 
@@ -1810,7 +1810,7 @@
             <div class="diamond-mission-message" role="status" aria-live="polite">
                 <span class="diamond-mission-message-text"></span>
             </div>
-            <button class="circle-mission-start-button diamond-mission-start-button" type="button" data-how-to-shape="diamond" hidden>Simulan</button>
+            <button class="circle-mission-start-button diamond-mission-start-button" type="button" data-how-to-shape="diamond" hidden>Start</button>
         </div>
         <div class="diamond-mission-blackout" aria-hidden="true" hidden></div>
         <section class="diamond-mission-game" aria-label="Diamond Mission game" hidden>
@@ -1833,7 +1833,7 @@
                 <div class="diamond-mission-game-over-panel">
                     <strong id="diamond-mission-game-over-title">Tapos ang Laro</strong>
                     <span>Subukan muli!</span>
-                    <button class="diamond-mission-retry-button" type="button">Ulitin</button>
+                    <button class="diamond-mission-retry-button" type="button">Retry</button>
                 </div>
             </div>
             <div class="diamond-mission-cart" role="status" aria-live="polite" aria-label="Collection cart: 0 of 4 diamond pieces">
@@ -1890,7 +1890,7 @@
             <img class="diamond-mission-celebration-cave" src="./assets/cave-CMtUnINq.webp" alt="">
             <img class="diamond-mission-celebration-cave1" src="./assets/cave1-695-2Pb0.webp" alt="">
         </section>
-        <button class="shape-area-preview-start-button" type="button">Simulan</button>
+        <button class="shape-area-preview-start-button" type="button">Start</button>
         <div class="circle-illustration-video-stage shape-preview-video-stage" aria-hidden="true">
             <div class="circle-illustration-tv-frame">
                 <div class="circle-illustration-tv-screen">
@@ -1900,27 +1900,27 @@
                     <div class="shape-tv-question-panel shape-preview-question-panel" hidden>Anong hugis ako?</div>
                     <div class="shape-tv-choices" aria-label="Piliin ang pangalan ng hugis">
                         <div class="shape-tv-choice-column">
-                            <button class="shape-tv-choice" type="button">Parisukat</button>
-                            <button class="shape-tv-choice" type="button" data-correct-answer>Dyamante</button>
+                            <button class="shape-tv-choice" type="button">Square</button>
+                            <button class="shape-tv-choice" type="button" data-correct-answer>Diamond</button>
                         </div>
                         <div class="shape-tv-choice-column">
-                            <button class="shape-tv-choice" type="button">Bituin</button>
-                            <button class="shape-tv-choice" type="button">Parihaba</button>
+                            <button class="shape-tv-choice" type="button">Star</button>
+                            <button class="shape-tv-choice" type="button">Rectangle</button>
                         </div>
                     </div>
                     <button class="circle-illustration-play-button shape-preview-play-button" type="button" aria-label="Play diamond lesson video">
                         <svg class="circle-illustration-play-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path class="circle-illustration-play-triangle" d="M40 30 L72 50 L40 70 Z"></path></svg>
                     </button>
                     <div class="circle-illustration-video-controls" aria-label="Mga kontrol ng video">
-                        <button class="circle-illustration-skip-button shape-preview-skip-button" type="button" aria-label="Skip diamond lesson video" hidden>Laktawan</button>
+                        <button class="circle-illustration-skip-button shape-preview-skip-button" type="button" aria-label="Skip diamond lesson video" hidden>Skip</button>
                     </div>
                 </div>
                 <div class="circle-illustration-tv-stand-row" aria-hidden="true"><span class="circle-illustration-tv-stand circle-illustration-tv-stand-left"></span><span class="circle-illustration-tv-stand circle-illustration-tv-stand-right"></span></div>
             </div>
         </div>
-        <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Balik sa Pulo ng mga Hugis">
+        <a class="game-return-btn loading-link" href="index.html" data-route="game3" aria-label="Return to Shape Island">
             <span>‹</span>
-            Balik
+            Back
         </a>
     </section>
 
@@ -1946,7 +1946,7 @@
             <div class="circle-mission-guide-bubble" role="status" aria-live="polite">
                 <span class="circle-mission-guide-text"></span>
             </div>
-            <button class="circle-mission-start-button" type="button" data-how-to-shape="circle" hidden>Simulan</button>
+            <button class="circle-mission-start-button" type="button" data-how-to-shape="circle" hidden>Start</button>
         </div>
         <section class="circle-hunt-ui" aria-label="Paghahanap ng Bilog" aria-hidden="true" hidden>
             <div class="circle-hunt-hud" aria-live="polite">
@@ -1958,10 +1958,10 @@
             <div class="circle-hunt-overlay">
                 <img class="circle-hunt-timeout-character circle-hunt-timeout-character-left" src="./assets/sad-CyivFgas.webp" alt="" aria-hidden="true">
                 <img class="circle-hunt-timeout-character circle-hunt-timeout-character-right" src="./assets/sad1-kkWGPdlS.webp" alt="" aria-hidden="true">
-                <button class="circle-hunt-start-button" type="button">SIMULAN</button>
+                <button class="circle-hunt-start-button" type="button">START</button>
                 <span class="circle-hunt-timeout-clock" aria-hidden="true">⏰</span>
                 <div class="circle-hunt-countdown" role="status" aria-live="assertive" hidden></div>
-                <button class="circle-hunt-play-again-button" type="button" hidden>MAGLARO MULI</button>
+                <button class="circle-hunt-play-again-button" type="button" hidden>PLAY AGAIN</button>
             </div>
             <div class="circle-hunt-celebration" aria-hidden="true">
                 <div class="circle-hunt-confetti" aria-hidden="true"></div>
@@ -1982,12 +1982,12 @@
                     <div class="shape-tv-question-panel circle-tv-question-panel" hidden>Anong hugis ako?</div>
                     <div class="shape-tv-choices" aria-label="Piliin ang pangalan ng hugis">
                         <div class="shape-tv-choice-column">
-                            <button class="shape-tv-choice" type="button" data-correct-answer>Bilog</button>
-                            <button class="shape-tv-choice" type="button">Bilohaba</button>
+                            <button class="shape-tv-choice" type="button" data-correct-answer>Circle</button>
+                            <button class="shape-tv-choice" type="button">Oval</button>
                         </div>
                         <div class="shape-tv-choice-column">
-                            <button class="shape-tv-choice" type="button">Parisukat</button>
-                            <button class="shape-tv-choice" type="button">Tatsulok</button>
+                            <button class="shape-tv-choice" type="button">Square</button>
+                            <button class="shape-tv-choice" type="button">Triangle</button>
                         </div>
                     </div>
                     <button class="circle-illustration-play-button" type="button" aria-label="Play circle lesson video">
@@ -1996,7 +1996,7 @@
                         </svg>
                     </button>
                     <div class="circle-illustration-video-controls" aria-label="Mga kontrol ng video">
-                        <button class="circle-illustration-skip-button" type="button" aria-label="Skip lesson video" hidden>Laktawan</button>
+                        <button class="circle-illustration-skip-button" type="button" aria-label="Skip lesson video" hidden>Skip</button>
                     </div>
                 </div>
                 <div class="circle-illustration-tv-stand-row" aria-hidden="true">
@@ -2030,15 +2030,15 @@
                     <button class="circle-lesson-progress-button" type="button" data-circle-lesson-replay aria-label="Replay lesson">
                         <img  alt="">
                     </button>
-                    <button class="circle-lesson-progress-button" type="button" data-circle-lesson-next aria-label="Magpatuloy">
+                    <button class="circle-lesson-progress-button" type="button" data-circle-lesson-next aria-label="Continue">
                         <img  alt="">
                     </button>
                 </div>
             </div>
         </section>
-        <a class="game-return-btn loading-link" href="index.html" data-route="shape-circle" aria-label="Balik sa Lugar ng Bilog">
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-circle" aria-label="Return to Circle Area">
             <span>‹</span>
-            Balik
+            Back
         </a>
     </section>
 
@@ -2077,7 +2077,7 @@
 
         <button class="circle-camera-start-button" type="button">
             <span class="circle-camera-start-icon" aria-hidden="true"></span>
-            <strong>Buksan ang Kamera</strong>
+            <strong>Start Camera</strong>
         </button>
 
         <aside class="circle-camera-unlock-board" aria-label="Circle camera challenge progress">
@@ -2095,7 +2095,7 @@
 
         <a class="game-return-btn loading-link" href="index.html" data-route="shape-circle" aria-label="Return to Circle Island intro">
             <span>‹</span>
-            Balik
+            Back
         </a>
     </section>
 
@@ -2131,7 +2131,7 @@
         </main>
         <button class="circle-camera-start-button" type="button">
             <span class="circle-camera-start-icon" aria-hidden="true"></span>
-            <strong>Buksan ang Kamera</strong>
+            <strong>Start Camera</strong>
         </button>
         <aside class="circle-camera-unlock-board" aria-label="Square camera challenge progress">
             <h2>Maghanap ng hugis parisukat<br>upang mabuksan ito!</h2>
@@ -2142,7 +2142,7 @@
                 <span class="circle-camera-chest-padlock"></span>
             </div>
         </aside>
-        <a class="game-return-btn loading-link" href="index.html" data-route="shape-square" aria-label="Return to Square Island intro"><span>‹</span>Balik</a>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-square" aria-label="Return to Square Island intro"><span>‹</span>Back</a>
     </section>
 
     <section id="learnscape-triangle-camera-page" class="circle-camera-page shape-camera-page triangle-camera-page" data-camera-shape="triangle" hidden>
@@ -2151,9 +2151,9 @@
         <div class="circle-camera-flowers" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
         <aside class="circle-camera-target-card" aria-label="Target na hugis"><h2>Target na Hugis:</h2><div class="circle-camera-target-shape triangle-camera-target-shape" aria-hidden="true"></div><strong>Tatsulok</strong></aside>
         <main class="circle-camera-scan-board" aria-label="Ayos ng larong pagtukoy sa kamera"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>I-scan ang isang bagay gamit ang kamera!</strong></div><div class="circle-camera-viewfinder" aria-label="Preview ng kamera"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
-        <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Buksan ang Kamera</strong></button>
+        <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Start Camera</strong></button>
         <aside class="circle-camera-unlock-board" aria-label="Triangle camera challenge progress"><h2>Maghanap ng hugis tatsulok<br>upang mabuksan ito!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
-        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-3" aria-label="Return to Triangle Island intro"><span>‹</span>Balik</a>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-3" aria-label="Return to Triangle Island intro"><span>‹</span>Back</a>
     </section>
 
     <section id="learnscape-rectangle-camera-page" class="circle-camera-page shape-camera-page rectangle-camera-page" data-camera-shape="rectangle" hidden>
@@ -2162,48 +2162,48 @@
         <div class="circle-camera-flowers" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
         <aside class="circle-camera-target-card" aria-label="Target na hugis"><h2>Target na Hugis:</h2><div class="circle-camera-target-shape rectangle-camera-target-shape" aria-hidden="true"></div><strong>Parihaba</strong></aside>
         <main class="circle-camera-scan-board" aria-label="Ayos ng larong pagtukoy sa kamera"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>I-scan ang isang bagay gamit ang kamera!</strong></div><div class="circle-camera-viewfinder" aria-label="Preview ng kamera"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
-        <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Buksan ang Kamera</strong></button>
+        <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Start Camera</strong></button>
         <aside class="circle-camera-unlock-board" aria-label="Rectangle camera challenge progress"><h2>Maghanap ng hugis parihaba<br>upang mabuksan ito!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
-        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-4" aria-label="Return to Rectangle Island intro"><span>‹</span>Balik</a>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-4" aria-label="Return to Rectangle Island intro"><span>‹</span>Back</a>
     </section>
 
     <section id="learnscape-oval-camera-page" class="circle-camera-page shape-camera-page oval-camera-page" data-camera-shape="oval" hidden>
         <div class="circle-camera-sky" aria-hidden="true"><span class="circle-camera-cloud circle-camera-cloud-a"></span><span class="circle-camera-cloud circle-camera-cloud-b"></span></div><div class="circle-camera-ground" aria-hidden="true"></div><div class="circle-camera-flowers" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
         <aside class="circle-camera-target-card" aria-label="Target na hugis"><h2>Target na Hugis:</h2><div class="circle-camera-target-shape oval-camera-target-shape" aria-hidden="true"></div><strong>Bilohaba</strong></aside>
         <main class="circle-camera-scan-board" aria-label="Ayos ng larong pagtukoy sa kamera"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>I-scan ang isang bagay gamit ang kamera!</strong></div><div class="circle-camera-viewfinder" aria-label="Preview ng kamera"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
-        <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Buksan ang Kamera</strong></button>
+        <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Start Camera</strong></button>
         <aside class="circle-camera-unlock-board" aria-label="Oval camera challenge progress"><h2>Maghanap ng hugis bilohaba<br>upang mabuksan ito!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
-        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-5" aria-label="Return to Oval Island intro"><span>‹</span>Balik</a>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-5" aria-label="Return to Oval Island intro"><span>‹</span>Back</a>
     </section>
 
     <section id="learnscape-heart-camera-page" class="circle-camera-page shape-camera-page heart-camera-page" data-camera-shape="heart" hidden>
         <div class="circle-camera-sky" aria-hidden="true"><span class="circle-camera-cloud circle-camera-cloud-a"></span><span class="circle-camera-cloud circle-camera-cloud-b"></span></div><div class="circle-camera-ground" aria-hidden="true"></div><div class="circle-camera-flowers" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
         <aside class="circle-camera-target-card" aria-label="Target na hugis"><h2>Target na Hugis:</h2><div class="circle-camera-target-shape heart-camera-target-shape" aria-hidden="true"></div><strong>Puso</strong></aside>
         <main class="circle-camera-scan-board" aria-label="Ayos ng larong pagtukoy sa kamera"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>I-scan ang isang bagay gamit ang kamera!</strong></div><div class="circle-camera-viewfinder" aria-label="Preview ng kamera"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
-        <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Buksan ang Kamera</strong></button>
+        <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Start Camera</strong></button>
         <aside class="circle-camera-unlock-board" aria-label="Heart camera challenge progress"><h2>Maghanap ng hugis puso<br>upang mabuksan ito!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
-        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-6" aria-label="Return to Heart Island intro"><span>‹</span>Balik</a>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-6" aria-label="Return to Heart Island intro"><span>‹</span>Back</a>
     </section>
 
     <section id="learnscape-star-camera-page" class="circle-camera-page shape-camera-page star-camera-page" data-camera-shape="star" hidden>
         <div class="circle-camera-sky" aria-hidden="true"><span class="circle-camera-cloud circle-camera-cloud-a"></span><span class="circle-camera-cloud circle-camera-cloud-b"></span></div><div class="circle-camera-ground" aria-hidden="true"></div><div class="circle-camera-flowers" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
         <aside class="circle-camera-target-card" aria-label="Target na hugis"><h2>Target na Hugis:</h2><div class="circle-camera-target-shape star-camera-target-shape" aria-hidden="true"></div><strong>Bituin</strong></aside>
         <main class="circle-camera-scan-board" aria-label="Ayos ng larong pagtukoy sa kamera"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>I-scan ang isang bagay gamit ang kamera!</strong></div><div class="circle-camera-viewfinder" aria-label="Preview ng kamera"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
-        <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Buksan ang Kamera</strong></button>
+        <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Start Camera</strong></button>
         <aside class="circle-camera-unlock-board" aria-label="Star camera challenge progress"><h2>Maghanap ng hugis bituin<br>upang mabuksan ito!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
-        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-7" aria-label="Return to Star Island intro"><span>‹</span>Balik</a>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-7" aria-label="Return to Star Island intro"><span>‹</span>Back</a>
     </section>
 
     <section id="learnscape-diamond-camera-page" class="circle-camera-page shape-camera-page diamond-camera-page" data-camera-shape="diamond" hidden>
         <div class="circle-camera-sky" aria-hidden="true"><span class="circle-camera-cloud circle-camera-cloud-a"></span><span class="circle-camera-cloud circle-camera-cloud-b"></span></div><div class="circle-camera-ground" aria-hidden="true"></div><div class="circle-camera-flowers" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
         <aside class="circle-camera-target-card" aria-label="Target na hugis"><h2>Target na Hugis:</h2><div class="circle-camera-target-shape diamond-camera-target-shape" aria-hidden="true"></div><strong>Dyamante</strong></aside>
         <main class="circle-camera-scan-board" aria-label="Ayos ng larong pagtukoy sa kamera"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>I-scan ang isang bagay gamit ang kamera!</strong></div><div class="circle-camera-viewfinder" aria-label="Preview ng kamera"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
-        <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Buksan ang Kamera</strong></button>
+        <button class="circle-camera-start-button" type="button"><span class="circle-camera-start-icon" aria-hidden="true"></span><strong>Start Camera</strong></button>
         <aside class="circle-camera-unlock-board" aria-label="Diamond camera challenge progress"><h2>Maghanap ng hugis dyamante<br>upang mabuksan ito!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
-        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-8" aria-label="Return to Diamond Island intro"><span>‹</span>Balik</a>
+        <a class="game-return-btn loading-link" href="index.html" data-route="shape-area-8" aria-label="Return to Diamond Island intro"><span>‹</span>Back</a>
     </section>
 
-    <script src="./script.js?v=20261106-06"></script>
+    <script src="./script.js?v=20261106-07"></script>
     </div>
 
     <script>

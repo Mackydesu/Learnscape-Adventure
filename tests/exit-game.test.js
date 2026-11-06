@@ -47,7 +47,7 @@ function createHarness({ closeSucceeds = false, closeThrows = false, fullscreen 
 }
 
 test('Exit Game is available in the shared settings menu', () => {
-    assert.match(html, /class="intro-settings-exit-button"[^>]*>Lumabas sa Laro<\/button>/);
+    assert.match(html, /class="intro-settings-exit-button"[^>]*>Exit Game<\/button>/);
     assert.match(html, /class="exit-game-dialog"/);
 });
 
