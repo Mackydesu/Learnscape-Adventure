@@ -1306,6 +1306,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const heartBowArt = heartCupidBowControl?.querySelector('.heart-bow-art') || null;
     const heartBowString = heartCupidBowControl?.querySelector('.heart-bow-string') || null;
     const heartBowArrowParts = Array.from(heartCupidBowControl?.querySelectorAll('.heart-bow-arrow, .heart-bow-arrow-head, .heart-bow-arrow-feather') || []);
+    const heartMobileAimButtons = Array.from(heartCupidGame?.querySelectorAll('[data-heart-aim-step]') || []);
+    const heartMobileShootButton = heartCupidGame?.querySelector('.heart-mobile-shoot-button') || null;
     const heartColorGauge = heartCupidGame?.querySelector('.heart-color-gauge') || null;
     const heartColorTargetIcon = heartCupidGame?.querySelector('.heart-color-target-icon') || null;
     const heartColorGaugeFill = heartCupidGame?.querySelector('.heart-color-gauge-fill') || null;
@@ -6970,6 +6972,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateHeartCupidAim(heartLastAimClientX, heartLastAimClientY);
     };
 
+    const nudgeHeartCupidAim = (direction) => {
+        if (
+            heartGameEnded
+            || heartGamePaused
+            || !heartCupidGame
+            || heartCupidGame.hidden
+            || heartCupidGame.classList.contains('is-shooting')
+        ) return;
+        const gameRect = heartCupidGame.getBoundingClientRect();
+        const pivot = {
+            x: gameRect.width / 2,
+            y: gameRect.height - Math.max(34, gameRect.height * 0.055),
+        };
+        const currentAngle = Number.parseFloat(heartCupidBowControl?.style.getPropertyValue('--heart-bow-angle')) || 0;
+        const angle = Math.max(-72, Math.min(72, currentAngle + (direction * 9)));
+        const angleRadians = (angle - 90) * Math.PI / 180;
+        const targetDistance = Math.max(gameRect.width, gameRect.height) * 0.72;
+        heartLastAimClientX = gameRect.left + pivot.x + (Math.cos(angleRadians) * targetDistance);
+        heartLastAimClientY = gameRect.top + pivot.y + (Math.sin(angleRadians) * targetDistance);
+        updateHeartCupidAim(heartLastAimClientX, heartLastAimClientY);
+    };
+
     const fireHeartCupidArrow = () => {
         if (heartGameEnded || heartGamePaused || heartCupidGame?.classList.contains('is-shooting')) return;
         restoreHeartCupidCursorAim();
@@ -7038,6 +7062,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     heartCupidBowControl?.addEventListener('dragstart', (event) => event.preventDefault());
+    heartMobileAimButtons.forEach((button) => {
+        button.addEventListener('click', () => nudgeHeartCupidAim(Number(button.dataset.heartAimStep)));
+    });
+    heartMobileShootButton?.addEventListener('click', fireHeartCupidArrow);
     window.addEventListener('resize', () => {
         sizeHeartShotField();
         restoreHeartCupidCursorAim();
@@ -9226,6 +9254,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 780);
     };
 
+    rectangleBossJumpButton?.addEventListener('click', jumpRectangleBossJeep);
+
     const showRectangleBossWarning = ({ startGuideIndex = 0 } = {}) => {
         const milestone = getRectangleBossMilestone();
         if (!rectangleBossWarning || !milestone) return;
@@ -9671,10 +9701,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const triangleGameMessageLastWord = triangleGamePage?.querySelector('.triangle-game-message-last-word') || null;
     const triangleGameStartButton = triangleGamePage?.querySelector('.triangle-game-start-button') || null;
     const triangleGameBackground = triangleGamePage?.querySelector('.shape-area-bg') || null;
-    const triangleGameTreeGroup = triangleGamePage?.querySelector('.triangle-game-tree-group') || null;
-    const triangleGameTrees = Array.from(triangleGamePage?.querySelectorAll('[data-triangle-game-tree]') || []);
-    const triangleTreeAxe = triangleGameTreeGroup?.querySelector('.triangle-tree-axe') || null;
-    const triangleTreeCutGuide = triangleGameTreeGroup?.querySelector('.triangle-tree-cut-guide') || null;
     const triangleWoodStorage = triangleGamePage?.querySelector('.triangle-wood-storage') || null;
     const triangleWoodStorageImage = triangleWoodStorage?.querySelector('.triangle-wood-storage-image') || null;
     const triangleWoodClickGuide = triangleWoodStorage?.querySelector('.triangle-wood-click-guide') || null;
@@ -9694,39 +9720,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const triangleGameCompleteProgress = triangleGamePage?.querySelector('.triangle-game-complete-progress') || null;
     const triangleGameCompleteReplayButton = triangleGameCompleteProgress?.querySelector('[data-triangle-game-replay]') || null;
     const triangleGameCompleteNextButton = triangleGameCompleteProgress?.querySelector('[data-triangle-game-next]') || null;
-    const triangleGameTreeSources = [
-        'assets/Shape UI/tree1.webp',
-        'assets/Shape UI/tree2.webp',
-        'assets/Shape UI/tree3.webp',
-        'assets/Shape UI/tree4.webp',
-    ];
     const triangleGameBackgroundSource = 'assets/Backgrounds/trianglegame.webp';
     const triangleGameCompletedBackgroundSource = 'assets/Backgrounds/trianglegame1.webp';
     const triangleGameCompleteWalkingSource = 'assets/Character/walking.gif';
     const triangleGameCompleteVoiceSource = 'assets/Audios/Voice over/Mahusay.mp3';
     const triangleGameCompleteCheeringSource = 'assets/Audios/Sound effects/kids cheering.mp3';
-    const triangleWoodChopAudioSource = 'assets/Audios/Sound effects/wood chop.mp3';
-    const triangleWoodChopAudioPool = window.Audio
-        ? Array.from({ length: 3 }, () => {
-            const audio = new window.Audio(triangleWoodChopAudioSource);
-            audio.preload = 'auto';
-            audio.playsInline = true;
-            audio.load?.();
-            return audio;
-        })
-        : [];
-    let triangleWoodChopAudioIndex = 0;
     const triangleGameMessages = [
         'Para sa ating triangle mission.',
         'Kailangan nating ayusin ang tulay upang makapagpatuloy!',
-        'Aha! May nakita akong mga puno!',
         'Gamitin natin ang mga kahoy para ayusin ang tulay!',
         'Handa ka na ba?',
     ];
     const triangleGameAudioSegments = [
         { start: 0, end: 2.5 },
         { start: 2.5, end: 6.6 },
-        { start: 6.6, end: 9.5 },
         { start: 9.5, end: Number.POSITIVE_INFINITY },
         { start: 0, end: Number.POSITIVE_INFINITY, source: 'assets/Audios/Voice over/Handa ka na ba.mp3' },
     ];
@@ -9735,7 +9742,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     let triangleGameDialogueFrame = null;
     let triangleGameDialogueTimers = [];
     let triangleGameDialogueAdvance = null;
-    const triangleGameTreePixelData = new Map();
     let triangleWoodCollected = 0;
     let triangleWoodCollectionSession = 0;
     let triangleWoodSnapInProgress = false;
@@ -9746,67 +9752,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     let triangleGameCompleteVoiceAudio = null;
     let triangleGameCompleteCheeringAudio = null;
     let triangleGameCompleteWalkLoopTimer = null;
-    let triangleTreeCutGuideTimer = null;
-    const TRIANGLE_TREE_CUT_GUIDE_IDLE_MS = 5000;
-
-    const hideTriangleTreeCutGuide = () => {
-        if (triangleTreeCutGuideTimer !== null) {
-            window.clearTimeout(triangleTreeCutGuideTimer);
-            triangleTreeCutGuideTimer = null;
-        }
-        if (triangleTreeCutGuide) triangleTreeCutGuide.hidden = true;
-    };
-
-    const playTriangleWoodChopAudio = () => {
-        const audio = triangleWoodChopAudioPool[triangleWoodChopAudioIndex % triangleWoodChopAudioPool.length];
-        triangleWoodChopAudioIndex += 1;
-        if (!audio) {
-            playUiClickSound('wood');
-            return;
-        }
-        audio.pause();
-        try {
-            audio.currentTime = 0;
-        } catch (error) {
-            // The preloaded clip will begin at the earliest available frame.
-        }
-        audio.play().catch(() => playUiClickSound('wood'));
-    };
-
-    const positionTriangleTreeCutGuide = () => {
-        if (!triangleTreeCutGuide || !triangleGameTreeGroup) return false;
-        const targetTree = triangleGameTrees.find((tree) => tree.classList.contains('is-clickable'));
-        if (!targetTree) {
-            triangleTreeCutGuide.hidden = true;
-            return false;
-        }
-        const groupRect = triangleGameTreeGroup.getBoundingClientRect();
-        const treeRect = targetTree.getBoundingClientRect();
-        triangleTreeCutGuide.style.left = `${treeRect.left - groupRect.left + (treeRect.width * 0.5)}px`;
-        triangleTreeCutGuide.style.top = `${treeRect.top - groupRect.top + (treeRect.height * 0.58)}px`;
-        triangleTreeCutGuide.hidden = false;
-        return true;
-    };
-
-    const scheduleTriangleTreeCutGuide = () => {
-        hideTriangleTreeCutGuide();
-        if (
-            triangleGamePage?.hidden
-            || !triangleGameTreeGroup?.classList.contains('is-active')
-            || !triangleGameTrees.some((tree) => tree.classList.contains('is-clickable'))
-        ) return;
-        const session = triangleWoodCollectionSession;
-        triangleTreeCutGuideTimer = window.setTimeout(() => {
-            triangleTreeCutGuideTimer = null;
-            if (
-                session !== triangleWoodCollectionSession
-                || triangleGamePage?.hidden
-                || !triangleGameTreeGroup?.classList.contains('is-active')
-            ) return;
-            positionTriangleTreeCutGuide();
-        }, TRIANGLE_TREE_CUT_GUIDE_IDLE_MS);
-    };
-
     const prepareTriangleGameCompleteConfetti = () => {
         if (!triangleGameCompleteConfetti || triangleGameCompleteConfetti.childElementCount) return;
         const colors = ['#ff4f64', '#ffd83d', '#38c7e8', '#70d34b', '#ff8f32', '#f17ac6', '#ffffff'];
@@ -10024,14 +9969,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         openShapeCameraLayout('triangleCamera');
     });
 
-    triangleGameTreeSources.forEach((source) => {
-        const image = new Image();
-        image.src = source;
-    });
-
     const resetTriangleGameTrees = () => {
-        hideTriangleTreeCutGuide();
-        triangleTreeAxe?.classList.remove('is-swinging');
         triangleWoodCollectionSession += 1;
         triangleBridgeBuildSession += 1;
         triangleBridgeBuildTimers.forEach((timerId) => window.clearTimeout(timerId));
@@ -10043,8 +9981,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         triangleGamePage?.classList.remove('is-switching-completed-background', 'is-bridge-complete-scene', 'is-game-progress-visible');
         stopTriangleGameCompletionSequence();
         if (triangleGameBackground) triangleGameBackground.src = triangleGameBackgroundSource;
-        triangleGameTreeGroup?.classList.remove('is-active', 'is-over-tree', 'is-exiting');
-        triangleGamePage?.querySelectorAll('.triangle-wood-collectible').forEach((collectible) => collectible.remove());
         triangleGamePage?.querySelectorAll('.triangle-wood-drag-ghost').forEach((ghost) => ghost.remove());
         triangleWoodSnapInProgress = false;
         if (triangleWoodStorageCount) triangleWoodStorageCount.textContent = '0';
@@ -10084,13 +10020,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             slot.classList.remove('is-filled', 'is-snapping');
             const wood = slot.querySelector('img');
             if (wood) wood.hidden = true;
-        });
-        triangleGameTrees.forEach((tree, treeIndex) => {
-            tree.src = 'assets/Shape UI/tree.webp';
-            tree.dataset.treeStage = '0';
-            tree.tabIndex = -1;
-            tree.classList.remove('is-clickable', 'is-hit', 'is-fallen');
-            tree.setAttribute('aria-label', `Tree ${treeIndex + 1}`);
         });
     };
 
@@ -10145,12 +10074,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const segment = triangleGameAudioSegments[stageIndex];
             if (!message || !segment || session !== triangleGameDialogueSession || triangleGamePage.hidden) return;
 
-            triangleGameCharacter.src = stageIndex === 4
+            triangleGameCharacter.src = stageIndex === triangleGameMessages.length - 1
                 ? 'assets/Character/ch17.webp'
-                : stageIndex === 2
-                    ? 'assets/Character/ch16.webp'
-                    : 'assets/Character/ch6.webp';
-            triangleGameCharacter.classList.toggle('is-ch17', stageIndex === 4);
+                : 'assets/Character/ch6.webp';
+            triangleGameCharacter.classList.toggle('is-ch17', stageIndex === triangleGameMessages.length - 1);
             triangleGameDialogueAdvance = null;
             triangleGamePage.classList.remove('is-dialog-ready');
             triangleGameMessagePanel.classList.remove('is-message-complete', 'is-final-message');
@@ -10276,88 +10203,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         triangleWoodStorageImage?.setAttribute('aria-label', 'Tap to place a wood block in the bridge frame');
         if (triangleWoodClickGuide) triangleWoodClickGuide.hidden = false;
         playUiClickSound('chime');
-    };
-
-    const storeTriangleWoodBlock = (session) => {
-        if (session !== triangleWoodCollectionSession || !triangleWoodStorage || !triangleWoodStorageCount) return;
-        triangleWoodCollected = Math.min(9, triangleWoodCollected + 1);
-        triangleWoodStorageCount.textContent = String(triangleWoodCollected);
-        playUiClickSound('woodStore');
-        triangleWoodStorage.classList.remove('is-storing');
-        triangleWoodStorage.getBoundingClientRect();
-        triangleWoodStorage.classList.add('is-storing');
-        triangleGameDialogueTimers.push(window.setTimeout(() => {
-            if (session === triangleWoodCollectionSession) triangleWoodStorage.classList.remove('is-storing');
-        }, 380));
-        if (triangleWoodCollected === 9) {
-            triangleGameDialogueTimers.push(window.setTimeout(() => showTriangleCraftingPanel(session), 520));
-        }
-    };
-
-    const releaseTriangleWoodBlocks = (tree) => {
-        if (!triangleGamePage || !triangleWoodStorageImage) return;
-        const session = triangleWoodCollectionSession;
-        window.requestAnimationFrame(() => {
-            if (session !== triangleWoodCollectionSession || triangleGamePage.hidden) return;
-            const pageRect = triangleGamePage.getBoundingClientRect();
-            const treeRect = tree.getBoundingClientRect();
-            const storageRect = triangleWoodStorageImage.getBoundingClientRect();
-            const startX = treeRect.left - pageRect.left + (treeRect.width * 0.78);
-            const startY = treeRect.bottom - pageRect.top - (treeRect.height * 0.34);
-            const targetX = storageRect.left - pageRect.left + (storageRect.width / 2);
-            const targetY = storageRect.top - pageRect.top + (storageRect.height / 2);
-            const burstOffsets = [
-                { x: -105, y: -120, rotation: -18 },
-                { x: 0, y: -165, rotation: 8 },
-                { x: 105, y: -115, rotation: 20 },
-            ];
-
-            burstOffsets.forEach((burst, blockIndex) => {
-                triangleGameDialogueTimers.push(window.setTimeout(() => {
-                    if (session !== triangleWoodCollectionSession || triangleGamePage.hidden) return;
-                    const collectible = document.createElement('img');
-                    collectible.className = 'triangle-wood-collectible';
-                    collectible.src = 'assets/Shape UI/wood-block-stylized.webp';
-                    collectible.alt = '';
-                    collectible.setAttribute('aria-hidden', 'true');
-                    collectible.style.left = `${startX}px`;
-                    collectible.style.top = `${startY}px`;
-                    triangleGamePage.appendChild(collectible);
-                    playUiClickSound('woodCollectPop');
-
-                    const animation = collectible.animate([
-                        {
-                            left: `${startX}px`,
-                            top: `${startY}px`,
-                            opacity: 0,
-                            transform: `translate(-50%, -50%) scale(0.22) rotate(${burst.rotation - 12}deg)`,
-                        },
-                        {
-                            offset: 0.48,
-                            left: `${startX + burst.x}px`,
-                            top: `${startY + burst.y}px`,
-                            opacity: 1,
-                            transform: `translate(-50%, -50%) scale(1.08) rotate(${burst.rotation}deg)`,
-                        },
-                        {
-                            left: `${targetX}px`,
-                            top: `${targetY}px`,
-                            opacity: 0.94,
-                            transform: 'translate(-50%, -50%) scale(0.3) rotate(0deg)',
-                        },
-                    ], {
-                        duration: 1120,
-                        easing: 'cubic-bezier(0.2, 0.82, 0.28, 1)',
-                        fill: 'forwards',
-                    });
-
-                    animation.finished.then(() => {
-                        collectible.remove();
-                        storeTriangleWoodBlock(session);
-                    }).catch(() => collectible.remove());
-                }, blockIndex * 180));
-            });
-        });
     };
 
     const createTriangleWoodDragGhost = (clientX, clientY) => {
@@ -10494,7 +10339,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             triangleGamePage?.classList.add('is-switching-completed-background');
             triangleCraftingPanel.classList.add('is-exiting');
             triangleWoodStorage?.classList.add('is-exiting');
-            triangleGameTreeGroup?.classList.add('is-exiting');
         }, 6000);
 
         scheduleBuildStep(() => {
@@ -10632,148 +10476,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    const swingTriangleTreeAxe = (tree) => {
-        if (!triangleTreeAxe || !triangleGameTreeGroup) return;
-        const groupRect = triangleGameTreeGroup.getBoundingClientRect();
-        const treeRect = tree.getBoundingClientRect();
-        if (!groupRect.width || !groupRect.height) return;
-
-        // The leaning tree artwork moves the trunk to the right of its image.
-        const trunkX = tree.dataset.treeStage === '2' ? 0.68 : 0.5;
-        const trunkY = tree.dataset.treeStage === '2' ? 0.75 : 0.77;
-        const trunkPositionX = (treeRect.left - groupRect.left + treeRect.width * trunkX) / groupRect.width;
-        triangleTreeAxe.style.left = `${trunkPositionX * 100}%`;
-        triangleTreeAxe.style.top = `${((treeRect.top - groupRect.top + treeRect.height * trunkY) / groupRect.height) * 100}%`;
-        triangleTreeAxe.classList.toggle('is-from-left', trunkPositionX > 0.85);
-        triangleTreeAxe.classList.remove('is-swinging');
-        triangleTreeAxe.getBoundingClientRect();
-        triangleTreeAxe.classList.add('is-swinging');
-    };
-
-    const advanceTriangleGameTree = (tree) => {
-        if (!triangleGameTreeGroup?.classList.contains('is-active') || !tree.classList.contains('is-clickable')) return;
-        swingTriangleTreeAxe(tree);
-        playTriangleWoodChopAudio();
-        scheduleTriangleTreeCutGuide();
-        const currentStage = Number.parseInt(tree.dataset.treeStage || '0', 10);
-        const nextStage = Math.min(currentStage + 1, 3);
-        tree.dataset.treeStage = String(nextStage);
-        tree.src = triangleGameTreeSources[nextStage - 1];
-        tree.classList.remove('is-hit');
-        tree.getBoundingClientRect();
-        tree.classList.add('is-hit');
-
-        const treeNumber = triangleGameTrees.indexOf(tree) + 1;
-        const tapsRemaining = 3 - nextStage;
-        if (nextStage >= 3) {
-            tree.classList.remove('is-clickable');
-            tree.tabIndex = -1;
-            tree.setAttribute('aria-label', `Tree ${treeNumber} is falling`);
-            triangleGameDialogueTimers.push(window.setTimeout(() => {
-                if (triangleGamePage?.hidden || tree.dataset.treeStage !== '3') return;
-                tree.src = triangleGameTreeSources[3];
-                tree.dataset.treeStage = '4';
-                tree.classList.add('is-fallen');
-                tree.setAttribute('aria-label', `Tree ${treeNumber} has fallen`);
-                releaseTriangleWoodBlocks(tree);
-            }, 380));
-            return;
-        }
-        tree.setAttribute('aria-label', `Tree ${treeNumber}, ${tapsRemaining} taps remaining`);
-    };
-
-    const isPointOnTriangleGameTree = (tree, clientX, clientY) => {
-        if (!tree.complete || !tree.naturalWidth || !tree.naturalHeight) return false;
-        const rect = tree.getBoundingClientRect();
-        if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return false;
-
-        const scale = Math.min(rect.width / tree.naturalWidth, rect.height / tree.naturalHeight);
-        const renderedWidth = tree.naturalWidth * scale;
-        const renderedHeight = tree.naturalHeight * scale;
-        const offsetX = (rect.width - renderedWidth) / 2;
-        const offsetY = rect.height - renderedHeight;
-        const mirroredX = rect.right - clientX;
-        const localY = clientY - rect.top;
-        if (mirroredX < offsetX || mirroredX >= offsetX + renderedWidth || localY < offsetY || localY >= offsetY + renderedHeight) return false;
-
-        const source = tree.currentSrc || tree.src;
-        let pixelData = triangleGameTreePixelData.get(source);
-        if (!pixelData) {
-            const canvas = document.createElement('canvas');
-            canvas.width = tree.naturalWidth;
-            canvas.height = tree.naturalHeight;
-            const context = canvas.getContext('2d', { willReadFrequently: true });
-            if (!context) return true;
-            context.drawImage(tree, 0, 0);
-            try {
-                pixelData = context.getImageData(0, 0, canvas.width, canvas.height);
-                triangleGameTreePixelData.set(source, pixelData);
-            } catch (error) {
-                return true;
-            }
-        }
-
-        const pixelX = Math.min(pixelData.width - 1, Math.floor(((mirroredX - offsetX) / renderedWidth) * pixelData.width));
-        const pixelY = Math.min(pixelData.height - 1, Math.floor(((localY - offsetY) / renderedHeight) * pixelData.height));
-        return pixelData.data[((pixelY * pixelData.width) + pixelX) * 4 + 3] > 24;
-    };
-
-    const findTriangleGameTreeAtPoint = (clientX, clientY) => [...triangleGameTrees]
-        .reverse()
-        .find((tree) => tree.classList.contains('is-clickable') && isPointOnTriangleGameTree(tree, clientX, clientY));
-
-    const startTriangleTreeMission = () => {
+    const startTriangleBridgeCrafting = () => {
         if (!triangleGamePage || triangleGamePage.hidden) return;
         if (triangleGameStartButton) {
             triangleGameStartButton.classList.remove('is-visible');
             triangleGameStartButton.hidden = true;
         }
-        triangleGameTreeGroup?.classList.add('is-active');
+        triangleWoodCollected = triangleCraftingSlots.length;
         if (triangleWoodStorage) {
             triangleWoodStorage.hidden = false;
             triangleWoodStorage.getBoundingClientRect();
             triangleWoodStorage.classList.add('is-visible');
         }
-        triangleGameTrees.forEach((tree, treeIndex) => {
-            tree.src = 'assets/Shape UI/tree.webp';
-            tree.dataset.treeStage = '0';
-            tree.tabIndex = 0;
-            tree.classList.add('is-clickable');
-            tree.classList.remove('is-hit', 'is-fallen');
-            tree.setAttribute('aria-label', `Tree ${treeIndex + 1}, 3 taps remaining`);
-        });
-        scheduleTriangleTreeCutGuide();
+        if (triangleWoodStorageCount) triangleWoodStorageCount.textContent = String(triangleWoodCollected);
+        showTriangleCraftingPanel(triangleWoodCollectionSession);
     };
 
-    triangleGameStartButton?.addEventListener('click', startTriangleTreeMission);
-
-    triangleTreeAxe?.addEventListener('animationend', () => triangleTreeAxe.classList.remove('is-swinging'));
-
-    triangleGameTreeGroup?.addEventListener('click', (event) => {
-        const tree = findTriangleGameTreeAtPoint(event.clientX, event.clientY);
-        if (tree) advanceTriangleGameTree(tree);
-    });
-
-    triangleGameTreeGroup?.addEventListener('pointermove', (event) => {
-        triangleGameTreeGroup.classList.toggle('is-over-tree', Boolean(findTriangleGameTreeAtPoint(event.clientX, event.clientY)));
-    });
-
-    triangleGameTreeGroup?.addEventListener('pointerleave', () => {
-        triangleGameTreeGroup.classList.remove('is-over-tree');
-    });
-
-    window.addEventListener('resize', () => {
-        if (triangleTreeCutGuide && !triangleTreeCutGuide.hidden) positionTriangleTreeCutGuide();
-    });
-
-    triangleGameTrees.forEach((tree) => {
-        tree.addEventListener('keydown', (event) => {
-            if (event.key !== 'Enter' && event.key !== ' ') return;
-            event.preventDefault();
-            advanceTriangleGameTree(tree);
-        });
-        tree.addEventListener('animationend', () => tree.classList.remove('is-hit'));
-    });
+    triangleGameStartButton?.addEventListener('click', startTriangleBridgeCrafting);
 
     window.addEventListener('learnscape:routechange', (event) => {
         if (event.detail?.route === 'triangleGame') {
@@ -15546,7 +15265,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (shape === 'triangle') {
             navigateToShapePhase(config.mission, () => {
                 stopTriangleGameDialogue();
-                startTriangleTreeMission();
+                startTriangleBridgeCrafting();
                 enableMissionHowToHelp('triangle');
             });
             return true;
