@@ -45,7 +45,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="style.css?v=20261107-01">
+    <link rel="stylesheet" href="style.css?v=20261107-02">
 </head>
 <body class="title-page is-page-loading is-initial-loading" aria-busy="true">
     <div id="app-shell-container" class="app-shell-container">
@@ -2200,7 +2200,7 @@
         <a class="game-return-btn loading-link game-icon-button icon-back" href="index.html" data-route="shape-area-8" aria-label="Return to Diamond Island intro"><span>‹</span>Back</a>
     </section>
 
-    <script src="./script.js?v=20261106-11"></script>
+    <script src="./script.js?v=20261107-02"></script>
     </div>
 
     <script>
@@ -6451,26 +6451,14 @@ const loadRuntimeAssets = async () => {
     let persistentStorage = false;
     if ('serviceWorker' in navigator && 'caches' in window) {
         try {
-        const registration = await navigator.serviceWorker.register(new URL('sw.js?rev=20261107-01', document.baseURI));
+        const registration = await navigator.serviceWorker.register(new URL('sw.js?rev=20261107-02', document.baseURI));
             // The installed app keeps its own shell cache. Ask it to check this
             // revision immediately so interface updates are not held by an old shell.
         const updateCheck = registration.update?.();
         updateCheck?.catch(() => {});
-            const pendingWorker = registration.installing || registration.waiting;
-            if (pendingWorker && pendingWorker.state !== 'activated') {
-                await new Promise((resolve, reject) => {
-                    const timeoutId = window.setTimeout(() => reject(new Error('Service worker activation timed out.')), 15000);
-                    const checkState = () => {
-                        if (!['activated', 'redundant'].includes(pendingWorker.state)) return;
-                        window.clearTimeout(timeoutId);
-                        pendingWorker.removeEventListener('statechange', checkState);
-                        if (pendingWorker.state === 'activated') resolve();
-                        else reject(new Error('Service worker activation failed.'));
-                    };
-                    pendingWorker.addEventListener('statechange', checkState);
-                    checkState();
-                });
-            }
+            // Cache Storage works before a newly installed worker controls this
+            // page. Never make the game's first render wait for activation: an
+            // older open tab can legitimately delay that transition.
             persistentStorage = true;
         } catch (error) {
             console.warn('[Learnscape] Persistent asset storage is unavailable.', error);
@@ -6535,6 +6523,7 @@ const loadRuntimeAssets = async () => {
     };
     const canHashAsset = (hash) => Boolean(window.crypto?.subtle && /^[a-f0-9]{64}$/.test(hash || ''));
     const isTextAsset = (url) => /\.(?:html?|js|mjs|css|svg|webmanifest|json)$/i.test(new URL(url).pathname);
+    const isOptionalAudioAsset = (url) => /\.(?:mp3|ogg|wav|m4a|aac)$/i.test(new URL(url).pathname);
     const verifyAsset = async (response, size, hash, url) => {
         if (!response?.ok) return false;
         if (canHashAsset(hash)) return matchesSavedAsset(response, hash, url);
@@ -6585,7 +6574,10 @@ const loadRuntimeAssets = async () => {
             };
             resetInactivityTimeout();
             try {
-                const response = await fetch(url, { cache: 'reload', signal: controller.signal });
+                // Revalidate through the browser cache instead of forcing a
+                // full reload for every file. This avoids overwhelming Pages
+                // on a first launch while still validating each asset below.
+                const response = await fetch(url, { cache: 'no-cache', signal: controller.signal });
                 const isHtml = (response.headers.get('content-type') || '').includes('text/html');
                 if (!response.ok || (isHtml && !/\.(?:html?)$/i.test(new URL(url).pathname))) {
                     throw new Error(`Asset request failed: ${url} (${response.status})`);
@@ -6619,6 +6611,11 @@ const loadRuntimeAssets = async () => {
                 controller.abort();
                 countBytes(0);
                 lastError = error;
+                if (attempt === 0) {
+                    // A brief pause gives transient GitHub Pages errors time to
+                    // recover instead of immediately repeating the same 503.
+                    await new Promise((resolve) => window.setTimeout(resolve, 750));
+                }
             } finally {
                 window.clearTimeout(timeoutId);
             }
@@ -6629,14 +6626,27 @@ const loadRuntimeAssets = async () => {
     const worker = async () => {
         while (nextAsset < assets.length) {
             const asset = assets[nextAsset++];
-            await downloadAsset(asset);
+            try {
+                await downloadAsset(asset);
+            } catch (error) {
+                // Sound effects and narration enhance the experience, but a
+                // temporary media-host failure must not leave the whole game
+                // frozen on its loading screen. They will be requested again
+                // normally when used and retried on the next launch.
+                if (!isOptionalAudioAsset(asset.url)) throw error;
+                console.warn('[Learnscape] Optional audio will be retried later.', asset.url, error);
+                if (hasSizes) {
+                    downloadedBytes += Math.max(0, asset.size || 0);
+                    updateAssetProgress();
+                }
+            }
             completed++;
             updateAssetProgress();
         }
     };
     // Without Cache Storage, verification has to buffer a response clone in
     // memory. Download one at a time in that fallback to avoid memory spikes.
-    const concurrency = assetCache ? 3 : 1;
+    const concurrency = assetCache ? 2 : 1;
     const results = await Promise.allSettled(Array.from({ length: Math.min(concurrency, assets.length) }, worker));
     const failure = results.find((result) => result.status === 'rejected');
     if (failure) throw failure.reason;

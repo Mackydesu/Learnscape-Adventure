@@ -1,7 +1,7 @@
 const SHELL_CACHE = 'learnscape-shell-v2';
 const META_CACHE = 'learnscape-meta-v2';
 // Bump this revision whenever the published app shell must replace an installed cache.
-const SHELL_REVISION = '20261107-01';
+const SHELL_REVISION = '20261107-02';
 const ACTIVE_CACHE_KEY = new URL('__learnscape_active_cache__', self.registration.scope).href;
 
 self.addEventListener('install', (event) => {

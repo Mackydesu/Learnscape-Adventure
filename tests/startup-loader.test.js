@@ -263,6 +263,25 @@ test('a failed asset download offers retry and retains successful downloads', as
     assert.equal(offline.hidden, true);
 });
 
+test('a temporarily unavailable audio asset cannot trap the game on the loading screen', async () => {
+    let requests = 0;
+    const app = createHarness({
+        manifest: {
+            version: '0123456789abcdef0123',
+            assets: ['assets/success.mp3'],
+            sizes: { 'assets/success.mp3': 7 },
+        },
+        assetFetch: async () => {
+            requests++;
+            return new Response('unavailable', { status: 503 });
+        },
+    });
+    await app.run();
+    assert.equal(requests, 2);
+    assert.equal(app.hidden, true);
+    assert.equal(app.retry.hidden, true);
+});
+
 test('a damaged asset in the current cache is verified and downloaded again', async () => {
     const storage = createStorage();
     const version = '0123456789abcdef0123';
