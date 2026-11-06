@@ -45,7 +45,7 @@
                     const cost = document.querySelector('.intro-shop-cost');
                     const button = document.createElement('button');
                     button.dataset.shopUseKey = 'circle';
-                    button.textContent = 'Use Circle key';
+                    button.textContent = 'Gamitin ang susi ng bilog';
                     cost.replaceChildren(button);
                 };
                 const hideOnboardingCoach = () => {};
@@ -53,7 +53,7 @@
                 const showOnboardingCoach = (target, message) => { document.querySelector('#stage').textContent = message; target?.focus(); };
                 const openIntroMenu = () => {};
                 const closeIntroMenu = () => {};
-                window.useLearnscapeIslandKey = () => { document.querySelector('#stage').textContent = 'Circle key used'; };
+                window.useLearnscapeIslandKey = () => { document.querySelector('#stage').textContent = 'Awtomatikong binubuksan ang isla'; };
                 ${guide}
                 ${handler}
                 document.body.dataset.ready = 'true';

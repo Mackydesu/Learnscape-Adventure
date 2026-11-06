@@ -297,6 +297,7 @@ function shopTutorialHarness({ replay = false, carrots = 10, unlocked = false } 
         isLearnscapeIslandUnlocked: () => unlocked,
         getIntroShopCost: () => 10,
         resourceCounts: { carrots },
+        learnscapeShapeLabels: { circle: 'Bilog' },
         setLearnscapeResourceCount: (_resource, value) => { context.resourceCounts.carrots = value; },
         showIntroCarrotSpendPopout() {}, introShopPurchaseKey: () => 'circle-key',
         writeSoundSetting: (key) => { if (key === 'circle-key') purchased = true; },
@@ -332,7 +333,10 @@ test('shop tutorial advances even if purchasing removes the clicked cost element
     assert.equal(guide.context.onboardingStage, 'use-key');
     guide.timers.find(({ delay }) => delay === 120).callback();
     assert.ok(guide.calls.includes('open:shop'));
-    assert.ok(guide.calls.some((call) => call.node === guide.useButton && call.message.includes('Use')));
+    assert.ok(guide.calls.some((call) => call.node === guide.useButton && call.message.includes('Gamitin')));
+    guide.click({ closest: (selector) => selector === '[data-shop-use-key]' ? guide.useButton : null });
+    assert.equal(guide.context.onboardingStage, 'unlocking');
+    assert.ok(guide.calls.includes('use'));
 });
 
 test('shop tutorial does not advance when the purchase fails', () => {

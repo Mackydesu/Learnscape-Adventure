@@ -3379,7 +3379,7 @@
                 window.setTimeout(() => popout.remove(), 1150);
             };
             const syncIntroShopItems = () => {
-                // A shop item contains a real Use button once purchased, so its outer
+                // A shop item contains a real Gamitin button once purchased, so its outer
                 // interactive surface must not remain a button (nested buttons are invalid).
                 introMenuCopy?.querySelectorAll('button.intro-shop-item').forEach((item) => {
                     const replacement = document.createElement('div');
@@ -3432,8 +3432,8 @@
                         useButton.className = 'intro-shop-use-key';
                         useButton.type = 'button';
                         useButton.dataset.shopUseKey = shape;
-                        useButton.setAttribute('aria-label', `Use ${learnscapeShapeLabels[shape]} key`);
-                        useButton.textContent = 'Use';
+                        useButton.setAttribute('aria-label', `Gamitin ang susi ng ${learnscapeShapeLabels[shape]}`);
+                        useButton.textContent = 'Gamitin';
                         cost?.replaceChildren(useButton);
                     } else if (!canUseKey && useButton) {
                         useButton.remove();
@@ -3925,8 +3925,8 @@
                         id: `shop:${shape}`,
                         type: 'shop',
                         shape,
-                        title: `${shape.charAt(0).toUpperCase() + shape.slice(1)} key purchased`,
-                        detail: 'Your new island key is ready to use.',
+                        title: `Nabili ang susi ng ${learnscapeShapeLabels[shape]}`,
+                        detail: 'Gamitin ito upang awtomatikong mabuksan ang isla.',
                     });
                     item.classList.remove('is-purchase-success');
                     void item.offsetWidth;
@@ -4704,7 +4704,7 @@
                     if (enter) {
                         enter.setAttribute('aria-disabled', String(!isUnlocked && !isReadyToUnlock));
                         enter.tabIndex = isUnlocked || isReadyToUnlock ? 0 : -1;
-                        enter.textContent = isUnlocked ? 'Lakbayin' : isReadyToUnlock ? 'Unlock' : 'Locked';
+                        enter.textContent = isUnlocked ? 'Lakbayin' : isReadyToUnlock ? 'Buksan' : 'Naka-lock';
                     }
                 });
             };
@@ -4775,7 +4775,7 @@
                     if (enter) {
                         enter.setAttribute('aria-disabled', 'true');
                         enter.tabIndex = -1;
-                        enter.textContent = 'Unlocking';
+                        enter.textContent = 'Binubuksan…';
                     }
                     card.querySelector('.game3-island-lock')?.removeAttribute('hidden');
                     playIntroPadlockSound();
@@ -4836,15 +4836,13 @@
                 closeIntroMenu();
                 const game3Page = document.getElementById('learnscape-game3-page');
                 if (game3Page && !game3Page.hidden) {
-                    animateLearnscapeIslandUnlock(shape, false);
-                    if (isTutorialUnlock) markTutorialCircleUnlockReady();
+                    animateLearnscapeIslandUnlock(shape, true);
                     return true;
                 }
                 const waitForIslandPage = (event) => {
                     if (event.detail?.route !== 'game3') return;
                     window.removeEventListener('learnscape:routechange', waitForIslandPage);
-                    animateLearnscapeIslandUnlock(shape, false);
-                    if (isTutorialUnlock) markTutorialCircleUnlockReady();
+                    animateLearnscapeIslandUnlock(shape, true);
                 };
                 window.addEventListener('learnscape:routechange', waitForIslandPage);
                 window.__learnscapeNavigate?.('game3');
@@ -5880,7 +5878,7 @@
                 if (lock) lock.hidden = false;
                 enter.setAttribute('aria-disabled', 'false');
                 enter.tabIndex = 0;
-                enter.textContent = 'Unlock';
+                enter.textContent = 'Buksan';
             };
             const completeTutorialCircleShopPurchase = (item) => {
                 if (tutorialCircleKeyPurchased) return;
@@ -5904,8 +5902,8 @@
                         category: 'game',
                         type: 'shop',
                         shape: 'circle',
-                        title: 'Circle key purchased',
-                        detail: 'Your new key is ready to use in the Shop.',
+                        title: 'Nabili ang susi ng bilog',
+                        detail: 'Handa na itong gamitin sa Tindahan.',
                         createdAt: Date.now(),
                         read: false,
                         tutorialOnly: true,
@@ -6181,7 +6179,7 @@
                     showOnboardingCoach(introMenuCopy?.querySelector('[data-shop-item="circle"]'), 'Pindutin ang item na gustong bilhin gamit ang carrots.');
                     return;
                 }
-                showOnboardingCoach(useKeyButton, 'Pindutin ang Use upang mabuksan ang unang isla.');
+                showOnboardingCoach(useKeyButton, 'Pindutin ang Gamitin upang awtomatikong mabuksan ang unang isla.');
             };
             const showProfileGuide = () => {
                 setOnboardingStage('open-profile');
@@ -6455,7 +6453,7 @@ const loadRuntimeAssets = async () => {
     let persistentStorage = false;
     if ('serviceWorker' in navigator && 'caches' in window) {
         try {
-            const registration = await navigator.serviceWorker.register(new URL('sw.js?rev=20261106-11', document.baseURI));
+        const registration = await navigator.serviceWorker.register(new URL('sw.js?rev=20261106-12', document.baseURI));
             // The installed app keeps its own shell cache. Ask it to check this
             // revision immediately so interface updates are not held by an old shell.
         const updateCheck = registration.update?.();
