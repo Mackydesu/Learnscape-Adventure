@@ -164,28 +164,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     };
 
+    // Translate once at startup, then only when the game changes screens. Watching every
+    // DOM mutation made the loader repeatedly walk the whole page while assets streamed in.
     localizePlayerFacingCopy();
-    const CopyMutationObserver = window.MutationObserver || globalThis.MutationObserver;
-    if (CopyMutationObserver && document.body) new CopyMutationObserver((records) => {
-        records.forEach((record) => {
-            if (record.type === 'characterData') translateTextNode(record.target);
-            record.addedNodes.forEach((node) => {
-                if (node.nodeType === Node.TEXT_NODE) translateTextNode(node);
-                else if (node.nodeType === Node.ELEMENT_NODE) localizePlayerFacingCopy(node);
-            });
-            if (record.type === 'attributes') {
-                const value = record.target.getAttribute(record.attributeName);
-                const translated = translatePlayerCopy(value);
-                if (value && translated !== value) record.target.setAttribute(record.attributeName, translated);
-            }
-        });
-    }).observe(document.body, {
-        childList: true,
-        subtree: true,
-        characterData: true,
-        attributes: true,
-        attributeFilter: ['aria-label', 'alt', 'title', 'placeholder'],
-    });
+    let isPlayerCopyLocalizationQueued = false;
+    const queuePlayerCopyLocalization = () => {
+        if (isPlayerCopyLocalizationQueued) return;
+        isPlayerCopyLocalizationQueued = true;
+        window.setTimeout(() => {
+            isPlayerCopyLocalizationQueued = false;
+            localizePlayerFacingCopy();
+        }, 0);
+    };
+    window.addEventListener('load', queuePlayerCopyLocalization, { once: true });
+    window.addEventListener('learnscape:routechange', queuePlayerCopyLocalization);
 
     let uiClickMasterVolume = null;
     const uiClickAudioContext = (() => {
