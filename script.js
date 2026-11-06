@@ -1621,34 +1621,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     const createProgressControlSvg = (kind, idSuffix) => {
         const isReplayControl = kind === 'replay' || kind === 'retry';
         if (isReplayControl) {
-            const label = kind === 'retry' ? 'RETRY' : 'REPLAY';
             return `
-                <svg class="progress-button-svg progress-button-svg-${kind}" viewBox="0 0 330 170" aria-hidden="true" focusable="false">
+                <svg class="progress-button-svg progress-button-svg-${kind}" viewBox="0 0 170 170" aria-hidden="true" focusable="false">
                     <defs>
                         <linearGradient id="progressOrange-${idSuffix}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc21c"/><stop offset="0.48" stop-color="#ff9412"/><stop offset="1" stop-color="#ef5a05"/></linearGradient>
                         <linearGradient id="progressOrangeIcon-${idSuffix}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffef5"/><stop offset="1" stop-color="#ffe8bd"/></linearGradient>
                         <filter id="progressShadow-${idSuffix}" x="-20%" y="-25%" width="140%" height="165%"><feDropShadow dx="0" dy="8" stdDeviation="5" flood-color="#7c2b00" flood-opacity=".55"/></filter>
                     </defs>
                     <g filter="url(#progressShadow-${idSuffix})">
-                        <rect x="10" y="8" width="310" height="146" rx="55" fill="url(#progressOrange-${idSuffix})" stroke="#ad3c04" stroke-width="8"/>
-                        <path d="M24 66C27 35 50 19 88 18h166" fill="none" stroke="#ffe765" stroke-width="6.5" stroke-linecap="round" opacity=".84"/>
+                        <rect x="10" y="8" width="150" height="146" rx="55" fill="url(#progressOrange-${idSuffix})" stroke="#ad3c04" stroke-width="8"/>
+                        <path d="M24 66C27 35 50 19 88 18h46" fill="none" stroke="#ffe765" stroke-width="6.5" stroke-linecap="round" opacity=".84"/>
                         <circle cx="83" cy="82" r="46" fill="#e66b08" stroke="#bd4704" stroke-width="5" opacity=".72"/>
                         <path d="M111 67A33 33 0 1 0 111 99" fill="none" stroke="#9f3300" stroke-width="16" stroke-linecap="round" opacity=".36" transform="translate(0 3)"/>
                         <path d="M111 64A33 33 0 1 0 111 96" fill="none" stroke="url(#progressOrangeIcon-${idSuffix})" stroke-width="14" stroke-linecap="round"/>
                         <path d="M115 42v29H86Z" fill="url(#progressOrangeIcon-${idSuffix})" stroke="#d05705" stroke-width="3" stroke-linejoin="round"/>
-                        <text x="210" y="99" text-anchor="middle" fill="#fffdf4" stroke="#9d3100" stroke-width="8" paint-order="stroke fill" font-family="Fredoka, Quicksand, sans-serif" font-size="47" font-weight="900" letter-spacing="1">${label}</text>
                     </g>
                 </svg>`;
         }
 
         const isHomeControl = kind === 'home';
         const isClaimControl = kind === 'claim';
-        const controlWidth = isClaimControl ? 410 : 310;
-        const viewBoxWidth = controlWidth + 20;
-        const labelX = isClaimControl ? 272 : 210;
-        const accentWidth = isClaimControl ? 246 : 166;
-        const labelFit = isClaimControl ? ' textLength="242" lengthAdjust="spacingAndGlyphs"' : '';
-        const actionLabel = isHomeControl ? 'HOME' : (isClaimControl ? 'CLAIM REWARDS' : 'NEXT');
+        const controlWidth = 150;
+        const viewBoxWidth = 170;
+        const accentWidth = 46;
         const actionIcon = isHomeControl
             ? `<path d="M48 83 83 49l35 34v39H94V96H72v26H48Z" fill="#0a6101" opacity=".38" transform="translate(0 4)"/>
                         <path d="M48 79 83 45l35 34v39H94V92H72v26H48Z" fill="url(#progressGreenIcon-${idSuffix})" stroke="#0e7203" stroke-width="4" stroke-linejoin="round"/>
@@ -1675,7 +1670,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <path d="M24 66C27 35 50 19 88 18h${accentWidth}" fill="none" stroke="#c9f982" stroke-width="6.5" stroke-linecap="round" opacity=".84"/>
                     <circle cx="83" cy="82" r="51" fill="#159407" stroke="#0b6d02" stroke-width="5" opacity=".76"/>
                     ${actionIcon}
-                    <text x="${labelX}" y="99"${labelFit} text-anchor="middle" fill="#fffdf4" stroke="#0b6202" stroke-width="8" paint-order="stroke fill" font-family="Fredoka, Quicksand, sans-serif" font-size="${isClaimControl ? '38' : '50'}" font-weight="900" letter-spacing="1">${actionLabel}</text>
                 </g>
             </svg>`;
     };
@@ -15425,7 +15419,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const subheading = document.createElement('p');
         subheading.textContent = 'Pumili ng gawain';
         const back = document.createElement('button');
-        back.className = 'shape-phase-hub-back';
+        back.className = 'shape-phase-hub-back game-icon-button icon-back';
         back.type = 'button';
         back.textContent = '‹ Back';
         back.addEventListener('click', () => {
@@ -15462,7 +15456,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             description.className = 'shape-phase-description';
             description.textContent = panelCopy.description;
             const play = document.createElement('button');
-            play.className = 'shape-phase-play';
+            play.className = 'shape-phase-play game-icon-button icon-play';
             play.type = 'button';
             play.dataset.shapePhase = phase;
             play.textContent = '▶ Play';

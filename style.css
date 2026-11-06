@@ -24439,3 +24439,84 @@ html.is-phone-landscape #learnscape-shape-square-page.is-square-puzzle-followup 
     font-size: clamp(1.55rem, 6vw, 3.1rem);
 }
 
+/* Game actions use their familiar symbols only. Accessible labels remain on the controls. */
+.game-icon-button {
+    display: inline-grid !important;
+    place-items: center;
+    box-sizing: border-box;
+    inline-size: clamp(3.05rem, 6.6vw, 4.7rem) !important;
+    min-inline-size: 0 !important;
+    block-size: clamp(3.05rem, 6.6vw, 4.7rem) !important;
+    min-block-size: 0 !important;
+    aspect-ratio: 1;
+    padding: 0 !important;
+    overflow: hidden;
+    font-size: 0 !important;
+    line-height: 1 !important;
+}
+
+.game-icon-button::after {
+    content: '▶';
+    display: grid;
+    place-items: center;
+    inline-size: 100%;
+    block-size: 100%;
+    color: currentColor;
+    font-family: system-ui, sans-serif;
+    font-size: clamp(1.45rem, 3.5vw, 2.55rem);
+    font-weight: 900;
+    line-height: 1;
+}
+
+.game-icon-button.icon-back::after { content: '‹'; font-size: clamp(2.35rem, 5vw, 3.4rem); }
+.game-icon-button.icon-forward::after { content: '›'; font-size: clamp(2.35rem, 5vw, 3.4rem); }
+.game-icon-button.icon-skip::after { content: '⏭'; font-size: clamp(1.25rem, 3vw, 2rem); }
+.game-icon-button.icon-retry::after { content: '↻'; font-size: clamp(2rem, 4.4vw, 3rem); }
+.game-icon-button.icon-check::after { content: '✓'; font-size: clamp(2rem, 4.4vw, 3rem); }
+.game-icon-button.icon-jump::after { content: '↥'; font-size: clamp(2rem, 4.4vw, 3rem); }
+.game-icon-button.icon-shoot::after { content: '⌁'; font-size: clamp(2.1rem, 4.6vw, 3.15rem); }
+
+.game-icon-button.circle-camera-start-button .circle-camera-start-icon {
+    display: block;
+    inline-size: 58%;
+    block-size: 58%;
+}
+
+.game-icon-button.circle-camera-start-button::after { display: none; }
+
+/* The star-progress artwork used to reserve most of each button for English text. */
+.circle-lesson-progress-button:has(.progress-button-svg) {
+    width: clamp(5.1rem, 10vw, 7.3rem) !important;
+    height: clamp(5.1rem, 10vw, 7.3rem) !important;
+    aspect-ratio: 1 !important;
+}
+
+.circle-lesson-progress-button[data-progress-control='next']:has(.progress-button-svg),
+.circle-lesson-progress-button[data-progress-control='claim']:has(.progress-button-svg) {
+    width: clamp(5.1rem, 10vw, 7.3rem) !important;
+}
+
+.circle-lesson-progress-actions:has(.progress-button-svg),
+.circle-lesson-progress.camera-completion-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-actions {
+    width: min(30vw, 15rem) !important;
+    gap: clamp(0.55rem, 1.8vw, 1rem) !important;
+    justify-content: center !important;
+}
+
+@media (max-width: 700px) {
+    .game-icon-button {
+        inline-size: clamp(2.8rem, 13vw, 3.8rem) !important;
+        block-size: clamp(2.8rem, 13vw, 3.8rem) !important;
+    }
+
+    .circle-lesson-progress-button:has(.progress-button-svg) {
+        width: clamp(4.25rem, 19vw, 5.8rem) !important;
+        height: clamp(4.25rem, 19vw, 5.8rem) !important;
+    }
+
+    .circle-lesson-progress-actions:has(.progress-button-svg),
+    .circle-lesson-progress.camera-completion-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-actions {
+        width: min(48vw, 12rem) !important;
+    }
+}
+
