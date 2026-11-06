@@ -24546,14 +24546,23 @@ html.is-phone-landscape #learnscape-shape-square-page.is-square-puzzle-followup 
 
 .game-icon-button.icon-back::after { content: '‹'; font-size: clamp(2.35rem, 5vw, 3.4rem); }
 .game-icon-button.icon-forward::after { content: '›'; font-size: clamp(2.35rem, 5vw, 3.4rem); }
-.game-icon-button.icon-skip::after { content: '⏭'; font-size: clamp(1.25rem, 3vw, 2rem); }
 .game-icon-button.icon-play::after {
     content: '';
-    inline-size: 0;
-    block-size: 0;
-    border-block: clamp(0.72rem, 1.55vw, 1.15rem) solid transparent;
-    border-inline-start: clamp(1.05rem, 2.2vw, 1.65rem) solid currentColor;
-    transform: translateX(16.67%);
+    inline-size: clamp(1.45rem, 3.2vw, 2.45rem);
+    block-size: clamp(1.45rem, 3.2vw, 2.45rem);
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 2 24 12 6 22Z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 2 24 12 6 22Z'/%3E%3C/svg%3E") center / contain no-repeat;
+    transform: none;
+}
+.game-icon-button.icon-skip::after {
+    content: '';
+    inline-size: clamp(1.7rem, 3.8vw, 2.7rem);
+    block-size: clamp(1.35rem, 3vw, 2.05rem);
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 20'%3E%3Cpath d='M1 2 11 10 1 18ZM10 2l10 8-10 8ZM22 2h3v16h-3z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 20'%3E%3Cpath d='M1 2 11 10 1 18ZM10 2l10 8-10 8ZM22 2h3v16h-3z'/%3E%3C/svg%3E") center / contain no-repeat;
+    transform: none;
 }
 .game-icon-button.icon-retry::after { content: '↻'; font-size: clamp(2rem, 4.4vw, 3rem); }
 .game-icon-button.icon-check::after { content: '✓'; font-size: clamp(2rem, 4.4vw, 3rem); }
@@ -24573,20 +24582,21 @@ html.is-phone-landscape #learnscape-shape-square-page.is-square-puzzle-followup 
 
 /* The star-progress artwork used to reserve most of each button for English text. */
 .circle-lesson-progress-button:has(.progress-button-svg) {
-    width: clamp(6rem, 11.5vw, 8.8rem) !important;
-    height: clamp(6rem, 11.5vw, 8.8rem) !important;
+    width: clamp(7.25rem, 14vw, 14rem) !important;
+    height: clamp(7.25rem, 14vw, 14rem) !important;
     aspect-ratio: 1 !important;
 }
 
 .circle-lesson-progress-button[data-progress-control='next']:has(.progress-button-svg),
 .circle-lesson-progress-button[data-progress-control='claim']:has(.progress-button-svg) {
-    width: clamp(6rem, 11.5vw, 8.8rem) !important;
+    width: clamp(7.25rem, 14vw, 14rem) !important;
 }
 
 .circle-lesson-progress-actions:has(.progress-button-svg),
 .circle-lesson-progress.camera-completion-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-actions {
-    width: min(44vw, 30rem) !important;
-    gap: clamp(1.5rem, 4.5vw, 5rem) !important;
+    bottom: 5% !important;
+    width: min(68vw, 56rem) !important;
+    gap: clamp(3rem, 9vw, 12rem) !important;
     justify-content: center !important;
 }
 
@@ -24597,14 +24607,14 @@ html.is-phone-landscape #learnscape-shape-square-page.is-square-puzzle-followup 
     }
 
     .circle-lesson-progress-button:has(.progress-button-svg) {
-        width: clamp(5rem, 22vw, 6.6rem) !important;
-        height: clamp(5rem, 22vw, 6.6rem) !important;
+        width: clamp(5.6rem, 24vw, 7.2rem) !important;
+        height: clamp(5.6rem, 24vw, 7.2rem) !important;
     }
 
     .circle-lesson-progress-actions:has(.progress-button-svg),
     .circle-lesson-progress.camera-completion-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-actions {
-        width: min(82vw, 26rem) !important;
-        gap: clamp(1.1rem, 5vw, 2.2rem) !important;
+        width: min(92vw, 28rem) !important;
+        gap: clamp(1.5rem, 7vw, 3.25rem) !important;
     }
 }
 
