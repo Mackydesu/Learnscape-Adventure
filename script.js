@@ -377,7 +377,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             node = walker.nextNode();
         }
         localizePlayerCopyAttributes(root);
-        root.querySelectorAll?.('[aria-label], [alt], [title], [placeholder]').forEach(localizePlayerCopyAttributes);
+        root.querySelectorAll?.('[aria-label], [alt], [title], [placeholder]').forEach((element) => {
+            localizePlayerCopyAttributes(element);
+        });
     };
 
     // Translate once at startup, then only when the game changes screens. Watching every
