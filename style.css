@@ -2102,8 +2102,12 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
 
 .circle-illustration-skip-button {
     position: relative;
-    min-width: clamp(4.5rem, 8vw, 6.5rem);
-    padding: 0.55em 1.15em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: clamp(7.4rem, 11vw, 9.5rem);
+    min-height: clamp(2.7rem, 4.6vw, 3.45rem);
+    padding: 0.62em 1.4em;
     border: 0.16rem solid #f7dc72;
     border-radius: 999px;
     background: linear-gradient(180deg, #78bd45 0%, #3d8c3d 58%, #286c37 100%);
@@ -2112,7 +2116,8 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
     font-size: clamp(0.9rem, 1.7vw, 1.2rem);
     font-weight: 800;
     line-height: 1;
-    text-transform: uppercase;
+    text-transform: none;
+    white-space: nowrap;
     box-shadow:
         0 0.3rem 0 #1f5b32,
         0 0.7rem 1rem rgba(39, 91, 48, 0.28),
