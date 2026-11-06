@@ -4,6 +4,189 @@ console.log("GAMIFIED script.js is executing!");
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Learnscape Adventure loaded!');
 
+    // Keep player-facing controls in simple Tagalog, including copy that is
+    // created later by missions and progress panels.
+    const tagalogCopy = new Map([
+        ['Rotate your phone', 'Iikot ang telepono'],
+        ['For the best experience, use landscape mode.', 'Para mas maayos, pahiga ang telepono.'],
+        ['TAP HERE', 'PINDUTIN DITO'],
+        ['Game Loading...', 'Naglo-load ang laro...'],
+        ['Loading Adventure', 'Naglo-load ang Laro'],
+        ['Try again', 'Subukan muli'],
+        ['Game Paused', 'Nakahinto ang Laro'],
+        ['Fullscreen Paused', 'Nakahinto ang Buong Screen'],
+        ['Enter Fullscreen', 'Buong Screen'],
+        ['Tutorial', 'Gabay'],
+        ['Fullscreen', 'Buong Screen'],
+        ['Mute sound', 'Patayin ang Tunog'],
+        ['Sound volume', 'Lakas ng Tunog'],
+        ['Reset Game', 'I-reset ang Laro'],
+        ['Reset Game?', 'I-reset ang Laro?'],
+        ['Exit Game', 'Lumabas sa Laro'],
+        ['Close the Game', 'Isara ang Laro'],
+        ['Cancel', 'Kanselahin'],
+        ['Continue Playing', 'Magpatuloy sa Laro'],
+        ['Skip for now', 'Laktawan muna'],
+        ['ENTER', 'PASOK'],
+        ['Terms of Use and Privacy', 'Patakaran at Pribado'],
+        ['About Us', 'Tungkol sa Amin'],
+        ['Credits', 'Mga Kredito'],
+        ['Enter', 'Pasok'],
+        ['COMING SOON', 'MALAPIT NA'],
+        ['Look for later updates', 'Abangan ang susunod na update'],
+        ['Game 3', 'Laro 3'],
+        ['Shape Island', 'Pulo ng mga Hugis'],
+        ['Start', 'Simulan'],
+        ['Skip', 'Laktawan'],
+        ['Next', 'Susunod'],
+        ['Continue', 'Magpatuloy'],
+        ['Retry', 'Ulitin'],
+        ['Play Again', 'Maglaro Muli'],
+        ['▶ Play', '▶ Maglaro'],
+        ['Lesson', 'Aralin'],
+        ['Mission', 'Misyon'],
+        ['Detection', 'Pagtukoy'],
+        ['Lesson Complete!', 'Tapos na ang Aralin!'],
+        ['Mission Complete!', 'Tapos na ang Misyon!'],
+        ['Game Complete!', 'Tapos na ang Laro!'],
+        ['Well done!', 'Magaling!'],
+        ['Bridge Complete', 'Tapos na ang Tulay'],
+        ['Bridge Crafting', 'Buuin ang Tulay'],
+        ['Game Over', 'Tapos ang Laro'],
+        ['Congratulations!', 'Binabati Kita!'],
+        ['Shoot', 'Pana'],
+        ['Jump', 'Talón'],
+        ['START', 'SIMULAN'],
+        ['PLAY AGAIN', 'MAGLARO MULI'],
+        ['Welcome to', 'Maligayang pagdating sa'],
+        ['Rectangle Village', 'Nayon ng Parihaba'],
+        ['Paused', 'Nakahinto'],
+        ['JUMP', 'TALON'],
+        ["TIME'S UP!", 'UBOS NA ANG ORAS!'],
+        ['Time’s Up!', 'Ubos na ang Oras!'],
+        ['Out of Lives!', 'Wala nang Buhay!'],
+        ['All Items', 'Lahat ng Gamit'],
+        ['Complete!', 'Tapos!'],
+        ['Done', 'Tapos'],
+        ['Stop', 'Hinto'],
+        ['Empty', 'Wala'],
+        ['CONGRATULATIONS!', 'BINABATI KITA!'],
+        ['Shape Monster defeated!', 'Natalo ang Halimaw na Hugis!'],
+        ['All deliveries completed', 'Tapos na ang lahat ng hatid'],
+        ['Laser fires automatically', 'Kusang puputok ang laser'],
+        ['You completed the rainbow!', 'Nabuo mo ang bahaghari!'],
+        ['Amazing! You collected all stars!', 'Ang galing! Nakuha mo ang lahat ng bituin!'],
+        ['Amazing! You found the crystal!', 'Ang galing! Nahanap mo ang kristal!'],
+        ['Hello explorer!', 'Kumusta, manlalakbay!'],
+        ['Please Wait...', 'Sandali...'],
+        ['Ready?', 'Handa na?'],
+        ['Choose an activity', 'Pumili ng gawain'],
+        ['Start Camera', 'Buksan ang Kamera'],
+        ['Scan an object using the camera!', 'I-scan ang isang bagay gamit ang kamera!'],
+        ['Camera preview placeholder', 'Preview ng kamera'],
+        ['Target Stars', 'Target na Bituin'],
+        ['Bookstore', 'Aklatan'],
+        ['Circle', 'Bilog'],
+        ['Square', 'Parisukat'],
+        ['Triangle', 'Tatsulok'],
+        ['Rectangle', 'Parihaba'],
+        ['Oval', 'Bilohaba'],
+        ['Heart', 'Puso'],
+        ['Star', 'Bituin'],
+        ['Diamond', 'Dyamante'],
+        ['Edit Avatar', 'Palitan ang Avatar'],
+        ['Edit Name', 'Palitan ang Pangalan'],
+        ['Change Frame', 'Palitan ang Frame'],
+        ['Player Name', 'Pangalan ng Manlalaro'],
+        ['BADGE COLLECTIONS', 'MGA BADGE'],
+        ['Stars Earned', 'Nakuhang Bituin'],
+        ['Carrots Collected', 'Nakuhang Karot'],
+        ['Areas Unlocked', 'Bukas na Lugar'],
+        ['Choose Your Avatar', 'Pumili ng Avatar'],
+        ['Open your gallery and choose a photo.', 'Buksan ang gallery at pumili ng larawan.'],
+        ['Not Now', 'Hindi Ngayon'],
+        ['Open Gallery', 'Buksan ang Gallery'],
+        ['Choose a Frame Color', 'Pumili ng Kulay ng Frame'],
+        ['Suggested Colors', 'Mungkahing Kulay'],
+        ['Color Matrix', 'Kulay'],
+        ['NOTIFICATION', 'PAALALA'],
+        ['Game Missions', 'Mga Misyon'],
+        ['System Updates', 'Mga Update'],
+        ['Game notifications will appear here.', 'Lalabas dito ang mga paalala ng laro.'],
+    ]);
+
+    const translatePlayerCopy = (copy) => {
+        const value = String(copy ?? '');
+        const direct = tagalogCopy.get(value.trim());
+        if (direct) return value.replace(value.trim(), direct);
+        return value
+            .replace(/^Pause (.+) game$/i, 'Ihinto muna ang laro ng $1')
+            .replace(/^Resume (.+) game$/i, 'Ipagpatuloy ang laro ng $1')
+            .replace(/^Replay (.+) lesson$/i, 'Ulitin ang aralin sa $1')
+            .replace(/^Retry (.+) Mission$/i, 'Ulitin ang Misyon ng $1')
+            .replace(/^Retry the (.+) mission$/i, 'Ulitin ang misyon ng $1')
+            .replace(/^Skip (.+) lesson video$/i, 'Laktawan ang aralin sa $1')
+            .replace(/^Return to (.+)$/i, 'Balik sa $1')
+            .replace(/^Close (.+)$/i, 'Isara ang $1')
+            .replace(/^(.+) badge locked$/i, 'Naka-lock ang badge ng $1')
+            .replace(/^(\d+) of (\d+) stars earned$/i, '$1 sa $2 bituin ang nakuha')
+            .replace(/^Completed colors: (\d+) of (\d+)$/i, 'Nabuo mong kulay: $1 sa $2')
+            .replace(/^Answer (\d+)$/i, 'Sagot $1')
+            .replace(/^Target Stars: (\d+)$/i, 'Target na Bituin: $1')
+            .replace(/^(\d+) seconds remaining$/i, '$1 segundong natitira');
+    };
+
+    const translateTextNode = (node) => {
+        if (!node?.nodeValue?.trim()) return;
+        const translated = translatePlayerCopy(node.nodeValue);
+        if (translated !== node.nodeValue) node.nodeValue = translated;
+    };
+
+    const localizePlayerFacingCopy = (root = document.body) => {
+        const nodeFilter = window.NodeFilter || globalThis.NodeFilter;
+        if (!root || !nodeFilter || !document.createTreeWalker) return;
+        const walker = document.createTreeWalker(root, nodeFilter.SHOW_TEXT, {
+            acceptNode: (node) => node.parentElement?.closest('script, style')
+                ? nodeFilter.FILTER_REJECT
+                : nodeFilter.FILTER_ACCEPT,
+        });
+        let node = walker.nextNode();
+        while (node) {
+            translateTextNode(node);
+            node = walker.nextNode();
+        }
+        root.querySelectorAll?.('[aria-label], [alt], [title], [placeholder]').forEach((element) => {
+            ['aria-label', 'alt', 'title', 'placeholder'].forEach((attribute) => {
+                const value = element.getAttribute(attribute);
+                const translated = translatePlayerCopy(value);
+                if (value && translated !== value) element.setAttribute(attribute, translated);
+            });
+        });
+    };
+
+    localizePlayerFacingCopy();
+    const CopyMutationObserver = window.MutationObserver || globalThis.MutationObserver;
+    if (CopyMutationObserver && document.body) new CopyMutationObserver((records) => {
+        records.forEach((record) => {
+            if (record.type === 'characterData') translateTextNode(record.target);
+            record.addedNodes.forEach((node) => {
+                if (node.nodeType === Node.TEXT_NODE) translateTextNode(node);
+                else if (node.nodeType === Node.ELEMENT_NODE) localizePlayerFacingCopy(node);
+            });
+            if (record.type === 'attributes') {
+                const value = record.target.getAttribute(record.attributeName);
+                const translated = translatePlayerCopy(value);
+                if (value && translated !== value) record.target.setAttribute(record.attributeName, translated);
+            }
+        });
+    }).observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: ['aria-label', 'alt', 'title', 'placeholder'],
+    });
+
     let uiClickMasterVolume = null;
     const uiClickAudioContext = (() => {
         const AudioCtor = window.AudioContext || window.webkitAudioContext;

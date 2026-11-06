@@ -4240,6 +4240,18 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
         drop-shadow(0 0 0.8rem rgba(255, 229, 74, 0.96));
 }
 
+/* Tagalog labels may be longer than the original English copy. */
+.circle-lesson-progress-button,
+.shape-area-start-button,
+.shape-area-square-start-button,
+.shape-area-preview-start-button,
+.circle-mission-start-button,
+.game-return-btn,
+.game3-island-enter {
+    overflow-wrap: anywhere;
+    white-space: normal;
+}
+
 @keyframes shapeLessonMascotCue {
     0%, 100% {
         transform: translateX(-50%) scale(1);
