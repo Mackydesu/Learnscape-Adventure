@@ -2901,6 +2901,43 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
     }
 }
 
+/* Reuse the gold-rimmed green Back control from the About page everywhere. */
+.game-icon-button.icon-back {
+    position: relative;
+    inline-size: clamp(3.5rem, 6vw, 5rem) !important;
+    block-size: clamp(3.5rem, 6vw, 5rem) !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    color: transparent !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    isolation: isolate;
+}
+
+.game-icon-button.icon-back::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    display: block;
+    content: '';
+    background: center / contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cdefs%3E%3ClinearGradient id='r' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ffd84d'/%3E%3Cstop offset='.52' stop-color='%23e49a16'/%3E%3Cstop offset='1' stop-color='%239a4b0e'/%3E%3C/linearGradient%3E%3ClinearGradient id='f' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%2382bd26'/%3E%3Cstop offset='.56' stop-color='%234f981d'/%3E%3Cstop offset='1' stop-color='%232f7117'/%3E%3C/linearGradient%3E%3Cfilter id='s' x='-30%25' y='-30%25' width='160%25' height='175%25'%3E%3CfeDropShadow dx='0' dy='4' stdDeviation='2.2' flood-color='%231f160b' flood-opacity='.62'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23s)'%3E%3Ccircle cx='40' cy='36' r='34' fill='%2365300d'/%3E%3Ccircle cx='40' cy='36' r='31.5' fill='url(%23r)' stroke='%23f8bc2b' stroke-width='1.5'/%3E%3Ccircle cx='40' cy='36' r='25.5' fill='%23315f13' stroke='%236d340c' stroke-width='2.4'/%3E%3Ccircle cx='40' cy='35' r='22.5' fill='url(%23f)'/%3E%3Cpath d='M24 25c7-8 21-12 32-5' fill='none' stroke='%23c9eb73' stroke-width='3' stroke-linecap='round' opacity='.62'/%3E%3Cpath d='M37 20.5 20.5 35.5 37 50v-9h19V30H37z' fill='%23fffdf2' stroke='%2335651c' stroke-width='2.5' stroke-linejoin='round'/%3E%3Cpath d='M25.5 35.5 38 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' opacity='.75'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.game-icon-button.icon-back::after,
+.game-icon-button.icon-back > span {
+    display: none;
+}
+
+.game-icon-button.icon-back:hover,
+.game-icon-button.icon-back:focus-visible {
+    transform: translateY(-0.12rem) scale(1.04);
+    filter: brightness(1.08) drop-shadow(0 0 0.65rem rgba(255, 232, 92, 0.95));
+    outline: none;
+}
+
 .circle-illustration-page.is-progress-visible .circle-illustration-video-stage,
 .circle-illustration-page.is-lesson-complete .circle-illustration-video-stage {
     opacity: 0;
