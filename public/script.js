@@ -3726,7 +3726,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeSquareVideo.pause();
         shapeSquareVideo.hidden = true;
         squareTvLessonImage.hidden = false;
-        if (squareTvMascot) squareTvMascot.hidden = false;
+        if (squareTvMascot) {
+            squareTvMascot.hidden = false;
+            squareTvMascot.classList.remove('is-shape-highlighted');
+            void squareTvMascot.offsetWidth;
+            squareTvMascot.classList.add('is-shape-highlighted');
+        }
         if (squareTvQuestionPanel) squareTvQuestionPanel.hidden = false;
         setShapeSquarePlayButtonVisible(false);
         setShapeSquareSkipButtonVisible(false);
@@ -7283,6 +7288,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         showShapePreviewProgress(diamondMissionPage);
     };
 
+    const highlightShapeLessonMascot = (mascot) => {
+        if (!mascot) return;
+        mascot.classList.remove('is-shape-highlighted');
+        void mascot.offsetWidth;
+        mascot.classList.add('is-shape-highlighted');
+    };
+
     const showShapePreviewIllustration = (page) => {
         if (!page || !isPageVisible(page)) return;
 
@@ -7989,6 +8001,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (video) video.hidden = true;
             if (lessonImage) lessonImage.hidden = false;
             if (mascot) mascot.hidden = false;
+            highlightShapeLessonMascot(mascot);
             if (questionPanel) questionPanel.hidden = false;
             if (playButton) playButton.hidden = true;
             if (skipButton) skipButton.hidden = true;
@@ -13167,7 +13180,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         circleIllustrationVideo.pause();
         circleIllustrationVideo.hidden = true;
         circleTvLessonImage.hidden = false;
-        if (circleTvMascot) circleTvMascot.hidden = false;
+        if (circleTvMascot) {
+            circleTvMascot.hidden = false;
+            circleTvMascot.classList.remove('is-shape-highlighted');
+            void circleTvMascot.offsetWidth;
+            circleTvMascot.classList.add('is-shape-highlighted');
+        }
         if (circleTvQuestionPanel) circleTvQuestionPanel.hidden = false;
         setCircleIllustrationPlayButtonVisible(false);
         setCircleIllustrationSkipButtonVisible(false);

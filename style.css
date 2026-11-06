@@ -4233,6 +4233,28 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     transform: translateX(-50%);
 }
 
+.shape-tv-mascot.is-shape-highlighted {
+    animation: shapeLessonMascotCue 1.7s ease-in-out infinite;
+    filter:
+        drop-shadow(0 0.45rem 0.35rem rgba(0, 0, 0, 0.28))
+        drop-shadow(0 0 0.8rem rgba(255, 229, 74, 0.96));
+}
+
+@keyframes shapeLessonMascotCue {
+    0%, 100% {
+        transform: translateX(-50%) scale(1);
+    }
+    50% {
+        transform: translateX(-50%) translateY(-0.45rem) scale(1.1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .shape-tv-mascot.is-shape-highlighted {
+        animation: none;
+    }
+}
+
 #learnscape-shape-area-4-page .shape-preview-mascot {
     bottom: clamp(7.4rem, 32%, 13rem);
 }
