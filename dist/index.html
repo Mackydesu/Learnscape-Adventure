@@ -4705,7 +4705,7 @@
                     if (enter) {
                         enter.setAttribute('aria-disabled', String(!isUnlocked && !isReadyToUnlock));
                         enter.tabIndex = isUnlocked || isReadyToUnlock ? 0 : -1;
-                        enter.textContent = isUnlocked ? 'Enter' : isReadyToUnlock ? 'Unlock' : 'Locked';
+                        enter.textContent = isUnlocked ? 'Lakbayin' : isReadyToUnlock ? 'Unlock' : 'Locked';
                     }
                 });
             };
@@ -4719,7 +4719,7 @@
                     if (enter) {
                         enter.setAttribute('aria-disabled', 'false');
                         enter.tabIndex = 0;
-                        enter.textContent = 'Enter';
+                        enter.textContent = 'Lakbayin';
                     }
                     activeIslandUnlockShape = '';
                     window.setTimeout(() => card.classList.remove('is-unlock-complete'), game3IslandEnterPulseDuration);
