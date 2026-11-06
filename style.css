@@ -3637,8 +3637,22 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
 
 /* The icon-only phase action sits in the middle of its card, not at its edge. */
 .shape-phase-play.game-icon-button {
+    display: grid !important;
+    place-items: center !important;
+    place-self: center;
     justify-self: center;
     align-self: center;
+}
+
+.shape-phase-play.game-icon-button::after {
+    transform: translateX(0.06em);
+}
+
+@media (min-width: 701px) {
+    .shape-phase-hub-choices {
+        width: min(97vw, 108rem);
+        gap: clamp(0.8rem, 1.8vw, 1.75rem);
+    }
 }
 
 @media (max-width: 700px) {
