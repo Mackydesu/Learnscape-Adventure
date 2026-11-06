@@ -2200,7 +2200,7 @@
         <a class="game-return-btn loading-link game-icon-button icon-back" href="index.html" data-route="shape-area-8" aria-label="Return to Diamond Island intro"><span>‹</span>Back</a>
     </section>
 
-    <script src="./script.js?v=20261106-10"></script>
+    <script src="./script.js?v=20261106-11"></script>
     </div>
 
     <script>
@@ -6451,7 +6451,7 @@ const loadRuntimeAssets = async () => {
     let persistentStorage = false;
     if ('serviceWorker' in navigator && 'caches' in window) {
         try {
-        const registration = await navigator.serviceWorker.register(new URL('sw.js?rev=20261106-12', document.baseURI));
+        const registration = await navigator.serviceWorker.register(new URL('sw.js?rev=20261106-13', document.baseURI));
             // The installed app keeps its own shell cache. Ask it to check this
             // revision immediately so interface updates are not held by an old shell.
         const updateCheck = registration.update?.();

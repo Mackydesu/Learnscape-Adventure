@@ -15368,9 +15368,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const shapePhasePanelCopy = Object.freeze({
-        lesson: { title: 'Aralin', description: 'Alamin ang hugis' },
-        mission: { title: 'Misyon', description: 'Laruin ang pakikipagsapalaran sa hugis' },
-        detection: { title: 'Pagtukoy', description: 'Hanapin ang hugis gamit ang kamera' },
+        lesson: { title: 'Aralin', description: 'Alamin ang hugis', action: 'Manood' },
+        mission: { title: 'Misyon', description: 'Laruin ang pakikipagsapalaran sa hugis', action: 'Maglaro' },
+        detection: { title: 'Pagtukoy', description: 'Hanapin ang hugis gamit ang kamera', action: 'Maghanap' },
     });
 
     const shapeIslandNames = Object.freeze({
@@ -15456,10 +15456,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             description.className = 'shape-phase-description';
             description.textContent = panelCopy.description;
             const play = document.createElement('button');
-            play.className = 'shape-phase-play game-icon-button icon-play';
+            play.className = 'shape-phase-play';
             play.type = 'button';
             play.dataset.shapePhase = phase;
-            play.textContent = '▶ Play';
+            play.textContent = panelCopy.action;
             play.addEventListener('click', (event) => {
                 event.preventDefault();
                 if (play.disabled) return;
