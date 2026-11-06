@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ['Skip', 'Laktawan'],
         ['Next', 'Susunod'],
         ['Continue', 'Magpatuloy'],
+        ['Replay', 'Ulitin'],
         ['Retry', 'Ulitin'],
         ['Play Again', 'Maglaro Muli'],
         ['▶ Play', '▶ Maglaro'],
