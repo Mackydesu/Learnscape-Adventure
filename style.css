@@ -2945,6 +2945,18 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
     letter-spacing: 0.02em;
 }
 
+/* Every island begins with the same readable Tagalog action label. */
+.shape-area-start-button,
+.shape-area-square-start-button,
+.shape-area-preview-start-button,
+.circle-mission-start-button,
+.square-mission-start-button {
+    min-width: clamp(11.25rem, 20vw, 15.5rem);
+    padding-inline: clamp(1.7rem, 3.4vw, 3.4rem);
+    text-transform: none;
+    letter-spacing: 0.01em;
+}
+
 .circle-illustration-page.is-progress-visible .circle-illustration-video-stage,
 .circle-illustration-page.is-lesson-complete .circle-illustration-video-stage {
     opacity: 0;
