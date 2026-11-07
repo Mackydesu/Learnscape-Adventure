@@ -2052,6 +2052,15 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
     pointer-events: auto;
 }
 
+/* The controls are moved to their full-screen lesson page at startup so the
+   skip button is clear of the TV frame and its feet. */
+:is(.shape-area-page, .circle-illustration-page) > .circle-illustration-video-controls {
+    position: absolute;
+    right: clamp(2rem, 5vw, 5rem);
+    bottom: clamp(1.5rem, 4vh, 3rem);
+    z-index: 40;
+}
+
 .circle-illustration-tv-stand-row {
     position: absolute;
     left: clamp(2.4rem, 7vw, 6rem);
@@ -4312,8 +4321,42 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
     animation: shapeLessonMascotCue 1.7s ease-in-out infinite;
     filter:
         drop-shadow(0 0.45rem 0.35rem rgba(0, 0, 0, 0.28))
-        drop-shadow(0 0 0.8rem rgba(255, 229, 74, 0.96));
+        drop-shadow(0 0 1.35rem rgba(255, 229, 74, 1))
+        drop-shadow(0 0 2.4rem rgba(255, 207, 47, 0.72));
 }
+
+/* Put the same golden circular rays used by the camera chest behind the
+   currently highlighted shape, without covering the question or answers. */
+/* Only reveal the rays with the active shape and its answer choices—not on
+   the lesson's replay/start frame where the mascot is hidden. */
+.is-tv-lesson-image-visible .circle-illustration-tv-screen:has(.shape-tv-mascot.is-shape-highlighted:not([hidden]))::after {
+    content: '';
+    position: absolute;
+    left: var(--shape-tv-ray-x, 50%);
+    top: var(--shape-tv-ray-y, 50%);
+    z-index: 3;
+    width: var(--shape-tv-ray-size, min(52%, 31rem));
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: repeating-conic-gradient(
+        from 5deg,
+        transparent 0 9deg,
+        rgba(255, 255, 188, 0.72) 13deg,
+        rgba(255, 207, 42, 0.5) 19deg,
+        transparent 25deg 39deg
+    );
+    -webkit-mask-image: radial-gradient(circle, transparent 0 21%, #000 35% 76%, transparent 96%);
+    mask-image: radial-gradient(circle, transparent 0 21%, #000 35% 76%, transparent 96%);
+    filter: saturate(1.2) drop-shadow(0 0 1rem rgba(255, 220, 50, 0.82));
+    pointer-events: none;
+    /* Keep centering independent from the spin animation's transform. */
+    translate: -50% -50%;
+    opacity: 0.82;
+    animation:
+        circleLessonGoldenRaysSpin 10s linear infinite,
+        circleLessonGoldenRaysPulse 1.55s ease-in-out infinite;
+}
+
 
 /* Tagalog labels may be longer than the original English copy. */
 .circle-lesson-progress-button,
@@ -4337,7 +4380,8 @@ body.is-fullscreen-mode .shape-area-speech-bubble-ch3 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .shape-tv-mascot.is-shape-highlighted {
+    .shape-tv-mascot.is-shape-highlighted,
+    .is-tv-lesson-image-visible .circle-illustration-tv-screen:has(.shape-tv-mascot.is-shape-highlighted:not([hidden]))::after {
         animation: none;
     }
 }
@@ -10352,7 +10396,7 @@ body *::after {
     animation: rectangleGuideJeepControlJump 1.8s cubic-bezier(0.24, 0.72, 0.25, 1) infinite;
 }
 
-.rectangle-guide-space-key {
+.rectangle-guide-jump-button {
     position: absolute;
     right: 12%;
     bottom: 24%;
@@ -10427,27 +10471,21 @@ body *::after {
 .rectangle-boss-warning-next {
     display: grid;
     place-items: center;
-    width: 5.1rem;
-    aspect-ratio: 1;
+    min-width: 10rem;
+    min-height: 3.8rem;
+    padding: 0.5rem 1.2rem;
     margin-bottom: 0.55rem;
     border: 0.22rem solid #62301b;
-    border-radius: 50%;
+    border-radius: 0.8rem;
     background: linear-gradient(180deg, #fff06c 0%, #ffb42a 58%, #e26b18 100%);
     box-shadow: inset 0 0.18rem 0 rgba(255, 255, 255, 0.72), 0 0.28rem 0 #4a2b18;
+    color: #572711;
+    font: 900 1.5rem/1 'Fredoka', 'Nunito', sans-serif;
+    text-shadow: 0 0.08rem 0 rgba(255, 255, 214, 0.82);
     cursor: pointer;
 }
 
 .rectangle-boss-warning-next[hidden] { display: none !important; }
-
-.rectangle-boss-warning-next span {
-    width: 0;
-    height: 0;
-    margin-left: 0.28rem;
-    border-top: 1.15rem solid transparent;
-    border-bottom: 1.15rem solid transparent;
-    border-left: 1.75rem solid #ffffff;
-    filter: drop-shadow(0 0.14rem 0 #844418);
-}
 
 .rectangle-boss-warning-continue {
     min-width: 12rem;
@@ -11150,6 +11188,44 @@ body *::after {
     display: none;
 }
 
+.rectangle-boss-jump-button[hidden] {
+    display: none !important;
+}
+
+.rectangle-delivery-page.is-boss-battle .rectangle-boss-jump-button:not([hidden]) {
+    position: absolute;
+    /* Keep a clear gap after the centered gas meter. */
+    left: calc(50% + clamp(11.75rem, 14vw, 14rem));
+    bottom: clamp(0.65rem, 2vh, 1.25rem);
+    z-index: 21;
+    display: grid;
+    place-items: center;
+    min-width: clamp(11.5rem, 13vw, 13.5rem);
+    min-height: clamp(4.8rem, 7.5vh, 5.8rem);
+    padding: 0.5rem 1.15rem 0.58rem;
+    border: 0.24rem solid #7b3517;
+    border-radius: 0.9rem;
+    background: linear-gradient(180deg, #fff27c 0%, #ffb22d 56%, #ec741c 100%);
+    box-shadow: inset 0 0.13rem 0 rgba(255, 255, 255, 0.72), 0 0.22rem 0 #8c3514, 0 0.42rem 0.7rem rgba(69, 30, 12, 0.34);
+    color: #5a230f;
+    font: 900 clamp(1.75rem, 2.5vw, 2.35rem)/1 'Fredoka', 'Nunito', sans-serif;
+    letter-spacing: 0.04em;
+    text-align: center;
+    text-indent: 0;
+    text-transform: none;
+    -webkit-text-stroke: 0.025em rgba(82, 32, 12, 0.62);
+    paint-order: stroke fill;
+    text-shadow: 0 0.1rem 0 rgba(255, 252, 205, 0.95), 0 0.18rem 0 rgba(132, 53, 17, 0.38);
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.rectangle-delivery-page.is-boss-battle .rectangle-boss-jump-button:hover:not(:disabled) {
+    filter: brightness(1.08);
+    transform: translateY(-0.1rem);
+}
+
 .rectangle-delivery-progress {
     --delivery-progress: 0%;
     position: absolute;
@@ -11403,21 +11479,21 @@ body *::after {
 
     .rectangle-delivery-page.is-boss-battle .rectangle-boss-jump-button {
         position: absolute;
-        left: calc(50% + min(7.9rem, 22vw));
+        left: calc(50% + min(9.5rem, 26vw));
         bottom: 0.65rem;
         z-index: 21;
         display: grid;
-        min-width: 7.8rem;
-        min-height: 3.8rem;
-        padding: 0.45rem 0.7rem 0.5rem;
+        min-width: 9.6rem;
+        min-height: 4.45rem;
+        padding: 0.5rem 0.85rem 0.55rem;
         border: 0.18rem solid #7b3517;
         border-radius: 0.75rem;
         background: linear-gradient(180deg, #fff27c 0%, #ffb22d 56%, #ec741c 100%);
         box-shadow: inset 0 0.13rem 0 rgba(255, 255, 255, 0.72), 0 0.22rem 0 #8c3514, 0 0.42rem 0.7rem rgba(69, 30, 12, 0.34);
         color: #5a230f;
-        font: 900 1.35rem/1 'Fredoka', 'Nunito', sans-serif;
+        font: 900 1.7rem/1 'Fredoka', 'Nunito', sans-serif;
         letter-spacing: 0.04em;
-        text-transform: uppercase;
+        text-transform: none;
         text-shadow: 0 0.08rem 0 rgba(255, 252, 205, 0.82);
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
@@ -12596,11 +12672,12 @@ body *::after {
 
     .triangle-game-message-panel {
         position: absolute;
-        left: 50%;
+        /* Leave clear space for the guide character on the left. */
+        left: 64%;
         bottom: clamp(1.5rem, 4vh, 3rem);
         z-index: 9;
-        width: 50rem;
-        max-width: calc(100vw - 4rem);
+        width: min(46rem, 52vw);
+        max-width: calc(100vw - 3rem);
         min-height: clamp(6rem, 13vh, 8.5rem);
         box-sizing: border-box;
         display: flex;
@@ -12616,7 +12693,7 @@ body *::after {
             0 0.9rem 1.25rem rgba(27, 48, 24, 0.3);
         color: #fffbd8;
         font-family: 'Baloo 2', 'Nunito', sans-serif;
-        font-size: clamp(1.3rem, 1.95vw, 1.85rem);
+        font-size: clamp(1.65rem, 2.4vw, 2.25rem);
         font-weight: 900;
         line-height: 1.25;
         letter-spacing: 0;
@@ -12630,7 +12707,8 @@ body *::after {
     .triangle-game-message-content {
         display: block;
         width: 100%;
-        white-space: nowrap;
+        white-space: normal;
+        overflow-wrap: anywhere;
     }
 
     .triangle-game-message-panel.is-visible {
@@ -16065,14 +16143,15 @@ body *::after {
 }
 
 .circle-lesson-progress.camera-completion-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-notification {
-    top: auto;
-    bottom: calc(100% + clamp(0.8rem, 2vh, 1.5rem));
-    width: min(72vw, 26rem);
-    transform: translate(-50%, 0.5rem) scale(0.9);
+    /* Keep the reward update in the open space between the two actions. */
+    top: 50%;
+    bottom: auto;
+    width: min(30vw, 18rem);
+    transform: translate(-50%, -50%) scale(0.9);
 }
 
 .circle-lesson-progress.camera-completion-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-notification.is-visible {
-    transform: translate(-50%, 0) scale(1);
+    transform: translate(-50%, -50%) scale(1);
 }
 
 .circle-lesson-progress-button:has(.progress-button-svg) {
@@ -16112,7 +16191,7 @@ body *::after {
     }
 
     .circle-lesson-progress.camera-completion-progress:has(.circle-lesson-stars[data-earned-stars='3']) .circle-lesson-progress-notification {
-        width: min(82vw, 20rem);
+        width: min(35vw, 11rem);
     }
 
     .circle-lesson-progress-button:has(.progress-button-svg) {
@@ -17793,8 +17872,8 @@ body *::after {
 .oval-match-timer-panel {
     left: calc(50% + min(16rem, 23vw) + clamp(0.65rem, 1vw, 1rem));
     right: auto;
-    min-width: clamp(11rem, 18vw, 18rem);
-    padding: clamp(0.65rem, 1.05vw, 0.9rem) clamp(1rem, 1.7vw, 1.55rem);
+    min-width: clamp(8rem, 11vw, 11rem);
+    padding: clamp(0.65rem, 1.05vw, 0.9rem) clamp(0.8rem, 1.15vw, 1.05rem);
     border: 0.26rem solid #294817;
     background: linear-gradient(180deg, #76ad3f 0%, #4f842e 56%, #315f22 100%);
     box-shadow:
@@ -19162,6 +19241,18 @@ body *::after {
         inset 0 0.15rem 0 rgba(255, 255, 255, 0.62);
     cursor: pointer;
     animation: game3IslandUnlockButtonPulse 1.25s ease-in-out infinite;
+}
+
+.game3-island-card.is-shop-link .game3-island-enter {
+    border-color: #fff9b8;
+    background: linear-gradient(180deg, #ffc95c, #ec8615 62%);
+    color: #fff;
+    text-shadow: 0 0.15rem 0 #874008, 0 0 0.45rem rgba(255, 255, 255, 0.62);
+    box-shadow:
+        0 0.35rem 0 #874008,
+        0 0.8rem 1.1rem rgba(20, 33, 44, 0.3),
+        inset 0 0.15rem 0 rgba(255, 255, 255, 0.62);
+    cursor: pointer;
 }
 
 @keyframes game3IslandUnlockButtonPulse {

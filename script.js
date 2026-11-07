@@ -6,6 +6,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Static copy is authored in Tagalog. Dynamic player copy is authored in Tagalog where it is created.
 
+    // Keep the lesson skip control clear of the TV picture. Moving it to the
+    // full-screen lesson page gives every shape the same page-corner placement.
+    document.querySelectorAll('.circle-illustration-video-stage .circle-illustration-video-controls').forEach((controls) => {
+        const stage = controls.closest('.circle-illustration-video-stage');
+        const page = stage?.closest('.shape-area-page, .circle-illustration-page');
+        if (page) page.appendChild(controls);
+    });
+
     let uiClickMasterVolume = null;
     const uiClickAudioContext = (() => {
         const AudioCtor = window.AudioContext || window.webkitAudioContext;
@@ -297,22 +305,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         return control.querySelector('.oval-card-number')?.textContent?.trim() || null;
     };
     const playNumberChoiceActivationFallback = (control) => {
-        const hasMouseHover = window.matchMedia?.('(hover: hover) and (pointer: fine)').matches;
-        if (!hasMouseHover) playNumberChoiceAudio(getNumberChoiceValue(control));
+        // Number voices are deliberate feedback for selecting an answer.
+        // Do not announce numbers merely by hovering or focusing them.
+        playNumberChoiceAudio(getNumberChoiceValue(control));
     };
-
-    document.addEventListener('pointerover', (event) => {
-        const control = event.target.closest?.(numberChoiceSelector);
-        if (!control || control.contains(event.relatedTarget)) return;
-        if (event.pointerType && event.pointerType !== 'mouse') return;
-        playNumberChoiceAudio(getNumberChoiceValue(control));
-    });
-
-    document.addEventListener('focusin', (event) => {
-        const control = event.target.closest?.(numberChoiceSelector);
-        if (!control || control.matches(':hover')) return;
-        playNumberChoiceAudio(getNumberChoiceValue(control));
-    });
 
     const getButtonClickSoundKind = (control) => {
         if (!control) return null;
@@ -3633,7 +3629,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             shapeSquareReplayButton?.setAttribute('aria-label', 'Replay square lesson');
         if (shapeSquareNextButtonImage) shapeSquareNextButtonImage.removeAttribute('src');
             shapeSquareNextButton?.setAttribute('aria-label', 'Continue');
-        setShapeSquareSkipButtonVisible(true);
+        setShapeSquareSkipButtonVisible(false);
         shapeSquareVideo?.pause?.();
 
         if (shapeSquareVideo) {
@@ -3694,7 +3690,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             resetShapeTvChoices(shapeSquarePage);
             setShapeSquareEarnedStars(0);
             setShapeSquarePlayButtonVisible(false);
-            setShapeSquareSkipButtonVisible(true);
+            setShapeSquareSkipButtonVisible(false);
             setShapeSquareVideoStageVisible(true);
             shapeSquareVideo.hidden = false;
             if (squareTvLessonImage) squareTvLessonImage.hidden = true;
@@ -3710,7 +3706,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             await shapeSquareVideo.play();
         } catch (error) {
             setShapeSquarePlayButtonVisible(true);
-            setShapeSquareSkipButtonVisible(true);
+            setShapeSquareSkipButtonVisible(false);
             console.warn('Square lesson video could not play.', error);
         }
     };
@@ -3724,9 +3720,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         squareTvLessonImage.hidden = false;
         if (squareTvMascot) {
             squareTvMascot.hidden = false;
-            squareTvMascot.classList.remove('is-shape-highlighted');
-            void squareTvMascot.offsetWidth;
-            squareTvMascot.classList.add('is-shape-highlighted');
+            highlightShapeLessonMascot(squareTvMascot);
         }
         if (squareTvQuestionPanel) squareTvQuestionPanel.hidden = false;
         setShapeSquarePlayButtonVisible(false);
@@ -7188,7 +7182,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (mascot) mascot.hidden = true;
         if (questionPanel) questionPanel.hidden = true;
         if (playButton) playButton.hidden = false;
-        if (skipButton) skipButton.hidden = false;
+        if (skipButton) skipButton.hidden = true;
         if (bridgeCharacterSequence) {
             bridgeCharacterSequence.hidden = true;
             bridgeCharacterSequence.classList.remove('is-walking');
@@ -7284,11 +7278,31 @@ document.addEventListener('DOMContentLoaded', async () => {
         showShapePreviewProgress(diamondMissionPage);
     };
 
+    const positionShapeLessonHighlight = (mascot) => {
+        const screen = mascot?.closest('.circle-illustration-tv-screen');
+        if (!screen || mascot.hidden) return;
+        const syncPosition = () => {
+            if (mascot.hidden || !mascot.isConnected || !screen.isConnected) return;
+            const screenRect = screen.getBoundingClientRect();
+            const mascotRect = mascot.getBoundingClientRect();
+            const size = Math.min(
+                screenRect.width * 0.55,
+                Math.max(mascotRect.width, mascotRect.height) * 1.55,
+            );
+            screen.style.setProperty('--shape-tv-ray-x', `${mascotRect.left - screenRect.left + (mascotRect.width / 2)}px`);
+            screen.style.setProperty('--shape-tv-ray-y', `${mascotRect.top - screenRect.top + (mascotRect.height / 2)}px`);
+            screen.style.setProperty('--shape-tv-ray-size', `${size}px`);
+        };
+        syncPosition();
+        window.requestAnimationFrame(syncPosition);
+    };
+
     const highlightShapeLessonMascot = (mascot) => {
         if (!mascot) return;
         mascot.classList.remove('is-shape-highlighted');
         void mascot.offsetWidth;
         mascot.classList.add('is-shape-highlighted');
+        positionShapeLessonHighlight(mascot);
     };
 
     const showShapePreviewIllustration = (page) => {
@@ -7316,7 +7330,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (mascot) mascot.hidden = Boolean(videoSource);
         if (questionPanel) questionPanel.hidden = Boolean(videoSource);
         if (playButton) playButton.hidden = false;
-        if (skipButton) skipButton.hidden = false;
+        if (skipButton) skipButton.hidden = true;
         videoStage?.setAttribute('aria-hidden', videoSource || lessonImage ? 'false' : 'true');
         page.classList.remove('is-transitioning-to-illustration');
         page.classList.add('is-illustration-background');
@@ -7988,7 +8002,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
             if (playButton) playButton.hidden = false;
-            if (skipButton) skipButton.hidden = false;
+            if (skipButton) skipButton.hidden = true;
         };
 
         const showLessonBackground = () => {
@@ -8009,7 +8023,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!video || !isPageVisible(page) || !page.classList.contains('is-illustration-background')) return;
 
             if (playButton) playButton.hidden = true;
-            if (skipButton) skipButton.hidden = false;
+            if (skipButton) skipButton.hidden = true;
             try {
                 video.currentTime = 0;
                 await video.play();
@@ -8024,6 +8038,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         skipButton?.addEventListener('click', () => {
             showLessonBackground();
             scheduleShapeQuestionAudio();
+        });
+        video?.addEventListener('play', () => {
+            if (skipButton) skipButton.hidden = false;
+        });
+        video?.addEventListener('pause', () => {
+            if (skipButton && !video.ended) skipButton.hidden = true;
         });
         video?.addEventListener('ended', () => {
             showLessonBackground();
@@ -9406,26 +9426,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 240);
     });
 
-    window.addEventListener('keydown', (event) => {
-        if (
-            event.code !== 'Space'
-            || event.repeat
-            || event.ctrlKey
-            || event.altKey
-            || event.metaKey
-            || !rectangleDeliveryPage
-            || rectangleDeliveryPage.hidden
-        ) return;
-        const target = event.target;
-        if (
-            target instanceof HTMLElement
-            && target.matches('input, textarea, select, button, [contenteditable="true"]')
-            && target !== rectanglePauseButton
-            && target !== rectangleRoadToggle
-        ) return;
-        event.preventDefault();
-        jumpRectangleBossJeep();
-    });
     window.addEventListener('learnscape:routechange', (event) => {
         if (event.detail?.route === 'rectangleDelivery') {
             window.setTimeout(startRectangleBossEncounter, 140);
@@ -10629,7 +10629,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             dedicatedAudio.currentTime = 0;
-            dedicatedAudio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+            // The global media-volume controller applies the player's master
+            // sound scale at playback time. Keep this clip at its native level
+            // so its volume is not scaled twice.
+            dedicatedAudio.volume = 1;
             dedicatedAudio.onended = finish;
             dedicatedAudio.onerror = finish;
             await dedicatedAudio.play();
@@ -12678,6 +12681,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         star: { color: '#ffc51c', dark: '#b06a06', shape: '<path class="badge-shape-shadow" transform="translate(0 4)" d="m40 14 7 17 19 2-15 12 5 19-16-10-16 10 5-19-15-12 19-2Z"/><path class="badge-shape-face" d="m40 14 7 17 19 2-15 12 5 19-16-10-16 10 5-19-15-12 19-2Z"/><path class="badge-shape-glint" d="m34 28 5-7 3 8"/>' },
         diamond: { color: '#167af5', dark: '#074ba5', shape: '<path class="badge-shape-shadow" transform="translate(0 4)" d="M40 12 66 40 40 68 14 40Z"/><path class="badge-shape-face" d="M40 12 66 40 40 68 14 40Z"/><path class="badge-shape-glint" d="m39 20-15 20 12-5"/>' },
     };
+    const cameraBadgeLabels = Object.freeze({
+        circle: 'Bilog', square: 'Parisukat', triangle: 'Tatsulok', rectangle: 'Parihaba',
+        oval: 'Bilohaba', heart: 'Puso', star: 'Bituin', diamond: 'Diyamante',
+    });
 
     const prepareCameraCelebrationBadge = (page, shape) => {
         const celebrationBadge = page?.querySelector('.camera-celebration-badge');
@@ -12690,26 +12697,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             badgeClone.className = 'intro-profile-badge';
             badgeClone.style.setProperty('--badge-color', artwork.color);
             badgeClone.style.setProperty('--badge-dark', artwork.dark);
-            badgeClone.innerHTML = `<span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/>${artwork.shape}</svg></span><strong>${shape[0].toUpperCase()}${shape.slice(1)}</strong>`;
+            badgeClone.innerHTML = `<span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/>${artwork.shape}</svg></span><strong>${cameraBadgeLabels[shape] || 'Hugis'}</strong>`;
         }
         badgeClone.removeAttribute('data-profile-badge');
         badgeClone.removeAttribute('role');
         badgeClone.removeAttribute('aria-label');
         badgeClone.classList.add('is-unlocked', 'camera-celebration-profile-badge');
         badgeClone.querySelector('.intro-profile-lock')?.remove();
-        // Keep the Square completion badge's playful slanted-Q lettering in
-        // sync with its Profile counterpart, including when built from the
-        // fallback badge artwork.
-        if (shape === 'square') {
-            const label = badgeClone.querySelector('strong');
-            if (label) {
-                const q = document.createElement('span');
-                q.className = 'badge-letter-q';
-                q.setAttribute('aria-label', 'Q');
-                q.textContent = 'O';
-                label.replaceChildren('S', q, 'UARE');
-            }
-        }
+        const label = badgeClone.querySelector('strong');
+        if (label) label.textContent = cameraBadgeLabels[shape] || 'Hugis';
         celebrationBadge.appendChild(badgeClone);
     };
 
@@ -13139,7 +13135,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             circleIllustrationPage?.classList.remove('is-lesson-complete', 'is-tv-lesson-image-visible');
             resetShapeTvChoices(circleIllustrationPage);
             setCircleIllustrationPlayButtonVisible(false);
-            setCircleIllustrationSkipButtonVisible(true);
+            setCircleIllustrationSkipButtonVisible(false);
             circleIllustrationVideo.hidden = false;
             if (circleTvLessonImage) circleTvLessonImage.hidden = true;
             if (circleTvMascot) circleTvMascot.hidden = true;
@@ -13161,7 +13157,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 || circleIllustrationPage?.classList.contains('is-tv-lesson-image-visible')) return;
 
             setCircleIllustrationPlayButtonVisible(true);
-            setCircleIllustrationSkipButtonVisible(true);
+            setCircleIllustrationSkipButtonVisible(false);
             if (error?.name !== 'AbortError') {
                 console.warn('Circle lesson video could not play.', error);
             }
@@ -13178,9 +13174,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         circleTvLessonImage.hidden = false;
         if (circleTvMascot) {
             circleTvMascot.hidden = false;
-            circleTvMascot.classList.remove('is-shape-highlighted');
-            void circleTvMascot.offsetWidth;
-            circleTvMascot.classList.add('is-shape-highlighted');
+            highlightShapeLessonMascot(circleTvMascot);
         }
         if (circleTvQuestionPanel) circleTvQuestionPanel.hidden = false;
         setCircleIllustrationPlayButtonVisible(false);
@@ -13199,7 +13193,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         circleIllustrationPage?.classList.remove('is-lesson-complete', 'is-tv-lesson-image-visible');
         resetShapeTvChoices(circleIllustrationPage);
         setCircleIllustrationEarnedStars(0);
-        setCircleIllustrationSkipButtonVisible(true);
+        setCircleIllustrationSkipButtonVisible(false);
         circleIllustrationVideo.pause?.();
         circleIllustrationVideo.hidden = false;
         if (circleTvLessonImage) circleTvLessonImage.hidden = true;
@@ -13710,6 +13704,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     circleIllustrationVideo?.addEventListener('play', () => {
         setCircleIllustrationPlayButtonVisible(false);
         setCircleIllustrationSkipButtonVisible(true);
+    });
+
+    circleIllustrationVideo?.addEventListener('pause', () => {
+        if (!circleIllustrationVideo.ended) setCircleIllustrationSkipButtonVisible(false);
     });
 
     circleIllustrationVideo?.addEventListener('ended', () => {
@@ -14827,8 +14825,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 || card.classList.contains('is-frozen')
             ) return;
 
-            playNumberChoiceActivationFallback(card);
-
             if (card.dataset.ovalChallengeType === 'bomb') {
                 triggerOvalBomb(card);
                 return;
@@ -15763,12 +15759,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             island: 'Triangle Island',
             mission: 'Buoin muli ang tulay.',
             steps: [
-                'I-tap ang bawat puno upang makakuha ng kahoy.',
-                'Bawat natumbang puno ay nagbibigay ng tatlong bloke ng kahoy.',
-                'Kolektahin ang lahat ng siyam na bloke ng kahoy.',
-                'Kapag lumitaw ang crafting board, i-tap ang kahoy.',
-                'Bawat pag-tap ay naglalagay ng isang bloke sa tulay.',
-                'Magpatuloy hanggang mapuno ang lahat ng siyam na puwesto.',
+                'I-tap ang bawat kahoy.',
+                'Bawat pag-tap ay nabubuo ang tulay.',
+                'Magpatuloy hanggang sa mailagay lahat ng kahoy.',
                 'Sagutin ang tanong upang ganap na mabuo ang tulay.',
             ],
             scopes: ['#learnscape-triangle-game-page'],
@@ -15781,9 +15774,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 'Simulan ang misyon ng paghahatid.',
                 'Awtomatikong bibiyahe at hihinto ang jeepney sa destinasyon.',
                 'Piliin ang tamang hugis ng paradahan.',
-                'I-tap ang tamang ihahatid mula sa mga nakolektang bagay.',
-                'Talunin ang Halimaw ng Hugis.',
-                'Pindutin ang Spacebar upang tumalon ang jeepney.',
+                'Pindutin ang tamang bagay na ihahatid.',
+                'Talunin ang Halimaw.',
+                'Pindutin ang "Talon" upang tumalon ang jeep.',
                 'Tumalon sa mga paparating na hugis na hindi parihaba.',
                 'Bantayan ang antas ng gasolina habang nababawasan ito.',
                 'Kolektahin ang mga parihaba upang madagdagan ang gasolina.',

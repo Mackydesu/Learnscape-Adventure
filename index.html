@@ -430,7 +430,7 @@
                 <img src="assets/Buttons/Shop.webp" alt="">
                 <span class="intro-shop-available-indicator" aria-hidden="true" hidden></span>
             </button>
-            <button class="game3-quick-menu-button" type="button" data-intro-panel="notifications" aria-label="Notifications">
+            <button class="game3-quick-menu-button" type="button" data-intro-panel="notifications" aria-label="Mga abiso">
                 <img src="assets/Buttons/Notification.webp" alt="">
                 <span class="intro-notification-unread-indicator" aria-hidden="true" hidden></span>
             </button>
@@ -691,8 +691,8 @@
             <span style="--size: 1.08rem; --color: #f28db2; --x: 12rem; --y: -12rem; --r: -83deg; --delay: .16s"></span>
             <span style="--size: .76rem; --color: #ffe98b; --x: 34rem; --y: -23rem; --r: -52deg; --delay: .22s"></span>
         </div>
-        <button class="square-puzzle-next-button game-icon-button icon-forward" type="button" aria-label="Continue" hidden>Next</button>
-        <button class="square-puzzle-retry-button game-icon-button icon-retry" type="button" aria-label="Retry the square mission" hidden>Retry</button>
+        <button class="square-puzzle-next-button" type="button" aria-label="Susunod sa misyon ng parisukat" hidden>Susunod</button>
+        <button class="square-puzzle-retry-button" type="button" aria-label="Ulitin ang misyon ng parisukat" hidden>Ulitin</button>
         <img class="square-mission-character square-mission-character-ch12" src="assets/Character/ch12.webp" alt="Celebration character" aria-hidden="true" hidden>
         <img class="square-mission-character square-mission-character-ch13" src="assets/Character/ch13.webp" alt="Celebration character" aria-hidden="true" hidden>
         <div class="square-chocolate-question-bubble" role="status" aria-live="polite" hidden>
@@ -747,7 +747,7 @@
                 <span class="triangle-bridge-message-text"></span><span class="triangle-bridge-message-dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span>
             </span>
         </div>
-        <button class="triangle-bridge-yes-button game-icon-button icon-check" type="button" aria-label="Oo, tutulungan kitang ayusin ang tulay" hidden>Yes</button>
+        <button class="triangle-bridge-yes-button" type="button" aria-label="Oo naman, tutulungan kitang ayusin ang tulay" hidden>Oo naman</button>
         <a class="game-return-btn loading-link game-icon-button icon-back" href="index.html" data-route="game3" aria-label="Return to Shape Island">
             <span>‹</span>
             Back
@@ -906,7 +906,7 @@
         <div class="rectangle-village-message-panel" role="status" aria-live="polite" hidden>
             <span class="rectangle-village-message-text"></span>
         </div>
-        <button class="rectangle-village-go-button game-icon-button icon-forward" type="button" hidden>Go &gt;</button>
+        <button class="rectangle-village-go-button" type="button" aria-label="Tara na sa misyon ng Paghahatid ng Parihaba" hidden>Tara na</button>
         <button class="shape-area-preview-start-button" type="button">Simulan na</button>
         <div class="circle-illustration-video-stage shape-preview-video-stage" aria-hidden="true">
             <div class="circle-illustration-tv-frame">
@@ -979,12 +979,12 @@
                         </div>
                     </div>
                     <div class="rectangle-boss-guide-page" data-boss-guide-page="jump" hidden>
-                        <p>Gamitin ang Spacebar</p>
+                        <p>Pindutin ang Talon</p>
                         <h2>Upang tumalon</h2>
                         <div class="rectangle-boss-guide-demo is-jump-demo" aria-hidden="true">
                             <span class="rectangle-guide-mini-jeep"></span>
                             <span class="rectangle-guide-jump-arrow">&uarr;</span>
-                            <span class="rectangle-guide-space-key">SPACE</span>
+                            <span class="rectangle-guide-jump-button">TALON</span>
                         </div>
                     </div>
                     <div class="rectangle-boss-guide-page" data-boss-guide-page="1" hidden>
@@ -1007,10 +1007,8 @@
                         </div>
                     </div>
                 </div>
-                <button class="rectangle-boss-warning-next" type="button" aria-label="Susunod na gabay">
-                    <span aria-hidden="true"></span>
-                </button>
-                <button class="rectangle-boss-warning-continue game-icon-button icon-forward" type="button">Continue</button>
+                <button class="rectangle-boss-warning-next" type="button" aria-label="Susunod na gabay">Susunod</button>
+                <button class="rectangle-boss-warning-continue" type="button" aria-label="Magpatuloy sa laban">Magpatuloy</button>
             </div>
         </div>
         <section class="rectangle-boss-encounter" aria-label="Shape monster battle" hidden>
@@ -1070,7 +1068,7 @@
             </span>
             <strong class="rectangle-gas-value">100%</strong>
         </div>
-        <button class="rectangle-boss-jump-button game-icon-button icon-jump" type="button" aria-label="Jump the jeepney" hidden>Jump</button>
+        <button class="rectangle-boss-jump-button" type="button" aria-label="Talon ang jeep" hidden>Talon</button>
         <div class="rectangle-delivery-progress" role="status" aria-live="polite" aria-label="Deliveries completed: 0 of 3">
             <span class="rectangle-delivery-progress-title">Naihatid</span>
             <strong class="rectangle-delivery-progress-count"><span>0</span>/3</strong>
@@ -1403,12 +1401,11 @@
             <span>Larong Pagtutugma ng Bilohaba</span>
         </div>
         <div class="oval-match-progress-panel" aria-live="polite">
-            <span>Magkaparehong Pares</span>
+            <span>Pares</span>
             <strong class="oval-match-progress-value">0/5</strong>
         </div>
         <div class="oval-match-timer-panel" aria-live="polite">
             <span class="oval-timer-clock-icon" aria-hidden="true"></span>
-            <span>Oras</span>
             <strong class="oval-match-timer-value">45s</strong>
         </div>
         <div class="oval-mission-guide" aria-hidden="true" hidden>
@@ -3077,12 +3074,12 @@
                                         <input id="intro-profile-name" class="intro-profile-name" type="text" maxlength="24" value="Adventurer" readonly>
                                     </div>
                                     <section class="intro-profile-collection" aria-labelledby="intro-profile-collection-title">
-                                        <h3 id="intro-profile-collection-title">BADGE COLLECTIONS</h3>
-                                        <div class="intro-profile-badges" aria-label="Shape badges">
+                                        <h3 id="intro-profile-collection-title">MGA BADGE</h3>
+                                        <div class="intro-profile-badges" aria-label="Mga badge ng hugis">
                                             <div class="intro-profile-badge" data-profile-badge="circle" style="--badge-color:#1887ff;--badge-dark:#0d54b6" role="img" aria-label="Circle badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><circle class="badge-shape-shadow" cx="40" cy="43" r="18"/><circle class="badge-shape-face" cx="40" cy="39" r="18"/><path class="badge-shape-glint" d="M28 34c3-7 9-11 16-11"/></svg><span class="intro-profile-lock"></span></span><strong>Circle</strong></div>
                                             <div class="intro-profile-badge" data-profile-badge="square" style="--badge-color:#8b2cf5;--badge-dark:#4c1197" role="img" aria-label="Square badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><rect class="badge-shape-shadow" x="22" y="25" width="36" height="36" rx="6"/><rect class="badge-shape-face" x="22" y="21" width="36" height="36" rx="6"/><path class="badge-shape-glint" d="M28 31v-4h17"/></svg><span class="intro-profile-lock"></span></span><strong>S<span class="badge-letter-q" aria-label="Q">O</span>UARE</strong></div>
                                             <div class="intro-profile-badge" data-profile-badge="triangle" style="--badge-color:#31c91d;--badge-dark:#14770c" role="img" aria-label="Triangle badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><path class="badge-shape-shadow" d="M40 20 62 61H18Z"/><path class="badge-shape-face" d="M40 16 62 57H18Z"/><path class="badge-shape-glint" d="m39 25-11 21"/></svg><span class="intro-profile-lock"></span></span><strong>Triangle</strong></div>
-                                            <div class="intro-profile-badge" data-profile-badge="rectangle" style="--badge-color:#ff8a17;--badge-dark:#a74408" role="img" aria-label="Rectangle badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><rect class="badge-shape-shadow" x="14" y="29" width="52" height="28" rx="5"/><rect class="badge-shape-face" x="14" y="25" width="52" height="28" rx="5"/><path class="badge-shape-glint" d="M21 34v-3h23"/></svg><span class="intro-profile-lock"></span></span><strong>Rectangle</strong></div>
+                                            <div class="intro-profile-badge" data-profile-badge="rectangle" style="--badge-color:#ff8a17;--badge-dark:#a74408" role="img" aria-label="Naka-lock ang badge ng parihaba"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><rect class="badge-shape-shadow" x="14" y="29" width="52" height="28" rx="5"/><rect class="badge-shape-face" x="14" y="25" width="52" height="28" rx="5"/><path class="badge-shape-glint" d="M21 34v-3h23"/></svg><span class="intro-profile-lock"></span></span><strong>Parihaba</strong></div>
                                             <div class="intro-profile-badge" data-profile-badge="oval" style="--badge-color:#f33ca4;--badge-dark:#a31363" role="img" aria-label="Oval badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><ellipse class="badge-shape-shadow" cx="40" cy="43" rx="24" ry="17"/><ellipse class="badge-shape-face" cx="40" cy="39" rx="24" ry="17"/><path class="badge-shape-glint" d="M24 37c4-7 11-10 19-10"/></svg><span class="intro-profile-lock"></span></span><strong>Oval</strong></div>
                                             <div class="intro-profile-badge" data-profile-badge="heart" style="--badge-color:#f02d25;--badge-dark:#9d1712" role="img" aria-label="Heart badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><path class="badge-shape-shadow" transform="translate(0 4)" d="M40 61 19 42C9 31 16 18 28 20c6 1 10 6 12 11 3-5 7-10 13-11 12-2 19 11 9 22Z"/><path class="badge-shape-face" d="M40 61 19 42C9 31 16 18 28 20c6 1 10 6 12 11 3-5 7-10 13-11 12-2 19 11 9 22Z"/><path class="badge-shape-glint" d="M24 31c3-5 8-6 12-2"/></svg><span class="intro-profile-lock"></span></span><strong>Heart</strong></div>
                                             <div class="intro-profile-badge" data-profile-badge="star" style="--badge-color:#ffc51c;--badge-dark:#b06a06" role="img" aria-label="Star badge locked"><span class="intro-profile-medal"><svg class="intro-profile-badge-emblem" viewBox="0 0 80 80" aria-hidden="true"><circle class="badge-emblem-field" cx="40" cy="40" r="32"/><circle class="badge-emblem-ring" cx="40" cy="40" r="27"/><path class="badge-shape-shadow" transform="translate(0 4)" d="m40 14 7 17 19 2-15 12 5 19-16-10-16 10 5-19-15-12 19-2Z"/><path class="badge-shape-face" d="m40 14 7 17 19 2-15 12 5 19-16-10-16 10 5-19-15-12 19-2Z"/><path class="badge-shape-glint" d="m34 28 5-7 3 8"/></svg><span class="intro-profile-lock"></span></span><strong>Star</strong></div>
@@ -3122,9 +3119,9 @@
                 },
                 notifications: {
                     kicker: '',
-                    title: 'NOTIFICATIONS',
+                    title: 'MGA ABISO',
                     copy: `
-                        <section class="intro-notification-board" aria-label="Notifications panel">
+                        <section class="intro-notification-board" aria-label="Panel ng mga abiso">
                             <svg class="intro-notification-frame-art" viewBox="0 0 960 620" preserveAspectRatio="none" aria-hidden="true">
                                 <defs>
                                     <linearGradient id="notifWoodTop" x1="0" y1="0" x2="0" y2="1">
@@ -3191,17 +3188,17 @@
                             </svg>
                             <div class="intro-notification-layout">
                                 <div class="intro-notification-title-row" aria-hidden="true">
-                                    <span class="intro-notification-title">NOTIFICATION</span>
+                                    <span class="intro-notification-title">MGA ABISO</span>
                                 </div>
-                                <div class="intro-notification-tabs" role="tablist" aria-label="Notification categories">
+                                <div class="intro-notification-tabs" role="tablist" aria-label="Mga kategorya ng abiso">
                                     <button class="intro-notification-tab is-active" id="intro-notification-game-tab" type="button" role="tab" aria-selected="true" aria-controls="intro-notification-content" data-notification-tab="game" tabindex="0">
                                         <svg class="intro-notification-speaker-icon" viewBox="0 0 96 96" aria-hidden="true"><path class="speaker-body" d="M35 34 70 18v60L35 62Z"/><path class="speaker-back" d="M18 36h18v28H18c-6 0-10-6-10-14s4-14 10-14Z"/><path class="speaker-handle" d="M32 61h15l9 25H40Z"/><path class="speaker-gloss" d="M43 37 62 28"/></svg>
-                                        <span>Game Missions</span>
+                                        <span>Mga Misyon sa Laro</span>
                                         <span class="intro-notification-tab-unread-indicator" data-notification-tab-indicator aria-hidden="true" hidden></span>
                                     </button>
                                     <button class="intro-notification-tab" id="intro-notification-system-tab" type="button" role="tab" aria-selected="false" aria-controls="intro-notification-content" data-notification-tab="system" tabindex="-1">
                                         <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M20 5h8l2 6a15 15 0 0 1 4 2l6-3 4 7-5 4v6l5 4-4 7-6-3a15 15 0 0 1-4 2l-2 6h-8l-2-6a15 15 0 0 1-4-2l-6 3-4-7 5-4v-6l-5-4 4-7 6 3a15 15 0 0 1 4-2Z"/><circle cx="24" cy="24" r="7"/></svg>
-                                        <span>System Updates</span>
+                                        <span>Mga Update ng Sistema</span>
                                         <span class="intro-notification-tab-unread-indicator" data-notification-tab-indicator aria-hidden="true" hidden></span>
                                     </button>
                                 </div>
@@ -3210,7 +3207,7 @@
                                     <div class="intro-notification-empty-bell" aria-hidden="true">
                                         <svg viewBox="0 0 96 96"><path class="empty-bell-shadow" d="M22 66c8-9 8-18 10-32 2-15 14-24 29-21 13 3 21 14 21 30 0 13 5 20 12 27 5 5 2 13-5 14l-57 5c-10 1-17-14-10-23Z"/><path class="empty-bell-body" d="M22 63c8-8 8-17 10-30 2-13 12-21 26-19 13 2 21 12 21 27 0 13 5 21 12 27 3 3 1 8-4 9l-59 5c-6 1-10-14-6-19Z"/><path class="empty-bell-rim" d="M23 66c15-11 53-14 68 1 3 3 1 8-4 10-19 8-47 10-64 0-5-3-4-8 0-11Z"/><circle class="empty-bell-clapper" cx="57" cy="79" r="10"/><path class="empty-bell-gloss" d="M43 23c-6 6-9 14-9 24M51 20c-5 4-7 11-7 18"/><path class="empty-bell-rays" d="M16 26 5 15M13 52H2M83 23 94 12"/></svg>
                                     </div>
-                                    <strong data-notification-empty-message>Game notifications will appear here.</strong>
+                                    <strong data-notification-empty-message>Dito lilitaw ang mga abiso ng laro.</strong>
                                     <span></span>
                                 </div>
                             </div>
@@ -3457,6 +3454,15 @@
             };
 
             const introProfileShapes = ['circle', 'square', 'triangle', 'rectangle', 'oval', 'heart', 'star', 'diamond'];
+            const introProfileBadgeLabels = Object.freeze({
+                circle: 'Bilog', square: 'Parisukat', triangle: 'Tatsulok', rectangle: 'Parihaba',
+                oval: 'Bilohaba', heart: 'Puso', star: 'Bituin', diamond: 'Diyamante',
+            });
+            const getIntroProfileBadgeLabel = (shape) => introProfileBadgeLabels[shape] || 'Hugis';
+            const getIntroProfileBadgeAriaLabel = (shape, state) => {
+                const stateLabels = { locked: 'naka-lock', ready: 'handa nang buksan', unlocking: 'binubuksan', unlocked: 'na-unlock' };
+                return `Badge ng ${getIntroProfileBadgeLabel(shape).toLowerCase()} — ${stateLabels[state] || stateLabels.locked}`;
+            };
             const introProfileFrameColors = [
                 '#ffb52e', '#ef4444', '#f97316', '#facc15', '#22c55e', '#14b8a6',
                 '#0ea5e9', '#2563eb', '#7c3aed', '#d946ef', '#ec4899', '#8b5e3c',
@@ -3480,7 +3486,7 @@
             const revealProfileBadge = (badge, shape, delay) => {
                 if (profileBadgeRevealTimers.has(badge)) return;
                 badge.classList.remove('is-unlocked');
-                badge.setAttribute('aria-label', `${shape} badge ready to reveal`);
+                badge.setAttribute('aria-label', getIntroProfileBadgeAriaLabel(shape, 'ready'));
                 const isProfileVisible = () => {
                     if (document.hidden || !badge.getClientRects().length
                         || document.body.classList.contains('is-page-loading')) return false;
@@ -3508,13 +3514,13 @@
                         visibleSince = null;
                         revealStarted = null;
                         badge.classList.remove('is-revealing');
-                        badge.setAttribute('aria-label', `${shape} badge ready to reveal`);
+                        badge.setAttribute('aria-label', getIntroProfileBadgeAriaLabel(shape, 'ready'));
                     } else {
                         visibleSince ??= now;
                         if (revealStarted === null && now - visibleSince >= delay) {
                             badge.style.setProperty('--badge-reveal-delay', '0ms');
                             badge.classList.add('is-revealing');
-                            badge.setAttribute('aria-label', `${shape} badge unlocking`);
+                            badge.setAttribute('aria-label', getIntroProfileBadgeAriaLabel(shape, 'unlocking'));
                             playIntroBadgeUnlockSound();
                             revealStarted = now;
                         }
@@ -3522,7 +3528,7 @@
                             profileBadgeRevealTimers.delete(badge);
                             badge.classList.remove('is-revealing');
                             badge.classList.add('is-unlocked');
-                            badge.setAttribute('aria-label', `${shape} badge unlocked`);
+                            badge.setAttribute('aria-label', getIntroProfileBadgeAriaLabel(shape, 'unlocked'));
                             viewedProfileBadges.add(shape);
                             writeSoundSetting(introProfileBadgeViewedKey(shape), 'true');
                             markLearnscapeNotificationRead(`badge:${shape}`);
@@ -3607,7 +3613,9 @@
                         return;
                     }
                     badge?.classList.toggle('is-unlocked', isUnlocked);
-                    badge?.setAttribute('aria-label', `${shape} badge ${isUnlocked ? 'unlocked' : 'locked'}`);
+                    const badgeLabel = badge?.querySelector('strong');
+                    if (badgeLabel) badgeLabel.textContent = getIntroProfileBadgeLabel(shape);
+                    badge?.setAttribute('aria-label', getIntroProfileBadgeAriaLabel(shape, isUnlocked ? 'unlocked' : 'locked'));
                 });
             };
             const saveIntroProfileName = () => {
@@ -3699,7 +3707,10 @@
                     introMenuClose.disabled = Boolean(onboardingStage && onboardingStage !== 'complete');
                     if (panelName === 'shop') syncIntroShopItems();
                     if (panelName === 'profile') syncIntroProfile();
-                    if (panelName === 'notifications') renderIntroNotifications('game');
+                    if (panelName === 'notifications') {
+                        renderIntroNotifications('game');
+                        queueAutomaticCarrotClaims();
+                    }
                     introMenuClose.focus({ preventScroll: true });
             };
             document.querySelectorAll('[data-intro-panel]').forEach((button) => {
@@ -3724,9 +3735,10 @@
                     contentPanel.setAttribute('aria-labelledby', tab.id);
                 }
                 if (message) message.textContent = category === 'system'
-                    ? 'System updates will appear here.'
-                    : 'Game notifications will appear here.';
+                    ? 'Dito lilitaw ang mga update ng sistema.'
+                    : 'Dito lilitaw ang mga abiso ng laro.';
                 renderIntroNotifications(category);
+                if (category === 'game') queueAutomaticCarrotClaims();
                 if (shouldFocus) tab.focus({ preventScroll: true });
                 window.playUiClickSound?.('soft');
             };
@@ -3765,11 +3777,6 @@
                             const badge = introMenuCopy.querySelector(`[data-profile-badge="${shape}"]`);
                             badge?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
                         }
-                    } else if (notificationAction.dataset.notificationAction === 'claim-carrots') {
-                        window.claimLearnscapeCarrotReward?.(
-                            notificationItem?.dataset.notificationId,
-                            notificationAction,
-                        );
                     }
                     return;
                 }
@@ -4072,14 +4079,24 @@
             };
             removeRetiredTutorialCompletionReward();
             const learnscapeShapeLabels = Object.freeze({
-                circle: 'Circle',
-                square: 'Square',
-                triangle: 'Triangle',
-                rectangle: 'Rectangle',
-                oval: 'Oval',
-                heart: 'Heart',
-                star: 'Star',
-                diamond: 'Diamond',
+                circle: 'Bilog',
+                square: 'Parisukat',
+                triangle: 'Tatsulok',
+                rectangle: 'Parihaba',
+                oval: 'Bilohaba',
+                heart: 'Puso',
+                star: 'Bituin',
+                diamond: 'Diyamante',
+            });
+            const notificationShapeLabels = Object.freeze({
+                circle: 'bilog',
+                square: 'parisukat',
+                triangle: 'tatsulok',
+                rectangle: 'parihaba',
+                oval: 'bilohaba',
+                heart: 'puso',
+                star: 'bituin',
+                diamond: 'diyamante',
             });
             const learnscapeAreaByRoute = Object.freeze({
                 shapeCircle: { shape: 'circle', name: 'Circle Meadow' },
@@ -4202,9 +4219,6 @@
                     star: [20, 30, 50],
                     diamond: [50, 50, 50],
                 });
-                const areaNames = Object.fromEntries(
-                    Object.values(learnscapeAreaByRoute).map((area) => [area.shape, area.name]),
-                );
                 const previewItems = [];
                 let previewIndex = 0;
                 const addPreview = (notification) => {
@@ -4221,37 +4235,37 @@
                     id: `preview:area:${shape}`,
                     type: 'progress',
                     shape,
-                    title: `New area unlocked: ${areaNames[shape]}`,
-                    detail: `${learnscapeShapeLabels[shape]} adventures are now available.`,
+                    title: 'May bagong lugar na nabuksan!',
+                    detail: `Handa nang lakbayin ang lugar ng ${notificationShapeLabels[shape] || learnscapeShapeLabels[shape]}.`,
                 }));
                 shapeOrder.forEach((shape) => addPreview({
                     id: `preview:lesson:${shape}`,
                     type: 'lesson',
                     shape,
-                    title: `${learnscapeShapeLabels[shape]} Lesson Complete`,
-                    detail: `${learnscapeShapeLabels[shape]} lesson progress completed.`,
+                    title: `Tapos na ang aralin sa ${notificationShapeLabels[shape] || learnscapeShapeLabels[shape]}!`,
+                    detail: `Nakumpleto na ang progreso sa ${notificationShapeLabels[shape] || learnscapeShapeLabels[shape]}.`,
                 }));
                 shapeOrder.forEach((shape) => addPreview({
                     id: `preview:mission:${shape}`,
                     type: 'mission',
                     shape,
-                    title: `${learnscapeShapeLabels[shape]} Mission Complete`,
-                    detail: `${learnscapeShapeLabels[shape]} mission progress completed.`,
+                    title: `Tapos na ang misyon sa ${notificationShapeLabels[shape] || learnscapeShapeLabels[shape]}!`,
+                    detail: `Nakumpleto na ang progreso sa ${notificationShapeLabels[shape] || learnscapeShapeLabels[shape]}.`,
                 }));
                 shapeOrder.forEach((shape) => addPreview({
                     id: `preview:camera:${shape}`,
                     type: 'camera',
                     shape,
-                    title: `${learnscapeShapeLabels[shape]} Object Detection Complete`,
-                    detail: 'Shape recognition completed.',
+                    title: `Tapos na ang pagkilala sa ${notificationShapeLabels[shape] || learnscapeShapeLabels[shape]}!`,
+                    detail: 'Matagumpay na nakilala ang hugis.',
                 }));
                 shapeOrder.forEach((shape) => [1, 2, 3].forEach((stars) => addPreview({
                     id: `preview:stars:${shape}:${stars}`,
                     type: 'reward',
                     shape,
                     stage: stars,
-                    title: `You earned ${stars} ${stars === 1 ? 'star' : 'stars'} in ${learnscapeShapeLabels[shape]}`,
-                    detail: 'Your star total has been updated.',
+                    title: `Nakakuha ka ng ${stars} bituin sa ${notificationShapeLabels[shape] || learnscapeShapeLabels[shape]}`,
+                    detail: 'Na-update na ang kabuuan ng iyong mga bituin.',
                 })));
                 shapeOrder.forEach((shape) => carrotRewards[shape].forEach((carrots, rewardIndex) => addPreview({
                     id: `carrots:preview:${shape}:${rewardIndex + 1}`,
@@ -4262,22 +4276,22 @@
                     claimRequired: true,
                     claimed: false,
                     isPreview: true,
-                    title: `${learnscapeShapeLabels[shape]} reward: +${carrots} carrots`,
-                    detail: 'Claim this reward to add it to your balance.',
+                    title: `Gantimpala sa ${notificationShapeLabels[shape] || learnscapeShapeLabels[shape]}: +${carrots} karot`,
+                    detail: 'Awtomatikong idaragdag ang gantimpalang ito.',
                 })));
                 shapeOrder.forEach((shape) => addPreview({
                     id: `preview:shop:${shape}`,
                     type: 'shop',
                     shape,
-                    title: `${learnscapeShapeLabels[shape]} key purchased`,
-                    detail: 'Your new island key is ready to use.',
+                    title: `Nabili ang susi ng ${notificationShapeLabels[shape] || learnscapeShapeLabels[shape]}`,
+                    detail: 'Handa na itong gamitin upang mabuksan ang isla.',
                 }));
                 shapeOrder.forEach((shape) => addPreview({
                     id: `preview:badge:${shape}`,
                     type: 'badge',
                     shape,
-                    title: 'BADGE UNLOCKED',
-                    detail: `${learnscapeShapeLabels[shape]} badge is now available.`,
+                    title: `Nakuha ang badge na ${learnscapeShapeLabels[shape]}!`,
+                    detail: 'Buksan ang Profile upang makita ang bago mong badge.',
                 }));
                 return previewItems;
             };
@@ -4330,11 +4344,11 @@
                 const carrotNotification = learnscapeNotifications.find((item) => item.id === `carrots:${rewardIdentity}`);
                 let didRepair = false;
 
-                if (starNotification && (starNotification.stage !== 2 || starNotification.title !== 'You earned 2 stars in Circle')) {
+                if (starNotification && (starNotification.stage !== 2 || starNotification.title !== 'Nakakuha ka ng 2 bituin sa bilog')) {
                     starNotification.shape = 'circle';
                     starNotification.stage = 2;
-                    starNotification.title = 'You earned 2 stars in Circle';
-                    starNotification.detail = 'Your star total has been updated.';
+                    starNotification.title = 'Nakakuha ka ng 2 bituin sa bilog';
+                    starNotification.detail = 'Na-update na ang kabuuan ng iyong mga bituin.';
                     didRepair = true;
                 }
 
@@ -4342,10 +4356,10 @@
                     carrotNotification.shape = 'circle';
                     carrotNotification.stage = 2;
                     carrotNotification.rewardAmount = 5;
-                    carrotNotification.title = 'Circle reward: +5 carrots';
+                    carrotNotification.title = 'Gantimpala sa bilog: +5 karot';
                     carrotNotification.detail = carrotNotification.claimed === true
-                        ? '5 carrots were added to your balance.'
-                        : 'Claim this reward to add it to your balance.';
+                        ? 'Nadagdag na ang 5 karot sa iyong balanse.'
+                        : 'Awtomatikong idaragdag ang gantimpalang ito.';
                     didRepair = true;
                 }
 
@@ -4371,7 +4385,7 @@
                 heartRewards.forEach(({ id, stage, amount }) => {
                     const notification = learnscapeNotifications.find((item) => item.id === id);
                     if (!notification || notification.isPreview === true || notification.claimed === true) return;
-                    const title = `Heart reward: +${amount} carrots`;
+                    const title = `Gantimpala sa puso: +${amount} karot`;
                     if (notification.stage === stage
                         && Number(notification.rewardAmount) === amount
                         && notification.title === title) return;
@@ -4379,7 +4393,7 @@
                     notification.stage = stage;
                     notification.rewardAmount = amount;
                     notification.title = title;
-                    notification.detail = 'Claim this reward to add it to your balance.';
+                    notification.detail = 'Awtomatikong idaragdag ang gantimpalang ito.';
                     didRepair = true;
                 });
                 if (!didRepair) return;
@@ -4389,7 +4403,7 @@
             repairHeartRewardNotifications();
             const formatLearnscapeNotificationTime = (timestamp) => {
                 const date = new Date(Number(timestamp) || Date.now());
-                return new Intl.DateTimeFormat(undefined, {
+                return new Intl.DateTimeFormat('fil-PH', {
                     month: 'short',
                     day: 'numeric',
                     hour: 'numeric',
@@ -4404,8 +4418,8 @@
                     indicator.hidden = unreadCount === 0;
                     button.dataset.unreadCount = String(unreadCount);
                     button.setAttribute('aria-label', unreadCount
-                        ? `Notifications, ${unreadCount} unread`
-                        : 'Notifications');
+                        ? `Mga abiso, ${unreadCount} hindi pa nababasa`
+                        : 'Mga abiso');
                 });
                 introMenuCopy?.querySelectorAll('[data-notification-tab]').forEach((tab) => {
                     const category = tab.dataset.notificationTab;
@@ -4441,6 +4455,61 @@
                 && notification.claimed !== true
                 && getNotificationCarrotAmount(notification) > 0
             );
+            const getNotificationCopy = (notification) => {
+                const shapeLabel = notificationShapeLabels[notification?.shape]
+                    || learnscapeShapeLabels[notification?.shape]
+                    || 'hugis';
+                const id = String(notification?.id || '');
+                if (id.startsWith('carrots:')) {
+                    const amount = getNotificationCarrotAmount(notification);
+                    return {
+                        title: `Gantimpala sa ${shapeLabel}: +${amount} karot`,
+                        detail: notification.claimed === true
+                            ? `Nadagdag na ang ${amount} karot sa iyong balanse.`
+                            : 'Awtomatikong idaragdag ang gantimpalang ito.',
+                    };
+                }
+                if (id.startsWith('stars:')) {
+                    const stars = Math.max(1, Math.min(3, Number(notification.stage) || 1));
+                    return {
+                        title: `Nakakuha ka ng ${stars} ${stars === 1 ? 'bituin' : 'bituin'} sa ${shapeLabel}`,
+                        detail: 'Na-update na ang kabuuan ng iyong mga bituin.',
+                    };
+                }
+                if (id.startsWith('completion:')) {
+                    const phase = notification.type === 'mission' ? 'misyon' : 'aralin';
+                    return {
+                        title: `Tapos na ang ${phase} sa ${shapeLabel}!`,
+                        detail: `Nakumpleto na ang progreso sa ${shapeLabel}.`,
+                    };
+                }
+                if (id.startsWith('camera:')) {
+                    return {
+                        title: `Tapos na ang pagkilala sa ${shapeLabel}!`,
+                        detail: 'Matagumpay na nakilala ang hugis.',
+                    };
+                }
+                if (id.startsWith('area:')) {
+                    return {
+                        title: 'May bagong lugar na nabuksan!',
+                        detail: `Handa nang lakbayin ang lugar ng ${shapeLabel}.`,
+                    };
+                }
+                if (id.startsWith('badge:')) {
+                    const badgeLabel = learnscapeShapeLabels[notification?.shape] || shapeLabel;
+                    return {
+                        title: `Nakuha ang badge na ${badgeLabel}!`,
+                        detail: 'Buksan ang Profile upang makita ang bago mong badge.',
+                    };
+                }
+                if (id === 'tutorial:complete') {
+                    return {
+                        title: 'Tapos na ang tutorial!',
+                        detail: 'Handa na ang misyon sa bilog. Pumasok sa Isla ng Bilog upang magpatuloy.',
+                    };
+                }
+                return { title: notification?.title || '', detail: notification?.detail || '' };
+            };
             const getLearnscapeNotificationDisplayPriority = (notification) => {
                 const hasClaimableAction = isClaimableCarrotNotification(notification);
                 if (hasClaimableAction) return 0;
@@ -4472,11 +4541,12 @@
                 list.replaceChildren();
                 if (!items.length) {
                     if (message) message.textContent = category === 'system'
-                        ? 'System updates will appear here.'
-                        : 'Game notifications will appear here.';
+                        ? 'Dito lilitaw ang mga update ng sistema.'
+                        : 'Dito lilitaw ang mga abiso ng laro.';
                     return;
                 }
                 items.forEach((notification) => {
+                    const notificationCopy = getNotificationCopy(notification);
                     const item = document.createElement('article');
                     item.className = 'intro-notification-item';
                     item.dataset.notificationType = notification.type || 'progress';
@@ -4485,7 +4555,7 @@
                     item.tabIndex = 0;
                     const isUnread = notification.read !== true;
                     item.classList.toggle('is-unread', isUnread);
-                    item.setAttribute('aria-label', `${notification.title}${isUnread ? ', unread' : ', read'}`);
+                    item.setAttribute('aria-label', `${notificationCopy.title}${isUnread ? ', hindi pa nababasa' : ', nabasa na'}`);
                     const readStatus = document.createElement('span');
                     readStatus.className = `intro-notification-item-read-status ${isUnread ? 'is-unread' : 'is-read'}`;
                     readStatus.setAttribute('aria-hidden', 'true');
@@ -4497,11 +4567,11 @@
                     const copy = document.createElement('span');
                     copy.className = 'intro-notification-item-copy';
                     const title = document.createElement('strong');
-                    title.textContent = notification.title;
+                    title.textContent = notificationCopy.title;
                     copy.appendChild(title);
-                    if (notification.detail) {
+                    if (notificationCopy.detail) {
                         const detail = document.createElement('span');
-                        detail.textContent = notification.detail;
+                        detail.textContent = notificationCopy.detail;
                         copy.appendChild(detail);
                     }
                     const time = document.createElement('time');
@@ -4519,22 +4589,14 @@
                         action.type = 'button';
                         action.dataset.notificationAction = 'view-badge';
                         action.dataset.notificationShape = notification.shape;
-                        action.setAttribute('aria-label', `View ${learnscapeShapeLabels[notification.shape]} badge in Profile`);
-                        action.textContent = 'View';
+                        action.setAttribute('aria-label', `Tingnan ang badge ng ${notificationShapeLabels[notification.shape] || learnscapeShapeLabels[notification.shape]} sa Profile`);
+                        action.textContent = 'Tingnan';
                         meta.appendChild(action);
                     }
-                    if (isClaimableCarrotNotification(notification)) {
-                        const action = document.createElement('button');
-                        action.className = 'intro-notification-claim-carrots';
-                        action.type = 'button';
-                        action.dataset.notificationAction = 'claim-carrots';
-                        action.setAttribute('aria-label', `Claim ${getNotificationCarrotAmount(notification)} carrots`);
-                        action.textContent = 'Claim';
-                        meta.appendChild(action);
-                    } else if (notification.claimRequired === true && notification.claimed === true) {
+                    if (notification.claimRequired === true && notification.claimed === true) {
                         const claimed = document.createElement('span');
                         claimed.className = 'intro-notification-claimed-reward';
-                        claimed.textContent = 'Claimed';
+                        claimed.textContent = 'Nakuha na';
                         meta.appendChild(claimed);
                     }
                     item.append(readStatus, icon, copy, meta);
@@ -4584,28 +4646,33 @@
                         id: `badge:${shape}`,
                         type: 'badge',
                         shape,
-                        title: `${learnscapeShapeLabels[shape]} Badge Earned!`,
-                        detail: 'Open your Profile to reveal your new badge.',
+                        title: `Nakuha ang badge na ${learnscapeShapeLabels[shape]}!`,
+                        detail: 'Buksan ang Profile upang makita ang bago mong badge.',
                     });
                 }
                 if (!introMenuPanel.hidden && introMenuPanel.dataset.panel === 'profile') syncIntroProfile();
             };
             let isCarrotClaimAnimationActive = false;
-            const claimLearnscapeCarrotReward = (notificationId, claimButton) => {
+            const claimLearnscapeCarrotReward = (notificationId, claimSource) => {
                 if (isTutorialSessionActive) return false;
                 if (isCarrotClaimAnimationActive) return false;
                 const notification = learnscapeNotifications.find((item) => item.id === notificationId);
                 if (!isClaimableCarrotNotification(notification)) return false;
                 const amount = getNotificationCarrotAmount(notification);
-                const item = claimButton?.closest('[data-notification-id]');
+                const item = claimSource?.closest?.('[data-notification-id]');
                 const sourceIcon = item?.querySelector('.intro-notification-item-icon');
                 const carrotPill = resourceCountElements.carrots?.closest('.intro-resource-pill-carrot');
                 if (!sourceIcon || !carrotPill) return false;
 
                 playIntroClaimSound();
                 isCarrotClaimAnimationActive = true;
-                claimButton.disabled = true;
-                claimButton.textContent = 'Claiming';
+                const claimButton = claimSource?.matches?.('[data-notification-action="claim-carrots"]')
+                    ? claimSource
+                    : null;
+                if (claimButton) {
+                    claimButton.disabled = true;
+                    claimButton.textContent = 'Claiming';
+                }
                 document.body.classList.add('is-claiming-carrots');
 
                 window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
@@ -4653,7 +4720,7 @@
                         window.setTimeout(() => {
                             notification.claimed = true;
                             notification.read = true;
-                            notification.detail = `${amount} carrots were added to your balance.`;
+                            notification.detail = `Nadagdag na ang ${amount} karot sa iyong balanse.`;
                             writeSoundSetting(`learnscape-carrot-claimed:${notification.id}`, 'true');
                             persistLearnscapeNotifications();
                             persistPendingCarrotClaims();
@@ -4671,6 +4738,7 @@
                             window.setTimeout(() => {
                                 document.body.classList.remove('is-claiming-carrots');
                                 isCarrotClaimAnimationActive = false;
+                                queueAutomaticCarrotClaims();
                             }, 350);
                         }, snapDuration);
                     }, popDuration + popHold);
@@ -4678,6 +4746,22 @@
                 return true;
             };
             window.claimLearnscapeCarrotReward = claimLearnscapeCarrotReward;
+            const queueAutomaticCarrotClaims = () => {
+                if (isTutorialSessionActive || isCarrotClaimAnimationActive) return;
+                window.requestAnimationFrame(() => {
+                    const panel = introMenuCopy?.querySelector('#intro-notification-content');
+                    const isGameNotificationsOpen = !introMenuPanel?.hidden
+                        && introMenuPanel?.dataset.panel === 'notifications'
+                        && panel?.dataset.notificationCategory !== 'system';
+                    if (!isGameNotificationsOpen || isCarrotClaimAnimationActive) return;
+                    const nextReward = sortLearnscapeNotificationsForDisplay(learnscapeNotifications)
+                        .find(isClaimableCarrotNotification);
+                    if (!nextReward) return;
+                    const notificationItem = [...(panel.querySelectorAll('[data-notification-id]') || [])]
+                        .find((item) => item.dataset.notificationId === nextReward.id);
+                    if (notificationItem) claimLearnscapeCarrotReward(nextReward.id, notificationItem);
+                });
+            };
             const learnscapePadlockBreakDuration = 1250;
             const learnscapeIslandUnlockAnimationDuration = 1650;
             const game3IslandEnterPulseDuration = 2500;
@@ -4698,11 +4782,12 @@
                     card.classList.toggle('is-locked', !isUnlocked);
                     card.classList.toggle('is-unlocked', isUnlocked);
                     card.classList.toggle('is-key-ready', isReadyToUnlock);
+                    card.classList.toggle('is-shop-link', !isUnlocked && !isReadyToUnlock);
                     if (lock && !card.classList.contains('is-unlocking')) lock.hidden = isUnlocked;
                     if (enter) {
-                        enter.setAttribute('aria-disabled', String(!isUnlocked && !isReadyToUnlock));
-                        enter.tabIndex = isUnlocked || isReadyToUnlock ? 0 : -1;
-                        enter.textContent = isUnlocked ? 'Lakbayin' : isReadyToUnlock ? 'Buksan' : 'Naka-lock';
+                        enter.setAttribute('aria-disabled', 'false');
+                        enter.tabIndex = 0;
+                        enter.textContent = isUnlocked ? 'Lakbayin' : isReadyToUnlock ? 'Buksan' : 'Pumunta sa Shop';
                     }
                 });
             };
@@ -4739,8 +4824,8 @@
                         id: `area:${shape}`,
                         type: 'progress',
                         shape,
-                        title: `New area unlocked: ${area.name}`,
-                        detail: `${learnscapeShapeLabels[shape]} adventures are now available.`,
+                        title: 'May bagong lugar na nabuksan!',
+                        detail: `Handa nang lakbayin ang lugar ng ${notificationShapeLabels[shape] || learnscapeShapeLabels[shape]}.`,
                     });
                 }
                 window.dispatchEvent(new CustomEvent('learnscape:islandunlocked', { detail: { shape } }));
@@ -4862,6 +4947,7 @@
                     if (!animateLearnscapeIslandUnlock(shape)) activeIslandUnlockShape = '';
                     return;
                 }
+                openIntroMenu('shop', enter);
                 window.playUiClickSound?.('soft');
             }, true);
             syncLearnscapeIslandLocks();
@@ -4884,8 +4970,8 @@
                     id: `camera:${shape}`,
                     type: 'camera',
                     shape,
-                    title: `${shapeLabel} Object Detection Complete`,
-                    detail: 'Shape recognition completed.',
+                    title: `Tapos na ang pagkilala sa ${notificationShapeLabels[shape] || shapeLabel}!`,
+                    detail: 'Matagumpay na nakilala ang hugis.',
                 });
             });
             window.addEventListener('learnscape:routechange', (event) => {
@@ -5019,7 +5105,7 @@
                     || '',
                 ).toLowerCase();
                 if (page?.matches('.circle-camera-page') || stage === 'camera') return 'camera';
-                if (stage === 'hunt' || stage === 'answer' || title.includes('mission')) return 'mission';
+                if (stage === 'hunt' || stage === 'answer' || title.includes('mission') || title.includes('misyon')) return 'mission';
                 return 'lesson';
             };
             const replayBonusAmounts = Object.freeze({ 1: 1, 2: 2, 3: 3 });
@@ -5078,8 +5164,8 @@
                         id: `completion:${rewardIdentity}`,
                         type: completionType,
                         shape,
-                        title: `${shapeLabel} ${completionType === 'mission' ? 'Mission' : 'Lesson'} Complete`,
-                        detail: `${shapeLabel} progress completed.`,
+                        title: `Tapos na ang ${completionType === 'mission' ? 'misyon' : 'aralin'} sa ${notificationShapeLabels[shape] || shapeLabel}!`,
+                        detail: `Nakumpleto na ang progreso sa ${notificationShapeLabels[shape] || shapeLabel}.`,
                     });
                 }
                 addLearnscapeNotification({
@@ -5087,8 +5173,8 @@
                     type: 'reward',
                     shape,
                     stage: starStage,
-                    title: `You earned ${starStage} ${starStage === 1 ? 'star' : 'stars'} in ${shapeLabel}`,
-                    detail: 'Your star total has been updated.',
+                    title: `Nakakuha ka ng ${starStage} bituin sa ${notificationShapeLabels[shape] || shapeLabel}`,
+                    detail: 'Na-update na ang kabuuan ng iyong mga bituin.',
                 });
                 const carrotNotificationId = `carrots:${rewardIdentity}`;
                 const carrotAlreadyClaimed = readSoundSetting(`learnscape-carrot-claimed:${carrotNotificationId}`, 'false') === 'true';
@@ -5100,19 +5186,19 @@
                     rewardAmount: reward,
                     claimRequired: true,
                     claimed: carrotAlreadyClaimed,
-                    title: `${shapeLabel} reward: +${reward} carrots`,
+                    title: `Gantimpala sa ${notificationShapeLabels[shape] || shapeLabel}: +${reward} karot`,
                     detail: carrotAlreadyClaimed
-                        ? `${reward} carrots were added to your balance.`
-                        : 'Claim this reward to add it to your balance.',
+                        ? `Nadagdag na ang ${reward} karot sa iyong balanse.`
+                        : 'Awtomatikong idaragdag ang gantimpalang ito.',
                 });
             };
             const progressMissionNotificationRuns = new WeakMap();
             const progressMissionAudioSource = 'assets/Audios/Sound effects/progress.mp3';
             const progressMissionInitialDelay = 1000;
             const progressCompletionTitles = Object.freeze({
-                1: 'Lesson Complete!',
-                2: 'Mission Complete!',
-                3: 'Game Complete!',
+                1: 'Tapos na ang Aralin!',
+                2: 'Tapos na ang Misyon!',
+                3: 'Tapos na ang Laro!',
             });
             const syncProgressCompletionTitle = (progress, starStage) => {
                 const completionTitle = progressCompletionTitles[starStage];
@@ -5154,29 +5240,29 @@
             const getProgressMissionMessages = (shape, starStage, bonusAmount) => {
                 const shapeLabel = learnscapeShapeLabels[shape];
                 if (bonusAmount) {
-                    const phase = starStage === 1 ? 'Lesson' : starStage === 2 ? 'Mission' : 'Camera Game';
-                    return [`${shapeLabel} ${phase} Completed!`, `Bonus +${bonusAmount} carrot`];
+                    const phase = starStage === 1 ? 'aralin' : starStage === 2 ? 'misyon' : 'hamon sa kamera';
+                    return [`Tapos na ang ${phase} sa ${notificationShapeLabels[shape] || shapeLabel}!`, `Bonus +${bonusAmount} karot`];
                 }
                 const carrotReward = progressRewardsByShape[shape]?.[starStage] || 0;
                 if (starStage === 1) {
                     return [
-                        `${shapeLabel} Lesson Complete!`,
-                        `You earned 1 star in ${shapeLabel}!`,
-                        `You earned ${carrotReward} carrots!`,
+                        `Tapos na ang aralin sa ${notificationShapeLabels[shape] || shapeLabel}!`,
+                        `Nakakuha ka ng 1 bituin sa ${notificationShapeLabels[shape] || shapeLabel}!`,
+                        `Nakakuha ka ng ${carrotReward} karot!`,
                     ];
                 }
                 if (starStage === 2) {
                     return [
-                        `${shapeLabel} Mission Complete!`,
-                        `You earned 2 stars in ${shapeLabel}!`,
-                        `You earned ${carrotReward} carrots!`,
+                        `Tapos na ang misyon sa ${notificationShapeLabels[shape] || shapeLabel}!`,
+                        `Nakakuha ka ng 2 bituin sa ${notificationShapeLabels[shape] || shapeLabel}!`,
+                        `Nakakuha ka ng ${carrotReward} karot!`,
                     ];
                 }
                 return [
-                    `${shapeLabel} Object Detection Complete!`,
-                    `You earned 3 stars in ${shapeLabel}!`,
-                    `${shapeLabel} Badge Earned!`,
-                    `You earned ${carrotReward} carrots!`,
+                    `Tapos na ang pagkilala sa ${notificationShapeLabels[shape] || shapeLabel}!`,
+                    `Nakakuha ka ng 3 bituin sa ${notificationShapeLabels[shape] || shapeLabel}!`,
+                    `Nakuha ang badge na ${learnscapeShapeLabels[shape] || shapeLabel}!`,
+                    `Nakakuha ka ng ${carrotReward} karot!`,
                 ];
             };
             const showProgressMissionNotifications = (progress, shape, starStage, bonusAmount) => {
@@ -6271,8 +6357,8 @@
                     id: 'tutorial:complete',
                     type: 'mission',
                     shape: 'circle',
-                    title: 'Tutorial Complete!',
-                    detail: 'Your Circle mission is ready. Enter Circle Island to continue your adventure.',
+                    title: 'Tapos na ang tutorial!',
+                    detail: 'Handa na ang misyon sa bilog. Pumasok sa Isla ng Bilog upang magpatuloy.',
                 });
                 if (introSettingsTutorialButton) introSettingsTutorialButton.hidden = currentRoute !== 'title';
                 isTutorialReplay = false;

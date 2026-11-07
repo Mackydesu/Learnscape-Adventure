@@ -82,7 +82,7 @@ function circlePlayerHarness() {
         circleTvLessonImage: { hidden: true }, circleTvMascot: null, circleTvQuestionPanel: null,
         isPageVisible: (page) => !page.hidden,
         resetCircleMissionGuide() {}, hideCircleIllustrationProgress() {}, resetCircleSortActivity() {},
-        resetCircleHunt() {}, setCircleIllustrationEarnedStars() {}, resetShapeTvChoices() {},
+        resetCircleHunt() {}, setCircleIllustrationEarnedStars() {}, resetShapeTvChoices() {}, highlightShapeLessonMascot() {},
         setCircleIllustrationPlayButtonVisible: (visible) => { controls.play = visible; },
         setCircleIllustrationSkipButtonVisible: (visible) => { controls.skip = visible; },
         console: { warn: (...args) => warnings.push(args) }, window: {},
@@ -107,7 +107,7 @@ test('interrupted Circle playback cannot restore controls after skipping or rese
     player.pending.shift().reject({ name: 'AbortError' });
     await playing;
     assert.equal(player.controls.play, true);
-    assert.equal(player.controls.skip, true);
+    assert.equal(player.controls.skip, false);
     assert.equal(player.warnings.length, 0);
 });
 
@@ -121,7 +121,7 @@ test('only the current Circle play request can change retry controls', async () 
     player.pending.shift().reject({ name: 'NotAllowedError' });
     await second;
     assert.equal(player.controls.play, true);
-    assert.equal(player.controls.skip, true);
+    assert.equal(player.controls.skip, false);
     assert.equal(player.warnings.length, 1);
 
     const interrupted = player.window.__learnscapePlayCircleIllustrationVideo();
