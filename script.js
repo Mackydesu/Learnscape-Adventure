@@ -14027,19 +14027,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const ovalGameOverPanel = ovalTimeoutFlow?.querySelector('.oval-game-over-panel') || null;
     const ovalGameOverRetryButton = ovalTimeoutFlow?.querySelector('.oval-game-over-retry') || null;
     // The fixed 10-card Oval deck has four image pairs and two traps.
-    // Both cards in a pair use the same labeled object image.
+    // Both cards in a pair use the same plain oval image.
     // Object 5 is intentionally not part of the mission or completion reward.
     const ovalPairNumbers = Object.freeze([1, 2, 3, 4]);
     const ovalPairPieces = ovalPairNumbers.flatMap((ovalNumber) => ([
         {
             number: ovalNumber,
-            image: `assets/Shape UI/oval${ovalNumber}object.webp`,
+            image: `assets/Shape UI/oval${ovalNumber}.webp`,
             objectImage: `assets/Shape UI/oval${ovalNumber}object.webp`,
             side: 'center',
         },
         {
             number: ovalNumber,
-            image: `assets/Shape UI/oval${ovalNumber}object.webp`,
+            image: `assets/Shape UI/oval${ovalNumber}.webp`,
             objectImage: `assets/Shape UI/oval${ovalNumber}object.webp`,
             side: 'center',
         },
