@@ -1,7 +1,7 @@
 const SHELL_CACHE = 'learnscape-shell-v2';
 const META_CACHE = 'learnscape-meta-v2';
 // Bump this revision whenever the published app shell must replace an installed cache.
-const SHELL_REVISION = '20261107-02';
+const SHELL_REVISION = '20261109-11';
 const ACTIVE_CACHE_KEY = new URL('__learnscape_active_cache__', self.registration.scope).href;
 
 self.addEventListener('install', (event) => {
@@ -90,7 +90,10 @@ self.addEventListener('fetch', (event) => {
   const isShell = request.mode === 'navigate' || /\.(?:html|js|css)$/.test(url.pathname) ||
     url.pathname.endsWith('/runtime-assets.json');
   event.respondWith((async () => {
-    if (request.cache === 'reload') {
+    // The startup verifier uses no-cache when checking a new runtime manifest.
+    // It must reach the network here; otherwise a stale active runtime cache can
+    // return an asset whose hash no longer matches the manifest.
+    if (request.cache === 'reload' || request.cache === 'no-cache') {
       try {
         const response = await fetch(request);
         if (request.mode === 'navigate' && response.type === 'opaqueredirect') return response;

@@ -14010,8 +14010,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const ovalMissionMessagePanel = ovalMissionGuide?.querySelector('.oval-mission-message-panel') || null;
     const ovalMissionMessageText = ovalMissionGuide?.querySelector('.oval-mission-message-text') || null;
     const ovalMissionStartButton = ovalMissionGuide?.querySelector('.oval-mission-start-button') || null;
-    const ovalTargetPicker = ovalBoardGamePage?.querySelector('.oval-target-picker') || null;
-    const ovalTargetButtons = Array.from(ovalTargetPicker?.querySelectorAll('[data-oval-target]') || []);
     const ovalMatchProgressValue = ovalBoardGamePage?.querySelector('.oval-match-progress-value') || null;
     const ovalMatchTimerPanel = ovalBoardGamePage?.querySelector('.oval-match-timer-panel') || null;
     const ovalMatchTimerValue = ovalMatchTimerPanel?.querySelector('.oval-match-timer-value') || null;
@@ -14028,29 +14026,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     const ovalTimesUpStage = ovalTimeoutFlow?.querySelector('.oval-times-up-stage') || null;
     const ovalGameOverPanel = ovalTimeoutFlow?.querySelector('.oval-game-over-panel') || null;
     const ovalGameOverRetryButton = ovalTimeoutFlow?.querySelector('.oval-game-over-retry') || null;
-    const ovalPairPieces = [1, 2, 3, 4, 5].flatMap((ovalNumber) => ([
+    // The fixed 10-card Oval deck has four image pairs and two traps.
+    // Both cards in a pair use the same labeled object image.
+    // Object 5 is intentionally not part of the mission or completion reward.
+    const ovalPairNumbers = Object.freeze([1, 2, 3, 4]);
+    const ovalPairPieces = ovalPairNumbers.flatMap((ovalNumber) => ([
         {
             number: ovalNumber,
-            image: `assets/Shape UI/oval${ovalNumber}.webp`,
+            image: `assets/Shape UI/oval${ovalNumber}object.webp`,
             objectImage: `assets/Shape UI/oval${ovalNumber}object.webp`,
-            side: 'left',
+            side: 'center',
         },
         {
             number: ovalNumber,
-            image: `assets/Shape UI/oval${ovalNumber}.webp`,
+            image: `assets/Shape UI/oval${ovalNumber}object.webp`,
             objectImage: `assets/Shape UI/oval${ovalNumber}object.webp`,
-            side: 'right',
+            side: 'center',
         },
     ]));
     const ovalObjectImageByNumber = new Map(
         ovalPairPieces.map((piece) => [String(piece.number), piece.objectImage]),
     );
     const ovalChallengePieces = [
-        { number: 'bomb-1', challengeType: 'bomb' },
-        { number: 'bomb-2', challengeType: 'bomb' },
-        { number: 'bomb-3', challengeType: 'bomb' },
-        { number: 'freeze-1', challengeType: 'freeze' },
-        { number: 'freeze-2', challengeType: 'freeze' },
+        { number: 'bomb', challengeType: 'bomb' },
+        { number: 'freeze', challengeType: 'freeze' },
     ].map((piece) => ({
         ...piece,
         image: '',
@@ -14058,11 +14057,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         side: 'center',
         challenge: true,
     }));
-    const ovalTargetConfigurations = new Map([
-        [5, { pairCount: 2, challenges: ['bomb'] }],
-        [10, { pairCount: 4, challenges: ['bomb', 'freeze'] }],
-        [15, { pairCount: 5, challenges: ['bomb', 'bomb', 'bomb', 'freeze', 'freeze'] }],
-    ]);
+    const ovalMissionConfiguration = Object.freeze({
+        cardCount: (ovalPairNumbers.length * 2) + 2,
+        pairCount: ovalPairNumbers.length,
+        challenges: ['bomb', 'freeze'],
+    });
     const shuffleOvalPieces = (pieces) => {
         const shuffled = [...pieces];
         for (let index = shuffled.length - 1; index > 0; index -= 1) {
@@ -14071,9 +14070,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         return shuffled;
     };
-    const buildOvalTargetPieces = (cardCount) => {
-        const configuration = ovalTargetConfigurations.get(cardCount) || ovalTargetConfigurations.get(15);
-        const pairPieces = ovalPairPieces.filter((piece) => Number(piece.number) <= configuration.pairCount);
+    const buildOvalTargetPieces = () => {
+        const configuration = ovalMissionConfiguration;
+        const pairPieces = [...ovalPairPieces];
         const challengePools = {
             bomb: ovalChallengePieces.filter((piece) => piece.challengeType === 'bomb'),
             freeze: ovalChallengePieces.filter((piece) => piece.challengeType === 'freeze'),
@@ -14086,9 +14085,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         return shuffleOvalPieces([...pairPieces, ...challenges]);
     };
-    let ovalTargetCardCount = 15;
-    let ovalTargetPairCount = 5;
-    let ovalHalfPieces = buildOvalTargetPieces(ovalTargetCardCount);
+    const ovalTargetCardCount = ovalMissionConfiguration.cardCount;
+    const ovalTargetPairCount = ovalMissionConfiguration.pairCount;
+    let ovalHalfPieces = buildOvalTargetPieces();
     let ovalOpenCards = [];
     let ovalMatchResolving = false;
     let ovalRewardHideTimer = null;
@@ -14115,6 +14114,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let ovalGameOverSession = 0;
     let ovalGameOverTimers = [];
     let ovalGameOverActive = false;
+    let openOvalMissionAtStartScreen = false;
     const ovalMissionAudioSource = 'assets/Audios/Voice over/oval mission.mp3';
     const ovalReadyAudioSource = 'assets/Audios/Voice over/Handa ka na ba.mp3';
     const getActiveOvalBoardCards = () => ovalBoardCards.filter((card) => !card.hidden);
@@ -14561,7 +14561,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             ovalMissionStartButton.hidden = true;
             ovalMissionStartButton.classList.remove('is-visible');
         }
-        if (ovalTargetPicker) ovalTargetPicker.hidden = true;
         ovalBoardGamePage?.classList.remove('is-mission-intro');
     };
 
@@ -14572,7 +14571,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const session = ovalMissionSession;
         resetOvalBoardGame();
         ovalGameStarted = false;
-        if (ovalTargetPicker) ovalTargetPicker.hidden = true;
         ovalBoardGamePage.classList.add('is-mission-intro');
         ovalBoardStage?.setAttribute('aria-hidden', 'true');
         ovalBoardCards.forEach((card) => {
@@ -14666,10 +14664,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             ovalGameCelebration.classList.remove('is-active');
         }
 
-        ovalHalfPieces = buildOvalTargetPieces(ovalTargetCardCount);
+        ovalHalfPieces = buildOvalTargetPieces();
         const resetPieces = [...ovalHalfPieces];
         ovalBoardStage?.setAttribute('aria-label', `${ovalTargetCardCount} piraso ng board na bilohaba`);
-        ovalBoardStage?.setAttribute('data-oval-target-size', String(ovalTargetCardCount));
+        ovalBoardStage?.removeAttribute('data-oval-target-size');
         ovalBoardCards.forEach((card, index) => {
             const isActiveCard = index < ovalTargetCardCount;
             card.hidden = !isActiveCard;
@@ -14932,12 +14930,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    const startOvalTargetRound = (cardCount) => {
-        const configuration = ovalTargetConfigurations.get(cardCount);
-        if (!configuration) return;
-        ovalTargetCardCount = cardCount;
-        ovalTargetPairCount = configuration.pairCount;
-        if (ovalTargetPicker) ovalTargetPicker.hidden = true;
+    const startOvalTargetRound = () => {
         resetOvalBoardGame();
         ovalGameStarted = false;
         ovalMatchResolving = true;
@@ -14954,13 +14947,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     };
 
-    ovalTargetButtons.forEach((button) => {
-        button.addEventListener('click', () => {
-            playUiClickSound('start');
-            startOvalTargetRound(Number(button.dataset.ovalTarget));
-        });
-    });
-
     ovalMissionStartButton?.addEventListener('click', () => {
         playUiClickSound('start');
         clearOvalMissionTimers();
@@ -14974,52 +14960,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         ovalMissionTimers.push(window.setTimeout(() => {
             if (ovalMissionGuide) ovalMissionGuide.hidden = true;
         }, 520));
-        if (ovalTargetPicker) {
-            ovalTargetPicker.hidden = false;
-            ovalTargetButtons[0]?.focus({ preventScroll: true });
-        } else {
-            startOvalTargetRound(15);
-        }
+        startOvalTargetRound();
     });
 
     ovalGameOverRetryButton?.addEventListener('click', () => {
         playUiClickSound('start');
-        clearOvalGameOverFlow();
-        resetOvalBoardGame();
-        ovalGameStarted = false;
-        ovalBoardGamePage?.classList.add('is-mission-intro');
-        ovalBoardStage?.setAttribute('aria-hidden', 'true');
-        ovalBoardCards.forEach((card) => { card.disabled = true; });
-        if (ovalMissionGuide) {
-            ovalMissionGuide.hidden = false;
-            ovalMissionGuide.setAttribute('aria-hidden', 'false');
-            ovalMissionGuide.classList.remove('is-visible');
-        }
-        if (ovalMissionStartButton) {
-            ovalMissionStartButton.hidden = false;
-            ovalMissionStartButton.getBoundingClientRect();
-            ovalMissionStartButton.classList.add('is-visible');
-        }
+        showOvalMissionStartDirectly();
     });
 
     ovalFinalReplayButton?.addEventListener('click', () => {
         playUiClickSound('start');
-        stopOvalMissionIntro();
-        resetOvalBoardGame();
-        ovalGameStarted = false;
-        ovalBoardGamePage?.classList.add('is-mission-intro');
-        ovalBoardStage?.setAttribute('aria-hidden', 'true');
-        ovalBoardCards.forEach((card) => { card.disabled = true; });
-        if (ovalMissionGuide) {
-            ovalMissionGuide.hidden = false;
-            ovalMissionGuide.setAttribute('aria-hidden', 'false');
-        }
-        if (ovalMissionStartButton) {
-            ovalMissionStartButton.hidden = false;
-            ovalMissionStartButton.getBoundingClientRect();
-            ovalMissionStartButton.classList.add('is-visible');
-            ovalMissionStartButton.focus({ preventScroll: true });
-        }
+        showOvalMissionStartDirectly();
     });
 
     ovalFinalNextButton?.addEventListener('click', () => {
@@ -15030,8 +14981,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     window.addEventListener('learnscape:routechange', (event) => {
         if (event.detail?.route === 'ovalBoardGame') {
-            startOvalMissionIntro();
+            if (openOvalMissionAtStartScreen) {
+                openOvalMissionAtStartScreen = false;
+                showOvalMissionStartDirectly();
+            } else {
+                startOvalMissionIntro();
+            }
         } else {
+            openOvalMissionAtStartScreen = false;
             stopOvalMissionIntro();
         }
     });
@@ -15284,9 +15241,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (shape === 'oval') {
+            openOvalMissionAtStartScreen = true;
+            // Prepare the exact Simulan na screen before the route transition;
+            // the route listener repeats this once the Oval page is visible.
+            showOvalMissionStartDirectly();
             navigateToShapePhase(config.mission, () => {
-                stopOvalMissionIntro();
-                startOvalTargetRound(15);
                 enableMissionHowToHelp('oval');
             });
             return true;
@@ -15794,7 +15753,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             island: 'Oval Island',
             mission: 'Itugma ang lahat ng pares bago maubos ang 45 segundo.',
             steps: [
-                'Piliin ang dami ng card.',
                 'Tandaan ang mga card sa loob ng tatlong segundong preview.',
                 'Baligtarin ang mga card upang hanapin ang bawat magkatugmang pares.',
                 'Ang tamang pares ay nagdadagdag ng 5 segundo.',
@@ -15803,7 +15761,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 'Mag-ingat sa mga trap card.',
                 'Ang bomba ay nagbabawas ng 5 segundo.',
                 'Pinatitigil ng freeze card ang dalawang karaniwang card sa loob ng 5 segundo.',
-                'Hanapin ang bawat pares bago maging zero ang oras.',
+                'Hanapin ang bawat pares bago maubos ang oras.',
             ],
             scopes: ['#learnscape-oval-board-game-page'],
         },

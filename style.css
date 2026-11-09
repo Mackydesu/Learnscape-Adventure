@@ -17689,93 +17689,6 @@ body *::after {
     z-index: 10;
 }
 
-.oval-target-picker[hidden] {
-    display: none !important;
-}
-
-.oval-target-picker {
-    position: absolute;
-    inset: 0;
-    z-index: 12;
-    display: grid;
-    place-items: center;
-    padding: 1rem;
-    background: rgba(48, 23, 8, 0.6);
-}
-
-.oval-target-picker-panel {
-    display: grid;
-    justify-items: center;
-    gap: 0.65rem;
-    width: min(48rem, calc(100vw - 2rem));
-    box-sizing: border-box;
-    padding: clamp(1.25rem, 2.5vw, 2rem);
-    border: 0.3rem solid #663515;
-    border-radius: 1.3rem;
-    background: linear-gradient(180deg, #fff7c9 0%, #f6c66d 58%, #e89947 100%);
-    box-shadow: inset 0 0.16rem rgba(255, 255, 255, 0.85), 0 0.48rem 0 #773f1a, 0 1rem 2rem rgba(43, 20, 7, 0.48);
-    color: #48240d;
-    text-align: center;
-    animation: ovalTargetPickerIn 0.48s cubic-bezier(0.2, 1.18, 0.32, 1) both;
-}
-
-.oval-target-picker-panel > strong {
-    font-size: clamp(2rem, 4vw, 3.6rem);
-    line-height: 1;
-    text-shadow: 0 0.1rem #fff3a9;
-}
-
-.oval-target-picker-panel > span {
-    font-size: clamp(1rem, 2vw, 1.45rem);
-    font-weight: 800;
-}
-
-.oval-target-picker-choices {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: clamp(0.65rem, 1.5vw, 1.2rem);
-    width: 100%;
-    margin-top: 0.35rem;
-}
-
-.oval-target-picker-choices button {
-    display: grid;
-    justify-items: center;
-    gap: 0.25rem;
-    min-height: clamp(7rem, 15vh, 10rem);
-    padding: 0.8rem 0.55rem;
-    border: 0.24rem solid #6d3a18;
-    border-radius: 1rem;
-    background: linear-gradient(180deg, #fffce0, #ffc75c);
-    box-shadow: inset 0 0.14rem rgba(255, 255, 255, 0.92), 0 0.3rem 0 #7c421b;
-    color: #4b260e;
-    cursor: pointer;
-    transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
-}
-
-.oval-target-picker-choices button:hover,
-.oval-target-picker-choices button:focus-visible {
-    outline: none;
-    filter: brightness(1.08);
-    transform: translateY(-0.2rem) scale(1.035);
-    box-shadow: inset 0 0.14rem rgba(255, 255, 255, 0.92), 0 0.3rem 0 #7c421b, 0 0 1rem #fff276;
-}
-
-.oval-target-picker-choices b {
-    font-size: clamp(2.8rem, 6vw, 5rem);
-    line-height: 1;
-}
-
-.oval-target-picker-choices small {
-    font-size: clamp(0.72rem, 1.35vw, 1rem);
-    font-weight: 800;
-}
-
-@keyframes ovalTargetPickerIn {
-    from { opacity: 0; transform: translateY(1.4rem) scale(0.86); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
 .oval-board-game-page.is-mission-intro .oval-board-stage,
 .oval-board-game-page.is-mission-intro .oval-board-title-panel,
 .oval-board-game-page.is-mission-intro .oval-match-progress-panel,
@@ -17830,10 +17743,12 @@ body *::after {
         0 0.36rem 0 #78461d,
         0 0.7rem 1.2rem rgba(56, 27, 9, 0.26);
     color: #43220d;
-    font-size: clamp(2.2rem, 3.4vw, 4rem);
+    font-size: clamp(1.25rem, 2.45vw, 3rem);
     font-weight: 900;
+    line-height: 1.1;
     text-align: center;
     text-shadow: 0 0.1rem 0 #fff1b0;
+    white-space: nowrap;
 }
 
 .oval-match-progress-panel,
@@ -17957,15 +17872,15 @@ body *::after {
     position: absolute;
     z-index: 3;
     left: 50%;
-    top: 22%;
+    top: 52%;
     display: grid;
-    width: min(92vw, 92rem);
+    width: min(86vw, 82rem);
     grid-template-columns: repeat(5, 1fr);
-    gap: clamp(0.5rem, 1vh, 0.9rem) clamp(0.8rem, 1.35vw, 1.5rem);
+    gap: clamp(0.3rem, 0.65vh, 0.55rem) clamp(0.3rem, 0.6vw, 0.65rem);
     justify-content: center;
     justify-items: center;
     align-items: center;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
     padding: 0;
     border: 0;
     background: transparent;
@@ -17974,7 +17889,7 @@ body *::after {
 
 .oval-board-card {
     position: relative;
-    width: clamp(6.1rem, 8.6vw, 9.8rem);
+    width: clamp(6.5rem, 11.8vw, 13rem);
     aspect-ratio: 0.68;
     border: 0;
     border-radius: 50% / 43%;
@@ -17994,46 +17909,16 @@ body *::after {
 .oval-board-card:nth-child(3n) { --oval-tilt: 0deg; }
 
 .oval-board-card:nth-child(even) {
-    width: clamp(8.9rem, 12.2vw, 14.1rem);
+    width: clamp(9.2rem, 16vw, 18rem);
     aspect-ratio: 1.48;
     border-radius: 44% / 50%;
-}
-
-.oval-board-stage[data-oval-target-size="5"] {
-    top: 52%;
-    width: min(94vw, 88rem);
-    column-gap: clamp(0.25rem, 0.6vw, 0.65rem);
-    transform: translate(-50%, -50%);
-}
-
-.oval-board-stage[data-oval-target-size="5"] .oval-board-card:nth-child(odd) {
-    width: clamp(7rem, 12vw, 13.5rem);
-}
-
-.oval-board-stage[data-oval-target-size="5"] .oval-board-card:nth-child(even) {
-    width: clamp(10rem, 17vw, 19rem);
-}
-
-.oval-board-stage[data-oval-target-size="10"] {
-    top: 52%;
-    width: min(86vw, 82rem);
-    gap: clamp(0.3rem, 0.65vh, 0.55rem) clamp(0.3rem, 0.6vw, 0.65rem);
-    transform: translate(-50%, -50%);
-}
-
-.oval-board-stage[data-oval-target-size="10"] .oval-board-card:nth-child(odd) {
-    width: clamp(6.5rem, 11.8vw, 13rem);
-}
-
-.oval-board-stage[data-oval-target-size="10"] .oval-board-card:nth-child(even) {
-    width: clamp(9.2rem, 16vw, 18rem);
 }
 
 @media (orientation: landscape) and (max-height: 700px) {
     .oval-board-title-panel {
         width: 36vw;
         padding: 0.35rem 0.5rem;
-        font-size: clamp(1rem, 5vh, 2rem);
+        font-size: clamp(0.75rem, 3.6vh, 1.35rem);
     }
 
     .oval-match-progress-panel,
@@ -18051,36 +17936,20 @@ body *::after {
     .oval-match-timer-panel strong { font-size: clamp(0.8rem, 3.5vh, 1.4rem); }
     .oval-timer-clock-icon { width: clamp(1.1rem, 5vh, 2rem); }
 
-    .oval-board-stage:not([data-oval-target-size="5"]) {
+    .oval-board-stage {
         top: 24%;
         bottom: 3%;
-        grid-template-rows: repeat(3, minmax(0, 1fr));
+        grid-template-rows: repeat(2, minmax(0, 1fr));
         row-gap: min(1vh, 0.4rem);
         transform: translateX(-50%);
     }
 
-    .oval-board-stage:not([data-oval-target-size="5"]) .oval-board-card:nth-child(odd) {
-        width: min(8.6vw, 14.8vh, 9.8rem);
-    }
-
-    .oval-board-stage:not([data-oval-target-size="5"]) .oval-board-card:nth-child(even) {
-        width: min(12.2vw, 22vh, 14.1rem);
-    }
-
-    .oval-board-stage[data-oval-target-size="10"] { grid-template-rows: repeat(2, minmax(0, 1fr)); }
-    .oval-board-stage[data-oval-target-size="10"] .oval-board-card:nth-child(odd) {
+    .oval-board-stage .oval-board-card:nth-child(odd) {
         width: min(11.8vw, 23vh, 13rem);
     }
-    .oval-board-stage[data-oval-target-size="10"] .oval-board-card:nth-child(even) {
+    .oval-board-stage .oval-board-card:nth-child(even) {
         width: min(16vw, 34vh, 18rem);
     }
-    .oval-board-stage[data-oval-target-size="5"] .oval-board-card:nth-child(odd) {
-        width: min(12vw, 32vh, 13.5rem);
-    }
-    .oval-board-stage[data-oval-target-size="5"] .oval-board-card:nth-child(even) {
-        width: min(17vw, 47vh, 19rem);
-    }
-
     .oval-board-game-page .oval-board-card .oval-card-number,
     .oval-board-game-page .oval-board-card:nth-child(even) .oval-card-number {
         font-size: clamp(1rem, 8vh, 3rem);

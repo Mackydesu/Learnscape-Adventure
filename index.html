@@ -45,7 +45,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="style.css?v=20261107-02">
+    <link rel="stylesheet" href="style.css?v=20261109-07">
 </head>
 <body class="title-page is-page-loading is-initial-loading" aria-busy="true">
     <div id="app-shell-container" class="app-shell-container">
@@ -1397,8 +1397,8 @@
 
     <section id="learnscape-oval-board-game-page" class="oval-board-game-page" hidden>
         <img class="game1-bg-image oval-board-bg" src="assets/Backgrounds/oval.webp" alt="" aria-hidden="true">
-        <div class="oval-board-title-panel" aria-label="Larong Pagtutugma ng Bilohaba">
-            <span>Larong Pagtutugma ng Bilohaba</span>
+        <div class="oval-board-title-panel" aria-label="Hanapin ang Magkapares">
+            <span>Hanapin ang Magkapares</span>
         </div>
         <div class="oval-match-progress-panel" aria-live="polite">
             <span>Pares</span>
@@ -1415,18 +1415,7 @@
             </div>
             <button class="circle-mission-start-button oval-mission-start-button" type="button" data-how-to-shape="oval" hidden>Simulan na</button>
         </div>
-        <div class="oval-target-picker" role="dialog" aria-modal="true" aria-labelledby="oval-target-picker-title" hidden>
-            <div class="oval-target-picker-panel">
-                <strong id="oval-target-picker-title">Pumili ng mga kard na layunin</strong>
-                <span>Ilang kard ang gusto mong laruin?</span>
-                <div class="oval-target-picker-choices">
-                    <button type="button" data-oval-target="5"><b>5</b><small>2 pairs + bomb</small></button>
-                    <button type="button" data-oval-target="10"><b>10</b><small>4 pairs + traps</small></button>
-                    <button type="button" data-oval-target="15"><b>15</b><small>5 pairs + traps</small></button>
-                </div>
-            </div>
-        </div>
-        <div class="oval-board-stage" aria-label="15 oval board pieces">
+        <div class="oval-board-stage" aria-label="10 oval board pieces">
             <button class="oval-board-card" type="button" aria-label="Oval board card 1" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">1</span></span><span class="oval-card-face oval-card-front"></span></button>
             <button class="oval-board-card" type="button" aria-label="Oval board card 2" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">2</span></span><span class="oval-card-face oval-card-front"></span></button>
             <button class="oval-board-card" type="button" aria-label="Oval board card 3" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">3</span></span><span class="oval-card-face oval-card-front"></span></button>
@@ -1437,11 +1426,6 @@
             <button class="oval-board-card" type="button" aria-label="Oval board card 8" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">8</span></span><span class="oval-card-face oval-card-front"></span></button>
             <button class="oval-board-card" type="button" aria-label="Oval board card 9" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">9</span></span><span class="oval-card-face oval-card-front"></span></button>
             <button class="oval-board-card" type="button" aria-label="Oval board card 10" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">10</span></span><span class="oval-card-face oval-card-front"></span></button>
-            <button class="oval-board-card" type="button" aria-label="Oval board card 11" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">11</span></span><span class="oval-card-face oval-card-front"></span></button>
-            <button class="oval-board-card" type="button" aria-label="Oval board card 12" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">12</span></span><span class="oval-card-face oval-card-front"></span></button>
-            <button class="oval-board-card" type="button" aria-label="Oval board card 13" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">13</span></span><span class="oval-card-face oval-card-front"></span></button>
-            <button class="oval-board-card" type="button" aria-label="Oval board card 14" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">14</span></span><span class="oval-card-face oval-card-front"></span></button>
-            <button class="oval-board-card" type="button" aria-label="Oval board card 15" aria-pressed="false"><span class="oval-card-face oval-card-back"><span class="oval-card-number">15</span></span><span class="oval-card-face oval-card-front"></span></button>
         </div>
         <div class="oval-match-reward" aria-live="polite" aria-label="Matched oval object" hidden>
             <div class="oval-match-confetti" aria-hidden="true"></div>
@@ -2197,7 +2181,7 @@
         <a class="game-return-btn loading-link game-icon-button icon-back" href="index.html" data-route="shape-area-8" aria-label="Return to Diamond Island intro"><span>‹</span>Back</a>
     </section>
 
-    <script src="./script.js?v=20261107-02"></script>
+    <script src="./script.js?v=20261109-12"></script>
     </div>
 
     <script>
@@ -2300,7 +2284,7 @@
                     hash: '#shape-area-5',
                 },
                 ovalBoardGame: {
-                    title: 'Learnscape Adventure - Oval Match Game',
+                    title: 'Learnscape Adventure - Hanapin ang Magkapares',
                     bodyClass: 'gameplay-page',
                     pageId: 'learnscape-oval-board-game-page',
                     hash: '#oval-board-game',
@@ -4772,22 +4756,40 @@
                 enter.classList.add('is-attention-pulse');
                 window.setTimeout(() => enter.classList.remove('is-attention-pulse'), game3IslandEnterPulseDuration);
             };
+            // Keep the island action in sync with the red Shop indicator: a locked
+            // island points to the Shop only when its own key can be purchased.
+            const isLearnscapeKeyAvailableToPurchase = (shape) => {
+                const carrots = window.getLearnscapeResourceCount?.('carrots')
+                    ?? Math.max(0, Math.floor(Number(readSoundSetting('learnscape-carrot-count', '0')) || 0));
+                const isPurchased = isTutorialSessionActive
+                    ? shape === 'circle' && tutorialCircleKeyPurchased
+                    : isLearnscapeKeyPurchased(shape);
+                return !isPurchased && carrots >= getIntroShopCost(shape);
+            };
             const syncLearnscapeIslandLocks = () => {
                 document.querySelectorAll('.game3-island-card[data-island-shape]').forEach((card) => {
                     const shape = card.dataset.islandShape;
                     const isUnlocked = isLearnscapeIslandUnlocked(shape);
                     const isReadyToUnlock = !isUnlocked && isLearnscapeKeyPurchased(shape);
+                    const isKeyAvailable = !isUnlocked && !isReadyToUnlock && isLearnscapeKeyAvailableToPurchase(shape);
                     const lock = card.querySelector('.game3-island-lock');
                     const enter = card.querySelector('.game3-island-enter');
                     card.classList.toggle('is-locked', !isUnlocked);
                     card.classList.toggle('is-unlocked', isUnlocked);
                     card.classList.toggle('is-key-ready', isReadyToUnlock);
-                    card.classList.toggle('is-shop-link', !isUnlocked && !isReadyToUnlock);
+                    card.classList.toggle('is-shop-link', isKeyAvailable);
                     if (lock && !card.classList.contains('is-unlocking')) lock.hidden = isUnlocked;
                     if (enter) {
-                        enter.setAttribute('aria-disabled', 'false');
-                        enter.tabIndex = 0;
-                        enter.textContent = isUnlocked ? 'Lakbayin' : isReadyToUnlock ? 'Buksan' : 'Pumunta sa Shop';
+                        const isLockedWithoutAvailableKey = !isUnlocked && !isReadyToUnlock && !isKeyAvailable;
+                        enter.setAttribute('aria-disabled', String(isLockedWithoutAvailableKey));
+                        enter.tabIndex = isLockedWithoutAvailableKey ? -1 : 0;
+                        enter.textContent = isUnlocked
+                            ? 'Lakbayin'
+                            : isReadyToUnlock
+                                ? 'Buksan'
+                                : isKeyAvailable
+                                    ? 'Pumunta sa Shop'
+                                    : 'Naka-Lock';
                     }
                 });
             };
@@ -4938,6 +4940,7 @@
                 if (!card) return;
                 event.preventDefault();
                 event.stopImmediatePropagation();
+                if (enter.getAttribute('aria-disabled') === 'true') return;
                 const shape = card.dataset.islandShape || '';
                 const isTutorialKeyReady = shape === 'circle'
                     && onboardingStage === 'unlocking'
@@ -5051,7 +5054,10 @@
             };
             syncIntroShopAvailability();
             window.addEventListener('learnscape:resourcechange', (event) => {
-                if (event.detail?.resource === 'carrots') syncIntroShopAvailability();
+                if (event.detail?.resource === 'carrots') {
+                    syncIntroShopAvailability();
+                    syncLearnscapeIslandLocks();
+                }
                 if (introMenuPanel?.dataset.panel === 'profile' && !introMenuPanel.hidden) syncIntroProfile();
             });
             const progressRewardsByShape = Object.freeze({
@@ -6537,7 +6543,7 @@ const loadRuntimeAssets = async () => {
     let persistentStorage = false;
     if ('serviceWorker' in navigator && 'caches' in window) {
         try {
-        const registration = await navigator.serviceWorker.register(new URL('sw.js?rev=20261107-02', document.baseURI));
+        const registration = await navigator.serviceWorker.register(new URL('sw.js?rev=20261109-11', document.baseURI));
             // The installed app keeps its own shell cache. Ask it to check this
             // revision immediately so interface updates are not held by an old shell.
         const updateCheck = registration.update?.();
