@@ -12487,10 +12487,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         dispatchCameraLifecycle('learnscape:camerastarted', page, video, { requireRemoval });
         // Do not leave the player behind a closed curtain if a browser blocks
         // the readiness or fullscreen event. The detector remains gated until
-        // this opens the curtain, so no hidden frame can be accepted.
+        // this opens the curtain, so no hidden frame can be accepted. Use the
+        // same “Handa na?” transition as a normal ready event.
         detectionReadyFallbackTimer = window.setTimeout(() => {
             if (!isPageVisible(page) || !video?.srcObject?.active) return;
-            openCurtains();
+            detectionReady = true;
+            fullscreenPromptCompleted = true;
+            tryOpenCurtains();
         }, 2500);
         return true;
     };
