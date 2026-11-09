@@ -12890,6 +12890,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         page.dataset.cameraDetectionCount = String(nextCount);
         saveCameraScanProgress(page, nextCount);
         showCameraDetectionFeedback(page);
+        playCameraScanRewardAudio(page, 'assets/Audios/Sound effects/kids cheering.mp3', 0.9);
         // Only the verified label that exactly matches this mission target is
         // allowed to reach the spoken-name sequence.
         playCameraDetectionCelebration(page, verifiedShape, () => {

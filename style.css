@@ -15645,8 +15645,8 @@ body *::after {
     animation: circleCameraTargetImagePulse 1.5s ease-in-out infinite alternate;
 }
 
-.circle-camera-page.is-camera-detection-success .circle-camera-target-image {
-    animation: cameraTargetSuccessJump 680ms cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
+.circle-camera-page.is-camera-detection-celebrating .circle-camera-target-image {
+    animation: cameraTargetSuccessJump 680ms cubic-bezier(0.2, 0.9, 0.3, 1.25) infinite;
 }
 
 .circle-camera-target-card strong {
