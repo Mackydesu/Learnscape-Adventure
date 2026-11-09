@@ -15635,6 +15635,16 @@ body *::after {
     animation: circleCameraTargetPulse 1.5s ease-in-out infinite alternate;
 }
 
+.circle-camera-target-image {
+    display: block;
+    width: clamp(8rem, 13vw, 13.5rem);
+    aspect-ratio: 1;
+    margin: 1.15rem auto 0.8rem;
+    object-fit: contain;
+    filter: drop-shadow(0 0.2rem 0.25rem rgba(61, 35, 17, 0.34));
+    animation: circleCameraTargetImagePulse 1.5s ease-in-out infinite alternate;
+}
+
 .circle-camera-target-card strong {
     display: inline-grid;
     place-items: center;
@@ -18881,6 +18891,17 @@ body *::after {
             drop-shadow(0 0 0.2rem var(--camera-target-border))
             drop-shadow(0 0 0.12rem var(--camera-target-border))
             brightness(1.08);
+    }
+}
+
+@keyframes circleCameraTargetImagePulse {
+    from {
+        transform: scale(1);
+        filter: drop-shadow(0 0.2rem 0.25rem rgba(61, 35, 17, 0.34)) brightness(1);
+    }
+    to {
+        transform: scale(1.035);
+        filter: drop-shadow(0 0.3rem 0.4rem rgba(61, 35, 17, 0.4)) brightness(1.08);
     }
 }
 
@@ -23653,7 +23674,8 @@ body.about-page {
         font-size: clamp(0.65rem, 2.55vh, 1.2rem);
     }
 
-    .circle-camera-page:not(.camera-test-page) .circle-camera-target-shape {
+    .circle-camera-page:not(.camera-test-page) .circle-camera-target-shape,
+    .circle-camera-page:not(.camera-test-page) .circle-camera-target-image {
         flex: 0 0 auto;
         width: min(14vw, 29vh, 11rem);
         margin: 0 auto;
