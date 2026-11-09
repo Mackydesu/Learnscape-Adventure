@@ -24,6 +24,14 @@ function cameraPageVisible(page) {
         getComputedStyle(page).display !== "none" && getComputedStyle(page).visibility !== "hidden");
 }
 
+function cameraCurtainIsClosed(page) {
+    const curtains = page?.querySelector(".camera-processing-curtains");
+    return Boolean(
+        page?.classList.contains("is-camera-processing")
+        || curtains?.getAttribute("aria-hidden") === "false"
+    );
+}
+
 function getOverlay(page) {
     const viewfinder = page?.querySelector(".circle-camera-viewfinder");
     if (!viewfinder) return null;
@@ -150,6 +158,10 @@ function drawTrackedObjects(session, tracks) {
 async function handleTrackedFrame(session, { frame, tracks }) {
     if (activeSession !== session || session.controller.signal.aborted) return;
     drawTrackedObjects(session, tracks);
+    // Detection warms up while the initial curtain is closed, but a closed
+    // curtain must never accept a frame. This also blocks any final in-flight
+    // frame while the post-detection processing curtain is closing.
+    if (cameraCurtainIsClosed(session.page)) return;
     // A correct scan owns the screen until its ordered audio and reward flow
     // finishes. Keep drawing, but do not accept another object meanwhile.
     if (session.page.classList.contains("is-camera-detection-celebrating")) return;
