@@ -15637,12 +15637,16 @@ body *::after {
 
 .circle-camera-target-image {
     display: block;
-    width: clamp(8rem, 13vw, 13.5rem);
+    width: min(18vw, 18rem);
     aspect-ratio: 1;
-    margin: 1.15rem auto 0.8rem;
+    margin: 0.35rem auto 0.8rem;
     object-fit: contain;
     filter: drop-shadow(0 0.2rem 0.25rem rgba(61, 35, 17, 0.34));
     animation: circleCameraTargetImagePulse 1.5s ease-in-out infinite alternate;
+}
+
+.circle-camera-page.is-camera-detection-success .circle-camera-target-image {
+    animation: cameraTargetSuccessJump 680ms cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
 }
 
 .circle-camera-target-card strong {
@@ -18903,6 +18907,14 @@ body *::after {
         transform: scale(1.035);
         filter: drop-shadow(0 0.3rem 0.4rem rgba(61, 35, 17, 0.4)) brightness(1.08);
     }
+}
+
+@keyframes cameraTargetSuccessJump {
+    0% { transform: translateY(0) scale(1); }
+    28% { transform: translateY(-1.25rem) scale(1.14); }
+    52% { transform: translateY(-0.75rem) scale(1.08); }
+    74% { transform: translateY(0.14rem) scale(0.96); }
+    100% { transform: translateY(0) scale(1); }
 }
 
 @keyframes circleCameraScanSweep {
@@ -23677,7 +23689,7 @@ body.about-page {
     .circle-camera-page:not(.camera-test-page) .circle-camera-target-shape,
     .circle-camera-page:not(.camera-test-page) .circle-camera-target-image {
         flex: 0 0 auto;
-        width: min(14vw, 29vh, 11rem);
+        width: min(18vw, 38vh, 14rem);
         margin: 0 auto;
     }
 
