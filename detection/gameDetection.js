@@ -53,18 +53,10 @@ function clearOverlay(page) {
     context.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-function setCameraStatus(page, message) {
-    const viewfinder = page?.querySelector(".circle-camera-viewfinder");
-    if (!viewfinder) return;
-    let status = viewfinder.querySelector(".camera-detection-status");
-    if (!status) {
-        status = document.createElement("p");
-        status.className = "camera-detection-status";
-        status.setAttribute("role", "status");
-        status.setAttribute("aria-live", "polite");
-        viewfinder.append(status);
-    }
-    status.textContent = message;
+function setCameraStatus(page) {
+    // The camera feed stays text-free. Remove the legacy live-status label in
+    // case it was created by an earlier script version.
+    page?.querySelector(".camera-detection-status")?.remove();
 }
 
 function notifyDetectionReady(session) {
