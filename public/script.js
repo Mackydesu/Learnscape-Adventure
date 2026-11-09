@@ -12442,6 +12442,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         let detectionReady = false;
         let fullscreenPromptCompleted = false;
         let readyMessageTimer = null;
+        let detectionReadyFallbackTimer = null;
+
+        const openCurtains = () => {
+            cancelCameraDetectionReadyWait(page);
+            openCameraProcessingCurtains(page);
+        };
 
         const tryOpenCurtains = () => {
             if (!detectionReady) return;
@@ -12450,8 +12456,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             setCameraCurtainMessage(page, 'ready');
             readyMessageTimer = window.setTimeout(() => {
                 readyMessageTimer = null;
-                cancelCameraDetectionReadyWait(page);
-                openCameraProcessingCurtains(page);
+                openCurtains();
             }, 700);
         };
         const handleDetectionReady = (event) => {
@@ -12467,6 +12472,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const cancelWait = () => {
             if (readyMessageTimer !== null) window.clearTimeout(readyMessageTimer);
             readyMessageTimer = null;
+            if (detectionReadyFallbackTimer !== null) window.clearTimeout(detectionReadyFallbackTimer);
+            detectionReadyFallbackTimer = null;
             window.removeEventListener('learnscape:cameradetectionready', handleDetectionReady);
             window.removeEventListener('learnscape:fullscreenpromptdone', handleFullscreenPromptDone);
             document.removeEventListener('fullscreenchange', handleFullscreenChange);
@@ -12478,6 +12485,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
         dispatchCameraLifecycle('learnscape:camerastarted', page, video, { requireRemoval });
+        // Do not leave the player behind a closed curtain if a browser blocks
+        // the readiness or fullscreen event. The detector remains gated until
+        // this opens the curtain, so no hidden frame can be accepted.
+        detectionReadyFallbackTimer = window.setTimeout(() => {
+            if (!isPageVisible(page) || !video?.srcObject?.active) return;
+            openCurtains();
+        }, 2500);
         return true;
     };
 
