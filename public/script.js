@@ -399,7 +399,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         page.querySelector('.circle-camera-scan-title strong')?.replaceChildren('I-scan ang isang bagay gamit ang kamera!');
         page.querySelector('.circle-camera-viewfinder')?.setAttribute('aria-label', 'Preview ng kamera');
         page.querySelector('.circle-camera-unlock-board')?.setAttribute('aria-label', `Progreso ng hamon sa kamera para sa ${shapeLabel.toLowerCase()}`);
-        page.querySelector('.circle-camera-start-button strong')?.replaceChildren('Buksan ang Kamera');
+        const cameraStartButton = page.querySelector('.circle-camera-start-button');
+        if (cameraStartButton) {
+            cameraStartButton.classList.remove('game-icon-button', 'icon-camera');
+            cameraStartButton.querySelector('.circle-camera-start-icon')?.remove();
+            if (!cameraStartButton.querySelector('.camera-start-guide-hand')) {
+                const guideHand = document.createElement('img');
+                guideHand.className = 'camera-start-guide-hand';
+                guideHand.src = 'assets/Shape UI/drag-guide-hand.png';
+                guideHand.alt = '';
+                guideHand.setAttribute('aria-hidden', 'true');
+                cameraStartButton.prepend(guideHand);
+            }
+            cameraStartButton.querySelector('strong')?.replaceChildren('Kamera');
+        }
 
         const unlockHeading = page.querySelector('.circle-camera-unlock-board h2');
         if (unlockHeading) {
@@ -459,7 +472,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="camera-processing-curtains" aria-hidden="true">
                     <span class="camera-processing-curtain camera-processing-curtain-left" aria-hidden="true"></span>
                     <span class="camera-processing-curtain camera-processing-curtain-right" aria-hidden="true"></span>
-                    <p class="camera-curtain-message"><span>Pindutin ang </span><strong>Buksan ang Kamera</strong></p>
+                    <p class="camera-curtain-message"><strong>Buksan ang Kamera</strong></p>
                 </div>
             `);
         }
@@ -475,6 +488,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             page.insertAdjacentHTML('beforeend', `
                 <section class="circle-hunt-celebration camera-detection-celebration" aria-hidden="true">
                     <div class="circle-hunt-confetti camera-detection-fullscreen-confetti" aria-hidden="true"></div>
+                    <img class="circle-hunt-character circle-hunt-character-ch7" src="assets/Character/ch7.webp" alt="Bibi celebrating">
+                    <div class="circle-hunt-ch8-pop"><img class="circle-hunt-character-ch8" src="assets/Character/ch8.webp" alt="Bibi giving a thumbs up"></div>
                 </section>
             `);
         }
@@ -8893,11 +8908,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rectangleBossHealthValue = rectangleBossEncounter?.querySelector('.rectangle-boss-health-value');
     const rectangleBossEffects = rectangleBossEncounter?.querySelector('.rectangle-boss-effects');
     const rectangleBossWarningAudio = window.Audio ? new window.Audio('assets/Audios/Sound effects/danger.mp3') : null;
+    const rectangleJumpGuideAudio = window.Audio ? new window.Audio('assets/Audios/Voice over/Talon.mp3') : null;
     if (rectangleBossWarningAudio) {
         rectangleBossWarningAudio.preload = 'auto';
         rectangleBossWarningAudio.playsInline = true;
         rectangleBossWarningAudio.loop = true;
         rectangleBossWarningAudio.volume = 0.5;
+    }
+    if (rectangleJumpGuideAudio) {
+        rectangleJumpGuideAudio.preload = 'auto';
+        rectangleJumpGuideAudio.playsInline = true;
     }
     const rectangleBossDeliveryMilestones = [1, 2];
     const rectangleBossCompletedMilestones = new Set();
@@ -8976,6 +8996,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleJumpGuide.classList.remove('is-visible');
         rectangleJumpGuide.hidden = true;
         rectangleJumpGuideObstacle = null;
+        rectangleJumpGuideAudio?.pause();
+    };
+
+    const playRectangleJumpGuideAudio = () => {
+        const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+        if (!rectangleJumpGuideAudio || soundScale <= 0) return;
+        rectangleJumpGuideAudio.pause();
+        try {
+            rectangleJumpGuideAudio.currentTime = 0;
+        } catch (error) {
+            // The clip may not have loaded metadata yet.
+        }
+        rectangleJumpGuideAudio.volume = Math.min(1, soundScale);
+        rectangleJumpGuideAudio.play().catch(() => {});
     };
 
     const showRectangleJumpGuide = (obstacle) => {
@@ -8987,6 +9021,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleJumpGuide.hidden = false;
         rectangleJumpGuide.getBoundingClientRect();
         rectangleJumpGuide.classList.add('is-visible');
+        playRectangleJumpGuideAudio();
         rectangleJumpGuideTimer = window.setTimeout(() => {
             rectangleJumpGuideTimer = null;
             hideRectangleJumpGuide(obstacle);
@@ -9222,7 +9257,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const damageRectangleBoss = () => {
         if (!rectangleBossActive) return;
-        rectangleBossHealthPoints = Math.max(0, rectangleBossHealthPoints - 5);
+        rectangleBossHealthPoints = Math.max(0, rectangleBossHealthPoints - 10);
         updateRectangleBossHealth();
         rectangleBossEncounter?.classList.remove('is-monster-hit');
         rectangleBossEncounter?.getBoundingClientRect();
@@ -12280,6 +12315,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const setCircleCameraButtonText = (text) => {
         const label = circleCameraStartButton?.querySelector('strong');
         if (label) label.textContent = text;
+        const guideHand = circleCameraStartButton?.querySelector('.camera-start-guide-hand');
+        if (guideHand) guideHand.hidden = text !== 'Kamera';
+    };
+
+    const setCircleCameraButtonVisible = (visible) => {
+        if (circleCameraStartButton) circleCameraStartButton.hidden = !visible;
     };
 
     const stopCircleCameraStream = () => {
@@ -12295,8 +12336,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             circleCameraVideo.hidden = true;
         }
         if (circleCameraStartButton) {
+            setCircleCameraButtonVisible(true);
             circleCameraStartButton.disabled = false;
-            setCircleCameraButtonText('Buksan ang Kamera');
+            setCircleCameraButtonText('Kamera');
         }
     };
 
@@ -12310,7 +12352,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         stopCircleCameraStream();
         const requestId = ++circleCameraStartRequestId;
         circleCameraStartButton.disabled = true;
-        setCircleCameraButtonText('Binubuksan ang Kamera...');
 
         let stream = null;
         try {
@@ -12334,15 +12375,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (circleCameraVideo.srcObject === stream) circleCameraVideo.srcObject = null;
                 return;
             }
-            setCircleCameraButtonText('Handa na ang Kamera');
+            setCircleCameraButtonVisible(false);
             waitForCameraDetectionReady(circleCameraPage, { waitForFullscreen: true });
         } catch (error) {
             if (stream) stream.getTracks().forEach((track) => track.stop());
             if (requestId !== circleCameraStartRequestId) return;
             if (circleCameraStream === stream) circleCameraStream = null;
             if (circleCameraVideo.srcObject === stream) circleCameraVideo.srcObject = null;
+            setCircleCameraButtonVisible(true);
             circleCameraStartButton.disabled = false;
-            setCircleCameraButtonText('Buksan ang Kamera');
+            setCircleCameraButtonText('Kamera');
         }
     };
 
@@ -12402,7 +12444,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (messageType === 'initial') {
             const emphasis = document.createElement('strong');
             emphasis.textContent = 'Buksan ang Kamera';
-            message.append('Pindutin ang ', emphasis);
+            message.append(emphasis);
         } else if (messageType === 'processing') {
             message.textContent = 'Sandali...';
         } else if (messageType === 'ready') {
@@ -12528,6 +12570,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const setShapeCameraButtonText = (page, text) => {
         const label = page?.querySelector('.circle-camera-start-button strong');
         if (label) label.textContent = text;
+        const guideHand = page?.querySelector('.camera-start-guide-hand');
+        if (guideHand) guideHand.hidden = text !== 'Kamera';
+    };
+
+    const setShapeCameraButtonVisible = (page, visible) => {
+        const button = page?.querySelector('.circle-camera-start-button');
+        if (button) button.hidden = !visible;
     };
 
     const stopShapeCameraStream = (page) => {
@@ -12547,8 +12596,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             video.hidden = true;
         }
         if (button) {
+            setShapeCameraButtonVisible(page, true);
             button.disabled = false;
-            setShapeCameraButtonText(page, 'Buksan ang Kamera');
+            setShapeCameraButtonText(page, 'Kamera');
         }
     };
 
@@ -12565,7 +12615,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const requestId = (shapeCameraStartRequestIds.get(page) || 0) + 1;
         shapeCameraStartRequestIds.set(page, requestId);
         button.disabled = true;
-        setShapeCameraButtonText(page, 'Binubuksan ang Kamera...');
 
         let stream = null;
         try {
@@ -12587,15 +12636,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (video.srcObject === stream) video.srcObject = null;
                 return;
             }
-            setShapeCameraButtonText(page, 'Handa na ang Kamera');
+            setShapeCameraButtonVisible(page, false);
             waitForCameraDetectionReady(page, { waitForFullscreen: true });
         } catch (error) {
             if (stream) stream.getTracks().forEach((track) => track.stop());
             if (shapeCameraStartRequestIds.get(page) !== requestId) return;
             if (shapeCameraStreams.get(page) === stream) shapeCameraStreams.delete(page);
             if (video.srcObject === stream) video.srcObject = null;
+            setShapeCameraButtonVisible(page, true);
             button.disabled = false;
-            setShapeCameraButtonText(page, 'Buksan ang Kamera');
+            setShapeCameraButtonText(page, 'Kamera');
         }
     };
 
@@ -12613,7 +12663,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const clearCameraDetectionCelebration = (page) => {
         page?.classList.remove('is-camera-detection-celebrating');
         const celebration = page?.querySelector('.camera-detection-celebration');
-        celebration?.classList.remove('is-active');
+        celebration?.classList.remove('is-active', 'is-ch8-visible');
         celebration?.setAttribute('aria-hidden', 'true');
     };
 
@@ -12685,7 +12735,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         void confetti.offsetWidth;
         page.classList.add('is-camera-detection-celebrating');
         celebration.setAttribute('aria-hidden', 'false');
-        celebration.classList.add('is-active');
+        celebration.classList.add('is-active', 'is-ch8-visible');
     };
 
     const cameraBadgeArtwork = {
@@ -12700,7 +12750,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     const cameraBadgeLabels = Object.freeze({
         circle: 'Bilog', square: 'Parisukat', triangle: 'Tatsulok', rectangle: 'Parihaba',
-        oval: 'Bilohaba', heart: 'Puso', star: 'Bituin', diamond: 'Diyamante',
+        oval: 'Bilohaba', heart: 'Puso', star: 'Bituin', diamond: 'Dyamante',
     });
 
     const prepareCameraCelebrationBadge = (page, shape) => {
@@ -15813,17 +15863,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         },
         diamond: {
             island: 'Diamond Island',
-            mission: 'Kolektahin ang mga piraso ng diyamante, pagkatapos ay buuin ang mga ito nang tama.',
+            mission: 'Kolektahin ang mga piraso ng dyamante, pagkatapos ay buuin ang mga ito nang tama.',
             steps: [
                 'May pangkat ng paniki na papasok sa kuweba.',
-                'I-tap ang paniking may dalang piraso ng diyamante.',
-                'Iwasang i-tap ang pain na hindi diyamante dahil mababawasan ka ng isang buhay.',
+                'I-tap ang paniking may dalang piraso ng dyamante.',
+                'Iwasang i-tap ang pain na hindi dyamante dahil mababawasan ka ng isang buhay.',
                 'Kapag naubos ang tatlong buhay, matatapos ang misyon.',
-                'Pagkatapos kolektahin ang mga piraso ng diyamante, buuin ang mga ito nang tama.',
+                'Pagkatapos kolektahin ang mga piraso ng dyamante, buuin ang mga ito nang tama.',
                 'Hanapin ang kumikinang na bakanteng puwesto.',
                 'I-tap ang pirasong katugma ng puwestong iyon.',
                 'Ang maling piraso ay kikinang nang pula.',
-                'Punan ang lahat ng apat na puwesto upang maging mahiwagang kristal ang diyamante.',
+                'Punan ang lahat ng apat na puwesto upang maging mahiwagang kristal ang dyamante.',
             ],
             scopes: ['#learnscape-shape-area-8-page'],
         },
@@ -16117,7 +16167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         oval: 'biluhaba',
         heart: 'puso',
         star: 'bituin',
-        diamond: 'diyamante',
+        diamond: 'dyamante',
     });
     const cameraHowToSeenThisSession = new Set();
     let activeCameraHowToShape = '';
@@ -16151,7 +16201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!shapeLabel || !cameraHowToMission || !cameraHowToSteps) return false;
         cameraHowToMission.textContent = `Ipakita sa kamera ang bagay na may hugis na ${shapeLabel.toLowerCase()} upang mabuksan ang kaban.`;
         const steps = [
-            'Pindutin ang Buksan ang Kamera at payagan ang paggamit ng kamera kapag hiningi ito ng browser.',
+            'Buksan ang Kamera at payagan ang paggamit ng kamera kapag hiningi ito ng browser.',
             `Tiyaking ang target na hugis ay ${shapeLabel}.`,
             `Ipakita sa loob ng frame ng kamera ang bagay na hugis ${shapeLabel.toLowerCase()}.`,
             'Pagkatapos ng bawat pag-scan, alisin muna nang buo ang bagay bago ito muling ipakita. Bubukas ang kaban pagkatapos ng tatlong magkakahiwalay na tamang pag-scan.',

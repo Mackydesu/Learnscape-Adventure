@@ -6,7 +6,11 @@ const DEFAULT_MIN_VOTES = 4;
 const COMPLEX_SHAPE_CONFIDENCE = 0.75;
 const TRACK_IOU_THRESHOLD = 0.20;
 const CROSS_CLASS_CONFLICT_IOU = 0.65;
-const SIZE_GUIDANCE_THRESHOLD = 0.65;
+// The game only accepts a shape when its largest box dimension occupies a
+// useful part of the camera frame. Keeping this resolution-independent makes
+// the same rule work on phone and desktop cameras.
+export const MIN_DETECTION_RELATIVE_SIZE = 0.16;
+export const MAX_DETECTION_RELATIVE_SIZE = 0.65;
 
 /** Returns the detected object's largest frame-relative dimension (0–1+). */
 export function getRelativeObjectSize(detection, video) {
@@ -14,6 +18,23 @@ export function getRelativeObjectSize(detection, video) {
     const objectWidth = Math.max(0, detection.x2 - detection.x1);
     const objectHeight = Math.max(0, detection.y2 - detection.y1);
     return Math.max(objectWidth / video.videoWidth, objectHeight / video.videoHeight);
+}
+
+export function getDetectionSizeGuidance(relativeSize) {
+    if (relativeSize === null || relativeSize === undefined) return "within-range";
+    if (relativeSize < MIN_DETECTION_RELATIVE_SIZE) return "move-closer";
+    if (relativeSize > MAX_DETECTION_RELATIVE_SIZE) return "move-farther";
+    return "within-range";
+}
+
+function getDetectionSizeMetadata(relativeSize) {
+    const sizeGuidance = getDetectionSizeGuidance(relativeSize);
+    return {
+        sizeGuidance,
+        sizeAccepted: sizeGuidance === "within-range",
+        moveCloser: sizeGuidance === "move-closer",
+        moveFartherAway: sizeGuidance === "move-farther"
+    };
 }
 
 function delayFrame() {
@@ -62,8 +83,18 @@ export async function trackLiveShapes(video, onFrame, options = {}) {
 
         const detections = predictions.map(item => {
             const relativeSize = getRelativeObjectSize(item, video);
-            const lowConfidenceComplexShape = ["heart", "star"].includes(item.label) && item.confidence < COMPLEX_SHAPE_CONFIDENCE;
-            const geometry = lowConfidenceComplexShape
+            const size = getDetectionSizeMetadata(relativeSize);
+            const lowConfidenceComplexShape = size.sizeAccepted && ["heart", "star"].includes(item.label) && item.confidence < COMPLEX_SHAPE_CONFIDENCE;
+            const geometry = !size.sizeAccepted
+                ? {
+                    verified: false,
+                    yoloLabel: item.label,
+                    geometricShape: null,
+                    reason: size.moveCloser
+                        ? "Bounding box is too small for reliable shape verification."
+                        : "Bounding box is too large for reliable shape verification."
+                }
+                : lowConfidenceComplexShape
                 ? { verified: false, yoloLabel: item.label, geometricShape: null, reason: "Confidence is below the heart/star verification threshold." }
                 : verifyShape(video, item);
             if (item.label === "circle" && !geometry.verified) {
@@ -85,7 +116,7 @@ export async function trackLiveShapes(video, onFrame, options = {}) {
                 ...item,
                 label: geometry.verified && geometry.label ? geometry.label : item.label,
                 relativeSize,
-                moveFartherAway: relativeSize !== null && relativeSize > SIZE_GUIDANCE_THRESHOLD,
+                ...size,
                 geometry,
                 frame
             };
@@ -106,16 +137,20 @@ export async function trackLiveShapes(video, onFrame, options = {}) {
                     box: { ...detection }, history: [], missed: 0 };
                 tracks.push(matched);
             }
-            const alpha = 0.65;
-            for (const key of ["x1", "y1", "x2", "y2"]) matched.box[key] = matched.box[key] * (1 - alpha) + detection[key] * alpha;
+            // Render the latest model box directly. Blending successive boxes
+            // makes the outline visibly trail a moving object.
+            for (const key of ["x1", "y1", "x2", "y2"]) matched.box[key] = detection[key];
             matched.label = detection.label;
             matched.confidence = detection.confidence;
             matched.relativeSize = detection.relativeSize;
+            matched.sizeGuidance = detection.sizeGuidance;
+            matched.sizeAccepted = detection.sizeAccepted;
+            matched.moveCloser = detection.moveCloser;
             matched.moveFartherAway = detection.moveFartherAway;
             matched.geometry = detection.geometry;
             matched.seen = true;
             matched.missed = 0;
-            matched.history.push({ label: detection.label, verified: detection.geometry.verified, frame });
+            matched.history.push({ label: detection.label, verified: detection.geometry.verified, sizeAccepted: detection.sizeAccepted, frame });
             matched.history = matched.history.slice(-stableVotes);
             claimed.add(matched);
         }
@@ -123,15 +158,20 @@ export async function trackLiveShapes(video, onFrame, options = {}) {
         for (const track of tracks) if (!track.seen) track.missed++;
         for (let i = tracks.length - 1; i >= 0; i--) if (tracks[i].missed > 2) tracks.splice(i, 1);
 
-        const visible = tracks.filter(track => track.missed <= 2).map(track => {
-            const labelVotes = track.history.filter(item => item.label === track.label).length;
-            const geometryVotes = track.history.filter(item => item.label === track.label && item.verified).length;
+        // Keep missed tracks internally for IoU matching, but do not draw an
+        // outdated box while the object has moved or left the frame.
+        const visible = tracks.filter(track => track.missed === 0).map(track => {
+            const labelVotes = track.history.filter(item => item.label === track.label && item.sizeAccepted).length;
+            const geometryVotes = track.history.filter(item => item.label === track.label && item.sizeAccepted && item.verified).length;
             return {
                 ...track.box,
                 trackId: track.id,
                 label: track.label,
                 confidence: track.confidence,
                 relativeSize: track.relativeSize,
+                sizeGuidance: track.sizeGuidance,
+                sizeAccepted: track.sizeAccepted,
+                moveCloser: track.moveCloser,
                 moveFartherAway: track.moveFartherAway,
                 geometry: track.geometry,
                 // Label stability drives the game flow. Geometry remains on the
@@ -171,7 +211,7 @@ export async function detectStableShape(video, options = {}) {
     const frameCount = Math.max(3, options.frameCount ?? DEFAULT_FRAME_COUNT);
     const minVotes = Math.min(frameCount, options.minVotes ?? DEFAULT_MIN_VOTES);
     const tracks = [];
-    const diagnostics = { candidateCount: 0, geometricPassCount: 0, mismatchCount: 0, uncertainContourCount: 0, lowConfidenceCount: 0, ambiguousCount: 0,
+    const diagnostics = { candidateCount: 0, geometricPassCount: 0, mismatchCount: 0, uncertainContourCount: 0, lowConfidenceCount: 0, tooSmallCount: 0, tooLargeCount: 0, ambiguousCount: 0,
         largestRelativeSize: 0 };
 
     const checkCancelled = () => {
@@ -201,16 +241,27 @@ export async function detectStableShape(video, options = {}) {
         diagnostics.lowConfidenceCount += predictions.filter(item =>
             ["heart", "star"].includes(item.label) && item.confidence < COMPLEX_SHAPE_CONFIDENCE
         ).length;
-        const checkedDetections = predictions
-            .filter(item => !["heart", "star"].includes(item.label) || item.confidence >= COMPLEX_SHAPE_CONFIDENCE)
-            .map((item, index) => {
-                const geometry = verifyShape(video, item, { debug: options.debug === true && index === 0 });
+        const checkedDetections = predictions.map((item, index) => {
                 const relativeSize = getRelativeObjectSize(item, video);
+                const size = getDetectionSizeMetadata(relativeSize);
+                const lowConfidenceComplexShape = size.sizeAccepted && ["heart", "star"].includes(item.label) && item.confidence < COMPLEX_SHAPE_CONFIDENCE;
+                const geometry = !size.sizeAccepted
+                    ? {
+                        verified: false,
+                        yoloLabel: item.label,
+                        geometricShape: null,
+                        reason: size.moveCloser
+                            ? "Bounding box is too small for reliable shape verification."
+                            : "Bounding box is too large for reliable shape verification."
+                    }
+                    : lowConfidenceComplexShape
+                        ? { verified: false, yoloLabel: item.label, geometricShape: null, reason: "Confidence is below the heart/star verification threshold." }
+                        : verifyShape(video, item, { debug: options.debug === true && index === 0 });
                 return {
                     ...item,
                     label: geometry.verified && geometry.label ? geometry.label : item.label,
                     relativeSize,
-                    moveFartherAway: relativeSize !== null && relativeSize > SIZE_GUIDANCE_THRESHOLD,
+                    ...size,
                     geometry,
                     frame
                 };
@@ -219,12 +270,14 @@ export async function detectStableShape(video, options = {}) {
         if (options.debug) console.table(checkedDetections.map(summarize));
 
         const rejected = checkedDetections.filter(item => item.geometry.verified !== true);
+        diagnostics.tooSmallCount += checkedDetections.filter(item => item.moveCloser).length;
+        diagnostics.tooLargeCount += checkedDetections.filter(item => item.moveFartherAway).length;
         diagnostics.mismatchCount += rejected.filter(item => item.geometry.geometry?.valid && item.geometry.geometry?.consistent !== false && item.geometry.geometricShape).length;
         diagnostics.uncertainContourCount += rejected.filter(item =>
             !item.geometry.geometry?.valid || item.geometry.geometry?.consistent === false
         ).length;
         const frameDetections = checkedDetections
-            .filter(item => item.geometry.verified === true)
+            .filter(item => item.sizeAccepted && item.geometry.verified === true)
             .sort((a, b) => b.confidence - a.confidence);
         options.onFrame?.({ frame, predictions, checkedDetections, acceptedDetections: frameDetections });
         diagnostics.geometricPassCount += frameDetections.length;
@@ -282,6 +335,12 @@ export async function detectStableShape(video, options = {}) {
         } else if (diagnostics.uncertainContourCount > 0) {
             failureCategory = "unclear-contour";
             reason = "Shape outline is unclear. Move it against a plain background.";
+        } else if (diagnostics.tooSmallCount > 0 && diagnostics.geometricPassCount === 0) {
+            failureCategory = "too-small";
+            reason = "Detected shape is too small. Move closer.";
+        } else if (diagnostics.tooLargeCount > 0 && diagnostics.geometricPassCount === 0) {
+            failureCategory = "too-large";
+            reason = "Detected shape is too large. Move farther.";
         } else if (diagnostics.lowConfidenceCount > 0 && diagnostics.geometricPassCount === 0) {
             failureCategory = "low-confidence";
             reason = "Heart or star prediction confidence was too low for verification.";
@@ -296,7 +355,9 @@ export async function detectStableShape(video, options = {}) {
             verified: false, stable: false, label: null, reason, failureCategory,
             framesChecked: frameCount,
             relativeSize: diagnostics.largestRelativeSize,
-            moveFartherAway: diagnostics.largestRelativeSize > SIZE_GUIDANCE_THRESHOLD,
+            sizeGuidance: getDetectionSizeGuidance(diagnostics.largestRelativeSize),
+            moveCloser: diagnostics.tooSmallCount > 0,
+            moveFartherAway: diagnostics.tooLargeCount > 0,
             verifiedFrames: Math.max(0, ...tracks.map(track => track.detections.length)),
             diagnostics
         };

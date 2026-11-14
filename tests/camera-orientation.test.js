@@ -51,7 +51,7 @@ test('camera detection frames follow the unmirrored video through cover cropping
     assert.deepEqual(rectangles, [[36, 52.5, 54, 67.5], [36, 52.5, 54, 67.5]]);
 });
 
-test('camera labels counter-mirror their glyphs while boxes follow the preview', () => {
+test('camera game omits box labels while the test preview keeps readable labels', () => {
     const gameDrawing = createDrawingContext();
     const testDrawing = createDrawingContext();
     const video = { videoWidth: 640, videoHeight: 480 };
@@ -69,9 +69,9 @@ test('camera labels counter-mirror their glyphs while boxes follow the preview',
     });
     drawTest([track]);
 
-    assert.deepEqual(gameDrawing.textTransforms, [[-1, 1]]);
+    assert.deepEqual(gameDrawing.textTransforms, []);
     assert.deepEqual(testDrawing.textTransforms, [[-1, 1]]);
-    assert.equal(gameDrawing.fillTextCalls[0][1], -63);
+    assert.equal(gameDrawing.fillTextCalls.length, 0);
     assert.equal(testDrawing.fillTextCalls[0][1], -63);
 });
 

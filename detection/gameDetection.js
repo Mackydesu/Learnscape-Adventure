@@ -2,8 +2,15 @@ import { trackLiveShapes } from "./detectionManager.js";
 
 // The camera game rewards the first clearly labeled target frame. The
 // removal gate below still prevents a held object from being counted twice.
-const TRACKING_OPTIONS = { intervalMs: 90, minVotes: 1 };
+// Run the next inference immediately after the previous one so the tracking
+// box follows a moving object without an added polling delay.
+const TRACKING_OPTIONS = { intervalMs: 0, minVotes: 1 };
 const REMOVAL_CONFIRMATION_FRAMES = 5;
+const DISTANCE_CUE_AUDIO = Object.freeze({
+    "move-farther": "assets/Audios/Voice over/Lumayo.mp3",
+    "move-closer": "assets/Audios/Voice over/Lumapit.mp3"
+});
+const DISTANCE_CUE_REPLAY_DELAY_MS = 2800;
 const SHAPE_NAMES = Object.freeze({
     circle: "circle",
     square: "square",
@@ -43,7 +50,36 @@ function getOverlay(page) {
         const video = viewfinder.querySelector(".circle-camera-video");
         viewfinder.insertBefore(canvas, video?.nextSibling ?? viewfinder.firstChild);
     }
-    return { viewfinder, canvas, context: canvas.getContext("2d") };
+    // Keep coaching outside the viewfinder so the feed and detection box stay
+    // unobstructed. Move a cue created by an earlier build when this page is
+    // still alive during in-app navigation.
+    let distanceCue = page.querySelector(".camera-detection-distance-cue");
+    if (!distanceCue) {
+        distanceCue = document.createElement("p");
+        distanceCue.className = "camera-detection-distance-cue";
+        distanceCue.setAttribute("role", "status");
+        distanceCue.setAttribute("aria-live", "polite");
+        distanceCue.hidden = true;
+    }
+    if (distanceCue.parentElement !== page) page.append(distanceCue);
+
+    let distanceCueCharacter = page.querySelector(".camera-detection-distance-character");
+    if (!distanceCueCharacter) {
+        distanceCueCharacter = document.createElement("img");
+        distanceCueCharacter.className = "camera-detection-distance-character";
+        distanceCueCharacter.src = "assets/Character/ch6.webp";
+        distanceCueCharacter.alt = "";
+        distanceCueCharacter.setAttribute("aria-hidden", "true");
+        distanceCueCharacter.hidden = true;
+    }
+    if (distanceCueCharacter.parentElement !== page) page.append(distanceCueCharacter);
+    return {
+        viewfinder,
+        canvas,
+        context: canvas.getContext("2d"),
+        distanceCue,
+        distanceCueCharacter
+    };
 }
 
 function clearOverlay(page) {
@@ -51,12 +87,106 @@ function clearOverlay(page) {
     const context = canvas?.getContext("2d");
     if (!canvas || !context) return;
     context.clearRect(0, 0, canvas.width, canvas.height);
+    const distanceCue = page.querySelector(".camera-detection-distance-cue");
+    if (distanceCue) {
+        distanceCue.hidden = true;
+        distanceCue.textContent = "";
+        delete distanceCue.dataset.guidance;
+    }
+    const distanceCueCharacter = page.querySelector(".camera-detection-distance-character");
+    if (distanceCueCharacter) distanceCueCharacter.hidden = true;
 }
 
 function setCameraStatus(page) {
     // The camera feed stays text-free. Remove the legacy live-status label in
     // case it was created by an earlier script version.
     page?.querySelector(".camera-detection-status")?.remove();
+}
+
+export function getDistanceCueCopy(guidance = "") {
+    // A larger-than-allowed box means the object is too close to the camera,
+    // so the player must move it farther away. A small box needs the inverse.
+    if (guidance === "move-farther") return "Subukang Lumayo";
+    if (guidance === "move-closer") return "Subukang Lumapit";
+    return "";
+}
+
+function stopDistanceCueAudio(session) {
+    const audio = session?.distanceCueAudio;
+    if (!audio) return;
+    audio.onended = null;
+    audio.onerror = null;
+    audio.pause();
+    session.distanceCueAudio = null;
+}
+
+function hideDistanceCue(session) {
+    const cue = session?.overlay?.distanceCue;
+    if (cue) {
+        cue.hidden = true;
+        cue.textContent = "";
+        delete cue.dataset.guidance;
+    }
+    const character = session?.overlay?.distanceCueCharacter;
+    if (character) character.hidden = true;
+    if (session) {
+        session.visibleDistanceCueGuidance = "";
+        session.pendingDistanceCueClear = false;
+    }
+}
+
+function playDistanceCueAudio(session, guidance) {
+    const source = DISTANCE_CUE_AUDIO[guidance];
+    const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+    if (!source || !window.Audio || soundScale <= 0) return;
+
+    const now = Date.now();
+    if (session.lastDistanceCueGuidance === guidance
+        && now - (session.lastDistanceCuePlayedAt || 0) < DISTANCE_CUE_REPLAY_DELAY_MS) return;
+
+    stopDistanceCueAudio(session);
+    const audio = new window.Audio(source);
+    session.distanceCueAudio = audio;
+    session.lastDistanceCueGuidance = guidance;
+    session.lastDistanceCuePlayedAt = now;
+    const release = () => {
+        if (session.distanceCueAudio !== audio) return;
+        session.distanceCueAudio = null;
+        if (session.pendingDistanceCueClear) hideDistanceCue(session);
+    };
+    audio.preload = "auto";
+    audio.playsInline = true;
+    audio.volume = Math.min(1, Math.max(0, soundScale));
+    audio.onended = release;
+    audio.onerror = release;
+    audio.play().catch(release);
+}
+
+function setDistanceCue(session, guidance = "") {
+    const cue = session.overlay?.distanceCue;
+    if (!cue) return;
+    const copy = getDistanceCueCopy(guidance);
+    if (!copy) {
+        // Let the player finish hearing the matching instruction before the
+        // coach disappears, even if the next live frame is already in range.
+        if (session.distanceCueAudio) {
+            session.pendingDistanceCueClear = true;
+            return;
+        }
+        hideDistanceCue(session);
+        return;
+    }
+
+    const previousGuidance = session.visibleDistanceCueGuidance || "";
+    session.pendingDistanceCueClear = false;
+    cue.hidden = !copy;
+    cue.textContent = copy;
+    const character = session.overlay?.distanceCueCharacter;
+    if (character) character.hidden = !copy;
+    if (copy) cue.dataset.guidance = guidance;
+    else delete cue.dataset.guidance;
+    if (guidance !== previousGuidance) playDistanceCueAudio(session, guidance);
+    session.visibleDistanceCueGuidance = guidance;
 }
 
 function notifyDetectionReady(session) {
@@ -117,32 +247,12 @@ function drawTrackedObjects(session, tracks) {
         const boxWidth = (track.x2 - track.x1) * scale;
         const boxHeight = (track.y2 - track.y1) * scale;
         const targetLabelMatched = trackHasTargetLabel(track, session.shape) && track.labelStable === true;
-        const color = targetLabelMatched ? "#35f178" : "#ffffff";
+        const needsDistanceAdjustment = trackHasTargetLabel(track, session.shape) && track.sizeAccepted === false;
+        const color = needsDistanceAdjustment ? "#ffd23f" : targetLabelMatched ? "#35f178" : "#ffffff";
         context.globalAlpha = track.stale ? 0.55 : 1;
         context.strokeStyle = color;
         context.lineWidth = 3;
         context.strokeRect(x, y, boxWidth, boxHeight);
-
-        // Show the same tracked label (including contour corrections) used
-        // to determine whether this is the target.
-        const displayLabel = track.label || "";
-        const text = String(displayLabel).toUpperCase();
-        if (text) {
-            context.font = "bold 16px Arial";
-            const labelWidth = context.measureText(text).width + 14;
-            const labelY = Math.max(3, y - 28);
-            context.fillStyle = color;
-            context.fillRect(x, labelY, labelWidth, 25);
-            context.fillStyle = "#173026";
-            // On desktop the canvas is mirrored with the video so the box
-            // tracks the preview. Counter-mirror only the glyphs: the label
-            // chip stays attached to its mirrored box while its text remains
-            // readable.
-            context.save();
-            context.scale(-1, 1);
-            context.fillText(text, -(x + labelWidth - 7), labelY + 18);
-            context.restore();
-        }
     }
     context.globalAlpha = 1;
 }
@@ -169,6 +279,7 @@ async function handleTrackedFrame(session, { frame, tracks }) {
     }
 
     if (session.waitingForRemoval) {
+        setDistanceCue(session);
         const targetStillVisible = tracks.some(track => trackHasTargetLabel(track, session.shape));
         if (!targetStillVisible) session.absentFrames++;
         else session.absentFrames = 0;
@@ -185,9 +296,10 @@ async function handleTrackedFrame(session, { frame, tracks }) {
     }
 
     const selected = tracks
-        .filter(track => !track.stale && track.labelStable === true && trackHasTargetLabel(track, session.shape))
+        .filter(track => !track.stale && track.sizeAccepted === true && track.labelStable === true && trackHasTargetLabel(track, session.shape))
         .sort((a, b) => b.confidence - a.confidence)[0];
     if (selected) {
+        setDistanceCue(session);
         if (session.confirming || frame - session.lastConfirmationFrame < 6) return;
         session.confirming = true;
         session.lastConfirmationFrame = frame;
@@ -219,6 +331,15 @@ async function handleTrackedFrame(session, { frame, tracks }) {
         return;
     }
 
+    const distanceAdjustment = tracks
+        .filter(track => !track.stale && track.sizeAccepted === false && trackHasTargetLabel(track, session.shape))
+        .sort((a, b) => b.confidence - a.confidence)[0];
+    if (distanceAdjustment) {
+        setDistanceCue(session, distanceAdjustment.sizeGuidance);
+        return;
+    }
+
+    setDistanceCue(session);
     setCameraStatus(session.page, targetCameraPrompt(session.shape));
 }
 
@@ -226,6 +347,7 @@ function stopActiveSession(page = null) {
     if (!activeSession || (page && activeSession.page !== page)) return;
     const session = activeSession;
     activeSession = null;
+    stopDistanceCueAudio(session);
     session.controller.abort();
     clearOverlay(session.page);
 }
@@ -253,6 +375,7 @@ async function runDetection(session, modelReady) {
     } finally {
         if (activeSession === session) {
             activeSession = null;
+            stopDistanceCueAudio(session);
             clearOverlay(page);
             if (!signal.aborted && !session.failed && cameraPageVisible(page)) {
                 setCameraStatus(page, "Huminto ang pagkilala ng kamera. I-restart ang kamera upang magpatuloy.");

@@ -83,8 +83,12 @@ function startLiveFeed() {
     liveTask = trackLiveShapes(video, ({ tracks }) => {
         if (controller.signal.aborted || liveController !== controller) return;
         drawTrackedObjects(tracks);
+        if (tracks.some(track => track.moveCloser)) {
+            status.textContent = "Move closer";
+            return;
+        }
         if (tracks.some(track => track.moveFartherAway)) {
-            status.textContent = "Move the shape farther away.";
+            status.textContent = "Move farther";
             return;
         }
         const verified = tracks.filter(track => track.verified);
@@ -96,7 +100,7 @@ function startLiveFeed() {
         } else {
             status.textContent = "Show a shape inside the camera frame.";
         }
-    }, { signal: controller.signal }).catch(error => {
+    }, { signal: controller.signal, intervalMs: 0 }).catch(error => {
         if (error.name !== "AbortError" && liveController === controller) {
             console.error("Camera feed detection failed:", error);
             status.textContent = "The camera feed could not detect shapes.";

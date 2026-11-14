@@ -15418,6 +15418,11 @@ body *::after {
     --camera-ground-bottom: #18893a;
     --camera-card-border: #7a3d17;
     --camera-card-gradient: linear-gradient(180deg, #ffe7a0 0%, #ffc86a 100%);
+    --camera-target-panel-border: #073e86;
+    --camera-target-panel-gradient: radial-gradient(circle at 50% 18%, #2caeff 0 8%, transparent 31%), linear-gradient(160deg, #1b68cc 0%, #073e86 64%, #03285d 100%);
+    --camera-target-panel-shadow: #021e4b;
+    --camera-target-label-border: #80dfff;
+    --camera-target-label-gradient: linear-gradient(180deg, #1b9eff, #0756bd);
     --camera-frame-gradient: linear-gradient(180deg, #b5692a 0%, #7f431d 100%);
     --camera-title-gradient: linear-gradient(180deg, #ffe5a2, #ffc265);
     --camera-unlock-gradient: linear-gradient(180deg, #d98b37 0%, #9c581f 100%);
@@ -15430,6 +15435,7 @@ body *::after {
     --camera-curtain-bottom: var(--camera-start-bottom);
     --camera-curtain-shadow: var(--camera-start-shadow);
     --camera-target-border: #063e91;
+    --camera-target-edge-glow: rgba(100, 221, 255, 0.95);
     --camera-chest-lid: linear-gradient(180deg, #e6faff 0%, #55c8ff 42%, #168cf0 70%, #0759bd 100%);
     --camera-chest-body: linear-gradient(180deg, #83dcff 0%, #168cf0 52%, #064da9 100%);
     --camera-chest-border: #073d88;
@@ -15607,6 +15613,8 @@ body *::after {
     padding: 1.55rem 1.4rem 1.2rem;
     border-radius: 1rem;
     text-align: center;
+    /* Match the progress/unlock board so the two side panels read as a pair. */
+    background: var(--camera-unlock-gradient);
 }
 
 .circle-camera-target-card h2,
@@ -15641,7 +15649,10 @@ body *::after {
     aspect-ratio: 1;
     margin: 0.35rem auto 0.8rem;
     object-fit: contain;
-    filter: drop-shadow(0 0.2rem 0.25rem rgba(61, 35, 17, 0.34));
+    filter:
+        drop-shadow(0 0 0.08rem rgba(255, 255, 255, 0.92))
+        drop-shadow(0 0 0.5rem var(--camera-target-edge-glow))
+        drop-shadow(0 0.2rem 0.25rem rgba(61, 35, 17, 0.34));
     animation: circleCameraTargetImagePulse 1.5s ease-in-out infinite alternate;
 }
 
@@ -15654,10 +15665,10 @@ body *::after {
     place-items: center;
     min-width: 10rem;
     min-height: 3rem;
-    border: 0.16rem solid #1d5fac;
+    border: 0.16rem solid var(--camera-target-label-border);
     border-radius: 0.8rem;
-    background: linear-gradient(180deg, #25bcff, #0474e4);
-    box-shadow: inset 0 0.12rem 0 rgba(255, 255, 255, 0.72), 0 0.25rem 0 #174685;
+    background: var(--camera-target-label-gradient);
+    box-shadow: inset 0 0.12rem 0 rgba(255, 255, 255, 0.72), 0 0.25rem 0 var(--camera-target-panel-shadow);
     color: #ffffff;
     font: 900 clamp(1.35rem, 2.2vw, 2rem)/1 'Fredoka', sans-serif;
     text-shadow: 0 0.1rem 0 #153f82;
@@ -15765,6 +15776,53 @@ body *::after {
     width: 100%;
     height: 100%;
     pointer-events: none;
+}
+
+.camera-detection-distance-cue {
+    position: absolute;
+    z-index: 6;
+    left: 50%;
+    top: calc(9% + min(77vh, 45rem) + clamp(0.75rem, 1.8vh, 1.35rem));
+    margin: 0;
+    width: min(44vw, 36rem);
+    min-width: 17rem;
+    max-width: calc(100% - 1.5rem);
+    padding: 0.7rem 1.45rem;
+    border: 0.16rem solid #fff2a5;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(92, 57, 7, 0.96), rgba(48, 27, 2, 0.96));
+    box-shadow: 0 0.22rem 0 rgba(31, 15, 0, 0.76), inset 0 0.08rem 0 rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+    font: 900 clamp(1.2rem, 2.8vw, 1.75rem)/1.05 'Fredoka', sans-serif;
+    letter-spacing: 0.02em;
+    text-align: center;
+    text-shadow: 0 0.1rem 0 #422100;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.camera-detection-distance-cue[data-guidance="move-closer"] {
+    border-color: #9dffb3;
+    background: linear-gradient(180deg, rgba(15, 117, 60, 0.96), rgba(5, 64, 31, 0.96));
+    text-shadow-color: #063d1e;
+}
+
+.camera-detection-distance-character {
+    position: absolute;
+    z-index: 5;
+    left: clamp(0.55rem, 1.6vw, 1.5rem);
+    bottom: clamp(0.35rem, 1.4vh, 1rem);
+    /* Match the scale of the ch7/ch8 celebration characters. */
+    width: clamp(11rem, 22vw, 19rem);
+    max-height: 66vh;
+    object-fit: contain;
+    object-position: left bottom;
+    pointer-events: none;
+    filter: drop-shadow(0 0.2rem 0.14rem rgba(27, 35, 11, 0.45));
+}
+
+.camera-detection-distance-character[hidden] {
+    display: none;
 }
 
 .camera-processing-curtains {
@@ -15969,6 +16027,34 @@ body *::after {
         inset 0 0.15rem 0 rgba(255, 255, 255, 0.48),
         0 0.18rem 0 var(--camera-start-shadow),
         0 0 0.75rem rgba(83, 255, 135, 0.48);
+}
+
+/* The start control is removed as soon as the camera stream is active. */
+.circle-camera-start-button[hidden] {
+    display: none !important;
+}
+
+.camera-start-guide-hand {
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    bottom: calc(100% - 0.45rem);
+    width: clamp(3.4rem, 7vw, 5.8rem);
+    max-width: none;
+    pointer-events: none;
+    filter: drop-shadow(0 0.2rem 0.16rem rgba(22, 35, 10, 0.42));
+    transform: translateX(-50%);
+    transform-origin: bottom center;
+    animation: cameraStartGuidePoint 900ms ease-in-out infinite alternate;
+}
+
+.camera-start-guide-hand[hidden] {
+    display: none;
+}
+
+@keyframes cameraStartGuidePoint {
+    from { transform: translateX(-50%) translateY(-0.15rem) scale(0.94); }
+    to { transform: translateX(-50%) translateY(0.22rem) scale(1); }
 }
 
 .camera-detection-check {
@@ -17277,6 +17363,7 @@ body *::after {
 
 .square-camera-page {
     --camera-target-border: #4c1688;
+    --camera-target-edge-glow: rgba(227, 145, 255, 0.96);
     --camera-glow-a: rgba(244, 219, 255, 0.5);
     --camera-glow-b: rgba(213, 120, 255, 0.3);
     --camera-sky-top: #8b2cf5;
@@ -17289,6 +17376,11 @@ body *::after {
     --camera-ground-bottom: #b8511c;
     --camera-card-border: #5d2494;
     --camera-card-gradient: linear-gradient(180deg, #f4d8ff 0%, #d578ff 55%, #8b2cf5 100%);
+    --camera-target-panel-border: #3a126d;
+    --camera-target-panel-gradient: radial-gradient(circle at 50% 18%, #d778ff 0 8%, transparent 31%), linear-gradient(160deg, #7c2bc1 0%, #421078 64%, #26074b 100%);
+    --camera-target-panel-shadow: #21063f;
+    --camera-target-label-border: #edbdff;
+    --camera-target-label-gradient: linear-gradient(180deg, #a74bf1, #5b168f);
     --camera-frame-gradient: linear-gradient(180deg, #8d49cf 0%, #4c1197 100%);
     --camera-title-gradient: linear-gradient(180deg, #fff2b8, #d578ff);
     --camera-unlock-gradient: linear-gradient(180deg, #6f2abd 0%, #3c0f7b 100%);
@@ -17309,6 +17401,7 @@ body *::after {
 
 .triangle-camera-page {
     --camera-target-border: #0c6412;
+    --camera-target-edge-glow: rgba(160, 255, 103, 0.96);
     --camera-glow-a: rgba(255, 255, 255, 0.42);
     --camera-glow-b: rgba(152, 239, 84, 0.34);
     --camera-sky-top: #20b6ff;
@@ -17321,6 +17414,11 @@ body *::after {
     --camera-ground-bottom: #14770c;
     --camera-card-border: #3f7b12;
     --camera-card-gradient: linear-gradient(180deg, #efffc2 0%, #98ef54 56%, #31c91d 100%);
+    --camera-target-panel-border: #164c0f;
+    --camera-target-panel-gradient: radial-gradient(circle at 50% 18%, #82e856 0 8%, transparent 31%), linear-gradient(160deg, #338e2a 0%, #155b18 64%, #08390f 100%);
+    --camera-target-panel-shadow: #062c0b;
+    --camera-target-label-border: #d7ff8b;
+    --camera-target-label-gradient: linear-gradient(180deg, #4cc836, #167a15);
     --camera-frame-gradient: linear-gradient(180deg, #5bb334 0%, #14770c 100%);
     --camera-title-gradient: linear-gradient(180deg, #fff7b8, #98ef54);
     --camera-unlock-gradient: linear-gradient(180deg, #54b92e 0%, #126f0b 100%);
@@ -17342,6 +17440,7 @@ body *::after {
 
 .rectangle-camera-page {
     --camera-target-border: #873608;
+    --camera-target-edge-glow: rgba(255, 208, 90, 0.96);
     --camera-glow-a: rgba(255, 239, 183, 0.44);
     --camera-glow-b: rgba(255, 210, 79, 0.34);
     --camera-sky-top: #36b2ff;
@@ -17354,6 +17453,11 @@ body *::after {
     --camera-ground-bottom: #9a470c;
     --camera-card-border: #8b4a17;
     --camera-card-gradient: linear-gradient(180deg, #fff1bd 0%, #ffd24f 46%, #ff8a17 100%);
+    --camera-target-panel-border: #6e2d09;
+    --camera-target-panel-gradient: radial-gradient(circle at 50% 18%, #ffb43b 0 8%, transparent 31%), linear-gradient(160deg, #cb6815 0%, #7a3109 64%, #461804 100%);
+    --camera-target-panel-shadow: #351101;
+    --camera-target-label-border: #ffe29a;
+    --camera-target-label-gradient: linear-gradient(180deg, #f59a25, #a74308);
     --camera-frame-gradient: linear-gradient(180deg, #c76d1e 0%, #7b3608 100%);
     --camera-title-gradient: linear-gradient(180deg, #fff3bd, #ffd24f);
     --camera-unlock-gradient: linear-gradient(180deg, #d9791f 0%, #7b3608 100%);
@@ -17374,6 +17478,7 @@ body *::after {
 
 .oval-camera-page {
     --camera-target-border: #86154b;
+    --camera-target-edge-glow: rgba(255, 156, 216, 0.96);
     --camera-glow-a: rgba(255, 226, 242, 0.45);
     --camera-glow-b: rgba(255, 145, 207, 0.32);
     --camera-sky-top: #f33ca4;
@@ -17386,6 +17491,11 @@ body *::after {
     --camera-ground-bottom: #8a4728;
     --camera-card-border: #9a285f;
     --camera-card-gradient: linear-gradient(180deg, #ffe5f2 0%, #ff91cf 58%, #f33ca4 100%);
+    --camera-target-panel-border: #70133f;
+    --camera-target-panel-gradient: radial-gradient(circle at 50% 18%, #ff94d0 0 8%, transparent 31%), linear-gradient(160deg, #bf397e 0%, #74123f 64%, #43051f 100%);
+    --camera-target-panel-shadow: #350318;
+    --camera-target-label-border: #ffd4e9;
+    --camera-target-label-gradient: linear-gradient(180deg, #ed5aa9, #9f1b62);
     --camera-frame-gradient: linear-gradient(180deg, #cf538e 0%, #8d164e 100%);
     --camera-title-gradient: linear-gradient(180deg, #fff0ba, #ff91cf);
     --camera-unlock-gradient: linear-gradient(180deg, #cf538e 0%, #8d164e 100%);
@@ -17406,6 +17516,7 @@ body *::after {
 
 .heart-camera-page {
     --camera-target-border: #79100c;
+    --camera-target-edge-glow: rgba(255, 137, 122, 0.98);
     --camera-glow-a: rgba(255, 235, 226, 0.46);
     --camera-glow-b: rgba(255, 129, 115, 0.34);
     --camera-sky-top: #f02d25;
@@ -17418,6 +17529,11 @@ body *::after {
     --camera-ground-bottom: #9d1712;
     --camera-card-border: #9d1712;
     --camera-card-gradient: linear-gradient(180deg, #ffe6df 0%, #ff8173 55%, #f02d25 100%);
+    --camera-target-panel-border: #74110d;
+    --camera-target-panel-gradient: radial-gradient(circle at 50% 18%, #ff8173 0 8%, transparent 31%), linear-gradient(160deg, #bc302a 0%, #74110d 64%, #430705 100%);
+    --camera-target-panel-shadow: #350403;
+    --camera-target-label-border: #ffd3cb;
+    --camera-target-label-gradient: linear-gradient(180deg, #e9433a, #98140f);
     --camera-frame-gradient: linear-gradient(180deg, #c93630 0%, #7d100c 100%);
     --camera-title-gradient: linear-gradient(180deg, #fff0b8, #ff8173);
     --camera-unlock-gradient: linear-gradient(180deg, #c93630 0%, #7d100c 100%);
@@ -17439,6 +17555,7 @@ body *::after {
 
 .star-camera-page {
     --camera-target-border: #925700;
+    --camera-target-edge-glow: rgba(255, 244, 112, 0.98);
     --camera-glow-a: rgba(255, 255, 230, 0.55);
     --camera-glow-b: rgba(255, 243, 106, 0.46);
     --camera-sky-top: #ffc51c;
@@ -17451,6 +17568,11 @@ body *::after {
     --camera-ground-bottom: #b06a06;
     --camera-card-border: #a96e00;
     --camera-card-gradient: linear-gradient(180deg, #ffffbd 0%, #fff36a 45%, #ffc51c 100%);
+    --camera-target-panel-border: #765000;
+    --camera-target-panel-gradient: radial-gradient(circle at 50% 18%, #fff36a 0 8%, transparent 31%), linear-gradient(160deg, #9e6a08 0%, #5b3900 64%, #332000 100%);
+    --camera-target-panel-shadow: #261700;
+    --camera-target-label-border: #fff5a4;
+    --camera-target-label-gradient: linear-gradient(180deg, #d99910, #8b5600);
     --camera-frame-gradient: linear-gradient(180deg, #d99c15 0%, #8f5b00 100%);
     --camera-title-gradient: linear-gradient(180deg, #ffffd1, #fff36a);
     --camera-unlock-gradient: linear-gradient(180deg, #d99c15 0%, #8f5b00 100%);
@@ -17472,6 +17594,7 @@ body *::after {
 
 .diamond-camera-page {
     --camera-target-border: #06478f;
+    --camera-target-edge-glow: rgba(122, 224, 255, 0.98);
     --camera-glow-a: rgba(225, 252, 255, 0.52);
     --camera-glow-b: rgba(101, 213, 255, 0.38);
     --camera-sky-top: #167af5;
@@ -17484,6 +17607,11 @@ body *::after {
     --camera-ground-bottom: #185aab;
     --camera-card-border: #185191;
     --camera-card-gradient: linear-gradient(180deg, #e1fbff 0%, #65d5ff 56%, #167af5 100%);
+    --camera-target-panel-border: #063f81;
+    --camera-target-panel-gradient: radial-gradient(circle at 50% 18%, #65d5ff 0 8%, transparent 31%), linear-gradient(160deg, #126fc2 0%, #063f81 64%, #022852 100%);
+    --camera-target-panel-shadow: #021d3b;
+    --camera-target-label-border: #b9efff;
+    --camera-target-label-gradient: linear-gradient(180deg, #278fe8, #0750a9);
     --camera-frame-gradient: linear-gradient(180deg, #1c86ca 0%, #074ba5 100%);
     --camera-title-gradient: linear-gradient(180deg, #ecffff, #65d5ff);
     --camera-unlock-gradient: linear-gradient(180deg, #1c86ca 0%, #074ba5 100%);
@@ -18885,15 +19013,17 @@ body *::after {
     from {
         transform: scale(1);
         filter:
-            drop-shadow(0 0 0.2rem var(--camera-target-border))
+            drop-shadow(0 0 0.08rem rgba(255, 255, 255, 0.92))
+            drop-shadow(0 0 0.36rem var(--camera-target-edge-glow))
             drop-shadow(0 0 0.12rem var(--camera-target-border))
             brightness(1);
     }
     to {
         transform: scale(1.035);
         filter:
-            drop-shadow(0 0 0.2rem var(--camera-target-border))
-            drop-shadow(0 0 0.12rem var(--camera-target-border))
+            drop-shadow(0 0 0.12rem rgba(255, 255, 255, 0.96))
+            drop-shadow(0 0 0.68rem var(--camera-target-edge-glow))
+            drop-shadow(0 0 0.16rem var(--camera-target-border))
             brightness(1.08);
     }
 }
@@ -18901,11 +19031,19 @@ body *::after {
 @keyframes circleCameraTargetImagePulse {
     from {
         transform: scale(1);
-        filter: drop-shadow(0 0.2rem 0.25rem rgba(61, 35, 17, 0.34)) brightness(1);
+        filter:
+            drop-shadow(0 0 0.08rem rgba(255, 255, 255, 0.92))
+            drop-shadow(0 0 0.36rem var(--camera-target-edge-glow))
+            drop-shadow(0 0.2rem 0.25rem rgba(61, 35, 17, 0.34))
+            brightness(1);
     }
     to {
         transform: scale(1.035);
-        filter: drop-shadow(0 0.3rem 0.4rem rgba(61, 35, 17, 0.4)) brightness(1.08);
+        filter:
+            drop-shadow(0 0 0.12rem rgba(255, 255, 255, 0.96))
+            drop-shadow(0 0 0.72rem var(--camera-target-edge-glow))
+            drop-shadow(0 0.3rem 0.4rem rgba(61, 35, 17, 0.4))
+            brightness(1.08);
     }
 }
 
@@ -23737,6 +23875,16 @@ body.about-page {
         padding: 0.35rem 1rem;
         gap: 0.5rem;
         font-size: clamp(0.75rem, 3.4vh, 1.45rem);
+    }
+
+    .circle-camera-page:not(.camera-test-page) .camera-detection-distance-cue {
+        top: calc(78% + clamp(0.45rem, 1.2vh, 0.8rem));
+        width: min(46vw, 26rem);
+    }
+
+    .circle-camera-page:not(.camera-test-page) .camera-detection-distance-character {
+        width: min(20vw, 50vh, 19rem);
+        max-height: 66vh;
     }
 
     .circle-camera-page:not(.camera-test-page) .camera-empty-stars {
