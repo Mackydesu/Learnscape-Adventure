@@ -76,7 +76,7 @@
             <button class="initial-loading-retry" type="button" hidden>Try again</button>
         </div>
         <div class="page-loading-panel route-loading-panel" role="status">
-            <img loading="eager" class="page-loading-art" src="assets/Backgrounds/loadingscreen.png" alt="Naglo-load">
+            <img loading="eager" data-initial-image class="page-loading-art" src="assets/Backgrounds/loadingscreen.png" alt="Naglo-load">
             <div class="route-loading-bar" aria-hidden="true">
                 <span></span>
             </div>
@@ -6785,9 +6785,9 @@ const loadRuntimeAssets = async () => {
 };
 
 const trackInitialImages = () => {
-    // Deferred island artwork is intentionally not part of the first-screen
-    // readiness check. It loads when its island becomes visible.
-    const images = Array.from(document.images).filter((image) => image.loading !== 'lazy');
+    // Only the loading-screen illustration gates startup. Islands may create
+    // images while booting, but those must load only when their page opens.
+    const images = Array.from(document.images).filter((image) => image.hasAttribute('data-initial-image'));
 
     if (!images.length) {
         setInitialLoadingProgress(95);
