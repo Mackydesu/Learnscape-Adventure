@@ -15974,15 +15974,37 @@ body *::after {
 }
 
 .camera-curtain-message[data-message='initial'] {
-    top: auto;
-    /* Keep the permission instruction immediately above the pointing hand. */
-    bottom: clamp(4.75rem, 11vh, 8.5rem);
-    font-size: clamp(2.2rem, 4.8vw, 3.6rem);
+    inset: 0;
+    width: 100%;
+    transform: none;
+    /* The two permission instructions are positioned independently. */
+    font-size: 1rem;
+}
+
+.camera-curtain-message[data-message='initial'] strong,
+.camera-curtain-message[data-message='initial'] small {
+    position: absolute;
+    left: 50%;
+    display: block;
+    width: max-content;
+    max-width: calc(100% - 1.5rem);
+    transform: translateX(-50%);
+}
+
+.camera-curtain-message[data-message='initial'] strong {
+    top: clamp(3.25rem, 12%, 5.5rem);
+    color: #fff06a;
+    font-size: clamp(1.55rem, 3.2vw, 2.7rem);
+    line-height: 1.1;
+    white-space: nowrap;
 }
 
 .camera-curtain-message[data-message='initial'] small {
+    bottom: clamp(7.75rem, 15vh, 10.5rem);
     margin-top: 0.65rem;
-    font-size: 1em;
+    color: #ffffff;
+    font-size: clamp(1.1rem, 2.25vw, 1.85rem);
+    line-height: 1.1;
 }
 
 .camera-curtain-message[data-message='ready'] {
