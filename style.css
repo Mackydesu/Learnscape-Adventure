@@ -15833,6 +15833,100 @@ body *::after {
     pointer-events: none;
 }
 
+.camera-film-countdown {
+    position: absolute;
+    z-index: 15;
+    inset: clamp(0.35rem, 1.25vw, 0.9rem);
+    display: grid;
+    place-items: center;
+    padding: clamp(0.35rem, 1vw, 0.8rem) clamp(2.2rem, 7vw, 5.5rem);
+    overflow: hidden;
+    border: clamp(0.18rem, 0.45vw, 0.32rem) solid #060606;
+    border-radius: clamp(0.45rem, 1.2vw, 1rem);
+    background:
+        repeating-linear-gradient(180deg, #030303 0 7%, transparent 7% 18%, #030303 18% 25%) left / clamp(1.65rem, 5.5vw, 4.3rem) 100% no-repeat,
+        repeating-linear-gradient(180deg, #030303 0 7%, transparent 7% 18%, #030303 18% 25%) right / clamp(1.65rem, 5.5vw, 4.3rem) 100% no-repeat,
+        #080808;
+    box-shadow: inset 0 0 0 0.15rem #343434, inset 0 0 1.5rem #000;
+}
+
+.camera-film-countdown[hidden] { display: none !important; }
+
+.camera-film-countdown::before,
+.camera-film-countdown::after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    top: 7%;
+    bottom: 7%;
+    width: clamp(0.8rem, 3vw, 2.5rem);
+    border-radius: clamp(0.12rem, 0.35vw, 0.28rem);
+    background: repeating-linear-gradient(180deg, #f6f6ef 0 10%, transparent 10% 25%);
+    box-shadow: 0 0 0 0.08rem rgba(255, 255, 255, 0.14);
+}
+
+.camera-film-countdown::before { left: clamp(0.35rem, 1.05vw, 0.8rem); }
+.camera-film-countdown::after { right: clamp(0.35rem, 1.05vw, 0.8rem); }
+
+.camera-film-countdown-frame {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border: 0.13rem solid #161616;
+    border-radius: clamp(0.4rem, 1.15vw, 1rem);
+    background:
+        radial-gradient(circle at 50% 50%, #f3f3f0 0 3%, #c8c8c5 33%, #777773 72%, #222 100%);
+    box-shadow: inset 0 0 2rem rgba(0, 0, 0, 0.64);
+}
+
+.camera-film-countdown-crosshair,
+.camera-film-countdown-rings,
+.camera-film-countdown-sweep {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.camera-film-countdown-crosshair {
+    background:
+        linear-gradient(90deg, transparent calc(50% - 0.09rem), rgba(248, 248, 245, 0.88) calc(50% - 0.09rem) calc(50% + 0.09rem), transparent calc(50% + 0.09rem)),
+        linear-gradient(transparent calc(50% - 0.09rem), rgba(248, 248, 245, 0.88) calc(50% - 0.09rem) calc(50% + 0.09rem), transparent calc(50% + 0.09rem));
+}
+
+.camera-film-countdown-rings {
+    inset: 50%;
+    width: min(66%, 23rem);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    border: clamp(0.12rem, 0.35vw, 0.22rem) solid rgba(250, 250, 247, 0.92);
+    border-radius: 50%;
+    box-shadow: 0 0 0 clamp(0.35rem, 1vw, 0.7rem) rgba(250, 250, 247, 0.75);
+}
+
+.camera-film-countdown-sweep {
+    z-index: 1;
+    background: conic-gradient(from -90deg, rgba(255, 255, 255, 0.06) 0 74%, rgba(0, 0, 0, 0.38) 74% 100%);
+    transform-origin: center;
+    animation: cameraFilmCountdownSweep 1s linear infinite;
+    mix-blend-mode: multiply;
+}
+
+.camera-film-countdown-number {
+    position: relative;
+    z-index: 3;
+    color: #171516;
+    font: 1000 clamp(5rem, 18vw, 14rem)/1 'Fredoka', 'Arial Black', sans-serif;
+    text-shadow: 0 0.08em 0 rgba(255, 255, 255, 0.22);
+}
+
+@keyframes cameraFilmCountdownSweep {
+    to { transform: rotate(360deg); }
+}
+
 .circle-camera-page.is-camera-intro .circle-camera-viewfinder {
     background: var(--camera-start-mid);
 }
@@ -16046,6 +16140,10 @@ body *::after {
     }
 
     .camera-processing-curtain::before {
+        animation: none;
+    }
+
+    .camera-film-countdown-sweep {
         animation: none;
     }
 

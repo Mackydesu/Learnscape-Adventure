@@ -478,6 +478,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
             `);
         }
+        if (viewfinder && !viewfinder.querySelector('.camera-film-countdown')) {
+            viewfinder.insertAdjacentHTML('beforeend', `
+                <section class="camera-film-countdown" aria-live="polite" aria-label="Sampung segundong countdown" hidden>
+                    <div class="camera-film-countdown-frame" aria-hidden="true">
+                        <span class="camera-film-countdown-crosshair"></span>
+                        <span class="camera-film-countdown-rings"></span>
+                        <span class="camera-film-countdown-sweep"></span>
+                        <output class="camera-film-countdown-number">10</output>
+                    </div>
+                </section>
+            `);
+        }
         if (viewfinder && !viewfinder.querySelector('.camera-intro-character')) {
             viewfinder.insertAdjacentHTML('afterbegin', '<img class="camera-intro-character" src="assets/Character/ch6.webp" alt="Bibi" hidden>');
         }
@@ -12419,8 +12431,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cameraDetectionReadyWaits = new WeakMap();
     const cameraIntroSessions = new WeakMap();
     const cameraIntroAudios = new WeakMap();
+    const cameraIntroCountdowns = new WeakMap();
 
     const cancelCameraIntro = (page) => {
+        cameraIntroCountdowns.get(page)?.();
+        cameraIntroCountdowns.delete(page);
         const session = (cameraIntroSessions.get(page) || 0) + 1;
         cameraIntroSessions.set(page, session);
         const audio = cameraIntroAudios.get(page);
@@ -12440,6 +12455,54 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const waitForCameraIntro = (page, session, duration) => new Promise((resolve) => {
         window.setTimeout(() => resolve(cameraIntroSessions.get(page) === session), duration);
+    });
+
+    const playCameraFilmCountdown = (page, session, durationSeconds = 10) => new Promise((resolve) => {
+        const countdown = page?.querySelector('.camera-film-countdown');
+        const number = countdown?.querySelector('.camera-film-countdown-number');
+        if (!countdown || !number || cameraIntroSessions.get(page) !== session) {
+            resolve(false);
+            return;
+        }
+
+        let frameId = null;
+        let complete = false;
+        let previousSecond = null;
+        const startedAt = performance.now();
+        countdown.hidden = false;
+        page.classList.add('is-camera-countdown');
+
+        const finish = (completed) => {
+            if (complete) return;
+            complete = true;
+            if (frameId !== null) window.cancelAnimationFrame(frameId);
+            if (cameraIntroCountdowns.get(page) === cancel) cameraIntroCountdowns.delete(page);
+            countdown.hidden = true;
+            page.classList.remove('is-camera-countdown');
+            resolve(completed);
+        };
+        const cancel = () => finish(false);
+        cameraIntroCountdowns.set(page, cancel);
+
+        const tick = (now) => {
+            if (cameraIntroSessions.get(page) !== session || !isPageVisible(page)) {
+                finish(false);
+                return;
+            }
+            const elapsed = now - startedAt;
+            const remaining = Math.max(0, Math.ceil((durationSeconds * 1000 - elapsed) / 1000));
+            if (remaining !== previousSecond) {
+                previousSecond = remaining;
+                number.textContent = String(remaining);
+                countdown.dataset.second = String(remaining);
+            }
+            if (elapsed >= durationSeconds * 1000) {
+                finish(true);
+                return;
+            }
+            frameId = window.requestAnimationFrame(tick);
+        };
+        tick(startedAt);
     });
 
     const playCameraIntroVoice = (page, session, source, { startAt = 0, endAt = null } = {}) => new Promise((resolve) => {
@@ -12578,7 +12641,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         page.classList.remove('is-camera-intro');
         character.hidden = true;
         panel.hidden = true;
-        waitForCameraDetectionReady(page, { waitForFullscreen: true });
+        closeCameraProcessingCurtains(page);
+        if (!await playCameraFilmCountdown(page, session, 10)) return;
+        if (cameraIntroSessions.get(page) !== session || !isPageVisible(page)) return;
+        waitForCameraDetectionReady(page, {
+            waitForFullscreen: true,
+            onOpened: () => {
+                if (cameraIntroSessions.get(page) !== session || !isPageVisible(page)) return;
+                panel.hidden = false;
+                showMessage('Ipakita sa kamera ang nahanap na hugis.');
+                playCameraIntroVoice(page, session, 'assets/Audios/Voice over/Ipakita.mp3')
+                    .then(() => {
+                        if (cameraIntroSessions.get(page) === session) panel.hidden = true;
+                    });
+            },
+        });
     };
 
     const stopCameraScanRewardAudio = (page) => {
@@ -12659,7 +12736,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const waitForCameraDetectionReady = (
         page,
-        { requireRemoval = false, waitForFullscreen = false } = {},
+        { requireRemoval = false, waitForFullscreen = false, onOpened = null } = {},
     ) => {
         if (!page || !isPageVisible(page)) return false;
         const video = page.querySelector('.circle-camera-video');
@@ -12675,6 +12752,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const openCurtains = () => {
             cancelCameraDetectionReadyWait(page);
             openCameraProcessingCurtains(page);
+            onOpened?.();
         };
 
         const tryOpenCurtains = () => {
