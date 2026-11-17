@@ -92,6 +92,7 @@ export default defineConfig(({ command }) => ({
             },
             async closeBundle() {
                 const projectRoot = process.cwd();
+                const outputRoot = resolve(projectRoot, "dist");
                 const assetsSource = resolve(projectRoot, "assets");
                 const assetsOutput = resolve(projectRoot, "dist/assets");
                 await cp(
@@ -100,7 +101,9 @@ export default defineConfig(({ command }) => ({
                     { recursive: true, force: true }
                 );
                 await cp(resolve(projectRoot, "manifest.webmanifest"), resolve(projectRoot, "dist/manifest.webmanifest"));
-                const outputRoot = resolve(projectRoot, "dist");
+                // Vite serves files in public/ verbatim. Keep an old public
+                // script from shadowing the current application script.
+                await cp(resolve(projectRoot, "script.js"), resolve(outputRoot, "script.js"), { force: true });
                 const outputFiles = (await collectFiles(outputRoot))
                     .filter((file) => !/[\\/]runtime-assets\.json$/.test(file))
                     .sort();

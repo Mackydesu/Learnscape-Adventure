@@ -403,6 +403,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (cameraStartButton) {
             cameraStartButton.classList.remove('game-icon-button', 'icon-camera');
             cameraStartButton.querySelector('.circle-camera-start-icon')?.remove();
+            cameraStartButton.setAttribute('aria-label', 'I-allow ang Kamera');
             if (!cameraStartButton.querySelector('.camera-start-guide-hand')) {
                 const guideHand = document.createElement('img');
                 guideHand.className = 'camera-start-guide-hand';
@@ -412,6 +413,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 cameraStartButton.prepend(guideHand);
             }
             cameraStartButton.querySelector('strong')?.replaceChildren('Kamera');
+            cameraStartButton.classList.add('is-camera-access-button');
         }
 
         const unlockHeading = page.querySelector('.circle-camera-unlock-board h2');
@@ -475,6 +477,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <p class="camera-curtain-message"><strong>Buksan ang Kamera</strong></p>
                 </div>
             `);
+        }
+        if (viewfinder && !viewfinder.querySelector('.camera-film-countdown')) {
+            viewfinder.insertAdjacentHTML('beforeend', `
+                <section class="camera-film-countdown" aria-live="polite" aria-label="Sampung segundong countdown" hidden>
+                    <div class="camera-film-countdown-frame" aria-hidden="true">
+                        <span class="camera-film-countdown-crosshair"></span>
+                        <span class="camera-film-countdown-rings"></span>
+                        <span class="camera-film-countdown-sweep"></span>
+                        <output class="camera-film-countdown-number">10</output>
+                    </div>
+                </section>
+            `);
+        }
+        if (viewfinder && !viewfinder.querySelector('.camera-countdown-times-up')) {
+            viewfinder.insertAdjacentHTML('beforeend', `
+                <section class="camera-countdown-times-up" role="status" aria-label="Ubos na ang oras" hidden>
+                    <span class="camera-countdown-clock" aria-hidden="true"><i></i><b></b></span>
+                </section>
+            `);
+        }
+        if (viewfinder && !viewfinder.querySelector('.camera-intro-character')) {
+            viewfinder.insertAdjacentHTML('afterbegin', '<img class="camera-intro-character" src="assets/Character/ch6.webp" alt="Bibi" hidden>');
+        }
+        if (!page.querySelector('.camera-intro-message-panel')) {
+            page.insertAdjacentHTML('beforeend', '<section class="camera-intro-message-panel" role="status" aria-live="polite" hidden><p class="camera-intro-message-text"></p></section>');
         }
         if (viewfinder && !viewfinder.querySelector('.camera-detection-check')) {
             viewfinder.insertAdjacentHTML('beforeend', '<div class="camera-detection-check" role="status" aria-label="Natukoy ang tamang hugis" aria-hidden="true"><span aria-hidden="true"></span></div>');
@@ -7105,7 +7132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     starMissionRetryButton?.addEventListener('click', () => {
         playUiClickSound('start');
-        showStarMissionSetup();
+        startStarMissionSequence();
     });
 
     starMissionPauseButton?.addEventListener('click', () => {
@@ -7127,27 +7154,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     diamondMissionRetryButton?.addEventListener('click', () => {
         playUiClickSound('start');
-        startDiamondMissionBats();
+        startDiamondMissionSequence();
     });
 
     heartGameRetryButton?.addEventListener('click', () => {
         playUiClickSound('start');
-        resetHeartGameState();
-        resetHeartCupidBow();
+        stopHeartCupidGame();
+        startHeartMissionSequence();
     });
 
     heartFinalReplayButton?.addEventListener('click', () => {
         playUiClickSound('start');
         stopHeartCupidGame();
-        stopHeartMissionSequence();
-        if (!heartMissionIntro || !heartMissionStartButton) return;
-        heartMissionPage?.classList.add('is-heart-mission-active');
-        heartMissionIntro.hidden = false;
-        heartMissionIntro.setAttribute('aria-hidden', 'false');
-        heartMissionStartButton.hidden = false;
-        heartMissionStartButton.getBoundingClientRect();
-        heartMissionStartButton.classList.add('is-visible');
-        heartMissionStartButton.focus({ preventScroll: true });
+        startHeartMissionSequence();
     });
 
     heartFinalNextButton?.addEventListener('click', () => {
@@ -8069,13 +8088,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (page === starMissionPage && progress?.dataset.progressStage === 'hunt') {
                 page.classList.remove('is-progress-visible', 'is-lesson-complete');
                 progress?.setAttribute('aria-hidden', 'true');
-                showStarMissionRetryStart();
+                startStarMissionSequence();
                 return;
             }
             if (page === diamondMissionPage && progress?.dataset.progressStage === 'hunt') {
                 page.classList.remove('is-progress-visible', 'is-lesson-complete');
                 progress.setAttribute('aria-hidden', 'true');
-                showDiamondMissionRetryStart();
+                startDiamondMissionSequence();
                 return;
             }
             setShapeMissionBgmPhase('');
@@ -8563,7 +8582,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     rectangleFinalReplayButton?.addEventListener('click', () => {
         hideRectangleFinalProgress();
-        navigateApp('shapeArea4');
+        navigateToShapePhase('shapeArea4', () => {
+            const config = shapePhaseConfigurations.rectangle;
+            showDirectPreviewMission(config.page, () => {
+                startRectangleDialogue();
+                enableMissionHowToHelp('rectangle');
+            });
+        });
     });
 
     rectangleFinalNextButton?.addEventListener('click', () => {
@@ -10001,12 +10026,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     triangleGameCompleteReplayButton?.addEventListener('click', () => {
         triangleGamePage?.classList.remove('is-game-progress-visible');
         triangleGameCompleteProgress?.setAttribute('aria-hidden', 'true');
-        stopTriangleGameDialogue();
-        if (!triangleGameStartButton) return;
-        triangleGameStartButton.hidden = false;
-        triangleGameStartButton.getBoundingClientRect();
-        triangleGameStartButton.classList.add('is-visible');
-        triangleGameStartButton.focus({ preventScroll: true });
+        startTriangleGameDialogue();
     });
 
     triangleGameCompleteNextButton?.addEventListener('click', () => {
@@ -12291,7 +12311,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const retryCircleHunt = () => {
         hideCircleIllustrationProgress();
-        showCircleHuntStart();
+        startCircleMissionGuide();
     };
 
     const finishCircleIllustrationLesson = () => {
@@ -12315,6 +12335,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const setCircleCameraButtonText = (text) => {
         const label = circleCameraStartButton?.querySelector('strong');
         if (label) label.textContent = text;
+        circleCameraStartButton?.classList.toggle('is-camera-access-button', text === 'Kamera');
+        circleCameraStartButton?.classList.toggle('is-camera-open-button', text === 'Buksan');
+        circleCameraStartButton?.setAttribute('aria-label', text === 'Kamera' ? 'I-allow ang Kamera' : text);
         const guideHand = circleCameraStartButton?.querySelector('.camera-start-guide-hand');
         if (guideHand) guideHand.hidden = text !== 'Kamera';
     };
@@ -12323,8 +12346,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (circleCameraStartButton) circleCameraStartButton.hidden = !visible;
     };
 
+    const clearCameraPermissionPrompt = (page) => {
+        const message = page?.querySelector('.camera-curtain-message');
+        message?.replaceChildren();
+        message?.removeAttribute('data-message');
+    };
+
     const stopCircleCameraStream = () => {
         circleCameraStartRequestId++;
+        delete circleCameraPage?.dataset.cameraAccessReady;
         dispatchCameraLifecycle('learnscape:camerastopped', circleCameraPage, circleCameraVideo);
         if (circleCameraStream) {
             circleCameraStream.getTracks().forEach((track) => track.stop());
@@ -12375,8 +12405,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (circleCameraVideo.srcObject === stream) circleCameraVideo.srcObject = null;
                 return;
             }
-            setCircleCameraButtonVisible(false);
-            waitForCameraDetectionReady(circleCameraPage, { waitForFullscreen: true });
+            circleCameraPage.dataset.cameraAccessReady = 'true';
+            setCircleCameraButtonText('Buksan');
+            clearCameraPermissionPrompt(circleCameraPage);
+            setCircleCameraButtonVisible(true);
+            circleCameraStartButton.disabled = false;
         } catch (error) {
             if (stream) stream.getTracks().forEach((track) => track.stop());
             if (requestId !== circleCameraStartRequestId) return;
@@ -12396,6 +12429,275 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cameraScanRewardAudio = new Map();
     const cameraDetectionFeedbackTimers = new WeakMap();
     const cameraDetectionReadyWaits = new WeakMap();
+    const cameraIntroSessions = new WeakMap();
+    const cameraIntroAudios = new WeakMap();
+    const cameraIntroCountdowns = new WeakMap();
+
+    const cancelCameraIntro = (page) => {
+        cameraIntroCountdowns.get(page)?.();
+        cameraIntroCountdowns.delete(page);
+        const timeUp = page?.querySelector('.camera-countdown-times-up');
+        if (timeUp) {
+            timeUp.hidden = true;
+            timeUp.classList.remove('is-active');
+        }
+        const session = (cameraIntroSessions.get(page) || 0) + 1;
+        cameraIntroSessions.set(page, session);
+        const audio = cameraIntroAudios.get(page);
+        if (audio) {
+            audio.onended = null;
+            audio.onerror = null;
+            audio.pause();
+            cameraIntroAudios.delete(page);
+        }
+        page?.classList.remove('is-camera-intro');
+        const character = page?.querySelector('.camera-intro-character');
+        if (character) character.hidden = true;
+        const panel = page?.querySelector('.camera-intro-message-panel');
+        if (panel) {
+            panel.hidden = true;
+            panel.classList.remove('is-camera-under-board-message');
+        }
+        return session;
+    };
+
+    const waitForCameraIntro = (page, session, duration) => new Promise((resolve) => {
+        window.setTimeout(() => resolve(cameraIntroSessions.get(page) === session), duration);
+    });
+
+    const playCameraCountdownSound = (source) => {
+        const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+        if (!source || !window.Audio || soundScale <= 0) return;
+        const audio = new window.Audio(source);
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = Math.min(1, Math.max(0, soundScale));
+        audio.play().catch(() => {});
+    };
+
+    const playCameraFilmCountdown = (page, session, durationSeconds = 10) => new Promise((resolve) => {
+        const countdown = page?.querySelector('.camera-film-countdown');
+        const number = countdown?.querySelector('.camera-film-countdown-number');
+        if (!countdown || !number || cameraIntroSessions.get(page) !== session) {
+            resolve(false);
+            return;
+        }
+
+        let frameId = null;
+        let complete = false;
+        let previousSecond = null;
+        const startedAt = performance.now();
+        countdown.hidden = false;
+        page.classList.add('is-camera-countdown');
+
+        const finish = (completed) => {
+            if (complete) return;
+            complete = true;
+            if (frameId !== null) window.cancelAnimationFrame(frameId);
+            if (cameraIntroCountdowns.get(page) === cancel) cameraIntroCountdowns.delete(page);
+            countdown.hidden = true;
+            page.classList.remove('is-camera-countdown');
+            resolve(completed);
+        };
+        const cancel = () => finish(false);
+        cameraIntroCountdowns.set(page, cancel);
+
+        const tick = (now) => {
+            if (cameraIntroSessions.get(page) !== session || !isPageVisible(page)) {
+                finish(false);
+                return;
+            }
+            const elapsed = now - startedAt;
+            const remaining = Math.max(0, Math.ceil((durationSeconds * 1000 - elapsed) / 1000));
+            if (remaining !== previousSecond) {
+                previousSecond = remaining;
+                number.textContent = String(remaining);
+                countdown.dataset.second = String(remaining);
+                if (remaining > 0) playCameraCountdownSound('assets/Audios/Sound effects/sec.mp3');
+            }
+            if (elapsed >= durationSeconds * 1000) {
+                finish(true);
+                return;
+            }
+            frameId = window.requestAnimationFrame(tick);
+        };
+        tick(startedAt);
+    });
+
+    const playCameraCountdownTimesUp = async (page, session) => {
+        const timeUp = page?.querySelector('.camera-countdown-times-up');
+        if (!timeUp || cameraIntroSessions.get(page) !== session) return false;
+        timeUp.hidden = false;
+        timeUp.classList.remove('is-active');
+        void timeUp.offsetWidth;
+        timeUp.classList.add('is-active');
+        await Promise.all([
+            playCameraIntroVoice(page, session, 'assets/Audios/Sound effects/times up.mp3'),
+            waitForCameraIntro(page, session, 1000),
+        ]);
+        if (cameraIntroSessions.get(page) !== session || !isPageVisible(page)) return false;
+        timeUp.hidden = true;
+        timeUp.classList.remove('is-active');
+        return true;
+    };
+
+    const playCameraIntroVoice = (page, session, source, { startAt = 0, endAt = null } = {}) => new Promise((resolve) => {
+        const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+        if (!source || !window.Audio || soundScale <= 0 || cameraIntroSessions.get(page) !== session) {
+            resolve();
+            return;
+        }
+        const audio = new window.Audio(source);
+        cameraIntroAudios.set(page, audio);
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = Math.min(1, Math.max(0, soundScale));
+        let finished = false;
+        const finish = () => {
+            if (finished) return;
+            finished = true;
+            if (cameraIntroAudios.get(page) === audio) cameraIntroAudios.delete(page);
+            resolve();
+        };
+        audio.onended = finish;
+        audio.onerror = finish;
+        audio.ontimeupdate = () => {
+            if (endAt !== null && audio.currentTime >= endAt) {
+                audio.pause();
+                finish();
+            }
+        };
+        try {
+            audio.currentTime = startAt;
+        } catch (error) {
+            // Seeking will fall back to the start when metadata is unavailable.
+        }
+        audio.play().catch(finish);
+    });
+
+    const playCameraIntroTimedVoice = (page, session, source, { switchAt, endAt, onSwitch }) => new Promise((resolve) => {
+        const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+        if (!source || !window.Audio || soundScale <= 0 || cameraIntroSessions.get(page) !== session) {
+            onSwitch?.();
+            resolve();
+            return;
+        }
+        const audio = new window.Audio(source);
+        cameraIntroAudios.set(page, audio);
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = Math.min(1, Math.max(0, soundScale));
+        let finished = false;
+        let switched = false;
+        let frameId = null;
+        const switchMessage = () => {
+            if (switched) return;
+            switched = true;
+            onSwitch?.();
+        };
+        const finish = () => {
+            if (finished) return;
+            finished = true;
+            if (frameId !== null) window.cancelAnimationFrame(frameId);
+            if (cameraIntroAudios.get(page) === audio) cameraIntroAudios.delete(page);
+            resolve();
+        };
+        const syncToTimestamp = () => {
+            if (cameraIntroSessions.get(page) !== session) {
+                audio.pause();
+                finish();
+                return;
+            }
+            if (!switched && audio.currentTime >= switchAt) switchMessage();
+            if (audio.currentTime >= endAt) {
+                audio.pause();
+                switchMessage();
+                finish();
+                return;
+            }
+            frameId = window.requestAnimationFrame(syncToTimestamp);
+        };
+        audio.onended = () => {
+            switchMessage();
+            finish();
+        };
+        audio.onerror = () => {
+            switchMessage();
+            finish();
+        };
+        audio.play().then(() => {
+            syncToTimestamp();
+        }).catch(() => {
+            switchMessage();
+            finish();
+        });
+    });
+
+    const startCameraIntro = async (page) => {
+        if (!page || !isPageVisible(page)) return;
+        const session = cancelCameraIntro(page);
+        const shape = String(page.dataset.cameraShape || '').trim().toLowerCase();
+        const shapeLabel = cameraShapeLabels[shape] || 'hugis';
+        const character = page.querySelector('.camera-intro-character');
+        const panel = page.querySelector('.camera-intro-message-panel');
+        const message = page.querySelector('.camera-intro-message-text');
+        const startButton = page.querySelector('.circle-camera-start-button');
+        if (!character || !panel || !message || !startButton) return;
+
+        startButton.hidden = true;
+        page.classList.add('is-camera-intro');
+        character.hidden = false;
+        panel.hidden = true;
+        closeCameraProcessingCurtains(page);
+
+        const showMessage = (text) => {
+            if (cameraIntroSessions.get(page) !== session) return false;
+            message.textContent = text;
+            return true;
+        };
+
+        if (!await waitForCameraIntro(page, session, 1000)) return;
+        openCameraProcessingCurtains(page);
+        panel.hidden = false;
+        showMessage('Ngayon! Gamitin ang natutuhan.');
+        await playCameraIntroTimedVoice(page, session, 'assets/Audios/Voice over/Maghanap.mp3', {
+            switchAt: 2.7,
+            endAt: 6.2,
+            onSwitch: () => showMessage(`Tumingin sa paligid at maghanap ng mga bagay na hugis ${shapeLabel.toLowerCase()}.`),
+        });
+        if (cameraIntroSessions.get(page) !== session) return;
+        await playCameraIntroVoice(page, session, shapeChoiceAudioSources[shape]);
+        if (cameraIntroSessions.get(page) !== session) return;
+        showMessage('Handa ka na ba?');
+        await playCameraIntroVoice(page, session, 'assets/Audios/Voice over/Handa ka na ba.mp3');
+        if (cameraIntroSessions.get(page) !== session) return;
+        showMessage('Simulan na ang paghahanap!');
+        await playCameraIntroVoice(page, session, 'assets/Audios/Voice over/Simulan.mp3');
+        if (cameraIntroSessions.get(page) !== session || !isPageVisible(page)) return;
+        page.classList.remove('is-camera-intro');
+        character.hidden = true;
+        panel.hidden = true;
+        closeCameraProcessingCurtains(page);
+        if (!await playCameraFilmCountdown(page, session, 10)) return;
+        if (cameraIntroSessions.get(page) !== session || !isPageVisible(page)) return;
+        if (!await playCameraCountdownTimesUp(page, session)) return;
+        waitForCameraDetectionReady(page, {
+            waitForFullscreen: true,
+            onOpened: () => {
+                if (cameraIntroSessions.get(page) !== session || !isPageVisible(page)) return;
+                panel.hidden = false;
+                panel.classList.add('is-camera-under-board-message');
+                showMessage('Ipakita sa kamera ang nahanap na hugis.');
+                playCameraIntroVoice(page, session, 'assets/Audios/Voice over/Ipakita.mp3')
+                    .then(() => {
+                        if (cameraIntroSessions.get(page) === session) {
+                            panel.hidden = true;
+                            panel.classList.remove('is-camera-under-board-message');
+                        }
+                    });
+            },
+        });
+    };
 
     const stopCameraScanRewardAudio = (page) => {
         const sounds = cameraScanRewardAudio.get(page);
@@ -12443,8 +12745,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         message.dataset.message = messageType;
         if (messageType === 'initial') {
             const emphasis = document.createElement('strong');
-            emphasis.textContent = 'Buksan ang Kamera';
-            message.append(emphasis);
+            emphasis.textContent = 'I-allow ang Kamera';
+            const instruction = document.createElement('small');
+            instruction.textContent = 'Pindutin ito';
+            message.append(emphasis, instruction);
         } else if (messageType === 'processing') {
             message.textContent = 'Sandali...';
         } else if (messageType === 'ready') {
@@ -12473,7 +12777,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const waitForCameraDetectionReady = (
         page,
-        { requireRemoval = false, waitForFullscreen = false } = {},
+        { requireRemoval = false, waitForFullscreen = false, onOpened = null } = {},
     ) => {
         if (!page || !isPageVisible(page)) return false;
         const video = page.querySelector('.circle-camera-video');
@@ -12489,6 +12793,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const openCurtains = () => {
             cancelCameraDetectionReadyWait(page);
             openCameraProcessingCurtains(page);
+            onOpened?.();
         };
 
         const tryOpenCurtains = () => {
@@ -12568,8 +12873,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const setShapeCameraButtonText = (page, text) => {
-        const label = page?.querySelector('.circle-camera-start-button strong');
+        const button = page?.querySelector('.circle-camera-start-button');
+        const label = button?.querySelector('strong');
         if (label) label.textContent = text;
+        button?.classList.toggle('is-camera-access-button', text === 'Kamera');
+        button?.classList.toggle('is-camera-open-button', text === 'Buksan');
+        button?.setAttribute('aria-label', text === 'Kamera' ? 'I-allow ang Kamera' : text);
         const guideHand = page?.querySelector('.camera-start-guide-hand');
         if (guideHand) guideHand.hidden = text !== 'Kamera';
     };
@@ -12581,6 +12890,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const stopShapeCameraStream = (page) => {
         shapeCameraStartRequestIds.set(page, (shapeCameraStartRequestIds.get(page) || 0) + 1);
+        delete page?.dataset.cameraAccessReady;
         dispatchCameraLifecycle('learnscape:camerastopped', page, page?.querySelector('.circle-camera-video'));
         const stream = shapeCameraStreams.get(page);
         if (stream) {
@@ -12636,8 +12946,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (video.srcObject === stream) video.srcObject = null;
                 return;
             }
-            setShapeCameraButtonVisible(page, false);
-            waitForCameraDetectionReady(page, { waitForFullscreen: true });
+            page.dataset.cameraAccessReady = 'true';
+            setShapeCameraButtonText(page, 'Buksan');
+            clearCameraPermissionPrompt(page);
+            setShapeCameraButtonVisible(page, true);
+            button.disabled = false;
         } catch (error) {
             if (stream) stream.getTracks().forEach((track) => track.stop());
             if (shapeCameraStartRequestIds.get(page) !== requestId) return;
@@ -13725,7 +14038,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.addEventListener('pointercancel', (event) => endCircleSortDrag(event, true), true);
 
     circleHuntStartButton?.addEventListener('click', startCircleHuntCountdown);
-    circleHuntPlayAgainButton?.addEventListener('click', startCircleHuntCountdown);
+    circleHuntPlayAgainButton?.addEventListener('click', startCircleMissionGuide);
     circleMissionStartButton?.addEventListener('click', () => {
         playUiClickSound('chime');
         circleMissionStartButton.classList.add('is-clicking');
@@ -13800,10 +14113,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         setShapeMissionBgmPhase('circle');
         finishCircleIllustrationLesson();
     });
-    circleCameraStartButton?.addEventListener('click', startCircleCameraStream);
+    const handleCameraAccessButtonPress = (event, page, startCamera) => {
+        event.preventDefault();
+        const button = event.currentTarget;
+        if (button?.disabled) return;
+        // Call getUserMedia from this trusted button press so the browser can
+        // display its camera-permission prompt.
+        if (page?.dataset.cameraAccessReady !== 'true') {
+            startCamera();
+            return;
+        }
+        startCameraIntro(page);
+    };
+
+    circleCameraStartButton?.addEventListener('click', (event) => {
+        handleCameraAccessButtonPress(event, circleCameraPage, startCircleCameraStream);
+    });
     shapeCameraPages.forEach((page) => {
-        page.querySelector('.circle-camera-start-button')?.addEventListener('click', () => {
-            startShapeCameraStream(page);
+        page.querySelector('.circle-camera-start-button')?.addEventListener('click', (event) => {
+            handleCameraAccessButtonPress(event, page, () => startShapeCameraStream(page));
         });
     });
     cameraPages.forEach((page) => {
@@ -13915,7 +14243,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     shapeSquareReplayButton?.addEventListener('click', () => {
         if (shapeSquareProgress?.dataset.progressStage === 'answer') {
-            returnToShapeSquareMissionStart();
+            startShapeSquareMissionGuide();
             return;
         }
         setShapeMissionBgmPhase('');
@@ -13941,7 +14269,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     shapeSquarePuzzleRetryButton?.addEventListener('click', () => {
         playUiClickSound('chime');
-        returnToShapeSquareMissionStart();
+        startShapeSquareMissionGuide();
     });
     shapeSquareAnswerTileButtons.forEach((tile) => {
         tile.addEventListener('click', handleShapeSquareAnswerTileClick);
@@ -14015,11 +14343,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (activeShapeCameraRoute !== `${page.dataset.cameraShape}Camera`) stopShapeCameraStream(page);
         });
         cameraPages.forEach((page) => {
+            if (!isPageVisible(page)) cancelCameraIntro(page);
+        });
+        cameraPages.forEach((page) => {
             if (!isPageVisible(page)) resetCameraCompletionFlow(page);
         });
         const activeCameraPage = cameraPages.find((page) => isPageVisible(page));
         if (activeCameraPage && /Camera$/.test(event.detail?.route || '')) {
+            delete activeCameraPage.dataset.cameraAccessReady;
             closeCameraProcessingCurtains(activeCameraPage, 'initial');
+            if (activeCameraPage === circleCameraPage) {
+                setCircleCameraButtonText('Kamera');
+                setCircleCameraButtonVisible(true);
+            } else {
+                setShapeCameraButtonText(activeCameraPage, 'Kamera');
+                setShapeCameraButtonVisible(activeCameraPage, true);
+            }
         }
         if (event.detail?.route !== 'shapeSquare') {
             resetShapeSquareScene();
@@ -15033,12 +15372,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     ovalGameOverRetryButton?.addEventListener('click', () => {
         playUiClickSound('start');
-        showOvalMissionStartDirectly();
+        startOvalMissionIntro();
     });
 
     ovalFinalReplayButton?.addEventListener('click', () => {
         playUiClickSound('start');
-        showOvalMissionStartDirectly();
+        startOvalMissionIntro();
     });
 
     ovalFinalNextButton?.addEventListener('click', () => {
@@ -15273,10 +15612,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (shape === 'circle') {
             navigateToShapePhase(config.mission, () => {
                 resetCircleIllustrationVideo();
-                resetCircleMissionGuide();
-                showCircleHuntStart();
-                setShapeMissionBgmPhase('circle');
-                startCircleHuntCountdown();
+                startCircleMissionGuide();
                 enableMissionHowToHelp('circle');
             });
             return true;
@@ -15285,10 +15621,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (shape === 'square') {
             runShapePhaseWithLoading(() => {
                 returnToShapeSquareMissionStart();
-                // Match pressing the post-lesson Start button instead of leaving
-                // the player at that checkpoint. The checkpoint applies
-                // squaregame.webp before the playable mission is revealed.
-                showShapeSquareObjectGame();
+                setShapeMissionBgmPhase('square');
+                startShapeSquareMissionGuide();
                 enableMissionHowToHelp('square');
             });
             return true;
@@ -15296,24 +15630,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (shape === 'triangle') {
             navigateToShapePhase(config.mission, () => {
-                stopTriangleGameDialogue();
-                startTriangleBridgeCrafting();
+                startTriangleGameDialogue();
                 enableMissionHowToHelp('triangle');
             });
             return true;
         }
 
         if (shape === 'rectangle') {
-            navigateToShapePhase('rectangleDelivery');
+            runShapePhaseWithLoading(() => showDirectPreviewMission(config.page, () => {
+                startRectangleDialogue();
+                enableMissionHowToHelp('rectangle');
+            }));
             return true;
         }
 
         if (shape === 'oval') {
-            openOvalMissionAtStartScreen = true;
-            // Prepare the exact Simulan na screen before the route transition;
-            // the route listener repeats this once the Oval page is visible.
-            showOvalMissionStartDirectly();
             navigateToShapePhase(config.mission, () => {
+                startOvalMissionIntro();
                 enableMissionHowToHelp('oval');
             });
             return true;
@@ -15321,25 +15654,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const missionStarters = {
             heart: () => {
-                stopHeartMissionSequence();
-                if (heartMissionIntro) {
-                    heartMissionIntro.hidden = true;
-                    heartMissionIntro.setAttribute('aria-hidden', 'true');
-                }
-                startHeartCupidGame();
+                startHeartMissionSequence();
                 enableMissionHowToHelp('heart');
             },
             star: () => {
-                stopStarMissionSequence();
-                if (starMissionIntro) {
-                    starMissionIntro.hidden = true;
-                    starMissionIntro.setAttribute('aria-hidden', 'true');
-                }
-                showStarMissionSetup();
+                startStarMissionSequence();
                 enableMissionHowToHelp('star');
             },
             diamond: () => {
-                startDiamondMissionGame();
+                startDiamondMissionSequence();
                 enableMissionHowToHelp('diamond');
             },
         };
@@ -15411,6 +15734,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const isShapeIslandCompleted = (shape) => hasShapePhaseBadge(shape);
 
     const setShapePhaseHubOpen = (record, isOpen) => {
+        // A phase action can hide this menu while its button still owns focus.
+        // Clear that focus first so assistive technology never sees a focused
+        // control inside an aria-hidden island menu.
+        if (!isOpen) {
+            const focusedElement = document.activeElement;
+            if (focusedElement instanceof HTMLElement && record.selector.contains(focusedElement)) {
+                focusedElement.blur();
+            }
+        }
         record.page.classList.toggle('is-shape-phase-selector-open', isOpen);
         record.selector.hidden = !isOpen;
         record.selector.setAttribute('aria-hidden', String(!isOpen));
@@ -15470,10 +15802,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 image.alt = `${shape[0].toUpperCase()}${shape.slice(1)} ${panelCopy.title.toLowerCase()} preview`;
                 preview.appendChild(image);
             } else {
-                const cameraIcon = document.createElement('span');
-                cameraIcon.className = `shape-phase-camera-shape shape-phase-camera-shape-${shape}`;
-                cameraIcon.setAttribute('aria-hidden', 'true');
-                preview.appendChild(cameraIcon);
+                const cameraShape = document.createElement('span');
+                cameraShape.className = `shape-phase-camera-shape shape-phase-camera-shape-${shape}`;
+                cameraShape.setAttribute('aria-hidden', 'true');
+                preview.appendChild(cameraShape);
             }
             const description = document.createElement('p');
             description.className = 'shape-phase-description';
