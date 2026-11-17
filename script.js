@@ -403,6 +403,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (cameraStartButton) {
             cameraStartButton.classList.remove('game-icon-button', 'icon-camera');
             cameraStartButton.querySelector('.circle-camera-start-icon')?.remove();
+            cameraStartButton.setAttribute('aria-label', 'I-allow ang Kamera');
             if (!cameraStartButton.querySelector('.camera-start-guide-hand')) {
                 const guideHand = document.createElement('img');
                 guideHand.className = 'camera-start-guide-hand';
@@ -12323,6 +12324,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const label = circleCameraStartButton?.querySelector('strong');
         if (label) label.textContent = text;
         circleCameraStartButton?.classList.toggle('is-camera-access-button', text === 'Kamera');
+        circleCameraStartButton?.setAttribute('aria-label', text === 'Kamera' ? 'I-allow ang Kamera' : text);
         const guideHand = circleCameraStartButton?.querySelector('.camera-start-guide-hand');
         if (guideHand) guideHand.hidden = text !== 'Kamera';
     };
@@ -12748,6 +12750,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const label = button?.querySelector('strong');
         if (label) label.textContent = text;
         button?.classList.toggle('is-camera-access-button', text === 'Kamera');
+        button?.setAttribute('aria-label', text === 'Kamera' ? 'I-allow ang Kamera' : text);
         const guideHand = page?.querySelector('.camera-start-guide-hand');
         if (guideHand) guideHand.hidden = text !== 'Kamera';
     };
@@ -13981,20 +13984,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         setShapeMissionBgmPhase('circle');
         finishCircleIllustrationLesson();
     });
-    circleCameraStartButton?.addEventListener('click', () => {
-        if (circleCameraPage?.dataset.cameraAccessReady === 'true') {
-            startCameraIntro(circleCameraPage);
+    const handleCameraAccessButtonPress = (event, page, startCamera) => {
+        event.preventDefault();
+        const button = event.currentTarget;
+        if (button?.disabled) return;
+        // Call getUserMedia from this trusted button press so the browser can
+        // display its camera-permission prompt.
+        if (page?.dataset.cameraAccessReady !== 'true') {
+            startCamera();
             return;
         }
-        startCircleCameraStream();
+        startCameraIntro(page);
+    };
+
+    circleCameraStartButton?.addEventListener('click', (event) => {
+        handleCameraAccessButtonPress(event, circleCameraPage, startCircleCameraStream);
     });
     shapeCameraPages.forEach((page) => {
-        page.querySelector('.circle-camera-start-button')?.addEventListener('click', () => {
-            if (page.dataset.cameraAccessReady === 'true') {
-                startCameraIntro(page);
-                return;
-            }
-            startShapeCameraStream(page);
+        page.querySelector('.circle-camera-start-button')?.addEventListener('click', (event) => {
+            handleCameraAccessButtonPress(event, page, () => startShapeCameraStream(page));
         });
     });
     cameraPages.forEach((page) => {

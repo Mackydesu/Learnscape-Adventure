@@ -16079,7 +16079,8 @@ body *::after {
 
 .circle-camera-start-button {
     position: absolute;
-    z-index: 5;
+    /* Keep the permission control above every decorative card and panel. */
+    z-index: 30;
     left: 50%;
     top: calc(9% + min(77vh, 45rem) + 4rem);
     display: inline-flex;
@@ -16104,6 +16105,9 @@ body *::after {
     text-shadow: 0 0.1rem 0 var(--camera-start-shadow);
     transform: translate(-50%, -50%);
     cursor: pointer;
+    pointer-events: auto;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
     transition: transform 160ms ease, filter 160ms ease;
 }
 
