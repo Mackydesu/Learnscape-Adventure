@@ -16082,7 +16082,8 @@ body *::after {
     /* Keep the permission control above every decorative card and panel. */
     z-index: 30;
     left: 50%;
-    top: calc(9% + min(77vh, 45rem) + 4rem);
+    /* Center the control in the open space below the scan board. */
+    top: calc(54.5% + min(38.5vh, 22.5rem));
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -16090,24 +16091,30 @@ body *::after {
     min-width: 15rem;
     min-height: 4.4rem;
     padding: 0.8rem 1.7rem;
-    border: 0.22rem solid #ffffff;
+    border: clamp(0.2rem, 0.42vw, 0.38rem) solid #51260f;
     border-radius: 999px;
-    background: linear-gradient(180deg, var(--camera-start-top) 0%, var(--camera-start-mid) 58%, var(--camera-start-bottom) 100%);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 204, 0.58) 0%, transparent 23%, transparent 74%, rgba(224, 128, 10, 0.22) 100%),
+        linear-gradient(180deg, #fff746 0%, #ffe021 48%, #ffc20d 100%);
     box-shadow:
-        inset 0 0.15rem 0 rgba(255, 255, 255, 0.65),
-        0 0.35rem 0 var(--camera-start-shadow),
-        0 0 1rem rgba(83, 255, 135, 0.58),
-        0 0.75rem 1.1rem rgba(38, 69, 20, 0.35);
-    color: #ffffff;
+        0 0.2rem 0 #9a4c19,
+        0 0.38rem 0 #49230f,
+        0 0.95rem 1.3rem rgba(15, 42, 35, 0.38),
+        inset 0 0.18rem 0 rgba(255, 255, 230, 0.92),
+        inset 0 -0.2rem 0 rgba(192, 103, 12, 0.42);
+    color: #075066;
     font-family: 'Fredoka', 'Nunito', sans-serif;
     font-size: clamp(1.35rem, 2vw, 1.95rem);
     font-weight: 900;
-    text-shadow: 0 0.1rem 0 var(--camera-start-shadow);
+    -webkit-text-stroke: 0.025em #d9ffff;
+    paint-order: stroke fill;
+    text-shadow: 0 0.12rem 0 #073e51;
     transform: translate(-50%, -50%);
     cursor: pointer;
     pointer-events: auto;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    isolation: isolate;
     transition: transform 160ms ease, filter 160ms ease;
 }
 
@@ -16119,9 +16126,8 @@ body *::after {
 .circle-camera-start-button:active {
     transform: translate(-50%, -50%) scale(0.98);
     box-shadow:
-        inset 0 0.15rem 0 rgba(255, 255, 255, 0.48),
-        0 0.18rem 0 var(--camera-start-shadow),
-        0 0 0.75rem rgba(83, 255, 135, 0.48);
+        0 0.08rem 0 #4b260f,
+        0 0.25rem 0.5rem rgba(15, 42, 35, 0.3);
 }
 
 .circle-camera-start-button.is-camera-access-button {
@@ -16132,18 +16138,20 @@ body *::after {
     0%, 55%, 100% {
         transform: translate(-50%, -50%) translateY(0);
         box-shadow:
-            inset 0 0.15rem 0 rgba(255, 255, 255, 0.65),
-            0 0.35rem 0 var(--camera-start-shadow),
-            0 0 1rem rgba(83, 255, 135, 0.58),
-            0 0.75rem 1.1rem rgba(38, 69, 20, 0.35);
+            0 0.2rem 0 #9a4c19,
+            0 0.38rem 0 #49230f,
+            0 0.95rem 1.3rem rgba(15, 42, 35, 0.38),
+            inset 0 0.18rem 0 rgba(255, 255, 230, 0.92),
+            inset 0 -0.2rem 0 rgba(192, 103, 12, 0.42);
     }
     28% {
         transform: translate(-50%, -50%) translateY(-0.55rem);
         box-shadow:
-            inset 0 0.15rem 0 rgba(255, 255, 255, 0.78),
-            0 0.35rem 0 var(--camera-start-shadow),
-            0 0 1.8rem rgba(137, 255, 108, 0.98),
-            0 0.75rem 1.8rem rgba(38, 69, 20, 0.48);
+            0 0.2rem 0 #9a4c19,
+            0 0.38rem 0 #49230f,
+            0 0 1.8rem rgba(255, 224, 33, 0.96),
+            0 0.95rem 1.6rem rgba(15, 42, 35, 0.44),
+            inset 0 0.2rem 0 rgba(255, 255, 230, 1);
     }
 }
 
@@ -23990,8 +23998,8 @@ body.about-page {
     }
 
     .circle-camera-page:not(.camera-test-page) .circle-camera-start-button {
-        top: auto;
-        bottom: -5.5%;
+        top: 89%;
+        bottom: auto;
         min-width: 0;
         min-height: 0;
         padding: 0.35rem 1rem;

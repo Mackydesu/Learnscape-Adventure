@@ -12333,6 +12333,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (circleCameraStartButton) circleCameraStartButton.hidden = !visible;
     };
 
+    const clearCameraPermissionPrompt = (page) => {
+        const message = page?.querySelector('.camera-curtain-message');
+        message?.replaceChildren();
+        message?.removeAttribute('data-message');
+    };
+
     const stopCircleCameraStream = () => {
         circleCameraStartRequestId++;
         delete circleCameraPage?.dataset.cameraAccessReady;
@@ -12388,6 +12394,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             circleCameraPage.dataset.cameraAccessReady = 'true';
             setCircleCameraButtonText('Buksan');
+            clearCameraPermissionPrompt(circleCameraPage);
             setCircleCameraButtonVisible(true);
             circleCameraStartButton.disabled = false;
         } catch (error) {
@@ -12820,6 +12827,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             page.dataset.cameraAccessReady = 'true';
             setShapeCameraButtonText(page, 'Buksan');
+            clearCameraPermissionPrompt(page);
             setShapeCameraButtonVisible(page, true);
             button.disabled = false;
         } catch (error) {
