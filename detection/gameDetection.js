@@ -12,14 +12,14 @@ const DISTANCE_CUE_AUDIO = Object.freeze({
 });
 const DISTANCE_CUE_REPLAY_DELAY_MS = 2800;
 const SHAPE_NAMES = Object.freeze({
-    circle: "circle",
-    square: "square",
-    triangle: "triangle",
-    rectangle: "rectangle",
-    oval: "oval",
-    heart: "heart",
-    star: "star",
-    diamond: "diamond"
+    circle: "Bilog",
+    square: "Parisukat",
+    triangle: "Tatsulok",
+    rectangle: "Parihaba",
+    oval: "Bilohaba",
+    heart: "Puso",
+    star: "Bituin",
+    diamond: "Dyamante"
 });
 
 let activeSession = null;
@@ -253,6 +253,31 @@ function drawTrackedObjects(session, tracks) {
         context.strokeStyle = color;
         context.lineWidth = 3;
         context.strokeRect(x, y, boxWidth, boxHeight);
+
+        // Keep the label attached to the live bounding box so players can
+        // immediately see which shape the camera recognised.
+        const label = shapeName(track.label, true);
+        if (label) {
+            context.font = "700 16px Arial, sans-serif";
+            const labelPaddingX = 8;
+            const labelHeight = 26;
+            const labelWidth = Math.ceil(context.measureText(label).width + labelPaddingX * 2);
+            const labelY = Math.max(3, y - labelHeight - 4);
+            context.fillStyle = color;
+            context.fillRect(x, labelY, labelWidth, labelHeight);
+            context.fillStyle = "#102235";
+
+            // On desktop the camera canvas is mirrored with the webcam feed.
+            // Flip only the text back so the Tagalog label remains readable.
+            if (window.matchMedia("(min-width: 901px)").matches) {
+                context.save();
+                context.scale(-1, 1);
+                context.fillText(label, -(x + labelWidth - labelPaddingX), labelY + 18);
+                context.restore();
+            } else {
+                context.fillText(label, x + labelPaddingX, labelY + 18);
+            }
+        }
     }
     context.globalAlpha = 1;
 }

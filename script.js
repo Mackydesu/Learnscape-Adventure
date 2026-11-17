@@ -7132,7 +7132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     starMissionRetryButton?.addEventListener('click', () => {
         playUiClickSound('start');
-        showStarMissionSetup();
+        startStarMissionSequence();
     });
 
     starMissionPauseButton?.addEventListener('click', () => {
@@ -7154,27 +7154,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     diamondMissionRetryButton?.addEventListener('click', () => {
         playUiClickSound('start');
-        startDiamondMissionBats();
+        startDiamondMissionSequence();
     });
 
     heartGameRetryButton?.addEventListener('click', () => {
         playUiClickSound('start');
-        resetHeartGameState();
-        resetHeartCupidBow();
+        stopHeartCupidGame();
+        startHeartMissionSequence();
     });
 
     heartFinalReplayButton?.addEventListener('click', () => {
         playUiClickSound('start');
         stopHeartCupidGame();
-        stopHeartMissionSequence();
-        if (!heartMissionIntro || !heartMissionStartButton) return;
-        heartMissionPage?.classList.add('is-heart-mission-active');
-        heartMissionIntro.hidden = false;
-        heartMissionIntro.setAttribute('aria-hidden', 'false');
-        heartMissionStartButton.hidden = false;
-        heartMissionStartButton.getBoundingClientRect();
-        heartMissionStartButton.classList.add('is-visible');
-        heartMissionStartButton.focus({ preventScroll: true });
+        startHeartMissionSequence();
     });
 
     heartFinalNextButton?.addEventListener('click', () => {
@@ -10028,12 +10020,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     triangleGameCompleteReplayButton?.addEventListener('click', () => {
         triangleGamePage?.classList.remove('is-game-progress-visible');
         triangleGameCompleteProgress?.setAttribute('aria-hidden', 'true');
-        stopTriangleGameDialogue();
-        if (!triangleGameStartButton) return;
-        triangleGameStartButton.hidden = false;
-        triangleGameStartButton.getBoundingClientRect();
-        triangleGameStartButton.classList.add('is-visible');
-        triangleGameStartButton.focus({ preventScroll: true });
+        startTriangleGameDialogue();
     });
 
     triangleGameCompleteNextButton?.addEventListener('click', () => {
@@ -12318,7 +12305,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const retryCircleHunt = () => {
         hideCircleIllustrationProgress();
-        showCircleHuntStart();
+        startCircleMissionGuide();
     };
 
     const finishCircleIllustrationLesson = () => {
@@ -14045,7 +14032,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.addEventListener('pointercancel', (event) => endCircleSortDrag(event, true), true);
 
     circleHuntStartButton?.addEventListener('click', startCircleHuntCountdown);
-    circleHuntPlayAgainButton?.addEventListener('click', startCircleHuntCountdown);
+    circleHuntPlayAgainButton?.addEventListener('click', startCircleMissionGuide);
     circleMissionStartButton?.addEventListener('click', () => {
         playUiClickSound('chime');
         circleMissionStartButton.classList.add('is-clicking');
@@ -14250,7 +14237,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     shapeSquareReplayButton?.addEventListener('click', () => {
         if (shapeSquareProgress?.dataset.progressStage === 'answer') {
-            returnToShapeSquareMissionStart();
+            startShapeSquareMissionGuide();
             return;
         }
         setShapeMissionBgmPhase('');
@@ -14276,7 +14263,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     shapeSquarePuzzleRetryButton?.addEventListener('click', () => {
         playUiClickSound('chime');
-        returnToShapeSquareMissionStart();
+        startShapeSquareMissionGuide();
     });
     shapeSquareAnswerTileButtons.forEach((tile) => {
         tile.addEventListener('click', handleShapeSquareAnswerTileClick);
@@ -15379,12 +15366,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     ovalGameOverRetryButton?.addEventListener('click', () => {
         playUiClickSound('start');
-        showOvalMissionStartDirectly();
+        startOvalMissionIntro();
     });
 
     ovalFinalReplayButton?.addEventListener('click', () => {
         playUiClickSound('start');
-        showOvalMissionStartDirectly();
+        startOvalMissionIntro();
     });
 
     ovalFinalNextButton?.addEventListener('click', () => {
@@ -15619,10 +15606,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (shape === 'circle') {
             navigateToShapePhase(config.mission, () => {
                 resetCircleIllustrationVideo();
-                resetCircleMissionGuide();
-                showCircleHuntStart();
-                setShapeMissionBgmPhase('circle');
-                startCircleHuntCountdown();
+                startCircleMissionGuide();
                 enableMissionHowToHelp('circle');
             });
             return true;
@@ -15631,10 +15615,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (shape === 'square') {
             runShapePhaseWithLoading(() => {
                 returnToShapeSquareMissionStart();
-                // Match pressing the post-lesson Start button instead of leaving
-                // the player at that checkpoint. The checkpoint applies
-                // squaregame.webp before the playable mission is revealed.
-                showShapeSquareObjectGame();
+                setShapeMissionBgmPhase('square');
+                startShapeSquareMissionGuide();
                 enableMissionHowToHelp('square');
             });
             return true;
@@ -15642,24 +15624,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (shape === 'triangle') {
             navigateToShapePhase(config.mission, () => {
-                stopTriangleGameDialogue();
-                startTriangleBridgeCrafting();
+                startTriangleGameDialogue();
                 enableMissionHowToHelp('triangle');
             });
             return true;
         }
 
         if (shape === 'rectangle') {
-            navigateToShapePhase('rectangleDelivery');
+            runShapePhaseWithLoading(() => showDirectPreviewMission(config.page, () => {
+                startRectangleDialogue();
+                enableMissionHowToHelp('rectangle');
+            }));
             return true;
         }
 
         if (shape === 'oval') {
-            openOvalMissionAtStartScreen = true;
-            // Prepare the exact Simulan na screen before the route transition;
-            // the route listener repeats this once the Oval page is visible.
-            showOvalMissionStartDirectly();
             navigateToShapePhase(config.mission, () => {
+                startOvalMissionIntro();
                 enableMissionHowToHelp('oval');
             });
             return true;
@@ -15667,25 +15648,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const missionStarters = {
             heart: () => {
-                stopHeartMissionSequence();
-                if (heartMissionIntro) {
-                    heartMissionIntro.hidden = true;
-                    heartMissionIntro.setAttribute('aria-hidden', 'true');
-                }
-                startHeartCupidGame();
+                startHeartMissionSequence();
                 enableMissionHowToHelp('heart');
             },
             star: () => {
-                stopStarMissionSequence();
-                if (starMissionIntro) {
-                    starMissionIntro.hidden = true;
-                    starMissionIntro.setAttribute('aria-hidden', 'true');
-                }
-                showStarMissionSetup();
+                startStarMissionSequence();
                 enableMissionHowToHelp('star');
             },
             diamond: () => {
-                startDiamondMissionGame();
+                startDiamondMissionSequence();
                 enableMissionHowToHelp('diamond');
             },
         };
