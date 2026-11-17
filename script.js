@@ -476,6 +476,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
             `);
         }
+        if (viewfinder && !viewfinder.querySelector('.camera-intro-character')) {
+            viewfinder.insertAdjacentHTML('afterbegin', '<img class="camera-intro-character" src="assets/Character/ch6.webp" alt="Bibi" hidden>');
+        }
+        if (!page.querySelector('.camera-intro-message-panel')) {
+            page.insertAdjacentHTML('beforeend', '<section class="camera-intro-message-panel" role="status" aria-live="polite" hidden><p class="camera-intro-message-text"></p></section>');
+        }
         if (viewfinder && !viewfinder.querySelector('.camera-detection-check')) {
             viewfinder.insertAdjacentHTML('beforeend', '<div class="camera-detection-check" role="status" aria-label="Natukoy ang tamang hugis" aria-hidden="true"><span aria-hidden="true"></span></div>');
         }
@@ -12396,6 +12402,95 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cameraScanRewardAudio = new Map();
     const cameraDetectionFeedbackTimers = new WeakMap();
     const cameraDetectionReadyWaits = new WeakMap();
+    const cameraIntroSessions = new WeakMap();
+    const cameraIntroAudios = new WeakMap();
+
+    const cancelCameraIntro = (page) => {
+        const session = (cameraIntroSessions.get(page) || 0) + 1;
+        cameraIntroSessions.set(page, session);
+        const audio = cameraIntroAudios.get(page);
+        if (audio) {
+            audio.onended = null;
+            audio.onerror = null;
+            audio.pause();
+            cameraIntroAudios.delete(page);
+        }
+        page?.classList.remove('is-camera-intro');
+        const character = page?.querySelector('.camera-intro-character');
+        if (character) character.hidden = true;
+        const panel = page?.querySelector('.camera-intro-message-panel');
+        if (panel) panel.hidden = true;
+        return session;
+    };
+
+    const waitForCameraIntro = (page, session, duration) => new Promise((resolve) => {
+        window.setTimeout(() => resolve(cameraIntroSessions.get(page) === session), duration);
+    });
+
+    const playCameraIntroVoice = (page, session, source) => new Promise((resolve) => {
+        const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+        if (!source || !window.Audio || soundScale <= 0 || cameraIntroSessions.get(page) !== session) {
+            resolve();
+            return;
+        }
+        const audio = new window.Audio(source);
+        cameraIntroAudios.set(page, audio);
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = Math.min(1, Math.max(0, soundScale));
+        const finish = () => {
+            if (cameraIntroAudios.get(page) === audio) cameraIntroAudios.delete(page);
+            resolve();
+        };
+        audio.onended = finish;
+        audio.onerror = finish;
+        audio.play().catch(finish);
+    });
+
+    const startCameraIntro = async (page) => {
+        if (!page || !isPageVisible(page)) return;
+        const session = cancelCameraIntro(page);
+        const shape = String(page.dataset.cameraShape || '').trim().toLowerCase();
+        const shapeLabel = cameraShapeLabels[shape] || 'hugis';
+        const character = page.querySelector('.camera-intro-character');
+        const panel = page.querySelector('.camera-intro-message-panel');
+        const message = page.querySelector('.camera-intro-message-text');
+        const startButton = page.querySelector('.circle-camera-start-button');
+        if (!character || !panel || !message || !startButton) return;
+
+        startButton.hidden = true;
+        page.classList.add('is-camera-intro');
+        character.hidden = false;
+        panel.hidden = false;
+        openCameraProcessingCurtains(page);
+
+        const showMessage = (text) => {
+            if (cameraIntroSessions.get(page) !== session) return false;
+            message.textContent = text;
+            return true;
+        };
+
+        showMessage('Ngayon! Gamitin ang natutuhan.');
+        if (!await waitForCameraIntro(page, session, 1200)) return;
+        showMessage(`Tumingin sa paligid at maghanap ng mga bagay na hugis ${shapeLabel.toLowerCase()}.`);
+        await playCameraIntroVoice(page, session, 'assets/Audios/Voice over/Maghanap.mp3');
+        if (cameraIntroSessions.get(page) !== session) return;
+        await playCameraIntroVoice(page, session, shapeChoiceAudioSources[shape]);
+        if (!await waitForCameraIntro(page, session, 350)) return;
+        showMessage('Handa ka na ba?');
+        await playCameraIntroVoice(page, session, 'assets/Audios/Voice over/Handa ka na ba.mp3');
+        if (!await waitForCameraIntro(page, session, 250)) return;
+        showMessage('Simulan na!');
+        await playCameraIntroVoice(page, session, 'assets/Audios/Voice over/Simulan.mp3');
+        if (!await waitForCameraIntro(page, session, 450)) return;
+        if (cameraIntroSessions.get(page) !== session || !isPageVisible(page)) return;
+        page.classList.remove('is-camera-intro');
+        character.hidden = true;
+        panel.hidden = true;
+        closeCameraProcessingCurtains(page, 'initial');
+        startButton.hidden = false;
+        startButton.disabled = false;
+    };
 
     const stopCameraScanRewardAudio = (page) => {
         const sounds = cameraScanRewardAudio.get(page);
@@ -14015,11 +14110,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (activeShapeCameraRoute !== `${page.dataset.cameraShape}Camera`) stopShapeCameraStream(page);
         });
         cameraPages.forEach((page) => {
+            if (!isPageVisible(page)) cancelCameraIntro(page);
+        });
+        cameraPages.forEach((page) => {
             if (!isPageVisible(page)) resetCameraCompletionFlow(page);
         });
         const activeCameraPage = cameraPages.find((page) => isPageVisible(page));
         if (activeCameraPage && /Camera$/.test(event.detail?.route || '')) {
-            closeCameraProcessingCurtains(activeCameraPage, 'initial');
+            startCameraIntro(activeCameraPage);
         }
         if (event.detail?.route !== 'shapeSquare') {
             resetShapeSquareScene();
@@ -15470,10 +15568,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 image.alt = `${shape[0].toUpperCase()}${shape.slice(1)} ${panelCopy.title.toLowerCase()} preview`;
                 preview.appendChild(image);
             } else {
-                const cameraIcon = document.createElement('span');
-                cameraIcon.className = `shape-phase-camera-shape shape-phase-camera-shape-${shape}`;
-                cameraIcon.setAttribute('aria-hidden', 'true');
-                preview.appendChild(cameraIcon);
+                const cameraShape = document.createElement('span');
+                cameraShape.className = `shape-phase-camera-shape shape-phase-camera-shape-${shape}`;
+                cameraShape.setAttribute('aria-hidden', 'true');
+                preview.appendChild(cameraShape);
             }
             const description = document.createElement('p');
             description.className = 'shape-phase-description';

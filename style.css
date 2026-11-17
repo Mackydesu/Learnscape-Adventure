@@ -15833,6 +15833,53 @@ body *::after {
     pointer-events: none;
 }
 
+.circle-camera-page.is-camera-intro .circle-camera-viewfinder {
+    background: var(--camera-start-mid);
+}
+
+.circle-camera-page.is-camera-intro .circle-camera-video,
+.circle-camera-page.is-camera-intro .circle-camera-corner,
+.circle-camera-page.is-camera-intro .circle-camera-scan-sweep {
+    display: none !important;
+}
+
+.camera-intro-character {
+    position: absolute;
+    z-index: 5;
+    left: 50%;
+    bottom: 0;
+    width: min(58%, 18rem);
+    max-height: 88%;
+    object-fit: contain;
+    object-position: bottom center;
+    transform: translateX(-50%);
+    filter: drop-shadow(0 0.35rem 0.24rem rgba(8, 49, 20, 0.35));
+}
+
+.camera-intro-message-panel {
+    position: absolute;
+    z-index: 12;
+    left: 50%;
+    bottom: clamp(1.5rem, 4vh, 3.5rem);
+    width: min(84vw, 48rem);
+    padding: clamp(0.75rem, 1.5vw, 1.2rem) clamp(1.1rem, 2.5vw, 2rem);
+    border: 0.2rem solid #754019;
+    border-radius: 1.25rem;
+    background: linear-gradient(180deg, #fff7ca, #ffd86e);
+    box-shadow: 0 0.32rem 0 #754019, 0 0.65rem 1rem rgba(3, 32, 71, 0.35);
+    color: #653311;
+    text-align: center;
+    transform: translateX(-50%);
+}
+
+.camera-intro-message-panel[hidden],
+.camera-intro-character[hidden] { display: none !important; }
+
+.camera-intro-message-text {
+    margin: 0;
+    font: 900 clamp(1.1rem, 2.3vw, 1.8rem)/1.2 'Fredoka', 'Nunito', sans-serif;
+}
+
 .camera-processing-curtain {
     position: absolute;
     z-index: 1;

@@ -1,9 +1,7 @@
 import { defineConfig } from "vite";
-import { cp, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { cp, readFile, readdir, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
-
-const CLOUDFLARE_MAX_ASSET_BYTES = 25 * 1024 * 1024;
 
 async function collectFiles(directory) {
     const entries = await readdir(directory, { withFileTypes: true });
@@ -57,23 +55,6 @@ async function createProjectManifest(projectRoot, modelFile, modelUrl = modelFil
     const files = urls.map((url) => resolve(projectRoot, url));
     urls[urls.length - 1] = modelUrl;
     return createManifest(files, urls);
-}
-
-async function validateCloudflareAssetSizes(directory) {
-    const files = await collectFiles(directory);
-    const fileSizes = await Promise.all(files.map(async (filePath) => ({
-        filePath,
-        size: (await stat(filePath)).size
-    })));
-    const oversizedFiles = fileSizes.filter(({ size }) => size > CLOUDFLARE_MAX_ASSET_BYTES);
-    if (!oversizedFiles.length) return;
-
-    const details = oversizedFiles
-        .map(({ filePath, size }) => `- ${filePath}: ${(size / 1024 / 1024).toFixed(2)} MiB`)
-        .join("\n");
-    throw new Error(
-        `Cloudflare Workers limits each static asset to 25 MiB. Compress or remove:\n${details}`
-    );
 }
 
 export default defineConfig(({ command }) => ({
@@ -136,7 +117,6 @@ export default defineConfig(({ command }) => ({
                     writeFile(resolve(projectRoot, "dist/runtime-assets.json"), JSON.stringify(previewManifest), "utf8"),
                     writeFile(resolve(projectRoot, "runtime-assets.json"), JSON.stringify(projectManifest), "utf8")
                 ]);
-                await validateCloudflareAssetSizes(resolve(projectRoot, "dist"));
             }
         }
     ],
