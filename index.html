@@ -6550,19 +6550,29 @@
             document.addEventListener('webkitfullscreenchange', pauseOnboardingOutsideFullscreen);
             document.addEventListener('MSFullscreenChange', pauseOnboardingOutsideFullscreen);
 const removeLegacyServiceWorker = async () => {
+    const appScope = new URL('./', document.baseURI).href;
+    let removedWorker = false;
     if ('serviceWorker' in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(registrations.map((registration) => registration.unregister()));
+        const appRegistrations = registrations.filter((registration) => registration.scope === appScope);
+        const removals = await Promise.all(appRegistrations.map((registration) => registration.unregister()));
+        removedWorker = removals.some(Boolean);
     }
-    if ('caches' in window) {
+    if (removedWorker && 'caches' in window) {
         const cacheNames = await caches.keys();
         await Promise.all(cacheNames
             .filter((name) => name.startsWith('learnscape-'))
             .map((name) => caches.delete(name)));
     }
+    if (removedWorker) {
+        // A controlled page continues using its old worker until it reloads.
+        // Reload once without it before starting the game's asset requests.
+        window.location.reload();
+        await new Promise(() => {});
+    }
 };
 
-void removeLegacyServiceWorker().catch(() => {});
+const legacyServiceWorkerCleanup = removeLegacyServiceWorker().catch(() => {});
 
 const loadRuntimeAssets = async () => {
     // Cache Storage here is only a verified asset download store. Unlike a
@@ -6888,6 +6898,9 @@ const trackInitialImages = () => {
 
             const completeInitialBoot = async () => {
                 try {
+                    await (typeof legacyServiceWorkerCleanup === 'undefined'
+                        ? Promise.resolve()
+                        : legacyServiceWorkerCleanup);
                     window.__learnscapeAssetsReady = loadRuntimeAssets();
                     await window.__learnscapeAssetsReady;
                     await waitForGameInitialization();
@@ -6926,7 +6939,7 @@ const trackInitialImages = () => {
     </script>
     <!-- Import map lets the camera detector run in both Vite and static Live Server. -->
     <script type="importmap">
-        {"imports":{"onnxruntime-web":"./node_modules/onnxruntime-web/dist/ort.wasm.bundle.min.mjs","onnxruntime-web/wasm":"./node_modules/onnxruntime-web/dist/ort.wasm.bundle.min.mjs"}}
+        {"imports":{"onnxruntime-web":"./detection/runtime/ort.wasm.bundle.min.mjs","onnxruntime-web/wasm":"./detection/runtime/ort.wasm.bundle.min.mjs"}}
     </script>
     <!-- ONNX Shape Detection -->
     <script type="module" src="./detection/init.js"></script>

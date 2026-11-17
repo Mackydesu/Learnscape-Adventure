@@ -25,9 +25,6 @@ async function createRuntimeAssetList(projectRoot, modelPath) {
         "manifest.webmanifest",
         ...assetFiles.map((filePath) => `assets/${filePath.slice(assetsRoot.length + 1).replaceAll("\\", "/")}`),
         ...detectionFiles.map((filePath) => `detection/${filePath.slice(detectionRoot.length + 1).replaceAll("\\", "/")}`),
-        "node_modules/onnxruntime-web/dist/ort.wasm.bundle.min.mjs",
-        "node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.mjs",
-        "node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm",
         modelPath
     ];
 }
