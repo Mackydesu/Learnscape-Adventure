@@ -6549,23 +6549,25 @@
             document.addEventListener('fullscreenchange', pauseOnboardingOutsideFullscreen);
             document.addEventListener('webkitfullscreenchange', pauseOnboardingOutsideFullscreen);
             document.addEventListener('MSFullscreenChange', pauseOnboardingOutsideFullscreen);
-const loadRuntimeAssets = async () => {
-    let persistentStorage = false;
-    if ('serviceWorker' in navigator && 'caches' in window) {
-        try {
-        const registration = await navigator.serviceWorker.register(new URL('sw.js?rev=20261109-11', document.baseURI));
-            // The installed app keeps its own shell cache. Ask it to check this
-            // revision immediately so interface updates are not held by an old shell.
-        const updateCheck = registration.update?.();
-        updateCheck?.catch(() => {});
-            // Cache Storage works before a newly installed worker controls this
-            // page. Never make the game's first render wait for activation: an
-            // older open tab can legitimately delay that transition.
-            persistentStorage = true;
-        } catch (error) {
-            console.warn('[Learnscape] Persistent asset storage is unavailable.', error);
-        }
+const removeLegacyServiceWorker = async () => {
+    if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map((registration) => registration.unregister()));
     }
+    if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames
+            .filter((name) => name.startsWith('learnscape-'))
+            .map((name) => caches.delete(name)));
+    }
+};
+
+void removeLegacyServiceWorker().catch(() => {});
+
+const loadRuntimeAssets = async () => {
+    // Cache Storage here is only a verified asset download store. Unlike a
+    // service worker, it never intercepts or serves normal page requests.
+    const persistentStorage = 'caches' in window;
     const manifestUrl = new URL('runtime-assets.json', document.baseURI);
     const manifestResponse = await fetch(manifestUrl, { cache: 'no-cache' });
     if (!manifestResponse.ok) throw new Error('Unable to load the asset list.');

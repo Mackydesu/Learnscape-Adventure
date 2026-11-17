@@ -61,7 +61,7 @@ function createHarness({ images = [], gameInitialized = true, assetFetch, storag
         fullscreenRestoreButton: null,
         CustomEvent: class CustomEvent { constructor(type) { this.type = type; } },
         console: { log() {}, warn() {}, error() {} },
-        navigator: persistentStorage ? { serviceWorker: { register: async () => ({}) } } : {},
+        navigator: {},
         caches: storage,
         URL, Response, AbortController,
         fetch: async (url, options) => {

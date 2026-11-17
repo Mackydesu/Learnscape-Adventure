@@ -102,11 +102,10 @@ export default defineConfig(({ command }) => ({
                     assetsOutput,
                     { recursive: true, force: true }
                 );
-                await cp(resolve(projectRoot, "sw.js"), resolve(projectRoot, "dist/sw.js"));
                 await cp(resolve(projectRoot, "manifest.webmanifest"), resolve(projectRoot, "dist/manifest.webmanifest"));
                 const outputRoot = resolve(projectRoot, "dist");
                 const outputFiles = (await collectFiles(outputRoot))
-                    .filter((file) => !/[\\/](runtime-assets\.json|sw\.js)$/.test(file))
+                    .filter((file) => !/[\\/]runtime-assets\.json$/.test(file))
                     .sort();
                 const outputUrls = outputFiles.map((file) => file.slice(outputRoot.length + 1).replaceAll("\\", "/"));
                 const [previewManifest, projectManifest] = await Promise.all([
