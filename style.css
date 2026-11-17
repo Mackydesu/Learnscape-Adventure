@@ -15992,7 +15992,8 @@ body *::after {
 }
 
 .camera-curtain-message[data-message='initial'] strong {
-    top: clamp(3.25rem, 12%, 5.5rem);
+    top: 50%;
+    transform: translate(-50%, -50%);
     color: #fff06a;
     font-size: clamp(1.55rem, 3.2vw, 2.7rem);
     line-height: 1.1;
@@ -16101,7 +16102,7 @@ body *::after {
     font-size: clamp(1.35rem, 2vw, 1.95rem);
     font-weight: 900;
     text-shadow: 0 0.1rem 0 var(--camera-start-shadow);
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
     cursor: pointer;
     transition: transform 160ms ease, filter 160ms ease;
 }
