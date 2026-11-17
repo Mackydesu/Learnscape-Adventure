@@ -8088,13 +8088,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (page === starMissionPage && progress?.dataset.progressStage === 'hunt') {
                 page.classList.remove('is-progress-visible', 'is-lesson-complete');
                 progress?.setAttribute('aria-hidden', 'true');
-                showStarMissionRetryStart();
+                startStarMissionSequence();
                 return;
             }
             if (page === diamondMissionPage && progress?.dataset.progressStage === 'hunt') {
                 page.classList.remove('is-progress-visible', 'is-lesson-complete');
                 progress.setAttribute('aria-hidden', 'true');
-                showDiamondMissionRetryStart();
+                startDiamondMissionSequence();
                 return;
             }
             setShapeMissionBgmPhase('');
@@ -8582,7 +8582,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     rectangleFinalReplayButton?.addEventListener('click', () => {
         hideRectangleFinalProgress();
-        navigateApp('shapeArea4');
+        navigateToShapePhase('shapeArea4', () => {
+            const config = shapePhaseConfigurations.rectangle;
+            showDirectPreviewMission(config.page, () => {
+                startRectangleDialogue();
+                enableMissionHowToHelp('rectangle');
+            });
+        });
     });
 
     rectangleFinalNextButton?.addEventListener('click', () => {
