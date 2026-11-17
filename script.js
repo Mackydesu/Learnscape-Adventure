@@ -12427,7 +12427,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.setTimeout(() => resolve(cameraIntroSessions.get(page) === session), duration);
     });
 
-    const playCameraIntroVoice = (page, session, source) => new Promise((resolve) => {
+    const playCameraIntroVoice = (page, session, source, { startAt = 0, endAt = null } = {}) => new Promise((resolve) => {
         const soundScale = window.__learnscapeSoundScale?.() ?? 1;
         if (!source || !window.Audio || soundScale <= 0 || cameraIntroSessions.get(page) !== session) {
             resolve();
@@ -12438,12 +12438,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         audio.preload = 'auto';
         audio.playsInline = true;
         audio.volume = Math.min(1, Math.max(0, soundScale));
+        let finished = false;
         const finish = () => {
+            if (finished) return;
+            finished = true;
             if (cameraIntroAudios.get(page) === audio) cameraIntroAudios.delete(page);
             resolve();
         };
         audio.onended = finish;
         audio.onerror = finish;
+        audio.ontimeupdate = () => {
+            if (endAt !== null && audio.currentTime >= endAt) {
+                audio.pause();
+                finish();
+            }
+        };
+        try {
+            audio.currentTime = startAt;
+        } catch (error) {
+            // Seeking will fall back to the start when metadata is unavailable.
+        }
         audio.play().catch(finish);
     });
 
@@ -12474,9 +12488,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         openCameraProcessingCurtains(page);
         panel.hidden = false;
         showMessage('Ngayon! Gamitin ang natutuhan.');
-        await playCameraIntroVoice(page, session, 'assets/Audios/Voice over/Maghanap.mp3');
+        await playCameraIntroVoice(page, session, 'assets/Audios/Voice over/Maghanap.mp3', { startAt: 0, endAt: 2.6 });
         if (cameraIntroSessions.get(page) !== session) return;
         showMessage(`Tumingin sa paligid at maghanap ng mga bagay na hugis ${shapeLabel.toLowerCase()}.`);
+        await playCameraIntroVoice(page, session, 'assets/Audios/Voice over/Maghanap.mp3', { startAt: 2.7, endAt: 6.4 });
+        if (cameraIntroSessions.get(page) !== session) return;
         await playCameraIntroVoice(page, session, shapeChoiceAudioSources[shape]);
         if (cameraIntroSessions.get(page) !== session) return;
         showMessage('Handa ka na ba?');
