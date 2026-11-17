@@ -15734,6 +15734,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const isShapeIslandCompleted = (shape) => hasShapePhaseBadge(shape);
 
     const setShapePhaseHubOpen = (record, isOpen) => {
+        // A phase action can hide this menu while its button still owns focus.
+        // Clear that focus first so assistive technology never sees a focused
+        // control inside an aria-hidden island menu.
+        if (!isOpen) {
+            const focusedElement = document.activeElement;
+            if (focusedElement instanceof HTMLElement && record.selector.contains(focusedElement)) {
+                focusedElement.blur();
+            }
+        }
         record.page.classList.toggle('is-shape-phase-selector-open', isOpen);
         record.selector.hidden = !isOpen;
         record.selector.setAttribute('aria-hidden', String(!isOpen));
