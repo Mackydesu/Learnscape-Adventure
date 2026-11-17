@@ -412,6 +412,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 cameraStartButton.prepend(guideHand);
             }
             cameraStartButton.querySelector('strong')?.replaceChildren('Kamera');
+            cameraStartButton.classList.add('is-camera-access-button');
         }
 
         const unlockHeading = page.querySelector('.circle-camera-unlock-board h2');
@@ -12321,6 +12322,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const setCircleCameraButtonText = (text) => {
         const label = circleCameraStartButton?.querySelector('strong');
         if (label) label.textContent = text;
+        circleCameraStartButton?.classList.toggle('is-camera-access-button', text === 'Kamera');
         const guideHand = circleCameraStartButton?.querySelector('.camera-start-guide-hand');
         if (guideHand) guideHand.hidden = text !== 'Kamera';
     };
@@ -12742,8 +12744,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const setShapeCameraButtonText = (page, text) => {
-        const label = page?.querySelector('.circle-camera-start-button strong');
+        const button = page?.querySelector('.circle-camera-start-button');
+        const label = button?.querySelector('strong');
         if (label) label.textContent = text;
+        button?.classList.toggle('is-camera-access-button', text === 'Kamera');
         const guideHand = page?.querySelector('.camera-start-guide-hand');
         if (guideHand) guideHand.hidden = text !== 'Kamera';
     };

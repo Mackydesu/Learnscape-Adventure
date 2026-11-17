@@ -16109,15 +16109,30 @@ body *::after {
 
 .circle-camera-start-button:hover {
     filter: brightness(1.08);
-    transform: translateX(-50%) translateY(-0.08rem);
+    transform: translate(-50%, -50%);
 }
 
 .circle-camera-start-button:active {
-    transform: translateX(-50%) translateY(0.16rem) scale(0.98);
+    transform: translate(-50%, -50%) scale(0.98);
     box-shadow:
         inset 0 0.15rem 0 rgba(255, 255, 255, 0.48),
         0 0.18rem 0 var(--camera-start-shadow),
         0 0 0.75rem rgba(83, 255, 135, 0.48);
+}
+
+.circle-camera-start-button.is-camera-access-button {
+    animation: cameraStartButtonPulse 1.15s ease-in-out infinite;
+}
+
+@keyframes cameraStartButtonPulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        filter: brightness(1);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.045);
+        filter: brightness(1.13);
+    }
 }
 
 /* The start control is removed as soon as the camera stream is active. */
@@ -16136,16 +16151,10 @@ body *::after {
     filter: drop-shadow(0 0.2rem 0.16rem rgba(22, 35, 10, 0.42));
     transform: translateX(-50%);
     transform-origin: bottom center;
-    animation: cameraStartGuidePoint 900ms ease-in-out infinite alternate;
 }
 
 .camera-start-guide-hand[hidden] {
     display: none;
-}
-
-@keyframes cameraStartGuidePoint {
-    from { transform: translateX(-50%) translateY(-0.15rem) scale(0.94); }
-    to { transform: translateX(-50%) translateY(0.22rem) scale(1); }
 }
 
 .camera-detection-check {
