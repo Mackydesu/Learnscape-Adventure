@@ -45,7 +45,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="style.css?v=20261117-21">
+    <link rel="stylesheet" href="style.css?v=20261118-23">
 </head>
 <body class="title-page is-page-loading is-initial-loading" aria-busy="true">
     <div id="app-shell-container" class="app-shell-container">
@@ -2177,7 +2177,7 @@
         <a class="game-return-btn loading-link game-icon-button icon-back" href="index.html" data-route="shape-area-8" aria-label="Return to Diamond Island intro"><span>‹</span>Back</a>
     </section>
 
-    <script src="./script.js?v=20261117-16"></script>
+    <script src="./script.js?v=20261118-20"></script>
     </div>
 
     <script>
@@ -5496,6 +5496,21 @@
             introBgm.preload = 'auto';
             introBgm.playsInline = true;
             introBgm.volume = 0.3;
+            const cameraBgmRoutes = new Set([
+                'circleCamera',
+                'squareCamera',
+                'triangleCamera',
+                'rectangleCamera',
+                'ovalCamera',
+                'heartCamera',
+                'starCamera',
+                'diamondCamera',
+            ]);
+            const cameraBgm = new Audio('assets/Audios/Bgm/camera game.mp3');
+            cameraBgm.loop = true;
+            cameraBgm.preload = 'auto';
+            cameraBgm.playsInline = true;
+            cameraBgm.volume = 0.3;
             const missionBgmSourceByShape = new Map([
                 ['circle', 'assets/Audios/Bgm/circle&oval mission.mp3'],
                 ['square', 'assets/Audios/Bgm/square mission.mp3'],
@@ -5613,6 +5628,18 @@
                 });
             }
 
+            function syncCameraBgmForRoute(routeName) {
+                if (!cameraBgmRoutes.has(routeName)) {
+                    resetBgm(cameraBgm);
+                    return;
+                }
+
+                if (!cameraBgm.paused) return;
+                cameraBgm.play().catch(() => {
+                    // The first pointer or keyboard interaction retries autoplay.
+                });
+            }
+
             function syncRectangleBossBgmForRoute(routeName) {
                 if (!rectangleBossBgmActive || routeName !== 'rectangleDelivery') {
                     resetBgm(rectangleBossBgm);
@@ -5643,6 +5670,7 @@
                 }
                 syncIntroBgmForRoute(routeName);
                 syncMissionBgmForRoute(routeName, resetPhase);
+                syncCameraBgmForRoute(routeName);
                 syncRectangleBossBgmForRoute(routeName);
             }
 

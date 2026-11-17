@@ -490,6 +490,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </section>
             `);
         }
+        if (viewfinder && !viewfinder.querySelector('.camera-countdown-times-up')) {
+            viewfinder.insertAdjacentHTML('beforeend', `
+                <section class="camera-countdown-times-up" role="status" aria-label="Ubos na ang oras" hidden>
+                    <span class="camera-countdown-clock" aria-hidden="true"><i></i><b></b></span>
+                </section>
+            `);
+        }
         if (viewfinder && !viewfinder.querySelector('.camera-intro-character')) {
             viewfinder.insertAdjacentHTML('afterbegin', '<img class="camera-intro-character" src="assets/Character/ch6.webp" alt="Bibi" hidden>');
         }
@@ -12436,6 +12443,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cancelCameraIntro = (page) => {
         cameraIntroCountdowns.get(page)?.();
         cameraIntroCountdowns.delete(page);
+        const timeUp = page?.querySelector('.camera-countdown-times-up');
+        if (timeUp) {
+            timeUp.hidden = true;
+            timeUp.classList.remove('is-active');
+        }
         const session = (cameraIntroSessions.get(page) || 0) + 1;
         cameraIntroSessions.set(page, session);
         const audio = cameraIntroAudios.get(page);
@@ -12449,13 +12461,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         const character = page?.querySelector('.camera-intro-character');
         if (character) character.hidden = true;
         const panel = page?.querySelector('.camera-intro-message-panel');
-        if (panel) panel.hidden = true;
+        if (panel) {
+            panel.hidden = true;
+            panel.classList.remove('is-camera-under-board-message');
+        }
         return session;
     };
 
     const waitForCameraIntro = (page, session, duration) => new Promise((resolve) => {
         window.setTimeout(() => resolve(cameraIntroSessions.get(page) === session), duration);
     });
+
+    const playCameraCountdownSound = (source) => {
+        const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+        if (!source || !window.Audio || soundScale <= 0) return;
+        const audio = new window.Audio(source);
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = Math.min(1, Math.max(0, soundScale));
+        audio.play().catch(() => {});
+    };
 
     const playCameraFilmCountdown = (page, session, durationSeconds = 10) => new Promise((resolve) => {
         const countdown = page?.querySelector('.camera-film-countdown');
@@ -12495,6 +12520,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 previousSecond = remaining;
                 number.textContent = String(remaining);
                 countdown.dataset.second = String(remaining);
+                if (remaining > 0) playCameraCountdownSound('assets/Audios/Sound effects/sec.mp3');
             }
             if (elapsed >= durationSeconds * 1000) {
                 finish(true);
@@ -12504,6 +12530,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         tick(startedAt);
     });
+
+    const playCameraCountdownTimesUp = async (page, session) => {
+        const timeUp = page?.querySelector('.camera-countdown-times-up');
+        if (!timeUp || cameraIntroSessions.get(page) !== session) return false;
+        timeUp.hidden = false;
+        timeUp.classList.remove('is-active');
+        void timeUp.offsetWidth;
+        timeUp.classList.add('is-active');
+        await Promise.all([
+            playCameraIntroVoice(page, session, 'assets/Audios/Sound effects/times up.mp3'),
+            waitForCameraIntro(page, session, 1000),
+        ]);
+        if (cameraIntroSessions.get(page) !== session || !isPageVisible(page)) return false;
+        timeUp.hidden = true;
+        timeUp.classList.remove('is-active');
+        return true;
+    };
 
     const playCameraIntroVoice = (page, session, source, { startAt = 0, endAt = null } = {}) => new Promise((resolve) => {
         const soundScale = window.__learnscapeSoundScale?.() ?? 1;
@@ -12626,7 +12669,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         showMessage('Ngayon! Gamitin ang natutuhan.');
         await playCameraIntroTimedVoice(page, session, 'assets/Audios/Voice over/Maghanap.mp3', {
             switchAt: 2.7,
-            endAt: 6.4,
+            endAt: 6.2,
             onSwitch: () => showMessage(`Tumingin sa paligid at maghanap ng mga bagay na hugis ${shapeLabel.toLowerCase()}.`),
         });
         if (cameraIntroSessions.get(page) !== session) return;
@@ -12644,15 +12687,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         closeCameraProcessingCurtains(page);
         if (!await playCameraFilmCountdown(page, session, 10)) return;
         if (cameraIntroSessions.get(page) !== session || !isPageVisible(page)) return;
+        if (!await playCameraCountdownTimesUp(page, session)) return;
         waitForCameraDetectionReady(page, {
             waitForFullscreen: true,
             onOpened: () => {
                 if (cameraIntroSessions.get(page) !== session || !isPageVisible(page)) return;
                 panel.hidden = false;
+                panel.classList.add('is-camera-under-board-message');
                 showMessage('Ipakita sa kamera ang nahanap na hugis.');
                 playCameraIntroVoice(page, session, 'assets/Audios/Voice over/Ipakita.mp3')
                     .then(() => {
-                        if (cameraIntroSessions.get(page) === session) panel.hidden = true;
+                        if (cameraIntroSessions.get(page) === session) {
+                            panel.hidden = true;
+                            panel.classList.remove('is-camera-under-board-message');
+                        }
                     });
             },
         });
