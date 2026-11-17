@@ -15973,6 +15973,17 @@ body *::after {
     animation: cameraCurtainMessagePulse 850ms ease-in-out infinite alternate;
 }
 
+.camera-curtain-message[data-message='initial'] {
+    top: auto;
+    bottom: clamp(0.8rem, 2vh, 1.5rem);
+    font-size: clamp(1.85rem, 4vw, 3rem);
+}
+
+.camera-curtain-message[data-message='initial'] small {
+    margin-top: 0.55rem;
+    font-size: 0.9em;
+}
+
 .camera-curtain-message[data-message='ready'] {
     color: #ffe54f;
     font-size: clamp(2.15rem, 5vw, 3.8rem);
@@ -16095,7 +16106,7 @@ body *::after {
     z-index: 1;
     left: 50%;
     bottom: calc(100% - 0.45rem);
-    width: clamp(3.4rem, 7vw, 5.8rem);
+    width: clamp(5rem, 10vw, 8rem);
     max-width: none;
     pointer-events: none;
     filter: drop-shadow(0 0.2rem 0.16rem rgba(22, 35, 10, 0.42));
