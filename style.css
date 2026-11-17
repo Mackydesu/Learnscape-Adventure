@@ -15956,8 +15956,17 @@ body *::after {
 }
 
 .camera-curtain-message strong {
+    display: block;
     color: #fff06a;
     font-weight: 1000;
+}
+
+.camera-curtain-message small {
+    display: block;
+    margin-top: 0.35rem;
+    color: #ffffff;
+    font-size: 0.7em;
+    font-weight: 900;
 }
 
 .camera-curtain-message[data-message='processing'] {

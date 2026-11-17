@@ -12331,6 +12331,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const stopCircleCameraStream = () => {
         circleCameraStartRequestId++;
+        delete circleCameraPage?.dataset.cameraAccessReady;
         dispatchCameraLifecycle('learnscape:camerastopped', circleCameraPage, circleCameraVideo);
         if (circleCameraStream) {
             circleCameraStream.getTracks().forEach((track) => track.stop());
@@ -12381,8 +12382,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (circleCameraVideo.srcObject === stream) circleCameraVideo.srcObject = null;
                 return;
             }
-            setCircleCameraButtonVisible(false);
-            waitForCameraDetectionReady(circleCameraPage, { waitForFullscreen: true });
+            circleCameraPage.dataset.cameraAccessReady = 'true';
+            setCircleCameraButtonText('Buksan');
+            setCircleCameraButtonVisible(true);
+            circleCameraStartButton.disabled = false;
         } catch (error) {
             if (stream) stream.getTracks().forEach((track) => track.stop());
             if (requestId !== circleCameraStartRequestId) return;
@@ -12563,9 +12566,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         page.classList.remove('is-camera-intro');
         character.hidden = true;
         panel.hidden = true;
-        closeCameraProcessingCurtains(page, 'initial');
-        startButton.hidden = false;
-        startButton.disabled = false;
+        waitForCameraDetectionReady(page, { waitForFullscreen: true });
     };
 
     const stopCameraScanRewardAudio = (page) => {
@@ -12614,8 +12615,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         message.dataset.message = messageType;
         if (messageType === 'initial') {
             const emphasis = document.createElement('strong');
-            emphasis.textContent = 'Buksan ang Kamera';
-            message.append(emphasis);
+            emphasis.textContent = 'I-allow ang Kamera';
+            const instruction = document.createElement('small');
+            instruction.textContent = 'Pindutin ito';
+            message.append(emphasis, instruction);
         } else if (messageType === 'processing') {
             message.textContent = 'Sandali...';
         } else if (messageType === 'ready') {
@@ -12752,6 +12755,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const stopShapeCameraStream = (page) => {
         shapeCameraStartRequestIds.set(page, (shapeCameraStartRequestIds.get(page) || 0) + 1);
+        delete page?.dataset.cameraAccessReady;
         dispatchCameraLifecycle('learnscape:camerastopped', page, page?.querySelector('.circle-camera-video'));
         const stream = shapeCameraStreams.get(page);
         if (stream) {
@@ -12807,8 +12811,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (video.srcObject === stream) video.srcObject = null;
                 return;
             }
-            setShapeCameraButtonVisible(page, false);
-            waitForCameraDetectionReady(page, { waitForFullscreen: true });
+            page.dataset.cameraAccessReady = 'true';
+            setShapeCameraButtonText(page, 'Buksan');
+            setShapeCameraButtonVisible(page, true);
+            button.disabled = false;
         } catch (error) {
             if (stream) stream.getTracks().forEach((track) => track.stop());
             if (shapeCameraStartRequestIds.get(page) !== requestId) return;
@@ -13971,9 +13977,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         setShapeMissionBgmPhase('circle');
         finishCircleIllustrationLesson();
     });
-    circleCameraStartButton?.addEventListener('click', startCircleCameraStream);
+    circleCameraStartButton?.addEventListener('click', () => {
+        if (circleCameraPage?.dataset.cameraAccessReady === 'true') {
+            startCameraIntro(circleCameraPage);
+            return;
+        }
+        startCircleCameraStream();
+    });
     shapeCameraPages.forEach((page) => {
         page.querySelector('.circle-camera-start-button')?.addEventListener('click', () => {
+            if (page.dataset.cameraAccessReady === 'true') {
+                startCameraIntro(page);
+                return;
+            }
             startShapeCameraStream(page);
         });
     });
@@ -14193,7 +14209,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         const activeCameraPage = cameraPages.find((page) => isPageVisible(page));
         if (activeCameraPage && /Camera$/.test(event.detail?.route || '')) {
-            startCameraIntro(activeCameraPage);
+            delete activeCameraPage.dataset.cameraAccessReady;
+            closeCameraProcessingCurtains(activeCameraPage, 'initial');
+            if (activeCameraPage === circleCameraPage) {
+                setCircleCameraButtonText('Kamera');
+                setCircleCameraButtonVisible(true);
+            } else {
+                setShapeCameraButtonText(activeCameraPage, 'Kamera');
+                setShapeCameraButtonVisible(activeCameraPage, true);
+            }
         }
         if (event.detail?.route !== 'shapeSquare') {
             resetShapeSquareScene();
