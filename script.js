@@ -12482,7 +12482,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         showMessage('Handa ka na ba?');
         await playCameraIntroVoice(page, session, 'assets/Audios/Voice over/Handa ka na ba.mp3');
         if (cameraIntroSessions.get(page) !== session) return;
-        showMessage('Simulan na!');
+        showMessage('Simulan na ang paghahanap!');
         await playCameraIntroVoice(page, session, 'assets/Audios/Voice over/Simulan.mp3');
         if (cameraIntroSessions.get(page) !== session || !isPageVisible(page)) return;
         page.classList.remove('is-camera-intro');
