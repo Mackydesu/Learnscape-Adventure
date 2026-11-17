@@ -12461,6 +12461,64 @@ document.addEventListener('DOMContentLoaded', async () => {
         audio.play().catch(finish);
     });
 
+    const playCameraIntroTimedVoice = (page, session, source, { switchAt, endAt, onSwitch }) => new Promise((resolve) => {
+        const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+        if (!source || !window.Audio || soundScale <= 0 || cameraIntroSessions.get(page) !== session) {
+            onSwitch?.();
+            resolve();
+            return;
+        }
+        const audio = new window.Audio(source);
+        cameraIntroAudios.set(page, audio);
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = Math.min(1, Math.max(0, soundScale));
+        let finished = false;
+        let switched = false;
+        let frameId = null;
+        const switchMessage = () => {
+            if (switched) return;
+            switched = true;
+            onSwitch?.();
+        };
+        const finish = () => {
+            if (finished) return;
+            finished = true;
+            if (frameId !== null) window.cancelAnimationFrame(frameId);
+            if (cameraIntroAudios.get(page) === audio) cameraIntroAudios.delete(page);
+            resolve();
+        };
+        const syncToTimestamp = () => {
+            if (cameraIntroSessions.get(page) !== session) {
+                audio.pause();
+                finish();
+                return;
+            }
+            if (!switched && audio.currentTime >= switchAt) switchMessage();
+            if (audio.currentTime >= endAt) {
+                audio.pause();
+                switchMessage();
+                finish();
+                return;
+            }
+            frameId = window.requestAnimationFrame(syncToTimestamp);
+        };
+        audio.onended = () => {
+            switchMessage();
+            finish();
+        };
+        audio.onerror = () => {
+            switchMessage();
+            finish();
+        };
+        audio.play().then(() => {
+            syncToTimestamp();
+        }).catch(() => {
+            switchMessage();
+            finish();
+        });
+    });
+
     const startCameraIntro = async (page) => {
         if (!page || !isPageVisible(page)) return;
         const session = cancelCameraIntro(page);
@@ -12484,14 +12542,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             return true;
         };
 
-        if (!await waitForCameraIntro(page, session, 500)) return;
+        if (!await waitForCameraIntro(page, session, 1000)) return;
         openCameraProcessingCurtains(page);
         panel.hidden = false;
         showMessage('Ngayon! Gamitin ang natutuhan.');
-        await playCameraIntroVoice(page, session, 'assets/Audios/Voice over/Maghanap.mp3', { startAt: 0, endAt: 2.6 });
-        if (cameraIntroSessions.get(page) !== session) return;
-        showMessage(`Tumingin sa paligid at maghanap ng mga bagay na hugis ${shapeLabel.toLowerCase()}.`);
-        await playCameraIntroVoice(page, session, 'assets/Audios/Voice over/Maghanap.mp3', { startAt: 2.7, endAt: 6.4 });
+        await playCameraIntroTimedVoice(page, session, 'assets/Audios/Voice over/Maghanap.mp3', {
+            switchAt: 2.7,
+            endAt: 6.4,
+            onSwitch: () => showMessage(`Tumingin sa paligid at maghanap ng mga bagay na hugis ${shapeLabel.toLowerCase()}.`),
+        });
         if (cameraIntroSessions.get(page) !== session) return;
         await playCameraIntroVoice(page, session, shapeChoiceAudioSources[shape]);
         if (cameraIntroSessions.get(page) !== session) return;
