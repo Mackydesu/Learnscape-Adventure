@@ -15975,13 +15975,14 @@ body *::after {
 
 .camera-curtain-message[data-message='initial'] {
     top: auto;
-    bottom: clamp(0.8rem, 2vh, 1.5rem);
-    font-size: clamp(1.85rem, 4vw, 3rem);
+    /* Keep the permission instruction immediately above the pointing hand. */
+    bottom: clamp(4.75rem, 11vh, 8.5rem);
+    font-size: clamp(2.2rem, 4.8vw, 3.6rem);
 }
 
 .camera-curtain-message[data-message='initial'] small {
-    margin-top: 0.55rem;
-    font-size: 0.9em;
+    margin-top: 0.65rem;
+    font-size: 1em;
 }
 
 .camera-curtain-message[data-message='ready'] {
@@ -16106,7 +16107,7 @@ body *::after {
     z-index: 1;
     left: 50%;
     bottom: calc(100% - 0.45rem);
-    width: clamp(5rem, 10vw, 8rem);
+    width: clamp(6rem, 12vw, 9.5rem);
     max-width: none;
     pointer-events: none;
     filter: drop-shadow(0 0.2rem 0.16rem rgba(22, 35, 10, 0.42));
