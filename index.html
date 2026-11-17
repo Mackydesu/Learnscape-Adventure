@@ -76,7 +76,7 @@
             <button class="initial-loading-retry" type="button" hidden>Try again</button>
         </div>
         <div class="page-loading-panel route-loading-panel" role="status">
-            <img class="page-loading-art" src="assets/Backgrounds/loadingscreen.png" alt="Naglo-load">
+            <img loading="eager" class="page-loading-art" src="assets/Backgrounds/loadingscreen.png" alt="Naglo-load">
             <div class="route-loading-bar" aria-hidden="true">
                 <span></span>
             </div>
@@ -101,7 +101,7 @@
     <div class="intro-settings">
         <div class="intro-home-resources" aria-label="Progreso ng pakikipagsapalaran">
             <div class="intro-resource-pill intro-resource-pill-star" data-resource="stars" aria-label="0 bituin">
-                <img src="assets/Shape UI/lesson-star.svg" alt="" aria-hidden="true">
+                <img loading="lazy" src="assets/Shape UI/lesson-star.svg" alt="" aria-hidden="true">
                 <output id="intro-star-count">0</output>
             </div>
             <div class="intro-resource-pill intro-resource-pill-carrot" data-resource="carrots" aria-label="0 karot">
@@ -268,7 +268,7 @@
 
     <div class="onboarding-dim" aria-hidden="true" hidden></div>
     <div class="onboarding-coach" aria-live="polite" hidden>
-        <img class="onboarding-hand" src="assets/Shape UI/drag-guide-hand.png" alt="" aria-hidden="true">
+        <img loading="lazy" class="onboarding-hand" src="assets/Shape UI/drag-guide-hand.png" alt="" aria-hidden="true">
         <div class="onboarding-coach-card">
             <p class="onboarding-coach-copy"></p>
             <button class="onboarding-coach-next" type="button" hidden>Next</button>
@@ -277,12 +277,12 @@
 
     <main id="learnscape-title-page">
         <section class="hero" id="home">
-            <img class="hero-bg-video" src="assets/Backgrounds/bgintro.webp" alt="" aria-hidden="true">
-            <img class="hero-title-art" src="assets/Backgrounds/title.webp" alt="Learnscape Adventure: Explore Shapes, Discover a Brighter World">
+            <img loading="lazy" class="hero-bg-video" src="assets/Backgrounds/bgintro.webp" alt="" aria-hidden="true">
+            <img loading="lazy" class="hero-title-art" src="assets/Backgrounds/title.webp" alt="Learnscape Adventure: Explore Shapes, Discover a Brighter World">
 
             <nav class="home-quick-menu" aria-label="Adventure menu">
                 <button class="home-quick-menu-button" type="button" data-intro-panel="profile" aria-label="Profile">
-                    <img src="assets/Buttons/profile.webp" alt="">
+                    <img loading="lazy" src="assets/Buttons/profile.webp" alt="">
                 </button>
             </nav>
 
@@ -290,7 +290,7 @@
                 <span class="btn-enter-label">Tara na</span>
             </a>
 
-            <img class="hero-character hero-character-ground" src="assets/Character/ch1.svg" alt="Peeking adventure character">
+            <img loading="lazy" class="hero-character hero-character-ground" src="assets/Character/ch1.svg" alt="Peeking adventure character">
 
             <nav class="title-legal-links" aria-label="Legal and about links">
                 <a href="#terms-of-use-privacy">Terms of Use and Privacy</a>
@@ -311,7 +311,7 @@
     </div>
 
     <section id="learnscape-about-page" class="learnscape-about-page" hidden>
-        <img class="about-page-background" src="assets/Backgrounds/bgintro.webp" alt="" aria-hidden="true">
+        <img loading="lazy" class="about-page-background" src="assets/Backgrounds/bgintro.webp" alt="" aria-hidden="true">
         <div class="about-page-shade" aria-hidden="true"></div>
         <a class="about-back-button loading-link" href="#home" data-route="title" aria-label="Return to the home page">
             <svg viewBox="0 0 80 80" aria-hidden="true" focusable="false">
@@ -364,7 +364,7 @@
                 <div class="about-content-board">
                     <section class="about-view-panel is-active" id="about-us-panel" role="tabpanel" aria-labelledby="about-us-tab" data-about-panel="about">
                         <article class="about-intro-card">
-                            <img class="about-intro-character" src="assets/Character/ch2.webp" alt="LearnScape rabbit character">
+                            <img loading="lazy" class="about-intro-character" src="assets/Character/ch2.webp" alt="LearnScape rabbit character">
                             <div>
                                 <h2>LearnScape Adventure</h2>
                                 <p>LearnScape Adventure is an educational game designed for kindergarten learners to explore shapes in a fun and interactive way. Through engaging activities, colorful worlds, and real-world object detection, the game helps children recognize and identify shapes while building their confidence and curiosity.</p>
@@ -381,7 +381,7 @@
                                     <p>Whatever you do, work at it with all your heart, as working for the Lord.</p>
                                     <cite>&mdash; Colossians 3:23</cite>
                                 </blockquote>
-                                <img src="assets/Team/Team.png" alt="The four student developers of LearnScape Adventure">
+                                <img loading="lazy" src="assets/Team/Team.png" alt="The four student developers of LearnScape Adventure">
                                 <blockquote class="about-team-verse about-team-verse-right">
                                     <p>Commit to the Lord whatever you do, and he will establish your plans.</p>
                                     <cite>&mdash; Proverbs 16:3</cite>
@@ -420,64 +420,64 @@
     </section>
 
     <section id="learnscape-game3-page" class="game3-page" data-game3-island="1" hidden>
-        <img class="game1-bg-image" src="assets/Backgrounds/skybg.webp" alt="" aria-hidden="true">
+        <img loading="lazy" class="game1-bg-image" src="assets/Backgrounds/skybg.webp" alt="" aria-hidden="true">
         <div class="game1-overlay" aria-hidden="true"></div>
         <div class="game3-clouds" aria-hidden="true"></div>
         <div class="game3-fog" aria-hidden="true"></div>
         <div class="game1-entry-veil" aria-hidden="true"></div>
         <nav class="game3-quick-menu" aria-label="Adventure menu">
             <button class="game3-quick-menu-button" type="button" data-intro-panel="shop" aria-label="Shop">
-                <img src="assets/Buttons/Shop.webp" alt="">
+                <img loading="lazy" src="assets/Buttons/Shop.webp" alt="">
                 <span class="intro-shop-available-indicator" aria-hidden="true" hidden></span>
             </button>
             <button class="game3-quick-menu-button" type="button" data-intro-panel="notifications" aria-label="Notifications">
-                <img src="assets/Buttons/Notification.webp" alt="">
+                <img loading="lazy" src="assets/Buttons/Notification.webp" alt="">
                 <span class="intro-notification-unread-indicator" aria-hidden="true" hidden></span>
             </button>
         </nav>
         <nav class="game3-island-carousel" aria-label="Mga lugar sa Pulo ng mga Hugis">
             <div class="game3-island-card" data-island-shape="circle">
-                <img src="assets/Shape UI/1.webp" alt="1. Circle Meadow">
+                <img loading="lazy" src="assets/Shape UI/1.webp" alt="1. Circle Meadow">
                 <svg class="game3-island-lock" viewBox="0 0 120 145" role="img" aria-label="Locked" hidden><use class="game3-island-lock-shackle" href="#game3-padlock-shackle"></use><use class="game3-island-lock-body" href="#game3-padlock-body"></use></svg>
                 <a class="game3-island-enter loading-link" href="index.html" data-route="shape-circle">Lakbayin</a>
             </div>
             <div class="game3-island-card" data-island-shape="square">
-                <img src="assets/Shape UI/2.webp" alt="2. Square Town">
+                <img loading="lazy" src="assets/Shape UI/2.webp" alt="2. Square Town">
                 <svg class="game3-island-lock" viewBox="0 0 120 145" role="img" aria-label="Locked" hidden><use class="game3-island-lock-shackle" href="#game3-padlock-shackle"></use><use class="game3-island-lock-body" href="#game3-padlock-body"></use></svg>
                 <a class="game3-island-enter loading-link" href="index.html" data-route="shape-square">Lakbayin</a>
             </div>
             <div class="game3-island-card" data-island-shape="triangle">
-                <img src="assets/Shape UI/3.webp" alt="3. Triangle Mountains">
+                <img loading="lazy" src="assets/Shape UI/3.webp" alt="3. Triangle Mountains">
                 <svg class="game3-island-lock" viewBox="0 0 120 145" role="img" aria-label="Locked" hidden><use class="game3-island-lock-shackle" href="#game3-padlock-shackle"></use><use class="game3-island-lock-body" href="#game3-padlock-body"></use></svg>
                 <a class="game3-island-enter loading-link" href="index.html" data-route="shape-area-3">Lakbayin</a>
             </div>
             <div class="game3-island-card" data-island-shape="rectangle">
-                <img src="assets/Shape UI/4.webp" alt="4. Rectangle Village">
+                <img loading="lazy" src="assets/Shape UI/4.webp" alt="4. Rectangle Village">
                 <svg class="game3-island-lock" viewBox="0 0 120 145" role="img" aria-label="Locked" hidden><use class="game3-island-lock-shackle" href="#game3-padlock-shackle"></use><use class="game3-island-lock-body" href="#game3-padlock-body"></use></svg>
                 <a class="game3-island-enter loading-link" href="index.html" data-route="shape-area-4">Lakbayin</a>
             </div>
             <div class="game3-island-card" data-island-shape="oval">
-                <img src="assets/Shape UI/5.webp" alt="5. Oval Garden">
+                <img loading="lazy" src="assets/Shape UI/5.webp" alt="5. Oval Garden">
                 <svg class="game3-island-lock" viewBox="0 0 120 145" role="img" aria-label="Locked" hidden><use class="game3-island-lock-shackle" href="#game3-padlock-shackle"></use><use class="game3-island-lock-body" href="#game3-padlock-body"></use></svg>
                 <a class="game3-island-enter loading-link" href="index.html" data-route="shape-area-5">Lakbayin</a>
             </div>
             <div class="game3-island-card" data-island-shape="heart">
-                <img src="assets/Shape UI/6.webp" alt="6. Heart City">
+                <img loading="lazy" src="assets/Shape UI/6.webp" alt="6. Heart City">
                 <svg class="game3-island-lock" viewBox="0 0 120 145" role="img" aria-label="Locked" hidden><use class="game3-island-lock-shackle" href="#game3-padlock-shackle"></use><use class="game3-island-lock-body" href="#game3-padlock-body"></use></svg>
                 <a class="game3-island-enter loading-link" href="index.html" data-route="shape-area-6">Lakbayin</a>
             </div>
             <div class="game3-island-card" data-island-shape="star">
-                <img src="assets/Shape UI/7.webp" alt="7. Star Forest">
+                <img loading="lazy" src="assets/Shape UI/7.webp" alt="7. Star Forest">
                 <svg class="game3-island-lock" viewBox="0 0 120 145" role="img" aria-label="Locked" hidden><use class="game3-island-lock-shackle" href="#game3-padlock-shackle"></use><use class="game3-island-lock-body" href="#game3-padlock-body"></use></svg>
                 <a class="game3-island-enter loading-link" href="index.html" data-route="shape-area-7">Lakbayin</a>
             </div>
             <div class="game3-island-card" data-island-shape="diamond">
-                <img src="assets/Shape UI/8.webp" alt="8. Diamond Cave">
+                <img loading="lazy" src="assets/Shape UI/8.webp" alt="8. Diamond Cave">
                 <svg class="game3-island-lock" viewBox="0 0 120 145" role="img" aria-label="Locked" hidden><use class="game3-island-lock-shackle" href="#game3-padlock-shackle"></use><use class="game3-island-lock-body" href="#game3-padlock-body"></use></svg>
                 <a class="game3-island-enter loading-link" href="index.html" data-route="shape-area-8">Lakbayin</a>
             </div>
             <div class="game3-island-card game3-coming-soon-card" aria-label="Pulong malapit nang dumating. Abangan ang susunod na update.">
-                <img src="assets/Shape UI/coming soon.webp" alt="Malapit nang dumating na pulong kastilyo">
+                <img loading="lazy" src="assets/Shape UI/coming soon.webp" alt="Malapit nang dumating na pulong kastilyo">
                 <div class="game3-coming-soon-message" role="status">
                     <strong>MALAPIT NA</strong>
                     <span>Abangan ang susunod na update</span>
@@ -542,10 +542,10 @@
     </section>
 
     <section id="learnscape-shape-circle-page" class="shape-area-page" hidden>
-        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area1.webp" alt="" aria-hidden="true">
-        <img class="shape-area-character shape-area-character-speaker shape-area-character-ch3" src="assets/Character/ch3.webp" alt="" aria-hidden="true" hidden>
-        <img class="shape-area-character shape-area-character-speaker shape-area-character-ch4" src="assets/Character/ch4.webp" alt="" aria-hidden="true" hidden>
-        <img class="shape-area-character shape-area-character-speaker shape-area-character-ch5" src="assets/Character/ch5.webp" alt="" aria-hidden="true" hidden>
+        <img loading="lazy" class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area1.webp" alt="" aria-hidden="true">
+        <img loading="lazy" class="shape-area-character shape-area-character-speaker shape-area-character-ch3" src="assets/Character/ch3.webp" alt="" aria-hidden="true" hidden>
+        <img loading="lazy" class="shape-area-character shape-area-character-speaker shape-area-character-ch4" src="assets/Character/ch4.webp" alt="" aria-hidden="true" hidden>
+        <img loading="lazy" class="shape-area-character shape-area-character-speaker shape-area-character-ch5" src="assets/Character/ch5.webp" alt="" aria-hidden="true" hidden>
         <button class="shape-area-start-button loading-link" type="button" data-route="circle-illustration">Simulan na</button>
         <div class="shape-area-speech-bubble shape-area-speech-bubble-ch3" data-messages="[&quot;MABUHAY! Ako nga pala si Bibi&quot;,&quot;Ikinagagalak kitang makilala&quot;,&quot;Maligayang pagdating sa aking munting paraiso&quot;,&quot;Kung saan pag-aaralan natin ang iba't-ibang hugis&quot;,&quot;Simulan natin sa Circle o Bilog!&quot;,&quot;Handa ka na ba?&quot;]" aria-hidden="true" hidden>
             <span class="shape-area-speech-bubble-text"></span>
@@ -557,11 +557,11 @@
     </section>
 
     <section id="learnscape-shape-square-page" class="shape-area-page" hidden>
-        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area2.webp" alt="" aria-hidden="true">
-        <img class="shape-area-square-character shape-area-square-character-ch3" src="assets/Character/ch6.webp" alt="" aria-hidden="true">
-        <img class="shape-area-square-character shape-area-square-character-ch9" src="assets/Character/ch9.webp" alt="" aria-hidden="true" hidden>
-        <img class="shape-area-square-character shape-area-square-character-next" src="assets/Character/ch14.webp" alt="" aria-hidden="true" hidden>
-        <img class="shape-area-square-character shape-area-square-character-ch5" src="assets/Character/ch5.webp" alt="" aria-hidden="true" hidden>
+        <img loading="lazy" class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area2.webp" alt="" aria-hidden="true">
+        <img loading="lazy" class="shape-area-square-character shape-area-square-character-ch3" src="assets/Character/ch6.webp" alt="" aria-hidden="true">
+        <img loading="lazy" class="shape-area-square-character shape-area-square-character-ch9" src="assets/Character/ch9.webp" alt="" aria-hidden="true" hidden>
+        <img loading="lazy" class="shape-area-square-character shape-area-square-character-next" src="assets/Character/ch14.webp" alt="" aria-hidden="true" hidden>
+        <img loading="lazy" class="shape-area-square-character shape-area-square-character-ch5" src="assets/Character/ch5.webp" alt="" aria-hidden="true" hidden>
         <div class="shape-area-square-speech-bubble" role="status" aria-live="polite">
             <span>Maligayang pagbabalik!</span>
         </div>
@@ -569,11 +569,11 @@
         <div class="circle-illustration-video-stage square-illustration-video-stage" aria-hidden="true">
             <div class="circle-illustration-tv-frame">
                 <div class="circle-illustration-tv-screen">
-                    <video class="circle-illustration-video square-illustration-video" playsinline preload="auto" aria-label="Square lesson video">
+                    <video class="circle-illustration-video square-illustration-video" playsinline preload="none" aria-label="Square lesson video">
                         <source src="assets/Videos/squareshape.mp4" type="video/mp4">
                     </video>
-                    <img class="circle-illustration-video shape-tv-lesson-image square-tv-lesson-image" src="assets/Backgrounds/square.webp" alt="Eksena ng aralin sa parisukat" hidden>
-                    <img class="shape-tv-mascot square-tv-mascot" src="assets/Shape UI/square.webp" alt="Square character" hidden>
+                    <img loading="lazy" class="circle-illustration-video shape-tv-lesson-image square-tv-lesson-image" src="assets/Backgrounds/square.webp" alt="Eksena ng aralin sa parisukat" hidden>
+                    <img loading="lazy" class="shape-tv-mascot square-tv-mascot" src="assets/Shape UI/square.webp" alt="Square character" hidden>
                     <div class="shape-tv-question-panel square-tv-question-panel" hidden>Anong hugis ako?</div>
                     <div class="shape-tv-choices" aria-label="Piliin ang pangalan ng hugis">
                         <div class="shape-tv-choice-column">
@@ -602,7 +602,7 @@
         </div>
         <section class="circle-lesson-progress square-lesson-progress" aria-label="Square lesson progress" aria-hidden="true">
             <div class="circle-lesson-progress-board">
-                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/board.webp" alt="">
+                <img loading="lazy" class="circle-lesson-progress-board-image" src="assets/Shape UI/board.webp" alt="">
                 <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Tapos na ang Aralin!">
                     <path id="squareLessonTitleCurve" d="M 4 44 Q 100 32 196 44" fill="none"></path>
                     <text textLength="184" lengthAdjust="spacingAndGlyphs">
@@ -611,29 +611,29 @@
                 </svg>
                 <div class="circle-lesson-stars square-lesson-stars" data-earned-stars="0" role="img" aria-label="0 of 3 stars earned">
                     <span class="circle-lesson-star-slot">
-                        <img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt="">
+                        <img loading="lazy" class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt="">
                     </span>
                     <span class="circle-lesson-star-slot">
-                        <img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt="">
+                        <img loading="lazy" class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt="">
                     </span>
                     <span class="circle-lesson-star-slot">
-                        <img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt="">
+                        <img loading="lazy" class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt="">
                     </span>
                 </div>
                 <p class="circle-lesson-star-message square-lesson-star-message" aria-live="polite"></p>
                 <div class="circle-lesson-progress-actions">
                     <button class="circle-lesson-progress-button" type="button" data-square-lesson-replay aria-label="Replay square lesson">
-                        <img  alt="">
+                        <img loading="lazy"  alt="">
                     </button>
                     <button class="circle-lesson-progress-button" type="button" data-square-lesson-next aria-label="Continue">
-                        <img  alt="">
+                        <img loading="lazy"  alt="">
                     </button>
                 </div>
             </div>
         </section>
         <div class="square-mission-guide" aria-hidden="true" hidden>
-            <img class="square-mission-character square-mission-character-ch10" src="assets/Character/ch10.webp" alt="" aria-hidden="true">
-            <img class="square-mission-character square-mission-character-ch11" src="assets/Character/ch11.webp" alt="" aria-hidden="true" hidden>
+            <img loading="lazy" class="square-mission-character square-mission-character-ch10" src="assets/Character/ch10.webp" alt="" aria-hidden="true">
+            <img loading="lazy" class="square-mission-character square-mission-character-ch11" src="assets/Character/ch11.webp" alt="" aria-hidden="true" hidden>
             <div class="square-mission-bubble" role="status" aria-live="polite">
                 <span class="square-mission-bubble-text"></span>
             </div>
@@ -666,11 +666,11 @@
             <button class="square-answer-tile" type="button"></button>
         </div>
         <div class="square-object-panel" aria-label="Square storage">
-            <span class="square-object-slot" data-square-slot="1"><button class="square-object-piece" type="button" data-square-piece="1" data-square-hint="orasan" aria-label="Place the square clock"><img src="assets/Shape UI/square1.webp" alt=""></button></span>
-            <span class="square-object-slot" data-square-slot="2"><button class="square-object-piece" type="button" data-square-piece="2" data-square-hint="bintana" aria-label="Place the square window"><img src="assets/Shape UI/square2.webp" alt=""></button></span>
-            <span class="square-object-slot" data-square-slot="3"><button class="square-object-piece" type="button" data-square-piece="3" data-square-hint="palamuti sa dingding" aria-label="Place the square wall panel"><img src="assets/Shape UI/square3.webp" alt=""></button></span>
-            <span class="square-object-slot" data-square-slot="4"><button class="square-object-piece" type="button" data-square-piece="4" data-square-hint="pintuan" aria-label="Place the square double doors"><img src="assets/Shape UI/square4.webp" alt=""></button></span>
-            <span class="square-object-slot" data-square-slot="5"><button class="square-object-piece" type="button" data-square-piece="5" data-square-hint="fountain" aria-label="Place the square fountain"><img src="assets/Shape UI/square5.webp" alt=""></button></span>
+            <span class="square-object-slot" data-square-slot="1"><button class="square-object-piece" type="button" data-square-piece="1" data-square-hint="orasan" aria-label="Place the square clock"><img loading="lazy" src="assets/Shape UI/square1.webp" alt=""></button></span>
+            <span class="square-object-slot" data-square-slot="2"><button class="square-object-piece" type="button" data-square-piece="2" data-square-hint="bintana" aria-label="Place the square window"><img loading="lazy" src="assets/Shape UI/square2.webp" alt=""></button></span>
+            <span class="square-object-slot" data-square-slot="3"><button class="square-object-piece" type="button" data-square-piece="3" data-square-hint="palamuti sa dingding" aria-label="Place the square wall panel"><img loading="lazy" src="assets/Shape UI/square3.webp" alt=""></button></span>
+            <span class="square-object-slot" data-square-slot="4"><button class="square-object-piece" type="button" data-square-piece="4" data-square-hint="pintuan" aria-label="Place the square double doors"><img loading="lazy" src="assets/Shape UI/square4.webp" alt=""></button></span>
+            <span class="square-object-slot" data-square-slot="5"><button class="square-object-piece" type="button" data-square-piece="5" data-square-hint="fountain" aria-label="Place the square fountain"><img loading="lazy" src="assets/Shape UI/square5.webp" alt=""></button></span>
         </div>
         <div class="square-placement-hint" role="status" aria-live="polite" hidden>
             <span>Pindutin ang</span>
@@ -693,14 +693,14 @@
         </div>
         <button class="square-puzzle-next-button" type="button" aria-label="Susunod sa misyon ng parisukat" hidden>Susunod</button>
         <button class="square-puzzle-retry-button" type="button" aria-label="Ulitin ang misyon ng parisukat" hidden>Ulitin</button>
-        <img class="square-mission-character square-mission-character-ch12" src="assets/Character/ch12.webp" alt="Celebration character" aria-hidden="true" hidden>
-        <img class="square-mission-character square-mission-character-ch13" src="assets/Character/ch13.webp" alt="Celebration character" aria-hidden="true" hidden>
+        <img loading="lazy" class="square-mission-character square-mission-character-ch12" src="assets/Character/ch12.webp" alt="Celebration character" aria-hidden="true" hidden>
+        <img loading="lazy" class="square-mission-character square-mission-character-ch13" src="assets/Character/ch13.webp" alt="Celebration character" aria-hidden="true" hidden>
         <div class="square-chocolate-question-bubble" role="status" aria-live="polite" hidden>
             <span>Tukuyin kung ilang hugis parisukat ang tsokolateng ito</span>
         </div>
-        <img class="square-kids-cheer-character square-kids-cheer-character-ch7" src="assets/Character/ch7.webp" alt="" aria-hidden="true" hidden>
+        <img loading="lazy" class="square-kids-cheer-character square-kids-cheer-character-ch7" src="assets/Character/ch7.webp" alt="" aria-hidden="true" hidden>
         <div class="square-kids-cheer-character square-kids-cheer-character-ch8" aria-hidden="true" hidden>
-            <img src="assets/Character/ch8.webp" alt="">
+            <img loading="lazy" src="assets/Character/ch8.webp" alt="">
         </div>
         <a class="game-return-btn loading-link game-icon-button icon-back" href="index.html" data-route="game3" aria-label="Return to Shape Island">
             <span>‹</span>
@@ -709,14 +709,14 @@
     </section>
 
     <section id="learnscape-shape-area-3-page" class="shape-area-page shape-area-preview-page" data-completed-shape="square" data-area-background="assets/Backgrounds/Area3.webp" data-illustration-background="assets/Backgrounds/triangle.webp" data-next-background="assets/Backgrounds/triangle1.webp" data-video-source="assets/Videos/triangleshape.mp4" hidden>
-        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area3.webp" alt="" aria-hidden="true">
+        <img loading="lazy" class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area3.webp" alt="" aria-hidden="true">
         <button class="shape-area-preview-start-button" type="button">Simulan na</button>
         <div class="circle-illustration-video-stage shape-preview-video-stage" aria-hidden="true">
             <div class="circle-illustration-tv-frame">
                 <div class="circle-illustration-tv-screen">
-                    <video class="circle-illustration-video shape-preview-video" playsinline preload="auto" aria-label="Triangle lesson video"></video>
-                    <img class="circle-illustration-video shape-preview-lesson-image" src="assets/Backgrounds/triangle.webp" alt="Eksena ng aralin sa tatsulok" hidden>
-                    <img class="shape-tv-mascot shape-preview-mascot" src="assets/Shape UI/triangle.webp" alt="Triangle character" hidden>
+                    <video class="circle-illustration-video shape-preview-video" playsinline preload="none" aria-label="Triangle lesson video"></video>
+                    <img loading="lazy" class="circle-illustration-video shape-preview-lesson-image" src="assets/Backgrounds/triangle.webp" alt="Eksena ng aralin sa tatsulok" hidden>
+                    <img loading="lazy" class="shape-tv-mascot shape-preview-mascot" src="assets/Shape UI/triangle.webp" alt="Triangle character" hidden>
                     <div class="shape-tv-question-panel shape-preview-question-panel" hidden>Anong hugis ako?</div>
                     <div class="shape-tv-choices" aria-label="Piliin ang pangalan ng hugis">
                         <div class="shape-tv-choice-column">
@@ -739,8 +739,8 @@
             </div>
         </div>
         <div class="triangle-bridge-character-sequence" aria-hidden="true" hidden>
-            <img class="triangle-bridge-walking-character" src="assets/Character/walking.gif" alt="">
-            <img class="triangle-bridge-arrival-character" src="assets/Character/ch15.webp" alt="" hidden>
+            <img loading="lazy" class="triangle-bridge-walking-character" src="assets/Character/walking.gif" alt="">
+            <img loading="lazy" class="triangle-bridge-arrival-character" src="assets/Character/ch15.webp" alt="" hidden>
         </div>
         <div class="triangle-bridge-message-panel" role="status" aria-live="polite" hidden>
             <span class="triangle-bridge-message-content">
@@ -755,67 +755,67 @@
     </section>
 
     <section id="learnscape-triangle-game-page" class="shape-area-page triangle-game-page" hidden>
-        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/trianglegame.webp" alt="Triangle bridge repair game" aria-hidden="true">
+        <img loading="lazy" class="game1-bg-image shape-area-bg" src="assets/Backgrounds/trianglegame.webp" alt="Triangle bridge repair game" aria-hidden="true">
         <div class="triangle-game-complete-title" role="status" hidden>Tapos na ang Tulay</div>
         <div class="triangle-game-complete-confetti" aria-hidden="true" hidden></div>
         <div class="triangle-game-complete-character-sequence" aria-hidden="true" hidden>
-            <img class="triangle-game-complete-walking-character" src="assets/Character/walking.gif" alt="">
-            <img class="triangle-game-complete-arrival-character" src="assets/Character/ch8.webp" alt="" hidden>
+            <img loading="lazy" class="triangle-game-complete-walking-character" src="assets/Character/walking.gif" alt="">
+            <img loading="lazy" class="triangle-game-complete-arrival-character" src="assets/Character/ch8.webp" alt="" hidden>
         </div>
         <div class="triangle-wood-storage" role="status" aria-live="polite" aria-label="Collected wood blocks" hidden>
-            <img class="triangle-wood-storage-image" src="assets/Shape UI/wood-block-stylized.webp" alt="">
-            <img class="triangle-wood-click-guide" src="assets/Shape UI/drag-guide-hand.png" alt="" aria-hidden="true" hidden>
+            <img loading="lazy" class="triangle-wood-storage-image" src="assets/Shape UI/wood-block-stylized.webp" alt="">
+            <img loading="lazy" class="triangle-wood-click-guide" src="assets/Shape UI/drag-guide-hand.png" alt="" aria-hidden="true" hidden>
             <strong class="triangle-wood-storage-count"><span data-triangle-wood-count>0</span>/9</strong>
         </div>
         <section class="triangle-crafting-panel" aria-label="Bridge crafting" hidden>
             <h2>Buuin ang Tulay</h2>
             <div class="triangle-crafting-shapes" aria-label="Three-triangle wooden bridge frame">
                 <span class="triangle-crafting-slot triangle-crafting-slot-diagonal triangle-crafting-slot-left-1" data-triangle-craft-slot data-slot-angle="-60">
-                    <img src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
+                    <img loading="lazy" src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
                 </span>
                 <span class="triangle-crafting-slot triangle-crafting-slot-diagonal triangle-crafting-slot-right-1" data-triangle-craft-slot data-slot-angle="60">
-                    <img src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
+                    <img loading="lazy" src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
                 </span>
                 <span class="triangle-crafting-slot triangle-crafting-slot-diagonal triangle-crafting-slot-left-2" data-triangle-craft-slot data-slot-angle="-60">
-                    <img src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
+                    <img loading="lazy" src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
                 </span>
                 <span class="triangle-crafting-slot triangle-crafting-slot-diagonal triangle-crafting-slot-right-2" data-triangle-craft-slot data-slot-angle="60">
-                    <img src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
+                    <img loading="lazy" src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
                 </span>
                 <span class="triangle-crafting-slot triangle-crafting-slot-diagonal triangle-crafting-slot-left-3" data-triangle-craft-slot data-slot-angle="-60">
-                    <img src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
+                    <img loading="lazy" src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
                 </span>
                 <span class="triangle-crafting-slot triangle-crafting-slot-diagonal triangle-crafting-slot-right-3" data-triangle-craft-slot data-slot-angle="60">
-                    <img src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
+                    <img loading="lazy" src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
                 </span>
                 <span class="triangle-crafting-slot triangle-crafting-slot-top triangle-crafting-slot-top-1" data-triangle-craft-slot data-slot-angle="0">
-                    <img src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
+                    <img loading="lazy" src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
                 </span>
                 <span class="triangle-crafting-slot triangle-crafting-slot-top triangle-crafting-slot-top-2" data-triangle-craft-slot data-slot-angle="0">
-                    <img src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
+                    <img loading="lazy" src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
                 </span>
                 <span class="triangle-crafting-slot triangle-crafting-slot-foundation" data-triangle-craft-slot data-slot-angle="0">
-                    <img src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
+                    <img loading="lazy" src="assets/Shape UI/wood-plank-side.webp" alt="" hidden>
                 </span>
             </div>
-            <img class="triangle-crafted-bridge" src="assets/Shape UI/bridge.webp" alt="Completed wooden bridge" hidden>
+            <img loading="lazy" class="triangle-crafted-bridge" src="assets/Shape UI/bridge.webp" alt="Completed wooden bridge" hidden>
             <div class="triangle-bridge-build-overlay" aria-hidden="true" hidden>
                 <div class="triangle-build-hammer-path">
-                    <img class="triangle-build-hammer" src="assets/Shape UI/hammer-build.webp" alt="">
+                    <img loading="lazy" class="triangle-build-hammer" src="assets/Shape UI/hammer-build.webp" alt="">
                 </div>
                 <div class="triangle-build-smoke">
-                    <img src="assets/Shape UI/clouds.webp" alt="">
-                    <img src="assets/Shape UI/clouds.webp" alt="">
-                    <img src="assets/Shape UI/clouds.webp" alt="">
-                    <img src="assets/Shape UI/clouds.webp" alt="">
-                    <img src="assets/Shape UI/clouds.webp" alt="">
-                    <img src="assets/Shape UI/clouds.webp" alt="">
-                    <img src="assets/Shape UI/clouds.webp" alt="">
-                    <img src="assets/Shape UI/clouds.webp" alt="">
-                    <img src="assets/Shape UI/clouds.webp" alt="">
-                    <img src="assets/Shape UI/clouds.webp" alt="">
-                    <img src="assets/Shape UI/clouds.webp" alt="">
-                    <img src="assets/Shape UI/clouds.webp" alt="">
+                    <img loading="lazy" src="assets/Shape UI/clouds.webp" alt="">
+                    <img loading="lazy" src="assets/Shape UI/clouds.webp" alt="">
+                    <img loading="lazy" src="assets/Shape UI/clouds.webp" alt="">
+                    <img loading="lazy" src="assets/Shape UI/clouds.webp" alt="">
+                    <img loading="lazy" src="assets/Shape UI/clouds.webp" alt="">
+                    <img loading="lazy" src="assets/Shape UI/clouds.webp" alt="">
+                    <img loading="lazy" src="assets/Shape UI/clouds.webp" alt="">
+                    <img loading="lazy" src="assets/Shape UI/clouds.webp" alt="">
+                    <img loading="lazy" src="assets/Shape UI/clouds.webp" alt="">
+                    <img loading="lazy" src="assets/Shape UI/clouds.webp" alt="">
+                    <img loading="lazy" src="assets/Shape UI/clouds.webp" alt="">
+                    <img loading="lazy" src="assets/Shape UI/clouds.webp" alt="">
                 </div>
             </div>
             <div class="triangle-bridge-question" role="group" aria-labelledby="triangle-bridge-question-text" hidden>
@@ -828,7 +828,7 @@
                 </div>
             </div>
         </section>
-        <img class="triangle-game-character" src="assets/Character/ch6.webp" alt="" aria-hidden="true" hidden>
+        <img loading="lazy" class="triangle-game-character" src="assets/Character/ch6.webp" alt="" aria-hidden="true" hidden>
         <div class="triangle-game-message-panel" role="status" aria-live="polite" hidden>
             <span class="triangle-game-message-content">
                 <span class="triangle-game-message-text"></span><span class="triangle-game-message-ending"><span class="triangle-game-message-last-word"></span><span class="triangle-game-message-dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></span>
@@ -837,7 +837,7 @@
         <button class="circle-mission-start-button triangle-game-start-button" type="button" data-how-to-shape="triangle" hidden>Simulan na</button>
         <section class="circle-lesson-progress triangle-game-complete-progress" aria-label="Bridge progress" aria-hidden="true">
             <div class="circle-lesson-progress-board">
-                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/board.webp" alt="">
+                <img loading="lazy" class="circle-lesson-progress-board-image" src="assets/Shape UI/board.webp" alt="">
                 <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Tapos na ang Misyon!">
                     <path id="triangleBridgeCompleteTitleCurve" d="M 4 44 Q 100 32 196 44" fill="none"></path>
                     <text textLength="184" lengthAdjust="spacingAndGlyphs">
@@ -845,17 +845,17 @@
                     </text>
                 </svg>
                 <div class="circle-lesson-stars" data-earned-stars="2" role="img" aria-label="2 of 3 stars earned">
-                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
-                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
-                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img loading="lazy" class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img loading="lazy" class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img loading="lazy" class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
                 </div>
                 <p class="circle-lesson-star-message">Magaling!</p>
                 <div class="circle-lesson-progress-actions">
                     <button class="circle-lesson-progress-button" type="button" data-triangle-game-replay aria-label="Retry bridge mission">
-                        <img  alt="">
+                        <img loading="lazy"  alt="">
                     </button>
                     <button class="circle-lesson-progress-button" type="button" data-triangle-game-next aria-label="Continue to Shape Island">
-                        <img  alt="">
+                        <img loading="lazy"  alt="">
                     </button>
                 </div>
             </div>
@@ -867,33 +867,33 @@
     </section>
 
     <section id="learnscape-shape-area-4-page" class="shape-area-page shape-area-preview-page" data-completed-shape="triangle" data-area-background="assets/Backgrounds/Area4.webp" data-illustration-background="assets/Backgrounds/rectangle.webp" data-next-background="assets/Backgrounds/Rectanglemission.webp" data-video-source="assets/Videos/rectangleshape.mp4" hidden>
-        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area4.webp" alt="" aria-hidden="true">
+        <img loading="lazy" class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area4.webp" alt="" aria-hidden="true">
         <div class="rectangle-jeep-sequence" aria-hidden="true" hidden>
-            <img class="rectangle-jeep-driving" src="assets/Character/jeep.webp" alt="">
-            <img class="rectangle-jeep-arrived" src="assets/Character/jeep1.webp" alt="" hidden>
+            <img loading="lazy" class="rectangle-jeep-driving" src="assets/Character/jeep.webp" alt="">
+            <img loading="lazy" class="rectangle-jeep-arrived" src="assets/Character/jeep1.webp" alt="" hidden>
         </div>
         <aside class="rectangle-mission-object-panel" aria-label="Choose three rectangle-shaped objects" hidden>
             <button class="rectangle-mission-object" type="button" data-rectangle-object="clock" aria-label="Circular clock" disabled>
-                <img src="assets/Shape UI/circle-clock.webp" alt="">
+                <img loading="lazy" src="assets/Shape UI/circle-clock.webp" alt="">
             </button>
             <button class="rectangle-mission-object" type="button" data-rectangle-object="books" data-rectangle-correct aria-label="Libro" disabled>
-                <img src="assets/Shape UI/rectangle-books.webp" alt="">
+                <img loading="lazy" src="assets/Shape UI/rectangle-books.webp" alt="">
             </button>
             <button class="rectangle-mission-object" type="button" data-rectangle-object="toy-box" data-rectangle-correct aria-label="Laruan" disabled>
-                <img src="assets/Shape UI/rectangle-toy-box.webp" alt="">
+                <img loading="lazy" src="assets/Shape UI/rectangle-toy-box.webp" alt="">
             </button>
             <button class="rectangle-mission-object" type="button" data-rectangle-object="triangle-sign" aria-label="Triangular sign" disabled>
-                <img src="assets/Shape UI/triangle-sign.webp" alt="">
+                <img loading="lazy" src="assets/Shape UI/triangle-sign.webp" alt="">
             </button>
             <button class="rectangle-mission-object" type="button" data-rectangle-object="heart-balloon" aria-label="Heart balloon" disabled>
-                <img src="assets/Shape UI/heart-balloon.webp" alt="">
+                <img loading="lazy" src="assets/Shape UI/heart-balloon.webp" alt="">
             </button>
             <button class="rectangle-mission-object" type="button" data-rectangle-object="bread-tray" data-rectangle-correct aria-label="Tinapay" disabled>
-                <img src="assets/Shape UI/rectangle-bread-tray.webp" alt="">
+                <img loading="lazy" src="assets/Shape UI/rectangle-bread-tray.webp" alt="">
             </button>
         </aside>
-        <img class="rectangle-mission-guide-character" src="assets/Character/ch6.webp" alt="Bibi guiding the Rectangle Mission" hidden>
-        <img class="rectangle-mission-guide-character rectangle-mission-guide-character-ch5" src="assets/Character/ch5.webp" alt="" aria-hidden="true" hidden>
+        <img loading="lazy" class="rectangle-mission-guide-character" src="assets/Character/ch6.webp" alt="Bibi guiding the Rectangle Mission" hidden>
+        <img loading="lazy" class="rectangle-mission-guide-character rectangle-mission-guide-character-ch5" src="assets/Character/ch5.webp" alt="" aria-hidden="true" hidden>
         <div class="rectangle-mission-storage-slots" aria-hidden="true" hidden>
             <span class="rectangle-mission-storage-slot" data-storage-slot="1" data-source-x="984" data-source-y="424" data-source-width="128" data-source-height="112"></span>
             <span class="rectangle-mission-storage-slot" data-storage-slot="2" data-source-x="1130" data-source-y="424" data-source-width="122" data-source-height="112"></span>
@@ -911,9 +911,9 @@
         <div class="circle-illustration-video-stage shape-preview-video-stage" aria-hidden="true">
             <div class="circle-illustration-tv-frame">
                 <div class="circle-illustration-tv-screen">
-                    <video class="circle-illustration-video shape-preview-video" playsinline preload="auto" aria-label="Rectangle lesson video"></video>
-                    <img class="circle-illustration-video shape-preview-lesson-image" src="assets/Backgrounds/rectangle.webp" alt="Eksena ng aralin sa parihaba" hidden>
-                    <img class="shape-tv-mascot shape-preview-mascot" src="assets/Shape UI/rectangle.webp" alt="Rectangle character" hidden>
+                    <video class="circle-illustration-video shape-preview-video" playsinline preload="none" aria-label="Rectangle lesson video"></video>
+                    <img loading="lazy" class="circle-illustration-video shape-preview-lesson-image" src="assets/Backgrounds/rectangle.webp" alt="Eksena ng aralin sa parihaba" hidden>
+                    <img loading="lazy" class="shape-tv-mascot shape-preview-mascot" src="assets/Shape UI/rectangle.webp" alt="Rectangle character" hidden>
                     <div class="shape-tv-question-panel shape-preview-question-panel" hidden>Anong hugis ako?</div>
                     <div class="shape-tv-choices" aria-label="Piliin ang pangalan ng hugis">
                         <div class="shape-tv-choice-column">
@@ -942,14 +942,14 @@
     </section>
 
     <section id="learnscape-rectangle-delivery-page" class="shape-area-page rectangle-delivery-page" hidden>
-        <img class="rectangle-delivery-complete-bg" src="assets/Backgrounds/rectangle1.webp" alt="" draggable="false" hidden>
+        <img loading="lazy" class="rectangle-delivery-complete-bg" src="assets/Backgrounds/rectangle1.webp" alt="" draggable="false" hidden>
         <div class="rectangle-road-scroll" tabindex="0" role="region" aria-label="Rectangle town scrolling road">
             <div class="rectangle-road-strip">
-                <img src="assets/Backgrounds/way1.webp" alt="" draggable="false">
-                <img src="assets/Backgrounds/way2.webp" alt="" draggable="false">
-                <img src="assets/Backgrounds/way3.webp" alt="" draggable="false">
-                <img src="assets/Backgrounds/way4.webp" alt="" draggable="false">
-                <img src="assets/Backgrounds/way5.webp" alt="" draggable="false">
+                <img loading="lazy" src="assets/Backgrounds/way1.webp" alt="" draggable="false">
+                <img loading="lazy" src="assets/Backgrounds/way2.webp" alt="" draggable="false">
+                <img loading="lazy" src="assets/Backgrounds/way3.webp" alt="" draggable="false">
+                <img loading="lazy" src="assets/Backgrounds/way4.webp" alt="" draggable="false">
+                <img loading="lazy" src="assets/Backgrounds/way5.webp" alt="" draggable="false">
             </div>
             <div class="rectangle-highway-track" aria-hidden="true">
                 <span class="rectangle-highway-segment is-highway-01"></span>
@@ -1086,17 +1086,17 @@
         </div>
         <div class="rectangle-delivery-jeep-sequence" aria-hidden="true" hidden>
             <div class="rectangle-jeep-smoke"><span></span><span></span><span></span></div>
-            <img class="rectangle-delivery-jeep-driving" src="assets/Character/jeep.webp" alt="">
-            <img class="rectangle-delivery-jeep-arrived" src="assets/Character/jeep.webp" alt="" hidden>
+            <img loading="lazy" class="rectangle-delivery-jeep-driving" src="assets/Character/jeep.webp" alt="">
+            <img loading="lazy" class="rectangle-delivery-jeep-arrived" src="assets/Character/jeep.webp" alt="" hidden>
         </div>
         <div class="rectangle-delivery-instruction-panel" role="status" aria-live="polite" hidden>
             Ihatid ang gamit sa tamang lugar.
         </div>
         <section class="rectangle-delivery-task-panel" aria-label="Kasalukuyang hatid" hidden>
             <div class="rectangle-delivery-item-stage" aria-hidden="true">
-                <img class="rectangle-delivery-item" data-delivery-item="books" src="assets/Shape UI/rectangle-books.webp" alt="">
-                <img class="rectangle-delivery-item" data-delivery-item="bread-tray" src="assets/Shape UI/rectangle-bread-tray.webp" alt="" hidden>
-                <img class="rectangle-delivery-item" data-delivery-item="toy-box" src="assets/Shape UI/rectangle-toy-box.webp" alt="" hidden>
+                <img loading="lazy" class="rectangle-delivery-item" data-delivery-item="books" src="assets/Shape UI/rectangle-books.webp" alt="">
+                <img loading="lazy" class="rectangle-delivery-item" data-delivery-item="bread-tray" src="assets/Shape UI/rectangle-bread-tray.webp" alt="" hidden>
+                <img loading="lazy" class="rectangle-delivery-item" data-delivery-item="toy-box" src="assets/Shape UI/rectangle-toy-box.webp" alt="" hidden>
             </div>
             <div class="rectangle-delivery-task-copy">
                 <span>Ihatid ito:</span>
@@ -1111,7 +1111,7 @@
         <div class="rectangle-delivery-complete-confetti" aria-hidden="true" hidden></div>
         <section class="circle-lesson-progress rectangle-final-progress" aria-label="Rectangle mission progress" aria-hidden="true">
             <div class="circle-lesson-progress-board">
-                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/board.webp" alt="">
+                <img loading="lazy" class="circle-lesson-progress-board-image" src="assets/Shape UI/board.webp" alt="">
                 <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Tapos na ang Misyon!">
                     <path id="rectangleMissionCompleteTitleCurve" d="M 4 44 Q 100 32 196 44" fill="none"></path>
                     <text textLength="184" lengthAdjust="spacingAndGlyphs">
@@ -1119,17 +1119,17 @@
                     </text>
                 </svg>
                 <div class="circle-lesson-stars" data-earned-stars="2" role="img" aria-label="2 of 3 stars earned">
-                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
-                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
-                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img loading="lazy" class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img loading="lazy" class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img loading="lazy" class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
                 </div>
                 <p class="circle-lesson-star-message">Magaling!</p>
                 <div class="circle-lesson-progress-actions">
                     <button class="circle-lesson-progress-button" type="button" data-rectangle-final-replay aria-label="Retry rectangle mission">
-                        <img  alt="">
+                        <img loading="lazy"  alt="">
                     </button>
                     <button class="circle-lesson-progress-button" type="button" data-rectangle-final-next aria-label="Continue to camera game">
-                        <img  alt="">
+                        <img loading="lazy"  alt="">
                     </button>
                 </div>
             </div>
@@ -1141,20 +1141,20 @@
     </section>
 
     <section id="learnscape-rectangle-bakery-page" class="shape-area-page rectangle-destination-page" hidden>
-        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/bakery.webp" alt="Panaderya" draggable="false">
+        <img loading="lazy" class="game1-bg-image shape-area-bg" src="assets/Backgrounds/bakery.webp" alt="Panaderya" draggable="false">
         <div class="rectangle-parking-shapes" aria-label="Choose a parking shape" hidden>
             <button class="rectangle-parking-shape" type="button" data-parking-shape="star" data-source-x="616" data-source-y="629" data-source-width="166" data-source-height="109" aria-label="Star parking space" aria-pressed="false">
-                <img class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/bakery-star.webp" alt="" draggable="false">
+                <img loading="lazy" class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/bakery-star.webp" alt="" draggable="false">
             </button>
             <button class="rectangle-parking-shape" type="button" data-parking-shape="diamond" data-source-x="916" data-source-y="626" data-source-width="174" data-source-height="119" aria-label="Diamond parking space" aria-pressed="false">
-                <img class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/bakery-diamond.webp" alt="" draggable="false">
+                <img loading="lazy" class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/bakery-diamond.webp" alt="" draggable="false">
             </button>
             <button class="rectangle-parking-shape" type="button" data-parking-shape="rectangle" data-correct-parking data-parking-route="rectangleBakery1" data-source-x="1212" data-source-y="652" data-source-width="209" data-source-height="71" aria-label="Rectangle parking space" aria-pressed="false">
-                <img class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/bakery-rectangle.webp" alt="" draggable="false">
+                <img loading="lazy" class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/bakery-rectangle.webp" alt="" draggable="false">
             </button>
         </div>
         <div class="rectangle-destination-jeep" aria-hidden="true" hidden>
-            <img src="assets/Character/jeep.webp" alt="">
+            <img loading="lazy" src="assets/Character/jeep.webp" alt="">
         </div>
         <div class="rectangle-parking-instruction-panel" role="status" aria-live="polite" hidden>
             Iparada ang jeep sa Parihaba.
@@ -1166,20 +1166,20 @@
     </section>
 
     <section id="learnscape-rectangle-bookstore-page" class="shape-area-page rectangle-destination-page" hidden>
-        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/bookstore.webp" alt="Aklatan" draggable="false">
+        <img loading="lazy" class="game1-bg-image shape-area-bg" src="assets/Backgrounds/bookstore.webp" alt="Aklatan" draggable="false">
         <div class="rectangle-parking-shapes" aria-label="Choose a parking shape" hidden>
             <button class="rectangle-parking-shape" type="button" data-parking-shape="circle" data-source-x="749" data-source-y="642" data-source-width="137" data-source-height="98" aria-label="Circle parking space" aria-pressed="false">
-                <img class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/bookstore-circle.webp" alt="" draggable="false">
+                <img loading="lazy" class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/bookstore-circle.webp" alt="" draggable="false">
             </button>
             <button class="rectangle-parking-shape" type="button" data-parking-shape="rectangle" data-correct-parking data-parking-route="rectangleBookstore1" data-source-x="1017" data-source-y="653" data-source-width="194" data-source-height="76" aria-label="Rectangle parking space" aria-pressed="false">
-                <img class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/bookstore-rectangle.webp" alt="" draggable="false">
+                <img loading="lazy" class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/bookstore-rectangle.webp" alt="" draggable="false">
             </button>
             <button class="rectangle-parking-shape" type="button" data-parking-shape="triangle" data-source-x="1347" data-source-y="644" data-source-width="148" data-source-height="87" aria-label="Triangle parking space" aria-pressed="false">
-                <img class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/bookstore-triangle.webp" alt="" draggable="false">
+                <img loading="lazy" class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/bookstore-triangle.webp" alt="" draggable="false">
             </button>
         </div>
         <div class="rectangle-destination-jeep" aria-hidden="true" hidden>
-            <img src="assets/Character/jeep.webp" alt="">
+            <img loading="lazy" src="assets/Character/jeep.webp" alt="">
         </div>
         <div class="rectangle-parking-instruction-panel" role="status" aria-live="polite" hidden>
             Iparada ang jeep sa Parihaba.
@@ -1191,20 +1191,20 @@
     </section>
 
     <section id="learnscape-rectangle-toy-shop-page" class="shape-area-page rectangle-destination-page" hidden>
-        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/toyshop.webp" alt="Tindahan ng Laruan" draggable="false">
+        <img loading="lazy" class="game1-bg-image shape-area-bg" src="assets/Backgrounds/toyshop.webp" alt="Tindahan ng Laruan" draggable="false">
         <div class="rectangle-parking-shapes" aria-label="Choose a parking shape" hidden>
             <button class="rectangle-parking-shape" type="button" data-parking-shape="rectangle" data-correct-parking data-parking-route="rectangleToyShop1" data-source-x="564" data-source-y="663" data-source-width="219" data-source-height="61" aria-label="Rectangle parking space" aria-pressed="false">
-                <img class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/toyshop-rectangle.webp" alt="" draggable="false">
+                <img loading="lazy" class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/toyshop-rectangle.webp" alt="" draggable="false">
             </button>
             <button class="rectangle-parking-shape" type="button" data-parking-shape="heart" data-source-x="918" data-source-y="649" data-source-width="171" data-source-height="94" aria-label="Heart parking space" aria-pressed="false">
-                <img class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/toyshop-heart.webp" alt="" draggable="false">
+                <img loading="lazy" class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/toyshop-heart.webp" alt="" draggable="false">
             </button>
             <button class="rectangle-parking-shape" type="button" data-parking-shape="square" data-source-x="1253" data-source-y="648" data-source-width="171" data-source-height="90" aria-label="Square parking space" aria-pressed="false">
-                <img class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/toyshop-square.webp" alt="" draggable="false">
+                <img loading="lazy" class="rectangle-parking-shape-asset" src="assets/Shape UI/Parking/toyshop-square.webp" alt="" draggable="false">
             </button>
         </div>
         <div class="rectangle-destination-jeep" aria-hidden="true" hidden>
-            <img src="assets/Character/jeep.webp" alt="">
+            <img loading="lazy" src="assets/Character/jeep.webp" alt="">
         </div>
         <div class="rectangle-parking-instruction-panel" role="status" aria-live="polite" hidden>
             Iparada ang jeep sa Parihaba.
@@ -1216,14 +1216,14 @@
     </section>
 
     <section id="learnscape-rectangle-bakery1-page" class="shape-area-page rectangle-interior-page" data-shop-type="bakery" data-right-object="bread-tray" hidden>
-        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/bakery1.webp" alt="Loob ng panaderya" draggable="false">
+        <img loading="lazy" class="game1-bg-image shape-area-bg" src="assets/Backgrounds/bakery1.webp" alt="Loob ng panaderya" draggable="false">
         <div class="rectangle-counter-storage" data-source-x="1000" data-source-y="370" data-source-width="205" data-source-height="120" aria-label="Bakery counter storage" role="region">
             <div class="rectangle-counter-target-zone" aria-hidden="true">
                 <span class="rectangle-counter-target-dashed"></span>
                 <span class="rectangle-counter-target-label">Ilagay dito!</span>
             </div>
             <div class="rectangle-counter-placed-item" aria-hidden="true" hidden>
-                <img class="rectangle-counter-placed-image" alt="Naihatid na Tinapay">
+                <img loading="lazy" class="rectangle-counter-placed-image" alt="Naihatid na Tinapay">
             </div>
         </div>
 
@@ -1238,19 +1238,19 @@
             <div class="rectangle-interior-storage-slots">
                 <div class="rectangle-interior-storage-slot" data-storage-slot="books">
                     <button class="rectangle-interior-object" type="button" data-rectangle-item="books" aria-label="Libro">
-                        <img class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-books.webp" alt="Libro" draggable="false">
+                        <img loading="lazy" class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-books.webp" alt="Libro" draggable="false">
                         <span class="rectangle-interior-object-label">Libro</span>
                     </button>
                 </div>
                 <div class="rectangle-interior-storage-slot" data-storage-slot="toy-box">
                     <button class="rectangle-interior-object" type="button" data-rectangle-item="toy-box" aria-label="Laruan">
-                        <img class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-toy-box.webp" alt="Laruan" draggable="false">
+                        <img loading="lazy" class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-toy-box.webp" alt="Laruan" draggable="false">
                         <span class="rectangle-interior-object-label">Laruan</span>
                     </button>
                 </div>
                 <div class="rectangle-interior-storage-slot" data-storage-slot="bread-tray">
                     <button class="rectangle-interior-object" type="button" data-rectangle-item="bread-tray" aria-label="Tinapay">
-                        <img class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-bread-tray.webp" alt="Tinapay" draggable="false">
+                        <img loading="lazy" class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-bread-tray.webp" alt="Tinapay" draggable="false">
                         <span class="rectangle-interior-object-label">Tinapay</span>
                     </button>
                 </div>
@@ -1264,14 +1264,14 @@
     </section>
 
     <section id="learnscape-rectangle-bookstore1-page" class="shape-area-page rectangle-interior-page" data-shop-type="bookstore" data-right-object="books" hidden>
-        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/bookstore1.webp" alt="Loob ng aklatan" draggable="false">
+        <img loading="lazy" class="game1-bg-image shape-area-bg" src="assets/Backgrounds/bookstore1.webp" alt="Loob ng aklatan" draggable="false">
         <div class="rectangle-counter-storage" data-source-x="1000" data-source-y="370" data-source-width="205" data-source-height="120" aria-label="Bookstore counter storage" role="region">
             <div class="rectangle-counter-target-zone" aria-hidden="true">
                 <span class="rectangle-counter-target-dashed"></span>
                 <span class="rectangle-counter-target-label">Ilagay dito!</span>
             </div>
             <div class="rectangle-counter-placed-item" aria-hidden="true" hidden>
-                <img class="rectangle-counter-placed-image" alt="Naihatid na Libro">
+                <img loading="lazy" class="rectangle-counter-placed-image" alt="Naihatid na Libro">
             </div>
         </div>
 
@@ -1286,19 +1286,19 @@
             <div class="rectangle-interior-storage-slots">
                 <div class="rectangle-interior-storage-slot" data-storage-slot="books">
                     <button class="rectangle-interior-object" type="button" data-rectangle-item="books" aria-label="Libro">
-                        <img class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-books.webp" alt="Libro" draggable="false">
+                        <img loading="lazy" class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-books.webp" alt="Libro" draggable="false">
                         <span class="rectangle-interior-object-label">Libro</span>
                     </button>
                 </div>
                 <div class="rectangle-interior-storage-slot" data-storage-slot="toy-box">
                     <button class="rectangle-interior-object" type="button" data-rectangle-item="toy-box" aria-label="Laruan">
-                        <img class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-toy-box.webp" alt="Laruan" draggable="false">
+                        <img loading="lazy" class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-toy-box.webp" alt="Laruan" draggable="false">
                         <span class="rectangle-interior-object-label">Laruan</span>
                     </button>
                 </div>
                 <div class="rectangle-interior-storage-slot" data-storage-slot="bread-tray">
                     <button class="rectangle-interior-object" type="button" data-rectangle-item="bread-tray" aria-label="Tinapay">
-                        <img class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-bread-tray.webp" alt="Tinapay" draggable="false">
+                        <img loading="lazy" class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-bread-tray.webp" alt="Tinapay" draggable="false">
                         <span class="rectangle-interior-object-label">Tinapay</span>
                     </button>
                 </div>
@@ -1312,14 +1312,14 @@
     </section>
 
     <section id="learnscape-rectangle-toy-shop1-page" class="shape-area-page rectangle-interior-page" data-shop-type="toy-shop" data-right-object="toy-box" hidden>
-        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/toyshop1.webp" alt="Loob ng tindahan ng laruan" draggable="false">
+        <img loading="lazy" class="game1-bg-image shape-area-bg" src="assets/Backgrounds/toyshop1.webp" alt="Loob ng tindahan ng laruan" draggable="false">
         <div class="rectangle-counter-storage" data-source-x="1000" data-source-y="370" data-source-width="205" data-source-height="120" aria-label="Toy shop counter storage" role="region">
             <div class="rectangle-counter-target-zone" aria-hidden="true">
                 <span class="rectangle-counter-target-dashed"></span>
                 <span class="rectangle-counter-target-label">Ilagay dito!</span>
             </div>
             <div class="rectangle-counter-placed-item" aria-hidden="true" hidden>
-                <img class="rectangle-counter-placed-image" alt="Naihatid na Laruan">
+                <img loading="lazy" class="rectangle-counter-placed-image" alt="Naihatid na Laruan">
             </div>
         </div>
 
@@ -1334,19 +1334,19 @@
             <div class="rectangle-interior-storage-slots">
                 <div class="rectangle-interior-storage-slot" data-storage-slot="books">
                     <button class="rectangle-interior-object" type="button" data-rectangle-item="books" aria-label="Libro">
-                        <img class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-books.webp" alt="Libro" draggable="false">
+                        <img loading="lazy" class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-books.webp" alt="Libro" draggable="false">
                         <span class="rectangle-interior-object-label">Libro</span>
                     </button>
                 </div>
                 <div class="rectangle-interior-storage-slot" data-storage-slot="toy-box">
                     <button class="rectangle-interior-object" type="button" data-rectangle-item="toy-box" aria-label="Laruan">
-                        <img class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-toy-box.webp" alt="Laruan" draggable="false">
+                        <img loading="lazy" class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-toy-box.webp" alt="Laruan" draggable="false">
                         <span class="rectangle-interior-object-label">Laruan</span>
                     </button>
                 </div>
                 <div class="rectangle-interior-storage-slot" data-storage-slot="bread-tray">
                     <button class="rectangle-interior-object" type="button" data-rectangle-item="bread-tray" aria-label="Tinapay">
-                        <img class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-bread-tray.webp" alt="Tinapay" draggable="false">
+                        <img loading="lazy" class="rectangle-interior-object-image" src="assets/Shape UI/rectangle-bread-tray.webp" alt="Tinapay" draggable="false">
                         <span class="rectangle-interior-object-label">Tinapay</span>
                     </button>
                 </div>
@@ -1360,14 +1360,14 @@
     </section>
 
     <section id="learnscape-shape-area-5-page" class="shape-area-page shape-area-preview-page" data-completed-shape="rectangle" data-area-background="assets/Backgrounds/Area5.webp" data-illustration-background="assets/Backgrounds/oval.webp" data-video-source="assets/Videos/ovalshape.mp4" data-camera-route="ovalBoardGame" hidden>
-        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area5.webp" alt="" aria-hidden="true">
+        <img loading="lazy" class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area5.webp" alt="" aria-hidden="true">
         <button class="shape-area-preview-start-button" type="button">Simulan na</button>
         <div class="circle-illustration-video-stage shape-preview-video-stage" aria-hidden="true">
             <div class="circle-illustration-tv-frame">
                 <div class="circle-illustration-tv-screen">
-                    <video class="circle-illustration-video shape-preview-video" playsinline preload="auto" aria-label="Oval lesson video"></video>
-                    <img class="circle-illustration-video shape-preview-lesson-image" src="assets/Backgrounds/oval.webp" alt="Eksena ng aralin sa bilohaba" hidden>
-                    <img class="shape-tv-mascot shape-preview-mascot" src="assets/Shape UI/oval.webp" alt="Oval character" hidden>
+                    <video class="circle-illustration-video shape-preview-video" playsinline preload="none" aria-label="Oval lesson video"></video>
+                    <img loading="lazy" class="circle-illustration-video shape-preview-lesson-image" src="assets/Backgrounds/oval.webp" alt="Eksena ng aralin sa bilohaba" hidden>
+                    <img loading="lazy" class="shape-tv-mascot shape-preview-mascot" src="assets/Shape UI/oval.webp" alt="Oval character" hidden>
                     <div class="shape-tv-question-panel shape-preview-question-panel" hidden>Anong hugis ako?</div>
                     <div class="shape-tv-choices" aria-label="Piliin ang pangalan ng hugis">
                         <div class="shape-tv-choice-column">
@@ -1396,7 +1396,7 @@
     </section>
 
     <section id="learnscape-oval-board-game-page" class="oval-board-game-page" hidden>
-        <img class="game1-bg-image oval-board-bg" src="assets/Backgrounds/oval.webp" alt="" aria-hidden="true">
+        <img loading="lazy" class="game1-bg-image oval-board-bg" src="assets/Backgrounds/oval.webp" alt="" aria-hidden="true">
         <div class="oval-board-title-panel" aria-label="Hanapin ang Magkapares">
             <span>Hanapin ang Magkapares</span>
         </div>
@@ -1409,7 +1409,7 @@
             <strong class="oval-match-timer-value">45s</strong>
         </div>
         <div class="oval-mission-guide" aria-hidden="true" hidden>
-            <img class="oval-mission-character" src="assets/Character/ch6.webp" alt="" aria-hidden="true">
+            <img loading="lazy" class="oval-mission-character" src="assets/Character/ch6.webp" alt="" aria-hidden="true">
             <div class="oval-mission-message-panel" role="status" aria-live="polite">
                 <span class="oval-mission-message-text"></span>
             </div>
@@ -1430,7 +1430,7 @@
         <div class="oval-match-reward" aria-live="polite" aria-label="Matched oval object" hidden>
             <div class="oval-match-confetti" aria-hidden="true"></div>
             <span class="oval-match-burst" aria-hidden="true"></span>
-            <img class="oval-match-object" alt="">
+            <img loading="lazy" class="oval-match-object" alt="">
         </div>
         <div class="oval-game-celebration" role="status" aria-live="polite" hidden>
             <div class="oval-celebration-confetti" aria-hidden="true"></div>
@@ -1442,7 +1442,7 @@
         </div>
         <section class="circle-lesson-progress oval-final-progress" aria-label="Oval mission progress" aria-hidden="true">
             <div class="circle-lesson-progress-board">
-                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/board.webp" alt="">
+                <img loading="lazy" class="circle-lesson-progress-board-image" src="assets/Shape UI/board.webp" alt="">
                 <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Tapos na ang Misyon!">
                     <path id="ovalMissionCompleteTitleCurve" d="M 4 44 Q 100 32 196 44" fill="none"></path>
                     <text textLength="184" lengthAdjust="spacingAndGlyphs">
@@ -1450,17 +1450,17 @@
                     </text>
                 </svg>
                 <div class="circle-lesson-stars" data-earned-stars="2" role="img" aria-label="2 of 3 stars earned">
-                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
-                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
-                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img loading="lazy" class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img loading="lazy" class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img loading="lazy" class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
                 </div>
                 <p class="circle-lesson-star-message">Magaling!</p>
                 <div class="circle-lesson-progress-actions">
                     <button class="circle-lesson-progress-button" type="button" data-oval-final-replay aria-label="Retry oval matching mission">
-                        <img  alt="">
+                        <img loading="lazy"  alt="">
                     </button>
                     <button class="circle-lesson-progress-button" type="button" data-oval-final-next aria-label="Continue to oval camera game">
-                        <img  alt="">
+                        <img loading="lazy"  alt="">
                     </button>
                 </div>
             </div>
@@ -1483,10 +1483,10 @@
     </section>
 
     <section id="learnscape-shape-area-6-page" class="shape-area-page shape-area-preview-page" data-completed-shape="oval" data-area-background="assets/Backgrounds/Area6.webp" data-illustration-background="assets/Backgrounds/heartmission.webp" data-next-background="assets/Backgrounds/heartmission.webp" data-video-source="assets/Videos/heartshape.mp4" hidden>
-        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area6.webp" alt="" aria-hidden="true">
+        <img loading="lazy" class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area6.webp" alt="" aria-hidden="true">
         <div class="heart-mission-intro" aria-hidden="true" hidden>
             <div class="heart-mission-character-wrap" aria-hidden="true">
-                <img class="heart-mission-character" src="assets/Character/ch18.webp" alt="">
+                <img loading="lazy" class="heart-mission-character" src="assets/Character/ch18.webp" alt="">
             </div>
             <div class="heart-mission-message" role="status" aria-live="polite">
                 <span class="heart-mission-message-text"></span>
@@ -1605,25 +1605,25 @@
             <div class="heart-celebration-confetti" aria-hidden="true"></div>
             <h2 class="heart-celebration-title">Binabati Kita!</h2>
             <div class="heart-celebration-character-wrap" aria-hidden="true">
-                <img class="heart-mission-character" src="assets/Character/ch18.webp" alt="">
+                <img loading="lazy" class="heart-mission-character" src="assets/Character/ch18.webp" alt="">
             </div>
         </section>
         <section class="circle-lesson-progress heart-final-progress" aria-label="Heart mission progress" aria-hidden="true">
             <div class="circle-lesson-progress-board">
-                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/board.webp" alt="">
+                <img loading="lazy" class="circle-lesson-progress-board-image" src="assets/Shape UI/board.webp" alt="">
                 <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Tapos na ang Misyon!">
                     <path id="heartMissionCompleteTitleCurve" d="M 4 44 Q 100 32 196 44" fill="none"></path>
                     <text textLength="184" lengthAdjust="spacingAndGlyphs"><textPath href="#heartMissionCompleteTitleCurve" startOffset="50%" text-anchor="middle">Tapos na ang Misyon!</textPath></text>
                 </svg>
                 <div class="circle-lesson-stars" data-earned-stars="2" role="img" aria-label="2 of 3 stars earned">
-                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
-                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
-                    <span class="circle-lesson-star-slot"><img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img loading="lazy" class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img loading="lazy" class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
+                    <span class="circle-lesson-star-slot"><img loading="lazy" class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt=""></span>
                 </div>
                 <p class="circle-lesson-star-message">Napakahusay!</p>
                 <div class="circle-lesson-progress-actions">
-                    <button class="circle-lesson-progress-button heart-final-replay" type="button" aria-label="Retry Heart Mission"><img  alt=""></button>
-                    <button class="circle-lesson-progress-button heart-final-next" type="button" aria-label="Continue to heart camera game"><img  alt=""></button>
+                    <button class="circle-lesson-progress-button heart-final-replay" type="button" aria-label="Retry Heart Mission"><img loading="lazy"  alt=""></button>
+                    <button class="circle-lesson-progress-button heart-final-next" type="button" aria-label="Continue to heart camera game"><img loading="lazy"  alt=""></button>
                 </div>
             </div>
         </section>
@@ -1631,9 +1631,9 @@
         <div class="circle-illustration-video-stage shape-preview-video-stage" aria-hidden="true">
             <div class="circle-illustration-tv-frame">
                 <div class="circle-illustration-tv-screen">
-                    <video class="circle-illustration-video shape-preview-video" playsinline preload="auto" aria-label="Heart lesson video"></video>
-                    <img class="circle-illustration-video shape-preview-lesson-image" src="assets/Backgrounds/heart.webp" alt="Eksena ng aralin sa puso" hidden>
-                    <img class="shape-tv-mascot shape-preview-mascot" src="assets/Shape UI/heart.webp" alt="Heart character" hidden>
+                    <video class="circle-illustration-video shape-preview-video" playsinline preload="none" aria-label="Heart lesson video"></video>
+                    <img loading="lazy" class="circle-illustration-video shape-preview-lesson-image" src="assets/Backgrounds/heart.webp" alt="Eksena ng aralin sa puso" hidden>
+                    <img loading="lazy" class="shape-tv-mascot shape-preview-mascot" src="assets/Shape UI/heart.webp" alt="Heart character" hidden>
                     <div class="shape-tv-question-panel shape-preview-question-panel" hidden>Anong hugis ako?</div>
                     <div class="shape-tv-choices" aria-label="Piliin ang pangalan ng hugis">
                         <div class="shape-tv-choice-column">
@@ -1662,10 +1662,10 @@
     </section>
 
     <section id="learnscape-shape-area-7-page" class="shape-area-page shape-area-preview-page" data-completed-shape="heart" data-area-background="assets/Backgrounds/Area7.webp" data-illustration-background="assets/Backgrounds/starmission.webp" data-next-background="assets/Backgrounds/starmission.webp" data-video-source="assets/Videos/starshape.mp4" data-camera-route="starCamera" hidden>
-        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area7.webp" alt="" aria-hidden="true">
+        <img loading="lazy" class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area7.webp" alt="" aria-hidden="true">
         <div class="star-mission-intro" aria-hidden="true" hidden>
             <div class="star-mission-character-wrap" aria-hidden="true">
-                <img class="star-mission-character" src="assets/Character/ch6.webp" alt="">
+                <img loading="lazy" class="star-mission-character" src="assets/Character/ch6.webp" alt="">
             </div>
             <div class="star-mission-message" role="status" aria-live="polite">
                 <span class="star-mission-message-text"></span>
@@ -1673,7 +1673,7 @@
             <button class="circle-mission-start-button star-mission-start-button" type="button" data-how-to-shape="star" hidden>Simulan na</button>
         </div>
         <div class="star-mission-walker" aria-hidden="true" hidden>
-            <img class="star-mission-walker-character" src="assets/Character/idle.gif" alt="">
+            <img loading="lazy" class="star-mission-walker-character" src="assets/Character/idle.gif" alt="">
         </div>
         <div class="star-mission-fall-field" aria-hidden="true" hidden></div>
         <section class="star-mission-setup" aria-labelledby="starMissionSetupTitle" hidden>
@@ -1722,8 +1722,8 @@
             <div class="star-mission-confetti" aria-hidden="true"></div>
             <h2>Binabati Kita!</h2>
             <p>NAKOLEKTA MO LAHAT!</p>
-            <img class="star-mission-celebration-ch7" src="assets/Character/ch7.webp" alt="">
-            <img class="star-mission-celebration-ch8" src="assets/Character/ch8.webp" alt="">
+            <img loading="lazy" class="star-mission-celebration-ch7" src="assets/Character/ch7.webp" alt="">
+            <img loading="lazy" class="star-mission-celebration-ch8" src="assets/Character/ch8.webp" alt="">
         </section>
         <section class="star-mission-timeout" aria-hidden="true" hidden>
             <div class="star-mission-timeout-card">
@@ -1742,9 +1742,9 @@
         <div class="circle-illustration-video-stage shape-preview-video-stage" aria-hidden="true">
             <div class="circle-illustration-tv-frame">
                 <div class="circle-illustration-tv-screen">
-                    <video class="circle-illustration-video shape-preview-video" playsinline preload="auto" aria-label="Star lesson video"></video>
-                    <img class="circle-illustration-video shape-preview-lesson-image" src="assets/Backgrounds/star.webp" alt="Eksena ng aralin sa bituin" hidden>
-                    <img class="shape-tv-mascot shape-preview-mascot" src="assets/Shape UI/star.webp" alt="Star character" hidden>
+                    <video class="circle-illustration-video shape-preview-video" playsinline preload="none" aria-label="Star lesson video"></video>
+                    <img loading="lazy" class="circle-illustration-video shape-preview-lesson-image" src="assets/Backgrounds/star.webp" alt="Eksena ng aralin sa bituin" hidden>
+                    <img loading="lazy" class="shape-tv-mascot shape-preview-mascot" src="assets/Shape UI/star.webp" alt="Star character" hidden>
                     <div class="shape-tv-question-panel shape-preview-question-panel" hidden>Anong hugis ako?</div>
                     <div class="shape-tv-choices" aria-label="Piliin ang pangalan ng hugis">
                         <div class="shape-tv-choice-column">
@@ -1773,7 +1773,7 @@
     </section>
 
     <section id="learnscape-shape-area-8-page" class="shape-area-page shape-area-preview-page" data-completed-shape="star" data-area-background="assets/Backgrounds/Area8.webp" data-illustration-background="assets/Backgrounds/diamond.webp" data-next-background="assets/Backgrounds/diamond.webp" data-video-source="assets/Videos/diamondshape.mp4" data-camera-route="diamondCamera" hidden>
-        <img class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area8.webp" alt="" aria-hidden="true">
+        <img loading="lazy" class="game1-bg-image shape-area-bg" src="assets/Backgrounds/Area8.webp" alt="" aria-hidden="true">
         <div class="diamond-mission-guide" aria-hidden="true" hidden>
             <div class="diamond-mission-dig-particles" aria-hidden="true">
                 <span></span><span></span><span></span><span></span><span></span><span></span>
@@ -1784,7 +1784,7 @@
                 <i></i><i></i><i></i><i></i><i></i><i></i>
                 <i></i><i></i><i></i><i></i><i></i><i></i>
             </span>
-            <img class="diamond-mission-cave" src="assets/Character/cave2.webp" alt="">
+            <img loading="lazy" class="diamond-mission-cave" src="assets/Character/cave2.webp" alt="">
             <div class="diamond-mission-message" role="status" aria-live="polite">
                 <span class="diamond-mission-message-text"></span>
             </div>
@@ -1806,8 +1806,8 @@
                 <strong>Nakahinto</strong>
             </div>
             <div class="diamond-mission-game-over" role="dialog" aria-modal="true" aria-labelledby="diamond-mission-game-over-title" hidden>
-                <img class="diamond-mission-game-over-cave3 is-left" src="assets/Character/cave3.webp" alt="" aria-hidden="true">
-                <img class="diamond-mission-game-over-cave3 is-right" src="assets/Character/cave3.webp" alt="" aria-hidden="true">
+                <img loading="lazy" class="diamond-mission-game-over-cave3 is-left" src="assets/Character/cave3.webp" alt="" aria-hidden="true">
+                <img loading="lazy" class="diamond-mission-game-over-cave3 is-right" src="assets/Character/cave3.webp" alt="" aria-hidden="true">
                 <div class="diamond-mission-game-over-panel">
                     <strong id="diamond-mission-game-over-title">Tapos ang Laro</strong>
                     <span>Subukan muli!</span>
@@ -1815,7 +1815,7 @@
                 </div>
             </div>
             <div class="diamond-mission-cart" role="status" aria-live="polite" aria-label="Collection cart: 0 of 4 diamond pieces">
-                <img src="assets/Shape UI/cart.webp" alt="" aria-hidden="true">
+                <img loading="lazy" src="assets/Shape UI/cart.webp" alt="" aria-hidden="true">
                 <strong class="diamond-mission-cart-progress">0/4</strong>
             </div>
             <div class="diamond-mission-collection-panel" role="status" aria-live="polite" aria-label="0 of 4 diamond pieces collected">
@@ -1856,7 +1856,7 @@
                         <path d="M137 98H274L137 196Z"/>
                     </g>
                 </svg>
-                <img class="diamond-mission-reveal-crystal" src="assets/Shape UI/crystal.webp" alt="">
+                <img loading="lazy" class="diamond-mission-reveal-crystal" src="assets/Shape UI/crystal.webp" alt="">
                 <span class="diamond-mission-reveal-spiral" aria-hidden="true"></span>
                 <span class="diamond-mission-reveal-shine" aria-hidden="true"></span>
             </div>
@@ -1865,16 +1865,16 @@
             <div class="star-mission-confetti diamond-mission-confetti" aria-hidden="true"></div>
             <h2>Binabati Kita!</h2>
             <p>NABUO MO ANG DYAMANTE!</p>
-            <img class="diamond-mission-celebration-cave" src="assets/Character/cave.webp" alt="">
-            <img class="diamond-mission-celebration-cave1" src="assets/Character/cave1.webp" alt="">
+            <img loading="lazy" class="diamond-mission-celebration-cave" src="assets/Character/cave.webp" alt="">
+            <img loading="lazy" class="diamond-mission-celebration-cave1" src="assets/Character/cave1.webp" alt="">
         </section>
         <button class="shape-area-preview-start-button" type="button">Simulan na</button>
         <div class="circle-illustration-video-stage shape-preview-video-stage" aria-hidden="true">
             <div class="circle-illustration-tv-frame">
                 <div class="circle-illustration-tv-screen">
-                    <video class="circle-illustration-video shape-preview-video" playsinline preload="auto" aria-label="Diamond lesson video"></video>
-                    <img class="circle-illustration-video shape-preview-lesson-image" src="assets/Backgrounds/diamond.webp" alt="Eksena ng aralin sa dyamante" hidden>
-                    <img class="shape-tv-mascot shape-preview-mascot" src="assets/Shape UI/diamond.webp" alt="Diamond character" hidden>
+                    <video class="circle-illustration-video shape-preview-video" playsinline preload="none" aria-label="Diamond lesson video"></video>
+                    <img loading="lazy" class="circle-illustration-video shape-preview-lesson-image" src="assets/Backgrounds/diamond.webp" alt="Eksena ng aralin sa dyamante" hidden>
+                    <img loading="lazy" class="shape-tv-mascot shape-preview-mascot" src="assets/Shape UI/diamond.webp" alt="Diamond character" hidden>
                     <div class="shape-tv-question-panel shape-preview-question-panel" hidden>Anong hugis ako?</div>
                     <div class="shape-tv-choices" aria-label="Piliin ang pangalan ng hugis">
                         <div class="shape-tv-choice-column">
@@ -1904,23 +1904,23 @@
 
     <section id="learnscape-circle-illustration-page" class="circle-illustration-page" hidden>
         <div class="circle-illustration-scene">
-            <img class="circle-illustration-bg" src="assets/Backgrounds/circlegame.webp" alt="Circle lesson illustration board">
+            <img loading="lazy" class="circle-illustration-bg" src="assets/Backgrounds/circlegame.webp" alt="Circle lesson illustration board">
             <div class="circle-illustration-shapes" aria-label="Hanapin ang sampung bilog na bagay">
-                <img class="circle-illustration-shape circle-illustration-shape-1" src="assets/Shape UI/circle1.webp" alt="Circle object 1" data-circle-hunt-target role="button" tabindex="-1">
-                <img class="circle-illustration-shape circle-illustration-shape-2" src="assets/Shape UI/circle2.webp" alt="Circle object 2" data-circle-hunt-target role="button" tabindex="-1">
-                <img class="circle-illustration-shape circle-illustration-shape-3" src="assets/Shape UI/circle3.webp" alt="Circle object 3" data-circle-hunt-target role="button" tabindex="-1">
-                <img class="circle-illustration-shape circle-illustration-shape-4" src="assets/Shape UI/circle4.webp" alt="Circle object 4" data-circle-hunt-target role="button" tabindex="-1">
-                <img class="circle-illustration-shape circle-illustration-shape-5" src="assets/Shape UI/circle5.webp" alt="Circle object 5" data-circle-hunt-target role="button" tabindex="-1">
-                <img class="circle-illustration-shape circle-illustration-shape-6" src="assets/Shape UI/circle6.webp" alt="Circle object 6" data-circle-hunt-target role="button" tabindex="-1">
+                <img loading="lazy" class="circle-illustration-shape circle-illustration-shape-1" src="assets/Shape UI/circle1.webp" alt="Circle object 1" data-circle-hunt-target role="button" tabindex="-1">
+                <img loading="lazy" class="circle-illustration-shape circle-illustration-shape-2" src="assets/Shape UI/circle2.webp" alt="Circle object 2" data-circle-hunt-target role="button" tabindex="-1">
+                <img loading="lazy" class="circle-illustration-shape circle-illustration-shape-3" src="assets/Shape UI/circle3.webp" alt="Circle object 3" data-circle-hunt-target role="button" tabindex="-1">
+                <img loading="lazy" class="circle-illustration-shape circle-illustration-shape-4" src="assets/Shape UI/circle4.webp" alt="Circle object 4" data-circle-hunt-target role="button" tabindex="-1">
+                <img loading="lazy" class="circle-illustration-shape circle-illustration-shape-5" src="assets/Shape UI/circle5.webp" alt="Circle object 5" data-circle-hunt-target role="button" tabindex="-1">
+                <img loading="lazy" class="circle-illustration-shape circle-illustration-shape-6" src="assets/Shape UI/circle6.webp" alt="Circle object 6" data-circle-hunt-target role="button" tabindex="-1">
                 <span class="circle-illustration-clock-post"></span>
-                <img class="circle-illustration-shape circle-illustration-shape-7" src="assets/Shape UI/circle7.webp" alt="Circle object 7" data-circle-hunt-target role="button" tabindex="-1">
-                <img class="circle-illustration-shape circle-illustration-shape-8" src="assets/Shape UI/circle8.webp" alt="Circle object 8" data-circle-hunt-target role="button" tabindex="-1">
-                <img class="circle-illustration-shape circle-illustration-shape-9" src="assets/Shape UI/circle9.webp" alt="Circle object 9" data-circle-hunt-target role="button" tabindex="-1">
-                <img class="circle-illustration-shape circle-illustration-shape-10" src="assets/Shape UI/circle10.webp" alt="Circle object 10" data-circle-hunt-target role="button" tabindex="-1">
+                <img loading="lazy" class="circle-illustration-shape circle-illustration-shape-7" src="assets/Shape UI/circle7.webp" alt="Circle object 7" data-circle-hunt-target role="button" tabindex="-1">
+                <img loading="lazy" class="circle-illustration-shape circle-illustration-shape-8" src="assets/Shape UI/circle8.webp" alt="Circle object 8" data-circle-hunt-target role="button" tabindex="-1">
+                <img loading="lazy" class="circle-illustration-shape circle-illustration-shape-9" src="assets/Shape UI/circle9.webp" alt="Circle object 9" data-circle-hunt-target role="button" tabindex="-1">
+                <img loading="lazy" class="circle-illustration-shape circle-illustration-shape-10" src="assets/Shape UI/circle10.webp" alt="Circle object 10" data-circle-hunt-target role="button" tabindex="-1">
             </div>
         </div>
         <div class="circle-mission-guide" aria-hidden="true" hidden>
-            <img class="circle-mission-guide-character" src="assets/Character/ch6.webp" alt="Bibi the circle mission guide">
+            <img loading="lazy" class="circle-mission-guide-character" src="assets/Character/ch6.webp" alt="Bibi the circle mission guide">
             <div class="circle-mission-guide-bubble" role="status" aria-live="polite">
                 <span class="circle-mission-guide-text"></span>
             </div>
@@ -1934,8 +1934,8 @@
             </div>
             <p class="circle-hunt-feedback" role="status" aria-live="polite"></p>
             <div class="circle-hunt-overlay">
-                <img class="circle-hunt-timeout-character circle-hunt-timeout-character-left" src="assets/Character/sad.webp" alt="" aria-hidden="true">
-                <img class="circle-hunt-timeout-character circle-hunt-timeout-character-right" src="assets/Character/sad1.webp" alt="" aria-hidden="true">
+                <img loading="lazy" class="circle-hunt-timeout-character circle-hunt-timeout-character-left" src="assets/Character/sad.webp" alt="" aria-hidden="true">
+                <img loading="lazy" class="circle-hunt-timeout-character circle-hunt-timeout-character-right" src="assets/Character/sad1.webp" alt="" aria-hidden="true">
                 <button class="circle-hunt-start-button game-icon-button icon-play" type="button">START</button>
                 <span class="circle-hunt-timeout-clock" aria-hidden="true">⏰</span>
                 <div class="circle-hunt-countdown" role="status" aria-live="assertive" hidden></div>
@@ -1943,20 +1943,20 @@
             </div>
             <div class="circle-hunt-celebration" aria-hidden="true">
                 <div class="circle-hunt-confetti" aria-hidden="true"></div>
-                <img class="circle-hunt-character circle-hunt-character-ch7" src="assets/Character/ch7.webp" alt="Nagdiwang si Bibi">
+                <img loading="lazy" class="circle-hunt-character circle-hunt-character-ch7" src="assets/Character/ch7.webp" alt="Nagdiwang si Bibi">
                 <div class="circle-hunt-ch8-pop">
-                    <img class="circle-hunt-character-ch8" src="assets/Character/ch8.webp" alt="Nag-thumbs up si Bibi">
+                    <img loading="lazy" class="circle-hunt-character-ch8" src="assets/Character/ch8.webp" alt="Nag-thumbs up si Bibi">
                 </div>
             </div>
         </section>
         <div class="circle-illustration-video-stage">
             <div class="circle-illustration-tv-frame">
                 <div class="circle-illustration-tv-screen">
-                    <video class="circle-illustration-video" playsinline preload="auto" aria-label="Circle lesson video">
+                <video class="circle-illustration-video" playsinline preload="none" aria-label="Circle lesson video">
                         <source src="assets/Videos/Circleshape.mp4" type="video/mp4">
                     </video>
-                    <img class="circle-illustration-video shape-tv-lesson-image circle-tv-lesson-image" src="assets/Backgrounds/circle.webp" alt="Eksena ng aralin sa bilog" hidden>
-                    <img class="shape-tv-mascot circle-tv-mascot" src="assets/Shape UI/circle.webp" alt="Circle character" hidden>
+                    <img loading="lazy" class="circle-illustration-video shape-tv-lesson-image circle-tv-lesson-image" src="assets/Backgrounds/circle.webp" alt="Eksena ng aralin sa bilog" hidden>
+                    <img loading="lazy" class="shape-tv-mascot circle-tv-mascot" src="assets/Shape UI/circle.webp" alt="Circle character" hidden>
                     <div class="shape-tv-question-panel circle-tv-question-panel" hidden>Anong hugis ako?</div>
                     <div class="shape-tv-choices" aria-label="Piliin ang pangalan ng hugis">
                         <div class="shape-tv-choice-column">
@@ -1985,7 +1985,7 @@
         </div>
         <section class="circle-lesson-progress" aria-label="Progreso ng Aralin" aria-hidden="true">
             <div class="circle-lesson-progress-board">
-                <img class="circle-lesson-progress-board-image" src="assets/Shape UI/board.webp" alt="">
+                <img loading="lazy" class="circle-lesson-progress-board-image" src="assets/Shape UI/board.webp" alt="">
                 <svg class="circle-lesson-progress-title" viewBox="0 0 200 72" role="img" aria-label="Tapos na ang Aralin!">
                     <path id="circleLessonTitleCurve" d="M 4 44 Q 100 32 196 44" fill="none"></path>
                     <text textLength="184" lengthAdjust="spacingAndGlyphs">
@@ -1994,22 +1994,22 @@
                 </svg>
                 <div class="circle-lesson-stars" data-earned-stars="0" role="img" aria-label="0 of 3 stars earned">
                     <span class="circle-lesson-star-slot">
-                        <img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt="">
+                        <img loading="lazy" class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt="">
                     </span>
                     <span class="circle-lesson-star-slot">
-                        <img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt="">
+                        <img loading="lazy" class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt="">
                     </span>
                     <span class="circle-lesson-star-slot">
-                        <img class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt="">
+                        <img loading="lazy" class="circle-lesson-star-real" src="assets/Shape UI/lesson-star.svg" alt="">
                     </span>
                 </div>
                 <p class="circle-lesson-star-message" aria-live="polite"></p>
                 <div class="circle-lesson-progress-actions">
                     <button class="circle-lesson-progress-button" type="button" data-circle-lesson-replay aria-label="Replay lesson">
-                        <img  alt="">
+                        <img loading="lazy"  alt="">
                     </button>
                     <button class="circle-lesson-progress-button" type="button" data-circle-lesson-next aria-label="Continue">
-                        <img  alt="">
+                        <img loading="lazy"  alt="">
                     </button>
                 </div>
             </div>
@@ -2033,7 +2033,7 @@
         </div>
 
         <aside class="circle-camera-target-card" aria-label="Target na hugis">
-            <img class="circle-camera-target-image" src="assets/Shape UI/circle choice.webp" alt="" aria-hidden="true">
+            <img loading="lazy" class="circle-camera-target-image" src="assets/Shape UI/circle choice.webp" alt="" aria-hidden="true">
             <strong>Bilog</strong>
         </aside>
 
@@ -2043,7 +2043,7 @@
                 <strong>I-scan ang isang bagay gamit ang kamera!</strong>
             </div>
             <div class="circle-camera-viewfinder" aria-label="Preview ng kamera">
-                <video class="circle-camera-video" autoplay playsinline muted hidden></video>
+                <video preload="none" class="circle-camera-video" autoplay playsinline muted hidden></video>
                 <span class="circle-camera-corner circle-camera-corner-tl"></span>
                 <span class="circle-camera-corner circle-camera-corner-tr"></span>
                 <span class="circle-camera-corner circle-camera-corner-bl"></span>
@@ -2087,7 +2087,7 @@
             <span></span><span></span><span></span><span></span>
         </div>
         <aside class="circle-camera-target-card" aria-label="Target na hugis">
-            <img class="circle-camera-target-image" src="assets/Shape UI/square choice.webp" alt="" aria-hidden="true">
+            <img loading="lazy" class="circle-camera-target-image" src="assets/Shape UI/square choice.webp" alt="" aria-hidden="true">
             <strong>Parisukat</strong>
         </aside>
         <main class="circle-camera-scan-board" aria-label="Ayos ng larong pagtukoy sa kamera">
@@ -2096,7 +2096,7 @@
                 <strong>I-scan ang isang bagay gamit ang kamera!</strong>
             </div>
             <div class="circle-camera-viewfinder" aria-label="Preview ng kamera">
-                <video class="circle-camera-video" autoplay playsinline muted hidden></video>
+                <video preload="none" class="circle-camera-video" autoplay playsinline muted hidden></video>
                 <span class="circle-camera-corner circle-camera-corner-tl"></span>
                 <span class="circle-camera-corner circle-camera-corner-tr"></span>
                 <span class="circle-camera-corner circle-camera-corner-bl"></span>
@@ -2123,8 +2123,8 @@
         <div class="circle-camera-sky" aria-hidden="true"><span class="circle-camera-cloud circle-camera-cloud-a"></span><span class="circle-camera-cloud circle-camera-cloud-b"></span></div>
         <div class="circle-camera-ground" aria-hidden="true"></div>
         <div class="circle-camera-flowers" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <aside class="circle-camera-target-card" aria-label="Target na hugis"><img class="circle-camera-target-image" src="assets/Shape UI/triangle choice.webp" alt="" aria-hidden="true"><strong>Tatsulok</strong></aside>
-        <main class="circle-camera-scan-board" aria-label="Ayos ng larong pagtukoy sa kamera"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>I-scan ang isang bagay gamit ang kamera!</strong></div><div class="circle-camera-viewfinder" aria-label="Preview ng kamera"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
+        <aside class="circle-camera-target-card" aria-label="Target na hugis"><img loading="lazy" class="circle-camera-target-image" src="assets/Shape UI/triangle choice.webp" alt="" aria-hidden="true"><strong>Tatsulok</strong></aside>
+        <main class="circle-camera-scan-board" aria-label="Ayos ng larong pagtukoy sa kamera"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>I-scan ang isang bagay gamit ang kamera!</strong></div><div class="circle-camera-viewfinder" aria-label="Preview ng kamera"><video preload="none" class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
         <button class="circle-camera-start-button" type="button"><strong>Kamera</strong></button>
         <aside class="circle-camera-unlock-board" aria-label="Triangle camera challenge progress"><h2>Maghanap ng hugis tatsulok<br>upang mabuksan ito!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
         <a class="game-return-btn loading-link game-icon-button icon-back" href="index.html" data-route="shape-area-3" aria-label="Return to Triangle Island intro"><span>‹</span>Back</a>
@@ -2134,8 +2134,8 @@
         <div class="circle-camera-sky" aria-hidden="true"><span class="circle-camera-cloud circle-camera-cloud-a"></span><span class="circle-camera-cloud circle-camera-cloud-b"></span></div>
         <div class="circle-camera-ground" aria-hidden="true"></div>
         <div class="circle-camera-flowers" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <aside class="circle-camera-target-card" aria-label="Target na hugis"><img class="circle-camera-target-image" src="assets/Shape UI/rectangle choice.webp" alt="" aria-hidden="true"><strong>Parihaba</strong></aside>
-        <main class="circle-camera-scan-board" aria-label="Ayos ng larong pagtukoy sa kamera"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>I-scan ang isang bagay gamit ang kamera!</strong></div><div class="circle-camera-viewfinder" aria-label="Preview ng kamera"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
+        <aside class="circle-camera-target-card" aria-label="Target na hugis"><img loading="lazy" class="circle-camera-target-image" src="assets/Shape UI/rectangle choice.webp" alt="" aria-hidden="true"><strong>Parihaba</strong></aside>
+        <main class="circle-camera-scan-board" aria-label="Ayos ng larong pagtukoy sa kamera"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>I-scan ang isang bagay gamit ang kamera!</strong></div><div class="circle-camera-viewfinder" aria-label="Preview ng kamera"><video preload="none" class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
         <button class="circle-camera-start-button" type="button"><strong>Kamera</strong></button>
         <aside class="circle-camera-unlock-board" aria-label="Rectangle camera challenge progress"><h2>Maghanap ng hugis parihaba<br>upang mabuksan ito!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
         <a class="game-return-btn loading-link game-icon-button icon-back" href="index.html" data-route="shape-area-4" aria-label="Return to Rectangle Island intro"><span>‹</span>Back</a>
@@ -2143,8 +2143,8 @@
 
     <section id="learnscape-oval-camera-page" class="circle-camera-page shape-camera-page oval-camera-page" data-camera-shape="oval" hidden>
         <div class="circle-camera-sky" aria-hidden="true"><span class="circle-camera-cloud circle-camera-cloud-a"></span><span class="circle-camera-cloud circle-camera-cloud-b"></span></div><div class="circle-camera-ground" aria-hidden="true"></div><div class="circle-camera-flowers" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <aside class="circle-camera-target-card" aria-label="Target na hugis"><img class="circle-camera-target-image" src="assets/Shape UI/oval choice.webp" alt="" aria-hidden="true"><strong>Bilohaba</strong></aside>
-        <main class="circle-camera-scan-board" aria-label="Ayos ng larong pagtukoy sa kamera"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>I-scan ang isang bagay gamit ang kamera!</strong></div><div class="circle-camera-viewfinder" aria-label="Preview ng kamera"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
+        <aside class="circle-camera-target-card" aria-label="Target na hugis"><img loading="lazy" class="circle-camera-target-image" src="assets/Shape UI/oval choice.webp" alt="" aria-hidden="true"><strong>Bilohaba</strong></aside>
+        <main class="circle-camera-scan-board" aria-label="Ayos ng larong pagtukoy sa kamera"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>I-scan ang isang bagay gamit ang kamera!</strong></div><div class="circle-camera-viewfinder" aria-label="Preview ng kamera"><video preload="none" class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
         <button class="circle-camera-start-button" type="button"><strong>Kamera</strong></button>
         <aside class="circle-camera-unlock-board" aria-label="Oval camera challenge progress"><h2>Maghanap ng hugis bilohaba<br>upang mabuksan ito!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
         <a class="game-return-btn loading-link game-icon-button icon-back" href="index.html" data-route="shape-area-5" aria-label="Return to Oval Island intro"><span>‹</span>Back</a>
@@ -2152,8 +2152,8 @@
 
     <section id="learnscape-heart-camera-page" class="circle-camera-page shape-camera-page heart-camera-page" data-camera-shape="heart" hidden>
         <div class="circle-camera-sky" aria-hidden="true"><span class="circle-camera-cloud circle-camera-cloud-a"></span><span class="circle-camera-cloud circle-camera-cloud-b"></span></div><div class="circle-camera-ground" aria-hidden="true"></div><div class="circle-camera-flowers" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <aside class="circle-camera-target-card" aria-label="Target na hugis"><img class="circle-camera-target-image" src="assets/Shape UI/heart choice.webp" alt="" aria-hidden="true"><strong>Puso</strong></aside>
-        <main class="circle-camera-scan-board" aria-label="Ayos ng larong pagtukoy sa kamera"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>I-scan ang isang bagay gamit ang kamera!</strong></div><div class="circle-camera-viewfinder" aria-label="Preview ng kamera"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
+        <aside class="circle-camera-target-card" aria-label="Target na hugis"><img loading="lazy" class="circle-camera-target-image" src="assets/Shape UI/heart choice.webp" alt="" aria-hidden="true"><strong>Puso</strong></aside>
+        <main class="circle-camera-scan-board" aria-label="Ayos ng larong pagtukoy sa kamera"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>I-scan ang isang bagay gamit ang kamera!</strong></div><div class="circle-camera-viewfinder" aria-label="Preview ng kamera"><video preload="none" class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
         <button class="circle-camera-start-button" type="button"><strong>Kamera</strong></button>
         <aside class="circle-camera-unlock-board" aria-label="Heart camera challenge progress"><h2>Maghanap ng hugis puso<br>upang mabuksan ito!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
         <a class="game-return-btn loading-link game-icon-button icon-back" href="index.html" data-route="shape-area-6" aria-label="Return to Heart Island intro"><span>‹</span>Back</a>
@@ -2161,8 +2161,8 @@
 
     <section id="learnscape-star-camera-page" class="circle-camera-page shape-camera-page star-camera-page" data-camera-shape="star" hidden>
         <div class="circle-camera-sky" aria-hidden="true"><span class="circle-camera-cloud circle-camera-cloud-a"></span><span class="circle-camera-cloud circle-camera-cloud-b"></span></div><div class="circle-camera-ground" aria-hidden="true"></div><div class="circle-camera-flowers" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <aside class="circle-camera-target-card" aria-label="Target na hugis"><img class="circle-camera-target-image" src="assets/Shape UI/star choice.webp" alt="" aria-hidden="true"><strong>Bituin</strong></aside>
-        <main class="circle-camera-scan-board" aria-label="Ayos ng larong pagtukoy sa kamera"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>I-scan ang isang bagay gamit ang kamera!</strong></div><div class="circle-camera-viewfinder" aria-label="Preview ng kamera"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
+        <aside class="circle-camera-target-card" aria-label="Target na hugis"><img loading="lazy" class="circle-camera-target-image" src="assets/Shape UI/star choice.webp" alt="" aria-hidden="true"><strong>Bituin</strong></aside>
+        <main class="circle-camera-scan-board" aria-label="Ayos ng larong pagtukoy sa kamera"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>I-scan ang isang bagay gamit ang kamera!</strong></div><div class="circle-camera-viewfinder" aria-label="Preview ng kamera"><video preload="none" class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
         <button class="circle-camera-start-button" type="button"><strong>Kamera</strong></button>
         <aside class="circle-camera-unlock-board" aria-label="Star camera challenge progress"><h2>Maghanap ng hugis bituin<br>upang mabuksan ito!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
         <a class="game-return-btn loading-link game-icon-button icon-back" href="index.html" data-route="shape-area-7" aria-label="Return to Star Island intro"><span>‹</span>Back</a>
@@ -2170,8 +2170,8 @@
 
     <section id="learnscape-diamond-camera-page" class="circle-camera-page shape-camera-page diamond-camera-page" data-camera-shape="diamond" hidden>
         <div class="circle-camera-sky" aria-hidden="true"><span class="circle-camera-cloud circle-camera-cloud-a"></span><span class="circle-camera-cloud circle-camera-cloud-b"></span></div><div class="circle-camera-ground" aria-hidden="true"></div><div class="circle-camera-flowers" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <aside class="circle-camera-target-card" aria-label="Target na hugis"><img class="circle-camera-target-image" src="assets/Shape UI/diamond choice.webp" alt="" aria-hidden="true"><strong>Dyamante</strong></aside>
-        <main class="circle-camera-scan-board" aria-label="Ayos ng larong pagtukoy sa kamera"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>I-scan ang isang bagay gamit ang kamera!</strong></div><div class="circle-camera-viewfinder" aria-label="Preview ng kamera"><video class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
+        <aside class="circle-camera-target-card" aria-label="Target na hugis"><img loading="lazy" class="circle-camera-target-image" src="assets/Shape UI/diamond choice.webp" alt="" aria-hidden="true"><strong>Dyamante</strong></aside>
+        <main class="circle-camera-scan-board" aria-label="Ayos ng larong pagtukoy sa kamera"><div class="circle-camera-scan-title"><span class="circle-camera-icon" aria-hidden="true"></span><strong>I-scan ang isang bagay gamit ang kamera!</strong></div><div class="circle-camera-viewfinder" aria-label="Preview ng kamera"><video preload="none" class="circle-camera-video" autoplay playsinline muted hidden></video><span class="circle-camera-corner circle-camera-corner-tl"></span><span class="circle-camera-corner circle-camera-corner-tr"></span><span class="circle-camera-corner circle-camera-corner-bl"></span><span class="circle-camera-corner circle-camera-corner-br"></span><div class="circle-camera-scan-sweep" aria-hidden="true"></div></div></main>
         <button class="circle-camera-start-button" type="button"><strong>Kamera</strong></button>
         <aside class="circle-camera-unlock-board" aria-label="Diamond camera challenge progress"><h2>Maghanap ng hugis dyamante<br>upang mabuksan ito!</h2><div class="circle-camera-locked-chest" aria-hidden="true"><span class="circle-camera-chest-lid"></span><span class="circle-camera-chest-body"></span><span class="circle-camera-chest-band circle-camera-chest-band-left"></span><span class="circle-camera-chest-band circle-camera-chest-band-right"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-a"></span><span class="circle-camera-chest-chain circle-camera-chest-chain-b"></span><span class="circle-camera-chest-padlock"></span></div></aside>
         <a class="game-return-btn loading-link game-icon-button icon-back" href="index.html" data-route="shape-area-8" aria-label="Return to Diamond Island intro"><span>‹</span>Back</a>
@@ -2998,16 +2998,16 @@
                     title: 'SHOP',
                     copy: `
                         <div class="intro-shop-board" aria-label="Shape key shop items">
-                            <img class="intro-shop-board-art" src="assets/Shape UI/shop-board.svg" alt="">
+                            <img loading="lazy" class="intro-shop-board-art" src="assets/Shape UI/shop-board.svg" alt="">
                             <div class="intro-shop-list">
-                                <div class="intro-shop-item" role="button" tabindex="0" data-shop-item="circle" aria-pressed="false" aria-label="Circle key, costs 10 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/circlekey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></div>
-                                <button class="intro-shop-item" type="button" data-shop-item="square" aria-pressed="false" aria-label="Square key, costs 15 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/squarekey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>15</span></span></button>
-                                <button class="intro-shop-item" type="button" data-shop-item="triangle" aria-pressed="false" aria-label="Triangle key, costs 20 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/trianglekey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>20</span></span></button>
-                                <button class="intro-shop-item" type="button" data-shop-item="rectangle" aria-pressed="false" aria-label="Rectangle key, costs 30 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/rectanglekey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>30</span></span></button>
-                                <button class="intro-shop-item" type="button" data-shop-item="oval" aria-pressed="false" aria-label="Oval key, costs 40 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/ovalkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>40</span></span></button>
-                                <button class="intro-shop-item" type="button" data-shop-item="heart" aria-pressed="false" aria-label="Heart key, costs 60 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/heartkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>60</span></span></button>
-                                <button class="intro-shop-item" type="button" data-shop-item="star" aria-pressed="false" aria-label="Star key, costs 80 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/starkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>80</span></span></button>
-                                <button class="intro-shop-item" type="button" data-shop-item="diamond" aria-pressed="false" aria-label="Diamond key, costs 100 carrots"><span class="intro-shop-key"><img src="assets/Shape UI/diamondkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>100</span></span></button>
+                                <div class="intro-shop-item" role="button" tabindex="0" data-shop-item="circle" aria-pressed="false" aria-label="Circle key, costs 10 carrots"><span class="intro-shop-key"><img loading="lazy" src="assets/Shape UI/circlekey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>10</span></span></div>
+                                <button class="intro-shop-item" type="button" data-shop-item="square" aria-pressed="false" aria-label="Square key, costs 15 carrots"><span class="intro-shop-key"><img loading="lazy" src="assets/Shape UI/squarekey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>15</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="triangle" aria-pressed="false" aria-label="Triangle key, costs 20 carrots"><span class="intro-shop-key"><img loading="lazy" src="assets/Shape UI/trianglekey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>20</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="rectangle" aria-pressed="false" aria-label="Rectangle key, costs 30 carrots"><span class="intro-shop-key"><img loading="lazy" src="assets/Shape UI/rectanglekey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>30</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="oval" aria-pressed="false" aria-label="Oval key, costs 40 carrots"><span class="intro-shop-key"><img loading="lazy" src="assets/Shape UI/ovalkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>40</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="heart" aria-pressed="false" aria-label="Heart key, costs 60 carrots"><span class="intro-shop-key"><img loading="lazy" src="assets/Shape UI/heartkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>60</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="star" aria-pressed="false" aria-label="Star key, costs 80 carrots"><span class="intro-shop-key"><img loading="lazy" src="assets/Shape UI/starkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>80</span></span></button>
+                                <button class="intro-shop-item" type="button" data-shop-item="diamond" aria-pressed="false" aria-label="Diamond key, costs 100 carrots"><span class="intro-shop-key"><img loading="lazy" src="assets/Shape UI/diamondkey.webp" alt=""></span><span class="intro-shop-cost"><span class="intro-shop-carrot" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg></span><span>100</span></span></button>
                             </div>
                             <p class="intro-shop-status" role="status" aria-live="polite"></p>
                         </div>
@@ -3032,7 +3032,7 @@
                                 <section class="intro-profile-avatar-column" aria-label="Avatar settings">
                                     <div class="intro-profile-avatar-frame">
                                         <div class="intro-profile-avatar-mat">
-                                            <img class="intro-profile-avatar" src="assets/Character/ch6.webp" alt="Player avatar">
+                                            <img loading="lazy" class="intro-profile-avatar" src="assets/Character/ch6.webp" alt="Player avatar">
                                         </div>
                                     </div>
                                     <button class="intro-profile-action intro-profile-action-avatar" type="button" data-profile-action="avatar-prompt">
@@ -3069,7 +3069,7 @@
                                 </section>
                                 <footer class="intro-profile-stats" aria-label="Player progress totals">
                                     <div class="intro-profile-stat-grid">
-                                        <div class="intro-profile-stat"><img src="assets/Shape UI/lesson-star.svg" alt="" aria-hidden="true"><span><small>Nakamit</small><strong data-profile-stat="stars">0 / 24</strong></span></div>
+                                        <div class="intro-profile-stat"><img loading="lazy" src="assets/Shape UI/lesson-star.svg" alt="" aria-hidden="true"><span><small>Nakamit</small><strong data-profile-stat="stars">0 / 24</strong></span></div>
                                         <div class="intro-profile-stat"><svg class="intro-profile-carrot-icon" viewBox="0 0 32 32" aria-hidden="true"><path class="carrot-leaf" d="M18 10C16 5 18 2 22 1c2 4 1 7-4 9Zm-2 1c-5-1-7-4-6-8 5 0 7 3 6 8Zm3 0c3-4 7-5 10-3-1 4-5 5-10 3Z"/><path class="carrot-root" d="M8 11c5-3 11-2 14 2 2 3-1 9-12 17-1 1-3 0-3-2-1-13-2-15 1-17Z"/><path class="carrot-line" d="m9 17 5 1m-5 5 4 1m2-10 4 1"/></svg><span><small>Naipon</small><strong data-profile-stat="carrots">0</strong></span></div>
                                         <div class="intro-profile-stat"><svg viewBox="0 0 48 48" aria-hidden="true"><path class="profile-stat-cup" d="M13 7h22v12c0 9-5 15-11 15s-11-6-11-15Z"/><path d="M13 11H6v5c0 7-4 11-10 11M35 11h7v5c0 7-4 11-10 11M24 34v7M15 44h18"/></svg><span><small>Nabuksan</small><strong data-profile-stat="areas">1 / 8</strong></span></div>
                                     </div>
@@ -6587,6 +6587,11 @@ const loadRuntimeAssets = async () => {
         throw new Error('The asset list is invalid.');
     }
 
+    // GitHub Pages can temporarily reject a burst of hundreds of static-file
+    // requests. The browser loads each island's media when that island opens,
+    // so do not pre-download the complete game library during boot.
+    return;
+
     let assetCache = null;
     let previousCaches = [];
     if (persistentStorage) {
@@ -6780,7 +6785,9 @@ const loadRuntimeAssets = async () => {
 };
 
 const trackInitialImages = () => {
-    const images = Array.from(document.images);
+    // Deferred island artwork is intentionally not part of the first-screen
+    // readiness check. It loads when its island becomes visible.
+    const images = Array.from(document.images).filter((image) => image.loading !== 'lazy');
 
     if (!images.length) {
         setInitialLoadingProgress(95);
