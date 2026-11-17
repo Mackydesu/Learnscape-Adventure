@@ -16081,7 +16081,7 @@ body *::after {
     position: absolute;
     z-index: 5;
     left: 50%;
-    top: calc(9% + min(77vh, 45rem) + 1rem);
+    top: calc(9% + min(77vh, 45rem) + 4rem);
     display: inline-flex;
     align-items: center;
     justify-content: center;
