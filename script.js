@@ -12461,8 +12461,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         startButton.hidden = true;
         page.classList.add('is-camera-intro');
         character.hidden = false;
-        panel.hidden = false;
-        openCameraProcessingCurtains(page);
+        panel.hidden = true;
+        closeCameraProcessingCurtains(page);
 
         const showMessage = (text) => {
             if (cameraIntroSessions.get(page) !== session) return false;
@@ -12470,19 +12470,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             return true;
         };
 
+        if (!await waitForCameraIntro(page, session, 500)) return;
+        openCameraProcessingCurtains(page);
+        panel.hidden = false;
         showMessage('Ngayon! Gamitin ang natutuhan.');
-        if (!await waitForCameraIntro(page, session, 1200)) return;
-        showMessage(`Tumingin sa paligid at maghanap ng mga bagay na hugis ${shapeLabel.toLowerCase()}.`);
         await playCameraIntroVoice(page, session, 'assets/Audios/Voice over/Maghanap.mp3');
         if (cameraIntroSessions.get(page) !== session) return;
+        showMessage(`Tumingin sa paligid at maghanap ng mga bagay na hugis ${shapeLabel.toLowerCase()}.`);
         await playCameraIntroVoice(page, session, shapeChoiceAudioSources[shape]);
-        if (!await waitForCameraIntro(page, session, 350)) return;
+        if (cameraIntroSessions.get(page) !== session) return;
         showMessage('Handa ka na ba?');
         await playCameraIntroVoice(page, session, 'assets/Audios/Voice over/Handa ka na ba.mp3');
-        if (!await waitForCameraIntro(page, session, 250)) return;
+        if (cameraIntroSessions.get(page) !== session) return;
         showMessage('Simulan na!');
         await playCameraIntroVoice(page, session, 'assets/Audios/Voice over/Simulan.mp3');
-        if (!await waitForCameraIntro(page, session, 450)) return;
         if (cameraIntroSessions.get(page) !== session || !isPageVisible(page)) return;
         page.classList.remove('is-camera-intro');
         character.hidden = true;
