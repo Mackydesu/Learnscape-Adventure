@@ -16104,8 +16104,9 @@ body *::after {
         inset 0 -0.2rem 0 rgba(192, 103, 12, 0.42);
     color: #075066;
     font-family: 'Fredoka', 'Nunito', sans-serif;
-    font-size: clamp(1.35rem, 2vw, 1.95rem);
+    font-size: clamp(1.8rem, 2.6vw, 2.5rem);
     font-weight: 900;
+    white-space: nowrap;
     -webkit-text-stroke: 0.025em #d9ffff;
     paint-order: stroke fill;
     text-shadow: 0 0.12rem 0 #073e51;
@@ -16130,7 +16131,7 @@ body *::after {
         0 0.25rem 0.5rem rgba(15, 42, 35, 0.3);
 }
 
-.circle-camera-start-button.is-camera-access-button {
+.circle-camera-start-button:is(.is-camera-access-button, .is-camera-open-button) {
     animation: cameraStartButtonBounce 1.15s ease-in-out infinite;
 }
 
@@ -24004,7 +24005,7 @@ body.about-page {
         min-height: 0;
         padding: 0.35rem 1rem;
         gap: 0.5rem;
-        font-size: clamp(0.75rem, 3.4vh, 1.45rem);
+        font-size: clamp(0.95rem, 4.1vh, 1.8rem);
     }
 
     .circle-camera-page:not(.camera-test-page) .camera-detection-distance-cue {

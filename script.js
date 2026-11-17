@@ -12324,6 +12324,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const label = circleCameraStartButton?.querySelector('strong');
         if (label) label.textContent = text;
         circleCameraStartButton?.classList.toggle('is-camera-access-button', text === 'Kamera');
+        circleCameraStartButton?.classList.toggle('is-camera-open-button', text === 'Buksan');
         circleCameraStartButton?.setAttribute('aria-label', text === 'Kamera' ? 'I-allow ang Kamera' : text);
         const guideHand = circleCameraStartButton?.querySelector('.camera-start-guide-hand');
         if (guideHand) guideHand.hidden = text !== 'Kamera';
@@ -12757,6 +12758,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const label = button?.querySelector('strong');
         if (label) label.textContent = text;
         button?.classList.toggle('is-camera-access-button', text === 'Kamera');
+        button?.classList.toggle('is-camera-open-button', text === 'Buksan');
         button?.setAttribute('aria-label', text === 'Kamera' ? 'I-allow ang Kamera' : text);
         const guideHand = page?.querySelector('.camera-start-guide-hand');
         if (guideHand) guideHand.hidden = text !== 'Kamera';
