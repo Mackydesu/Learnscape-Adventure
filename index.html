@@ -2925,12 +2925,16 @@
                         // A mission replay may have replaced the lesson while the
                         // loading screen was fading, so do not restart it there.
                         const lesson = pages.circleIllustration;
-                        if (routeData.routeName === 'circleIllustration'
+                        const isCircleMissionLaunch = lesson?.dataset?.shapePhaseLaunch === 'mission';
+                        const shouldAutoPlayCircleLesson = routeData.routeName === 'circleIllustration'
                             && currentRoute === 'circleIllustration'
                             && lesson && !lesson.hidden
+                            && !isCircleMissionLaunch
                             && !lesson.classList.contains('is-lesson-complete')
                             && !lesson.classList.contains('is-progress-visible')
-                            && !document.documentElement.classList.contains('is-phone')) {
+                            && !document.documentElement.classList.contains('is-phone');
+                        if (lesson?.dataset) delete lesson.dataset.shapePhaseLaunch;
+                        if (shouldAutoPlayCircleLesson) {
                             window.__learnscapePlayCircleIllustrationVideo?.();
                         }
                     });

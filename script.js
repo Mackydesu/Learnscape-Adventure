@@ -2809,7 +2809,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         shapeSquarePage.classList.remove('is-progress-visible');
         shapeSquarePage.classList.add('is-square-answer-completing');
-        shapeSquareProgress?.setAttribute('aria-hidden', 'true');
+        setAriaRegionHidden(shapeSquareProgress, true);
         if (shapeSquareCelebrationText) {
             shapeSquareCelebrationText.textContent = 'TAMA ANG IYONG SAGOT!';
             shapeSquareCelebrationText.hidden = true;
@@ -3382,7 +3382,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeSquareCelebrationTimers.forEach((timerId) => window.clearTimeout(timerId));
         shapeSquareCelebrationTimers = [];
         shapeSquarePage?.classList.remove('is-progress-visible');
-        shapeSquareProgress?.setAttribute('aria-hidden', 'true');
+        setAriaRegionHidden(shapeSquareProgress, true);
     };
 
     const setShapeSquareEarnedStars = (count) => {
@@ -6681,7 +6681,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         heartGameCelebration?.classList.remove('is-active', 'is-character-exiting', 'is-finishing');
         if (heartGameCelebration) heartGameCelebration.hidden = true;
-        heartFinalProgress?.setAttribute('aria-hidden', 'true');
+        setAriaRegionHidden(heartFinalProgress, true);
         heartMissionPage?.classList.remove('is-heart-victory-celebration', 'is-heart-final-progress-visible');
     };
 
@@ -8170,7 +8170,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const hideRectangleFinalProgress = () => {
         rectangleDeliveryPage?.classList.remove('is-rectangle-final-progress-visible');
-        rectangleFinalProgress?.setAttribute('aria-hidden', 'true');
+        setAriaRegionHidden(rectangleFinalProgress, true);
     };
 
     const showRectangleFinalProgress = () => {
@@ -8234,7 +8234,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleFinalCelebrationStarted = false;
         stopRectangleFinalCelebrationAudio();
         rectangleDeliveryPage?.classList.remove('is-final-complete-scene', 'is-rectangle-final-progress-visible');
-        rectangleFinalProgress?.setAttribute('aria-hidden', 'true');
+        setAriaRegionHidden(rectangleFinalProgress, true);
         if (rectangleDeliveryCompleteBg) rectangleDeliveryCompleteBg.hidden = true;
         if (rectangleDeliveryCompleteConfetti) rectangleDeliveryCompleteConfetti.hidden = true;
     };
@@ -12034,7 +12034,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         circleIllustrationCelebrationTimers.forEach((timerId) => window.clearTimeout(timerId));
         circleIllustrationCelebrationTimers = [];
         circleIllustrationPage?.classList.remove('is-progress-visible');
-        circleIllustrationProgress?.setAttribute('aria-hidden', 'true');
+        setAriaRegionHidden(circleIllustrationProgress, true);
     };
 
     const setCircleIllustrationEarnedStars = (count) => {
@@ -13794,6 +13794,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const isPageVisible = (pageElement) => Boolean(pageElement && !pageElement.hidden);
 
+    // Do not hide a region from assistive technology while one of its controls
+    // still owns focus. This prevents the browser's aria-hidden focus warning.
+    const setAriaRegionHidden = (region, isHidden) => {
+        if (!region) return;
+        const focusedElement = document.activeElement;
+        if (isHidden && focusedElement instanceof HTMLElement && region.contains(focusedElement)) {
+            focusedElement.blur();
+        }
+        region.setAttribute('aria-hidden', String(isHidden));
+    };
+
     const resetGame3Hotspots = () => {
         game3Hotspots.forEach((hotspot) => {
             hotspot.classList.remove('is-active');
@@ -14770,7 +14781,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const hideOvalFinalProgress = () => {
         ovalBoardGamePage?.classList.remove('is-oval-final-progress-visible');
-        ovalFinalProgress?.setAttribute('aria-hidden', 'true');
+        setAriaRegionHidden(ovalFinalProgress, true);
     };
 
     const showOvalFinalProgress = () => {
@@ -15524,6 +15535,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const openShapeLessonPhase = (shape, config) => {
         if (shape === 'circle') {
+            if (circleIllustrationPage) delete circleIllustrationPage.dataset.shapePhaseLaunch;
             navigateToShapePhase(config.lesson, () => {
                 resetCircleIllustrationVideo();
                 circleIllustrationPlayButton?.focus({ preventScroll: true });
@@ -15550,6 +15562,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const openShapeMissionPhase = (shape, config) => {
         if (shape === 'circle') {
+            // The shell normally autoplays this route's lesson after its loading
+            // curtain. Mark this launch so the Mission guide keeps control instead.
+            if (circleIllustrationPage) circleIllustrationPage.dataset.shapePhaseLaunch = 'mission';
             navigateToShapePhase(config.mission, () => {
                 resetCircleIllustrationVideo();
                 startCircleMissionGuide();
