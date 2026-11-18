@@ -208,6 +208,10 @@ function polygonMetrics(vertices) {
     const concaveVertices = turns.filter(turn => turn < 0).length;
     const minSide = Math.min(...sideLengths), maxSide = Math.max(...sideLengths);
     const equalSides = minSide > 0 && maxSide / minSide <= 1.25;
+    // A square needs a much stricter measurement than a general rhombus.
+    // Pixel sampling and camera lenses prevent literal mathematical equality,
+    // so allow only a small 6% side-length variance and 4° angle variance.
+    const squareEqualSides = minSide > 0 && maxSide / minSide <= 1.06;
     const bboxDiagonal = Math.hypot(
         Math.max(...vertices.map(point => point.x)) - Math.min(...vertices.map(point => point.x)),
         Math.max(...vertices.map(point => point.y)) - Math.min(...vertices.map(point => point.y))
@@ -215,6 +219,7 @@ function polygonMetrics(vertices) {
     const substantialSides = sideLengths.every(length => length >= bboxDiagonal * 0.16);
     const convex = concaveVertices === 0;
     const rightAngled = count === 4 && angles.every(angle => angle >= 72 && angle <= 108);
+    const squareRightAngled = count === 4 && angles.every(angle => angle >= 86 && angle <= 94);
     const axisAligned = count === 4 && edgeAxisDeviations.every(deviation => deviation <= 15);
     const oppositeSidesMatch = count === 4 &&
         Math.abs(sideLengths[0] - sideLengths[2]) / Math.max(sideLengths[0], sideLengths[2]) < 0.30 &&
@@ -223,7 +228,7 @@ function polygonMetrics(vertices) {
         vertices.some(point => point.y <= Math.min(...vertices.map(p => p.y)) + 3) &&
         vertices.some(point => point.y >= Math.max(...vertices.map(p => p.y)) - 3);
     const circularity = perimeter > 0 ? 4 * Math.PI * Math.abs(twiceArea / 2) / (perimeter * perimeter) : 0;
-    return { count, sideLengths, angles, concaveVertices, equalSides, substantialSides, convex, rightAngled, axisAligned,
+    return { count, sideLengths, angles, concaveVertices, equalSides, squareEqualSides, substantialSides, convex, rightAngled, squareRightAngled, axisAligned,
         oppositeSidesMatch, topBottomVertices, circularity, area: Math.abs(twiceArea / 2) };
 }
 
@@ -310,7 +315,7 @@ function matches(label, g) {
                 g.angles.length === 3 && g.angles.every(angle => angle > 0 && angle < 180) &&
                 Math.abs(g.angles.reduce((sum, angle) => sum + angle, 0) - 180) <= 12;
         case "square":
-            return g.count === 4 && g.equalSides && g.rightAngled && g.axisAligned;
+            return g.count === 4 && g.squareEqualSides && g.squareRightAngled && g.axisAligned;
         case "rectangle":
             return g.count === 4 && g.rightAngled && !g.equalSides && g.oppositeSidesMatch;
         // A diamond is a four-sided rhombus: this includes 60/120-degree

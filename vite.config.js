@@ -54,9 +54,31 @@ async function createProjectManifest(projectRoot, modelFile, modelUrl = modelFil
     return createManifest(files, urls);
 }
 
-export default defineConfig(({ command }) => ({
+export default defineConfig(({ command }) => {
+    const cacheControlHeaders = {
+        // Asset filenames are deliberately human-readable, so never let the
+        // local server keep an older audio or image after it is replaced.
+        "Cache-Control": "no-store, max-age=0, must-revalidate"
+    };
+    const buildAssetRevision = `build-${Date.now().toString(36)}`;
+
+    return {
     base: "./",
     plugins: [
+        {
+            name: "revision-local-media-urls",
+            transformIndexHtml(html) {
+                // A fresh revision is generated for every development page
+                // request. Builds receive one revision that stays consistent
+                // for the published release.
+                const revision = command === "serve"
+                    ? `dev-${Date.now().toString(36)}`
+                    : buildAssetRevision;
+                return html
+                    .replace('content="__LEARNSCAPE_ASSET_REVISION__"', `content="${revision}"`)
+                    .replace(/(style\.css|script\.js|detection\/init\.js)\?v=[^"'\s>]+/g, `$1?v=${revision}`);
+            }
+        },
         ...(command === "build" ? [
         {
             name: "remove-static-server-import-map",
@@ -131,5 +153,12 @@ export default defineConfig(({ command }) => ({
                 cameraTest: resolve(process.cwd(), "camera-test.html")
             }
         }
+    },
+    server: {
+        headers: cacheControlHeaders
+    },
+    preview: {
+        headers: cacheControlHeaders
     }
-}));
+};
+});

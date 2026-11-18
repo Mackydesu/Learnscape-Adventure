@@ -75,12 +75,43 @@ test('a square stays a square and can correct a rectangle model prediction', () 
     assert.equal(corrected.label, 'square');
 });
 
+test('a near-square rectangle is not accepted as a square', () => {
+    const { video, box } = makeRectangle(90, 98);
+    const result = verifyShape(video, { ...box, label: 'square' });
+    assert.equal(result.verified, false);
+    assert.notEqual(result.geometricShape, 'square');
+});
+
 test('an unclear contour cannot correct a model prediction from the box alone', () => {
     const { video, box } = makeRectangle(70, 120);
     video.pixels.fill(245);
     const result = verifyShape(video, { ...box, label: 'square' });
     assert.equal(result.verified, false);
     assert.equal(result.correctedLabel, null);
+});
+
+test('the Rectangle camera accepts a clearly elongated square prediction when its contour is obscured', async () => {
+    const { video, box } = makeRectangle(70, 120);
+    video.pixels.fill(245);
+    const prediction = { ...box, label: 'square', confidence: 0.9 };
+    const source = readFileSync(new URL('../detection/detectionManager.js', import.meta.url), 'utf8')
+        .replace(/^import .*;\r?\n/gm, '')
+        .replace(/^export /gm, '');
+    const context = { detectShapes: async () => [prediction], verifyShape, DOMException, setTimeout, clearTimeout, console };
+    vm.runInNewContext(`${source}\nglobalThis.trackLiveShapes = trackLiveShapes;`, context);
+
+    const controller = new AbortController();
+    let result;
+    await context.trackLiveShapes(video, frame => {
+        result = frame.tracks[0];
+        controller.abort();
+    }, { signal: controller.signal, intervalMs: 0, minVotes: 1, targetShape: 'rectangle' }).catch(error => {
+        if (error.name !== 'AbortError') throw error;
+    });
+
+    assert.equal(result.label, 'rectangle');
+    assert.equal(result.labelStable, true);
+    assert.equal(result.geometry.targetLabelCorrection, 'rectangle');
 });
 
 test('the live tracker exposes the corrected rectangle as a stable target', async () => {

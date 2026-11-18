@@ -3,6 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="learnscape-asset-revision" content="__LEARNSCAPE_ASSET_REVISION__">
+    <script>
+        // Keep the friendly asset filenames while still giving each edited
+        // image and audio file a new browser-cache key. Vite replaces the
+        // revision above on every development reload and every production
+        // build. The fallback also keeps a directly opened HTML file fresh.
+        (() => {
+            const revisionMeta = document.querySelector('meta[name="learnscape-asset-revision"]');
+            const revision = revisionMeta?.content === '__LEARNSCAPE_ASSET_REVISION__'
+                ? `local-${Date.now().toString(36)}`
+                : revisionMeta?.content;
+            if (!revision) return;
+
+            const assetUrl = (source) => {
+                if (typeof source !== 'string' || !source || /^(?:data:|blob:|#)/i.test(source)) return source;
+                try {
+                    const url = new URL(source, document.baseURI);
+                    if (url.origin !== location.origin || !url.pathname.includes('/assets/')) return source;
+                    url.searchParams.set('rev', revision);
+                    return url.href;
+                } catch {
+                    return source;
+                }
+            };
+
+            window.__learnscapeAssetUrl = assetUrl;
+
+            const patchSourceSetter = (prototype, property) => {
+                const descriptor = Object.getOwnPropertyDescriptor(prototype, property);
+                if (!descriptor?.get || !descriptor.set) return;
+                Object.defineProperty(prototype, property, {
+                    configurable: true,
+                    enumerable: descriptor.enumerable,
+                    get: descriptor.get,
+                    set(value) {
+                        descriptor.set.call(this, assetUrl(value));
+                    }
+                });
+            };
+            patchSourceSetter(window.HTMLImageElement?.prototype, 'src');
+            patchSourceSetter(window.HTMLMediaElement?.prototype, 'src');
+
+            const NativeAudio = window.Audio;
+            if (NativeAudio) {
+                const RevisionedAudio = function (source) {
+                    const audio = new NativeAudio();
+                    if (typeof source === 'string') audio.src = assetUrl(source);
+                    return audio;
+                };
+                RevisionedAudio.prototype = NativeAudio.prototype;
+                Object.setPrototypeOf(RevisionedAudio, NativeAudio);
+                window.Audio = RevisionedAudio;
+            }
+
+            const refreshAssetSources = (root = document) => {
+                const elements = root.querySelectorAll?.('img[src], audio[src], video[src], source[src], video[poster]') || [];
+                elements.forEach((element) => {
+                    for (const attribute of ['src', 'poster']) {
+                        const current = element.getAttribute(attribute);
+                        const next = assetUrl(current);
+                        if (next && next !== current) element.setAttribute(attribute, next);
+                    }
+                });
+            };
+            document.addEventListener('DOMContentLoaded', () => refreshAssetSources(), { once: true });
+        })();
+    </script>
     <script>
         // The game scenes are composed for a laptop-sized landscape viewport.
         // Let Android phones render that same layout in a virtual viewport so
@@ -3697,6 +3764,29 @@
                     }
                     introMenuClose.focus({ preventScroll: true });
             };
+            const viewLearnscapeBadgeFromNotification = (shape) => {
+                const normalizedShape = String(shape || '').trim().toLowerCase();
+                if (!introProfileShapes.includes(normalizedShape)
+                    || readSoundSetting(introProfileBadgeUnlockKey(normalizedShape), 'false') !== 'true') {
+                    return false;
+                }
+
+                openIntroMenu('profile');
+                const badge = introMenuCopy?.querySelector(`[data-profile-badge="${normalizedShape}"]`);
+                if (!badge) return false;
+
+                // Opening the profile queues all unseen badges. Prioritize the
+                // badge selected from this notification so every island's
+                // "Tingnan" button leads to its own reveal immediately.
+                cancelProfileBadgeReveals();
+                const revealSelectedBadge = () => {
+                    if (introMenuPanel?.hidden || introMenuPanel?.dataset.panel !== 'profile') return;
+                    badge.scrollIntoView({ block: 'center', inline: 'nearest' });
+                    revealProfileBadge(badge, normalizedShape, 0);
+                };
+                window.requestAnimationFrame(revealSelectedBadge);
+                return true;
+            };
             document.querySelectorAll('[data-intro-panel]').forEach((button) => {
                 button.addEventListener('click', () => openIntroMenu(button.dataset.introPanel, button));
             });
@@ -3754,13 +3844,7 @@
                     event.stopPropagation();
                     const notificationItem = notificationAction.closest('[data-notification-id]');
                     if (notificationAction.dataset.notificationAction === 'view-badge') {
-                        const shape = notificationAction.dataset.notificationShape;
-                        if (introProfileShapes.includes(shape)
-                            && readSoundSetting(introProfileBadgeUnlockKey(shape), 'false') === 'true') {
-                            openIntroMenu('profile');
-                            const badge = introMenuCopy.querySelector(`[data-profile-badge="${shape}"]`);
-                            badge?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-                        }
+                        viewLearnscapeBadgeFromNotification(notificationAction.dataset.notificationShape);
                     }
                     return;
                 }
@@ -5369,15 +5453,24 @@
                 const wasAwarded = claimedProgressRewards.has(rewardIdentity)
                     || readSoundSetting(rewardStorageKey, 'false') === 'true'
                     || legacyRewardWasAwarded;
+                const isMatchingReplay = pendingReplayBonus?.shape === rewardShape
+                    && pendingReplayBonus.starStage === starStage;
                 let bonusAmount = 0;
-                if (pendingReplayBonus?.shape === rewardShape
-                    && pendingReplayBonus.starStage === starStage) {
+                // Opening a phase from the hub also emits replay-start.  It is
+                // only a replay after this exact progress reward has already
+                // been earned; otherwise the first completion must show its
+                // full star and carrot rewards.
+                if (isMatchingReplay && wasAwarded) {
                     bonusAmount = replayBonusAmounts[starStage];
                     pendingReplayBonus = null;
                     // A pending attempt is consumed once, independently of
                     // whether an older progress notification is still active.
                     stopProgressMissionNotifications(progress);
                     window.addLearnscapeResource('carrots', bonusAmount);
+                } else if (isMatchingReplay) {
+                    // Do not let the phase-hub launch for a first attempt
+                    // leak into a later completion as a replay bonus.
+                    pendingReplayBonus = null;
                 }
                 showProgressMissionNotifications(progress, rewardShape, starStage, bonusAmount);
                 if (wasAwarded) {

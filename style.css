@@ -3648,12 +3648,6 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
 .shape-phase-camera-shape-star { border-radius: 0; clip-path: polygon(50% 0, 61% 34%, 98% 35%, 68% 56%, 80% 93%, 50% 72%, 20% 93%, 32% 56%, 2% 35%, 39% 34%); }
 .shape-phase-camera-shape-diamond { border-radius: 0.42rem; transform: rotate(45deg) scale(0.76); }
 
-.shape-phase-description {
-    margin: 0;
-    color: #653311;
-    font: 800 clamp(0.84rem, 1.35vw, 1.12rem)/1.15 'Nunito', sans-serif;
-}
-
 .shape-phase-play {
     width: min(100%, 13.5rem);
     min-height: clamp(2.65rem, 4.8vw, 3.6rem);
@@ -3687,7 +3681,6 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
     .shape-phase-choice { min-height: 0; padding: 0.38rem; }
     .shape-phase-choice h3 { margin-top: -0.62rem; font-size: clamp(0.86rem, 4.3vw, 1.15rem); }
     .shape-phase-preview img { min-height: 0; }
-    .shape-phase-description { display: none; }
     .shape-phase-play { width: 100%; min-height: 2.25rem; padding-inline: 0.45rem; font-size: clamp(0.75rem, 3.65vw, 0.98rem); }
 }
 

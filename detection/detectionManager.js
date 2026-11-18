@@ -6,11 +6,16 @@ const DEFAULT_MIN_VOTES = 4;
 const COMPLEX_SHAPE_CONFIDENCE = 0.75;
 const TRACK_IOU_THRESHOLD = 0.20;
 const CROSS_CLASS_CONFLICT_IOU = 0.65;
+// A clearly elongated model box is a useful fallback only when the active
+// camera challenge explicitly asks for a rectangle. This covers a rectangle
+// that YOLO calls a square when its contour is obscured by glare or a hand,
+// without changing Square-camera classifications.
+const TARGET_RECTANGLE_MIN_BOX_ASPECT = 1.25;
 // The game only accepts a shape when its largest box dimension occupies a
 // useful part of the camera frame. Keeping this resolution-independent makes
 // the same rule work on phone and desktop cameras.
-export const MIN_DETECTION_RELATIVE_SIZE = 0.16;
-export const MAX_DETECTION_RELATIVE_SIZE = 0.65;
+export const MIN_DETECTION_RELATIVE_SIZE = 0.25;
+export const MAX_DETECTION_RELATIVE_SIZE = 0.50;
 
 /** Returns the detected object's largest frame-relative dimension (0–1+). */
 export function getRelativeObjectSize(detection, video) {
@@ -35,6 +40,15 @@ function getDetectionSizeMetadata(relativeSize) {
         moveCloser: sizeGuidance === "move-closer",
         moveFartherAway: sizeGuidance === "move-farther"
     };
+}
+
+function isTargetRectangleBox(item, targetShape, geometry) {
+    if (targetShape !== "rectangle" || item?.label !== "square" || geometry?.verified) return false;
+    const width = Math.max(0, item.x2 - item.x1);
+    const height = Math.max(0, item.y2 - item.y1);
+    const shorterSide = Math.min(width, height);
+    if (shorterSide <= 0) return false;
+    return Math.max(width, height) / shorterSide >= TARGET_RECTANGLE_MIN_BOX_ASPECT;
 }
 
 function delayFrame() {
@@ -72,6 +86,7 @@ export async function trackLiveShapes(video, onFrame, options = {}) {
     // Callers may deliberately choose a single processed frame, such as the
     // game camera. Other callers continue to use their configured default.
     const stableVotes = Math.max(1, options.minVotes ?? DEFAULT_MIN_VOTES);
+    const targetShape = String(options.targetShape || "").trim().toLowerCase();
     const tracks = [];
     let frame = 0;
 
@@ -85,7 +100,7 @@ export async function trackLiveShapes(video, onFrame, options = {}) {
             const relativeSize = getRelativeObjectSize(item, video);
             const size = getDetectionSizeMetadata(relativeSize);
             const lowConfidenceComplexShape = size.sizeAccepted && ["heart", "star"].includes(item.label) && item.confidence < COMPLEX_SHAPE_CONFIDENCE;
-            const geometry = !size.sizeAccepted
+            let geometry = !size.sizeAccepted
                 ? {
                     verified: false,
                     yoloLabel: item.label,
@@ -97,6 +112,14 @@ export async function trackLiveShapes(video, onFrame, options = {}) {
                 : lowConfidenceComplexShape
                 ? { verified: false, yoloLabel: item.label, geometricShape: null, reason: "Confidence is below the heart/star verification threshold." }
                 : verifyShape(video, item);
+            const targetRectangleFallback = isTargetRectangleBox(item, targetShape, geometry);
+            if (targetRectangleFallback) {
+                geometry = {
+                    ...geometry,
+                    targetLabelCorrection: "rectangle",
+                    reason: "Target rectangle has a clearly elongated bounding box despite an unverified square model label."
+                };
+            }
             if (item.label === "circle" && !geometry.verified) {
                 console.log("[CIRCLE VERIFICATION FAILED]", {
                     confidence: item.confidence,
@@ -114,7 +137,11 @@ export async function trackLiveShapes(video, onFrame, options = {}) {
             }
             return {
                 ...item,
-                label: geometry.verified && geometry.label ? geometry.label : item.label,
+                label: geometry.verified && geometry.label
+                    ? geometry.label
+                    : targetRectangleFallback
+                        ? "rectangle"
+                        : item.label,
                 relativeSize,
                 ...size,
                 geometry,

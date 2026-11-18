@@ -5,13 +5,11 @@ import { trackLiveShapes } from "./detectionManager.js";
 // Run the next inference immediately after the previous one so the tracking
 // box follows a moving object without an added polling delay.
 const TRACKING_OPTIONS = { intervalMs: 0, minVotes: 1 };
-const REMOVAL_CONFIRMATION_FRAMES = 5;
 const DISTANCE_CUE_AUDIO = Object.freeze({
     "move-farther": "assets/Audios/Voice over/Lumayo.mp3",
     "move-closer": "assets/Audios/Voice over/Lumapit.mp3"
 });
 const DISTANCE_CUE_REPLAY_DELAY_MS = 2800;
-const WRONG_SHAPE_FEEDBACK_COOLDOWN_MS = 1400;
 const SHAPE_NAMES = Object.freeze({
     circle: "Bilog",
     square: "Parisukat",
@@ -26,6 +24,7 @@ const SHAPE_NAMES = Object.freeze({
 let activeSession = null;
 let activeTask = Promise.resolve();
 let nextScanAttemptId = 0;
+const distanceCueAudioPrimes = new WeakMap();
 
 function cameraPageVisible(page) {
     return Boolean(page?.isConnected && !page.hidden && page.getClientRects().length &&
@@ -137,6 +136,39 @@ function hideDistanceCue(session, { stopAudio = false } = {}) {
     }
 }
 
+function primeDistanceCueAudio(page) {
+    const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+    if (!page || !window.Audio || soundScale <= 0) return;
+
+    const primedAudio = new Map();
+    Object.entries(DISTANCE_CUE_AUDIO).forEach(([guidance, source]) => {
+        const audio = new window.Audio(source);
+        audio.preload = "auto";
+        audio.playsInline = true;
+        audio.muted = true;
+        audio.volume = Math.min(1, Math.max(0, soundScale));
+        primedAudio.set(guidance, audio);
+        audio.play().then(() => {
+            // This begins inside the trusted Kamera/Buksan click. Reusing the
+            // same element later keeps the spoken distance instruction audible
+            // when automatic processing opens the next scan.
+            if (distanceCueAudioPrimes.get(page) !== primedAudio) return;
+            audio.pause();
+            try {
+                audio.currentTime = 0;
+            } catch {
+                // Metadata may not have loaded yet; playback still starts at
+                // the browser's available beginning.
+            }
+            audio.muted = false;
+        }).catch(() => {
+            // A later normal playback attempt remains available on browsers
+            // that do not allow muted priming.
+        });
+    });
+    distanceCueAudioPrimes.set(page, primedAudio);
+}
+
 function playDistanceCueAudio(session, guidance) {
     const source = DISTANCE_CUE_AUDIO[guidance];
     const soundScale = window.__learnscapeSoundScale?.() ?? 1;
@@ -147,7 +179,8 @@ function playDistanceCueAudio(session, guidance) {
         && now - (session.lastDistanceCuePlayedAt || 0) < DISTANCE_CUE_REPLAY_DELAY_MS) return;
 
     stopDistanceCueAudio(session);
-    const audio = new window.Audio(source);
+    const audio = distanceCueAudioPrimes.get(session.page)?.get(guidance)
+        || new window.Audio(source);
     session.distanceCueAudio = audio;
     session.lastDistanceCueGuidance = guidance;
     session.lastDistanceCuePlayedAt = now;
@@ -181,6 +214,11 @@ function setDistanceCue(session, guidance = "", { clearImmediately = false } = {
     }
 
     const previousGuidance = session.visibleDistanceCueGuidance || "";
+    // Once a distance coach starts speaking, keep that instruction intact.
+    // Live detection can briefly switch labels or sizes frame-to-frame, but
+    // cutting the voice mid-sentence is more confusing than waiting for the
+    // next stable frame after it finishes.
+    if (session.distanceCueAudio && guidance !== previousGuidance) return;
     session.pendingDistanceCueClear = false;
     cue.hidden = !copy;
     cue.textContent = copy;
@@ -211,23 +249,6 @@ function shapeName(shape, capitalized = false) {
 
 function targetCameraPrompt(shape) {
     return `Magpakita ng bagay na hugis ${shapeName(shape, true)} sa Kamera`;
-}
-
-function playWrongShapeFeedback(session, track) {
-    const key = `${track.trackId ?? track.label}:${track.label}`;
-    const now = Date.now();
-    if (session.lastWrongShapeKey === key
-        && now - (session.lastWrongShapeFeedbackAt || 0) < WRONG_SHAPE_FEEDBACK_COOLDOWN_MS) return;
-
-    session.lastWrongShapeKey = key;
-    session.lastWrongShapeFeedbackAt = now;
-    const soundScale = window.__learnscapeSoundScale?.() ?? 1;
-    if (!window.Audio || soundScale <= 0) return;
-    const audio = new window.Audio("assets/Audios/Sound effects/buzzer.mp3");
-    audio.preload = "auto";
-    audio.playsInline = true;
-    audio.volume = Math.min(1, Math.max(0, soundScale));
-    audio.play().catch(() => {});
 }
 
 function drawTrackedObjects(session, tracks) {
@@ -326,32 +347,15 @@ async function handleTrackedFrame(session, { frame, tracks }) {
         })));
     }
 
-    if (session.waitingForRemoval) {
-        setDistanceCue(session, "", { clearImmediately: true });
-        const targetStillVisible = tracks.some(track => trackHasTargetLabel(track, session.shape));
-        if (!targetStillVisible) session.absentFrames++;
-        else session.absentFrames = 0;
-
-        if (session.absentFrames >= REMOVAL_CONFIRMATION_FRAMES) {
-            session.waitingForRemoval = false;
-            session.absentFrames = 0;
-            setCameraStatus(session.page, targetCameraPrompt(session.shape));
-            // The curtain listener opens only after the old target has been
-            // absent for enough live frames to safely accept another scan.
-            notifyDetectionReady(session);
-        }
-        return;
-    }
-
-    // A stable, in-range non-target is a wrong attempt: keep its red box,
-    // give one short wrong-answer cue, and never apply target-size coaching.
+    // A stable, in-range non-target is a wrong attempt: keep its red box and
+    // never apply target-size coaching. Let an already-started distance cue
+    // finish instead of interrupting it because another shape appeared.
     const hasLiveTarget = tracks.some(track => !track.stale && trackHasTargetLabel(track, session.shape));
     const wrongShape = !hasLiveTarget && tracks
         .filter(track => !track.stale && track.sizeAccepted === true && track.labelStable === true && !trackHasTargetLabel(track, session.shape))
         .sort((a, b) => b.confidence - a.confidence)[0];
     if (wrongShape) {
-        setDistanceCue(session, "", { clearImmediately: true });
-        playWrongShapeFeedback(session, wrongShape);
+        setDistanceCue(session, "");
         setCameraStatus(session.page, targetCameraPrompt(session.shape));
         return;
     }
@@ -368,8 +372,6 @@ async function handleTrackedFrame(session, { frame, tracks }) {
         try {
             // The green target frame, check mark, confetti, audio, and reward
             // all begin together as soon as the label becomes stable.
-            session.waitingForRemoval = true;
-            session.absentFrames = 0;
             window.dispatchEvent(new CustomEvent("learnscape:verified-shape", {
                 detail: {
                     page: session.page,
@@ -401,9 +403,8 @@ async function handleTrackedFrame(session, { frame, tracks }) {
     }
 
     // The size cue is reserved for the active mission target. If the target
-    // is no longer in the live frame, immediately clear any old instruction
-    // instead of leaving “Lumapit” or “Lumayo” beside a wrong-shape box.
-    setDistanceCue(session, "", { clearImmediately: !hasLiveTarget });
+    // leaves the frame, let any instruction already playing finish first.
+    setDistanceCue(session, "");
     setCameraStatus(session.page, targetCameraPrompt(session.shape));
 }
 
@@ -422,12 +423,11 @@ async function runDetection(session, modelReady) {
     try {
         await modelReady;
         if (signal.aborted || activeSession !== session) return;
-        if (!session.waitingForRemoval) notifyDetectionReady(session);
-        if (!session.waitingForRemoval) {
-            setCameraStatus(page, targetCameraPrompt(session.shape));
-        }
+        notifyDetectionReady(session);
+        setCameraStatus(page, targetCameraPrompt(session.shape));
         await trackLiveShapes(video, frameResult => handleTrackedFrame(session, frameResult), {
             ...TRACKING_OPTIONS,
+            targetShape: session.shape,
             signal
         });
     } catch (error) {
@@ -449,7 +449,7 @@ async function runDetection(session, modelReady) {
 }
 
 function startDetection(event, modelReady) {
-    const { page, video, shape, requireRemoval = false } = event.detail ?? {};
+    const { page, video, shape } = event.detail ?? {};
     const normalizedShape = String(shape ?? "").trim().toLowerCase();
     if (!page || !video || !normalizedShape || page.dataset.cameraShape !== normalizedShape || !cameraPageVisible(page)) return;
 
@@ -461,13 +461,9 @@ function startDetection(event, modelReady) {
         stream: video.srcObject,
         overlay: getOverlay(page),
         controller: new AbortController(),
-        waitingForRemoval: Boolean(requireRemoval),
         readyNotified: false,
-        absentFrames: 0,
         confirming: false,
-        lastConfirmationFrame: -Infinity,
-        lastWrongShapeKey: "",
-        lastWrongShapeFeedbackAt: -Infinity
+        lastConfirmationFrame: -Infinity
     };
     if (!session.stream?.active || !session.overlay) return;
 
@@ -482,6 +478,9 @@ function startDetection(event, modelReady) {
 }
 
 export function initializeGameCameraDetection(modelReady) {
+    window.addEventListener("learnscape:prime-camera-distance-cues", event => {
+        primeDistanceCueAudio(event.detail?.page);
+    });
     window.addEventListener("learnscape:camerastarted", event => startDetection(event, modelReady));
     window.addEventListener("learnscape:camerastopped", event => stopActiveSession(event.detail?.page ?? null));
     window.addEventListener("learnscape:routechange", event => {

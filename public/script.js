@@ -2146,8 +2146,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             shapeCircleBubbleCh3SkipButton.style.display = 'none';
         }
 
+        const finishFinalMessage = () => {
+            completeShapeIslandIntro('circle');
+        };
+
         if (shouldPlayAudio !== false) {
-            playShapeCircleAudio(shapeCircleFinalAudioSource);
+            playShapeCircleAudio(shapeCircleFinalAudioSource, finishFinalMessage, finishFinalMessage);
+        } else {
+            // This is the short return-from-progress version of the guide. Keep
+            // the final prompt on screen long enough to be read before opening
+            // the phase menu that was requested by the progress Next button.
+            shapeCircleTimers.push(window.setTimeout(finishFinalMessage, 1200));
         }
     };
 
@@ -4058,6 +4067,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    const showShapePreviewFinalMessage = (page) => {
+        if (!page || !isPageVisible(page)) return false;
+
+        stopShapePreviewIntro(page);
+        const state = getShapePreviewIntroState(page);
+        page.classList.add('is-preview-intro-active');
+        state.activeStage = 4;
+        Object.entries(state.characters).forEach(([role, character]) => {
+            const isReadySpeaker = role === 'ready';
+            character.hidden = !isReadySpeaker;
+            character.classList.remove('is-entering', 'is-exiting');
+            if (isReadySpeaker) {
+                character.getBoundingClientRect();
+                character.classList.add('is-entering');
+            }
+        });
+        state.bubble.classList.remove('is-ch9', 'is-ch4', 'is-entering', 'is-exiting', 'is-message-changing', 'is-message-complete');
+        state.bubble.classList.add('is-ch5', 'is-final-message', 'is-message-complete');
+        state.bubbleText.textContent = shapeSquareReadyMessage;
+        if (state.startButton) state.startButton.hidden = true;
+        return true;
+    };
+
     const startShapePreviewIntro = (page) => {
         if (!page || !isPageVisible(page) || page.classList.contains('is-illustration-background')) return;
 
@@ -4189,6 +4221,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 stageComplete = true;
                 state.bubble.classList.add('is-message-complete');
                 if (stageIndex >= stages.length - 1) {
+                    const shape = Object.entries(shapePhaseConfigurations)
+                        .find(([, config]) => config.page === page)?.[0];
+                    if (shape && completeShapeIslandIntro(shape)) return;
                     if (state.startButton) state.startButton.hidden = false;
                     return;
                 }
@@ -7201,7 +7236,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     heartFinalNextButton?.addEventListener('click', () => {
         playUiClickSound('chime');
         stopHeartVictoryCelebration();
-        returnToShapePhaseSelector('heart');
+        returnToShapeIslandIntroThenOpenSelector('heart');
     });
 
     const resetShapePreviewPage = (page) => {
@@ -8166,7 +8201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         nextButton?.addEventListener('click', () => {
             const shape = Object.entries(shapePhaseConfigurations)
                 .find(([, config]) => config.page === page)?.[0];
-            if (shape) returnToShapePhaseSelector(shape);
+            if (shape) returnToShapeIslandIntroThenOpenSelector(shape);
         });
     });
 
@@ -8558,7 +8593,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         navigateToShapePhase('shapeArea4', () => {
             const config = shapePhaseConfigurations.rectangle;
             showDirectPreviewMission(config.page, () => {
-                startRectangleDialogue();
+                shapePreviewMissionStartByPage.get(config.page)?.();
                 enableMissionHowToHelp('rectangle');
             });
         });
@@ -8566,7 +8601,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     rectangleFinalNextButton?.addEventListener('click', () => {
         hideRectangleFinalProgress();
-        returnToShapePhaseSelector('rectangle');
+        returnToShapeIslandIntroThenOpenSelector('rectangle');
     });
 
     rectangleDeliveryJeepSequence?.addEventListener('animationend', (event) => {
@@ -9255,7 +9290,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const damageRectangleBoss = () => {
         if (!rectangleBossActive) return;
-        rectangleBossHealthPoints = Math.max(0, rectangleBossHealthPoints - 10);
+        rectangleBossHealthPoints = Math.max(0, rectangleBossHealthPoints - 5);
         updateRectangleBossHealth();
         rectangleBossEncounter?.classList.remove('is-monster-hit');
         rectangleBossEncounter?.getBoundingClientRect();
@@ -9794,6 +9829,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     let triangleGameCompleteVoiceAudio = null;
     let triangleGameCompleteCheeringAudio = null;
     let triangleGameCompleteWalkLoopTimer = null;
+    let triangleGameCompleteWalkFallbackTimer = null;
+    let triangleGameCompleteExitFallbackTimer = null;
+    let triangleGameCompletionStage = 'idle';
     const prepareTriangleGameCompleteConfetti = () => {
         if (!triangleGameCompleteConfetti || triangleGameCompleteConfetti.childElementCount) return;
         const colors = ['#ff4f64', '#ffd83d', '#38c7e8', '#70d34b', '#ff8f32', '#f17ac6', '#ffffff'];
@@ -9810,7 +9848,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     };
 
+    const clearTriangleGameCompletionFallbacks = () => {
+        if (triangleGameCompleteWalkFallbackTimer !== null) {
+            window.clearTimeout(triangleGameCompleteWalkFallbackTimer);
+            triangleGameCompleteWalkFallbackTimer = null;
+        }
+        if (triangleGameCompleteExitFallbackTimer !== null) {
+            window.clearTimeout(triangleGameCompleteExitFallbackTimer);
+            triangleGameCompleteExitFallbackTimer = null;
+        }
+    };
+
     const stopTriangleGameCompletionSequence = () => {
+        clearTriangleGameCompletionFallbacks();
+        triangleGameCompletionStage = 'idle';
         if (triangleGameCompleteWalkLoopTimer !== null) {
             window.clearTimeout(triangleGameCompleteWalkLoopTimer);
             triangleGameCompleteWalkLoopTimer = null;
@@ -9856,8 +9907,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 650));
     };
 
+    const finishTriangleGameCompletionExitWalk = () => {
+        if (
+            triangleGameCompletionStage !== 'leaving'
+            || !triangleGamePage?.classList.contains('is-bridge-complete-scene')
+        ) return;
+        if (triangleGameCompleteExitFallbackTimer !== null) {
+            window.clearTimeout(triangleGameCompleteExitFallbackTimer);
+            triangleGameCompleteExitFallbackTimer = null;
+        }
+        triangleGameCompletionStage = 'progress';
+        if (triangleGameCompleteWalkLoopTimer !== null) {
+            window.clearTimeout(triangleGameCompleteWalkLoopTimer);
+            triangleGameCompleteWalkLoopTimer = null;
+        }
+        triangleGameCompleteCharacterSequence.hidden = true;
+        triangleGameCompleteCharacterSequence.classList.remove('is-leaving');
+        showTriangleGameCompleteProgress();
+    };
+
     const startTriangleGameCompletionExitWalk = () => {
-        if (!triangleGameCompleteCharacterSequence || !triangleGamePage?.classList.contains('is-bridge-complete-scene')) return;
+        if (
+            !triangleGameCompleteCharacterSequence
+            || !triangleGamePage?.classList.contains('is-bridge-complete-scene')
+            || triangleGameCompletionStage === 'leaving'
+            || triangleGameCompletionStage === 'progress'
+        ) return;
+        triangleGameCompletionStage = 'leaving';
         triangleGameCompleteCharacterSequence.classList.remove('is-walking', 'is-arrived', 'is-leaving');
         if (triangleGameCompleteArrivalCharacter) triangleGameCompleteArrivalCharacter.hidden = true;
         if (triangleGameCompleteWalkingCharacter) {
@@ -9879,17 +9955,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                     && triangleGameCompleteWalkingCharacter
                 ) triangleGameCompleteWalkingCharacter.src = `${triangleGameCompleteWalkingSource}?leave-loop=${Date.now()}`;
             }, 2140);
+            // Portrait, reduced-motion, and slow-loading layouts may not emit
+            // animationend. Keep the mission moving in those layouts.
+            triangleGameCompleteExitFallbackTimer = window.setTimeout(
+                finishTriangleGameCompletionExitWalk,
+                4600,
+            );
         };
-        if (!triangleGameCompleteWalkingCharacter || triangleGameCompleteWalkingCharacter.complete) {
-            startLeaving();
-        } else {
-            triangleGameCompleteWalkingCharacter.addEventListener('load', startLeaving, { once: true });
-            triangleGameCompleteWalkingCharacter.addEventListener('error', startLeaving, { once: true });
-        }
+        // The GIF can be lazy-loaded while this sequence is hidden. Do not
+        // make scene progression depend on its load event: reveal the walk
+        // immediately and let the GIF begin as soon as its frames are ready.
+        startLeaving();
     };
 
     const playTriangleGameCompletionAudio = () => {
-        if (!window.Audio || !triangleGamePage?.classList.contains('is-bridge-complete-scene')) return;
+        if (!triangleGamePage?.classList.contains('is-bridge-complete-scene')) return;
+        if (!window.Audio) {
+            startTriangleGameCompletionExitWalk();
+            return;
+        }
 
         let cheeringStarted = false;
         const playCheering = () => {
@@ -9930,6 +10014,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         voiceAudio.play().catch(finishVoice);
     };
 
+    const finishTriangleGameCompletionWalk = () => {
+        if (
+            triangleGameCompletionStage !== 'walking'
+            || !triangleGamePage?.classList.contains('is-bridge-complete-scene')
+        ) return;
+        if (triangleGameCompleteWalkFallbackTimer !== null) {
+            window.clearTimeout(triangleGameCompleteWalkFallbackTimer);
+            triangleGameCompleteWalkFallbackTimer = null;
+        }
+        triangleGameCompletionStage = 'arrived';
+        if (triangleGameCompleteWalkingCharacter) triangleGameCompleteWalkingCharacter.hidden = true;
+        if (triangleGameCompleteArrivalCharacter) triangleGameCompleteArrivalCharacter.hidden = false;
+        triangleGameCompleteCharacterSequence.classList.remove('is-walking');
+        triangleGameCompleteCharacterSequence.classList.add('is-arrived');
+        if (triangleGameCompleteConfetti) {
+            prepareTriangleGameCompleteConfetti();
+            triangleGameCompleteConfetti.hidden = false;
+            triangleGameCompleteConfetti.classList.remove('is-active');
+            triangleGameCompleteConfetti.getBoundingClientRect();
+            triangleGameCompleteConfetti.classList.add('is-active');
+        }
+        playTriangleGameCompletionAudio();
+    };
+
     const startTriangleGameCompletionSequence = () => {
         if (!triangleGameCompleteCharacterSequence || !triangleGamePage?.classList.contains('is-bridge-complete-scene')) return;
 
@@ -9951,15 +10059,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         const startWalking = () => {
             if (hasStarted || !triangleGamePage.classList.contains('is-bridge-complete-scene')) return;
             hasStarted = true;
+            triangleGameCompletionStage = 'walking';
             triangleGameCompleteCharacterSequence.hidden = false;
             triangleGameCompleteCharacterSequence.classList.add('is-walking');
+            triangleGameCompleteWalkFallbackTimer = window.setTimeout(
+                finishTriangleGameCompletionWalk,
+                2400,
+            );
         };
-        if (!triangleGameCompleteWalkingCharacter || triangleGameCompleteWalkingCharacter.complete) {
-            startWalking();
-        } else {
-            triangleGameCompleteWalkingCharacter.addEventListener('load', startWalking, { once: true });
-            triangleGameCompleteWalkingCharacter.addEventListener('error', startWalking, { once: true });
-        }
+        // A hidden lazy image may never emit load. Start the original walking
+        // animation now; the refreshed GIF will render when it is available.
+        startWalking();
     };
 
     triangleGameCompleteCharacterSequence?.addEventListener('animationend', (event) => {
@@ -9968,13 +10078,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             && event.animationName === 'triangleGameCompletedBridgeExitDesktop'
             && triangleGamePage?.classList.contains('is-bridge-complete-scene')
         ) {
-            if (triangleGameCompleteWalkLoopTimer !== null) {
-                window.clearTimeout(triangleGameCompleteWalkLoopTimer);
-                triangleGameCompleteWalkLoopTimer = null;
-            }
-            triangleGameCompleteCharacterSequence.hidden = true;
-            triangleGameCompleteCharacterSequence.classList.remove('is-leaving');
-            showTriangleGameCompleteProgress();
+            finishTriangleGameCompletionExitWalk();
             return;
         }
         if (
@@ -9982,18 +10086,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             || event.animationName !== 'triangleGameCompletedBridgeWalkDesktop'
             || !triangleGamePage?.classList.contains('is-bridge-complete-scene')
         ) return;
-        if (triangleGameCompleteWalkingCharacter) triangleGameCompleteWalkingCharacter.hidden = true;
-        if (triangleGameCompleteArrivalCharacter) triangleGameCompleteArrivalCharacter.hidden = false;
-        triangleGameCompleteCharacterSequence.classList.remove('is-walking');
-        triangleGameCompleteCharacterSequence.classList.add('is-arrived');
-        if (triangleGameCompleteConfetti) {
-            prepareTriangleGameCompleteConfetti();
-            triangleGameCompleteConfetti.hidden = false;
-            triangleGameCompleteConfetti.classList.remove('is-active');
-            triangleGameCompleteConfetti.getBoundingClientRect();
-            triangleGameCompleteConfetti.classList.add('is-active');
-        }
-        playTriangleGameCompletionAudio();
+        finishTriangleGameCompletionWalk();
     });
 
     triangleGameCompleteReplayButton?.addEventListener('click', () => {
@@ -10003,7 +10096,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     triangleGameCompleteNextButton?.addEventListener('click', () => {
-        returnToShapePhaseSelector('triangle');
+        returnToShapeIslandIntroThenOpenSelector('triangle');
     });
 
     const resetTriangleGameTrees = () => {
@@ -10776,23 +10869,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            if (shapeWrongAnswerAudio) {
-                shapeWrongAnswerAudio.pause();
-                shapeWrongAnswerAudio.currentTime = 0;
-                shapeWrongAnswerAudio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
-                if (shapeWrongAnswerAudio.volume > 0) shapeWrongAnswerAudio.play().catch(() => {});
-            }
-            choice.classList.remove('is-wrong');
-            const choiceItem = choice.closest('.shape-tv-choice-item');
-            choiceItem?.classList.remove('is-wrong');
-            choice.getBoundingClientRect();
-            choice.classList.add('is-wrong');
-            choiceItem?.getBoundingClientRect();
-            choiceItem?.classList.add('is-wrong');
-            window.setTimeout(() => {
+            const showWrongAnswerFeedback = () => {
+                if (shapeWrongAnswerAudio) {
+                    shapeWrongAnswerAudio.pause();
+                    shapeWrongAnswerAudio.currentTime = 0;
+                    shapeWrongAnswerAudio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);
+                    if (shapeWrongAnswerAudio.volume > 0) shapeWrongAnswerAudio.play().catch(() => {});
+                }
                 choice.classList.remove('is-wrong');
+                const choiceItem = choice.closest('.shape-tv-choice-item');
                 choiceItem?.classList.remove('is-wrong');
-            }, 500);
+                choice.getBoundingClientRect();
+                choice.classList.add('is-wrong');
+                choiceItem?.getBoundingClientRect();
+                choiceItem?.classList.add('is-wrong');
+                window.setTimeout(() => {
+                    choice.classList.remove('is-wrong');
+                    choiceItem?.classList.remove('is-wrong');
+                }, 500);
+            };
+            // Every choice button names the selected shape in the original
+            // click gesture, then continues with its regular feedback.
+            stopShapeQuestionAudio();
+            playShapeNameAudio(choice.textContent, choice, showWrongAnswerFeedback);
         };
 
         choices.forEach((choice) => {
@@ -10806,12 +10905,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             choice.addEventListener('pointercancel', () => {
                 isPointerFocusing = false;
             });
-            choice.addEventListener('pointerenter', (event) => {
-                if (event.pointerType !== 'mouse') return;
-                if (choiceGroup.querySelector('[data-answer-pending="true"]')) return;
-                playShapeChoiceAudio(choice, true);
-            });
-
             choice.addEventListener('focus', () => {
                 if (isPointerFocusing || !choice.matches(':focus-visible')) return;
                 if (choiceGroup.querySelector('[data-answer-pending="true"]')) return;
@@ -10961,6 +11054,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 stageComplete = true;
                 shapeSquareBubble.classList.add('is-message-complete');
                 if (stageIndex >= shapeSquareIntroStages.length - 1) {
+                    if (completeShapeIslandIntro('square')) return;
                     if (shapeSquareStartButton) shapeSquareStartButton.hidden = false;
                     return;
                 }
@@ -12344,6 +12438,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const message = page?.querySelector('.camera-curtain-message');
         message?.replaceChildren();
         message?.removeAttribute('data-message');
+        if (message) message.hidden = true;
     };
 
     const stopCircleCameraStream = () => {
@@ -12669,6 +12764,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const startCameraIntro = async (page) => {
         if (!page || !isPageVisible(page)) return;
+        // ch6 is the one-time orientation for this camera-game visit. Later
+        // Buksan presses must go straight to the live curtain transition.
+        page.dataset.cameraDetectionGuidePlayed = 'true';
         const session = cancelCameraIntro(page);
         primeCameraDetectionStartVoice(page);
         const shape = String(page.dataset.cameraShape || '').trim().toLowerCase();
@@ -12790,14 +12888,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         message.replaceChildren();
         message.dataset.message = messageType;
         if (messageType === 'initial') {
+            // Permission guidance is useful only until the browser grants
+            // access. Never restore it for later visits to this camera page.
+            if (hasCameraAccessBeenGranted(page)) {
+                message.removeAttribute('data-message');
+                message.hidden = true;
+                return;
+            }
+            message.hidden = false;
             const emphasis = document.createElement('strong');
             emphasis.textContent = 'I-allow ang Kamera';
             const instruction = document.createElement('small');
             instruction.textContent = 'Pindutin ito';
             message.append(emphasis, instruction);
         } else if (messageType === 'processing') {
+            message.hidden = false;
             message.textContent = 'Sandali...';
         } else if (messageType === 'ready') {
+            message.hidden = false;
             message.textContent = 'Handa na?';
         }
     };
@@ -12823,7 +12931,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const waitForCameraDetectionReady = (
         page,
-        { requireRemoval = false, waitForFullscreen = false, onOpened = null } = {},
+        { waitForFullscreen = false, onOpened = null } = {},
     ) => {
         if (!page || !isPageVisible(page)) return false;
         const video = page.querySelector('.circle-camera-video');
@@ -12831,7 +12939,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         cancelCameraDetectionReadyWait(page);
         closeCameraProcessingCurtains(page);
-        let detectionReady = false;
         let fullscreenPromptCompleted = false;
         let readyMessageTimer = null;
         let detectionReadyFallbackTimer = null;
@@ -12839,11 +12946,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const openCurtains = () => {
             cancelCameraDetectionReadyWait(page);
             openCameraProcessingCurtains(page);
+            // Start a fresh live detection session only after the processing
+            // curtain is gone. Frames behind the curtain cannot leak into the
+            // next star's scan.
+            dispatchCameraLifecycle('learnscape:camerastarted', page, video);
             onOpened?.();
         };
 
         const tryOpenCurtains = () => {
-            if (!detectionReady) return;
             if (waitForFullscreen && !isCameraFullscreenActive() && !fullscreenPromptCompleted) return;
             if (readyMessageTimer !== null) return;
             setCameraCurtainMessage(page, 'ready');
@@ -12851,11 +12961,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 readyMessageTimer = null;
                 openCurtains();
             }, 700);
-        };
-        const handleDetectionReady = (event) => {
-            if (event.detail?.page !== page) return;
-            detectionReady = true;
-            tryOpenCurtains();
         };
         const handleFullscreenChange = () => tryOpenCurtains();
         const handleFullscreenPromptDone = () => {
@@ -12867,27 +12972,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             readyMessageTimer = null;
             if (detectionReadyFallbackTimer !== null) window.clearTimeout(detectionReadyFallbackTimer);
             detectionReadyFallbackTimer = null;
-            window.removeEventListener('learnscape:cameradetectionready', handleDetectionReady);
             window.removeEventListener('learnscape:fullscreenpromptdone', handleFullscreenPromptDone);
             document.removeEventListener('fullscreenchange', handleFullscreenChange);
             document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
         };
         cameraDetectionReadyWaits.set(page, cancelWait);
-        window.addEventListener('learnscape:cameradetectionready', handleDetectionReady);
         window.addEventListener('learnscape:fullscreenpromptdone', handleFullscreenPromptDone);
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-        dispatchCameraLifecycle('learnscape:camerastarted', page, video, { requireRemoval });
-        // Do not leave the player behind a closed curtain if a browser blocks
-        // the readiness or fullscreen event. The detector remains gated until
-        // this opens the curtain, so no hidden frame can be accepted. Use the
-        // same “Handa na?” transition as a normal ready event.
+        // The camera remains completely idle behind the curtain. Use the same
+        // “Handa na?” transition before beginning the next live scan.
         detectionReadyFallbackTimer = window.setTimeout(() => {
             if (!isPageVisible(page) || !video?.srcObject?.active) return;
-            detectionReady = true;
             fullscreenPromptCompleted = true;
             tryOpenCurtains();
         }, 2500);
+        tryOpenCurtains();
         return true;
     };
 
@@ -12901,7 +13001,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 || page.classList.contains('is-camera-chest-ready')
                 || Number(page.dataset.cameraDetectionCount) >= 3
             ) return false;
-            return waitForCameraDetectionReady(page, { requireRemoval: true });
+            return waitForCameraDetectionReady(page);
         }
 
         openCameraProcessingCurtains(page);
@@ -12933,6 +13033,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const setShapeCameraButtonVisible = (page, visible) => {
         const button = page?.querySelector('.circle-camera-start-button');
         if (button) button.hidden = !visible;
+    };
+
+    const setCameraCurtainOpenButtonVisible = (page, visible) => {
+        const button = page?.querySelector('.circle-camera-start-button');
+        if (!button) return;
+        if (page === circleCameraPage) {
+            setCircleCameraButtonText('Buksan');
+            setCircleCameraButtonVisible(visible);
+        } else {
+            setShapeCameraButtonText(page, 'Buksan');
+            setShapeCameraButtonVisible(page, visible);
+        }
+        button.disabled = false;
     };
 
     const stopShapeCameraStream = (page) => {
@@ -13360,8 +13473,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                             // until the player explicitly chooses Retry.
                             closeCameraProcessingCurtains(page);
                         } else {
-                            // The curtains stay shut until the detector confirms
-                            // that its next live recognition session is ready.
+                            // Resume the next live scan only after all reward
+                            // processing has completed and the curtain can
+                            // safely reopen.
                             clearCameraProcessing(page, { resumeDetection: true });
                         }
                     }, 760);
@@ -13906,14 +14020,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Do not hide a region from assistive technology while one of its controls
     // still owns focus. This prevents the browser's aria-hidden focus warning.
-    const setAriaRegionHidden = (region, isHidden) => {
+    function setAriaRegionHidden(region, isHidden) {
         if (!region) return;
         const focusedElement = document.activeElement;
         if (isHidden && focusedElement instanceof HTMLElement && region.contains(focusedElement)) {
             focusedElement.blur();
         }
         region.setAttribute('aria-hidden', String(isHidden));
-    };
+    }
 
     const resetGame3Hotspots = () => {
         game3Hotspots.forEach((hotspot) => {
@@ -14172,19 +14286,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     circleIllustrationNextButton?.addEventListener('click', () => {
         if (circleIllustrationProgress?.dataset.progressStage === 'hunt') {
-            returnToShapePhaseSelector('circle');
+            returnToShapeIslandIntroThenOpenSelector('circle');
             return;
         }
-        returnToShapePhaseSelector('circle');
+        returnToShapeIslandIntroThenOpenSelector('circle');
     });
     const handleCameraAccessButtonPress = (event, page, startCamera) => {
         event.preventDefault();
         const button = event.currentTarget;
         if (button?.disabled) return;
+        // Prime size-coaching voices inside the trusted Kamera/Buksan click.
+        // Later distance feedback runs from live camera frames, outside the
+        // browser's direct user-activation window.
+        window.dispatchEvent(new CustomEvent('learnscape:prime-camera-distance-cues', {
+            detail: { page },
+        }));
         // Call getUserMedia from this trusted button press so the browser can
         // display its camera-permission prompt.
         if (page?.dataset.cameraAccessReady !== 'true') {
             startCamera();
+            return;
+        }
+        const earnedStars = Number(page.dataset.cameraDetectionCount) || 0;
+        if (page.dataset.cameraDetectionGuidePlayed === 'true' || earnedStars > 0) {
+            setCameraCurtainOpenButtonVisible(page, false);
+            waitForCameraDetectionReady(page);
             return;
         }
         startCameraIntro(page);
@@ -14317,10 +14443,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     shapeSquareNextButton?.addEventListener('click', () => {
         if (shapeSquareProgress?.dataset.progressStage === 'answer') {
-            returnToShapePhaseSelector('square');
+            returnToShapeIslandIntroThenOpenSelector('square');
             return;
         }
-        returnToShapePhaseSelector('square');
+        returnToShapeIslandIntroThenOpenSelector('square');
     });
     shapeSquareMissionStartButton?.addEventListener('click', () => {
         playUiClickSound('chime');
@@ -14431,7 +14557,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const activePreviewPage = shapePreviewPages.find((page) => isPageVisible(page));
             if (activePreviewPage) {
                 if (/Camera$/.test(previousRoute || '')) resetShapePreviewPage(activePreviewPage);
-                startShapePreviewIntro(activePreviewPage);
+                const shape = Object.entries(shapePhaseConfigurations)
+                    .find(([, config]) => config.page === activePreviewPage)?.[0];
+                if (shape && pendingShapePhaseSelectorIntros.has(shape)) {
+                    showShapePreviewFinalMessage(activePreviewPage);
+                    openShapePhaseSelectorAfterFinalMessage(shape);
+                } else {
+                    startShapePreviewIntro(activePreviewPage);
+                }
             }
             return;
         }
@@ -14448,7 +14581,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (event.detail?.route === 'shapeSquare') {
             resetShapeCircleScene();
-            startShapeSquareScene();
+            if (pendingShapePhaseSelectorIntros.has('square')) {
+                showShapeSquareFinalMessage();
+                openShapePhaseSelectorAfterFinalMessage('square');
+            } else {
+                startShapeSquareScene();
+            }
             return;
         }
 
@@ -15446,7 +15584,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     ovalFinalNextButton?.addEventListener('click', () => {
         playUiClickSound('start');
         hideOvalFinalProgress();
-        returnToShapePhaseSelector('oval');
+        returnToShapeIslandIntroThenOpenSelector('oval');
     });
 
     window.addEventListener('learnscape:routechange', (event) => {
@@ -15703,7 +15841,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (shape === 'rectangle') {
             runShapePhaseWithLoading(() => showDirectPreviewMission(config.page, () => {
-                startRectangleDialogue();
+                shapePreviewMissionStartByPage.get(config.page)?.();
                 enableMissionHowToHelp('rectangle');
             }));
             return true;
@@ -15794,6 +15932,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const shapePhaseSelectors = new Map();
+    const pendingShapePhaseSelectorIntros = new Set();
 
     const setShapePhaseHubOpen = (record, isOpen) => {
         // A phase action can hide this menu while its button still owns focus.
@@ -15828,24 +15967,52 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!isPageVisible(record.page)) setShapePhaseHubOpen(record, false);
     };
 
+    const openShapePhaseSelector = (shape) => {
+        const record = shapePhaseSelectors.get(shape);
+        if (!record || !isPageVisible(record.page)) return false;
+        setShapePhaseHubOpen(record, true);
+        syncShapePhaseSelector(shape);
+        record.selector.querySelector('.shape-phase-play:not(:disabled)')?.focus({ preventScroll: true });
+        return true;
+    };
+
+    const completeShapeIslandIntro = (shape) => {
+        if (!pendingShapePhaseSelectorIntros.delete(shape)) return false;
+        return openShapePhaseSelector(shape);
+    };
+
+    const openShapePhaseSelectorAfterFinalMessage = (shape) => {
+        window.setTimeout(() => completeShapeIslandIntro(shape), 1200);
+    };
+
     const returnToShapePhaseSelector = (shape) => {
         const config = shapePhaseConfigurations[shape];
         if (!config) return false;
+        if (isPageVisible(config.page)) return openShapePhaseSelector(shape);
+        navigateToShapePhase(config.island, () => openShapePhaseSelector(shape));
+        return true;
+    };
+
+    const returnToShapeIslandIntroThenOpenSelector = (shape) => {
+        const config = shapePhaseConfigurations[shape];
+        if (!config) return false;
+
+        pendingShapePhaseSelectorIntros.add(shape);
         if (isPageVisible(config.page)) {
-            const record = shapePhaseSelectors.get(shape);
-            if (!record) return false;
-            setShapePhaseHubOpen(record, true);
-            syncShapePhaseSelector(shape);
-            record.selector.querySelector('.shape-phase-play:not(:disabled)')?.focus({ preventScroll: true });
+            if (shape === 'circle') {
+                resetShapeCircleScene();
+                showShapeCircleCh3FinalMessage(false);
+            } else if (shape === 'square') {
+                showShapeSquareFinalMessage();
+                openShapePhaseSelectorAfterFinalMessage(shape);
+            } else {
+                resetShapePreviewPage(config.page);
+                showShapePreviewFinalMessage(config.page);
+                openShapePhaseSelectorAfterFinalMessage(shape);
+            }
             return true;
         }
-        navigateToShapePhase(config.island, () => {
-            const record = shapePhaseSelectors.get(shape);
-            if (!record) return;
-            setShapePhaseHubOpen(record, true);
-            syncShapePhaseSelector(shape);
-            record.selector.querySelector('.shape-phase-play:not(:disabled)')?.focus({ preventScroll: true });
-        });
+        navigateToShapePhase(config.island);
         return true;
     };
 
@@ -15900,9 +16067,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 cameraShape.setAttribute('aria-hidden', 'true');
                 preview.appendChild(cameraShape);
             }
-            const description = document.createElement('p');
-            description.className = 'shape-phase-description';
-            description.textContent = panelCopy.description;
             const play = document.createElement('button');
             play.className = 'shape-phase-play';
             play.type = 'button';
@@ -15921,7 +16085,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 setShapePhaseHubOpen({ page, selector }, true);
                 play.focus({ preventScroll: true });
             });
-            choice.append(title, preview, description, play);
+            choice.append(title, preview, play);
             choices.appendChild(choice);
         });
         selector.append(header, choices);
