@@ -3580,8 +3580,8 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
     z-index: 3;
     top: 50%;
     left: 50%;
-    width: clamp(4.5rem, 8vw, 7.25rem);
-    height: clamp(5.45rem, 9.7vw, 8.8rem);
+    width: clamp(3.15rem, 5.1vw, 4.65rem);
+    height: clamp(3.8rem, 6.2vw, 5.65rem);
     overflow: visible;
     filter:
         drop-shadow(0 0.28rem 0 rgba(31, 38, 44, 0.65))

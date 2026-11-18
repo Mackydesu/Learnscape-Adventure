@@ -15814,7 +15814,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             lock.setAttribute('viewBox', '0 0 120 145');
             lock.setAttribute('role', 'img');
             lock.setAttribute('aria-label', `${panelCopy.title} ay naka-lock`);
-            lock.innerHTML = '<use class="shape-phase-lock-shackle" href="#game3-padlock-shackle"></use><use class="shape-phase-lock-body" href="#game3-padlock-body"></use>';
+            // Keep the island lock artwork within this SVG's own viewBox.  Referencing
+            // the reusable symbols here lets some browsers size the symbol viewport as
+            // the whole card, which produces an oversized, split lock.
+            lock.innerHTML = '<g class="shape-phase-lock-shackle"><path d="M31 62V42C31 22 44 10 60 10s29 12 29 32v20" fill="none" stroke="#3b444d" stroke-width="23" stroke-linecap="round"></path><path d="M31 62V42C31 22 44 10 60 10s29 12 29 32v20" fill="none" stroke="url(#game3-lock-shackle)" stroke-width="15" stroke-linecap="round"></path><path d="M39 48V41c0-14 8-23 21-23" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity="0.72"></path></g><g class="shape-phase-lock-body"><rect x="10" y="55" width="100" height="79" rx="16" fill="url(#game3-lock-rim)" filter="url(#game3-lock-inner-shadow)"></rect><rect x="16" y="59" width="88" height="67" rx="12" fill="url(#game3-lock-body)" stroke="#dce2e7" stroke-width="2.5"></rect><path d="M22 66h76" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity="0.58"></path><path d="M22 116c24 7 52 7 76 0" fill="none" stroke="#3f4851" stroke-width="3" stroke-linecap="round" opacity="0.5"></path><circle cx="27" cy="75" r="3.2" fill="#eef2f5" stroke="#626c76" stroke-width="1.5"></circle><circle cx="93" cy="75" r="3.2" fill="#eef2f5" stroke="#626c76" stroke-width="1.5"></circle><circle cx="60" cy="88" r="10" fill="url(#game3-lock-keyhole)" stroke="#707b85" stroke-width="2"></circle><path d="M55 94h10l3 20H52z" fill="url(#game3-lock-keyhole)"></path><path d="M58 98h4l1.4 10h-6.8z" fill="#050709" opacity="0.7"></path></g>';
             const play = document.createElement('button');
             play.className = 'shape-phase-play';
             play.type = 'button';
