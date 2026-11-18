@@ -3580,22 +3580,37 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
     z-index: 3;
     top: 50%;
     left: 50%;
-    display: grid;
-    place-items: center;
-    width: clamp(3.4rem, 7vw, 6rem);
-    aspect-ratio: 1;
-    border: clamp(0.14rem, 0.25vw, 0.23rem) solid #fff3b2;
-    border-radius: 50%;
-    background: radial-gradient(circle at 32% 28%, #f7f8fb, #9faab5 48%, #47515b 100%);
-    box-shadow: 0 0.25rem 0 #252d34, 0 0.5rem 0.8rem rgba(0, 0, 0, 0.48);
-    color: #1e252b;
-    font-size: clamp(1.8rem, 4vw, 3.5rem);
-    line-height: 1;
+    width: clamp(4.5rem, 8vw, 7.25rem);
+    height: clamp(5.45rem, 9.7vw, 8.8rem);
+    overflow: visible;
+    filter:
+        drop-shadow(0 0.28rem 0 rgba(31, 38, 44, 0.65))
+        drop-shadow(0 0.75rem 0.85rem rgba(20, 33, 44, 0.4));
     transform: translate(-50%, -50%);
-    filter: none;
+    pointer-events: none;
 }
 
 .shape-phase-lock[hidden] { display: none; }
+
+.shape-phase-lock-shackle {
+    transform-box: view-box;
+    transform-origin: 31px 62px;
+}
+
+/* Use the island padlock break motion only. The card returns to color without
+   the island carousel's rainbow sweep or background reveal. */
+.shape-phase-choice.is-unlocking .shape-phase-lock-shackle {
+    animation: game3IslandShackleUnlock 1.25s cubic-bezier(.2, .78, .28, 1) forwards;
+}
+
+.shape-phase-choice.is-unlocking .shape-phase-lock {
+    animation: shapePhasePadlockDismiss 1.25s cubic-bezier(.2, .78, .28, 1) forwards;
+}
+
+@keyframes shapePhasePadlockDismiss {
+    0%, 76% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -62%) scale(0.78); }
+}
 
 .shape-phase-choice h3 {
     z-index: 1;

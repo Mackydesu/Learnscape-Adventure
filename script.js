@@ -7312,6 +7312,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         showShapePreviewProgress(diamondMissionPage);
     };
 
+    const shapeLessonHighlightFrames = new WeakMap();
+    const observedShapeLessonMascots = new WeakSet();
     const positionShapeLessonHighlight = (mascot) => {
         const screen = mascot?.closest('.circle-illustration-tv-screen');
         if (!screen || mascot.hidden) return;
@@ -7327,8 +7329,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             screen.style.setProperty('--shape-tv-ray-y', `${mascotRect.top - screenRect.top + (mascotRect.height / 2)}px`);
             screen.style.setProperty('--shape-tv-ray-size', `${size}px`);
         };
-        syncPosition();
-        window.requestAnimationFrame(syncPosition);
+        const syncAfterLayout = () => {
+            const previousFrame = shapeLessonHighlightFrames.get(mascot);
+            if (previousFrame !== undefined) window.cancelAnimationFrame(previousFrame);
+            syncPosition();
+            const frame = window.requestAnimationFrame(() => {
+                syncPosition();
+                shapeLessonHighlightFrames.delete(mascot);
+            });
+            shapeLessonHighlightFrames.set(mascot, frame);
+        };
+        syncAfterLayout();
+        // Cached images can report a layout box before their decoded pixels are
+        // ready. Recalculate after both a fresh load and a completed decode.
+        if (!observedShapeLessonMascots.has(mascot)) {
+            observedShapeLessonMascots.add(mascot);
+            mascot.addEventListener('load', syncAfterLayout);
+            mascot.addEventListener('error', syncAfterLayout);
+            if (typeof ResizeObserver === 'function') {
+                const observer = new ResizeObserver(syncAfterLayout);
+                observer.observe(mascot);
+            }
+        }
+        mascot.decode?.().then(syncAfterLayout).catch(syncAfterLayout);
     };
 
     const highlightShapeLessonMascot = (mascot) => {
@@ -7338,6 +7361,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         mascot.classList.add('is-shape-highlighted');
         positionShapeLessonHighlight(mascot);
     };
+
+    window.addEventListener('resize', () => {
+        document.querySelectorAll('.shape-tv-mascot.is-shape-highlighted:not([hidden])')
+            .forEach(positionShapeLessonHighlight);
+    });
 
     const showShapePreviewIllustration = (page) => {
         if (!page || !isPageVisible(page)) return;
@@ -15641,6 +15669,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const shapePhaseSelectors = new Map();
+    const shapePhaseUnlockTimers = new WeakMap();
 
     const setShapePhaseHubOpen = (record, isOpen) => {
         // A phase action can hide this menu while its button still owns focus.
@@ -15666,13 +15695,41 @@ document.addEventListener('DOMContentLoaded', async () => {
             const unlocked = isShapePhaseUnlocked(shape, phase);
             const playButton = choice.querySelector('.shape-phase-play');
             const lock = choice.querySelector('.shape-phase-lock');
+            const wasLocked = choice.dataset.shapePhaseUnlocked === 'false';
+            const shouldAnimateUnlock = unlocked
+                && (wasLocked || choice.dataset.pendingUnlockAnimation === 'true');
             choice.classList.toggle('is-locked', !unlocked);
             choice.setAttribute('aria-disabled', String(!unlocked));
             if (playButton) {
                 playButton.disabled = !unlocked;
                 playButton.removeAttribute('aria-busy');
             }
-            if (lock) lock.hidden = unlocked;
+            if (lock) {
+                const previousTimer = shapePhaseUnlockTimers.get(choice);
+                if (choice.classList.contains('is-unlocking') && previousTimer !== undefined) {
+                    choice.dataset.shapePhaseUnlocked = String(unlocked);
+                    return;
+                }
+                if (previousTimer !== undefined) window.clearTimeout(previousTimer);
+                if (shouldAnimateUnlock && !record.selector.hidden) {
+                    choice.dataset.pendingUnlockAnimation = 'false';
+                    lock.hidden = false;
+                    choice.classList.remove('is-unlocking');
+                    void choice.offsetWidth;
+                    choice.classList.add('is-unlocking');
+                    const unlockTimer = window.setTimeout(() => {
+                        lock.hidden = true;
+                        choice.classList.remove('is-unlocking');
+                        shapePhaseUnlockTimers.delete(choice);
+                    }, 1250);
+                    shapePhaseUnlockTimers.set(choice, unlockTimer);
+                } else {
+                    lock.hidden = unlocked;
+                    if (shouldAnimateUnlock) choice.dataset.pendingUnlockAnimation = 'true';
+                    choice.classList.remove('is-unlocking');
+                }
+            }
+            choice.dataset.shapePhaseUnlocked = String(unlocked);
         });
         if (!isPageVisible(record.page)) setShapePhaseHubOpen(record, false);
     };
@@ -15683,16 +15740,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isPageVisible(config.page)) {
             const record = shapePhaseSelectors.get(shape);
             if (!record) return false;
-            syncShapePhaseSelector(shape);
             setShapePhaseHubOpen(record, true);
+            syncShapePhaseSelector(shape);
             record.selector.querySelector('.shape-phase-play:not(:disabled)')?.focus({ preventScroll: true });
             return true;
         }
         navigateToShapePhase(config.island, () => {
             const record = shapePhaseSelectors.get(shape);
             if (!record) return;
-            syncShapePhaseSelector(shape);
             setShapePhaseHubOpen(record, true);
+            syncShapePhaseSelector(shape);
             record.selector.querySelector('.shape-phase-play:not(:disabled)')?.focus({ preventScroll: true });
         });
         return true;
@@ -15752,11 +15809,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const description = document.createElement('p');
             description.className = 'shape-phase-description';
             description.textContent = panelCopy.description;
-            const lock = document.createElement('span');
+            const lock = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             lock.className = 'shape-phase-lock';
+            lock.setAttribute('viewBox', '0 0 120 145');
             lock.setAttribute('role', 'img');
             lock.setAttribute('aria-label', `${panelCopy.title} ay naka-lock`);
-            lock.textContent = '🔒';
+            lock.innerHTML = '<use class="shape-phase-lock-shackle" href="#game3-padlock-shackle"></use><use class="shape-phase-lock-body" href="#game3-padlock-body"></use>';
             const play = document.createElement('button');
             play.className = 'shape-phase-play';
             play.type = 'button';
@@ -15795,8 +15853,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 stopShapePreviewIntroAudioOnly(page);
             }
-            syncShapePhaseSelector(shape);
             setShapePhaseHubOpen(record, true);
+            syncShapePhaseSelector(shape);
             selector.querySelector('.shape-phase-play:not(:disabled)')?.focus({ preventScroll: true });
         }, true);
         syncShapePhaseSelector(shape);
