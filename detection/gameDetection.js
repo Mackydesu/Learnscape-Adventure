@@ -11,6 +11,7 @@ const DISTANCE_CUE_AUDIO = Object.freeze({
     "move-closer": "assets/Audios/Voice over/Lumapit.mp3"
 });
 const DISTANCE_CUE_REPLAY_DELAY_MS = 2800;
+const WRONG_SHAPE_FEEDBACK_COOLDOWN_MS = 1400;
 const SHAPE_NAMES = Object.freeze({
     circle: "Bilog",
     square: "Parisukat",
@@ -120,7 +121,8 @@ function stopDistanceCueAudio(session) {
     session.distanceCueAudio = null;
 }
 
-function hideDistanceCue(session) {
+function hideDistanceCue(session, { stopAudio = false } = {}) {
+    if (stopAudio) stopDistanceCueAudio(session);
     const cue = session?.overlay?.distanceCue;
     if (cue) {
         cue.hidden = true;
@@ -162,18 +164,19 @@ function playDistanceCueAudio(session, guidance) {
     audio.play().catch(release);
 }
 
-function setDistanceCue(session, guidance = "") {
+function setDistanceCue(session, guidance = "", { clearImmediately = false } = {}) {
     const cue = session.overlay?.distanceCue;
     if (!cue) return;
     const copy = getDistanceCueCopy(guidance);
     if (!copy) {
         // Let the player finish hearing the matching instruction before the
-        // coach disappears, even if the next live frame is already in range.
-        if (session.distanceCueAudio) {
+        // coach disappears when the target is still in view and simply moves
+        // into range. Wrong shapes clear it immediately instead.
+        if (!clearImmediately && session.distanceCueAudio) {
             session.pendingDistanceCueClear = true;
             return;
         }
-        hideDistanceCue(session);
+        hideDistanceCue(session, { stopAudio: clearImmediately });
         return;
     }
 
@@ -208,6 +211,23 @@ function shapeName(shape, capitalized = false) {
 
 function targetCameraPrompt(shape) {
     return `Magpakita ng bagay na hugis ${shapeName(shape, true)} sa Kamera`;
+}
+
+function playWrongShapeFeedback(session, track) {
+    const key = `${track.trackId ?? track.label}:${track.label}`;
+    const now = Date.now();
+    if (session.lastWrongShapeKey === key
+        && now - (session.lastWrongShapeFeedbackAt || 0) < WRONG_SHAPE_FEEDBACK_COOLDOWN_MS) return;
+
+    session.lastWrongShapeKey = key;
+    session.lastWrongShapeFeedbackAt = now;
+    const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+    if (!window.Audio || soundScale <= 0) return;
+    const audio = new window.Audio("assets/Audios/Sound effects/buzzer.mp3");
+    audio.preload = "auto";
+    audio.playsInline = true;
+    audio.volume = Math.min(1, Math.max(0, soundScale));
+    audio.play().catch(() => {});
 }
 
 function drawTrackedObjects(session, tracks) {
@@ -246,9 +266,12 @@ function drawTrackedObjects(session, tracks) {
         const y = track.y1 * scale + offsetY;
         const boxWidth = (track.x2 - track.x1) * scale;
         const boxHeight = (track.y2 - track.y1) * scale;
-        const targetLabelMatched = trackHasTargetLabel(track, session.shape) && track.labelStable === true;
-        const needsDistanceAdjustment = trackHasTargetLabel(track, session.shape) && track.sizeAccepted === false;
-        const color = needsDistanceAdjustment ? "#ffd23f" : targetLabelMatched ? "#35f178" : "#ffffff";
+        const isTargetShape = trackHasTargetLabel(track, session.shape);
+        const targetLabelMatched = isTargetShape && track.labelStable === true;
+        const needsDistanceAdjustment = isTargetShape && track.sizeAccepted === false;
+        // Keep the target's progress colours, but make an identified wrong
+        // shape unambiguous: its live box and label are red.
+        const color = !isTargetShape ? "#ff4b4b" : needsDistanceAdjustment ? "#ffd23f" : targetLabelMatched ? "#35f178" : "#ffffff";
         context.globalAlpha = track.stale ? 0.55 : 1;
         context.strokeStyle = color;
         context.lineWidth = 3;
@@ -304,7 +327,7 @@ async function handleTrackedFrame(session, { frame, tracks }) {
     }
 
     if (session.waitingForRemoval) {
-        setDistanceCue(session);
+        setDistanceCue(session, "", { clearImmediately: true });
         const targetStillVisible = tracks.some(track => trackHasTargetLabel(track, session.shape));
         if (!targetStillVisible) session.absentFrames++;
         else session.absentFrames = 0;
@@ -320,11 +343,24 @@ async function handleTrackedFrame(session, { frame, tracks }) {
         return;
     }
 
+    // A stable, in-range non-target is a wrong attempt: keep its red box,
+    // give one short wrong-answer cue, and never apply target-size coaching.
+    const hasLiveTarget = tracks.some(track => !track.stale && trackHasTargetLabel(track, session.shape));
+    const wrongShape = !hasLiveTarget && tracks
+        .filter(track => !track.stale && track.sizeAccepted === true && track.labelStable === true && !trackHasTargetLabel(track, session.shape))
+        .sort((a, b) => b.confidence - a.confidence)[0];
+    if (wrongShape) {
+        setDistanceCue(session, "", { clearImmediately: true });
+        playWrongShapeFeedback(session, wrongShape);
+        setCameraStatus(session.page, targetCameraPrompt(session.shape));
+        return;
+    }
+
     const selected = tracks
         .filter(track => !track.stale && track.sizeAccepted === true && track.labelStable === true && trackHasTargetLabel(track, session.shape))
         .sort((a, b) => b.confidence - a.confidence)[0];
     if (selected) {
-        setDistanceCue(session);
+        setDistanceCue(session, "", { clearImmediately: true });
         if (session.confirming || frame - session.lastConfirmationFrame < 6) return;
         session.confirming = true;
         session.lastConfirmationFrame = frame;
@@ -364,7 +400,10 @@ async function handleTrackedFrame(session, { frame, tracks }) {
         return;
     }
 
-    setDistanceCue(session);
+    // The size cue is reserved for the active mission target. If the target
+    // is no longer in the live frame, immediately clear any old instruction
+    // instead of leaving “Lumapit” or “Lumayo” beside a wrong-shape box.
+    setDistanceCue(session, "", { clearImmediately: !hasLiveTarget });
     setCameraStatus(session.page, targetCameraPrompt(session.shape));
 }
 
@@ -426,7 +465,9 @@ function startDetection(event, modelReady) {
         readyNotified: false,
         absentFrames: 0,
         confirming: false,
-        lastConfirmationFrame: -Infinity
+        lastConfirmationFrame: -Infinity,
+        lastWrongShapeKey: "",
+        lastWrongShapeFeedbackAt: -Infinity
     };
     if (!session.stream?.active || !session.overlay) return;
 

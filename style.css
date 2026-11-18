@@ -3569,47 +3569,15 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
 
 .shape-phase-choice.is-locked {
     filter: grayscale(0.82) brightness(0.54);
+    cursor: not-allowed;
 }
 
-.shape-phase-choice.is-locked > :not(.shape-phase-lock) {
+.shape-phase-choice.is-locked > * {
     pointer-events: none;
 }
 
-.shape-phase-lock {
-    position: absolute;
-    z-index: 3;
-    top: 50%;
-    left: 50%;
-    width: clamp(3.15rem, 5.1vw, 4.65rem);
-    height: clamp(3.8rem, 6.2vw, 5.65rem);
-    overflow: visible;
-    filter:
-        drop-shadow(0 0.28rem 0 rgba(31, 38, 44, 0.65))
-        drop-shadow(0 0.75rem 0.85rem rgba(20, 33, 44, 0.4));
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-}
-
-.shape-phase-lock[hidden] { display: none; }
-
-.shape-phase-lock-shackle {
-    transform-box: view-box;
-    transform-origin: 31px 62px;
-}
-
-/* Use the island padlock break motion only. The card returns to color without
-   the island carousel's rainbow sweep or background reveal. */
-.shape-phase-choice.is-unlocking .shape-phase-lock-shackle {
-    animation: game3IslandShackleUnlock 1.25s cubic-bezier(.2, .78, .28, 1) forwards;
-}
-
-.shape-phase-choice.is-unlocking .shape-phase-lock {
-    animation: shapePhasePadlockDismiss 1.25s cubic-bezier(.2, .78, .28, 1) forwards;
-}
-
-@keyframes shapePhasePadlockDismiss {
-    0%, 76% { opacity: 1; }
-    100% { opacity: 0; transform: translate(-50%, -62%) scale(0.78); }
+.shape-phase-choice.is-locked .shape-phase-play:disabled {
+    cursor: not-allowed;
 }
 
 .shape-phase-choice h3 {
@@ -15699,7 +15667,7 @@ body *::after {
         drop-shadow(0 0 0.08rem rgba(255, 255, 255, 0.92))
         drop-shadow(0 0 0.5rem var(--camera-target-edge-glow))
         drop-shadow(0 0.2rem 0.25rem rgba(61, 35, 17, 0.34));
-    animation: circleCameraTargetImagePulse 1.5s ease-in-out infinite alternate;
+    animation: circleCameraTargetImageBouncePulse 1.35s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
 }
 
 .circle-camera-page.is-camera-detection-celebrating .circle-camera-target-image {
@@ -16464,6 +16432,31 @@ body *::after {
 
 .camera-detection-celebration {
     z-index: 23;
+}
+
+.camera-detection-character-ch9 {
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    bottom: clamp(-0.9rem, -1vh, -0.2rem);
+    width: clamp(10rem, 23vw, 18rem);
+    max-height: 70%;
+    object-fit: contain;
+    object-position: center bottom;
+    opacity: 0;
+    transform: translate(-50%, 34%) scale(0.42) rotate(-7deg);
+    transform-origin: center bottom;
+    filter: drop-shadow(0.35rem 0.6rem 0.42rem rgba(11, 38, 88, 0.42));
+}
+
+.camera-detection-celebration.is-active .camera-detection-character-ch9 {
+    animation: cameraDetectionCh9Celebrate 0.72s cubic-bezier(0.2, 1.42, 0.35, 1) forwards;
+}
+
+@keyframes cameraDetectionCh9Celebrate {
+    0% { opacity: 0; transform: translate(-50%, 34%) scale(0.42) rotate(-7deg); }
+    72% { opacity: 1; transform: translate(-50%, -4%) scale(1.06) rotate(3deg); }
+    100% { opacity: 1; transform: translate(-50%, 0) scale(1) rotate(0); }
 }
 
 .camera-completion-celebration {
@@ -19388,8 +19381,8 @@ body *::after {
     }
 }
 
-@keyframes circleCameraTargetImagePulse {
-    from {
+@keyframes circleCameraTargetImageBouncePulse {
+    0%, 100% {
         transform: scale(1);
         filter:
             drop-shadow(0 0 0.08rem rgba(255, 255, 255, 0.92))
@@ -19397,14 +19390,16 @@ body *::after {
             drop-shadow(0 0.2rem 0.25rem rgba(61, 35, 17, 0.34))
             brightness(1);
     }
-    to {
-        transform: scale(1.035);
+    36% {
+        transform: translateY(-0.58rem) scale(1.085);
         filter:
             drop-shadow(0 0 0.12rem rgba(255, 255, 255, 0.96))
             drop-shadow(0 0 0.72rem var(--camera-target-edge-glow))
             drop-shadow(0 0.3rem 0.4rem rgba(61, 35, 17, 0.4))
             brightness(1.08);
     }
+    62% { transform: translateY(0.08rem) scale(0.975); }
+    80% { transform: translateY(-0.16rem) scale(1.025); }
 }
 
 @keyframes cameraTargetSuccessJump {

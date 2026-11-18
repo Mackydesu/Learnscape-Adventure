@@ -384,6 +384,26 @@ document.addEventListener('DOMContentLoaded', async () => {
             detail: { page, video, shape: page?.dataset.cameraShape || '', ...extraDetail },
         }));
     };
+    const cameraAccessSessionKey = (page) => `learnscape-camera-accessed:${page?.dataset.cameraShape || 'shape'}`;
+    const hasCameraAccessBeenGranted = (page) => {
+        if (!page) return false;
+        if (page.dataset.cameraAccessGranted === 'true') return true;
+        try {
+            return window.sessionStorage?.getItem(cameraAccessSessionKey(page)) === 'true';
+        } catch (error) {
+            return false;
+        }
+    };
+    const markCameraAccessGranted = (page) => {
+        if (!page) return;
+        page.dataset.cameraAccessGranted = 'true';
+        try {
+            window.sessionStorage?.setItem(cameraAccessSessionKey(page), 'true');
+        } catch (error) {
+            // Keeping the in-memory marker still prevents repeats in this visit.
+        }
+    };
+    const cameraStartButtonText = (page) => (hasCameraAccessBeenGranted(page) ? 'Buksan' : 'Kamera');
     cameraPages.forEach((page) => {
         const shape = page.dataset.cameraShape || '';
         const shapeLabel = cameraShapeLabels[shape] || 'Shape';
@@ -403,7 +423,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (cameraStartButton) {
             cameraStartButton.classList.remove('game-icon-button', 'icon-camera');
             cameraStartButton.querySelector('.circle-camera-start-icon')?.remove();
-            cameraStartButton.setAttribute('aria-label', 'I-allow ang Kamera');
+            const startText = cameraStartButtonText(page);
+            cameraStartButton.setAttribute('aria-label', startText === 'Kamera' ? 'I-allow ang Kamera' : startText);
             if (!cameraStartButton.querySelector('.camera-start-guide-hand')) {
                 const guideHand = document.createElement('img');
                 guideHand.className = 'camera-start-guide-hand';
@@ -412,8 +433,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 guideHand.setAttribute('aria-hidden', 'true');
                 cameraStartButton.prepend(guideHand);
             }
-            cameraStartButton.querySelector('strong')?.replaceChildren('Kamera');
-            cameraStartButton.classList.add('is-camera-access-button');
+            cameraStartButton.querySelector('strong')?.replaceChildren(startText);
+            cameraStartButton.classList.toggle('is-camera-access-button', startText === 'Kamera');
+            cameraStartButton.classList.toggle('is-camera-open-button', startText === 'Buksan');
+            cameraStartButton.querySelector('.camera-start-guide-hand').hidden = startText !== 'Kamera';
         }
 
         const unlockHeading = page.querySelector('.circle-camera-unlock-board h2');
@@ -478,6 +501,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
             `);
         }
+        viewfinder?.querySelectorAll('.camera-curtain-character').forEach((character) => character.remove());
         if (viewfinder && !viewfinder.querySelector('.camera-film-countdown')) {
             viewfinder.insertAdjacentHTML('beforeend', `
                 <section class="camera-film-countdown" aria-live="polite" aria-label="Sampung segundong countdown" hidden>
@@ -510,15 +534,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         // viewfinder. Remove it in case this page was kept alive during an
         // in-app navigation; correct scans now celebrate across the screen.
         viewfinder?.querySelectorAll('.camera-detection-confetti').forEach((confetti) => confetti.remove());
+        page.querySelectorAll('.camera-detection-celebration .circle-hunt-character-ch7, .camera-detection-celebration .circle-hunt-ch8-pop').forEach((character) => character.remove());
 
         if (!page.querySelector('.camera-detection-celebration')) {
             page.insertAdjacentHTML('beforeend', `
                 <section class="circle-hunt-celebration camera-detection-celebration" aria-hidden="true">
                     <div class="circle-hunt-confetti camera-detection-fullscreen-confetti" aria-hidden="true"></div>
-                    <img class="circle-hunt-character circle-hunt-character-ch7" src="assets/Character/ch7.webp" alt="Bibi celebrating">
-                    <div class="circle-hunt-ch8-pop"><img class="circle-hunt-character-ch8" src="assets/Character/ch8.webp" alt="Bibi giving a thumbs up"></div>
+                    <img class="camera-detection-character-ch9" src="assets/Character/ch9.webp" alt="" aria-hidden="true">
                 </section>
             `);
+        }
+        const detectionCelebration = page.querySelector('.camera-detection-celebration');
+        if (detectionCelebration && !detectionCelebration.querySelector('.camera-detection-character-ch9')) {
+            detectionCelebration.insertAdjacentHTML('beforeend', '<img class="camera-detection-character-ch9" src="assets/Character/ch9.webp" alt="" aria-hidden="true">');
         }
 
         if (!page.querySelector('.camera-completion-celebration')) {
@@ -555,6 +583,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             `);
 
         }
+        page.querySelectorAll('.camera-completion-celebration .camera-detection-character-ch9').forEach((character) => character.remove());
 
     });
     const shapeSquarePage = document.getElementById('learnscape-shape-square-page');
@@ -11215,6 +11244,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         setShapeMissionBgmPhase('circle');
 
         resetCircleMissionGuide();
+        // Mission starts use the illustration scene, never the lesson TV/player.
+        // This also prevents a previously opened lesson from showing underneath
+        // the guide while its dialogue begins.
+        circleIllustrationVideo?.pause();
+        if (circleIllustrationVideo) circleIllustrationVideo.hidden = true;
+        if (circleTvLessonImage) circleTvLessonImage.hidden = true;
+        if (circleTvMascot) circleTvMascot.hidden = true;
+        if (circleTvQuestionPanel) circleTvQuestionPanel.hidden = true;
+        setCircleIllustrationPlayButtonVisible(false);
+        setCircleIllustrationSkipButtonVisible(false);
+        circleIllustrationPage.classList.remove('is-tv-lesson-image-visible');
+        circleIllustrationPage.classList.add('is-lesson-complete');
         const session = circleMissionGuideSession;
         circleMissionGuide.hidden = false;
         circleMissionGuide.setAttribute('aria-hidden', 'false');
@@ -12279,16 +12320,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     const setCircleCameraButtonText = (text) => {
         const label = circleCameraStartButton?.querySelector('strong');
         if (label) label.textContent = text;
-        circleCameraStartButton?.classList.toggle('is-camera-access-button', text === 'Kamera');
+        const showAccessCue = text === 'Kamera' && !hasCameraAccessBeenGranted(circleCameraPage);
+        circleCameraStartButton?.classList.toggle('is-camera-access-button', showAccessCue);
         circleCameraStartButton?.classList.toggle('is-camera-open-button', text === 'Buksan');
-        circleCameraStartButton?.setAttribute('aria-label', text === 'Kamera' ? 'I-allow ang Kamera' : text);
+        circleCameraStartButton?.setAttribute('aria-label', showAccessCue ? 'I-allow ang Kamera' : text);
         const guideHand = circleCameraStartButton?.querySelector('.camera-start-guide-hand');
-        if (guideHand) guideHand.hidden = text !== 'Kamera';
+        if (guideHand) guideHand.hidden = !showAccessCue;
     };
 
     const setCircleCameraButtonVisible = (visible) => {
         if (circleCameraStartButton) circleCameraStartButton.hidden = !visible;
     };
+
+    const shouldShowCameraGuideButton = (page) => Boolean(
+        page
+        && !page.classList.contains('is-camera-intro')
+        && !page.classList.contains('is-camera-completing')
+        && !page.classList.contains('is-camera-celebrating')
+        && !page.classList.contains('is-camera-progress-visible')
+    );
 
     const clearCameraPermissionPrompt = (page) => {
         const message = page?.querySelector('.camera-curtain-message');
@@ -12310,9 +12360,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             circleCameraVideo.hidden = true;
         }
         if (circleCameraStartButton) {
-            setCircleCameraButtonVisible(true);
+            setCircleCameraButtonVisible(shouldShowCameraGuideButton(circleCameraPage));
             circleCameraStartButton.disabled = false;
-            setCircleCameraButtonText('Kamera');
+            setCircleCameraButtonText(cameraStartButtonText(circleCameraPage));
         }
     };
 
@@ -12350,6 +12400,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
             circleCameraPage.dataset.cameraAccessReady = 'true';
+            markCameraAccessGranted(circleCameraPage);
             setCircleCameraButtonText('Buksan');
             clearCameraPermissionPrompt(circleCameraPage);
             setCircleCameraButtonVisible(true);
@@ -12361,7 +12412,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (circleCameraVideo.srcObject === stream) circleCameraVideo.srcObject = null;
             setCircleCameraButtonVisible(true);
             circleCameraStartButton.disabled = false;
-            setCircleCameraButtonText('Kamera');
+            setCircleCameraButtonText(cameraStartButtonText(circleCameraPage));
         }
     };
 
@@ -12376,8 +12427,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cameraIntroSessions = new WeakMap();
     const cameraIntroAudios = new WeakMap();
     const cameraIntroCountdowns = new WeakMap();
+    const cameraDetectionStartAudioPrimes = new WeakMap();
+    const cameraDetectionStartVoiceSource = 'assets/Audios/Voice over/Ipakita.mp3';
+
+    // The detection curtain opens after several timed scenes. Prime this clip
+    // while the player is still clicking “Buksan” so browsers continue to allow
+    // its audible playback when the live detection view is finally revealed.
+    const clearCameraDetectionStartAudioPrime = (page) => {
+        const audio = cameraDetectionStartAudioPrimes.get(page);
+        if (!audio) return;
+        audio.pause();
+        cameraDetectionStartAudioPrimes.delete(page);
+    };
+
+    const primeCameraDetectionStartVoice = (page) => {
+        const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+        if (!page || !window.Audio || soundScale <= 0) return;
+        clearCameraDetectionStartAudioPrime(page);
+        const audio = new window.Audio(cameraDetectionStartVoiceSource);
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.muted = true;
+        audio.volume = Math.min(1, Math.max(0, soundScale));
+        cameraDetectionStartAudioPrimes.set(page, audio);
+        audio.play().then(() => {
+            if (cameraDetectionStartAudioPrimes.get(page) !== audio) return;
+            audio.pause();
+            try {
+                audio.currentTime = 0;
+            } catch (error) {
+                // The clip will begin at its available start point instead.
+            }
+            audio.muted = false;
+        }).catch(() => {
+            // A fresh playback attempt at the curtain still gives permissive
+            // browsers a chance to play the instruction.
+        });
+    };
 
     const cancelCameraIntro = (page) => {
+        clearCameraDetectionStartAudioPrime(page);
         cameraIntroCountdowns.get(page)?.();
         cameraIntroCountdowns.delete(page);
         const timeUp = page?.querySelector('.camera-countdown-times-up');
@@ -12485,16 +12574,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         return true;
     };
 
-    const playCameraIntroVoice = (page, session, source, { startAt = 0, endAt = null } = {}) => new Promise((resolve) => {
+    const playCameraIntroVoice = (page, session, source, { startAt = 0, endAt = null, audio: suppliedAudio = null } = {}) => new Promise((resolve) => {
         const soundScale = window.__learnscapeSoundScale?.() ?? 1;
         if (!source || !window.Audio || soundScale <= 0 || cameraIntroSessions.get(page) !== session) {
             resolve();
             return;
         }
-        const audio = new window.Audio(source);
+        const audio = suppliedAudio || new window.Audio(source);
         cameraIntroAudios.set(page, audio);
         audio.preload = 'auto';
         audio.playsInline = true;
+        audio.muted = false;
         audio.volume = Math.min(1, Math.max(0, soundScale));
         let finished = false;
         const finish = () => {
@@ -12580,6 +12670,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const startCameraIntro = async (page) => {
         if (!page || !isPageVisible(page)) return;
         const session = cancelCameraIntro(page);
+        primeCameraDetectionStartVoice(page);
         const shape = String(page.dataset.cameraShape || '').trim().toLowerCase();
         const shapeLabel = cameraShapeLabels[shape] || 'hugis';
         const character = page.querySelector('.camera-intro-character');
@@ -12632,7 +12723,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 panel.hidden = false;
                 panel.classList.add('is-camera-under-board-message');
                 showMessage('Ipakita sa kamera ang nahanap na hugis.');
-                playCameraIntroVoice(page, session, 'assets/Audios/Voice over/Ipakita.mp3')
+                const primedAudio = cameraDetectionStartAudioPrimes.get(page);
+                cameraDetectionStartAudioPrimes.delete(page);
+                playCameraIntroVoice(page, session, cameraDetectionStartVoiceSource, {
+                    audio: primedAudio || undefined,
+                })
                     .then(() => {
                         if (cameraIntroSessions.get(page) === session) {
                             panel.hidden = true;
@@ -12653,16 +12748,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         cameraScanRewardAudio.delete(page);
     };
 
-    const playCameraScanRewardAudio = (page, source, volume = 1) => {
+    const playCameraScanRewardAudio = (page, source, volume = 1, onFinished = null) => {
         const soundScale = window.__learnscapeSoundScale?.() ?? 1;
-        if (!page || !source || !window.Audio || soundScale <= 0) return;
+        if (!page || !source || !window.Audio || soundScale <= 0) {
+            onFinished?.();
+            return;
+        }
         const audio = new window.Audio(source);
         const sounds = cameraScanRewardAudio.get(page) || new Set();
+        let finished = false;
         const release = () => {
+            if (finished) return;
+            finished = true;
             sounds.delete(audio);
             if (!sounds.size && cameraScanRewardAudio.get(page) === sounds) {
                 cameraScanRewardAudio.delete(page);
             }
+            onFinished?.();
         };
         sounds.add(audio);
         cameraScanRewardAudio.set(page, sounds);
@@ -12820,11 +12922,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const button = page?.querySelector('.circle-camera-start-button');
         const label = button?.querySelector('strong');
         if (label) label.textContent = text;
-        button?.classList.toggle('is-camera-access-button', text === 'Kamera');
+        const showAccessCue = text === 'Kamera' && !hasCameraAccessBeenGranted(page);
+        button?.classList.toggle('is-camera-access-button', showAccessCue);
         button?.classList.toggle('is-camera-open-button', text === 'Buksan');
-        button?.setAttribute('aria-label', text === 'Kamera' ? 'I-allow ang Kamera' : text);
+        button?.setAttribute('aria-label', showAccessCue ? 'I-allow ang Kamera' : text);
         const guideHand = page?.querySelector('.camera-start-guide-hand');
-        if (guideHand) guideHand.hidden = text !== 'Kamera';
+        if (guideHand) guideHand.hidden = !showAccessCue;
     };
 
     const setShapeCameraButtonVisible = (page, visible) => {
@@ -12850,9 +12953,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             video.hidden = true;
         }
         if (button) {
-            setShapeCameraButtonVisible(page, true);
+            setShapeCameraButtonVisible(page, shouldShowCameraGuideButton(page));
             button.disabled = false;
-            setShapeCameraButtonText(page, 'Kamera');
+            setShapeCameraButtonText(page, cameraStartButtonText(page));
         }
     };
 
@@ -12891,6 +12994,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
             page.dataset.cameraAccessReady = 'true';
+            markCameraAccessGranted(page);
             setShapeCameraButtonText(page, 'Buksan');
             clearCameraPermissionPrompt(page);
             setShapeCameraButtonVisible(page, true);
@@ -12902,7 +13006,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (video.srcObject === stream) video.srcObject = null;
             setShapeCameraButtonVisible(page, true);
             button.disabled = false;
-            setShapeCameraButtonText(page, 'Kamera');
+            setShapeCameraButtonText(page, cameraStartButtonText(page));
         }
     };
 
@@ -12985,6 +13089,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const confetti = celebration?.querySelector('.camera-detection-fullscreen-confetti');
         if (!celebration || !confetti) return;
         clearCameraDetectionCelebration(page);
+        const character = celebration.querySelector('.camera-detection-character-ch9');
+        if (character) character.hidden = false;
         confetti.replaceChildren();
         populateCameraCelebrationConfetti(confetti);
         // Recreating the pieces gives every correct scan a fresh full-screen
@@ -12992,7 +13098,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         void confetti.offsetWidth;
         page.classList.add('is-camera-detection-celebrating');
         celebration.setAttribute('aria-hidden', 'false');
-        celebration.classList.add('is-active', 'is-ch8-visible');
+        celebration.classList.add('is-active');
     };
 
     const cameraBadgeArtwork = {
@@ -13214,7 +13320,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         page.dataset.cameraDetectionCount = String(nextCount);
         saveCameraScanProgress(page, nextCount);
         showCameraDetectionFeedback(page);
-        playCameraScanRewardAudio(page, 'assets/Audios/Sound effects/kids cheering.mp3', 0.9);
+        playCameraScanRewardAudio(page, 'assets/Audios/Sound effects/kids cheering.mp3', 0.9, () => {
+            if (Number(page?.dataset.cameraDetectionCount) !== nextCount) return;
+            const character = page.querySelector('.camera-detection-character-ch9');
+            if (character) character.hidden = true;
+        });
         // Only the verified label that exactly matches this mission target is
         // allowed to reach the spoken-name sequence.
         playCameraDetectionCelebration(page, verifiedShape, () => {
@@ -13270,7 +13380,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         page.classList.remove('is-camera-celebrating');
         page.classList.add('is-camera-progress-visible');
         const celebration = page.querySelector('.camera-completion-celebration');
-        celebration?.classList.remove('is-active', 'is-ch8-visible');
+        celebration?.classList.remove('is-active');
         celebration?.setAttribute('aria-hidden', 'true');
         page.querySelector('.camera-completion-progress')?.setAttribute('aria-hidden', 'false');
         playUiClickSound('boardSuccess');
@@ -14306,10 +14416,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             delete activeCameraPage.dataset.cameraAccessReady;
             closeCameraProcessingCurtains(activeCameraPage, 'initial');
             if (activeCameraPage === circleCameraPage) {
-                setCircleCameraButtonText('Kamera');
+                setCircleCameraButtonText(cameraStartButtonText(circleCameraPage));
                 setCircleCameraButtonVisible(true);
             } else {
-                setShapeCameraButtonText(activeCameraPage, 'Kamera');
+                setShapeCameraButtonText(activeCameraPage, cameraStartButtonText(activeCameraPage));
                 setShapeCameraButtonVisible(activeCameraPage, true);
             }
         }
@@ -15684,7 +15794,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const shapePhaseSelectors = new Map();
-    const shapePhaseUnlockTimers = new WeakMap();
 
     const setShapePhaseHubOpen = (record, isOpen) => {
         // A phase action can hide this menu while its button still owns focus.
@@ -15709,42 +15818,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const phase = choice.dataset.shapePhaseChoice;
             const unlocked = isShapePhaseUnlocked(shape, phase);
             const playButton = choice.querySelector('.shape-phase-play');
-            const lock = choice.querySelector('.shape-phase-lock');
-            const wasLocked = choice.dataset.shapePhaseUnlocked === 'false';
-            const shouldAnimateUnlock = unlocked
-                && (wasLocked || choice.dataset.pendingUnlockAnimation === 'true');
             choice.classList.toggle('is-locked', !unlocked);
             choice.setAttribute('aria-disabled', String(!unlocked));
             if (playButton) {
                 playButton.disabled = !unlocked;
                 playButton.removeAttribute('aria-busy');
             }
-            if (lock) {
-                const previousTimer = shapePhaseUnlockTimers.get(choice);
-                if (choice.classList.contains('is-unlocking') && previousTimer !== undefined) {
-                    choice.dataset.shapePhaseUnlocked = String(unlocked);
-                    return;
-                }
-                if (previousTimer !== undefined) window.clearTimeout(previousTimer);
-                if (shouldAnimateUnlock && !record.selector.hidden) {
-                    choice.dataset.pendingUnlockAnimation = 'false';
-                    lock.hidden = false;
-                    choice.classList.remove('is-unlocking');
-                    void choice.offsetWidth;
-                    choice.classList.add('is-unlocking');
-                    const unlockTimer = window.setTimeout(() => {
-                        lock.hidden = true;
-                        choice.classList.remove('is-unlocking');
-                        shapePhaseUnlockTimers.delete(choice);
-                    }, 1250);
-                    shapePhaseUnlockTimers.set(choice, unlockTimer);
-                } else {
-                    lock.hidden = unlocked;
-                    if (shouldAnimateUnlock) choice.dataset.pendingUnlockAnimation = 'true';
-                    choice.classList.remove('is-unlocking');
-                }
-            }
-            choice.dataset.shapePhaseUnlocked = String(unlocked);
         });
         if (!isPageVisible(record.page)) setShapePhaseHubOpen(record, false);
     };
@@ -15824,15 +15903,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const description = document.createElement('p');
             description.className = 'shape-phase-description';
             description.textContent = panelCopy.description;
-            const lock = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            lock.className = 'shape-phase-lock';
-            lock.setAttribute('viewBox', '0 0 120 145');
-            lock.setAttribute('role', 'img');
-            lock.setAttribute('aria-label', `${panelCopy.title} ay naka-lock`);
-            // Keep the island lock artwork within this SVG's own viewBox.  Referencing
-            // the reusable symbols here lets some browsers size the symbol viewport as
-            // the whole card, which produces an oversized, split lock.
-            lock.innerHTML = '<g class="shape-phase-lock-shackle"><path d="M31 62V42C31 22 44 10 60 10s29 12 29 32v20" fill="none" stroke="#3b444d" stroke-width="23" stroke-linecap="round"></path><path d="M31 62V42C31 22 44 10 60 10s29 12 29 32v20" fill="none" stroke="url(#game3-lock-shackle)" stroke-width="15" stroke-linecap="round"></path><path d="M39 48V41c0-14 8-23 21-23" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity="0.72"></path></g><g class="shape-phase-lock-body"><rect x="10" y="55" width="100" height="79" rx="16" fill="url(#game3-lock-rim)" filter="url(#game3-lock-inner-shadow)"></rect><rect x="16" y="59" width="88" height="67" rx="12" fill="url(#game3-lock-body)" stroke="#dce2e7" stroke-width="2.5"></rect><path d="M22 66h76" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity="0.58"></path><path d="M22 116c24 7 52 7 76 0" fill="none" stroke="#3f4851" stroke-width="3" stroke-linecap="round" opacity="0.5"></path><circle cx="27" cy="75" r="3.2" fill="#eef2f5" stroke="#626c76" stroke-width="1.5"></circle><circle cx="93" cy="75" r="3.2" fill="#eef2f5" stroke="#626c76" stroke-width="1.5"></circle><circle cx="60" cy="88" r="10" fill="url(#game3-lock-keyhole)" stroke="#707b85" stroke-width="2"></circle><path d="M55 94h10l3 20H52z" fill="url(#game3-lock-keyhole)"></path><path d="M58 98h4l1.4 10h-6.8z" fill="#050709" opacity="0.7"></path></g>';
             const play = document.createElement('button');
             play.className = 'shape-phase-play';
             play.type = 'button';
@@ -15851,7 +15921,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 setShapePhaseHubOpen({ page, selector }, true);
                 play.focus({ preventScroll: true });
             });
-            choice.append(title, preview, description, lock, play);
+            choice.append(title, preview, description, play);
             choices.appendChild(choice);
         });
         selector.append(header, choices);
