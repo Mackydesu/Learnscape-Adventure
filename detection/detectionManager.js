@@ -1,5 +1,5 @@
 import { detectShapes } from "./yolo.js";
-import { verifyShape } from "./shapeVerifier.js?v=20261121-03";
+import { verifyShape } from "./shapeVerifier.js?v=20261121-04";
 
 const DEFAULT_FRAME_COUNT = 5;
 const DEFAULT_MIN_VOTES = 4;
@@ -49,6 +49,15 @@ function isTargetRectangleBox(item, targetShape, geometry) {
     const shorterSide = Math.min(width, height);
     if (shorterSide <= 0) return false;
     return Math.max(width, height) / shorterSide >= TARGET_RECTANGLE_MIN_BOX_ASPECT;
+}
+
+function isCloseTargetTriangle(item, targetShape, geometry, size) {
+    // A close triangle can pick up one extra contour corner from a shadow or
+    // thick edge, which makes YOLO propose diamond. Use a remaining
+    // three-corner vote only for the Triangle camera while it is too close to
+    // accept; the player still receives the normal move-farther instruction.
+    return targetShape === "triangle" && size.moveFartherAway && item?.label === "diamond" &&
+        geometry?.verified !== true && (geometry?.geometry?.shapeVoteCounts?.triangle ?? 0) > 0;
 }
 
 function delayFrame() {
@@ -104,11 +113,15 @@ export async function trackLiveShapes(video, onFrame, options = {}) {
                 ? { verified: false, yoloLabel: item.label, geometricShape: null, reason: "Confidence is below the heart/star verification threshold." }
                 : verifyShape(video, item);
             const targetRectangleFallback = isTargetRectangleBox(item, targetShape, geometry);
-            if (targetRectangleFallback) {
+            const targetTriangleFallback = isCloseTargetTriangle(item, targetShape, geometry, size);
+            const targetLabelCorrection = targetRectangleFallback ? "rectangle" : targetTriangleFallback ? "triangle" : null;
+            if (targetLabelCorrection) {
                 geometry = {
                     ...geometry,
-                    targetLabelCorrection: "rectangle",
-                    reason: "Target rectangle has a clearly elongated bounding box despite an unverified square model label."
+                    targetLabelCorrection,
+                    reason: targetRectangleFallback
+                        ? "Target rectangle has a clearly elongated bounding box despite an unverified square model label."
+                        : "Close target triangle has three-corner contour evidence despite an unverified diamond model label."
                 };
             }
             if (item.label === "circle" && !geometry.verified) {
@@ -130,8 +143,8 @@ export async function trackLiveShapes(video, onFrame, options = {}) {
                 ...item,
                 label: geometry.verified && geometry.label
                     ? geometry.label
-                    : targetRectangleFallback
-                        ? "rectangle"
+                    : targetLabelCorrection
+                        ? targetLabelCorrection
                         : item.label,
                 relativeSize,
                 ...size,

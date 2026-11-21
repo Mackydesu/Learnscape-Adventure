@@ -20004,12 +20004,12 @@ body *::after {
     height: 10.2rem;
     padding: 0;
     border: 0;
-    background: linear-gradient(135deg, #31486c 0%, #142543 58%, #07111f 100%);
+    background: linear-gradient(135deg, #6384ad 0%, #365f8d 58%, #1b3e67 100%);
     background: linear-gradient(
         135deg,
-        color-mix(in srgb, var(--game3-island-nav-highlight) 30%, #14233d) 0%,
-        color-mix(in srgb, var(--game3-island-nav-color) 42%, #0b1729) 58%,
-        #07111f 100%
+        color-mix(in srgb, var(--game3-island-nav-highlight) 48%, #294968) 0%,
+        color-mix(in srgb, var(--game3-island-nav-color) 58%, #1a3555) 58%,
+        #163451 100%
     );
     cursor: pointer;
     filter:
@@ -20063,6 +20063,15 @@ body *::after {
 .game3-island-prev {
     left: clamp(1rem, 3vw, 3rem);
     clip-path: polygon(100% 0, 0 50%, 100% 100%);
+    /* Mirror the gradient because this triangle exposes the opposite side of
+       the fill from the next arrow. */
+    background: linear-gradient(225deg, #6384ad 0%, #365f8d 58%, #1b3e67 100%);
+    background: linear-gradient(
+        225deg,
+        color-mix(in srgb, var(--game3-island-nav-highlight) 48%, #294968) 0%,
+        color-mix(in srgb, var(--game3-island-nav-color) 58%, #1a3555) 58%,
+        #163451 100%
+    );
 }
 
 .game3-island-next {

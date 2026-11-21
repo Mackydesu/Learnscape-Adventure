@@ -1,4 +1,4 @@
-import { trackLiveShapes } from "./detectionManager.js?v=20261121-03";
+import { trackLiveShapes } from "./detectionManager.js?v=20261121-04";
 
 // The camera game rewards a consistently recognised target in the central
 // scan area. The removal gate below still prevents a held object from being

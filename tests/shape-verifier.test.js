@@ -76,6 +76,34 @@ function makeStar(outerRadius = 84, innerRadius = 36) {
     };
 }
 
+function makeTriangle(size = 180) {
+    const videoWidth = 240, videoHeight = 240;
+    const half = size / 2;
+    const points = [
+        { x: 120, y: 120 - half },
+        { x: 120 - half, y: 120 + half },
+        { x: 120 + half, y: 120 + half }
+    ];
+    const contains = (x, y) => points.reduce((inside, point, index) => {
+        const previous = points[(index + points.length - 1) % points.length];
+        const crosses = (point.y > y) !== (previous.y > y)
+            && x < (previous.x - point.x) * (y - point.y) / (previous.y - point.y) + point.x;
+        return crosses ? !inside : inside;
+    }, false);
+    const pixels = new Uint8ClampedArray(videoWidth * videoHeight * 4);
+    for (let y = 0; y < videoHeight; y++) for (let x = 0; x < videoWidth; x++) {
+        const offset = (y * videoWidth + x) * 4;
+        pixels.set(contains(x + 0.5, y + 0.5) ? [20, 40, 80, 255] : [245, 245, 245, 255], offset);
+    }
+    return {
+        video: { videoWidth, videoHeight, pixels },
+        box: {
+            x1: Math.min(...points.map(point => point.x)), y1: Math.min(...points.map(point => point.y)),
+            x2: Math.max(...points.map(point => point.x)), y2: Math.max(...points.map(point => point.y))
+        }
+    };
+}
+
 installCanvas();
 
 test('a clear upright or rotated rectangle corrects a square model prediction', () => {
@@ -124,6 +152,15 @@ test('a clear star contour corrects a close-range diamond model prediction', () 
     assert.equal(result.verified, true);
     assert.equal(result.correctedLabel, 'star');
     assert.equal(result.label, 'star');
+});
+
+test('a clear close triangle contour corrects a diamond model prediction', () => {
+    const { video, box } = makeTriangle();
+    const result = verifyShape(video, { ...box, label: 'diamond' });
+    assert.equal(result.geometricShape, 'triangle', result.reason);
+    assert.equal(result.verified, true);
+    assert.equal(result.correctedLabel, 'triangle');
+    assert.equal(result.label, 'triangle');
 });
 
 test('the live tracker corrects a close star label but keeps the distance guide active', async () => {
@@ -181,6 +218,36 @@ test('the live tracker preserves a target label at close and far distances witho
         assert.equal(result.labelStable, false);
         assert.equal(result.sizeAccepted, false);
     }
+});
+
+test('the Triangle camera labels a close diamond prediction as triangle when its contour retains triangle evidence', async () => {
+    const video = { videoWidth: 1000, videoHeight: 1000 };
+    const prediction = { x1: 100, y1: 100, x2: 760, y2: 760, label: 'diamond', confidence: 0.9 };
+    const source = readFileSync(new URL('../detection/detectionManager.js', import.meta.url), 'utf8')
+        .replace(/^import .*;\r?\n/gm, '')
+        .replace(/^export /gm, '');
+    const verifyWithTriangleEvidence = () => ({
+        verified: false,
+        yoloLabel: 'diamond',
+        geometricShape: null,
+        geometry: { shapeVoteCounts: { triangle: 1, diamond: 1 } }
+    });
+    const context = { detectShapes: async () => [prediction], verifyShape: verifyWithTriangleEvidence, DOMException, setTimeout, clearTimeout, console };
+    vm.runInNewContext(`${source}\nglobalThis.trackLiveShapes = trackLiveShapes;`, context);
+
+    const controller = new AbortController();
+    let result;
+    await context.trackLiveShapes(video, frame => {
+        result = frame.tracks[0];
+        controller.abort();
+    }, { signal: controller.signal, intervalMs: 0, minVotes: 1, targetShape: 'triangle' }).catch(error => {
+        if (error.name !== 'AbortError') throw error;
+    });
+
+    assert.equal(result.label, 'triangle');
+    assert.equal(result.sizeAccepted, false);
+    assert.equal(result.labelStable, false);
+    assert.equal(result.geometry.targetLabelCorrection, 'triangle');
 });
 
 test('the Rectangle camera accepts a clearly elongated square prediction when its contour is obscured', async () => {
