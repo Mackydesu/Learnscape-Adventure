@@ -20000,8 +20000,8 @@ body *::after {
     position: fixed;
     top: 50%;
     z-index: 24;
-    width: clamp(6.5rem, 10vw, 10rem);
-    height: clamp(8.75rem, 13.5vw, 13.5rem);
+    width: 7.75rem;
+    height: 10.2rem;
     padding: 0;
     border: 0;
     background: linear-gradient(135deg, #31486c 0%, #142543 58%, #07111f 100%);
