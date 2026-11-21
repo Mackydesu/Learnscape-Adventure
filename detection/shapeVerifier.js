@@ -397,10 +397,14 @@ export function verifyShape(video, detection, options = {}) {
         // webcam noise. When YOLO proposed triangle, require all three scales
         // to agree before correcting that label to diamond.
         const diamondCanCorrectTriangle = detection.label !== "triangle" || geometry.diamondStrongRulePassed;
-        const squareRectangleCorrection = geometry.consistent &&
-            ((detection.label === "square" && geometricShape === "rectangle") ||
-             (detection.label === "rectangle" && geometricShape === "square"));
-        const contourRulePassed = triangleRulePassed || (diamondRulePassed && diamondCanCorrectTriangle) || squareRectangleCorrection;
+        // These classifications have distinctive, scale-independent contour
+        // features. A clear consensus can correct a scale-related model
+        // mistake (for example, a close star proposed as a diamond) without
+        // treating the ambiguous triangle/diamond pair as interchangeable.
+        const strongContourCorrection = geometry.consistent &&
+            ["square", "rectangle", "star", "heart", "circle", "oval"].includes(geometricShape);
+        const contourRulePassed = triangleRulePassed || (diamondRulePassed && diamondCanCorrectTriangle) ||
+            strongContourCorrection;
         const correctedLabel = contourRulePassed && geometricShape !== detection.label ? geometricShape : null;
         const verified = geometry.consistent && (geometricShape === detection.label || contourRulePassed);
         const reason = !geometry.consistent

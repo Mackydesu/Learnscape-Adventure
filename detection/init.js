@@ -1,5 +1,5 @@
 import { loadModel } from "./model.js";
-import { initializeGameCameraDetection } from "./gameDetection.js?v=20261118-01";
+import { initializeGameCameraDetection } from "./gameDetection.js?v=20261121-03";
 
 console.log("Starting ONNX initialization...");
 // The model and its WASM runtime are part of the startup asset package.

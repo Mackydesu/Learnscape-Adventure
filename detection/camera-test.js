@@ -1,6 +1,6 @@
 import { loadModel } from "./model.js";
 import { startWebcam, stopWebcam } from "./webcam.js";
-import { trackLiveShapes } from "./detectionManager.js";
+import { trackLiveShapes } from "./detectionManager.js?v=20261121-03";
 
 const video = document.getElementById("webcam");
 const viewfinder = document.querySelector(".circle-camera-viewfinder");

@@ -49,6 +49,33 @@ function makeRectangle(width, height, degrees = 0) {
     return { video: { videoWidth, videoHeight, pixels }, box };
 }
 
+function makeStar(outerRadius = 84, innerRadius = 36) {
+    const videoWidth = 240, videoHeight = 240;
+    const points = Array.from({ length: 10 }, (_, index) => {
+        const angle = -Math.PI / 2 + index * Math.PI / 5;
+        const radius = index % 2 === 0 ? outerRadius : innerRadius;
+        return { x: 120 + Math.cos(angle) * radius, y: 120 + Math.sin(angle) * radius };
+    });
+    const contains = (x, y) => points.reduce((inside, point, index) => {
+        const previous = points[(index + points.length - 1) % points.length];
+        const crosses = (point.y > y) !== (previous.y > y)
+            && x < (previous.x - point.x) * (y - point.y) / (previous.y - point.y) + point.x;
+        return crosses ? !inside : inside;
+    }, false);
+    const pixels = new Uint8ClampedArray(videoWidth * videoHeight * 4);
+    for (let y = 0; y < videoHeight; y++) for (let x = 0; x < videoWidth; x++) {
+        const offset = (y * videoWidth + x) * 4;
+        pixels.set(contains(x + 0.5, y + 0.5) ? [20, 40, 80, 255] : [245, 245, 245, 255], offset);
+    }
+    return {
+        video: { videoWidth, videoHeight, pixels },
+        box: {
+            x1: Math.min(...points.map(point => point.x)), y1: Math.min(...points.map(point => point.y)),
+            x2: Math.max(...points.map(point => point.x)), y2: Math.max(...points.map(point => point.y))
+        }
+    };
+}
+
 installCanvas();
 
 test('a clear upright or rotated rectangle corrects a square model prediction', () => {
@@ -88,6 +115,72 @@ test('an unclear contour cannot correct a model prediction from the box alone', 
     const result = verifyShape(video, { ...box, label: 'square' });
     assert.equal(result.verified, false);
     assert.equal(result.correctedLabel, null);
+});
+
+test('a clear star contour corrects a close-range diamond model prediction', () => {
+    const { video, box } = makeStar();
+    const result = verifyShape(video, { ...box, label: 'diamond' });
+    assert.equal(result.geometricShape, 'star', result.reason);
+    assert.equal(result.verified, true);
+    assert.equal(result.correctedLabel, 'star');
+    assert.equal(result.label, 'star');
+});
+
+test('the live tracker corrects a close star label but keeps the distance guide active', async () => {
+    const { video, box } = makeStar();
+    const prediction = { ...box, label: 'diamond', confidence: 0.9 };
+    const source = readFileSync(new URL('../detection/detectionManager.js', import.meta.url), 'utf8')
+        .replace(/^import .*;\r?\n/gm, '')
+        .replace(/^export /gm, '');
+    const context = { detectShapes: async () => [prediction], verifyShape, DOMException, setTimeout, clearTimeout, console };
+    vm.runInNewContext(`${source}\nglobalThis.trackLiveShapes = trackLiveShapes;`, context);
+
+    const controller = new AbortController();
+    let result;
+    await context.trackLiveShapes(video, frame => {
+        result = frame.tracks[0];
+        controller.abort();
+    }, { signal: controller.signal, intervalMs: 0, minVotes: 1 }).catch(error => {
+        if (error.name !== 'AbortError') throw error;
+    });
+
+    assert.ok(result.relativeSize > 0.5, 'test star must exercise the old close-range rejection band');
+    assert.equal(result.label, 'star');
+    assert.equal(result.labelStable, false);
+    assert.equal(result.sizeAccepted, false);
+    assert.equal(result.geometry.correctedLabel, 'star');
+});
+
+test('the live tracker preserves a target label at close and far distances without accepting it', async () => {
+    for (const relativeSize of [0.02, 0.98]) {
+        const video = { videoWidth: 1000, videoHeight: 1000 };
+        const prediction = {
+            x1: 10,
+            y1: 10,
+            x2: 10 + relativeSize * 1000,
+            y2: 10 + relativeSize * 1000,
+            label: 'star',
+            confidence: 0.9
+        };
+        const source = readFileSync(new URL('../detection/detectionManager.js', import.meta.url), 'utf8')
+            .replace(/^import .*;\r?\n/gm, '')
+            .replace(/^export /gm, '');
+        const context = { detectShapes: async () => [prediction], verifyShape, DOMException, setTimeout, clearTimeout, console };
+        vm.runInNewContext(`${source}\nglobalThis.trackLiveShapes = trackLiveShapes;`, context);
+
+        const controller = new AbortController();
+        let result;
+        await context.trackLiveShapes(video, frame => {
+            result = frame.tracks[0];
+            controller.abort();
+        }, { signal: controller.signal, intervalMs: 0, minVotes: 1 }).catch(error => {
+            if (error.name !== 'AbortError') throw error;
+        });
+
+        assert.equal(result.label, 'star');
+        assert.equal(result.labelStable, false);
+        assert.equal(result.sizeAccepted, false);
+    }
 });
 
 test('the Rectangle camera accepts a clearly elongated square prediction when its contour is obscured', async () => {

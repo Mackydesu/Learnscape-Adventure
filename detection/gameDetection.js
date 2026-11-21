@@ -1,10 +1,12 @@
-import { trackLiveShapes } from "./detectionManager.js";
+import { trackLiveShapes } from "./detectionManager.js?v=20261121-03";
 
-// The camera game rewards the first clearly labeled target frame. The
-// removal gate below still prevents a held object from being counted twice.
+// The camera game rewards a consistently recognised target in the central
+// scan area. The removal gate below still prevents a held object from being
+// counted twice.
 // Run the next inference immediately after the previous one so the tracking
 // box follows a moving object without an added polling delay.
-const TRACKING_OPTIONS = { intervalMs: 0, minVotes: 1 };
+const TRACKING_OPTIONS = { intervalMs: 0, minVotes: 3 };
+const SCAN_ZONE = Object.freeze({ left: 0.18, top: 0.15, right: 0.82, bottom: 0.85 });
 const DISTANCE_CUE_AUDIO = Object.freeze({
     "move-farther": "assets/Audios/Voice over/Lumayo.mp3",
     "move-closer": "assets/Audios/Voice over/Lumapit.mp3"
@@ -50,6 +52,13 @@ function getOverlay(page) {
         const video = viewfinder.querySelector(".circle-camera-video");
         viewfinder.insertBefore(canvas, video?.nextSibling ?? viewfinder.firstChild);
     }
+    let scanZone = viewfinder.querySelector(".camera-detection-scan-zone");
+    if (!scanZone) {
+        scanZone = document.createElement("div");
+        scanZone.className = "camera-detection-scan-zone";
+        scanZone.setAttribute("aria-hidden", "true");
+        viewfinder.append(scanZone);
+    }
     // Keep coaching outside the viewfinder so the feed and detection box stay
     // unobstructed. Move a cue created by an earlier build when this page is
     // still alive during in-app navigation.
@@ -77,6 +86,7 @@ function getOverlay(page) {
         viewfinder,
         canvas,
         context: canvas.getContext("2d"),
+        scanZone,
         distanceCue,
         distanceCueCharacter
     };
@@ -242,6 +252,14 @@ function trackHasTargetLabel(track, targetShape) {
     return String(track?.label || "").trim().toLowerCase() === targetShape;
 }
 
+function trackIsInScanZone(track, video) {
+    if (!track || !video?.videoWidth || !video?.videoHeight) return false;
+    const centerX = (track.x1 + track.x2) / (2 * video.videoWidth);
+    const centerY = (track.y1 + track.y2) / (2 * video.videoHeight);
+    return centerX >= SCAN_ZONE.left && centerX <= SCAN_ZONE.right &&
+        centerY >= SCAN_ZONE.top && centerY <= SCAN_ZONE.bottom;
+}
+
 function shapeName(shape, capitalized = false) {
     const label = SHAPE_NAMES[String(shape || "").trim().toLowerCase()] || String(shape || "shape");
     return capitalized ? `${label[0].toUpperCase()}${label.slice(1)}` : label;
@@ -328,7 +346,11 @@ function drawTrackedObjects(session, tracks) {
 
 async function handleTrackedFrame(session, { frame, tracks }) {
     if (activeSession !== session || session.controller.signal.aborted) return;
-    drawTrackedObjects(session, tracks);
+    // Ignore background objects outside the central scan area. The intended
+    // object is held in front of the camera there, while scenery commonly
+    // appears at the edges of the frame.
+    const scanZoneTracks = tracks.filter(track => trackIsInScanZone(track, session.video));
+    drawTrackedObjects(session, scanZoneTracks);
     // Detection warms up while the initial curtain is closed, but a closed
     // curtain must never accept a frame. This also blocks any final in-flight
     // frame while the post-detection processing curtain is closing.
@@ -337,7 +359,7 @@ async function handleTrackedFrame(session, { frame, tracks }) {
     // finishes. Keep drawing, but do not accept another object meanwhile.
     if (session.page.classList.contains("is-camera-detection-celebrating")) return;
     if (frame % 10 === 0) {
-        console.log("[LIVE TRACKS]", tracks.map(track => ({
+        console.log("[LIVE TRACKS]", scanZoneTracks.map(track => ({
             label: track.label,
             labelStable: track.labelStable,
             labelFrames: track.labelFrames,
@@ -350,8 +372,8 @@ async function handleTrackedFrame(session, { frame, tracks }) {
     // A stable, in-range non-target is a wrong attempt: keep its red box and
     // never apply target-size coaching. Let an already-started distance cue
     // finish instead of interrupting it because another shape appeared.
-    const hasLiveTarget = tracks.some(track => !track.stale && trackHasTargetLabel(track, session.shape));
-    const wrongShape = !hasLiveTarget && tracks
+    const hasLiveTarget = scanZoneTracks.some(track => !track.stale && trackHasTargetLabel(track, session.shape));
+    const wrongShape = !hasLiveTarget && scanZoneTracks
         .filter(track => !track.stale && track.sizeAccepted === true && track.labelStable === true && !trackHasTargetLabel(track, session.shape))
         .sort((a, b) => b.confidence - a.confidence)[0];
     if (wrongShape) {
@@ -360,7 +382,7 @@ async function handleTrackedFrame(session, { frame, tracks }) {
         return;
     }
 
-    const selected = tracks
+    const selected = scanZoneTracks
         .filter(track => !track.stale && track.sizeAccepted === true && track.labelStable === true && trackHasTargetLabel(track, session.shape))
         .sort((a, b) => b.confidence - a.confidence)[0];
     if (selected) {
@@ -394,7 +416,7 @@ async function handleTrackedFrame(session, { frame, tracks }) {
         return;
     }
 
-    const distanceAdjustment = tracks
+    const distanceAdjustment = scanZoneTracks
         .filter(track => !track.stale && track.sizeAccepted === false && trackHasTargetLabel(track, session.shape))
         .sort((a, b) => b.confidence - a.confidence)[0];
     if (distanceAdjustment) {

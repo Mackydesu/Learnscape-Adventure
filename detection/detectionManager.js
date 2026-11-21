@@ -1,5 +1,5 @@
 import { detectShapes } from "./yolo.js";
-import { verifyShape } from "./shapeVerifier.js";
+import { verifyShape } from "./shapeVerifier.js?v=20261121-03";
 
 const DEFAULT_FRAME_COUNT = 5;
 const DEFAULT_MIN_VOTES = 4;
@@ -11,9 +11,9 @@ const CROSS_CLASS_CONFLICT_IOU = 0.65;
 // that YOLO calls a square when its contour is obscured by glare or a hand,
 // without changing Square-camera classifications.
 const TARGET_RECTANGLE_MIN_BOX_ASPECT = 1.25;
-// The game only accepts a shape when its largest box dimension occupies a
-// useful part of the camera frame. Keeping this resolution-independent makes
-// the same rule work on phone and desktop cameras.
+// Keep the target at a usable camera distance. This is an acceptance gate for
+// the game, but contour inspection still runs outside the range so the UI can
+// identify the shape correctly before asking the player to move it.
 export const MIN_DETECTION_RELATIVE_SIZE = 0.25;
 export const MAX_DETECTION_RELATIVE_SIZE = 0.50;
 
@@ -99,17 +99,8 @@ export async function trackLiveShapes(video, onFrame, options = {}) {
         const detections = predictions.map(item => {
             const relativeSize = getRelativeObjectSize(item, video);
             const size = getDetectionSizeMetadata(relativeSize);
-            const lowConfidenceComplexShape = size.sizeAccepted && ["heart", "star"].includes(item.label) && item.confidence < COMPLEX_SHAPE_CONFIDENCE;
-            let geometry = !size.sizeAccepted
-                ? {
-                    verified: false,
-                    yoloLabel: item.label,
-                    geometricShape: null,
-                    reason: size.moveCloser
-                        ? "Bounding box is too small for reliable shape verification."
-                        : "Bounding box is too large for reliable shape verification."
-                }
-                : lowConfidenceComplexShape
+            const lowConfidenceComplexShape = ["heart", "star"].includes(item.label) && item.confidence < COMPLEX_SHAPE_CONFIDENCE;
+            let geometry = lowConfidenceComplexShape
                 ? { verified: false, yoloLabel: item.label, geometricShape: null, reason: "Confidence is below the heart/star verification threshold." }
                 : verifyShape(video, item);
             const targetRectangleFallback = isTargetRectangleBox(item, targetShape, geometry);
@@ -188,6 +179,9 @@ export async function trackLiveShapes(video, onFrame, options = {}) {
         // Keep missed tracks internally for IoU matching, but do not draw an
         // outdated box while the object has moved or left the frame.
         const visible = tracks.filter(track => track.missed === 0).map(track => {
+            // The label must remain stable while the target is inside the
+            // guided distance range. Out-of-range frames retain their label
+            // for feedback, but cannot become a successful scan.
             const labelVotes = track.history.filter(item => item.label === track.label && item.sizeAccepted).length;
             const geometryVotes = track.history.filter(item => item.label === track.label && item.sizeAccepted && item.verified).length;
             return {
@@ -271,17 +265,8 @@ export async function detectStableShape(video, options = {}) {
         const checkedDetections = predictions.map((item, index) => {
                 const relativeSize = getRelativeObjectSize(item, video);
                 const size = getDetectionSizeMetadata(relativeSize);
-                const lowConfidenceComplexShape = size.sizeAccepted && ["heart", "star"].includes(item.label) && item.confidence < COMPLEX_SHAPE_CONFIDENCE;
-                const geometry = !size.sizeAccepted
-                    ? {
-                        verified: false,
-                        yoloLabel: item.label,
-                        geometricShape: null,
-                        reason: size.moveCloser
-                            ? "Bounding box is too small for reliable shape verification."
-                            : "Bounding box is too large for reliable shape verification."
-                    }
-                    : lowConfidenceComplexShape
+                const lowConfidenceComplexShape = ["heart", "star"].includes(item.label) && item.confidence < COMPLEX_SHAPE_CONFIDENCE;
+                const geometry = lowConfidenceComplexShape
                         ? { verified: false, yoloLabel: item.label, geometricShape: null, reason: "Confidence is below the heart/star verification threshold." }
                         : verifyShape(video, item, { debug: options.debug === true && index === 0 });
                 return {

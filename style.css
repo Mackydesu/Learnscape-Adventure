@@ -15785,6 +15785,26 @@ body *::after {
     pointer-events: none;
 }
 
+/* Only the central guide is eligible for a camera-game answer. This keeps
+   decorative or background shapes near the edge of the video from winning. */
+.camera-detection-scan-zone {
+    position: absolute;
+    z-index: 3;
+    left: 18%;
+    top: 15%;
+    width: 64%;
+    height: 70%;
+    box-sizing: border-box;
+    border: 0.18rem dashed rgba(255, 249, 171, 0.9);
+    border-radius: 1rem;
+    box-shadow: 0 0 0 0.12rem rgba(8, 54, 95, 0.42), inset 0 0 1rem rgba(255, 236, 102, 0.12);
+    pointer-events: none;
+}
+
+.circle-camera-page.is-camera-intro .camera-detection-scan-zone {
+    display: none;
+}
+
 .camera-detection-distance-cue {
     position: absolute;
     z-index: 6;
@@ -19980,15 +20000,21 @@ body *::after {
     position: fixed;
     top: 50%;
     z-index: 24;
-    width: clamp(3.2rem, 5vw, 4.8rem);
-    height: clamp(4.3rem, 6.8vw, 6.4rem);
+    width: clamp(6.5rem, 10vw, 10rem);
+    height: clamp(8.75rem, 13.5vw, 13.5rem);
     padding: 0;
     border: 0;
-    background: linear-gradient(135deg, var(--game3-island-nav-highlight), var(--game3-island-nav-color) 58%);
+    background: linear-gradient(135deg, #31486c 0%, #142543 58%, #07111f 100%);
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--game3-island-nav-highlight) 30%, #14233d) 0%,
+        color-mix(in srgb, var(--game3-island-nav-color) 42%, #0b1729) 58%,
+        #07111f 100%
+    );
     cursor: pointer;
     filter:
-        drop-shadow(0.25rem 0.32rem 0 var(--game3-island-nav-shadow))
-        drop-shadow(0 0.65rem 0.8rem rgba(23, 62, 96, 0.3));
+        drop-shadow(0.3rem 0.38rem 0 #07111f)
+        drop-shadow(0 0.75rem 1rem rgba(0, 0, 0, 0.5));
     transform: translateY(-50%);
     transition: transform 160ms ease, filter 160ms ease, opacity 160ms ease, background 180ms ease;
 }
@@ -20050,8 +20076,8 @@ body *::after {
 .game3-island-next:focus-visible {
     filter:
         brightness(1.12)
-        drop-shadow(0.25rem 0.32rem 0 var(--game3-island-nav-shadow))
-        drop-shadow(0 0.75rem 0.9rem rgba(23, 62, 96, 0.36));
+        drop-shadow(0.3rem 0.38rem 0 #07111f)
+        drop-shadow(0 0.85rem 1.1rem rgba(0, 0, 0, 0.58));
     outline: none;
     transform: translateY(-50%) scale(1.08);
 }
@@ -20114,8 +20140,8 @@ body *::after {
 
     .game3-island-prev,
     .game3-island-next {
-        width: 2.8rem;
-        height: 3.8rem;
+        width: 3.6rem;
+        height: 4.85rem;
     }
 
     .game3-island-prev {

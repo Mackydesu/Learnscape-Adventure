@@ -19,8 +19,8 @@ const gameDetectionSource = readFileSync(new URL('../detection/gameDetection.js'
     .replace(/^import .*;\r?\n/gm, '')
     .replace(/^export /gm, '');
 const gameDetectionContext = {};
-vm.runInNewContext(`${gameDetectionSource}\nglobalThis.cueHelpers = { getDistanceCueCopy };`, gameDetectionContext);
-const { getDistanceCueCopy } = gameDetectionContext.cueHelpers;
+vm.runInNewContext(`${gameDetectionSource}\nglobalThis.cueHelpers = { getDistanceCueCopy, trackIsInScanZone };`, gameDetectionContext);
+const { getDistanceCueCopy, trackIsInScanZone } = gameDetectionContext.cueHelpers;
 
 test('bounding-box distance guidance is resolution independent', () => {
     const video = { videoWidth: 1280, videoHeight: 720 };
@@ -37,4 +37,11 @@ test('bounding-box distance cues direct the player in the correct direction', ()
 
     assert.equal(getDistanceCueCopy(tooSmallGuidance), 'Subukang Lumapit');
     assert.equal(getDistanceCueCopy(tooLargeGuidance), 'Subukang Lumayo');
+});
+
+test('only objects centred in the scan guide are eligible for the camera game', () => {
+    const video = { videoWidth: 1000, videoHeight: 1000 };
+    assert.equal(trackIsInScanZone({ x1: 350, y1: 350, x2: 650, y2: 650 }, video), true);
+    assert.equal(trackIsInScanZone({ x1: 0, y1: 350, x2: 120, y2: 650 }, video), false);
+    assert.equal(trackIsInScanZone({ x1: 350, y1: 850, x2: 650, y2: 980 }, video), false);
 });
