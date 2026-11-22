@@ -10116,20 +10116,50 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         clearTriangleGameCompletionArrivalTransition();
         triangleGameCompletionStage = 'arrived';
-        if (triangleGameCompleteArrivalCharacter) triangleGameCompleteArrivalCharacter.hidden = false;
         triangleGameCompleteCharacterSequence.classList.remove('is-walking');
-        triangleGameCompleteCharacterSequence.getBoundingClientRect();
-        triangleGameCompleteCharacterSequence.classList.add('is-arrived');
-        triangleGameCompleteArrivalTransitionTimer = window.setTimeout(() => {
-            triangleGameCompleteArrivalTransitionTimer = null;
+        let hasStartedArrivalCrossfade = false;
+        const startArrivalCrossfade = () => {
             if (
-                triangleGameCompletionStage === 'arrived'
-                && triangleGameCompleteCharacterSequence?.classList.contains('is-arrived')
-                && triangleGameCompleteWalkingCharacter
-            ) {
-                triangleGameCompleteWalkingCharacter.hidden = true;
+                hasStartedArrivalCrossfade
+                || triangleGameCompletionStage !== 'arrived'
+                || !triangleGameCompleteCharacterSequence
+            ) return;
+            hasStartedArrivalCrossfade = true;
+            window.requestAnimationFrame(() => {
+                if (
+                    triangleGameCompletionStage !== 'arrived'
+                    || !triangleGameCompleteCharacterSequence
+                ) return;
+                triangleGameCompleteCharacterSequence.classList.add('is-arrived');
+                triangleGameCompleteArrivalTransitionTimer = window.setTimeout(() => {
+                    triangleGameCompleteArrivalTransitionTimer = null;
+                    if (
+                        triangleGameCompletionStage === 'arrived'
+                        && triangleGameCompleteCharacterSequence?.classList.contains('is-arrived')
+                        && triangleGameCompleteWalkingCharacter
+                    ) {
+                        triangleGameCompleteWalkingCharacter.hidden = true;
+                    }
+                }, 520);
+            });
+        };
+
+        if (triangleGameCompleteArrivalCharacter) {
+            triangleGameCompleteArrivalCharacter.hidden = false;
+            if (triangleGameCompleteArrivalCharacter.complete) {
+                const arrivalDecode = typeof triangleGameCompleteArrivalCharacter.decode === 'function'
+                    ? triangleGameCompleteArrivalCharacter.decode()
+                    : Promise.resolve();
+                arrivalDecode
+                    .catch(() => {})
+                    .finally(startArrivalCrossfade);
+            } else {
+                triangleGameCompleteArrivalCharacter.addEventListener('load', startArrivalCrossfade, { once: true });
+                triangleGameCompleteArrivalCharacter.addEventListener('error', startArrivalCrossfade, { once: true });
             }
-        }, 420);
+        } else {
+            startArrivalCrossfade();
+        }
         if (triangleGameCompleteConfetti) {
             prepareTriangleGameCompleteConfetti();
             triangleGameCompleteConfetti.hidden = false;
