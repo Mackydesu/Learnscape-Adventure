@@ -9853,6 +9853,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const triangleWoodStorageCount = triangleWoodStorage?.querySelector('[data-triangle-wood-count]') || null;
     const triangleCraftingPanel = triangleGamePage?.querySelector('.triangle-crafting-panel') || null;
     const triangleCraftingShapes = triangleCraftingPanel?.querySelector('.triangle-crafting-shapes') || null;
+    const triangleShapeCountHighlights = Array.from(
+        triangleCraftingShapes?.querySelectorAll('[data-triangle-count-highlight]') || [],
+    );
     const triangleCraftingSlots = Array.from(triangleCraftingPanel?.querySelectorAll('[data-triangle-craft-slot]') || []);
     const triangleBridgeQuestion = triangleCraftingPanel?.querySelector('.triangle-bridge-question') || null;
     const triangleBridgeQuestionChoices = Array.from(triangleBridgeQuestion?.querySelectorAll('[data-triangle-count-answer]') || []);
@@ -9895,12 +9898,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     let triangleBridgeBuildTimers = [];
     let triangleBridgeQuestionAnswered = false;
     let triangleBridgeQuestionAudio = null;
+    let triangleBridgeShapeCountSession = 0;
     let triangleGameCompleteVoiceAudio = null;
     let triangleGameCompleteCheeringAudio = null;
     let triangleGameCompleteWalkLoopTimer = null;
     let triangleGameCompleteWalkFallbackTimer = null;
     let triangleGameCompleteExitFallbackTimer = null;
     let triangleGameCompletionStage = 'idle';
+
+    const stopTriangleBridgeShapeCount = () => {
+        triangleBridgeShapeCountSession += 1;
+        stopNumberChoiceAudio();
+        triangleShapeCountHighlights.forEach((highlight) => {
+            highlight.classList.remove('is-counting');
+        });
+    };
     const prepareTriangleGameCompleteConfetti = () => {
         if (!triangleGameCompleteConfetti || triangleGameCompleteConfetti.childElementCount) return;
         const colors = ['#ff4f64', '#ffd83d', '#38c7e8', '#70d34b', '#ff8f32', '#f17ac6', '#ffffff'];
@@ -10171,6 +10183,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const resetTriangleGameTrees = () => {
         triangleWoodCollectionSession += 1;
         triangleBridgeBuildSession += 1;
+        stopTriangleBridgeShapeCount();
         triangleBridgeBuildTimers.forEach((timerId) => window.clearTimeout(timerId));
         triangleBridgeBuildTimers = [];
         triangleWoodCollected = 0;
@@ -10450,6 +10463,64 @@ document.addEventListener('DOMContentLoaded', async () => {
         audio.play().catch(releaseAudio);
     };
 
+    const countTriangleBridgeShapes = (collectionSession, onComplete) => {
+        if (
+            collectionSession !== triangleWoodCollectionSession
+            || !triangleShapeCountHighlights.length
+            || triangleGamePage?.hidden
+        ) {
+            onComplete?.();
+            return;
+        }
+
+        stopTriangleBridgeShapeCount();
+        const countSession = triangleBridgeShapeCountSession;
+        let shapeIndex = 0;
+
+        const countNextShape = () => {
+            if (
+                countSession !== triangleBridgeShapeCountSession
+                || collectionSession !== triangleWoodCollectionSession
+                || triangleGamePage?.hidden
+            ) return;
+
+            const highlight = triangleShapeCountHighlights[shapeIndex];
+            if (!highlight) {
+                onComplete?.();
+                return;
+            }
+
+            const number = shapeIndex + 1;
+            highlight.classList.remove('is-counting');
+            highlight.getBoundingClientRect();
+            highlight.classList.add('is-counting');
+
+            const didPlayNumber = playNumberChoiceAudio(number);
+            const numberDelay = didPlayNumber
+                ? getNumberChoiceAudioDuration(number) + 170
+                : 680;
+            const countTimer = window.setTimeout(() => {
+                triangleGameDialogueTimers = triangleGameDialogueTimers.filter((timerId) => timerId !== countTimer);
+                if (
+                    countSession !== triangleBridgeShapeCountSession
+                    || collectionSession !== triangleWoodCollectionSession
+                    || triangleGamePage?.hidden
+                ) return;
+
+                highlight.classList.remove('is-counting');
+                shapeIndex += 1;
+                if (shapeIndex < triangleShapeCountHighlights.length) {
+                    countNextShape();
+                } else {
+                    onComplete?.();
+                }
+            }, Math.max(680, numberDelay));
+            triangleGameDialogueTimers.push(countTimer);
+        };
+
+        countNextShape();
+    };
+
     const showTriangleBridgeQuestion = (session) => {
         if (!triangleBridgeQuestion || session !== triangleWoodCollectionSession) return;
         triangleBridgeQuestionAnswered = false;
@@ -10642,7 +10713,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     triangleBridgeQuestionChoices.forEach((choice) => {
         choice.addEventListener('click', () => {
             if (triangleBridgeQuestionAnswered || triangleBridgeQuestion?.hidden) return;
-            playNumberChoiceActivationFallback(choice);
             const isCorrect = choice.hasAttribute('data-correct-answer');
             triangleBridgeQuestionChoices.forEach((candidate) => {
                 candidate.classList.remove('is-correct', 'is-wrong');
@@ -10652,6 +10722,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             choice.setAttribute('aria-pressed', 'true');
 
             if (!isCorrect) {
+                playNumberChoiceActivationFallback(choice);
                 playTriangleBridgeQuestionAudio('assets/Audios/Sound effects/buzzer.mp3');
                 triangleGameDialogueTimers.push(window.setTimeout(() => {
                     choice.classList.remove('is-wrong');
@@ -10664,11 +10735,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             triangleBridgeQuestionChoices.forEach((candidate) => {
                 candidate.disabled = true;
             });
-            playTriangleBridgeQuestionAudio('assets/Audios/Sound effects/correct.mp3');
             const session = triangleWoodCollectionSession;
-            triangleGameDialogueTimers.push(window.setTimeout(() => {
-                if (session === triangleWoodCollectionSession) startTriangleBridgeBuildSequence(session);
-            }, 650));
+            playTriangleBridgeQuestionAudio('assets/Audios/Sound effects/correct.mp3', () => {
+                if (session !== triangleWoodCollectionSession || triangleGamePage?.hidden) return;
+                countTriangleBridgeShapes(session, () => {
+                    if (session === triangleWoodCollectionSession) startTriangleBridgeBuildSequence(session);
+                });
+            });
         });
     });
 
