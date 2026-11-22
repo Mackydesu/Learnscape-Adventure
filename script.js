@@ -9904,7 +9904,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     let triangleGameCompleteWalkLoopTimer = null;
     let triangleGameCompleteWalkFallbackTimer = null;
     let triangleGameCompleteExitFallbackTimer = null;
-    let triangleGameCompleteArrivalTransitionTimer = null;
     let triangleGameCompletionStage = 'idle';
 
     const stopTriangleBridgeShapeCount = () => {
@@ -9941,16 +9940,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    const clearTriangleGameCompletionArrivalTransition = () => {
-        if (triangleGameCompleteArrivalTransitionTimer !== null) {
-            window.clearTimeout(triangleGameCompleteArrivalTransitionTimer);
-            triangleGameCompleteArrivalTransitionTimer = null;
-        }
-    };
-
     const stopTriangleGameCompletionSequence = () => {
         clearTriangleGameCompletionFallbacks();
-        clearTriangleGameCompletionArrivalTransition();
         triangleGameCompletionStage = 'idle';
         if (triangleGameCompleteWalkLoopTimer !== null) {
             window.clearTimeout(triangleGameCompleteWalkLoopTimer);
@@ -10024,7 +10015,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             || triangleGameCompletionStage === 'progress'
         ) return;
         triangleGameCompletionStage = 'leaving';
-        clearTriangleGameCompletionArrivalTransition();
         triangleGameCompleteCharacterSequence.classList.remove('is-walking', 'is-arrived', 'is-leaving');
         if (triangleGameCompleteArrivalCharacter) triangleGameCompleteArrivalCharacter.hidden = true;
         if (triangleGameCompleteWalkingCharacter) {
@@ -10114,52 +10104,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.clearTimeout(triangleGameCompleteWalkFallbackTimer);
             triangleGameCompleteWalkFallbackTimer = null;
         }
-        clearTriangleGameCompletionArrivalTransition();
         triangleGameCompletionStage = 'arrived';
+        if (triangleGameCompleteWalkingCharacter) triangleGameCompleteWalkingCharacter.hidden = true;
+        if (triangleGameCompleteArrivalCharacter) triangleGameCompleteArrivalCharacter.hidden = false;
         triangleGameCompleteCharacterSequence.classList.remove('is-walking');
-        let hasStartedArrivalCrossfade = false;
-        const startArrivalCrossfade = () => {
-            if (
-                hasStartedArrivalCrossfade
-                || triangleGameCompletionStage !== 'arrived'
-                || !triangleGameCompleteCharacterSequence
-            ) return;
-            hasStartedArrivalCrossfade = true;
-            window.requestAnimationFrame(() => {
-                if (
-                    triangleGameCompletionStage !== 'arrived'
-                    || !triangleGameCompleteCharacterSequence
-                ) return;
-                triangleGameCompleteCharacterSequence.classList.add('is-arrived');
-                triangleGameCompleteArrivalTransitionTimer = window.setTimeout(() => {
-                    triangleGameCompleteArrivalTransitionTimer = null;
-                    if (
-                        triangleGameCompletionStage === 'arrived'
-                        && triangleGameCompleteCharacterSequence?.classList.contains('is-arrived')
-                        && triangleGameCompleteWalkingCharacter
-                    ) {
-                        triangleGameCompleteWalkingCharacter.hidden = true;
-                    }
-                }, 520);
-            });
-        };
-
-        if (triangleGameCompleteArrivalCharacter) {
-            triangleGameCompleteArrivalCharacter.hidden = false;
-            if (triangleGameCompleteArrivalCharacter.complete) {
-                const arrivalDecode = typeof triangleGameCompleteArrivalCharacter.decode === 'function'
-                    ? triangleGameCompleteArrivalCharacter.decode()
-                    : Promise.resolve();
-                arrivalDecode
-                    .catch(() => {})
-                    .finally(startArrivalCrossfade);
-            } else {
-                triangleGameCompleteArrivalCharacter.addEventListener('load', startArrivalCrossfade, { once: true });
-                triangleGameCompleteArrivalCharacter.addEventListener('error', startArrivalCrossfade, { once: true });
-            }
-        } else {
-            startArrivalCrossfade();
-        }
+        triangleGameCompleteCharacterSequence.classList.add('is-arrived');
         if (triangleGameCompleteConfetti) {
             prepareTriangleGameCompleteConfetti();
             triangleGameCompleteConfetti.hidden = false;
@@ -10172,8 +10121,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const startTriangleGameCompletionSequence = () => {
         if (!triangleGameCompleteCharacterSequence || !triangleGamePage?.classList.contains('is-bridge-complete-scene')) return;
-
-        clearTriangleGameCompletionArrivalTransition();
 
         if (triangleGameCompleteTitle) {
             triangleGameCompleteTitle.hidden = false;

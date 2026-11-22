@@ -11866,32 +11866,6 @@ body *::after {
     display: none !important;
 }
 
-.triangle-game-complete-character-sequence .triangle-game-complete-walking-character,
-.triangle-game-complete-character-sequence .triangle-game-complete-arrival-character {
-    will-change: opacity, transform;
-    transition: opacity 0.38s ease, transform 0.42s cubic-bezier(0.22, 0.9, 0.32, 1);
-}
-
-.triangle-game-complete-character-sequence .triangle-game-complete-walking-character {
-    opacity: 1;
-    transform: translateX(-50%) scale(1);
-}
-
-.triangle-game-complete-character-sequence .triangle-game-complete-arrival-character {
-    opacity: 0;
-    transform: translateX(-50%) scale(0.96);
-}
-
-.triangle-game-complete-character-sequence.is-arrived .triangle-game-complete-walking-character {
-    opacity: 0;
-    transform: translateX(-50%) scale(0.98);
-}
-
-.triangle-game-complete-character-sequence.is-arrived .triangle-game-complete-arrival-character {
-    opacity: 1;
-    transform: translateX(-50%) scale(1);
-}
-
 @media (min-width: 901px) and (orientation: landscape) {
     .triangle-game-complete-title {
         position: absolute;
