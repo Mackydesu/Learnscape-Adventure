@@ -13419,6 +13419,30 @@ body *::after {
     transition: opacity 0.42s ease;
 }
 
+.square-chocolate-piece.is-counting {
+    position: relative;
+    z-index: 1;
+    animation: squareChocolateCountPulse 0.68s cubic-bezier(0.22, 0.9, 0.32, 1.2) both;
+}
+
+@keyframes squareChocolateCountPulse {
+    0% {
+        transform: scale(1);
+    }
+
+    42% {
+        transform: scale(1.26);
+    }
+
+    72% {
+        transform: scale(0.94);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
 .square-cookie-square[hidden] {
     display: none;
 }
@@ -14648,6 +14672,7 @@ body *::after {
     .square-placement-hint,
     .square-object-piece.is-snapping,
     .square-object-piece.is-scattered,
+    .square-chocolate-piece.is-counting,
     #learnscape-shape-square-page.is-square-kids-cheering .square-kids-cheer-character-ch7,
     #learnscape-shape-square-page.is-square-kids-cheering .square-kids-cheer-character-ch8 {
         animation: none;

@@ -2021,6 +2021,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let shapeSquareAreaIntroFrame = null;
     let shapeSquareStartPressTimer = null;
     let shapeSquareCelebrationTimers = [];
+    let shapeSquareChocolateCountSession = 0;
     const squareObjectSnapTimers = new Map();
     let squareObjectPanelExitTimer = null;
     let squareObjectGuidedTargetNumber = null;
@@ -2403,6 +2404,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const clearShapeSquareTimers = () => {
         shapeSquareTimers.forEach((timerId) => window.clearTimeout(timerId));
         shapeSquareTimers = [];
+        stopShapeSquareChocolateCount();
         shapeSquarePage?.classList.remove('is-intro-click-ready');
         shapeSquareBubble?.classList.remove('is-message-complete');
     };
@@ -2734,8 +2736,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         return shuffled;
     };
 
+    const stopShapeSquareChocolateCount = () => {
+        shapeSquareChocolateCountSession += 1;
+        stopNumberChoiceAudio();
+        shapeSquareCookieSquare?.querySelectorAll('.square-chocolate-piece.is-counting').forEach((chocolate) => {
+            chocolate.classList.remove('is-counting');
+        });
+    };
+
+    const getNumberChoiceAudioDuration = (number) => {
+        const segment = numberChoiceAudioSegments[Math.floor(Number(number)) - 1];
+        return segment ? Math.max(0, (segment[1] - segment[0]) * 1000) : 0;
+    };
+
     const setShapeSquareAnswerTiles = (rangeMin, rangeMax) => {
         if (!shapeSquareAnswerTileButtons.length) return;
+
+        stopShapeSquareChocolateCount();
 
         if (shapeSquareCookieSquare) {
             shapeSquareCookieSquare.classList.remove(
@@ -2831,6 +2848,55 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         takeNextBite();
+    };
+
+    const animateShapeSquareChocolateCount = (onComplete) => {
+        const chocolates = Array.from(shapeSquareCookieSquare?.querySelectorAll('.square-chocolate-piece') || []);
+        const chocolateCount = Number(shapeSquareCookieSquare?.dataset.chocolateCount) || chocolates.length;
+        const total = Math.min(chocolateCount, chocolates.length);
+        if (!total) {
+            onComplete?.();
+            return;
+        }
+
+        stopShapeSquareChocolateCount();
+        const session = shapeSquareChocolateCountSession;
+        let chocolateIndex = 0;
+
+        const countNextChocolate = () => {
+            if (session !== shapeSquareChocolateCountSession) return;
+
+            const chocolate = chocolates[chocolateIndex];
+            if (!chocolate) {
+                onComplete?.();
+                return;
+            }
+
+            const number = chocolateIndex + 1;
+            chocolate.classList.remove('is-counting');
+            chocolate.getBoundingClientRect();
+            chocolate.classList.add('is-counting');
+
+            const didPlayNumber = playNumberChoiceAudio(number);
+            const numberDelay = didPlayNumber
+                ? getNumberChoiceAudioDuration(number) + 170
+                : 680;
+            const countTimer = window.setTimeout(() => {
+                shapeSquareTimers = shapeSquareTimers.filter((timerId) => timerId !== countTimer);
+                if (session !== shapeSquareChocolateCountSession) return;
+
+                chocolate.classList.remove('is-counting');
+                chocolateIndex += 1;
+                if (chocolateIndex < total) {
+                    countNextChocolate();
+                } else {
+                    onComplete?.();
+                }
+            }, Math.max(680, numberDelay));
+            shapeSquareTimers.push(countTimer);
+        };
+
+        countNextChocolate();
     };
 
     const showShapeSquareAnswerCelebration = () => {
@@ -2955,7 +3021,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const handleShapeSquareAnswerTileClick = (event) => {
         const tile = event.currentTarget;
         if (!tile || tile.disabled) return;
-        playNumberChoiceActivationFallback(tile);
 
         if (tile.dataset.correct === 'true') {
             shapeSquareAnswerTileButtons.forEach((button) => {
@@ -2970,12 +3035,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             const completionTimer = window.setTimeout(() => {
                 shapeSquareTimers = shapeSquareTimers.filter((timerId) => timerId !== completionTimer);
-                animateShapeSquareChocolateBites(showShapeSquareAnswerCelebration);
+                animateShapeSquareChocolateCount(() => {
+                    animateShapeSquareChocolateBites(showShapeSquareAnswerCelebration);
+                });
             }, 420);
             shapeSquareTimers.push(completionTimer);
             return;
         }
 
+        playNumberChoiceActivationFallback(tile);
         tile.classList.remove('is-wrong');
         tile.getBoundingClientRect();
         tile.classList.add('is-wrong');
@@ -2994,6 +3062,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const resetSquareObjectPuzzle = () => {
         squareObjectGuidedTargetNumber = null;
+        stopShapeSquareChocolateCount();
         if (shapeSquareCountRangePicker) shapeSquareCountRangePicker.hidden = true;
         if (squareGameTitle) squareGameTitle.hidden = true;
         if (squarePlacementTitle) squarePlacementTitle.hidden = true;
