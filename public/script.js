@@ -6863,7 +6863,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ? 'Nabuo mo ang bahaghari!'
                 : `Completed colors: ${heartGameColorIndex} of ${HEART_COLOR_CHALLENGES.length}`;
         }
-        if (heartGameRetryButton) heartGameRetryButton.textContent = won ? 'Play Again' : 'Retry';
+        if (heartGameRetryButton) heartGameRetryButton.textContent = 'Subukan ulit';
         if (heartGameResult) {
             heartGameResult.hidden = false;
             heartGameResult.getBoundingClientRect();
