@@ -7704,7 +7704,7 @@ body *::after {
     position: absolute;
     inset: 0;
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     align-items: center;
     justify-items: end;
     padding-right: clamp(0.25rem, 0.55vw, 0.45rem);

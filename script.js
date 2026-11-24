@@ -1458,15 +1458,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const HEART_RAINBOW_START_DELAY_MS = 1800;
     const HEART_RAINBOW_DRAW_MS = 2400;
     const HEART_RAINBOW_HOLD_MS = 450;
-    const HEART_SETS_PER_COLOR = 3;
+    const HEART_SETS_PER_COLOR = 1;
     const HEART_COLOR_CHALLENGES = [
-        { key: 'red', label: 'RED', required: HEART_SETS_PER_COLOR, color: '#ff435f', edge: '#9d1737' },
-        { key: 'orange', label: 'ORANGE', required: HEART_SETS_PER_COLOR, color: '#ff8a32', edge: '#a94516' },
-        { key: 'yellow', label: 'YELLOW', required: HEART_SETS_PER_COLOR, color: '#ffd83d', edge: '#a86d08' },
-        { key: 'green', label: 'GREEN', required: HEART_SETS_PER_COLOR, color: '#55c95c', edge: '#247431' },
-        { key: 'blue', label: 'BLUE', required: HEART_SETS_PER_COLOR, color: '#3f9cff', edge: '#205ca8' },
-        { key: 'indigo', label: 'INDIGO', required: HEART_SETS_PER_COLOR, color: '#5556c9', edge: '#2d2e79' },
-        { key: 'violet', label: 'VIOLET', required: HEART_SETS_PER_COLOR, color: '#a653e5', edge: '#65269b' },
+        { key: 'red', label: 'Pula', required: HEART_SETS_PER_COLOR, color: '#ff435f', edge: '#9d1737' },
+        { key: 'orange', label: 'Kahel', required: HEART_SETS_PER_COLOR, color: '#ff8a32', edge: '#a94516' },
+        { key: 'yellow', label: 'Dilaw', required: HEART_SETS_PER_COLOR, color: '#ffd83d', edge: '#a86d08' },
+        { key: 'green', label: 'Berde', required: HEART_SETS_PER_COLOR, color: '#55c95c', edge: '#247431' },
+        { key: 'blue', label: 'Asul', required: HEART_SETS_PER_COLOR, color: '#3f9cff', edge: '#205ca8' },
+        { key: 'violet', label: 'Lila', required: HEART_SETS_PER_COLOR, color: '#a653e5', edge: '#65269b' },
     ];
     const HEART_CELEBRATION_AUDIO_SOURCES = [
         'assets/Audios/Sound effects/completed.mp3',
@@ -6260,8 +6259,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             heartColorGauge.setAttribute(
                 'aria-label',
                 challenge
-                    ? `Target ${challenge.label}: ${heartGameColorProgress} of ${challenge.required} hearts`
-                    : 'All seven rainbow heart colors completed',
+                    ? `Target na ${challenge.label}: ${heartGameColorProgress} sa ${challenge.required} puso`
+                    : `Nakumpleto ang lahat ng ${HEART_COLOR_CHALLENGES.length} na kulay ng pusong bahaghari`,
             );
         }
         heartColorMilestones.forEach((milestone, index) => {
@@ -6930,7 +6929,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (heartGameResultCopy) {
             heartGameResultCopy.textContent = won
                 ? 'Nabuo mo ang bahaghari!'
-                : `Completed colors: ${heartGameColorIndex} of ${HEART_COLOR_CHALLENGES.length}`;
+                : `Nakumpletong kulay: ${heartGameColorIndex} sa ${HEART_COLOR_CHALLENGES.length}`;
         }
         if (heartGameRetryButton) heartGameRetryButton.textContent = 'Subukan ulit';
         if (heartGameResult) {
@@ -16305,13 +16304,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const gameIslandShapeLabels = Object.freeze({
-        ...cameraShapeLabels,
+        circle: 'Circle Meadow',
+        square: 'Square Town',
+        triangle: 'Triangle Mountains',
+        rectangle: 'Rectangle Village',
+        oval: 'Oval Garden',
+        heart: 'Heart City',
+        star: 'Star Forest',
+        diamond: 'Diamond Cave',
     });
 
     appBackButtons.forEach((button) => {
         const buttonIslandShape = getBackButtonIslandShape(button);
         if (buttonIslandShape) {
-            button.setAttribute('aria-label', `Return to ${gameIslandShapeLabels[buttonIslandShape]} Island`);
+            button.setAttribute('aria-label', `Return to ${gameIslandShapeLabels[buttonIslandShape]}`);
         }
         button.addEventListener('click', (event) => {
             event.preventDefault();
@@ -16489,7 +16495,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const shapeHowToGuides = {
         circle: {
-            island: 'Circle Island',
+            island: 'Circle Meadow',
             mission: 'Hanapin ang lahat ng sampung bilog na bagay bago maubos ang oras.',
             steps: [
                 'Simulan ang misyon at hintayin ang countdown.',
@@ -16503,12 +16509,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             scopes: ['#learnscape-circle-illustration-page'],
         },
         square: {
-            island: 'Square Island',
-            mission: 'Ayusin ang Bayan ng Parisukat.',
+            island: 'Square Town',
+            mission: 'Ayusin ang Square Town.',
             steps: [
                 'Hanapin at i-tap ang limang nawawalang bagay na parisukat upang makolekta ang mga ito.',
                 'I-tap ang katugmang bagay sa panel ng koleksyon upang ayusin ang bayan.',
-                'Magpatuloy hanggang makumpleto ang Bayan ng Parisukat.',
+                'Magpatuloy hanggang makumpleto ang Square Town.',
                 'Pumili ng saklaw ng bilang para sa tsokolate.',
                 'Bilangin ang mga ipinakitang parisukat na tsokolate.',
                 'Piliin ang sagot na katumbas ng bilang ng mga tsokolate.',
@@ -16516,7 +16522,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             scopes: ['#learnscape-shape-square-page'],
         },
         triangle: {
-            island: 'Triangle Island',
+            island: 'Triangle Mountains',
             mission: 'Buoin muli ang tulay.',
             steps: [
                 'I-tap ang bawat kahoy.',
@@ -16527,7 +16533,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             scopes: ['#learnscape-triangle-game-page'],
         },
         rectangle: {
-            island: 'Rectangle Island',
+            island: 'Rectangle Village',
             mission: 'Maghatid ng tatlong parihabang pakete.',
             steps: [
                 'Pumili ng tatlong parihabang bagay.',
@@ -16551,7 +16557,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             ],
         },
         oval: {
-            island: 'Oval Island',
+            island: 'Oval Garden',
             mission: 'Itugma ang lahat ng pares bago maubos ang 45 segundo.',
             steps: [
                 'Tandaan ang mga card sa loob ng tatlong segundong preview.',
@@ -16567,13 +16573,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             scopes: ['#learnscape-oval-board-game-page'],
         },
         heart: {
-            island: 'Heart Island',
+            island: 'Heart City',
             mission: 'Tirahin ang mga pusong lobo ayon sa pagkakasunod-sunod ng kulay ng bahaghari.',
             steps: [
                 'Tandaan ang target na kulay.',
                 'Igalaw ang pointer o mouse upang itutok ang busog na puso.',
                 'Pindutin ang Spacebar upang magpaputok.',
-                'Tirahin ang tatlong pusong lobo na katugma ng bawat target na kulay.',
+                'Tirahin ang isang pusong lobo na katugma ng bawat target na kulay.',
                 'Bawat pangkat ng lobo ay may 10 segundong oras.',
                 'Ang lobong hindi puso ay nagbabawas ng 2 segundo sa oras.',
                 'Tingnan ang iyong progreso at punuin ang lahat ng kulay para sa palabas na bahaghari.',
@@ -16581,7 +16587,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             scopes: ['#learnscape-shape-area-6-page'],
         },
         star: {
-            island: 'Star Island',
+            island: 'Star Forest',
             mission: 'Saluhin ang mga nahuhulog na bituin bago maubos ang oras.',
             steps: [
                 'Pumili ng saklaw na bilang ng bituin.',
@@ -16595,7 +16601,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             scopes: ['#learnscape-shape-area-7-page'],
         },
         diamond: {
-            island: 'Diamond Island',
+            island: 'Diamond Cave',
             mission: 'Kolektahin ang mga piraso ng dyamante, pagkatapos ay buuin ang mga ito nang tama.',
             steps: [
                 'May pangkat ng paniki na papasok sa kuweba.',
