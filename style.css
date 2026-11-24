@@ -13501,16 +13501,47 @@ body *::after {
 }
 
 .square-chocolate-piece {
+    --chocolate-highlight: #ff4d6d;
     display: block;
     width: var(--chocolate-piece-size);
     height: var(--chocolate-piece-size);
+    box-sizing: border-box;
+    padding: clamp(0.04rem, 0.12vw, 0.1rem);
+    border: clamp(0.14rem, 0.28vw, 0.26rem) solid var(--chocolate-highlight);
+    border-radius: clamp(0.45rem, 1vw, 0.9rem);
     object-fit: contain;
-    transition: opacity 0.42s ease;
+    box-shadow:
+        0 0 0 clamp(0.04rem, 0.1vw, 0.09rem) #fff9da,
+        0 0 clamp(0.38rem, 0.9vw, 0.75rem) var(--chocolate-highlight),
+        0 0.16rem 0.22rem rgba(72, 30, 10, 0.42);
+    transition: opacity 0.42s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
+
+.square-chocolate-piece:nth-child(1)  { --chocolate-highlight: #ff3d5a; }
+.square-chocolate-piece:nth-child(2)  { --chocolate-highlight: #ff7a18; }
+.square-chocolate-piece:nth-child(3)  { --chocolate-highlight: #ffcc1a; }
+.square-chocolate-piece:nth-child(4)  { --chocolate-highlight: #a7dc22; }
+.square-chocolate-piece:nth-child(5)  { --chocolate-highlight: #35c85a; }
+.square-chocolate-piece:nth-child(6)  { --chocolate-highlight: #19c6a3; }
+.square-chocolate-piece:nth-child(7)  { --chocolate-highlight: #1dc8ef; }
+.square-chocolate-piece:nth-child(8)  { --chocolate-highlight: #3d8cff; }
+.square-chocolate-piece:nth-child(9)  { --chocolate-highlight: #5c63e8; }
+.square-chocolate-piece:nth-child(10) { --chocolate-highlight: #9b51e0; }
+.square-chocolate-piece:nth-child(11) { --chocolate-highlight: #da4cc8; }
+.square-chocolate-piece:nth-child(12) { --chocolate-highlight: #f44f9a; }
+.square-chocolate-piece:nth-child(13) { --chocolate-highlight: #ef5a29; }
+.square-chocolate-piece:nth-child(14) { --chocolate-highlight: #f7b733; }
+.square-chocolate-piece:nth-child(15) { --chocolate-highlight: #78be20; }
+.square-chocolate-piece:nth-child(16) { --chocolate-highlight: #00a98f; }
+.square-chocolate-piece:nth-child(17) { --chocolate-highlight: #00acd4; }
+.square-chocolate-piece:nth-child(18) { --chocolate-highlight: #2563eb; }
+.square-chocolate-piece:nth-child(19) { --chocolate-highlight: #7c3aed; }
+.square-chocolate-piece:nth-child(20) { --chocolate-highlight: #e8378f; }
 
 .square-chocolate-piece.is-counting {
     position: relative;
     z-index: 1;
+    filter: drop-shadow(0 0 0.7rem var(--chocolate-highlight));
     animation: squareChocolateCountPulse 0.68s cubic-bezier(0.22, 0.9, 0.32, 1.2) both;
 }
 
@@ -13846,10 +13877,16 @@ body *::after {
     bottom: clamp(21rem, 46vw, 43rem);
     z-index: 31;
     color: #6a3214;
-    font: italic 800 clamp(2.5rem, 6vw, 5.5rem) 'Nunito', sans-serif;
-    line-height: 1;
+    font: 900 clamp(3.1rem, 7.2vw, 6.6rem)/0.94 'Fredoka', 'Nunito', sans-serif;
+    font-style: normal;
+    letter-spacing: 0.012em;
     text-align: center;
-    text-shadow: 0.08rem 0.1rem 0 #fff1ad, 0 0 0.8rem rgba(255, 236, 142, 0.78);
+    -webkit-text-stroke: clamp(0.03rem, 0.07vw, 0.065rem) #51210d;
+    paint-order: stroke fill;
+    text-shadow:
+        0.08rem 0.1rem 0 #fff1ad,
+        0.15rem 0.2rem 0 #7e3a16,
+        0 0 0.95rem rgba(255, 236, 142, 0.88);
     transform: translateX(-50%);
     animation: squarePuzzleCelebrationTextIn 0.55s 0.12s cubic-bezier(0.2, 1.15, 0.35, 1) both;
     white-space: nowrap;
@@ -13927,6 +13964,9 @@ body *::after {
     color: #fff7a8;
     font: 900 clamp(2rem, 4.35vw, 4.1rem) 'Fredoka', sans-serif;
     line-height: 1.04;
+    letter-spacing: normal;
+    -webkit-text-stroke: 0;
+    paint-order: normal;
     white-space: normal;
     text-shadow:
         0 0.12rem 0 #4b250d,

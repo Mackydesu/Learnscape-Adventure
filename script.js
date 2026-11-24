@@ -1922,7 +1922,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeSquareWelcomeMessage = 'Maligayang pagbabalik!';
     const shapeSquareCelebrationMessages = [
         'Matagumpay mong natapos ang Circle Mission!',
-        'Binabati kita sa iyong tagumpay!',
+        'Binabati kita!',
     ];
     const shapeSquareNextShapeMessage = 'Ngayon, panibagong hugis ang ating aalamin!';
     const shapeSquareReadyMessage = 'Handa ka na ba?';
@@ -8542,7 +8542,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleDeliveryTaskItems.forEach((item) => {
             item.hidden = true;
         });
-        if (rectangleDeliveryTaskItemName) rectangleDeliveryTaskItemName.textContent = 'BINABATI KITA!';
+        if (rectangleDeliveryTaskItemName) rectangleDeliveryTaskItemName.textContent = 'Binabati kita!';
         if (rectangleDeliveryTaskDestinationName) rectangleDeliveryTaskDestinationName.textContent = 'Naihatid mo lahat ng gamit';
         rectangleDeliveryTaskPanel.hidden = false;
         rectangleDeliveryTaskPanel.getBoundingClientRect();
@@ -10924,7 +10924,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         overlay.className = 'shape-tv-celebration';
         overlay.setAttribute('role', 'status');
         overlay.setAttribute('aria-live', 'polite');
-        overlay.innerHTML = '<div class="shape-tv-celebration-confetti" aria-hidden="true"></div><div class="shape-tv-celebration-copy"><strong>CONGRATULATIONS</strong><span>TAMA ANG IYONG SAGOT!</span></div><div class="shape-tv-celebration-character shape-tv-celebration-ch7" aria-hidden="true"><img src="assets/Character/ch7.webp" alt=""></div><div class="shape-tv-celebration-character shape-tv-celebration-ch8" aria-hidden="true"><img src="assets/Character/ch8.webp" alt=""></div>';
+        overlay.innerHTML = '<div class="shape-tv-celebration-confetti" aria-hidden="true"></div><div class="shape-tv-celebration-copy"><strong>Binabati kita!</strong><span>TAMA ANG IYONG SAGOT!</span></div><div class="shape-tv-celebration-character shape-tv-celebration-ch7" aria-hidden="true"><img src="assets/Character/ch7.webp" alt=""></div><div class="shape-tv-celebration-character shape-tv-celebration-ch8" aria-hidden="true"><img src="assets/Character/ch8.webp" alt=""></div>';
         const confetti = overlay.querySelector('.shape-tv-celebration-confetti');
         for (let index = 0; index < 96; index += 1) {
             const piece = document.createElement('i');
