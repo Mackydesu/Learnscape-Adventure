@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             cameraStartButton.classList.remove('game-icon-button', 'icon-camera');
             cameraStartButton.querySelector('.circle-camera-start-icon')?.remove();
             const startText = cameraStartButtonText(page);
-            cameraStartButton.setAttribute('aria-label', startText === 'Kamera' ? 'I-allow ang Kamera' : startText);
+            cameraStartButton.setAttribute('aria-label', startText === 'Kamera' ? 'Pahintulutan ang Kamera' : startText);
             if (!cameraStartButton.querySelector('.camera-start-guide-hand')) {
                 const guideHand = document.createElement('img');
                 guideHand.className = 'camera-start-guide-hand';
@@ -12417,7 +12417,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const showAccessCue = text === 'Kamera' && !hasCameraAccessBeenGranted(circleCameraPage);
         circleCameraStartButton?.classList.toggle('is-camera-access-button', showAccessCue);
         circleCameraStartButton?.classList.toggle('is-camera-open-button', text === 'Buksan');
-        circleCameraStartButton?.setAttribute('aria-label', showAccessCue ? 'I-allow ang Kamera' : text);
+        circleCameraStartButton?.setAttribute('aria-label', showAccessCue ? 'Pahintulutan ang Kamera' : text);
         const guideHand = circleCameraStartButton?.querySelector('.camera-start-guide-hand');
         if (guideHand) guideHand.hidden = !showAccessCue;
     };
@@ -12897,7 +12897,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             message.hidden = false;
             const emphasis = document.createElement('strong');
-            emphasis.textContent = 'I-allow ang Kamera';
+            emphasis.textContent = 'Pahintulutan ang Kamera';
             const instruction = document.createElement('small');
             instruction.textContent = 'Pindutin ito';
             message.append(emphasis, instruction);
@@ -13025,7 +13025,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const showAccessCue = text === 'Kamera' && !hasCameraAccessBeenGranted(page);
         button?.classList.toggle('is-camera-access-button', showAccessCue);
         button?.classList.toggle('is-camera-open-button', text === 'Buksan');
-        button?.setAttribute('aria-label', showAccessCue ? 'I-allow ang Kamera' : text);
+        button?.setAttribute('aria-label', showAccessCue ? 'Pahintulutan ang Kamera' : text);
         const guideHand = page?.querySelector('.camera-start-guide-hand');
         if (guideHand) guideHand.hidden = !showAccessCue;
     };

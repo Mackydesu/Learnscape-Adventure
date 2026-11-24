@@ -3618,19 +3618,6 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
     background: linear-gradient(135deg, #6ce9ff 0%, #1595e8 52%, #1762c8 100%);
 }
 
-.shape-phase-preview-detection::before {
-    content: 'CAMERA CHALLENGE';
-    position: absolute;
-    top: 0.45rem;
-    z-index: 1;
-    padding: 0.24rem 0.52rem;
-    border-radius: 999px;
-    background: rgba(58, 31, 10, 0.8);
-    color: #fff3bf;
-    font: 900 clamp(0.5rem, 0.95vw, 0.72rem)/1 'Fredoka', sans-serif;
-    letter-spacing: 0.05em;
-}
-
 .shape-phase-camera-shape {
     width: clamp(4.5rem, 9vw, 8.5rem);
     aspect-ratio: 1;

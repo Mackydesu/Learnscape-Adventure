@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             cameraStartButton.classList.remove('game-icon-button', 'icon-camera');
             cameraStartButton.querySelector('.circle-camera-start-icon')?.remove();
             const startText = cameraStartButtonText(page);
-            cameraStartButton.setAttribute('aria-label', startText === 'Kamera' ? 'I-allow ang Kamera' : startText);
+            cameraStartButton.setAttribute('aria-label', startText === 'Kamera' ? 'Pahintulutan ang Kamera' : startText);
             if (!cameraStartButton.querySelector('.camera-start-guide-hand')) {
                 const guideHand = document.createElement('img');
                 guideHand.className = 'camera-start-guide-hand';
@@ -12683,7 +12683,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const showAccessCue = text === 'Kamera' && !hasCameraAccessBeenGranted(circleCameraPage);
         circleCameraStartButton?.classList.toggle('is-camera-access-button', showAccessCue);
         circleCameraStartButton?.classList.toggle('is-camera-open-button', text === 'Buksan');
-        circleCameraStartButton?.setAttribute('aria-label', showAccessCue ? 'I-allow ang Kamera' : text);
+        circleCameraStartButton?.setAttribute('aria-label', showAccessCue ? 'Pahintulutan ang Kamera' : text);
         const guideHand = circleCameraStartButton?.querySelector('.camera-start-guide-hand');
         if (guideHand) guideHand.hidden = !showAccessCue;
     };
@@ -13163,7 +13163,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             message.hidden = false;
             const emphasis = document.createElement('strong');
-            emphasis.textContent = 'I-allow ang Kamera';
+            emphasis.textContent = 'Pahintulutan ang Kamera';
             const instruction = document.createElement('small');
             instruction.textContent = 'Pindutin ito';
             message.append(emphasis, instruction);
@@ -13291,7 +13291,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const showAccessCue = text === 'Kamera' && !hasCameraAccessBeenGranted(page);
         button?.classList.toggle('is-camera-access-button', showAccessCue);
         button?.classList.toggle('is-camera-open-button', text === 'Buksan');
-        button?.setAttribute('aria-label', showAccessCue ? 'I-allow ang Kamera' : text);
+        button?.setAttribute('aria-label', showAccessCue ? 'Pahintulutan ang Kamera' : text);
         const guideHand = page?.querySelector('.camera-start-guide-hand');
         if (guideHand) guideHand.hidden = !showAccessCue;
     };
@@ -14921,6 +14921,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const ovalObjectImageByNumber = new Map(
         ovalPairPieces.map((piece) => [String(piece.number), piece.objectImage]),
     );
+    const ovalImageSources = Object.freeze([
+        ...new Set([
+            ...ovalPairPieces.map((piece) => piece.image),
+            ...ovalPairPieces.map((piece) => piece.objectImage),
+        ]),
+    ]);
+    const ovalImagePreloads = typeof window.Image === 'function'
+        ? ovalImageSources.map((source) => {
+            const image = new window.Image();
+            image.decoding = 'async';
+            image.src = source;
+            return image;
+        })
+        : [];
     const ovalChallengePieces = [
         { number: 'bomb', challengeType: 'bomb' },
         { number: 'freeze', challengeType: 'freeze' },
@@ -14965,6 +14979,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let ovalOpenCards = [];
     let ovalMatchResolving = false;
     let ovalRewardHideTimer = null;
+    let ovalMatchRewardSession = 0;
     let ovalMatchCheeringAudio = null;
     let ovalWrongPairAudio = null;
     let ovalMissionSession = 0;
@@ -15481,6 +15496,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         playOvalMissionAudio(ovalMissionAudioSource, session, 7000, playReadyMessage);
     };
 
+    const setOvalCardImageSource = (card, cardImage, source, isChallenge) => {
+        const imageRequest = (Number(card.dataset.ovalImageRequest || '0') || 0) + 1;
+        const requestId = String(imageRequest);
+        card.dataset.ovalImageRequest = requestId;
+        cardImage.onload = null;
+        cardImage.onerror = null;
+
+        if (isChallenge || !source) {
+            cardImage.hidden = true;
+            cardImage.removeAttribute('src');
+            return;
+        }
+
+        const revealImage = () => {
+            if (card.dataset.ovalImageRequest !== requestId) return;
+            cardImage.hidden = false;
+            cardImage.onload = null;
+            cardImage.onerror = null;
+        };
+        const keepImageHidden = () => {
+            if (card.dataset.ovalImageRequest === requestId) cardImage.hidden = true;
+        };
+
+        cardImage.hidden = true;
+        cardImage.onload = revealImage;
+        cardImage.onerror = keepImageHidden;
+        cardImage.src = source;
+
+        if (cardImage.complete && cardImage.naturalWidth > 0) {
+            if (typeof cardImage.decode === 'function') {
+                cardImage.decode().then(revealImage).catch(revealImage);
+            } else {
+                window.requestAnimationFrame(revealImage);
+            }
+        }
+    };
+
     const applyOvalHalfPiece = (card, halfPiece) => {
         const cardFront = card.querySelector('.oval-card-front');
         let cardImage = cardFront?.querySelector('.oval-card-image');
@@ -15491,11 +15543,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             cardImage.setAttribute('aria-hidden', 'true');
             cardFront.append(cardImage);
         }
-        if (cardImage) {
-            if (halfPiece.image) cardImage.src = halfPiece.image;
-            else cardImage.removeAttribute('src');
-            cardImage.hidden = Boolean(halfPiece.challenge);
-        }
+        if (cardImage) setOvalCardImageSource(card, cardImage, halfPiece.image, Boolean(halfPiece.challenge));
         card.style.setProperty('--oval-piece-image', halfPiece.image ? `url("${halfPiece.image}")` : 'none');
         card.style.setProperty('--oval-piece-position', `${halfPiece.side} center`);
         card.dataset.ovalPiece = `${halfPiece.image}-${halfPiece.side}`;
@@ -15528,6 +15576,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (ovalRewardHideTimer !== null) {
             window.clearTimeout(ovalRewardHideTimer);
             ovalRewardHideTimer = null;
+        }
+        ovalMatchRewardSession += 1;
+        if (ovalMatchObject) {
+            ovalMatchObject.onload = null;
+            ovalMatchObject.onerror = null;
+            ovalMatchObject.hidden = true;
         }
         if (ovalMatchReward) {
             ovalMatchReward.hidden = true;
@@ -15654,32 +15708,57 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.clearTimeout(ovalRewardHideTimer);
             ovalRewardHideTimer = null;
         }
-        ovalMatchObject.src = piece.objectImage;
+        const rewardSession = ovalMatchRewardSession + 1;
+        let rewardRevealed = false;
+        ovalMatchRewardSession = rewardSession;
+        ovalMatchReward.hidden = true;
+        ovalMatchReward.classList.remove('is-visible');
+        ovalMatchObject.hidden = true;
+        ovalMatchObject.loading = 'eager';
         ovalMatchObject.alt = `Oval ${piece.number} matched object`;
-        if (ovalMatchConfetti && ovalMatchConfetti.childElementCount === 0) {
-            const colors = ['#ffe04f', '#ff6f7f', '#61d8f2', '#69d65f', '#b77bff', '#ff9d42'];
-            for (let index = 0; index < 68; index += 1) {
-                const confetti = document.createElement('span');
-                confetti.style.setProperty('--match-confetti-x', `${2 + Math.random() * 96}%`);
-                confetti.style.setProperty('--match-confetti-size', `${0.42 + Math.random() * 0.7}rem`);
-                confetti.style.setProperty('--match-confetti-color', colors[index % colors.length]);
-                confetti.style.setProperty('--match-confetti-delay', `${Math.random() * 0.55}s`);
-                confetti.style.setProperty('--match-confetti-duration', `${2 + Math.random() * 1.15}s`);
-                confetti.style.setProperty('--match-confetti-drift', `${-9 + Math.random() * 18}vw`);
-                ovalMatchConfetti.appendChild(confetti);
+
+        const revealReward = () => {
+            if (rewardRevealed || ovalMatchRewardSession !== rewardSession) return;
+            rewardRevealed = true;
+            ovalMatchObject.hidden = false;
+            ovalMatchObject.onload = null;
+            ovalMatchObject.onerror = null;
+            if (ovalMatchConfetti && ovalMatchConfetti.childElementCount === 0) {
+                const colors = ['#ffe04f', '#ff6f7f', '#61d8f2', '#69d65f', '#b77bff', '#ff9d42'];
+                for (let index = 0; index < 68; index += 1) {
+                    const confetti = document.createElement('span');
+                    confetti.style.setProperty('--match-confetti-x', `${2 + Math.random() * 96}%`);
+                    confetti.style.setProperty('--match-confetti-size', `${0.42 + Math.random() * 0.7}rem`);
+                    confetti.style.setProperty('--match-confetti-color', colors[index % colors.length]);
+                    confetti.style.setProperty('--match-confetti-delay', `${Math.random() * 0.55}s`);
+                    confetti.style.setProperty('--match-confetti-duration', `${2 + Math.random() * 1.15}s`);
+                    confetti.style.setProperty('--match-confetti-drift', `${-9 + Math.random() * 18}vw`);
+                    ovalMatchConfetti.appendChild(confetti);
+                }
+            }
+            ovalMatchReward.hidden = false;
+            void ovalMatchReward.offsetWidth;
+            ovalMatchReward.classList.add('is-visible');
+            playOvalMatchCheering();
+            ovalRewardHideTimer = window.setTimeout(() => {
+                if (ovalMatchRewardSession !== rewardSession) return;
+                ovalMatchReward.classList.remove('is-visible');
+                ovalMatchReward.hidden = true;
+                stopOvalMatchCheering();
+                ovalRewardHideTimer = null;
+            }, 4250);
+        };
+
+        ovalMatchObject.onload = revealReward;
+        ovalMatchObject.onerror = revealReward;
+        ovalMatchObject.src = piece.objectImage;
+        if (ovalMatchObject.complete && ovalMatchObject.naturalWidth > 0) {
+            if (typeof ovalMatchObject.decode === 'function') {
+                ovalMatchObject.decode().then(revealReward).catch(revealReward);
+            } else {
+                window.requestAnimationFrame(revealReward);
             }
         }
-        ovalMatchReward.hidden = false;
-        ovalMatchReward.classList.remove('is-visible');
-        void ovalMatchReward.offsetWidth;
-        ovalMatchReward.classList.add('is-visible');
-        playOvalMatchCheering();
-        ovalRewardHideTimer = window.setTimeout(() => {
-            ovalMatchReward.classList.remove('is-visible');
-            ovalMatchReward.hidden = true;
-            stopOvalMatchCheering();
-            ovalRewardHideTimer = null;
-        }, 4250);
     };
 
     ovalBoardCards.forEach((card, index) => {
@@ -16618,12 +16697,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             mission: 'Hanapin ang lahat ng sampung bilog na bagay bago maubos ang oras.',
             steps: [
                 'Simulan ang misyon at hintayin ang countdown.',
-                'Hanapin sa eksena ang sampung nakatagong bilog na bagay.',
-                'I-tap ang bawat bilog na bagay upang makolekta ito.',
+                'Hanapin ang sampung bilog na bagay na makikita sa bakuran.',
+                'Pindutin ang bawat bilog na bagay.',
                 'Bawat tamang bilog ay nagdadagdag ng 1 segundo sa oras.',
-                'Iwasang mag-tap sa maling bahagi.',
-                'Pagkatapos ng tatlong maling pag-tap, may bilog na kikinang sandali bilang pahiwatig.',
-                'Kolektahin ang lahat ng sampung bilog sa loob ng 60 segundo.',
+                'Pagkatapos ng tatlong maling pag pindot, magpapakita ito ng pahiwatig.',
+                'Habapin ang lahat ng sampung bilog sa loob ng 60 segundo.',
             ],
             scopes: ['#learnscape-circle-illustration-page'],
         },
@@ -16631,8 +16709,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             island: 'Square Town',
             mission: 'Ayusin ang Square Town.',
             steps: [
-                'Hanapin at i-tap ang limang nawawalang bagay na parisukat upang makolekta ang mga ito.',
-                'I-tap ang katugmang bagay sa panel ng koleksyon upang ayusin ang bayan.',
+                'Hanapin at pindutin ang limang nawawalang bagay upang makolekta ang mga ito.',
+                'Pindutin ang katugmang bagay mula sa koleksyon upang maibalik ito sa kaayusan.',
                 'Magpatuloy hanggang makumpleto ang Square Town.',
                 'Pumili ng saklaw ng bilang para sa tsokolate.',
                 'Bilangin ang mga ipinakitang parisukat na tsokolate.',
@@ -16644,8 +16722,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             island: 'Triangle Mountains',
             mission: 'Buoin muli ang tulay.',
             steps: [
-                'I-tap ang bawat kahoy.',
-                'Bawat pag-tap ay nabubuo ang tulay.',
+                'Pindutin ang bawat kahoy.',
+                'Bawat pag pindot ay nabubuo ang tulay.',
                 'Magpatuloy hanggang sa mailagay lahat ng kahoy.',
                 'Sagutin ang tanong upang ganap na mabuo ang tulay.',
             ],
@@ -16653,7 +16731,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         },
         rectangle: {
             island: 'Rectangle Village',
-            mission: 'Maghatid ng tatlong parihabang pakete.',
+            mission: 'Maghatid ng tatlong parihabang bagay.',
             steps: [
                 'Pumili ng tatlong parihabang bagay.',
                 'Simulan ang misyon ng paghahatid.',
@@ -16724,12 +16802,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             mission: 'Kolektahin ang mga piraso ng dyamante, pagkatapos ay buuin ang mga ito nang tama.',
             steps: [
                 'May pangkat ng paniki na papasok sa kuweba.',
-                'I-tap ang paniking may dalang piraso ng dyamante.',
-                'Iwasang i-tap ang pain na hindi dyamante dahil mababawasan ka ng isang buhay.',
+                'Pindutin ang paniking may dalang piraso ng dyamante.',
+                'Iwasang pindutin ang hindi parte ng dyamante dahil mababawasan ka ng isang buhay.',
                 'Kapag naubos ang tatlong buhay, matatapos ang misyon.',
                 'Pagkatapos kolektahin ang mga piraso ng dyamante, buuin ang mga ito nang tama.',
-                'Hanapin ang kumikinang na bakanteng puwesto.',
-                'I-tap ang pirasong katugma ng puwestong iyon.',
+                'Pagmasdan ang kumikinang na bakanteng puwesto.',
+                'Pindutin ang pirasong katugma ng puwestong iyon.',
                 'Ang maling piraso ay kikinang nang pula.',
                 'Punan ang lahat ng apat na puwesto upang maging mahiwagang kristal ang dyamante.',
             ],
