@@ -13506,14 +13506,15 @@ body *::after {
     width: var(--chocolate-piece-size);
     height: var(--chocolate-piece-size);
     box-sizing: border-box;
-    padding: clamp(0.04rem, 0.12vw, 0.1rem);
-    border: clamp(0.14rem, 0.28vw, 0.26rem) solid var(--chocolate-highlight);
+    padding: clamp(0.08rem, 0.18vw, 0.16rem);
+    border: clamp(0.24rem, 0.48vw, 0.42rem) solid var(--chocolate-highlight);
     border-radius: clamp(0.45rem, 1vw, 0.9rem);
     object-fit: contain;
     box-shadow:
-        0 0 0 clamp(0.04rem, 0.1vw, 0.09rem) #fff9da,
-        0 0 clamp(0.38rem, 0.9vw, 0.75rem) var(--chocolate-highlight),
-        0 0.16rem 0.22rem rgba(72, 30, 10, 0.42);
+        0 0 0 clamp(0.08rem, 0.16vw, 0.14rem) #fffdf1,
+        0 0 0 clamp(0.17rem, 0.32vw, 0.28rem) var(--chocolate-highlight),
+        0 0 clamp(0.55rem, 1.2vw, 1rem) var(--chocolate-highlight),
+        0 0.2rem 0.28rem rgba(72, 30, 10, 0.46);
     transition: opacity 0.42s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
@@ -13541,7 +13542,7 @@ body *::after {
 .square-chocolate-piece.is-counting {
     position: relative;
     z-index: 1;
-    filter: drop-shadow(0 0 0.7rem var(--chocolate-highlight));
+    filter: drop-shadow(0 0 1rem var(--chocolate-highlight));
     animation: squareChocolateCountPulse 0.68s cubic-bezier(0.22, 0.9, 0.32, 1.2) both;
 }
 
