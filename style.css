@@ -12230,12 +12230,12 @@ body *::after {
     }
 
     .triangle-shape-count-highlight {
-        --triangle-highlight-fill: rgba(255, 227, 91, 0.38);
-        --triangle-highlight-stroke: #fff6a8;
-        --triangle-highlight-glow: rgba(255, 224, 73, 0.96);
+        --triangle-highlight-fill: rgba(237, 180, 0, 0.68);
+        --triangle-highlight-stroke: #694700;
+        --triangle-highlight-glow: rgba(255, 190, 0, 1);
         fill: var(--triangle-highlight-fill);
         stroke: var(--triangle-highlight-stroke);
-        stroke-width: 3;
+        stroke-width: 4;
         vector-effect: non-scaling-stroke;
         opacity: 0;
         transform-box: fill-box;
@@ -12244,38 +12244,38 @@ body *::after {
     }
 
     .triangle-shape-count-highlight:nth-child(1) {
-        --triangle-highlight-fill: rgba(255, 215, 84, 0.42);
-        --triangle-highlight-stroke: #fff2a1;
-        --triangle-highlight-glow: rgba(255, 208, 48, 0.98);
+        --triangle-highlight-fill: rgba(237, 180, 0, 0.7);
+        --triangle-highlight-stroke: #694700;
+        --triangle-highlight-glow: rgba(255, 190, 0, 1);
     }
 
     .triangle-shape-count-highlight:nth-child(2) {
-        --triangle-highlight-fill: rgba(80, 207, 255, 0.38);
-        --triangle-highlight-stroke: #bff5ff;
-        --triangle-highlight-glow: rgba(66, 201, 255, 0.98);
+        --triangle-highlight-fill: rgba(0, 133, 225, 0.66);
+        --triangle-highlight-stroke: #003c73;
+        --triangle-highlight-glow: rgba(0, 151, 241, 1);
     }
 
     .triangle-shape-count-highlight:nth-child(3) {
-        --triangle-highlight-fill: rgba(255, 130, 116, 0.4);
-        --triangle-highlight-stroke: #ffd0c7;
-        --triangle-highlight-glow: rgba(255, 112, 93, 0.98);
+        --triangle-highlight-fill: rgba(229, 65, 42, 0.68);
+        --triangle-highlight-stroke: #70170d;
+        --triangle-highlight-glow: rgba(242, 73, 45, 1);
     }
 
     .triangle-shape-count-highlight:nth-child(4) {
-        --triangle-highlight-fill: rgba(174, 137, 255, 0.38);
-        --triangle-highlight-stroke: #e4d4ff;
-        --triangle-highlight-glow: rgba(163, 119, 255, 0.98);
+        --triangle-highlight-fill: rgba(111, 65, 204, 0.66);
+        --triangle-highlight-stroke: #391071;
+        --triangle-highlight-glow: rgba(124, 73, 218, 1);
     }
 
     .triangle-shape-count-highlight:nth-child(5) {
-        --triangle-highlight-fill: rgba(139, 224, 105, 0.4);
-        --triangle-highlight-stroke: #d3ffc1;
-        --triangle-highlight-glow: rgba(118, 215, 82, 0.98);
+        --triangle-highlight-fill: rgba(39, 154, 65, 0.68);
+        --triangle-highlight-stroke: #0e511f;
+        --triangle-highlight-glow: rgba(47, 181, 75, 1);
     }
 
     .triangle-shape-count-highlight.is-revealed {
-        opacity: 0.66;
-        filter: drop-shadow(0 0 0.3rem var(--triangle-highlight-glow));
+        opacity: 0.82;
+        filter: drop-shadow(0 0 0.38rem var(--triangle-highlight-glow));
     }
 
     .triangle-shape-count-highlight.is-counting {
@@ -12284,7 +12284,7 @@ body *::after {
 
     @keyframes triangleBridgeShapeCountPulse {
         0% {
-            opacity: 0.66;
+            opacity: 0.82;
             transform: scale(1);
         }
 
@@ -12295,9 +12295,9 @@ body *::after {
         }
 
         100% {
-            opacity: 0.66;
+            opacity: 0.82;
             transform: scale(1);
-            filter: drop-shadow(0 0 0.3rem var(--triangle-highlight-glow));
+            filter: drop-shadow(0 0 0.38rem var(--triangle-highlight-glow));
         }
     }
 
