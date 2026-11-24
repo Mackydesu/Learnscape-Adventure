@@ -10233,6 +10233,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const wood = slot.querySelector('img');
             if (wood) wood.hidden = true;
         });
+        triangleShapeCountHighlights.forEach((highlight) => {
+            highlight.classList.remove('is-revealed');
+        });
     };
 
     const stopTriangleGameDialogue = () => {
@@ -10675,6 +10678,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 triangleWoodStorage?.classList.add('is-exiting');
                 triangleWoodStorageImage?.setAttribute('tabindex', '-1');
                 triangleWoodStorageImage?.setAttribute('aria-label', 'Nailagay na ang lahat ng kahoy');
+                triangleShapeCountHighlights.forEach((highlight) => {
+                    highlight.classList.add('is-revealed');
+                });
                 showTriangleBridgeQuestion(session);
             }
         }).catch(() => {

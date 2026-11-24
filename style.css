@@ -12230,13 +12230,52 @@ body *::after {
     }
 
     .triangle-shape-count-highlight {
-        fill: rgba(255, 238, 74, 0.22);
-        stroke: rgba(255, 253, 198, 0.98);
+        --triangle-highlight-fill: rgba(255, 227, 91, 0.38);
+        --triangle-highlight-stroke: #fff6a8;
+        --triangle-highlight-glow: rgba(255, 224, 73, 0.96);
+        fill: var(--triangle-highlight-fill);
+        stroke: var(--triangle-highlight-stroke);
         stroke-width: 3;
         vector-effect: non-scaling-stroke;
         opacity: 0;
         transform-box: fill-box;
         transform-origin: center;
+        transition: opacity 220ms ease, filter 220ms ease;
+    }
+
+    .triangle-shape-count-highlight:nth-child(1) {
+        --triangle-highlight-fill: rgba(255, 215, 84, 0.42);
+        --triangle-highlight-stroke: #fff2a1;
+        --triangle-highlight-glow: rgba(255, 208, 48, 0.98);
+    }
+
+    .triangle-shape-count-highlight:nth-child(2) {
+        --triangle-highlight-fill: rgba(80, 207, 255, 0.38);
+        --triangle-highlight-stroke: #bff5ff;
+        --triangle-highlight-glow: rgba(66, 201, 255, 0.98);
+    }
+
+    .triangle-shape-count-highlight:nth-child(3) {
+        --triangle-highlight-fill: rgba(255, 130, 116, 0.4);
+        --triangle-highlight-stroke: #ffd0c7;
+        --triangle-highlight-glow: rgba(255, 112, 93, 0.98);
+    }
+
+    .triangle-shape-count-highlight:nth-child(4) {
+        --triangle-highlight-fill: rgba(174, 137, 255, 0.38);
+        --triangle-highlight-stroke: #e4d4ff;
+        --triangle-highlight-glow: rgba(163, 119, 255, 0.98);
+    }
+
+    .triangle-shape-count-highlight:nth-child(5) {
+        --triangle-highlight-fill: rgba(139, 224, 105, 0.4);
+        --triangle-highlight-stroke: #d3ffc1;
+        --triangle-highlight-glow: rgba(118, 215, 82, 0.98);
+    }
+
+    .triangle-shape-count-highlight.is-revealed {
+        opacity: 0.66;
+        filter: drop-shadow(0 0 0.3rem var(--triangle-highlight-glow));
     }
 
     .triangle-shape-count-highlight.is-counting {
@@ -12245,20 +12284,20 @@ body *::after {
 
     @keyframes triangleBridgeShapeCountPulse {
         0% {
-            opacity: 0;
-            transform: scale(0.88);
+            opacity: 0.66;
+            transform: scale(1);
         }
 
         42% {
             opacity: 1;
             transform: scale(1.08);
-            filter: drop-shadow(0 0 0.7rem rgba(255, 232, 58, 0.98));
+            filter: drop-shadow(0 0 0.7rem var(--triangle-highlight-glow));
         }
 
         100% {
-            opacity: 0.56;
+            opacity: 0.66;
             transform: scale(1);
-            filter: drop-shadow(0 0 0.28rem rgba(255, 232, 58, 0.66));
+            filter: drop-shadow(0 0 0.3rem var(--triangle-highlight-glow));
         }
     }
 
@@ -12895,6 +12934,7 @@ body *::after {
         animation: none;
     }
 
+    .triangle-shape-count-highlight.is-revealed,
     .triangle-shape-count-highlight.is-counting {
         animation: none;
         opacity: 1;
