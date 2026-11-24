@@ -7893,7 +7893,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const rectangleDialogueMessages = [
             'Hello explorer!',
             'Para sa ating Rectangle Mission, tulungan mo akong ihatid ang mga gamit sa Rectangle Village.',
-            'Piliin ang tatlong bagay na hugis rectangle at ilagay ito sa jeep.',
+            'Piliin ang tatlong bagay na hugis parihaba at ilagay ito sa jeep.',
         ];
         const rectangleDialogueSegments = [
             { start: 0, end: 1.4 },
@@ -9119,6 +9119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rectangleBossGuidePages = Array.from(rectangleBossWarning?.querySelectorAll('.rectangle-boss-guide-page') || []);
     const rectangleBossHealth = rectangleBossEncounter?.querySelector('.rectangle-boss-health');
     const rectangleBossHealthValue = rectangleBossEncounter?.querySelector('.rectangle-boss-health-value');
+    const rectangleBossHealthBars = Array.from(rectangleBossEncounter?.querySelectorAll('.rectangle-boss-health-bar') || []);
     const rectangleBossEffects = rectangleBossEncounter?.querySelector('.rectangle-boss-effects');
     const rectangleBossWarningAudio = window.Audio ? new window.Audio('assets/Audios/Sound effects/danger.mp3') : null;
     const rectangleJumpGuideAudio = window.Audio ? new window.Audio('assets/Audios/Voice over/Talon.mp3') : null;
@@ -9134,7 +9135,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     const rectangleBossDeliveryMilestones = [1, 2];
     const rectangleBossCompletedMilestones = new Set();
-    let rectangleBossHealthPoints = 100;
+    const RECTANGLE_BOSS_MAX_HEALTH_BARS = 10;
+    let rectangleBossHealthBarsRemaining = RECTANGLE_BOSS_MAX_HEALTH_BARS;
     let rectangleBossActive = false;
     let rectangleBossCurrentMilestone = null;
     let rectangleBossWarningMilestone = null;
@@ -9161,10 +9163,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     );
 
     const updateRectangleBossHealth = () => {
-        const health = Math.max(0, Math.min(100, rectangleBossHealthPoints));
-        rectangleBossEncounter?.style.setProperty('--boss-health', `${health}%`);
-        rectangleBossHealth?.setAttribute('aria-valuenow', String(health));
-        if (rectangleBossHealthValue) rectangleBossHealthValue.textContent = `${health} HP`;
+        const remainingBars = Math.max(0, Math.min(RECTANGLE_BOSS_MAX_HEALTH_BARS, rectangleBossHealthBarsRemaining));
+        const healthText = `${remainingBars} of ${RECTANGLE_BOSS_MAX_HEALTH_BARS} bars`;
+        rectangleBossHealth?.setAttribute('aria-valuenow', String(remainingBars));
+        rectangleBossHealth?.setAttribute('aria-valuetext', healthText);
+        rectangleBossHealth?.setAttribute('aria-label', `Shape monster health: ${healthText}`);
+        rectangleBossHealthBars.forEach((bar, index) => {
+            bar.classList.toggle('is-depleted', index >= remainingBars);
+        });
+        if (rectangleBossHealthValue) rectangleBossHealthValue.textContent = `${remainingBars}/${RECTANGLE_BOSS_MAX_HEALTH_BARS}`;
     };
 
     const getRectangleBossMilestone = () => {
@@ -9292,7 +9299,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleBossWarningMilestone = null;
         restoreRectangleDeliveryControls();
         if (resetHealth) {
-            rectangleBossHealthPoints = 100;
+            rectangleBossHealthBarsRemaining = RECTANGLE_BOSS_MAX_HEALTH_BARS;
             updateRectangleBossHealth();
         }
         showRectangleBossGuidePage(0);
@@ -9470,7 +9477,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const damageRectangleBoss = () => {
         if (!rectangleBossActive) return;
-        rectangleBossHealthPoints = Math.max(0, rectangleBossHealthPoints - 5);
+        rectangleBossHealthBarsRemaining = Math.max(0, rectangleBossHealthBarsRemaining - 1);
         updateRectangleBossHealth();
         rectangleBossEncounter?.classList.remove('is-monster-hit');
         rectangleBossEncounter?.getBoundingClientRect();
@@ -9480,7 +9487,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             rectangleBossFlashTimer = null;
             rectangleBossEncounter?.classList.remove('is-monster-hit');
         }, 150);
-        if (rectangleBossHealthPoints === 0) finishRectangleBossBattle();
+        if (rectangleBossHealthBarsRemaining === 0) finishRectangleBossBattle();
     };
 
     const fireRectangleBossLaser = () => {
@@ -9603,7 +9610,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setRectangleBossBgmState(true, rectangleGamePaused);
         rectangleObstacleContacts.clear();
         rectangleBossCurrentMilestone = milestone;
-        rectangleBossHealthPoints = 100;
+        rectangleBossHealthBarsRemaining = RECTANGLE_BOSS_MAX_HEALTH_BARS;
         updateRectangleBossHealth();
         rectangleBossEffects?.replaceChildren();
         rectangleDeliveryPage.classList.add('is-boss-battle');
