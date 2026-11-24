@@ -1305,9 +1305,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rectangleDeliveryTaskItemName = rectangleDeliveryPage?.querySelector('.rectangle-delivery-task-copy strong') || null;
     const rectangleDeliveryTaskDestinationName = rectangleDeliveryPage?.querySelector('.rectangle-delivery-task-destination strong') || null;
     const rectangleDeliveryJobs = [
-        { item: 'books', itemName: 'Libro', destination: 'Bookstore', route: 'rectangleBookstore', wayIndex: 1, center: 0.36 },
+        { item: 'books', itemName: 'Libro', destination: 'Books', route: 'rectangleBookstore', wayIndex: 1, center: 0.36 },
+        { item: 'toy-box', itemName: 'Laruan', destination: 'Toys', route: 'rectangleToyShop', wayIndex: 4, center: 0.39 },
         { item: 'bread-tray', itemName: 'Tinapay', destination: 'Bakery', route: 'rectangleBakery', wayIndex: 2, center: 0.82 },
-        { item: 'toy-box', itemName: 'Laruan', destination: 'Toy Shop', route: 'rectangleToyShop', wayIndex: 4, center: 0.39 },
     ];
     let rectangleDeliveryJobIndex = 0;
     const rectangleDeliveredItems = new Set();
