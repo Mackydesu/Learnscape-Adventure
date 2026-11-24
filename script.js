@@ -1953,6 +1953,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeSquareCompletedAudioSource = 'assets/Audios/Sound effects/completed.mp3';
     const shapeSquareCelebrationAudioSource = 'assets/Audios/Voice over/Mahusay.mp3';
     const shapeSquareKidsCheeringAudioSource = 'assets/Audios/Sound effects/kids cheering.mp3';
+    const shapeSquareObjectHuntAudioSource = 'assets/Audios/Voice over/Hanapin.mp3';
+    const shapeSquarePlacementPrefixAudioSource = 'assets/Audios/Voice over/Mula sa.mp3';
+    const shapeSquarePlacementObjectAudioSources = Object.freeze({
+        1: 'assets/Audios/Voice over/orasan.mp3',
+        2: 'assets/Audios/Voice over/bintana.mp3',
+        3: 'assets/Audios/Voice over/palamuti.mp3',
+        4: 'assets/Audios/Voice over/pintuan.mp3',
+        5: 'assets/Audios/Voice over/bukal.mp3',
+    });
     const shapeSquareChocolateQuestionAudioSource = 'assets/Audios/Voice over/Tukuyin kung ilang square.mp3';
     const shapeQuestionBaseAudioSource = 'assets/Audios/Voice over/base sa.mp3';
     const shapeQuestionAudioSource = 'assets/Audios/Voice over/anong hugis ito.mp3';
@@ -2016,6 +2025,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     let shapeSquareMissionAudio = null;
     let shapeSquareReadyAudio = null;
     let shapeSquareCelebrationAudio = null;
+    let shapeSquareObjectHuntAudio = null;
+    let shapeSquarePlacementAudio = null;
     let shapeSquareChocolateQuestionAudio = null;
     let shapeSquareAreaIntroFrame = null;
     let shapeSquareStartPressTimer = null;
@@ -2024,6 +2035,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const squareObjectSnapTimers = new Map();
     let squareObjectPanelExitTimer = null;
     let squareObjectGuidedTargetNumber = null;
+    let squareObjectPromptPieceNumber = null;
+    let shapeSquarePlacementAudioSession = 0;
     const squareObjectTargetSpecs = {
         1: { x: 793, y: 198, width: 138, height: 137 },
         2: { x: 230, y: 363, width: 126, height: 125 },
@@ -2577,6 +2590,90 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeSquareChocolateQuestionAudio = null;
     };
 
+    const stopShapeSquareObjectHuntAudio = () => {
+        if (!shapeSquareObjectHuntAudio) return;
+
+        shapeSquareObjectHuntAudio.onended = null;
+        shapeSquareObjectHuntAudio.onerror = null;
+        shapeSquareObjectHuntAudio.pause();
+        try {
+            shapeSquareObjectHuntAudio.currentTime = 0;
+        } catch (error) {
+            // Pausing is enough while the audio metadata is still loading.
+        }
+        shapeSquareObjectHuntAudio = null;
+    };
+
+    const playShapeSquareObjectHuntAudio = () => {
+        const AudioCtor = window.Audio;
+        const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+        if (!AudioCtor || soundScale <= 0) return;
+
+        stopShapeSquareObjectHuntAudio();
+        const audio = new AudioCtor(shapeSquareObjectHuntAudioSource);
+        shapeSquareObjectHuntAudio = audio;
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = Math.min(1, soundScale);
+        const release = () => {
+            if (shapeSquareObjectHuntAudio === audio) shapeSquareObjectHuntAudio = null;
+        };
+        audio.onended = release;
+        audio.onerror = release;
+        audio.play().catch(release);
+    };
+
+    const stopShapeSquarePlacementAudio = () => {
+        shapeSquarePlacementAudioSession += 1;
+        if (!shapeSquarePlacementAudio) return;
+
+        shapeSquarePlacementAudio.onended = null;
+        shapeSquarePlacementAudio.onerror = null;
+        shapeSquarePlacementAudio.pause();
+        try {
+            shapeSquarePlacementAudio.currentTime = 0;
+        } catch (error) {
+            // Pausing is enough while the audio metadata is still loading.
+        }
+        shapeSquarePlacementAudio = null;
+    };
+
+    const playShapeSquarePlacementCue = (pieceNumber) => {
+        const objectAudioSource = shapeSquarePlacementObjectAudioSources[pieceNumber];
+        const AudioCtor = window.Audio;
+        const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+        if (!objectAudioSource || !AudioCtor || soundScale <= 0) return;
+
+        stopShapeSquarePlacementAudio();
+        const session = shapeSquarePlacementAudioSession;
+        let objectNameStarted = false;
+        const playObjectName = () => {
+            if (objectNameStarted || session !== shapeSquarePlacementAudioSession) return;
+            objectNameStarted = true;
+            const objectAudio = new AudioCtor(objectAudioSource);
+            shapeSquarePlacementAudio = objectAudio;
+            objectAudio.preload = 'auto';
+            objectAudio.playsInline = true;
+            objectAudio.volume = Math.min(1, soundScale);
+            const release = () => {
+                if (session !== shapeSquarePlacementAudioSession) return;
+                if (shapeSquarePlacementAudio === objectAudio) shapeSquarePlacementAudio = null;
+            };
+            objectAudio.onended = release;
+            objectAudio.onerror = release;
+            objectAudio.play().catch(release);
+        };
+
+        const prefixAudio = new AudioCtor(shapeSquarePlacementPrefixAudioSource);
+        shapeSquarePlacementAudio = prefixAudio;
+        prefixAudio.preload = 'auto';
+        prefixAudio.playsInline = true;
+        prefixAudio.volume = Math.min(1, soundScale);
+        prefixAudio.onended = playObjectName;
+        prefixAudio.onerror = playObjectName;
+        prefixAudio.play().catch(playObjectName);
+    };
+
     const playShapeSquareChocolateQuestionAudio = () => {
         const AudioCtor = window.Audio;
         if (!AudioCtor) return;
@@ -3061,7 +3158,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const resetSquareObjectPuzzle = () => {
         squareObjectGuidedTargetNumber = null;
+        squareObjectPromptPieceNumber = null;
         stopShapeSquareChocolateCount();
+        stopShapeSquareObjectHuntAudio();
+        stopShapeSquarePlacementAudio();
         if (shapeSquareCountRangePicker) shapeSquareCountRangePicker.hidden = true;
         if (squareGameTitle) squareGameTitle.hidden = true;
         if (squarePlacementTitle) squarePlacementTitle.hidden = true;
@@ -3368,6 +3468,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         ] || null;
         squareObjectGuidedTargetNumber = nextPiece?.dataset.squarePiece || null;
 
+        if (squareObjectGuidedTargetNumber && squareObjectGuidedTargetNumber !== squareObjectPromptPieceNumber) {
+            squareObjectPromptPieceNumber = squareObjectGuidedTargetNumber;
+            stopShapeSquareObjectHuntAudio();
+            playShapeSquarePlacementCue(squareObjectGuidedTargetNumber);
+        } else if (!squareObjectGuidedTargetNumber) {
+            squareObjectPromptPieceNumber = null;
+            stopShapeSquarePlacementAudio();
+        }
+
         if (squareGameTitle) squareGameTitle.hidden = allCollected;
         if (squarePlacementTitle) squarePlacementTitle.hidden = !squareObjectGuidedTargetNumber;
         if (squarePlacementHint) squarePlacementHint.hidden = !squareObjectGuidedTargetNumber;
@@ -3539,6 +3648,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         shapeSquarePage?.classList.add('is-lesson-complete');
         if (squareGameTitle) squareGameTitle.hidden = false;
+        playShapeSquareObjectHuntAudio();
         updateSquareObjectTargets();
         setShapeSquareVideoStageVisible(false);
         setShapeSquarePlayButtonVisible(false);
@@ -3940,6 +4050,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         stopShapeSquareIntroAudio();
         stopShapeSquareMissionAudio();
         stopShapeSquareReadyAudio();
+        stopShapeSquareObjectHuntAudio();
+        stopShapeSquarePlacementAudio();
         hideShapeSquareMissionGuide();
         resetShapeSquareLessonVideo();
         shapeSquareSession += 1;
