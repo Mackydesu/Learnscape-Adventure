@@ -4512,7 +4512,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         stopHeartMissionSequence();
         const session = heartMissionSession;
         heartMissionPage.classList.add('is-heart-mission-active');
-        heartMissionMessageText.textContent = 'Para sa ating Misyon ng Puso, putukin ang mga lobong hugis puso!';
+        heartMissionMessageText.textContent = 'Para sa ating Heart Mission, putukin ang mga lobong hugis puso!';
         heartMissionIntro.hidden = false;
         heartMissionIntro.setAttribute('aria-hidden', 'false');
         heartMissionIntro.getBoundingClientRect();
