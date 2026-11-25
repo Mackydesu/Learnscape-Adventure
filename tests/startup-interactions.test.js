@@ -261,6 +261,14 @@ test('published and source game scripts stay in sync', () => {
     assert.equal(readFileSync(new URL('../public/script.js', import.meta.url), 'utf8'), script);
 });
 
+test('camera phase previews use the current island shape and palette', () => {
+    assert.match(script, /shape-phase-preview-\$\{phase\} shape-phase-preview-shape-\$\{shape\}/);
+    const style = readFileSync(new URL('../style.css', import.meta.url), 'utf8');
+    for (const shape of ['circle', 'square', 'triangle', 'rectangle', 'oval', 'heart', 'star', 'diamond']) {
+        assert.match(style, new RegExp(`\\.shape-phase-preview-shape-${shape}\\s*\\{`));
+    }
+});
+
 function shopTutorialHarness({ replay = false, carrots = 10, unlocked = false } = {}) {
     const handlers = new Map();
     const timers = [];

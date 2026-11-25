@@ -16399,7 +16399,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const title = document.createElement('h3');
             title.textContent = panelCopy.title;
             const preview = document.createElement('div');
-            preview.className = `shape-phase-preview shape-phase-preview-${phase}`;
+            preview.className = `shape-phase-preview shape-phase-preview-${phase} shape-phase-preview-shape-${shape}`;
             const artwork = shapePhasePanelArt[shape]?.[phase];
             if (artwork) {
                 const image = document.createElement('img');

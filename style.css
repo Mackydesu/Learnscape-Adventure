@@ -3615,16 +3615,82 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
 .shape-phase-preview-detection {
     display: grid;
     place-items: center;
-    background: linear-gradient(135deg, #6ce9ff 0%, #1595e8 52%, #1762c8 100%);
+    background:
+        radial-gradient(circle at 30% 23%, var(--shape-preview-highlight), transparent 34%),
+        linear-gradient(135deg, var(--shape-preview-light) 0%, var(--shape-preview-main) 52%, var(--shape-preview-deep) 100%);
 }
 
 .shape-phase-camera-shape {
     width: clamp(4.5rem, 9vw, 8.5rem);
     aspect-ratio: 1;
-    border: clamp(0.2rem, 0.38vw, 0.34rem) solid #0a4da4;
+    border: clamp(0.2rem, 0.38vw, 0.34rem) solid var(--shape-preview-outline);
     border-radius: 50%;
-    background: radial-gradient(circle at 30% 23%, #b8ffff, #21d4f4 30%, #126ee5 65%, #073789 100%);
-    box-shadow: inset 0.4rem 0.4rem 0 rgba(255, 255, 255, 0.24), 0 0.3rem 0 rgba(4, 48, 115, 0.76), 0 0.55rem 0.8rem rgba(0, 36, 97, 0.36);
+    background: radial-gradient(circle at 30% 23%, var(--shape-preview-highlight), var(--shape-preview-light) 30%, var(--shape-preview-main) 65%, var(--shape-preview-deep) 100%);
+    box-shadow: inset 0.4rem 0.4rem 0 rgba(255, 255, 255, 0.24), 0 0.3rem 0 color-mix(in srgb, var(--shape-preview-deep) 82%, #000), 0 0.55rem 0.8rem color-mix(in srgb, var(--shape-preview-deep) 46%, transparent);
+}
+
+.shape-phase-preview-shape-circle {
+    --shape-preview-highlight: #d8ffff;
+    --shape-preview-light: #38d9f4;
+    --shape-preview-main: #147de0;
+    --shape-preview-deep: #073789;
+    --shape-preview-outline: #0a4da4;
+}
+
+.shape-phase-preview-shape-square {
+    --shape-preview-highlight: #f0d9ff;
+    --shape-preview-light: #c47af5;
+    --shape-preview-main: #8546d2;
+    --shape-preview-deep: #43218e;
+    --shape-preview-outline: #51249a;
+}
+
+.shape-phase-preview-shape-triangle {
+    --shape-preview-highlight: #edffc4;
+    --shape-preview-light: #8ddd58;
+    --shape-preview-main: #48ad45;
+    --shape-preview-deep: #166d39;
+    --shape-preview-outline: #1b7134;
+}
+
+.shape-phase-preview-shape-rectangle {
+    --shape-preview-highlight: #ffe0ad;
+    --shape-preview-light: #f5a353;
+    --shape-preview-main: #d96728;
+    --shape-preview-deep: #913718;
+    --shape-preview-outline: #9c451b;
+}
+
+.shape-phase-preview-shape-oval {
+    --shape-preview-highlight: #ffe0f7;
+    --shape-preview-light: #ef81d1;
+    --shape-preview-main: #c640a7;
+    --shape-preview-deep: #762369;
+    --shape-preview-outline: #7f246e;
+}
+
+.shape-phase-preview-shape-heart {
+    --shape-preview-highlight: #ffd6df;
+    --shape-preview-light: #f86b88;
+    --shape-preview-main: #dc345f;
+    --shape-preview-deep: #8d153d;
+    --shape-preview-outline: #97163e;
+}
+
+.shape-phase-preview-shape-star {
+    --shape-preview-highlight: #fff8c3;
+    --shape-preview-light: #ffd756;
+    --shape-preview-main: #e6a91a;
+    --shape-preview-deep: #92570a;
+    --shape-preview-outline: #9b5c08;
+}
+
+.shape-phase-preview-shape-diamond {
+    --shape-preview-highlight: #cbfff9;
+    --shape-preview-light: #59ddd1;
+    --shape-preview-main: #24aaa9;
+    --shape-preview-deep: #09677e;
+    --shape-preview-outline: #076e83;
 }
 
 .shape-phase-camera-shape-square { border-radius: 0.55rem; }
