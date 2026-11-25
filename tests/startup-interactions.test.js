@@ -270,6 +270,16 @@ test('camera phase previews use the current island shape and palette', () => {
     assert.match(style, /\.shape-phase-camera-shape-heart\s*\{[\s\S]*?clip-path: polygon\(/);
 });
 
+test('every lesson phase preview includes a decorative video play icon', () => {
+    assert.match(script, /if \(phase === 'lesson'\) \{[\s\S]*?shape-phase-video-play-icon/);
+    assert.match(readFileSync(new URL('../style.css', import.meta.url), 'utf8'), /\.shape-phase-video-play-icon::before/);
+});
+
+test('every mission phase preview includes a decorative game icon', () => {
+    assert.match(script, /else if \(phase === 'mission'\) \{[\s\S]*?shape-phase-game-icon/);
+    assert.match(readFileSync(new URL('../style.css', import.meta.url), 'utf8'), /\.shape-phase-game-icon::before/);
+});
+
 function shopTutorialHarness({ replay = false, carrots = 10, unlocked = false } = {}) {
     const handlers = new Map();
     const timers = [];

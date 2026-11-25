@@ -16406,6 +16406,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 image.src = artwork;
                 image.alt = `${shape[0].toUpperCase()}${shape.slice(1)} ${panelCopy.title.toLowerCase()} preview`;
                 preview.appendChild(image);
+                if (phase === 'lesson') {
+                    const videoPlayIcon = document.createElement('span');
+                    videoPlayIcon.className = 'shape-phase-video-play-icon';
+                    videoPlayIcon.setAttribute('aria-hidden', 'true');
+                    preview.appendChild(videoPlayIcon);
+                } else if (phase === 'mission') {
+                    const gameIcon = document.createElement('span');
+                    gameIcon.className = 'shape-phase-game-icon';
+                    gameIcon.setAttribute('aria-hidden', 'true');
+                    preview.appendChild(gameIcon);
+                }
             } else {
                 const cameraShape = document.createElement('span');
                 cameraShape.className = `shape-phase-camera-shape shape-phase-camera-shape-${shape}`;

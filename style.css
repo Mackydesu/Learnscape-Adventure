@@ -3612,6 +3612,75 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
     object-position: center;
 }
 
+.shape-phase-video-play-icon {
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: clamp(2.75rem, 5.5vw, 5.25rem);
+    aspect-ratio: 1;
+    border: clamp(0.16rem, 0.3vw, 0.28rem) solid rgba(255, 255, 255, 0.94);
+    border-radius: 50%;
+    background: rgba(4, 44, 93, 0.72);
+    box-shadow: 0 0.2rem 0 rgba(3, 27, 58, 0.8), 0 0.45rem 0.9rem rgba(0, 20, 50, 0.4), inset 0 0.12rem 0 rgba(255, 255, 255, 0.26);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+}
+
+.shape-phase-video-play-icon::before {
+    content: '';
+    width: 0;
+    height: 0;
+    margin-left: 0.14em;
+    border-top: 0.29em solid transparent;
+    border-bottom: 0.29em solid transparent;
+    border-left: 0.46em solid #ffffff;
+    filter: drop-shadow(0 0.08rem 0 rgba(3, 27, 58, 0.65));
+}
+
+.shape-phase-game-icon {
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    top: 50%;
+    width: clamp(3.2rem, 6.5vw, 6rem);
+    aspect-ratio: 1.55;
+    border: clamp(0.14rem, 0.28vw, 0.25rem) solid rgba(255, 255, 255, 0.94);
+    border-radius: 42% 42% 48% 48%;
+    background: rgba(27, 90, 41, 0.8);
+    box-shadow: 0 0.2rem 0 rgba(9, 50, 20, 0.86), 0 0.45rem 0.9rem rgba(0, 20, 50, 0.4), inset 0 0.12rem 0 rgba(255, 255, 255, 0.26);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+}
+
+.shape-phase-game-icon::before {
+    content: '';
+    position: absolute;
+    left: 22%;
+    top: 50%;
+    width: 27%;
+    aspect-ratio: 1;
+    background:
+        linear-gradient(#ffffff, #ffffff) center / 30% 100% no-repeat,
+        linear-gradient(#ffffff, #ffffff) center / 100% 30% no-repeat;
+    transform: translateY(-50%);
+}
+
+.shape-phase-game-icon::after {
+    content: '';
+    position: absolute;
+    right: 19%;
+    top: 50%;
+    width: 13%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #fff4aa;
+    box-shadow: 0.42em -0.32em 0 #ffffff;
+    transform: translateY(-50%);
+}
+
 .shape-phase-preview-detection {
     display: grid;
     place-items: center;
