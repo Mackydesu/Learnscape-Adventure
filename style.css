@@ -16345,7 +16345,7 @@ body *::after {
     top: 50%;
     transform: translate(-50%, -50%);
     color: #fff06a;
-    font-size: clamp(1.55rem, 3.2vw, 2.7rem);
+    font-size: clamp(1.45rem, 2.5vw, 2.3rem);
     line-height: 1.1;
     white-space: nowrap;
 }
