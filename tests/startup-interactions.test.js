@@ -267,6 +267,7 @@ test('camera phase previews use the current island shape and palette', () => {
     for (const shape of ['circle', 'square', 'triangle', 'rectangle', 'oval', 'heart', 'star', 'diamond']) {
         assert.match(style, new RegExp(`\\.shape-phase-preview-shape-${shape}\\s*\\{`));
     }
+    assert.match(style, /\.shape-phase-camera-shape-heart\s*\{[\s\S]*?clip-path: polygon\(/);
 });
 
 function shopTutorialHarness({ replay = false, carrots = 10, unlocked = false } = {}) {

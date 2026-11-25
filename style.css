@@ -3621,6 +3621,7 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
 }
 
 .shape-phase-camera-shape {
+    position: relative;
     width: clamp(4.5rem, 9vw, 8.5rem);
     aspect-ratio: 1;
     border: clamp(0.2rem, 0.38vw, 0.34rem) solid var(--shape-preview-outline);
@@ -3697,7 +3698,23 @@ body.is-page-loading:not(.is-initial-loading) .route-loading-panel {
 .shape-phase-camera-shape-triangle { border-radius: 0; clip-path: polygon(50% 1%, 99% 98%, 1% 98%); }
 .shape-phase-camera-shape-rectangle { aspect-ratio: 1.45; border-radius: 0.55rem; }
 .shape-phase-camera-shape-oval { aspect-ratio: 1.45; border-radius: 50%; }
-.shape-phase-camera-shape-heart { border-radius: 48% 48% 44% 44%; transform: rotate(45deg) scale(0.73); }
+.shape-phase-camera-shape-heart {
+    border: 0;
+    border-radius: 0;
+    background: var(--shape-preview-outline);
+    clip-path: polygon(50% 98%, 8% 58%, 1% 39%, 2% 24%, 11% 10%, 24% 3%, 38% 6%, 50% 19%, 62% 6%, 76% 3%, 89% 10%, 98% 24%, 99% 39%, 92% 58%);
+    box-shadow: none;
+    filter: drop-shadow(0 0.3rem 0 color-mix(in srgb, var(--shape-preview-deep) 82%, #000)) drop-shadow(0 0.55rem 0.8rem color-mix(in srgb, var(--shape-preview-deep) 46%, transparent));
+    transform: none;
+}
+
+.shape-phase-camera-shape-heart::before {
+    content: '';
+    position: absolute;
+    inset: clamp(0.22rem, 0.42vw, 0.38rem);
+    background: radial-gradient(circle at 34% 22%, var(--shape-preview-highlight), var(--shape-preview-light) 30%, var(--shape-preview-main) 65%, var(--shape-preview-deep) 100%);
+    clip-path: inherit;
+}
 .shape-phase-camera-shape-star { border-radius: 0; clip-path: polygon(50% 0, 61% 34%, 98% 35%, 68% 56%, 80% 93%, 50% 72%, 20% 93%, 32% 56%, 2% 35%, 39% 34%); }
 .shape-phase-camera-shape-diamond { border-radius: 0.42rem; transform: rotate(45deg) scale(0.76); }
 
