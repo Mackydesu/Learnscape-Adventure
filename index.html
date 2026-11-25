@@ -7031,7 +7031,15 @@ const trackInitialImages = () => {
                         ? Promise.resolve()
                         : legacyServiceWorkerCleanup);
                     window.__learnscapeAssetsReady = loadRuntimeAssets();
-                    await window.__learnscapeAssetsReady;
+                    try {
+                        await window.__learnscapeAssetsReady;
+                    } catch (error) {
+                        // The game itself has already been loaded by this point.
+                        // Caching every optional asset improves first-run and
+                        // offline play, but an out-of-sync deployment must not
+                        // leave children trapped on the loading screen.
+                        console.warn('[Learnscape] Runtime asset cache was not prepared; continuing online.', error);
+                    }
                     await waitForGameInitialization();
                     await trackInitialImages();
                     setInitialLoadingProgress(97);

@@ -1458,15 +1458,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const HEART_RAINBOW_START_DELAY_MS = 1800;
     const HEART_RAINBOW_DRAW_MS = 2400;
     const HEART_RAINBOW_HOLD_MS = 450;
-    const HEART_SETS_PER_COLOR = 3;
+    const HEART_SETS_PER_COLOR = 1;
     const HEART_COLOR_CHALLENGES = [
-        { key: 'red', label: 'RED', required: HEART_SETS_PER_COLOR, color: '#ff435f', edge: '#9d1737' },
-        { key: 'orange', label: 'ORANGE', required: HEART_SETS_PER_COLOR, color: '#ff8a32', edge: '#a94516' },
-        { key: 'yellow', label: 'YELLOW', required: HEART_SETS_PER_COLOR, color: '#ffd83d', edge: '#a86d08' },
-        { key: 'green', label: 'GREEN', required: HEART_SETS_PER_COLOR, color: '#55c95c', edge: '#247431' },
-        { key: 'blue', label: 'BLUE', required: HEART_SETS_PER_COLOR, color: '#3f9cff', edge: '#205ca8' },
-        { key: 'indigo', label: 'INDIGO', required: HEART_SETS_PER_COLOR, color: '#5556c9', edge: '#2d2e79' },
-        { key: 'violet', label: 'VIOLET', required: HEART_SETS_PER_COLOR, color: '#a653e5', edge: '#65269b' },
+        { key: 'red', label: 'Pula', required: HEART_SETS_PER_COLOR, color: '#ff435f', edge: '#9d1737' },
+        { key: 'orange', label: 'Kahel', required: HEART_SETS_PER_COLOR, color: '#ff8a32', edge: '#a94516' },
+        { key: 'yellow', label: 'Dilaw', required: HEART_SETS_PER_COLOR, color: '#ffd83d', edge: '#a86d08' },
+        { key: 'green', label: 'Berde', required: HEART_SETS_PER_COLOR, color: '#55c95c', edge: '#247431' },
+        { key: 'blue', label: 'Asul', required: HEART_SETS_PER_COLOR, color: '#3f9cff', edge: '#205ca8' },
+        { key: 'violet', label: 'Lila', required: HEART_SETS_PER_COLOR, color: '#a653e5', edge: '#65269b' },
     ];
     const HEART_CELEBRATION_AUDIO_SOURCES = [
         'assets/Audios/Sound effects/completed.mp3',
@@ -1922,7 +1921,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeSquareWelcomeMessage = 'Maligayang pagbabalik!';
     const shapeSquareCelebrationMessages = [
         'Matagumpay mong natapos ang Circle Mission!',
-        'Binabati kita sa iyong tagumpay!',
+        'Binabati kita!',
     ];
     const shapeSquareNextShapeMessage = 'Ngayon, panibagong hugis ang ating aalamin!';
     const shapeSquareReadyMessage = 'Handa ka na ba?';
@@ -1954,6 +1953,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shapeSquareCompletedAudioSource = 'assets/Audios/Sound effects/completed.mp3';
     const shapeSquareCelebrationAudioSource = 'assets/Audios/Voice over/Mahusay.mp3';
     const shapeSquareKidsCheeringAudioSource = 'assets/Audios/Sound effects/kids cheering.mp3';
+    const shapeSquareObjectHuntAudioSource = 'assets/Audios/Voice over/Hanapin.mp3';
+    const shapeSquarePlacementPrefixAudioSource = 'assets/Audios/Voice over/Mula sa.mp3';
+    const shapeSquarePlacementObjectAudioSources = Object.freeze({
+        1: 'assets/Audios/Voice over/orasan.mp3',
+        2: 'assets/Audios/Voice over/bintana.mp3',
+        3: 'assets/Audios/Voice over/palamuti.mp3',
+        4: 'assets/Audios/Voice over/pintuan.mp3',
+        5: 'assets/Audios/Voice over/bukal.mp3',
+    });
     const shapeSquareChocolateQuestionAudioSource = 'assets/Audios/Voice over/Tukuyin kung ilang square.mp3';
     const shapeQuestionBaseAudioSource = 'assets/Audios/Voice over/base sa.mp3';
     const shapeQuestionAudioSource = 'assets/Audios/Voice over/anong hugis ito.mp3';
@@ -2017,13 +2025,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     let shapeSquareMissionAudio = null;
     let shapeSquareReadyAudio = null;
     let shapeSquareCelebrationAudio = null;
+    let shapeSquareObjectHuntAudio = null;
+    let shapeSquarePlacementAudio = null;
     let shapeSquareChocolateQuestionAudio = null;
     let shapeSquareAreaIntroFrame = null;
     let shapeSquareStartPressTimer = null;
     let shapeSquareCelebrationTimers = [];
+    let shapeSquareChocolateCountSession = 0;
     const squareObjectSnapTimers = new Map();
     let squareObjectPanelExitTimer = null;
     let squareObjectGuidedTargetNumber = null;
+    let squareObjectPromptPieceNumber = null;
+    let shapeSquarePlacementAudioSession = 0;
     const squareObjectTargetSpecs = {
         1: { x: 793, y: 198, width: 138, height: 137 },
         2: { x: 230, y: 363, width: 126, height: 125 },
@@ -2403,6 +2416,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const clearShapeSquareTimers = () => {
         shapeSquareTimers.forEach((timerId) => window.clearTimeout(timerId));
         shapeSquareTimers = [];
+        stopShapeSquareChocolateCount();
         shapeSquarePage?.classList.remove('is-intro-click-ready');
         shapeSquareBubble?.classList.remove('is-message-complete');
     };
@@ -2576,6 +2590,90 @@ document.addEventListener('DOMContentLoaded', async () => {
         shapeSquareChocolateQuestionAudio = null;
     };
 
+    const stopShapeSquareObjectHuntAudio = () => {
+        if (!shapeSquareObjectHuntAudio) return;
+
+        shapeSquareObjectHuntAudio.onended = null;
+        shapeSquareObjectHuntAudio.onerror = null;
+        shapeSquareObjectHuntAudio.pause();
+        try {
+            shapeSquareObjectHuntAudio.currentTime = 0;
+        } catch (error) {
+            // Pausing is enough while the audio metadata is still loading.
+        }
+        shapeSquareObjectHuntAudio = null;
+    };
+
+    const playShapeSquareObjectHuntAudio = () => {
+        const AudioCtor = window.Audio;
+        const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+        if (!AudioCtor || soundScale <= 0) return;
+
+        stopShapeSquareObjectHuntAudio();
+        const audio = new AudioCtor(shapeSquareObjectHuntAudioSource);
+        shapeSquareObjectHuntAudio = audio;
+        audio.preload = 'auto';
+        audio.playsInline = true;
+        audio.volume = Math.min(1, soundScale);
+        const release = () => {
+            if (shapeSquareObjectHuntAudio === audio) shapeSquareObjectHuntAudio = null;
+        };
+        audio.onended = release;
+        audio.onerror = release;
+        audio.play().catch(release);
+    };
+
+    const stopShapeSquarePlacementAudio = () => {
+        shapeSquarePlacementAudioSession += 1;
+        if (!shapeSquarePlacementAudio) return;
+
+        shapeSquarePlacementAudio.onended = null;
+        shapeSquarePlacementAudio.onerror = null;
+        shapeSquarePlacementAudio.pause();
+        try {
+            shapeSquarePlacementAudio.currentTime = 0;
+        } catch (error) {
+            // Pausing is enough while the audio metadata is still loading.
+        }
+        shapeSquarePlacementAudio = null;
+    };
+
+    const playShapeSquarePlacementCue = (pieceNumber) => {
+        const objectAudioSource = shapeSquarePlacementObjectAudioSources[pieceNumber];
+        const AudioCtor = window.Audio;
+        const soundScale = window.__learnscapeSoundScale?.() ?? 1;
+        if (!objectAudioSource || !AudioCtor || soundScale <= 0) return;
+
+        stopShapeSquarePlacementAudio();
+        const session = shapeSquarePlacementAudioSession;
+        let objectNameStarted = false;
+        const playObjectName = () => {
+            if (objectNameStarted || session !== shapeSquarePlacementAudioSession) return;
+            objectNameStarted = true;
+            const objectAudio = new AudioCtor(objectAudioSource);
+            shapeSquarePlacementAudio = objectAudio;
+            objectAudio.preload = 'auto';
+            objectAudio.playsInline = true;
+            objectAudio.volume = Math.min(1, soundScale);
+            const release = () => {
+                if (session !== shapeSquarePlacementAudioSession) return;
+                if (shapeSquarePlacementAudio === objectAudio) shapeSquarePlacementAudio = null;
+            };
+            objectAudio.onended = release;
+            objectAudio.onerror = release;
+            objectAudio.play().catch(release);
+        };
+
+        const prefixAudio = new AudioCtor(shapeSquarePlacementPrefixAudioSource);
+        shapeSquarePlacementAudio = prefixAudio;
+        prefixAudio.preload = 'auto';
+        prefixAudio.playsInline = true;
+        prefixAudio.volume = Math.min(1, soundScale);
+        prefixAudio.onended = playObjectName;
+        prefixAudio.onerror = playObjectName;
+        prefixAudio.play().catch(playObjectName);
+    };
+
     const playShapeSquareChocolateQuestionAudio = () => {
         const AudioCtor = window.Audio;
         if (!AudioCtor) return;
@@ -2734,8 +2832,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         return shuffled;
     };
 
+    const stopShapeSquareChocolateCount = () => {
+        shapeSquareChocolateCountSession += 1;
+        stopNumberChoiceAudio();
+        shapeSquareCookieSquare?.querySelectorAll('.square-chocolate-piece.is-counting').forEach((chocolate) => {
+            chocolate.classList.remove('is-counting');
+        });
+    };
+
+    const getNumberChoiceAudioDuration = (number) => {
+        const segment = numberChoiceAudioSegments[Math.floor(Number(number)) - 1];
+        return segment ? Math.max(0, (segment[1] - segment[0]) * 1000) : 0;
+    };
+
     const setShapeSquareAnswerTiles = (rangeMin, rangeMax) => {
         if (!shapeSquareAnswerTileButtons.length) return;
+
+        stopShapeSquareChocolateCount();
 
         if (shapeSquareCookieSquare) {
             shapeSquareCookieSquare.classList.remove(
@@ -2831,6 +2944,55 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         takeNextBite();
+    };
+
+    const animateShapeSquareChocolateCount = (onComplete) => {
+        const chocolates = Array.from(shapeSquareCookieSquare?.querySelectorAll('.square-chocolate-piece') || []);
+        const chocolateCount = Number(shapeSquareCookieSquare?.dataset.chocolateCount) || chocolates.length;
+        const total = Math.min(chocolateCount, chocolates.length);
+        if (!total) {
+            onComplete?.();
+            return;
+        }
+
+        stopShapeSquareChocolateCount();
+        const session = shapeSquareChocolateCountSession;
+        let chocolateIndex = 0;
+
+        const countNextChocolate = () => {
+            if (session !== shapeSquareChocolateCountSession) return;
+
+            const chocolate = chocolates[chocolateIndex];
+            if (!chocolate) {
+                onComplete?.();
+                return;
+            }
+
+            const number = chocolateIndex + 1;
+            chocolate.classList.remove('is-counting');
+            chocolate.getBoundingClientRect();
+            chocolate.classList.add('is-counting');
+
+            const didPlayNumber = playNumberChoiceAudio(number);
+            const numberDelay = didPlayNumber
+                ? getNumberChoiceAudioDuration(number) + 170
+                : 680;
+            const countTimer = window.setTimeout(() => {
+                shapeSquareTimers = shapeSquareTimers.filter((timerId) => timerId !== countTimer);
+                if (session !== shapeSquareChocolateCountSession) return;
+
+                chocolate.classList.remove('is-counting');
+                chocolateIndex += 1;
+                if (chocolateIndex < total) {
+                    countNextChocolate();
+                } else {
+                    onComplete?.();
+                }
+            }, Math.max(680, numberDelay));
+            shapeSquareTimers.push(countTimer);
+        };
+
+        countNextChocolate();
     };
 
     const showShapeSquareAnswerCelebration = () => {
@@ -2955,7 +3117,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const handleShapeSquareAnswerTileClick = (event) => {
         const tile = event.currentTarget;
         if (!tile || tile.disabled) return;
-        playNumberChoiceActivationFallback(tile);
 
         if (tile.dataset.correct === 'true') {
             shapeSquareAnswerTileButtons.forEach((button) => {
@@ -2970,12 +3131,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             const completionTimer = window.setTimeout(() => {
                 shapeSquareTimers = shapeSquareTimers.filter((timerId) => timerId !== completionTimer);
-                animateShapeSquareChocolateBites(showShapeSquareAnswerCelebration);
+                animateShapeSquareChocolateCount(() => {
+                    animateShapeSquareChocolateBites(showShapeSquareAnswerCelebration);
+                });
             }, 420);
             shapeSquareTimers.push(completionTimer);
             return;
         }
 
+        playNumberChoiceActivationFallback(tile);
         tile.classList.remove('is-wrong');
         tile.getBoundingClientRect();
         tile.classList.add('is-wrong');
@@ -2994,6 +3158,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const resetSquareObjectPuzzle = () => {
         squareObjectGuidedTargetNumber = null;
+        squareObjectPromptPieceNumber = null;
+        stopShapeSquareChocolateCount();
+        stopShapeSquareObjectHuntAudio();
+        stopShapeSquarePlacementAudio();
         if (shapeSquareCountRangePicker) shapeSquareCountRangePicker.hidden = true;
         if (squareGameTitle) squareGameTitle.hidden = true;
         if (squarePlacementTitle) squarePlacementTitle.hidden = true;
@@ -3300,6 +3468,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         ] || null;
         squareObjectGuidedTargetNumber = nextPiece?.dataset.squarePiece || null;
 
+        if (squareObjectGuidedTargetNumber && squareObjectGuidedTargetNumber !== squareObjectPromptPieceNumber) {
+            squareObjectPromptPieceNumber = squareObjectGuidedTargetNumber;
+            stopShapeSquareObjectHuntAudio();
+            playShapeSquarePlacementCue(squareObjectGuidedTargetNumber);
+        } else if (!squareObjectGuidedTargetNumber) {
+            squareObjectPromptPieceNumber = null;
+            stopShapeSquarePlacementAudio();
+        }
+
         if (squareGameTitle) squareGameTitle.hidden = allCollected;
         if (squarePlacementTitle) squarePlacementTitle.hidden = !squareObjectGuidedTargetNumber;
         if (squarePlacementHint) squarePlacementHint.hidden = !squareObjectGuidedTargetNumber;
@@ -3471,6 +3648,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         shapeSquarePage?.classList.add('is-lesson-complete');
         if (squareGameTitle) squareGameTitle.hidden = false;
+        playShapeSquareObjectHuntAudio();
         updateSquareObjectTargets();
         setShapeSquareVideoStageVisible(false);
         setShapeSquarePlayButtonVisible(false);
@@ -3872,6 +4050,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         stopShapeSquareIntroAudio();
         stopShapeSquareMissionAudio();
         stopShapeSquareReadyAudio();
+        stopShapeSquareObjectHuntAudio();
+        stopShapeSquarePlacementAudio();
         hideShapeSquareMissionGuide();
         resetShapeSquareLessonVideo();
         shapeSquareSession += 1;
@@ -6191,8 +6371,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             heartColorGauge.setAttribute(
                 'aria-label',
                 challenge
-                    ? `Target ${challenge.label}: ${heartGameColorProgress} of ${challenge.required} hearts`
-                    : 'All seven rainbow heart colors completed',
+                    ? `Target na ${challenge.label}: ${heartGameColorProgress} sa ${challenge.required} puso`
+                    : `Nakumpleto ang lahat ng ${HEART_COLOR_CHALLENGES.length} na kulay ng pusong bahaghari`,
             );
         }
         heartColorMilestones.forEach((milestone, index) => {
@@ -6861,7 +7041,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (heartGameResultCopy) {
             heartGameResultCopy.textContent = won
                 ? 'Nabuo mo ang bahaghari!'
-                : `Completed colors: ${heartGameColorIndex} of ${HEART_COLOR_CHALLENGES.length}`;
+                : `Nakumpletong kulay: ${heartGameColorIndex} sa ${HEART_COLOR_CHALLENGES.length}`;
         }
         if (heartGameRetryButton) heartGameRetryButton.textContent = 'Subukan ulit';
         if (heartGameResult) {
@@ -7713,7 +7893,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const rectangleDialogueMessages = [
             'Hello explorer!',
             'Para sa ating Rectangle Mission, tulungan mo akong ihatid ang mga gamit sa Rectangle Village.',
-            'Piliin ang tatlong bagay na hugis rectangle at ilagay ito sa jeep.',
+            'Piliin ang tatlong bagay na hugis parihaba at ilagay ito sa jeep.',
         ];
         const rectangleDialogueSegments = [
             { start: 0, end: 1.4 },
@@ -8473,7 +8653,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleDeliveryTaskItems.forEach((item) => {
             item.hidden = true;
         });
-        if (rectangleDeliveryTaskItemName) rectangleDeliveryTaskItemName.textContent = 'BINABATI KITA!';
+        if (rectangleDeliveryTaskItemName) rectangleDeliveryTaskItemName.textContent = 'Binabati kita!';
         if (rectangleDeliveryTaskDestinationName) rectangleDeliveryTaskDestinationName.textContent = 'Naihatid mo lahat ng gamit';
         rectangleDeliveryTaskPanel.hidden = false;
         rectangleDeliveryTaskPanel.getBoundingClientRect();
@@ -8939,6 +9119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rectangleBossGuidePages = Array.from(rectangleBossWarning?.querySelectorAll('.rectangle-boss-guide-page') || []);
     const rectangleBossHealth = rectangleBossEncounter?.querySelector('.rectangle-boss-health');
     const rectangleBossHealthValue = rectangleBossEncounter?.querySelector('.rectangle-boss-health-value');
+    const rectangleBossHealthBars = Array.from(rectangleBossEncounter?.querySelectorAll('.rectangle-boss-health-bar') || []);
     const rectangleBossEffects = rectangleBossEncounter?.querySelector('.rectangle-boss-effects');
     const rectangleBossWarningAudio = window.Audio ? new window.Audio('assets/Audios/Sound effects/danger.mp3') : null;
     const rectangleJumpGuideAudio = window.Audio ? new window.Audio('assets/Audios/Voice over/Talon.mp3') : null;
@@ -8954,7 +9135,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     const rectangleBossDeliveryMilestones = [1, 2];
     const rectangleBossCompletedMilestones = new Set();
-    let rectangleBossHealthPoints = 100;
+    const RECTANGLE_BOSS_MAX_HEALTH_BARS = 10;
+    let rectangleBossHealthBarsRemaining = RECTANGLE_BOSS_MAX_HEALTH_BARS;
     let rectangleBossActive = false;
     let rectangleBossCurrentMilestone = null;
     let rectangleBossWarningMilestone = null;
@@ -8981,10 +9163,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     );
 
     const updateRectangleBossHealth = () => {
-        const health = Math.max(0, Math.min(100, rectangleBossHealthPoints));
-        rectangleBossEncounter?.style.setProperty('--boss-health', `${health}%`);
-        rectangleBossHealth?.setAttribute('aria-valuenow', String(health));
-        if (rectangleBossHealthValue) rectangleBossHealthValue.textContent = `${health} HP`;
+        const remainingBars = Math.max(0, Math.min(RECTANGLE_BOSS_MAX_HEALTH_BARS, rectangleBossHealthBarsRemaining));
+        const healthText = `${remainingBars} of ${RECTANGLE_BOSS_MAX_HEALTH_BARS} bars`;
+        rectangleBossHealth?.setAttribute('aria-valuenow', String(remainingBars));
+        rectangleBossHealth?.setAttribute('aria-valuetext', healthText);
+        rectangleBossHealth?.setAttribute('aria-label', `Shape monster health: ${healthText}`);
+        rectangleBossHealthBars.forEach((bar, index) => {
+            bar.classList.toggle('is-depleted', index >= remainingBars);
+        });
+        if (rectangleBossHealthValue) rectangleBossHealthValue.textContent = `${remainingBars}/${RECTANGLE_BOSS_MAX_HEALTH_BARS}`;
     };
 
     const getRectangleBossMilestone = () => {
@@ -9112,7 +9299,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         rectangleBossWarningMilestone = null;
         restoreRectangleDeliveryControls();
         if (resetHealth) {
-            rectangleBossHealthPoints = 100;
+            rectangleBossHealthBarsRemaining = RECTANGLE_BOSS_MAX_HEALTH_BARS;
             updateRectangleBossHealth();
         }
         showRectangleBossGuidePage(0);
@@ -9290,7 +9477,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const damageRectangleBoss = () => {
         if (!rectangleBossActive) return;
-        rectangleBossHealthPoints = Math.max(0, rectangleBossHealthPoints - 5);
+        rectangleBossHealthBarsRemaining = Math.max(0, rectangleBossHealthBarsRemaining - 1);
         updateRectangleBossHealth();
         rectangleBossEncounter?.classList.remove('is-monster-hit');
         rectangleBossEncounter?.getBoundingClientRect();
@@ -9300,7 +9487,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             rectangleBossFlashTimer = null;
             rectangleBossEncounter?.classList.remove('is-monster-hit');
         }, 150);
-        if (rectangleBossHealthPoints === 0) finishRectangleBossBattle();
+        if (rectangleBossHealthBarsRemaining === 0) finishRectangleBossBattle();
     };
 
     const fireRectangleBossLaser = () => {
@@ -9423,7 +9610,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setRectangleBossBgmState(true, rectangleGamePaused);
         rectangleObstacleContacts.clear();
         rectangleBossCurrentMilestone = milestone;
-        rectangleBossHealthPoints = 100;
+        rectangleBossHealthBarsRemaining = RECTANGLE_BOSS_MAX_HEALTH_BARS;
         updateRectangleBossHealth();
         rectangleBossEffects?.replaceChildren();
         rectangleDeliveryPage.classList.add('is-boss-battle');
@@ -9784,6 +9971,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const triangleWoodStorageCount = triangleWoodStorage?.querySelector('[data-triangle-wood-count]') || null;
     const triangleCraftingPanel = triangleGamePage?.querySelector('.triangle-crafting-panel') || null;
     const triangleCraftingShapes = triangleCraftingPanel?.querySelector('.triangle-crafting-shapes') || null;
+    const triangleShapeCountHighlights = Array.from(
+        triangleCraftingShapes?.querySelectorAll('[data-triangle-count-highlight]') || [],
+    );
     const triangleCraftingSlots = Array.from(triangleCraftingPanel?.querySelectorAll('[data-triangle-craft-slot]') || []);
     const triangleBridgeQuestion = triangleCraftingPanel?.querySelector('.triangle-bridge-question') || null;
     const triangleBridgeQuestionChoices = Array.from(triangleBridgeQuestion?.querySelectorAll('[data-triangle-count-answer]') || []);
@@ -9826,12 +10016,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     let triangleBridgeBuildTimers = [];
     let triangleBridgeQuestionAnswered = false;
     let triangleBridgeQuestionAudio = null;
+    let triangleBridgeShapeCountSession = 0;
     let triangleGameCompleteVoiceAudio = null;
     let triangleGameCompleteCheeringAudio = null;
     let triangleGameCompleteWalkLoopTimer = null;
     let triangleGameCompleteWalkFallbackTimer = null;
     let triangleGameCompleteExitFallbackTimer = null;
     let triangleGameCompletionStage = 'idle';
+
+    const stopTriangleBridgeShapeCount = () => {
+        triangleBridgeShapeCountSession += 1;
+        stopNumberChoiceAudio();
+        triangleShapeCountHighlights.forEach((highlight) => {
+            highlight.classList.remove('is-counting');
+        });
+    };
     const prepareTriangleGameCompleteConfetti = () => {
         if (!triangleGameCompleteConfetti || triangleGameCompleteConfetti.childElementCount) return;
         const colors = ['#ff4f64', '#ffd83d', '#38c7e8', '#70d34b', '#ff8f32', '#f17ac6', '#ffffff'];
@@ -10102,6 +10301,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const resetTriangleGameTrees = () => {
         triangleWoodCollectionSession += 1;
         triangleBridgeBuildSession += 1;
+        stopTriangleBridgeShapeCount();
         triangleBridgeBuildTimers.forEach((timerId) => window.clearTimeout(timerId));
         triangleBridgeBuildTimers = [];
         triangleWoodCollected = 0;
@@ -10150,6 +10350,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             slot.classList.remove('is-filled', 'is-snapping');
             const wood = slot.querySelector('img');
             if (wood) wood.hidden = true;
+        });
+        triangleShapeCountHighlights.forEach((highlight) => {
+            highlight.classList.remove('is-revealed');
         });
     };
 
@@ -10381,6 +10584,64 @@ document.addEventListener('DOMContentLoaded', async () => {
         audio.play().catch(releaseAudio);
     };
 
+    const countTriangleBridgeShapes = (collectionSession, onComplete) => {
+        if (
+            collectionSession !== triangleWoodCollectionSession
+            || !triangleShapeCountHighlights.length
+            || triangleGamePage?.hidden
+        ) {
+            onComplete?.();
+            return;
+        }
+
+        stopTriangleBridgeShapeCount();
+        const countSession = triangleBridgeShapeCountSession;
+        let shapeIndex = 0;
+
+        const countNextShape = () => {
+            if (
+                countSession !== triangleBridgeShapeCountSession
+                || collectionSession !== triangleWoodCollectionSession
+                || triangleGamePage?.hidden
+            ) return;
+
+            const highlight = triangleShapeCountHighlights[shapeIndex];
+            if (!highlight) {
+                onComplete?.();
+                return;
+            }
+
+            const number = shapeIndex + 1;
+            highlight.classList.remove('is-counting');
+            highlight.getBoundingClientRect();
+            highlight.classList.add('is-counting');
+
+            const didPlayNumber = playNumberChoiceAudio(number);
+            const numberDelay = didPlayNumber
+                ? getNumberChoiceAudioDuration(number) + 170
+                : 680;
+            const countTimer = window.setTimeout(() => {
+                triangleGameDialogueTimers = triangleGameDialogueTimers.filter((timerId) => timerId !== countTimer);
+                if (
+                    countSession !== triangleBridgeShapeCountSession
+                    || collectionSession !== triangleWoodCollectionSession
+                    || triangleGamePage?.hidden
+                ) return;
+
+                highlight.classList.remove('is-counting');
+                shapeIndex += 1;
+                if (shapeIndex < triangleShapeCountHighlights.length) {
+                    countNextShape();
+                } else {
+                    onComplete?.();
+                }
+            }, Math.max(680, numberDelay));
+            triangleGameDialogueTimers.push(countTimer);
+        };
+
+        countNextShape();
+    };
+
     const showTriangleBridgeQuestion = (session) => {
         if (!triangleBridgeQuestion || session !== triangleWoodCollectionSession) return;
         triangleBridgeQuestionAnswered = false;
@@ -10535,6 +10796,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 triangleWoodStorage?.classList.add('is-exiting');
                 triangleWoodStorageImage?.setAttribute('tabindex', '-1');
                 triangleWoodStorageImage?.setAttribute('aria-label', 'Nailagay na ang lahat ng kahoy');
+                triangleShapeCountHighlights.forEach((highlight) => {
+                    highlight.classList.add('is-revealed');
+                });
                 showTriangleBridgeQuestion(session);
             }
         }).catch(() => {
@@ -10573,7 +10837,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     triangleBridgeQuestionChoices.forEach((choice) => {
         choice.addEventListener('click', () => {
             if (triangleBridgeQuestionAnswered || triangleBridgeQuestion?.hidden) return;
-            playNumberChoiceActivationFallback(choice);
             const isCorrect = choice.hasAttribute('data-correct-answer');
             triangleBridgeQuestionChoices.forEach((candidate) => {
                 candidate.classList.remove('is-correct', 'is-wrong');
@@ -10583,6 +10846,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             choice.setAttribute('aria-pressed', 'true');
 
             if (!isCorrect) {
+                playNumberChoiceActivationFallback(choice);
                 playTriangleBridgeQuestionAudio('assets/Audios/Sound effects/buzzer.mp3');
                 triangleGameDialogueTimers.push(window.setTimeout(() => {
                     choice.classList.remove('is-wrong');
@@ -10595,11 +10859,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             triangleBridgeQuestionChoices.forEach((candidate) => {
                 candidate.disabled = true;
             });
-            playTriangleBridgeQuestionAudio('assets/Audios/Sound effects/correct.mp3');
             const session = triangleWoodCollectionSession;
-            triangleGameDialogueTimers.push(window.setTimeout(() => {
-                if (session === triangleWoodCollectionSession) startTriangleBridgeBuildSequence(session);
-            }, 650));
+            playTriangleBridgeQuestionAudio('assets/Audios/Sound effects/correct.mp3', () => {
+                if (session !== triangleWoodCollectionSession || triangleGamePage?.hidden) return;
+                countTriangleBridgeShapes(session, () => {
+                    if (session === triangleWoodCollectionSession) startTriangleBridgeBuildSequence(session);
+                });
+            });
         });
     });
 
@@ -10776,7 +11042,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         overlay.className = 'shape-tv-celebration';
         overlay.setAttribute('role', 'status');
         overlay.setAttribute('aria-live', 'polite');
-        overlay.innerHTML = '<div class="shape-tv-celebration-confetti" aria-hidden="true"></div><div class="shape-tv-celebration-copy"><strong>CONGRATULATIONS</strong><span>TAMA ANG IYONG SAGOT!</span></div><div class="shape-tv-celebration-character shape-tv-celebration-ch7" aria-hidden="true"><img src="assets/Character/ch7.webp" alt=""></div><div class="shape-tv-celebration-character shape-tv-celebration-ch8" aria-hidden="true"><img src="assets/Character/ch8.webp" alt=""></div>';
+        overlay.innerHTML = '<div class="shape-tv-celebration-confetti" aria-hidden="true"></div><div class="shape-tv-celebration-copy"><strong>Binabati kita!</strong><span>TAMA ANG IYONG SAGOT!</span></div><div class="shape-tv-celebration-character shape-tv-celebration-ch7" aria-hidden="true"><img src="assets/Character/ch7.webp" alt=""></div><div class="shape-tv-celebration-character shape-tv-celebration-ch8" aria-hidden="true"><img src="assets/Character/ch8.webp" alt=""></div>';
         const confetti = overlay.querySelector('.shape-tv-celebration-confetti');
         for (let index = 0; index < 96; index += 1) {
             const piece = document.createElement('i');
@@ -14655,6 +14921,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const ovalObjectImageByNumber = new Map(
         ovalPairPieces.map((piece) => [String(piece.number), piece.objectImage]),
     );
+    const ovalImageSources = Object.freeze([
+        ...new Set([
+            ...ovalPairPieces.map((piece) => piece.image),
+            ...ovalPairPieces.map((piece) => piece.objectImage),
+        ]),
+    ]);
+    const ovalImagePreloads = typeof window.Image === 'function'
+        ? ovalImageSources.map((source) => {
+            const image = new window.Image();
+            image.decoding = 'async';
+            image.src = source;
+            return image;
+        })
+        : [];
     const ovalChallengePieces = [
         { number: 'bomb', challengeType: 'bomb' },
         { number: 'freeze', challengeType: 'freeze' },
@@ -14699,6 +14979,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let ovalOpenCards = [];
     let ovalMatchResolving = false;
     let ovalRewardHideTimer = null;
+    let ovalMatchRewardSession = 0;
     let ovalMatchCheeringAudio = null;
     let ovalWrongPairAudio = null;
     let ovalMissionSession = 0;
@@ -15215,6 +15496,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         playOvalMissionAudio(ovalMissionAudioSource, session, 7000, playReadyMessage);
     };
 
+    const setOvalCardImageSource = (card, cardImage, source, isChallenge) => {
+        const imageRequest = (Number(card.dataset.ovalImageRequest || '0') || 0) + 1;
+        const requestId = String(imageRequest);
+        card.dataset.ovalImageRequest = requestId;
+        cardImage.onload = null;
+        cardImage.onerror = null;
+
+        if (isChallenge || !source) {
+            cardImage.hidden = true;
+            cardImage.removeAttribute('src');
+            return;
+        }
+
+        const revealImage = () => {
+            if (card.dataset.ovalImageRequest !== requestId) return;
+            cardImage.hidden = false;
+            cardImage.onload = null;
+            cardImage.onerror = null;
+        };
+        const keepImageHidden = () => {
+            if (card.dataset.ovalImageRequest === requestId) cardImage.hidden = true;
+        };
+
+        cardImage.hidden = true;
+        cardImage.onload = revealImage;
+        cardImage.onerror = keepImageHidden;
+        cardImage.src = source;
+
+        if (cardImage.complete && cardImage.naturalWidth > 0) {
+            if (typeof cardImage.decode === 'function') {
+                cardImage.decode().then(revealImage).catch(revealImage);
+            } else {
+                window.requestAnimationFrame(revealImage);
+            }
+        }
+    };
+
     const applyOvalHalfPiece = (card, halfPiece) => {
         const cardFront = card.querySelector('.oval-card-front');
         let cardImage = cardFront?.querySelector('.oval-card-image');
@@ -15225,11 +15543,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             cardImage.setAttribute('aria-hidden', 'true');
             cardFront.append(cardImage);
         }
-        if (cardImage) {
-            if (halfPiece.image) cardImage.src = halfPiece.image;
-            else cardImage.removeAttribute('src');
-            cardImage.hidden = Boolean(halfPiece.challenge);
-        }
+        if (cardImage) setOvalCardImageSource(card, cardImage, halfPiece.image, Boolean(halfPiece.challenge));
         card.style.setProperty('--oval-piece-image', halfPiece.image ? `url("${halfPiece.image}")` : 'none');
         card.style.setProperty('--oval-piece-position', `${halfPiece.side} center`);
         card.dataset.ovalPiece = `${halfPiece.image}-${halfPiece.side}`;
@@ -15262,6 +15576,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (ovalRewardHideTimer !== null) {
             window.clearTimeout(ovalRewardHideTimer);
             ovalRewardHideTimer = null;
+        }
+        ovalMatchRewardSession += 1;
+        if (ovalMatchObject) {
+            ovalMatchObject.onload = null;
+            ovalMatchObject.onerror = null;
+            ovalMatchObject.hidden = true;
         }
         if (ovalMatchReward) {
             ovalMatchReward.hidden = true;
@@ -15388,32 +15708,57 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.clearTimeout(ovalRewardHideTimer);
             ovalRewardHideTimer = null;
         }
-        ovalMatchObject.src = piece.objectImage;
+        const rewardSession = ovalMatchRewardSession + 1;
+        let rewardRevealed = false;
+        ovalMatchRewardSession = rewardSession;
+        ovalMatchReward.hidden = true;
+        ovalMatchReward.classList.remove('is-visible');
+        ovalMatchObject.hidden = true;
+        ovalMatchObject.loading = 'eager';
         ovalMatchObject.alt = `Oval ${piece.number} matched object`;
-        if (ovalMatchConfetti && ovalMatchConfetti.childElementCount === 0) {
-            const colors = ['#ffe04f', '#ff6f7f', '#61d8f2', '#69d65f', '#b77bff', '#ff9d42'];
-            for (let index = 0; index < 68; index += 1) {
-                const confetti = document.createElement('span');
-                confetti.style.setProperty('--match-confetti-x', `${2 + Math.random() * 96}%`);
-                confetti.style.setProperty('--match-confetti-size', `${0.42 + Math.random() * 0.7}rem`);
-                confetti.style.setProperty('--match-confetti-color', colors[index % colors.length]);
-                confetti.style.setProperty('--match-confetti-delay', `${Math.random() * 0.55}s`);
-                confetti.style.setProperty('--match-confetti-duration', `${2 + Math.random() * 1.15}s`);
-                confetti.style.setProperty('--match-confetti-drift', `${-9 + Math.random() * 18}vw`);
-                ovalMatchConfetti.appendChild(confetti);
+
+        const revealReward = () => {
+            if (rewardRevealed || ovalMatchRewardSession !== rewardSession) return;
+            rewardRevealed = true;
+            ovalMatchObject.hidden = false;
+            ovalMatchObject.onload = null;
+            ovalMatchObject.onerror = null;
+            if (ovalMatchConfetti && ovalMatchConfetti.childElementCount === 0) {
+                const colors = ['#ffe04f', '#ff6f7f', '#61d8f2', '#69d65f', '#b77bff', '#ff9d42'];
+                for (let index = 0; index < 68; index += 1) {
+                    const confetti = document.createElement('span');
+                    confetti.style.setProperty('--match-confetti-x', `${2 + Math.random() * 96}%`);
+                    confetti.style.setProperty('--match-confetti-size', `${0.42 + Math.random() * 0.7}rem`);
+                    confetti.style.setProperty('--match-confetti-color', colors[index % colors.length]);
+                    confetti.style.setProperty('--match-confetti-delay', `${Math.random() * 0.55}s`);
+                    confetti.style.setProperty('--match-confetti-duration', `${2 + Math.random() * 1.15}s`);
+                    confetti.style.setProperty('--match-confetti-drift', `${-9 + Math.random() * 18}vw`);
+                    ovalMatchConfetti.appendChild(confetti);
+                }
+            }
+            ovalMatchReward.hidden = false;
+            void ovalMatchReward.offsetWidth;
+            ovalMatchReward.classList.add('is-visible');
+            playOvalMatchCheering();
+            ovalRewardHideTimer = window.setTimeout(() => {
+                if (ovalMatchRewardSession !== rewardSession) return;
+                ovalMatchReward.classList.remove('is-visible');
+                ovalMatchReward.hidden = true;
+                stopOvalMatchCheering();
+                ovalRewardHideTimer = null;
+            }, 4250);
+        };
+
+        ovalMatchObject.onload = revealReward;
+        ovalMatchObject.onerror = revealReward;
+        ovalMatchObject.src = piece.objectImage;
+        if (ovalMatchObject.complete && ovalMatchObject.naturalWidth > 0) {
+            if (typeof ovalMatchObject.decode === 'function') {
+                ovalMatchObject.decode().then(revealReward).catch(revealReward);
+            } else {
+                window.requestAnimationFrame(revealReward);
             }
         }
-        ovalMatchReward.hidden = false;
-        ovalMatchReward.classList.remove('is-visible');
-        void ovalMatchReward.offsetWidth;
-        ovalMatchReward.classList.add('is-visible');
-        playOvalMatchCheering();
-        ovalRewardHideTimer = window.setTimeout(() => {
-            ovalMatchReward.classList.remove('is-visible');
-            ovalMatchReward.hidden = true;
-            stopOvalMatchCheering();
-            ovalRewardHideTimer = null;
-        }, 4250);
     };
 
     ovalBoardCards.forEach((card, index) => {
@@ -16157,13 +16502,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const gameIslandShapeLabels = Object.freeze({
-        ...cameraShapeLabels,
+        circle: 'Circle Meadow',
+        square: 'Square Town',
+        triangle: 'Triangle Mountains',
+        rectangle: 'Rectangle Village',
+        oval: 'Oval Garden',
+        heart: 'Heart City',
+        star: 'Star Forest',
+        diamond: 'Diamond Cave',
     });
 
     appBackButtons.forEach((button) => {
         const buttonIslandShape = getBackButtonIslandShape(button);
         if (buttonIslandShape) {
-            button.setAttribute('aria-label', `Return to ${gameIslandShapeLabels[buttonIslandShape]} Island`);
+            button.setAttribute('aria-label', `Return to ${gameIslandShapeLabels[buttonIslandShape]}`);
         }
         button.addEventListener('click', (event) => {
             event.preventDefault();
@@ -16341,26 +16693,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const shapeHowToGuides = {
         circle: {
-            island: 'Circle Island',
+            island: 'Circle Meadow',
             mission: 'Hanapin ang lahat ng sampung bilog na bagay bago maubos ang oras.',
             steps: [
                 'Simulan ang misyon at hintayin ang countdown.',
-                'Hanapin sa eksena ang sampung nakatagong bilog na bagay.',
-                'I-tap ang bawat bilog na bagay upang makolekta ito.',
+                'Hanapin ang sampung bilog na bagay na makikita sa bakuran.',
+                'Pindutin ang bawat bilog na bagay.',
                 'Bawat tamang bilog ay nagdadagdag ng 1 segundo sa oras.',
-                'Iwasang mag-tap sa maling bahagi.',
-                'Pagkatapos ng tatlong maling pag-tap, may bilog na kikinang sandali bilang pahiwatig.',
-                'Kolektahin ang lahat ng sampung bilog sa loob ng 60 segundo.',
+                'Pagkatapos ng tatlong maling pag pindot, magpapakita ito ng pahiwatig.',
+                'Habapin ang lahat ng sampung bilog sa loob ng 60 segundo.',
             ],
             scopes: ['#learnscape-circle-illustration-page'],
         },
         square: {
-            island: 'Square Island',
-            mission: 'Ayusin ang Bayan ng Parisukat.',
+            island: 'Square Town',
+            mission: 'Ayusin ang Square Town.',
             steps: [
-                'Hanapin at i-tap ang limang nawawalang bagay na parisukat upang makolekta ang mga ito.',
-                'I-tap ang katugmang bagay sa panel ng koleksyon upang ayusin ang bayan.',
-                'Magpatuloy hanggang makumpleto ang Bayan ng Parisukat.',
+                'Hanapin at pindutin ang limang nawawalang bagay upang makolekta ang mga ito.',
+                'Pindutin ang katugmang bagay mula sa koleksyon upang maibalik ito sa kaayusan.',
+                'Magpatuloy hanggang makumpleto ang Square Town.',
                 'Pumili ng saklaw ng bilang para sa tsokolate.',
                 'Bilangin ang mga ipinakitang parisukat na tsokolate.',
                 'Piliin ang sagot na katumbas ng bilang ng mga tsokolate.',
@@ -16368,19 +16719,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             scopes: ['#learnscape-shape-square-page'],
         },
         triangle: {
-            island: 'Triangle Island',
+            island: 'Triangle Mountains',
             mission: 'Buoin muli ang tulay.',
             steps: [
-                'I-tap ang bawat kahoy.',
-                'Bawat pag-tap ay nabubuo ang tulay.',
+                'Pindutin ang bawat kahoy.',
+                'Bawat pag pindot ay nabubuo ang tulay.',
                 'Magpatuloy hanggang sa mailagay lahat ng kahoy.',
                 'Sagutin ang tanong upang ganap na mabuo ang tulay.',
             ],
             scopes: ['#learnscape-triangle-game-page'],
         },
         rectangle: {
-            island: 'Rectangle Island',
-            mission: 'Maghatid ng tatlong parihabang pakete.',
+            island: 'Rectangle Village',
+            mission: 'Maghatid ng tatlong parihabang bagay.',
             steps: [
                 'Pumili ng tatlong parihabang bagay.',
                 'Simulan ang misyon ng paghahatid.',
@@ -16403,7 +16754,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             ],
         },
         oval: {
-            island: 'Oval Island',
+            island: 'Oval Garden',
             mission: 'Itugma ang lahat ng pares bago maubos ang 45 segundo.',
             steps: [
                 'Tandaan ang mga card sa loob ng tatlong segundong preview.',
@@ -16419,13 +16770,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             scopes: ['#learnscape-oval-board-game-page'],
         },
         heart: {
-            island: 'Heart Island',
+            island: 'Heart City',
             mission: 'Tirahin ang mga pusong lobo ayon sa pagkakasunod-sunod ng kulay ng bahaghari.',
             steps: [
                 'Tandaan ang target na kulay.',
                 'Igalaw ang pointer o mouse upang itutok ang busog na puso.',
                 'Pindutin ang Spacebar upang magpaputok.',
-                'Tirahin ang tatlong pusong lobo na katugma ng bawat target na kulay.',
+                'Tirahin ang isang pusong lobo na katugma ng bawat target na kulay.',
                 'Bawat pangkat ng lobo ay may 10 segundong oras.',
                 'Ang lobong hindi puso ay nagbabawas ng 2 segundo sa oras.',
                 'Tingnan ang iyong progreso at punuin ang lahat ng kulay para sa palabas na bahaghari.',
@@ -16433,7 +16784,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             scopes: ['#learnscape-shape-area-6-page'],
         },
         star: {
-            island: 'Star Island',
+            island: 'Star Forest',
             mission: 'Saluhin ang mga nahuhulog na bituin bago maubos ang oras.',
             steps: [
                 'Pumili ng saklaw na bilang ng bituin.',
@@ -16447,16 +16798,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             scopes: ['#learnscape-shape-area-7-page'],
         },
         diamond: {
-            island: 'Diamond Island',
+            island: 'Diamond Cave',
             mission: 'Kolektahin ang mga piraso ng dyamante, pagkatapos ay buuin ang mga ito nang tama.',
             steps: [
                 'May pangkat ng paniki na papasok sa kuweba.',
-                'I-tap ang paniking may dalang piraso ng dyamante.',
-                'Iwasang i-tap ang pain na hindi dyamante dahil mababawasan ka ng isang buhay.',
+                'Pindutin ang paniking may dalang piraso ng dyamante.',
+                'Iwasang pindutin ang hindi parte ng dyamante dahil mababawasan ka ng isang buhay.',
                 'Kapag naubos ang tatlong buhay, matatapos ang misyon.',
                 'Pagkatapos kolektahin ang mga piraso ng dyamante, buuin ang mga ito nang tama.',
-                'Hanapin ang kumikinang na bakanteng puwesto.',
-                'I-tap ang pirasong katugma ng puwestong iyon.',
+                'Pagmasdan ang kumikinang na bakanteng puwesto.',
+                'Pindutin ang pirasong katugma ng puwestong iyon.',
                 'Ang maling piraso ay kikinang nang pula.',
                 'Punan ang lahat ng apat na puwesto upang maging mahiwagang kristal ang dyamante.',
             ],

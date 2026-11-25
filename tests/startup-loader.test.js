@@ -96,6 +96,7 @@ function image({ complete = false, naturalWidth = 0, decode } = {}) {
         naturalWidth,
         decode,
         currentSrc: '/assets/example.png',
+        hasAttribute: (name) => name === 'data-initial-image',
         getAttribute: () => '/assets/example.png',
         addEventListener() {},
         removeEventListener() {},
@@ -238,7 +239,7 @@ test('a slow large download is not aborted while bytes keep arriving', async () 
     assert.equal(attempts, 1);
 });
 
-test('a failed asset download offers retry and retains successful downloads', async () => {
+test('a failed asset download does not block the game and retains successful downloads', async () => {
     const storage = createStorage();
     const requests = [];
     const app = createHarness({ storage, assetFetch: async (url) => {
@@ -246,9 +247,9 @@ test('a failed asset download offers retry and retains successful downloads', as
         return new Response('error', { status: url.endsWith('.mp4') ? 503 : 200 });
     } });
     await app.run();
-    assert.equal(app.hidden, false);
-    assert.equal(app.retry.hidden, false);
-    assert.equal(requests.filter((url) => url.endsWith('.mp4')).length, 2);
+    assert.equal(app.hidden, true);
+    assert.equal(app.retry.hidden, true);
+    assert.equal(requests.filter((url) => url.endsWith('.mp4')).length, 3);
 
     const resumedRequests = [];
     const resumed = createHarness({ storage, assetFetch: async (url) => {
@@ -277,7 +278,7 @@ test('a temporarily unavailable audio asset cannot trap the game on the loading 
         },
     });
     await app.run();
-    assert.equal(requests, 2);
+    assert.equal(requests, 3);
     assert.equal(app.hidden, true);
     assert.equal(app.retry.hidden, true);
 });
@@ -317,7 +318,7 @@ test('a same-size corrupted download is retried before startup reaches 100 perce
     assert.ok(app.progressValues.includes(100));
 });
 
-test('a truncated download cannot activate a cache or report a successful boot', async () => {
+test('a truncated download cannot activate a cache but does not block the game', async () => {
     const storage = createStorage();
     const meta = await storage.open('learnscape-meta-v2');
     const activeKey = 'https://game.test/__learnscape_active_cache__';
@@ -332,10 +333,10 @@ test('a truncated download cannot activate a cache or report a successful boot',
         assetFetch: async () => { requests++; return new Response('vid'); },
     });
     await app.run();
-    assert.equal(requests, 2);
-    assert.equal(app.hidden, false);
-    assert.equal(app.retry.hidden, false);
-    assert.equal(app.progressValues.includes(100), false);
+    assert.equal(requests, 3);
+    assert.equal(app.hidden, true);
+    assert.equal(app.retry.hidden, true);
+    assert.equal(app.progressValues.includes(100), true);
     assert.equal(await (await meta.match(activeKey)).text(), 'learnscape-runtime-11111111111111111111');
 });
 
@@ -423,13 +424,13 @@ test('verified text assets are reused across Windows and GitHub line endings', a
     assert.equal(app.hidden, true);
 });
 
-test('an HTML fallback for a missing asset does not count as a successful download', async () => {
+test('an HTML fallback for a missing asset does not block the loaded game', async () => {
     const app = createHarness({ assetFetch: async () => new Response('<html></html>', {
         headers: { 'content-type': 'text/html' },
     }) });
     await app.run();
-    assert.equal(app.hidden, false);
-    assert.equal(app.retry.hidden, false);
+    assert.equal(app.hidden, true);
+    assert.equal(app.retry.hidden, true);
 });
 
 test('failed or stalled images and stalled image decoding cannot block startup', async () => {
@@ -449,6 +450,7 @@ test('an image that failed before caching is retried after the assets are ready'
     const failedImage = {
         complete: true,
         naturalWidth: 0,
+        hasAttribute: (name) => name === 'data-initial-image',
         getAttribute: (name) => name === 'src' ? '/assets/example.png' : null,
         setAttribute() {
             retries++;
