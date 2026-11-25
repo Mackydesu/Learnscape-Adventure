@@ -6519,13 +6519,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (event.code === 'Space') event.preventDefault();
     });
 
-    const showHeartHitFeedback = (text, x, y, tone = 'positive') => {
+    const showHeartHitFeedback = (text, x, y, tone = 'positive', colorChallenge = null) => {
         if (!heartCupidGame) return;
         const feedback = document.createElement('span');
         feedback.className = `heart-hit-feedback is-${tone}`;
         feedback.textContent = text;
         feedback.style.left = `${x}px`;
         feedback.style.top = `${y}px`;
+        if (colorChallenge) {
+            feedback.classList.add('is-color-name');
+            feedback.style.setProperty('--heart-hit-name-color', colorChallenge.edge);
+            feedback.style.setProperty('--heart-hit-name-glow', colorChallenge.color);
+        }
         heartCupidGame.appendChild(feedback);
         window.setTimeout(() => feedback.remove(), 900);
     };
@@ -7091,7 +7096,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             );
             if (!challenge || balloon.dataset.heartColor !== challenge.key) {
                 popHeartFloatingBalloon(balloon, balloonRect, gameRect, false, false);
-                showHeartHitFeedback(poppedColor?.label || 'HEART', feedbackX, feedbackY, 'negative');
+                showHeartHitFeedback(poppedColor?.label || 'HEART', feedbackX, feedbackY, 'negative', poppedColor);
                 if (window.Audio) {
                     const buzzerAudio = new window.Audio('assets/Audios/Sound effects/buzzer.mp3');
                     buzzerAudio.play().catch(() => playUiClickSound('thunk'));
@@ -7106,7 +7111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             heartGameColorProgress += 1;
             stopHeartGameClock();
             stopHeartGameClockTickingAudio();
-            showHeartHitFeedback(challenge.label, feedbackX, feedbackY, 'positive');
+            showHeartHitFeedback(challenge.label, feedbackX, feedbackY, 'positive', challenge);
             if (window.Audio) {
                 const correctAudio = new window.Audio(HEART_TARGET_POP_AUDIO_SOURCE);
                 correctAudio.volume = Math.min(1, window.__learnscapeSoundScale?.() ?? 1);

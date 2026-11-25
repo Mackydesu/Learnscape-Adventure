@@ -8254,6 +8254,14 @@ body *::after {
     text-shadow: 0 0.25rem 0 #4a1820, 0 0 0.8rem rgba(255, 78, 78, 0.82);
 }
 
+.heart-hit-feedback.is-color-name {
+    color: var(--heart-hit-name-color);
+    -webkit-text-stroke: 0.12rem #fff9d7;
+    text-shadow:
+        0 0.24rem 0 var(--heart-hit-name-color),
+        0 0 0.8rem var(--heart-hit-name-glow);
+}
+
 .heart-game-result {
     position: absolute;
     inset: 0;
