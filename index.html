@@ -6679,31 +6679,6 @@
             document.addEventListener('fullscreenchange', pauseOnboardingOutsideFullscreen);
             document.addEventListener('webkitfullscreenchange', pauseOnboardingOutsideFullscreen);
             document.addEventListener('MSFullscreenChange', pauseOnboardingOutsideFullscreen);
-const removeLegacyServiceWorker = async () => {
-    const appScope = new URL('./', document.baseURI).href;
-    let removedWorker = false;
-    if ('serviceWorker' in navigator) {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        const appRegistrations = registrations.filter((registration) => registration.scope === appScope);
-        const removals = await Promise.all(appRegistrations.map((registration) => registration.unregister()));
-        removedWorker = removals.some(Boolean);
-    }
-    if (removedWorker && 'caches' in window) {
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames
-            .filter((name) => name.startsWith('learnscape-'))
-            .map((name) => caches.delete(name)));
-    }
-    if (removedWorker) {
-        // A controlled page continues using its old worker until it reloads.
-        // Reload once without it before starting the game's asset requests.
-        window.location.reload();
-        await new Promise(() => {});
-    }
-};
-
-const legacyServiceWorkerCleanup = removeLegacyServiceWorker().catch(() => {});
-
 const loadRuntimeAssets = async () => {
     // Cache Storage here is only a verified asset download store. Unlike a
     // service worker, it never intercepts or serves normal page requests.
@@ -6904,6 +6879,23 @@ const loadRuntimeAssets = async () => {
     }
 };
 
+const registerOfflineWorker = async () => {
+    if (!('serviceWorker' in navigator)) return null;
+
+    const appScope = new URL('./', document.baseURI);
+    const workerUrl = new URL('service-worker.js', appScope);
+    try {
+        return await navigator.serviceWorker.register(workerUrl.href, {
+            scope: appScope.href,
+            updateViaCache: 'none',
+        });
+    } catch (error) {
+        // The game still works online when a browser blocks service workers.
+        console.warn('[Learnscape] Offline mode could not be enabled.', error);
+        return null;
+    }
+};
+
 const trackInitialImages = () => {
     // Only the loading-screen illustration gates startup. Islands may create
     // images while booting, but those must load only when their page opens.
@@ -7025,9 +7017,10 @@ const trackInitialImages = () => {
 
             const completeInitialBoot = async () => {
                 try {
-                    await (typeof legacyServiceWorkerCleanup === 'undefined'
-                        ? Promise.resolve()
-                        : legacyServiceWorkerCleanup);
+                    // Register before filling the verified runtime cache. Once
+                    // it activates, the worker can serve this same cache when
+                    // the player opens the game without an internet connection.
+                    await registerOfflineWorker();
                     window.__learnscapeAssetsReady = loadRuntimeAssets();
                     try {
                         await window.__learnscapeAssetsReady;

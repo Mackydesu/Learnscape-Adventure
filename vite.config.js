@@ -23,6 +23,7 @@ async function createRuntimeAssetList(projectRoot, modelPath) {
         "script.js",
         "style.css",
         "manifest.webmanifest",
+        "service-worker.js",
         ...assetFiles.map((filePath) => `assets/${filePath.slice(assetsRoot.length + 1).replaceAll("\\", "/")}`),
         ...detectionFiles.map((filePath) => `detection/${filePath.slice(detectionRoot.length + 1).replaceAll("\\", "/")}`),
         modelPath
@@ -123,6 +124,7 @@ export default defineConfig(({ command }) => {
                     { recursive: true, force: true }
                 );
                 await cp(resolve(projectRoot, "manifest.webmanifest"), resolve(projectRoot, "dist/manifest.webmanifest"));
+                await cp(resolve(projectRoot, "service-worker.js"), resolve(projectRoot, "dist/service-worker.js"));
                 // Vite serves files in public/ verbatim. Keep an old public
                 // script from shadowing the current application script.
                 await cp(resolve(projectRoot, "script.js"), resolve(outputRoot, "script.js"), { force: true });

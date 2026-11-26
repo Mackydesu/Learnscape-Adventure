@@ -21,7 +21,7 @@ function createStorage() {
 }
 
 // Run the actual inline startup code with controllable asset responses and events.
-function createHarness({ images = [], gameInitialized = true, assetFetch, storage = createStorage(), persistentStorage = true, requestAnimationFrame = (callback) => setImmediate(callback), baseURI = 'https://game.test/index.html', manifest, timeout = (delay) => Math.ceil(delay / 100), prepareLessonMedia } = {}) {
+function createHarness({ images = [], gameInitialized = true, assetFetch, storage = createStorage(), persistentStorage = true, requestAnimationFrame = (callback) => setImmediate(callback), baseURI = 'https://game.test/index.html', manifest, timeout = (delay) => Math.ceil(delay / 100), prepareLessonMedia, serviceWorker } = {}) {
     const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
     const start = html.indexOf('const loadRuntimeAssets =');
     const end = html.indexOf('            syncFullscreenClass();', start);
@@ -62,7 +62,7 @@ function createHarness({ images = [], gameInitialized = true, assetFetch, storag
         fullscreenRestoreButton: null,
         CustomEvent: class CustomEvent { constructor(type) { this.type = type; } },
         console: { log() {}, warn() {}, error() {} },
-        navigator: {},
+        navigator: serviceWorker ? { serviceWorker } : {},
         caches: storage,
         URL, Response, AbortController,
         fetch: async (url, options) => {
@@ -123,6 +123,22 @@ test('a first successful load stores its manifest alongside the active offline a
     assert.equal((await manifest.json()).version, '0123456789abcdef0123');
     const meta = await storage.open('learnscape-meta-v2');
     assert.equal(await (await meta.match('https://game.test/__learnscape_active_cache__')).text(), 'learnscape-runtime-0123456789abcdef0123');
+});
+
+test('startup registers a scoped worker before filling the offline cache', async () => {
+    const registrations = [];
+    const app = createHarness({
+        baseURI: 'https://game.test/Learnscape-Adventure/index.html',
+        serviceWorker: {
+            register: async (url, options) => registrations.push({ url, options }),
+        },
+    });
+
+    await app.run();
+    assert.equal(registrations.length, 1);
+    assert.equal(registrations[0].url, 'https://game.test/Learnscape-Adventure/service-worker.js');
+    assert.equal(registrations[0].options.scope, 'https://game.test/Learnscape-Adventure/');
+    assert.equal(registrations[0].options.updateViaCache, 'none');
 });
 
 test('initial loading text displays the same percentage as the progress bar', () => {
