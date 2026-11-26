@@ -71,6 +71,11 @@ self.addEventListener('fetch', (event) => {
     const scopeUrl = getScopeUrl();
     if (url.origin !== scopeUrl.origin || !url.href.startsWith(scopeUrl.href)) return;
 
+    // A URL such as /Learnscape-Adventure/#home is only a same-page hash
+    // navigation. Let the browser handle it directly instead of attempting
+    // to fetch it through the offline layer before a cache is available.
+    if (url.href === scopeUrl.href) return;
+
     const isRuntimeManifest = url.pathname === new URL('runtime-assets.json', scopeUrl).pathname;
     // The startup loader uses no-cache requests to validate a newly deployed
     // manifest. Let those refresh from the network, but still fall back to

@@ -116,11 +116,23 @@ test('offline worker falls back to the cached app shell for navigation', async (
     await seedRuntimeCache(worker.caches);
 
     const request = {
-        url: 'https://game.test/Learnscape-Adventure/',
+        url: 'https://game.test/Learnscape-Adventure/offline-route',
         method: 'GET',
         mode: 'same-origin',
         destination: 'document',
     };
     const response = await worker.dispatchFetch(request);
     assert.equal(await response.text(), 'game shell');
+});
+
+test('offline worker leaves the root hash route to the browser', () => {
+    const worker = createWorkerHarness();
+
+    const response = worker.dispatchFetch({
+        url: 'https://game.test/Learnscape-Adventure/',
+        method: 'GET',
+        mode: 'same-origin',
+        destination: 'document',
+    });
+    assert.equal(response, undefined);
 });
