@@ -4612,7 +4612,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         stopStarMissionSequence();
         const session = starMissionSession;
         starMissionIntro.classList.remove('is-ready-message');
-        starMissionMessageText.textContent = 'Para sa ating Misyon ng Bituin, kolektahin ang lahat ng bituing nahuhulog mula sa langit.';
+        starMissionMessageText.textContent = 'Para sa ating Star Mission, kolektahin ang lahat ng bituing nahuhulog mula sa langit.';
         starMissionIntro.hidden = false;
         starMissionIntro.setAttribute('aria-hidden', 'false');
         starMissionIntro.getBoundingClientRect();
