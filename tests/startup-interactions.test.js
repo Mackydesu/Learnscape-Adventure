@@ -238,6 +238,7 @@ test('failed preloaded media is reloaded before the next playback request', () =
 
 test('counting audio requests playback inside the original user gesture', async () => {
     let audio;
+    let completed = 0;
     const handlers = new Map();
     class MockAudio {
         constructor() { audio = this; this.readyState = 0; this.currentTime = 0; }
@@ -250,11 +251,30 @@ test('counting audio requests playback inside the original user gesture', async 
         requestAnimationFrame: () => 1, cancelAnimationFrame() {}, setTimeout: () => 1, clearTimeout() {},
     } };
     vm.runInNewContext(excerpt(script, '    const numberChoiceAudioSegments =', '    const numberChoiceSelector ='), context);
-    assert.equal(context.window.playLearnscapeCountingNumber(3), true);
+    assert.equal(context.window.playLearnscapeCountingNumber(3, () => { completed += 1; }), true);
     assert.equal(audio.played, true, 'play must be requested before metadata arrives');
     handlers.get('loadedmetadata')();
     assert.equal(audio.currentTime, 1.6);
+    audio.onended();
+    assert.equal(completed, 1, 'the completion runs after the selected number finishes');
     await Promise.resolve();
+});
+
+test('Triangle correct answers are voiced before triangle counting begins', () => {
+    const triangleAnswerFlow = excerpt(
+        script.replace(/\r\n/g, '\n'),
+        "    triangleBridgeQuestionChoices.forEach((choice) => {\n        choice.addEventListener('click', () => {",
+        '    const startTriangleBridgeCrafting =',
+    );
+    assert.match(triangleAnswerFlow, /const answerValue = getNumberChoiceValue\(choice\);/);
+    assert.match(
+        triangleAnswerFlow,
+        /const didPlayCorrectAnswer = playNumberChoiceAudio\(answerValue, startCorrectFeedback\);/,
+    );
+    assert.match(
+        triangleAnswerFlow,
+        /const startCorrectFeedback = \(\) => \{[\s\S]*?countTriangleBridgeShapes\(session,/,
+    );
 });
 
 test('published and source game scripts stay in sync', () => {

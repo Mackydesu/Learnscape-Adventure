@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    const playNumberChoiceAudio = (number) => {
+    const playNumberChoiceAudio = (number, onComplete = null) => {
         if (number === null || number === undefined || number === '') return false;
         const value = Math.floor(Number(number));
         if (value === 0 && window.Audio && (window.__learnscapeSoundScale?.() ?? 1) > 0) {
@@ -243,6 +243,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const releaseZeroAudio = () => {
                 if (numberChoiceAudio !== zeroAudio) return;
                 stopNumberChoiceAudio();
+                onComplete?.();
             };
             zeroAudio.onended = releaseZeroAudio;
             zeroAudio.onerror = releaseZeroAudio;
@@ -261,6 +262,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const releaseAudio = () => {
             if (numberChoiceAudio !== audio) return;
             stopNumberChoiceAudio();
+            onComplete?.();
         };
         const monitorSegment = () => {
             if (numberChoiceAudio !== audio) return;
@@ -10863,6 +10865,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     triangleBridgeQuestionChoices.forEach((choice) => {
         choice.addEventListener('click', () => {
             if (triangleBridgeQuestionAnswered || triangleBridgeQuestion?.hidden) return;
+            const answerValue = getNumberChoiceValue(choice);
             const isCorrect = choice.hasAttribute('data-correct-answer');
             triangleBridgeQuestionChoices.forEach((candidate) => {
                 candidate.classList.remove('is-correct', 'is-wrong');
@@ -10886,12 +10889,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 candidate.disabled = true;
             });
             const session = triangleWoodCollectionSession;
-            playTriangleBridgeQuestionAudio('assets/Audios/Sound effects/correct.mp3', () => {
+            const startCorrectFeedback = () => {
                 if (session !== triangleWoodCollectionSession || triangleGamePage?.hidden) return;
-                countTriangleBridgeShapes(session, () => {
-                    if (session === triangleWoodCollectionSession) startTriangleBridgeBuildSequence(session);
+                playTriangleBridgeQuestionAudio('assets/Audios/Sound effects/correct.mp3', () => {
+                    if (session !== triangleWoodCollectionSession || triangleGamePage?.hidden) return;
+                    countTriangleBridgeShapes(session, () => {
+                        if (session === triangleWoodCollectionSession) startTriangleBridgeBuildSequence(session);
+                    });
                 });
-            });
+            };
+            const didPlayCorrectAnswer = playNumberChoiceAudio(answerValue, startCorrectFeedback);
+            if (!didPlayCorrectAnswer) startCorrectFeedback();
         });
     });
 
