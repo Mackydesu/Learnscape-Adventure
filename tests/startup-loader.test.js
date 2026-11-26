@@ -125,12 +125,20 @@ test('a first successful load stores its manifest alongside the active offline a
     assert.equal(await (await meta.match('https://game.test/__learnscape_active_cache__')).text(), 'learnscape-runtime-0123456789abcdef0123');
 });
 
-test('startup registers a scoped worker before filling the offline cache', async () => {
+test('startup registers a scoped worker after filling the offline cache', async () => {
     const registrations = [];
+    const events = [];
     const app = createHarness({
         baseURI: 'https://game.test/Learnscape-Adventure/index.html',
+        assetFetch: async () => {
+            events.push('asset');
+            return new Response('asset');
+        },
         serviceWorker: {
-            register: async (url, options) => registrations.push({ url, options }),
+            register: async (url, options) => {
+                events.push('worker');
+                registrations.push({ url, options });
+            },
         },
     });
 
@@ -139,6 +147,7 @@ test('startup registers a scoped worker before filling the offline cache', async
     assert.equal(registrations[0].url, 'https://game.test/Learnscape-Adventure/service-worker.js');
     assert.equal(registrations[0].options.scope, 'https://game.test/Learnscape-Adventure/');
     assert.equal(registrations[0].options.updateViaCache, 'none');
+    assert.ok(events.indexOf('asset') < events.indexOf('worker'));
 });
 
 test('initial loading text displays the same percentage as the progress bar', () => {

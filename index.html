@@ -7017,13 +7017,11 @@ const trackInitialImages = () => {
 
             const completeInitialBoot = async () => {
                 try {
-                    // Register before filling the verified runtime cache. Once
-                    // it activates, the worker can serve this same cache when
-                    // the player opens the game without an internet connection.
-                    await registerOfflineWorker();
+                    let hasVerifiedRuntimeCache = false;
                     window.__learnscapeAssetsReady = loadRuntimeAssets();
                     try {
                         await window.__learnscapeAssetsReady;
+                        hasVerifiedRuntimeCache = true;
                     } catch (error) {
                         // The game itself has already been loaded by this point.
                         // Caching every optional asset improves first-run and
@@ -7031,6 +7029,10 @@ const trackInitialImages = () => {
                         // leave children trapped on the loading screen.
                         console.warn('[Learnscape] Runtime asset cache was not prepared; continuing online.', error);
                     }
+                    // Wait until the complete verified cache exists before the
+                    // worker starts handling requests. This avoids an offline
+                    // fallback response racing the first page load.
+                    if (hasVerifiedRuntimeCache) await registerOfflineWorker();
                     await waitForGameInitialization();
                     await trackInitialImages();
                     setInitialLoadingProgress(97);
