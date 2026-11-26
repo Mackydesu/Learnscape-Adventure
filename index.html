@@ -2904,18 +2904,16 @@
                     introSettingsTutorialButton.hidden = !isIntro || !isOnboardingComplete();
                 }
                 if (fullscreenRestoreKicker) fullscreenRestoreKicker.textContent = isIntro ? 'Welcome, Adventurer' : 'Game Paused';
-                if (fullscreenRestoreTitle) fullscreenRestoreTitle.textContent = isIntro ? 'Handa ka na bang maglakbay?' : 'Fullscreen Paused';
+                if (fullscreenRestoreTitle) fullscreenRestoreTitle.textContent = 'Handa ka na bang maglakbay?';
                 if (fullscreenRestoreCopy) {
-                    fullscreenRestoreCopy.textContent = isIntro
-                        ? 'Pindutin ito upang magpatuloy sa laro'
-                        : 'Tap the button below to continue your adventure in fullscreen.';
+                    fullscreenRestoreCopy.textContent = 'Pindutin ito upang magpatuloy sa laro';
                 }
                 if (fullscreenRestoreButtonText) {
-                    fullscreenRestoreButtonText.textContent = isIntro ? 'Mag-Fullscreen' : 'Return to Fullscreen';
+                    fullscreenRestoreButtonText.textContent = 'Mag-Fullscreen';
                 }
                 fullscreenRestoreButton?.setAttribute(
                     'aria-label',
-                    isIntro ? 'Mag-Fullscreen' : 'Return game to fullscreen',
+                    'Mag-Fullscreen',
                 );
 
                 Object.entries(pages).forEach(([name, page]) => {

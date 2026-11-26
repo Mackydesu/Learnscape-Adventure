@@ -12415,7 +12415,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (circleHuntState !== 'playing' || !circleIllustrationScene) return;
 
         circleHuntIncorrectAttempts += 1;
-        setCircleHuntFeedback('Oops! Look for something round!', 'wrong');
+        setCircleHuntFeedback('Oops! Maghanap ng iba pang bilog!', 'wrong');
         playUiClickSound('thunk');
 
         const sceneRect = circleIllustrationScene.getBoundingClientRect();
