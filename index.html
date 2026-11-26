@@ -154,13 +154,13 @@
     <div class="fullscreen-restore-overlay">
         <div class="fullscreen-restore-card" role="dialog" aria-modal="true" aria-labelledby="fullscreen-restore-title" aria-describedby="fullscreen-restore-copy">
             <p class="fullscreen-restore-kicker">Nakahinto ang Laro</p>
-            <h2 id="fullscreen-restore-title">Nakahinto ang Buong Screen</h2>
-            <p id="fullscreen-restore-copy" class="fullscreen-restore-copy">Pindutin ang button sa ibaba upang magpatuloy sa buong screen.</p>
-            <button class="fullscreen-restore-button" type="button" aria-label="Enter fullscreen">
+            <h2 id="fullscreen-restore-title">Handa ka na bang maglakbay?</h2>
+            <p id="fullscreen-restore-copy" class="fullscreen-restore-copy">Pindutin ito upang magpatuloy sa laro</p>
+            <button class="fullscreen-restore-button" type="button" aria-label="Mag-Fullscreen">
                 <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
                     <path d="M38 18H18v20M62 18h20v20M18 62v20h20M82 62v20H62"></path>
                 </svg>
-                <span>Enter Fullscreen</span>
+                <span>Mag-Fullscreen</span>
             </button>
         </div>
     </div>
@@ -2904,18 +2904,18 @@
                     introSettingsTutorialButton.hidden = !isIntro || !isOnboardingComplete();
                 }
                 if (fullscreenRestoreKicker) fullscreenRestoreKicker.textContent = isIntro ? 'Welcome, Adventurer' : 'Game Paused';
-                if (fullscreenRestoreTitle) fullscreenRestoreTitle.textContent = isIntro ? 'Ready to Explore?' : 'Fullscreen Paused';
+                if (fullscreenRestoreTitle) fullscreenRestoreTitle.textContent = isIntro ? 'Handa ka na bang maglakbay?' : 'Fullscreen Paused';
                 if (fullscreenRestoreCopy) {
                     fullscreenRestoreCopy.textContent = isIntro
-                        ? 'Tap below to continue your adventure in fullscreen.'
+                        ? 'Pindutin ito upang magpatuloy sa laro'
                         : 'Tap the button below to continue your adventure in fullscreen.';
                 }
                 if (fullscreenRestoreButtonText) {
-                    fullscreenRestoreButtonText.textContent = isIntro ? 'Enter Fullscreen' : 'Return to Fullscreen';
+                    fullscreenRestoreButtonText.textContent = isIntro ? 'Mag-Fullscreen' : 'Return to Fullscreen';
                 }
                 fullscreenRestoreButton?.setAttribute(
                     'aria-label',
-                    isIntro ? 'Enter fullscreen' : 'Return game to fullscreen',
+                    isIntro ? 'Mag-Fullscreen' : 'Return game to fullscreen',
                 );
 
                 Object.entries(pages).forEach(([name, page]) => {
