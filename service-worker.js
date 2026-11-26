@@ -4,6 +4,12 @@ const ACTIVE_RUNTIME_CACHE_KEY = '__learnscape_active_cache__';
 
 const getScopeUrl = () => new URL(self.registration.scope);
 const getActiveRuntimeCacheKey = () => new URL(ACTIVE_RUNTIME_CACHE_KEY, getScopeUrl()).href;
+const isNavigationRequest = (request) => request.mode === 'navigate' || request.destination === 'document';
+const offlineResponse = () => new Response('This game resource is not cached yet. Connect to the internet once to finish downloading the game.', {
+    status: 503,
+    statusText: 'Offline',
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+});
 
 const getActiveRuntimeCache = async () => {
     const metaCache = await caches.open(RUNTIME_META_CACHE);
@@ -19,7 +25,7 @@ const getCachedResponse = async (request) => {
     if (!runtimeCache) return null;
 
     const cached = await runtimeCache.match(request, { ignoreSearch: true });
-    if (cached || request.mode !== 'navigate') return cached;
+    if (cached || !isNavigationRequest(request)) return cached;
 
     return runtimeCache.match(new URL('index.html', getScopeUrl()).href, { ignoreSearch: true });
 };
@@ -29,13 +35,22 @@ const respondNetworkFirst = async (request) => {
         return await fetch(request);
     } catch (error) {
         const cached = await getCachedResponse(request);
-        return cached || Response.error();
+        return cached || offlineResponse();
     }
 };
 
 const respondCacheFirst = async (request) => {
     const cached = await getCachedResponse(request);
-    return cached || fetch(request);
+    if (cached) return cached;
+
+    try {
+        return await fetch(request);
+    } catch (error) {
+        // Never reject a FetchEvent. An uncached file may be requested while
+        // the first download is still running, or a navigation can be aborted
+        // by the browser while a hash route changes.
+        return (await getCachedResponse(request)) || offlineResponse();
+    }
 };
 
 self.addEventListener('install', (event) => {
@@ -61,7 +76,7 @@ self.addEventListener('fetch', (event) => {
     // manifest. Let those refresh from the network, but still fall back to
     // the last verified cache when the player is offline.
     const shouldRevalidate = request.cache === 'no-cache' || request.cache === 'reload';
-    if (request.mode === 'navigate' || isRuntimeManifest || shouldRevalidate) {
+    if (isNavigationRequest(request) || isRuntimeManifest || shouldRevalidate) {
         event.respondWith(respondNetworkFirst(request));
         return;
     }

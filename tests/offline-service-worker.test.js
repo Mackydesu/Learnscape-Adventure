@@ -101,6 +101,16 @@ test('offline worker lets the startup loader revalidate a newer asset online', a
     assert.equal(await response.text(), 'updated area five');
 });
 
+test('offline worker returns a normal response for an uncached resource instead of rejecting the FetchEvent', async () => {
+    const worker = createWorkerHarness();
+
+    const response = await worker.dispatchFetch(new Request(
+        'https://game.test/Learnscape-Adventure/assets/missing.webp',
+    ));
+    assert.equal(response.status, 503);
+    assert.match(await response.text(), /not cached yet/i);
+});
+
 test('offline worker falls back to the cached app shell for navigation', async () => {
     const worker = createWorkerHarness();
     await seedRuntimeCache(worker.caches);
@@ -108,7 +118,8 @@ test('offline worker falls back to the cached app shell for navigation', async (
     const request = {
         url: 'https://game.test/Learnscape-Adventure/',
         method: 'GET',
-        mode: 'navigate',
+        mode: 'same-origin',
+        destination: 'document',
     };
     const response = await worker.dispatchFetch(request);
     assert.equal(await response.text(), 'game shell');
