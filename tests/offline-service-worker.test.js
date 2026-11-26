@@ -31,6 +31,9 @@ function createCacheStorage() {
                 },
             };
         },
+        async keys() {
+            return [...stores.keys()];
+        },
     };
 }
 
@@ -64,17 +67,22 @@ function createWorkerHarness({ fetchImpl = async () => { throw new Error('offlin
             });
             return response;
         },
+        dispatchMessage(data) {
+            listeners.get('message')?.({ data });
+        },
     };
 }
 
 async function seedRuntimeCache(caches) {
-    const runtime = await caches.open('learnscape-runtime-offline-ready');
+    const runtimeName = 'learnscape-runtime-0123456789abcdef0123';
+    const runtime = await caches.open(runtimeName);
     await runtime.put('https://game.test/Learnscape-Adventure/index.html', new Response('game shell'));
+    await runtime.put('https://game.test/Learnscape-Adventure/runtime-assets.json', new Response('{"version":"offline-ready","assets":[]}'));
     await runtime.put('https://game.test/Learnscape-Adventure/assets/Backgrounds/Area5.webp', new Response('area five'));
     const meta = await caches.open('learnscape-meta-v2');
     await meta.put(
         'https://game.test/Learnscape-Adventure/__learnscape_active_cache__',
-        new Response('learnscape-runtime-offline-ready'),
+        new Response(runtimeName),
     );
 }
 
@@ -101,14 +109,14 @@ test('offline worker lets the startup loader revalidate a newer asset online', a
     assert.equal(await response.text(), 'updated area five');
 });
 
-test('offline worker returns a normal response for an uncached resource instead of rejecting the FetchEvent', async () => {
+test('offline worker returns a non-error response for an uncached resource instead of repeating a 503', async () => {
     const worker = createWorkerHarness();
 
     const response = await worker.dispatchFetch(new Request(
         'https://game.test/Learnscape-Adventure/assets/missing.webp',
     ));
-    assert.equal(response.status, 503);
-    assert.match(await response.text(), /not cached yet/i);
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('X-Learnscape-Offline'), 'not-cached-yet');
 });
 
 test('offline worker falls back to the cached app shell for navigation', async () => {
@@ -125,14 +133,76 @@ test('offline worker falls back to the cached app shell for navigation', async (
     assert.equal(await response.text(), 'game shell');
 });
 
-test('offline worker leaves the root hash route to the browser', () => {
+test('offline worker serves the cached shell for the root hash route', async () => {
     const worker = createWorkerHarness();
+    await seedRuntimeCache(worker.caches);
 
-    const response = worker.dispatchFetch({
+    const response = await worker.dispatchFetch({
         url: 'https://game.test/Learnscape-Adventure/',
         method: 'GET',
         mode: 'same-origin',
         destination: 'document',
     });
-    assert.equal(response, undefined);
+    assert.equal(await response.text(), 'game shell');
+});
+
+test('offline worker repairs missing active-cache metadata from a complete runtime cache', async () => {
+    const worker = createWorkerHarness();
+    await seedRuntimeCache(worker.caches);
+    const meta = await worker.caches.open('learnscape-meta-v2');
+    await meta.put(
+        'https://game.test/Learnscape-Adventure/__learnscape_active_cache__',
+        new Response('learnscape-runtime-missing000000'),
+    );
+
+    const response = await worker.dispatchFetch(new Request(
+        'https://game.test/Learnscape-Adventure/runtime-assets.json',
+        { cache: 'no-cache' },
+    ));
+    assert.equal(await response.text(), '{"version":"offline-ready","assets":[]}');
+    assert.equal(
+        await (await meta.match('https://game.test/Learnscape-Adventure/__learnscape_active_cache__')).text(),
+        'learnscape-runtime-0123456789abcdef0123',
+    );
+});
+
+test('offline worker switches to a newly verified runtime cache without rescanning every request', async () => {
+    const worker = createWorkerHarness();
+    await seedRuntimeCache(worker.caches);
+
+    const first = await worker.dispatchFetch(new Request(
+        'https://game.test/Learnscape-Adventure/assets/Backgrounds/Area5.webp',
+    ));
+    assert.equal(await first.text(), 'area five');
+
+    const replacementName = 'learnscape-runtime-11111111111111111111';
+    const replacement = await worker.caches.open(replacementName);
+    await replacement.put('https://game.test/Learnscape-Adventure/index.html', new Response('new shell'));
+    await replacement.put('https://game.test/Learnscape-Adventure/runtime-assets.json', new Response('{"version":"new","assets":[]}'));
+    await replacement.put('https://game.test/Learnscape-Adventure/assets/Backgrounds/Area5.webp', new Response('new area five'));
+    const meta = await worker.caches.open('learnscape-meta-v2');
+    await meta.put(
+        'https://game.test/Learnscape-Adventure/__learnscape_active_cache__',
+        new Response(replacementName),
+    );
+    worker.dispatchMessage({ type: 'LEARNSCAPE_RUNTIME_CACHE_READY' });
+
+    const refreshed = await worker.dispatchFetch(new Request(
+        'https://game.test/Learnscape-Adventure/assets/Backgrounds/Area5.webp',
+    ));
+    assert.equal(await refreshed.text(), 'new area five');
+});
+
+test('offline worker gives an unprepared navigation a usable fallback instead of a 503', async () => {
+    const worker = createWorkerHarness();
+
+    const response = await worker.dispatchFetch({
+        url: 'https://game.test/Learnscape-Adventure/',
+        method: 'GET',
+        mode: 'navigate',
+        destination: 'document',
+    });
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('X-Learnscape-Offline'), 'not-cached-yet');
+    assert.match(await response.text(), /Mag-connect muna/i);
 });

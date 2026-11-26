@@ -144,10 +144,35 @@ test('startup registers a scoped worker after filling the offline cache', async 
 
     await app.run();
     assert.equal(registrations.length, 1);
-    assert.equal(registrations[0].url, 'https://game.test/Learnscape-Adventure/service-worker.js');
+    assert.equal(registrations[0].url, 'https://game.test/Learnscape-Adventure/service-worker.js?release=20261126-27');
     assert.equal(registrations[0].options.scope, 'https://game.test/Learnscape-Adventure/');
     assert.equal(registrations[0].options.updateViaCache, 'none');
     assert.ok(events.indexOf('asset') < events.indexOf('worker'));
+});
+
+test('startup upgrades an existing worker before it requests the runtime assets', async () => {
+    const events = [];
+    const registrations = [];
+    const app = createHarness({
+        baseURI: 'https://game.test/Learnscape-Adventure/index.html',
+        assetFetch: async () => {
+            events.push('asset');
+            return new Response('asset');
+        },
+        serviceWorker: {
+            controller: { scriptURL: 'https://game.test/Learnscape-Adventure/service-worker.js' },
+            register: async (url, options) => {
+                events.push('worker');
+                registrations.push({ url, options });
+                return { update: async () => events.push('update') };
+            },
+        },
+    });
+
+    await app.run();
+    assert.equal(registrations[0].url, 'https://game.test/Learnscape-Adventure/service-worker.js?release=20261126-27');
+    assert.ok(events.indexOf('worker') < events.indexOf('asset'));
+    assert.ok(events.includes('update'));
 });
 
 test('initial loading text displays the same percentage as the progress bar', () => {

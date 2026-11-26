@@ -2251,7 +2251,7 @@
         <a class="game-return-btn loading-link game-icon-button icon-back" href="index.html" data-route="shape-area-8" aria-label="Return to Diamond Cave intro"><span>‹</span>Back</a>
     </section>
 
-    <script src="./script.js?v=20261126-25"></script>
+    <script src="./script.js?v=20261126-27"></script>
     </div>
 
     <script>
@@ -6872,11 +6872,46 @@ const loadRuntimeAssets = async () => {
         // it active. This also works on the first visit, before the service
         // worker has taken control of the page.
         await assetCache.put(manifestUrl.href, offlineManifestResponse);
+        // Cache the project root as well as index.html. Browsers request the
+        // root URL for hash routes such as #home, while the manifest lists the
+        // physical index.html file.
+        const appScopeUrl = new URL('./', document.baseURI);
+        const appShell = await assetCache.match(new URL('index.html', appScopeUrl).href);
+        if (appShell) await assetCache.put(appScopeUrl.href, appShell);
         await meta.put(new URL('__learnscape_active_cache__', document.baseURI).href, new Response(cacheName));
         const keys = await caches.keys();
         await Promise.all(keys.filter((key) => key.startsWith('learnscape-runtime-') && key !== cacheName)
             .map((key) => caches.delete(key)));
+        navigator.serviceWorker?.controller?.postMessage?.({ type: 'LEARNSCAPE_RUNTIME_CACHE_READY' });
     }
+
+    return manifest.version;
+};
+
+// A release query forces browsers that already control the app with an older
+// service worker to fetch this worker script instead of reusing its cached URL.
+const OFFLINE_WORKER_RELEASE = '20261126-27';
+
+const waitForWorkerActivation = (registration) => {
+    const worker = registration?.installing || registration?.waiting;
+    if (!worker || worker.state === 'activated' || typeof worker.addEventListener !== 'function') {
+        return Promise.resolve();
+    }
+
+    return new Promise((resolve) => {
+        let timeoutId;
+        const finish = () => {
+            window.clearTimeout(timeoutId);
+            worker.removeEventListener?.('statechange', onStateChange);
+            resolve();
+        };
+        const onStateChange = () => {
+            if (worker.state === 'activated' || worker.state === 'redundant') finish();
+        };
+        timeoutId = window.setTimeout(finish, 4000);
+        worker.addEventListener('statechange', onStateChange);
+        onStateChange();
+    });
 };
 
 const registerOfflineWorker = async () => {
@@ -6884,16 +6919,30 @@ const registerOfflineWorker = async () => {
 
     const appScope = new URL('./', document.baseURI);
     const workerUrl = new URL('service-worker.js', appScope);
+    workerUrl.searchParams.set('release', OFFLINE_WORKER_RELEASE);
     try {
-        return await navigator.serviceWorker.register(workerUrl.href, {
+        const registration = await navigator.serviceWorker.register(workerUrl.href, {
             scope: appScope.href,
             updateViaCache: 'none',
         });
+        await registration?.update?.();
+        registration?.waiting?.postMessage?.({ type: 'LEARNSCAPE_SKIP_WAITING' });
+        await waitForWorkerActivation(registration);
+        return registration;
     } catch (error) {
         // The game still works online when a browser blocks service workers.
         console.warn('[Learnscape] Offline mode could not be enabled.', error);
         return null;
     }
+};
+
+const refreshExistingOfflineWorker = async () => {
+    // Run before fetching the startup manifest only for browsers that are
+    // already controlled. This migrates legacy workers that could otherwise
+    // intercept that request with an obsolete offline response. A first visit
+    // still waits until the verified runtime cache is ready.
+    if (!navigator.serviceWorker?.controller) return null;
+    return registerOfflineWorker();
 };
 
 const trackInitialImages = () => {
@@ -7017,11 +7066,14 @@ const trackInitialImages = () => {
 
             const completeInitialBoot = async () => {
                 try {
-                    let hasVerifiedRuntimeCache = false;
+                    try {
+                        await refreshExistingOfflineWorker();
+                    } catch (error) {
+                        console.warn('[Learnscape] Existing offline worker could not be refreshed.', error);
+                    }
                     window.__learnscapeAssetsReady = loadRuntimeAssets();
                     try {
                         await window.__learnscapeAssetsReady;
-                        hasVerifiedRuntimeCache = true;
                     } catch (error) {
                         // The game itself has already been loaded by this point.
                         // Caching every optional asset improves first-run and
@@ -7030,9 +7082,10 @@ const trackInitialImages = () => {
                         console.warn('[Learnscape] Runtime asset cache was not prepared; continuing online.', error);
                     }
                     // Wait until the complete verified cache exists before the
-                    // worker starts handling requests. This avoids an offline
-                    // fallback response racing the first page load.
-                    if (hasVerifiedRuntimeCache) await registerOfflineWorker();
+                    // worker starts handling requests. If a previous worker
+                    // was stale, registering here also finishes its upgrade
+                    // after the loader has had a chance to repair the cache.
+                    await registerOfflineWorker();
                     await waitForGameInitialization();
                     await trackInitialImages();
                     setInitialLoadingProgress(97);
