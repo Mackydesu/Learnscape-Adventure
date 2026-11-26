@@ -7041,6 +7041,12 @@ const trackInitialImages = () => {
                     await waitForGameInitialization();
                     await trackInitialImages();
                     setInitialLoadingProgress(97);
+                    // Downloading a lesson video is not enough to guarantee that
+                    // its first frame is ready to paint. Prepare every lesson
+                    // player before revealing the fullscreen prompt so the TV
+                    // never opens as an empty black frame on a cold visit.
+                    await window.__learnscapePrepareLessonMedia?.();
+                    setInitialLoadingProgress(99);
 
                     const minimumLoadingTime = 1200;
                     const remainingTime = Math.max(0, minimumLoadingTime - (performance.now() - initialBootStartedAt));

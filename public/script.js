@@ -7457,8 +7457,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         video?.pause?.();
         if (video) {
-            video.removeAttribute('src');
-            video.load();
+            if (!video.dataset.learnscapeMediaSource) {
+                video.removeAttribute('src');
+                video.load();
+            } else {
+                video.preload = 'auto';
+                try {
+                    video.currentTime = 0;
+                } catch (error) {
+                    // The prepared video may still be seeking to its first frame.
+                }
+            }
             video.hidden = false;
         }
         if (lessonImage) lessonImage.hidden = true;
@@ -7633,8 +7642,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             background.src = illustrationBackgroundSource;
         }
         if (video && videoSource) {
-            video.src = videoSource;
-            video.load();
+            if (video.dataset.learnscapeMediaSource !== videoSource
+                || video.dataset.learnscapeMediaReady !== 'true') {
+                video.src = videoSource;
+                video.dataset.learnscapeMediaSource = videoSource;
+                video.dataset.learnscapeMediaReady = 'pending';
+                video.preload = 'auto';
+                video.load();
+            }
             video.hidden = false;
         }
         if (lessonImage) lessonImage.hidden = Boolean(videoSource);
@@ -7661,8 +7676,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         const video = page.querySelector('.shape-preview-video');
         if (video && videoSource) {
-            video.src = videoSource;
-            video.load();
+            if (video.dataset.learnscapeMediaSource !== videoSource
+                || video.dataset.learnscapeMediaReady !== 'true') {
+                video.src = videoSource;
+                video.dataset.learnscapeMediaSource = videoSource;
+                video.dataset.learnscapeMediaReady = 'pending';
+                video.preload = 'auto';
+                video.load();
+            }
         }
         page.classList.add('is-transitioning-to-illustration');
 
@@ -14623,9 +14644,83 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const lessonVideos = Array.from(document.querySelectorAll('.circle-illustration-tv-screen video'));
+    const lessonMediaWarmupTimeout = 20000;
+
+    const getLessonVideoSource = (video) => {
+        const previewPage = video.closest('.shape-area-preview-page');
+        return previewPage?.dataset.videoSource
+            || video.getAttribute('src')
+            || video.querySelector('source')?.getAttribute('src')
+            || '';
+    };
+
+    const prepareLessonVideo = (video) => new Promise((resolve) => {
+        const source = getLessonVideoSource(video);
+        if (!source) {
+            resolve(false);
+            return;
+        }
+
+        let settled = false;
+        let timeoutId;
+        const finish = (isReady) => {
+            if (settled) return;
+            settled = true;
+            window.clearTimeout(timeoutId);
+            video.removeEventListener('loadeddata', onReady);
+            video.removeEventListener('error', onError);
+            video.dataset.learnscapeMediaReady = isReady ? 'true' : 'false';
+            resolve(isReady);
+        };
+        const onReady = () => finish(true);
+        const onError = () => finish(false);
+
+        const previewPage = video.closest('.shape-area-preview-page');
+        if (previewPage && video.dataset.learnscapeMediaSource !== source) {
+            video.src = source;
+        }
+        video.dataset.learnscapeMediaSource = source;
+        video.preload = 'auto';
+
+        if (video.readyState >= 2) {
+            finish(true);
+            return;
+        }
+
+        video.dataset.learnscapeMediaReady = 'pending';
+        video.addEventListener('loadeddata', onReady, { once: true });
+        video.addEventListener('error', onError, { once: true });
+        timeoutId = window.setTimeout(() => finish(false), lessonMediaWarmupTimeout);
+        try {
+            video.load();
+        } catch (error) {
+            finish(false);
+        }
+    });
+
+    const prepareLessonMedia = () => {
+        if (window.__learnscapeLessonMediaReady) return window.__learnscapeLessonMediaReady;
+
+        window.__learnscapeLessonMediaReady = Promise.all(lessonVideos.map(prepareLessonVideo))
+            .then((results) => {
+                const unavailable = results.filter((isReady) => !isReady).length;
+                if (unavailable) {
+                    console.warn(`[Learnscape] ${unavailable} lesson video(s) were not ready before startup completed.`);
+                }
+            });
+        return window.__learnscapeLessonMediaReady;
+    };
+
+    window.__learnscapePrepareLessonMedia = prepareLessonMedia;
     const lessonSeekTargets = new WeakMap();
     lessonVideos.forEach((video) => {
         const playButton = video.closest('.circle-illustration-video-stage')?.querySelector('.circle-illustration-play-button');
+        video.addEventListener('loadeddata', () => {
+            video.dataset.learnscapeMediaReady = 'true';
+        });
+        video.addEventListener('error', () => {
+            video.dataset.learnscapeMediaReady = 'false';
+        });
         video.addEventListener('pause', () => {
             const page = video.closest('.circle-illustration-page, .shape-area-page');
             if (!playButton || !isPageVisible(page) || video.hidden || video.ended || video.currentTime <= 0) return;

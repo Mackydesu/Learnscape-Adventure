@@ -21,7 +21,7 @@ function createStorage() {
 }
 
 // Run the actual inline startup code with controllable asset responses and events.
-function createHarness({ images = [], gameInitialized = true, assetFetch, storage = createStorage(), persistentStorage = true, requestAnimationFrame = (callback) => setImmediate(callback), baseURI = 'https://game.test/index.html', manifest, timeout = (delay) => Math.ceil(delay / 100) } = {}) {
+function createHarness({ images = [], gameInitialized = true, assetFetch, storage = createStorage(), persistentStorage = true, requestAnimationFrame = (callback) => setImmediate(callback), baseURI = 'https://game.test/index.html', manifest, timeout = (delay) => Math.ceil(delay / 100), prepareLessonMedia } = {}) {
     const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
     const start = html.indexOf('const loadRuntimeAssets =');
     const end = html.indexOf('            syncFullscreenClass();', start);
@@ -41,6 +41,7 @@ function createHarness({ images = [], gameInitialized = true, assetFetch, storag
             caches: storage,
             crypto: webcrypto,
             __learnscapeGameInitialized: gameInitialized,
+            __learnscapePrepareLessonMedia: prepareLessonMedia,
             setTimeout: (callback, delay) => setTimeout(callback, timeout(delay)),
             clearTimeout,
             addEventListener: (name, callback) => listeners.set(name, callback),
@@ -182,6 +183,27 @@ test('startup waits for a complete asset download', async () => {
     finishDownload();
     await boot;
     assert.equal(app.hidden, true);
+});
+
+test('startup waits until lesson video frames are prepared', async () => {
+    let finishPreparation;
+    const app = createHarness({
+        prepareLessonMedia: () => new Promise((resolve) => {
+            finishPreparation = resolve;
+        }),
+    });
+    const boot = app.run();
+
+    for (let attempt = 0; attempt < 50 && !finishPreparation; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 2));
+    }
+    assert.equal(typeof finishPreparation, 'function');
+    assert.equal(app.hidden, false);
+
+    finishPreparation();
+    await boot;
+    assert.equal(app.hidden, true);
+    assert.ok(app.progressValues.includes(99));
 });
 
 test('large downloads report byte progress before the file finishes', async () => {
